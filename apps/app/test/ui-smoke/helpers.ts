@@ -1,7 +1,7 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 
-export const ROOT_TIMEOUT_MS = 20_000;
-export const NAV_TIMEOUT_MS = 12_000;
+const ROOT_TIMEOUT_MS = 20_000;
+const NAV_TIMEOUT_MS = 12_000;
 // These "ready" checks only look for mocked/static UI markers after navigation.
 // Full backend/bootstrap waits use the longer per-test and Playwright defaults.
 const READY_CHECK_TIMEOUT_MS = 5_000;
@@ -187,8 +187,7 @@ export async function installDefaultAppRoutes(page: Page): Promise<void> {
   });
 }
 
-/** Handles returned by {@link installCloudWalletImportApiOverrides}. */
-export type CloudWalletImportMockApi = {
+type CloudWalletImportMockApi = {
   lastWalletConfigPut: () => Record<string, unknown> | null;
   stewardStatusRequestCount: () => number;
 };
@@ -359,27 +358,4 @@ export async function installCloudWalletImportApiOverrides(
     lastWalletConfigPut: () => lastWalletPut,
     stewardStatusRequestCount: () => stewardStatusHits,
   };
-}
-
-export async function runSoftReadyChecks(
-  page: Page,
-  label: string,
-  checks: ReadyCheck[],
-  mode: "any" | "all" = "any",
-  timeoutMs: number = READY_CHECK_TIMEOUT_MS,
-): Promise<void> {
-  const evaluation = await evaluateReadyChecks(page, checks, mode, timeoutMs);
-  if (evaluation.passed) {
-    return;
-  }
-
-  const summary = evaluation.results
-    .map(
-      (result) =>
-        `${result.passed ? "pass" : "fail"}:${formatReadyCheck(result.check)}`,
-    )
-    .join(", ");
-  console.warn(
-    `[playwright-ui-smoke] ${label}: ready checks failed (${summary}).`,
-  );
 }

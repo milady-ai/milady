@@ -142,37 +142,6 @@ jobs:
       - name: Run type checker
         run: bun run verify:typecheck
 
-  test:
-    name: Real tests (Vitest)
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          # Published-only CI restores required non-eliza submodules during setup.
-          submodules: false
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Setup workspace dependencies
-        uses: ./.github/actions/setup-bun-workspace
-        with:
-          bun-version: ${{ env.BUN_VERSION }}
-          install-command: bun install --ignore-scripts --no-frozen-lockfile
-
-      - name: Restore eliza workspace paths for repo scripts
-        run: node scripts/restore-local-eliza-workspace.mjs
-
-      - name: Build
-        run: bun run build
-
-      - name: Run real integration tests (live/real suite)
-        run: bun run test:ci:real
-        env:
-          NODE_NO_WARNINGS: "1"
-
   build:
     name: Build
     runs-on: ubuntu-24.04

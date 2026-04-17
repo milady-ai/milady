@@ -1,3 +1,4 @@
+import DOMPurify from "dompurify";
 import { useEffect, useId, useRef, useState } from "react";
 
 export interface DiagramProps {
@@ -62,7 +63,13 @@ export function Diagram({ children, caption, alt }: DiagramProps) {
         });
         const { svg } = await mermaid.render(`mermaid-${id}`, children.trim());
         if (!cancelled && containerRef.current) {
-          containerRef.current.innerHTML = svg;
+          // Defense-in-depth: mermaid is configured with securityLevel:"strict"
+          // but we DOMPurify the resulting SVG before innerHTML insertion so
+          // we survive any future mermaid regression or dependency swap.
+          const sanitized = DOMPurify.sanitize(svg, {
+            USE_PROFILES: { svg: true, svgFilters: true },
+          });
+          containerRef.current.innerHTML = sanitized;
         }
       } catch (err) {
         if (!cancelled) {

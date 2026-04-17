@@ -18,6 +18,8 @@ const files = {
   packageJson: "package.json",
   disableScript: "scripts/disable-local-eliza-workspace.mjs",
   restoreScript: "scripts/restore-local-eliza-workspace.mjs",
+  publishedFallbackScript:
+    "scripts/install-published-workspace-fallback-deps.sh",
   regressionMatrixScript:
     "eliza/packages/app-core/scripts/validate-regression-matrix.mjs",
 };

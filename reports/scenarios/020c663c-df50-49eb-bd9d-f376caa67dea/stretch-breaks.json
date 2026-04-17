@@ -1,0 +1,26 @@
+{
+  "id": "stretch-breaks",
+  "title": "Stretch default breaks during the day",
+  "domain": "tasks",
+  "tags": [
+    "lifeops",
+    "tasks"
+  ],
+  "status": "skipped",
+  "durationMs": 0,
+  "providerName": "none",
+  "startedAtIso": "2026-04-17T00:16:19.361Z",
+  "completedAtIso": "2026-04-17T00:16:20.195Z",
+  "turns": [],
+  "finalChecks": [],
+  "actionsCalled": [],
+  "cleanup": [],
+  "cost": {
+    "provider": "none",
+    "usd": 0,
+    "tokensIn": 0,
+    "tokensOut": 0
+  },
+  "llmCallCount": 0,
+  "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+}

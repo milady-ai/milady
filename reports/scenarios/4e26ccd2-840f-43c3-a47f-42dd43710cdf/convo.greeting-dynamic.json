@@ -1,0 +1,27 @@
+{
+  "id": "convo.greeting-dynamic",
+  "title": "Convo framework: greeting triggers non-empty response (scripted port)",
+  "domain": "convo",
+  "tags": [
+    "smoke",
+    "convo",
+    "greeting"
+  ],
+  "status": "skipped",
+  "durationMs": 0,
+  "providerName": "none",
+  "startedAtIso": "2026-04-17T00:16:02.719Z",
+  "completedAtIso": "2026-04-17T00:16:03.539Z",
+  "turns": [],
+  "finalChecks": [],
+  "actionsCalled": [],
+  "cleanup": [],
+  "cost": {
+    "provider": "none",
+    "usd": 0,
+    "tokensIn": 0,
+    "tokensOut": 0
+  },
+  "llmCallCount": 0,
+  "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+}

@@ -56,12 +56,14 @@ function resolveOriginPort(origin: URL, fallbackPort: number): number {
 export function resolveViteDevServerRuntime(
   env: Record<string, string | undefined>,
   uiPort: number,
+  brandedPrefix = "MILADY",
 ): ViteDevServerRuntime {
+  const branded = (suffix: string) => `${brandedPrefix}_${suffix}`;
   const explicitOrigin = parseHttpOrigin(
-    env.MILADY_VITE_ORIGIN ?? env.ELIZA_VITE_ORIGIN,
+    env[branded("VITE_ORIGIN")] ?? env.ELIZA_VITE_ORIGIN,
   );
   const explicitHmrHost = (
-    env.MILADY_HMR_HOST ??
+    env[branded("HMR_HOST")] ??
     env.ELIZA_HMR_HOST ??
     ""
   ).trim();
@@ -79,7 +81,7 @@ export function resolveViteDevServerRuntime(
 
   if (
     envFlagEnabled(env, [
-      "MILADY_VITE_LOOPBACK_ORIGIN",
+      branded("VITE_LOOPBACK_ORIGIN"),
       "ELIZA_VITE_LOOPBACK_ORIGIN",
     ])
   ) {

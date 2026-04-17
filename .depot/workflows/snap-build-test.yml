@@ -53,6 +53,16 @@ jobs:
           VERSION=$(node -p "require('./package.json').version" 2>/dev/null || echo "0.0.0-dev")
           sed -i "s/^version: .*/version: '${VERSION}'/" snap/snapcraft.yaml
           echo "Building snap version: $VERSION"
+      - name: Normalize runner root ownership for snapd
+        run: |
+          set -euo pipefail
+          ROOT_OWNER="$(stat -c '%u:%g' /)"
+          echo "Runner root owner: ${ROOT_OWNER}"
+          if [ "${ROOT_OWNER}" != "0:0" ]; then
+            echo "Repairing / ownership so snapd/systemd path canonicalization accepts this runner"
+            sudo chown root:root /
+          fi
+          test "$(stat -c '%u:%g' /)" = "0:0"
       - name: Build snap
         uses: snapcore/action-build@v1
         id: snapcraft

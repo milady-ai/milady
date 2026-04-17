@@ -1,0 +1,68 @@
+{
+  "runId": "195d24c1-e38b-4a39-87e2-820294de8eef",
+  "startedAtIso": "2026-04-17T00:07:08.469Z",
+  "completedAtIso": "2026-04-17T00:07:10.844Z",
+  "providerName": "none",
+  "scenarios": [
+    {
+      "id": "convo.echo-self-test",
+      "title": "Convo framework self-test: ECHO_TEST action is captured",
+      "domain": "convo",
+      "tags": [
+        "smoke",
+        "convo",
+        "self-test"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:07:08.470Z",
+      "completedAtIso": "2026-04-17T00:07:10.073Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "convo.greeting-dynamic",
+      "title": "Convo framework: greeting triggers non-empty response (scripted port)",
+      "domain": "convo",
+      "tags": [
+        "smoke",
+        "convo",
+        "greeting"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:07:10.078Z",
+      "completedAtIso": "2026-04-17T00:07:10.840Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    }
+  ],
+  "totalCount": 2,
+  "passedCount": 0,
+  "failedCount": 0,
+  "flakyPassedCount": 0,
+  "skippedCount": 2,
+  "totalCostUsd": 0
+}

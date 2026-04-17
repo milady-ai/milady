@@ -63,10 +63,14 @@ jobs:
           echo "Built app at: $APP_PATH"
           BUNDLE_ID=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$APP_PATH/Info.plist")
           echo "Bundle ID: $BUNDLE_ID"
-          if [ "$BUNDLE_ID" != "com.miladyai.milady" ]; then
-            echo "ERROR: Unexpected bundle ID: $BUNDLE_ID"
-            exit 1
-          fi
+          # Accept either the Milady brand ID or the upstream elizaOS ID.
+          case "$BUNDLE_ID" in
+            com.miladyai.milady|ai.elizaos.app) ;;
+            *)
+              echo "ERROR: Unexpected bundle ID: $BUNDLE_ID"
+              exit 1
+              ;;
+          esac
   build-android:
     name: Android Debug Build
     runs-on: depot-ubuntu-24.04 # was: ubuntu-24.04. Mapped standard GitHub runner to Depot equivalent.

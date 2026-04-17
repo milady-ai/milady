@@ -1,0 +1,37 @@
+{
+  "name": "@miladyai/app-ios-companion",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Milady iOS companion — Capacitor-wrapped skeleton for pairing, chat mirror, and native intent delivery (alarm, reminder).",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --config vitest.config.ts",
+    "cap:sync:ios": "capacitor sync ios",
+    "cap:open:ios": "capacitor open ios",
+    "build:ios": "bash scripts/build-ios.sh"
+  },
+  "dependencies": {
+    "@capacitor/barcode-scanner": "^2.0.0",
+    "@capacitor/core": "8.0.2",
+    "@capacitor/haptics": "^7.0.0",
+    "@capacitor/ios": "8.0.2",
+    "@capacitor/preferences": "^7.0.0",
+    "@capacitor/push-notifications": "^7.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.2.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react-swc": "^4.2.1",
+    "jsdom": "^28.1.0",
+    "typescript": "^5.9.3",
+    "vite": "^6.4.2",
+    "vitest": "^2.1.9"
+  }
+}

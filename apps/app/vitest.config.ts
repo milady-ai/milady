@@ -12,7 +12,9 @@ import {
 import {
   getAppCoreBridgeStubPath,
   getUiSourceAliases,
+  getWorkspaceAppAliases,
 } from "../../test/vitest/workspace-aliases";
+import { CAPACITOR_PLUGIN_NAMES } from "./scripts/capacitor-plugin-names.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "../..");
@@ -26,6 +28,23 @@ const agentSourceRoot = getAutonomousSourceRoot(here);
 const uiSourceRoot = getUiSourceRoot(here);
 const bridgeStubPath = getAppCoreBridgeStubPath(repoRoot);
 const capacitorCoreEntry = _require.resolve("@capacitor/core");
+const nativePluginAliasMap = Object.fromEntries(
+  CAPACITOR_PLUGIN_NAMES.map((name) => [
+    `@elizaos/capacitor-${name}`,
+    path.join(nativePluginsRoot, `${name}/src/index.ts`),
+  ]),
+);
+const vitestInlineDeps = [
+  "@elizaos/agent",
+  "@elizaos/app-core",
+  "@elizaos/core",
+  "@testing-library/react",
+  "react",
+  "react-dom",
+  "react-test-renderer",
+  /^@elizaos\/plugin-/,
+  "zod",
+];
 
 /**
  * Redirects `@elizaos/app-core` bridge entrypoints to the test shim (matches
@@ -76,6 +95,17 @@ export default defineConfig({
       {
         find: /^@capacitor\/core$/,
         replacement: capacitorCoreEntry,
+      },
+      {
+        find: /^@elizaos\/plugin-sql$/,
+        replacement: path.join(
+          repoRoot,
+          "eliza",
+          "plugins",
+          "plugin-sql",
+          "typescript",
+          "index.node.ts",
+        ),
       },
       ...(appCorePackageRoot
         ? (() => {
@@ -138,6 +168,15 @@ export default defineConfig({
             },
           ]
         : []),
+      ...getWorkspaceAppAliases(repoRoot, [
+        "app-companion",
+        "app-task-coordinator",
+        "app-vincent",
+        "app-shopify",
+        "app-steward",
+        "app-lifeops",
+        "app-knowledge",
+      ]),
     ],
   },
   test: {
@@ -189,58 +228,13 @@ export default defineConfig({
         "doubles",
         "elizaos-skills.ts",
       ),
-      "@elizaos/capacitor-gateway": path.join(
-        nativePluginsRoot,
-        "gateway/src/index.ts",
-      ),
-      "@elizaos/capacitor-swabble": path.join(
-        nativePluginsRoot,
-        "swabble/src/index.ts",
-      ),
-      "@elizaos/capacitor-talkmode": path.join(
-        nativePluginsRoot,
-        "talkmode/src/index.ts",
-      ),
-      "@elizaos/capacitor-camera": path.join(
-        nativePluginsRoot,
-        "camera/src/index.ts",
-      ),
-      "@elizaos/capacitor-location": path.join(
-        nativePluginsRoot,
-        "location/src/index.ts",
-      ),
-      "@elizaos/capacitor-screencapture": path.join(
-        nativePluginsRoot,
-        "screencapture/src/index.ts",
-      ),
-      "@elizaos/capacitor-canvas": path.join(
-        nativePluginsRoot,
-        "canvas/src/index.ts",
-      ),
-      "@elizaos/capacitor-desktop": path.join(
-        nativePluginsRoot,
-        "desktop/src/index.ts",
-      ),
-      "@elizaos/capacitor-agent": path.join(
-        nativePluginsRoot,
-        "agent/src/index.ts",
-      ),
-      "@elizaos/capacitor-websiteblocker": path.join(
-        nativePluginsRoot,
-        "websiteblocker/src/index.ts",
-      ),
+      ...nativePluginAliasMap,
     },
     testTimeout: 30000,
     globals: true,
     server: {
       deps: {
-        inline: [
-          "@elizaos/app-core",
-          "@testing-library/react",
-          "react",
-          "react-dom",
-          "react-test-renderer",
-        ],
+        inline: vitestInlineDeps,
       },
     },
   },

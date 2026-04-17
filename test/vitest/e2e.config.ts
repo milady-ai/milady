@@ -1,3 +1,4 @@
+import { defineConfig, mergeConfig } from "vitest/config";
 import baseConfig from "./real.config";
 
 export const heavyOnlyE2EPaths = [
@@ -28,8 +29,13 @@ export const specializedLiveE2EPaths = [
   "eliza/apps/app-lifeops/test/selfcontrol-desktop.live.e2e.test.ts",
   "eliza/apps/app-lifeops/test/selfcontrol-dev.live.e2e.test.ts",
   "eliza/apps/app-knowledge/test/knowledge-live.e2e.test.ts",
+  "eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts",
+  "eliza/packages/app-core/test/live-agent/cloud-auth.live.e2e.test.ts",
   "eliza/packages/app-core/test/live-agent/cloud-providers.live.e2e.test.ts",
+  "eliza/packages/app-core/test/live-agent/database-conversation.live.e2e.test.ts",
+  "eliza/packages/app-core/test/live-agent/personality-routing.live.e2e.test.ts",
   "eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts",
+  "eliza/packages/app-core/test/live-agent/runtime-debug.live.e2e.test.ts",
 ];
 
 export const credentialDependentE2EPaths = [
@@ -45,24 +51,26 @@ export const credentialDependentE2EPaths = [
   "eliza/packages/app-core/test/live-agent/telegram-connector.live.e2e.test.ts",
 ];
 
-export const defaultE2EInclude = [
-  "eliza/apps/**/*.live.e2e.test.ts",
-  "eliza/apps/**/*.real.e2e.test.ts",
-  "eliza/packages/**/*.live.e2e.test.ts",
-  "eliza/packages/**/*.real.e2e.test.ts",
+export const liveAndRealE2EInclude = [
+  "eliza/apps/**/*.{live,real}.e2e.test.{ts,tsx}",
+  "eliza/apps/**/*-{live,real}.e2e.test.{ts,tsx}",
+  "eliza/packages/**/*.{live,real}.e2e.test.{ts,tsx}",
+  "eliza/packages/**/*-{live,real}.e2e.test.{ts,tsx}",
 ];
 
-export default {
-  ...baseConfig,
-  test: {
-    ...baseConfig.test,
-    include: defaultE2EInclude,
-    exclude: [
-      ...(baseConfig.test?.exclude ?? []),
-      ...heavyOnlyE2EPaths,
-      ...checkoutDependentE2EPaths,
-      ...specializedLiveE2EPaths,
-      ...credentialDependentE2EPaths,
-    ],
-  },
-};
+export const baselineE2EExcludedPaths = [
+  ...heavyOnlyE2EPaths,
+  ...checkoutDependentE2EPaths,
+  ...specializedLiveE2EPaths,
+  ...credentialDependentE2EPaths,
+];
+
+export default mergeConfig(
+  baseConfig,
+  defineConfig({
+    test: {
+      include: liveAndRealE2EInclude,
+      exclude: baselineE2EExcludedPaths,
+    },
+  }),
+);

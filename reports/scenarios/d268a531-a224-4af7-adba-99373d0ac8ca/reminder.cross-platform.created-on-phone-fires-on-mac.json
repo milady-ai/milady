@@ -1,0 +1,28 @@
+{
+  "id": "reminder.cross-platform.created-on-phone-fires-on-mac",
+  "title": "Reminder created on phone fires on Mac via device bus",
+  "domain": "reminders",
+  "tags": [
+    "reminders",
+    "lifeops",
+    "cross-platform",
+    "not-yet-implemented"
+  ],
+  "status": "skipped",
+  "durationMs": 0,
+  "providerName": "none",
+  "startedAtIso": "2026-04-17T00:23:18.598Z",
+  "completedAtIso": "2026-04-17T00:23:19.228Z",
+  "turns": [],
+  "finalChecks": [],
+  "actionsCalled": [],
+  "cleanup": [],
+  "cost": {
+    "provider": "none",
+    "usd": 0,
+    "tokensIn": 0,
+    "tokensOut": 0
+  },
+  "llmCallCount": 0,
+  "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+}

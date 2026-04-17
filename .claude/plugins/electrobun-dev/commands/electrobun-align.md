@@ -142,7 +142,7 @@ Scan all `.ts` files in `src/`:
 
 Scan all `.ts` files for:
 - `console.log(` statements → flag each file that has them
-- Placeholder or `FIXME` comments → list files
+- Stale placeholder or unresolved marker comments → list files
 - `as any` without adjacent comment → flag
 
 ---

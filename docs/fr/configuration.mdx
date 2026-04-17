@@ -128,7 +128,7 @@ Le fichier de configuration prend en charge la syntaxe **JSON5**, qui permet :
 
   // API keys (prefer .env for secrets)
   env: {
-    ANTHROPIC_API_KEY: "sk-ant-...",
+    ANTHROPIC_API_KEY: "<ANTHROPIC_API_KEY>",
   },
 }
 ```
@@ -174,11 +174,11 @@ Milady charge les variables d'environnement à partir de deux sources :
     ```json5
     {
       env: {
-        ANTHROPIC_API_KEY: "sk-ant-...",
-        OPENAI_API_KEY: "sk-...",
+        ANTHROPIC_API_KEY: "<ANTHROPIC_API_KEY>",
+        OPENAI_API_KEY: "<OPENAI_API_KEY>",
         // Structured form under vars:
         vars: {
-          BRAVE_API_KEY: "BSA...",
+          BRAVE_API_KEY: "<BRAVE_API_KEY>",
         },
       },
     }
@@ -426,7 +426,7 @@ La section `models` au niveau supérieur vous permet de définir des fournisseur
     providers: {
       "my-provider": {
         baseUrl: "https://api.example.com/v1",
-        apiKey: "sk-...",
+        apiKey: "<OPENAI_API_KEY>",
         api: "openai-completions",   // openai-completions | openai-responses | anthropic-messages | google-generative-ai | bedrock-converse-stream
         models: [
           {
@@ -621,17 +621,17 @@ Les connecteurs intègrent Milady aux plateformes de messagerie. Configurez-les 
   connectors: {
     telegram: {
       enabled: true,
-      botToken: "123456:ABC-...",
+      botToken: "<TELEGRAM_BOT_TOKEN>",
       // Additional connector-specific options
     },
     discord: {
       enabled: true,
-      botToken: "MTk...",
+      botToken: "<DISCORD_BOT_TOKEN>",
     },
     slack: {
       enabled: true,
-      botToken: "xoxb-...",
-      apiKey: "xapp-...",
+      botToken: "<SLACK_BOT_TOKEN>",
+      apiKey: "<SLACK_APP_TOKEN>",
     },
     whatsapp: {
       enabled: true,
@@ -699,7 +699,7 @@ La passerelle est le serveur central qui gère les connexions WebSocket, l'API H
     // Authentication
     auth: {
       mode: "token",            // "token" | "password"
-      token: "my-secret-token",
+      token: "<API_TOKEN>",
       allowTailscale: false,
     },
     // Control UI (web dashboard)
@@ -723,7 +723,7 @@ La passerelle est le serveur central qui gère les connexions WebSocket, l'API H
     remote: {
       url: "wss://remote-host:18789",
       transport: "direct",      // "ssh" | "direct"
-      token: "remote-auth-token",
+      token: "<REMOTE_AUTH_TOKEN>",
       sshTarget: "user@host",
       sshIdentity: "~/.ssh/id_ed25519",
     },
@@ -778,7 +778,7 @@ La section `tools` contrôle la disponibilité des outils, la recherche/récupé
       search: {
         enabled: true,
         provider: "brave",     // "brave" | "perplexity"
-        apiKey: "BSA...",
+        apiKey: "<BRAVE_API_KEY>",
         maxResults: 5,
         cacheTtlMinutes: 15,
       },
@@ -790,7 +790,7 @@ La section `tools` contrôle la disponibilité des outils, la recherche/récupé
         readability: true,
         firecrawl: {
           enabled: true,
-          apiKey: "fc-...",
+          apiKey: "<FIRECRAWL_API_KEY>",
         },
       },
     },
@@ -896,7 +896,7 @@ Milady prend en charge deux backends de base de données :
           port: 5432,
           database: "milady",
           user: "milady",
-          password: "secret",
+          password: "<DB_PASSWORD>",
           ssl: true,
         },
       },
@@ -1016,24 +1016,24 @@ Configurez la génération d'images, de vidéos, d'audio et la vision :
       mode: "own-key",              // "cloud" | "own-key"
       provider: "fal",              // "cloud" | "fal" | "openai" | "google" | "xai"
       defaultSize: "1024x1024",
-      fal: { apiKey: "fal-...", model: "flux/schnell" },
+      fal: { apiKey: "<FAL_API_KEY>", model: "flux/schnell" },
     },
     video: {
       enabled: true,
       mode: "own-key",
       provider: "fal",
-      fal: { apiKey: "fal-..." },
+      fal: { apiKey: "<FAL_API_KEY>" },
     },
     audio: {
       enabled: true,
       mode: "own-key",
       provider: "suno",
-      suno: { apiKey: "suno-..." },
+      suno: { apiKey: "<SUNO_API_KEY>" },
     },
     vision: {
       enabled: true,
       provider: "openai",
-      openai: { apiKey: "sk-...", model: "gpt-4o" },
+      openai: { apiKey: "<OPENAI_API_KEY>", model: "gpt-4o" },
     },
   },
 }
@@ -1087,7 +1087,7 @@ Les hooks permettent les intégrations de webhooks et la surveillance Gmail :
   hooks: {
     enabled: true,
     path: "/hooks",
-    token: "webhook-secret-token",
+    token: "<WEBHOOK_TOKEN>",
     maxBodyBytes: 1048576,
     // Webhook-to-agent mappings
     mappings: [
@@ -1372,7 +1372,7 @@ Transférez les demandes d'approbation d'exécution vers les canaux de discussio
     entries: {
       "my-skill": {
         enabled: true,
-        apiKey: "sk-...",
+        apiKey: "<OPENAI_API_KEY>",
         env: { CUSTOM_VAR: "value" },
         config: { maxRetries: 3 },
       },
@@ -1531,7 +1531,7 @@ Une configuration complète montrant les options les plus courantes :
 
   // Environment variables
   env: {
-    ANTHROPIC_API_KEY: "sk-ant-...",
+    ANTHROPIC_API_KEY: "<ANTHROPIC_API_KEY>",
   },
 
   // Logging
@@ -1565,7 +1565,7 @@ Une configuration complète montrant les options les plus courantes :
 
   // Connectors
   connectors: {
-    telegram: { botToken: "123:ABC..." },
+    telegram: { botToken: "<TELEGRAM_BOT_TOKEN>" },
   },
 
   // Tools

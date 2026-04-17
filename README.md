@@ -1,6 +1,7 @@
 # Milady
 
-<!-- TODO: add badges (npm, CI, license) once public -->
+[![CI](https://github.com/milady-ai/milady/actions/workflows/ci.yml/badge.svg)](https://github.com/milady-ai/milady/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 > *your schizo AI waifu that actually respects your privacy*
 
@@ -456,7 +457,7 @@ Lives at `~/.milady/milady.json` (override with `MILADY_CONFIG_PATH` or `MILADY_
     model: "anthropic/claude-opus-4-5",
   },
   env: {
-    ANTHROPIC_API_KEY: "sk-ant-...",
+    ANTHROPIC_API_KEY: "<ANTHROPIC_API_KEY>",
   },
 }
 ```

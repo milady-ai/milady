@@ -1,0 +1,7 @@
+[Unit]
+Description=Milady — refresh Anthropic OAuth (zero-token; only calls auth endpoint when near expiry)
+
+[Service]
+Type=oneshot
+EnvironmentFile=%h/.config/milady/env
+ExecStart=%h/bin/milady-refresh-oauth.sh

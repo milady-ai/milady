@@ -11,7 +11,14 @@
  */
 import type { AppConfig } from "@elizaos/app-core";
 
-const config: AppConfig = {
+interface AppWebConfig {
+  shortName: string;
+  themeColor: string;
+  backgroundColor: string;
+  shareImagePath: string;
+}
+
+const config = {
   appName: "Milady",
   appId: "com.miladyai.milady",
   orgName: "milady-ai",
@@ -45,6 +52,6 @@ const config: AppConfig = {
     fileExtension: ".milady-agent",
     packageScope: "miladyai",
   },
-};
+} satisfies AppConfig & { web: AppWebConfig };
 
 export default config;

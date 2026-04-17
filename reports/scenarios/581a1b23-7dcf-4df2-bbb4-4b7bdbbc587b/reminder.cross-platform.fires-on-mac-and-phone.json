@@ -1,0 +1,28 @@
+{
+  "id": "reminder.cross-platform.fires-on-mac-and-phone",
+  "title": "Reminder fires on both Mac and phone via device bus",
+  "domain": "reminders",
+  "tags": [
+    "reminders",
+    "lifeops",
+    "cross-platform",
+    "not-yet-implemented"
+  ],
+  "status": "skipped",
+  "durationMs": 0,
+  "providerName": "none",
+  "startedAtIso": "2026-04-17T00:20:02.664Z",
+  "completedAtIso": "2026-04-17T00:20:03.350Z",
+  "turns": [],
+  "finalChecks": [],
+  "actionsCalled": [],
+  "cleanup": [],
+  "cost": {
+    "provider": "none",
+    "usd": 0,
+    "tokensIn": 0,
+    "tokensOut": 0
+  },
+  "llmCallCount": 0,
+  "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+}

@@ -1,0 +1,28 @@
+{
+  "id": "todo.cross-device.create-and-query",
+  "title": "Create a todo on the dashboard, query it from mobile",
+  "domain": "todos",
+  "tags": [
+    "lifeops",
+    "todos",
+    "smoke",
+    "cross-platform-inconsistency"
+  ],
+  "status": "skipped",
+  "durationMs": 0,
+  "providerName": "none",
+  "startedAtIso": "2026-04-17T00:16:23.439Z",
+  "completedAtIso": "2026-04-17T00:16:24.243Z",
+  "turns": [],
+  "finalChecks": [],
+  "actionsCalled": [],
+  "cleanup": [],
+  "cost": {
+    "provider": "none",
+    "usd": 0,
+    "tokensIn": 0,
+    "tokensOut": 0
+  },
+  "llmCallCount": 0,
+  "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+}
