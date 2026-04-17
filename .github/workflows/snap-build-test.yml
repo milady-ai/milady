@@ -30,6 +30,21 @@ jobs:
           #   runner: ubuntu-24.04-arm
 
     steps:
+      - name: Free disk space on runner
+        # Snapcraft multipass + bun install of every workspace dependency
+        # inside the sandbox consistently exhausts the default 14GB GHA
+        # runner disk, producing `System.IO.IOException: No space left on
+        # device` halfway through the build. Reclaim ~30GB up front by
+        # dropping unused toolchains.
+        run: |
+          set -euo pipefail
+          echo "=== before ==="
+          df -h /
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL 2>/dev/null || true
+          sudo docker image prune -af 2>/dev/null || true
+          echo "=== after ==="
+          df -h /
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
