@@ -1,0 +1,174 @@
+{
+  "catalogId": "lifeops-connector-certification",
+  "title": "LifeOps connector certification scenario catalog",
+  "scenarios": [
+    {
+      "id": "connector.gmail.certify-core",
+      "connector": "gmail",
+      "providers": ["Gmail API"],
+      "actions": ["GMAIL_ACTION", "INBOX"],
+      "capabilities": ["read", "draft", "send-after-approval", "degraded-auth"]
+    },
+    {
+      "id": "connector.google-calendar.certify-core",
+      "connector": "google-calendar",
+      "providers": ["Google Calendar API"],
+      "actions": [
+        "CALENDAR_ACTION",
+        "PROPOSE_MEETING_TIMES",
+        "UPDATE_MEETING_PREFERENCES"
+      ],
+      "capabilities": [
+        "availability",
+        "create",
+        "reschedule",
+        "cancel",
+        "conflict-repair"
+      ]
+    },
+    {
+      "id": "connector.calendly.certify-core",
+      "connector": "calendly",
+      "providers": ["Calendly API"],
+      "actions": ["CALENDLY", "PROPOSE_MEETING_TIMES"],
+      "capabilities": [
+        "availability-handoff",
+        "booking-reconciliation",
+        "single-use-link"
+      ]
+    },
+    {
+      "id": "connector.discord.certify-core",
+      "connector": "discord",
+      "providers": ["Discord bridge"],
+      "actions": ["INBOX", "CROSS_CHANNEL_SEND"],
+      "capabilities": [
+        "inbound-fetch",
+        "reply-draft",
+        "send",
+        "thread-context",
+        "deep-link"
+      ]
+    },
+    {
+      "id": "connector.telegram.certify-core",
+      "connector": "telegram",
+      "providers": ["Telegram bridge"],
+      "actions": ["INBOX", "CROSS_CHANNEL_SEND"],
+      "capabilities": [
+        "inbound-fetch",
+        "reply-draft",
+        "send",
+        "thread-context",
+        "deep-link"
+      ]
+    },
+    {
+      "id": "connector.x-dm.certify-core",
+      "connector": "x-dm",
+      "providers": ["X bridge"],
+      "actions": ["X_READ", "INBOX"],
+      "capabilities": ["inbound-fetch", "reply-draft", "send", "thread-context"]
+    },
+    {
+      "id": "connector.signal.certify-core",
+      "connector": "signal",
+      "providers": ["Signal bridge"],
+      "actions": ["INBOX", "CROSS_CHANNEL_SEND"],
+      "capabilities": [
+        "inbound-fetch",
+        "reply-draft",
+        "send",
+        "delivery",
+        "degraded-behavior"
+      ]
+    },
+    {
+      "id": "connector.whatsapp.certify-core",
+      "connector": "whatsapp",
+      "providers": ["WhatsApp bridge"],
+      "actions": ["INBOX", "CROSS_CHANNEL_SEND"],
+      "capabilities": [
+        "inbound-fetch",
+        "reply-draft",
+        "send",
+        "delivery",
+        "degraded-behavior"
+      ]
+    },
+    {
+      "id": "connector.imessage.certify-core",
+      "connector": "imessage",
+      "providers": ["BlueBubbles / Blooio"],
+      "actions": ["INBOX", "CROSS_CHANNEL_SEND"],
+      "capabilities": ["bridge-health", "send", "delivery-state", "reconnect"]
+    },
+    {
+      "id": "connector.twilio-sms.certify-core",
+      "connector": "twilio-sms",
+      "providers": ["Twilio"],
+      "actions": ["CROSS_CHANNEL_SEND"],
+      "capabilities": [
+        "send-after-approval",
+        "delivery-state",
+        "retry",
+        "idempotency"
+      ]
+    },
+    {
+      "id": "connector.twilio-voice.certify-core",
+      "connector": "twilio-voice",
+      "providers": ["Twilio"],
+      "actions": ["CALL_USER", "CALL_EXTERNAL"],
+      "capabilities": [
+        "call-after-approval",
+        "outcome-state",
+        "escalation-ladder"
+      ]
+    },
+    {
+      "id": "connector.google-drive-docs-sheets.certify-core",
+      "connector": "google-drive-docs-sheets",
+      "providers": ["Google Drive API", "Google Docs API", "Google Sheets API"],
+      "actions": ["LIFEOPS_COMPUTER_USE"],
+      "capabilities": [
+        "file-fetch",
+        "upload",
+        "share",
+        "provenance",
+        "degraded-auth"
+      ]
+    },
+    {
+      "id": "connector.travel-booking.certify-core",
+      "connector": "travel-booking",
+      "providers": ["Travel adapter"],
+      "actions": ["CALENDAR_ACTION", "CROSS_CHANNEL_SEND", "CALL_EXTERNAL"],
+      "capabilities": [
+        "search",
+        "hold",
+        "book",
+        "sync-itinerary",
+        "rebook-on-conflict"
+      ]
+    },
+    {
+      "id": "connector.notifications.certify-core",
+      "connector": "notifications",
+      "providers": ["Desktop notification bridge", "Mobile companion"],
+      "actions": ["PUBLISH_DEVICE_INTENT", "INTENT_SYNC"],
+      "capabilities": ["dispatch", "ack-sync", "suppression-after-ack"]
+    },
+    {
+      "id": "connector.browser-portal.certify-core",
+      "connector": "browser-portal",
+      "providers": ["Browser bridge"],
+      "actions": ["LIFEOPS_COMPUTER_USE", "REQUEST_FIELD_FILL"],
+      "capabilities": [
+        "upload",
+        "blocked-state-intervention",
+        "credential-scoped-resume"
+      ]
+    }
+  ]
+}

@@ -28,14 +28,12 @@ describe("mobile platform workflow contract", () => {
     expect(workflow).toContain("runs-on: macos-15");
     expect(workflow).not.toContain("runs-on: macos-latest");
     expect(workflow).toContain(
-      "run: node eliza/packages/app-core/scripts/run-mobile-build.mjs ios",
+      "run: node --max-old-space-size=8192 eliza/packages/app-core/scripts/run-mobile-build.mjs ios",
     );
     expect(workflow).toContain(
-      "run: node eliza/packages/app-core/scripts/run-mobile-build.mjs android",
+      "run: node --max-old-space-size=8192 eliza/packages/app-core/scripts/run-mobile-build.mjs android",
     );
-    expect(workflow).toContain(
-      'if [ "$BUNDLE_ID" != "com.miladyai.milady" ]; then',
-    );
+    expect(workflow).toContain("com.miladyai.milady|ai.elizaos.app) ;;");
   });
 
   it("avoids broad package-local bun installs in the Windows preload smoke job", () => {

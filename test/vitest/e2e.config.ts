@@ -1,4 +1,4 @@
-import { defineConfig, mergeConfig } from "vitest/config";
+import { defineConfig } from "vitest/config";
 import baseConfig from "./real.config";
 
 export const heavyOnlyE2EPaths = [
@@ -65,12 +65,11 @@ export const baselineE2EExcludedPaths = [
   ...credentialDependentE2EPaths,
 ];
 
-export default mergeConfig(
-  baseConfig,
-  defineConfig({
-    test: {
-      include: liveAndRealE2EInclude,
-      exclude: baselineE2EExcludedPaths,
-    },
-  }),
-);
+export default defineConfig({
+  ...baseConfig,
+  test: {
+    ...baseConfig.test,
+    include: liveAndRealE2EInclude,
+    exclude: [...(baseConfig.test?.exclude ?? []), ...baselineE2EExcludedPaths],
+  },
+});

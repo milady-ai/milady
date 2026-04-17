@@ -239,7 +239,7 @@ function unwrapListResponse<T>(
   return [];
 }
 
-interface CreateCloudAgentInput {
+export interface CreateCloudAgentInput {
   name: string;
   characterId?: string;
   config?: JsonObject;
@@ -253,7 +253,7 @@ interface CreateCloudAgentRequest {
   environmentVars?: Record<string, string>;
 }
 
-interface CreateCloudAgentResponse {
+export interface CreateCloudAgentResponse {
   id: string;
 }
 

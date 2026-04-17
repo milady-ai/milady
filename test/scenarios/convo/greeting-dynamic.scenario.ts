@@ -65,7 +65,7 @@ export default scenario({
       name: "greet-hello",
       text: "Hello!",
       timeoutMs: 120_000,
-      assertResponse: (text) => {
+      assertResponse: (text: string) => {
         if (!text || text.trim().length === 0) {
           return "Expected a non-empty response to the greeting";
         }

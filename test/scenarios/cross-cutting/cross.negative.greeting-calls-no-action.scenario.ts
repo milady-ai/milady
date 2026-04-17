@@ -43,7 +43,7 @@ export default scenario({
         "BLOCK_WEBSITES",
         "BLOCK_APPS",
       ],
-      assertResponse: (text) => {
+      assertResponse: (text: string) => {
         if (!text || text.trim().length === 0) {
           return "Expected a non-empty conversational response to a greeting";
         }

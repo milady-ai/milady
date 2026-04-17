@@ -217,8 +217,9 @@ jobs:
 
       - name: Test snap
         run: |
-          sudo snap install ${{ steps.snapcraft.outputs.snap }} --classic --dangerous
-          elizaos-app --version || echo "Version check completed"
+          sudo snap install ${{ steps.snapcraft.outputs.snap }} --dangerous
+          snap list milady
+          milady --version || echo "Version check completed"
 
       - name: Publish to Snap Store
         if: success()

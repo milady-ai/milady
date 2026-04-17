@@ -47,7 +47,7 @@ export default scenario({
           "Agent responds clearly about the todos, handling any data issues gracefully without exposing errors to the user.",
         minimumScore: 0.7,
       },
-      assertResponse: (text) => {
+      assertResponse: (text: string) => {
         if (!text || text.trim().length === 0) {
           return "Expected a non-empty response";
         }

@@ -1,17 +1,36 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-read_version_from_manifest() {
-  local manifest="$1"
+read_package_spec_from_manifest() {
+  local package_name="$1"
+  local manifest="$2"
   [[ -f "$manifest" ]] || return 1
 
   node -e '
     const fs = require("node:fs");
     const pkg = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
-    if (typeof pkg.version === "string") {
+    const packageName = process.argv[2];
+
+    if (pkg.name === packageName && typeof pkg.version === "string") {
       process.stdout.write(pkg.version);
+      process.exit(0);
     }
-  ' "$manifest"
+
+    const dependencyFields = [
+      "dependencies",
+      "devDependencies",
+      "peerDependencies",
+      "optionalDependencies",
+    ];
+
+    for (const field of dependencyFields) {
+      const spec = pkg[field]?.[packageName];
+      if (typeof spec === "string") {
+        process.stdout.write(spec);
+        process.exit(0);
+      }
+    }
+  ' "$manifest" "$package_name"
 }
 
 # Reads the pinned spec for `dep_name` from a manifest's dependencies /
@@ -43,10 +62,10 @@ append_versioned_package() {
   local package_name="$1"
   shift
 
-  local manifest version
+  local manifest spec
   for manifest in "$@"; do
-    if version="$(read_version_from_manifest "$manifest" 2>/dev/null)" && [[ -n "$version" ]]; then
-      packages+=("${package_name}@${version}")
+    if spec="$(read_package_spec_from_manifest "$package_name" "$manifest" 2>/dev/null)" && [[ -n "$spec" ]]; then
+      packages+=("${package_name}@${spec}")
       return 0
     fi
   done

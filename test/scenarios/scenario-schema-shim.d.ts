@@ -21,8 +21,9 @@ declare module "@elizaos/scenario-schema" {
 
   export type ScenarioCheckResult =
     | string
+    | void
     | undefined
-    | Promise<string | undefined>;
+    | Promise<string | undefined | void>;
 
   export type ScenarioAssertResponse =
     | ((text: string) => ScenarioCheckResult)
@@ -38,6 +39,13 @@ declare module "@elizaos/scenario-schema" {
     type: string;
     name?: string;
     apply?: (ctx: ScenarioContext) => ScenarioCheckResult;
+    by?: string;
+    connector?: string;
+    provider?: string;
+    state?: string;
+    capabilities?: string[];
+    scopes?: string[];
+    limit?: number;
     [key: string]: unknown;
   };
 
@@ -62,6 +70,75 @@ declare module "@elizaos/scenario-schema" {
         actionName: string;
         status?: string;
         minCount?: number;
+        [key: string]: unknown;
+      }
+    | {
+        type: "selectedAction";
+        actionName: string | string[];
+        [key: string]: unknown;
+      }
+    | {
+        type: "selectedActionArguments";
+        actionName: string | string[];
+        includesAny?: Array<string | RegExp>;
+        includesAll?: Array<string | RegExp>;
+        [key: string]: unknown;
+      }
+    | {
+        type: "clarificationRequested";
+        expected?: boolean;
+        [key: string]: unknown;
+      }
+    | {
+        type: "interventionRequestExists";
+        expected?: boolean;
+        [key: string]: unknown;
+      }
+    | {
+        type: "pushSent";
+        channel: string | string[];
+        [key: string]: unknown;
+      }
+    | {
+        type: "pushEscalationOrder";
+        channelOrder: string[];
+        [key: string]: unknown;
+      }
+    | {
+        type: "pushAcknowledgedSync";
+        expected?: boolean;
+        [key: string]: unknown;
+      }
+    | {
+        type: "approvalRequestExists";
+        expected?: boolean;
+        [key: string]: unknown;
+      }
+    | {
+        type: "draftExists";
+        channel?: string | string[];
+        expected?: boolean;
+        [key: string]: unknown;
+      }
+    | {
+        type: "messageDelivered";
+        channel?: string | string[];
+        expected?: boolean;
+        [key: string]: unknown;
+      }
+    | {
+        type: "browserTaskCompleted";
+        expected?: boolean;
+        [key: string]: unknown;
+      }
+    | {
+        type: "browserTaskNeedsHuman";
+        expected?: boolean;
+        [key: string]: unknown;
+      }
+    | {
+        type: "uploadedAssetExists";
+        expected?: boolean;
         [key: string]: unknown;
       }
     | {

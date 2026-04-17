@@ -42,6 +42,19 @@ const appCoreNativePluginEntrypoints = path.join(
 const uiPkgRoot = path.join(miladyRoot, "eliza/packages/ui");
 const capacitorCoreEntry = _require.resolve("@capacitor/core");
 const patheEntry = _require.resolve("pathe");
+// Other Capacitor packages imported by eliza/packages/app-core sources.
+// Resolved here (apps/app scope) so Rollup can find them when bundling
+// files from within the eliza submodule tree where bun may not hoist them.
+function tryResolve(id: string): string | undefined {
+  try {
+    return _require.resolve(id);
+  } catch {
+    return undefined;
+  }
+}
+const capacitorKeyboardEntry = tryResolve("@capacitor/keyboard");
+const capacitorPreferencesEntry = tryResolve("@capacitor/preferences");
+const capacitorAppEntry = tryResolve("@capacitor/app");
 
 function ensureTrailingSlash(value: string): string {
   return value.endsWith("/") ? value : `${value}/`;
@@ -754,6 +767,9 @@ function nativeModuleStubPlugin(): Plugin {
     "@elizaos/plugin-agent-orchestrator",
   ]);
   const nativeScopeRe = /^@node-llama-cpp\//;
+  // Capacitor native plugins — mobile-only, must never run in the browser.
+  // Stubbing prevents Rollup from failing when bun workspaces don't hoist them.
+  const capacitorNativeScopeRe = /^@capacitor\/(?!core)(.+)$/;
 
   return {
     name: "native-module-stub",
@@ -803,6 +819,8 @@ function nativeModuleStubPlugin(): Plugin {
         : id.split("/")[0];
       // Scoped: @node-llama-cpp/*
       if (nativeScopeRe.test(id)) return VIRTUAL_PREFIX + id;
+      // Capacitor native plugins (@capacitor/* except @capacitor/core)
+      if (capacitorNativeScopeRe.test(id)) return VIRTUAL_PREFIX + id;
       // sharp's optional platform packages (@img/sharp-wasm32, etc.)
       if (
         id.startsWith("@img/sharp") ||
@@ -964,6 +982,40 @@ function nativeModuleStubPlugin(): Plugin {
           "  return c;",
           "}",
           "export default function sharp() { return mk(); }",
+        ].join("\n");
+      }
+
+      // Capacitor native plugins — mobile-only, cloud builds stub them.
+      // Must export the exact named identifiers used in app-core sources.
+      if (capacitorNativeScopeRe.test(strippedId)) {
+        const capPkg = strippedId.split("/").slice(0, 2).join("/");
+        if (capPkg === "@capacitor/haptics") {
+          return [
+            "const noop = () => {};const noopObj = new Proxy({}, { get: () => noop });",
+            "export const Haptics = noopObj;",
+            "export const ImpactStyle = Object.freeze({ Heavy: 'HEAVY', Medium: 'MEDIUM', Light: 'LIGHT' });",
+            "export const NotificationType = Object.freeze({ Success: 'SUCCESS', Warning: 'WARNING', Error: 'ERROR' });",
+            "export default noopObj;",
+          ].join("\n");
+        }
+        if (capPkg === "@capacitor/keyboard") {
+          return [
+            "const noop = () => {};const noopObj = new Proxy({}, { get: () => noop });",
+            "export const Keyboard = noopObj;",
+            "export default noopObj;",
+          ].join("\n");
+        }
+        if (capPkg === "@capacitor/preferences") {
+          return [
+            "const noop = () => Promise.resolve({ value: null });const noopObj = new Proxy({}, { get: () => noop });",
+            "export const Preferences = noopObj;",
+            "export default noopObj;",
+          ].join("\n");
+        }
+        // Generic Capacitor plugin stub
+        return [
+          "const noop = () => {};const stub = new Proxy({}, { get: () => noop });",
+          "export default stub;",
         ].join("\n");
       }
 
@@ -1197,6 +1249,27 @@ export default defineConfig({
       // events is pre-bundled via optimizeDeps.
       { find: /^path$/, replacement: patheEntry },
       { find: /^@capacitor\/core$/, replacement: capacitorCoreEntry },
+      // Aliases for Capacitor packages that may not be hoisted to root node_modules
+      // by bun workspaces. Apps/app resolves them; eliza submodule sources cannot.
+      ...(capacitorKeyboardEntry
+        ? [
+            {
+              find: /^@capacitor\/keyboard$/,
+              replacement: capacitorKeyboardEntry,
+            },
+          ]
+        : []),
+      ...(capacitorPreferencesEntry
+        ? [
+            {
+              find: /^@capacitor\/preferences$/,
+              replacement: capacitorPreferencesEntry,
+            },
+          ]
+        : []),
+      ...(capacitorAppEntry
+        ? [{ find: /^@capacitor\/app$/, replacement: capacitorAppEntry }]
+        : []),
       // Keep this subpath on the concrete source file so Docker/Vite builds
       // do not fall back to the extensionless tsconfig wildcard rewrite.
       {

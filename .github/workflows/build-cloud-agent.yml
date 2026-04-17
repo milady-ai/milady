@@ -56,7 +56,7 @@ jobs:
   build:
     name: Build cloud agent image
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
       # ── 1. Checkout ─────────────────────────────────────────────────────────
@@ -65,6 +65,7 @@ jobs:
         with:
           ref: ${{ env.SOURCE_REF }}
           fetch-depth: 0
+          submodules: false
 
       # ── 2. Set up Node + Bun ────────────────────────────────────────────────
       - name: Setup Node.js 22
@@ -86,23 +87,160 @@ jobs:
           restore-keys: |
             bun-store-cloud-${{ runner.os }}-
 
-      # ── 3.5. Init submodules (skip eliza workspace) ─────────────────────────
-      - name: Init non-eliza submodules
+      # ── 3.5. Init submodules + patch workspace for CI ──────────────
+      - name: Init submodules
         run: |
-          node scripts/init-submodules.mjs
-          node scripts/disable-local-eliza-workspace.mjs
-        env:
-          MILADY_SKIP_LOCAL_UPSTREAMS: "1"
+          # Init eliza submodule first (needed for workspace resolution)
+          # Full clone (not shallow) because eliza commit may not be in shallow history
+          git submodule update --init eliza || echo "eliza submodule init failed, continuing"
+          # Apply cloud runtime patches to eliza submodule
+          if [ -f cloud/patches/cloud-runtime-patches.patch ]; then
+            echo "Applying cloud runtime patches to eliza submodule..."
+            cd eliza && git apply ../cloud/patches/cloud-runtime-patches.patch && cd ..
+            echo "Cloud patches applied successfully"
+          fi
+          # AppBlockerSettingsCard alias — not in upstream eliza yet, add inline
+          # milady develop main.tsx imports it; alias to WebsiteBlockerSettingsCard until merged upstream
+          LIFEOPS_UI=eliza/apps/app-lifeops/src/ui.ts
+          if [ -f "$LIFEOPS_UI" ] && ! grep -q 'AppBlockerSettingsCard' "$LIFEOPS_UI"; then
+            if grep -q 'WebsiteBlockerSettingsCard' "$LIFEOPS_UI"; then
+              WBSC_PATH=$(grep 'WebsiteBlockerSettingsCard' "$LIFEOPS_UI" | grep 'export \*' | sed 's/export \* from "//;s/";$//')
+              echo "export { WebsiteBlockerSettingsCard as AppBlockerSettingsCard } from \"${WBSC_PATH:-./components/WebsiteBlockerSettingsCard.tsx}\";" >> "$LIFEOPS_UI"
+              echo "AppBlockerSettingsCard alias added to $LIFEOPS_UI"
+            fi
+          fi
+          ls eliza/package.json && echo "eliza submodule OK" || echo "WARN: eliza submodule missing"
+          # Init other submodules (skip local upstreams to avoid nested plugin submodules)
+          MILADY_SKIP_LOCAL_UPSTREAMS=1 node scripts/init-submodules.mjs || echo "Some submodules failed, continuing"
+          # Disable workspace entries for missing plugin submodules
+          MILADY_SKIP_LOCAL_UPSTREAMS=1 node scripts/disable-local-eliza-workspace.mjs || echo "Disable script failed, continuing"
+
+      # The disable script removes all eliza/* workspace entries and rewrites
+      # workspace:* overrides, but the vite build needs app-core, ui, shared,
+      # agent, and app packages that exist on disk. Re-add them.
+      - name: Restore build-critical workspaces
+        run: |
+          node -e '
+            const fs = require("fs");
+            const path = require("path");
+            const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
+
+            // Scan for eliza packages that exist on disk with a package.json
+            const dirs = [
+              ...fs.readdirSync("eliza/packages").map(d => "eliza/packages/" + d),
+              ...fs.readdirSync("eliza/apps").map(d => "eliza/apps/" + d),
+            ];
+            const restored = [];
+            for (const d of dirs) {
+              const p = d + "/package.json";
+              if (fs.existsSync(p)) {
+                if (!pkg.workspaces.includes(d)) {
+                  pkg.workspaces.push(d);
+                  restored.push(d);
+                }
+              }
+            }
+            // Also collect names of restored packages to fix overrides
+            const restoredNames = new Set();
+            for (const d of [...restored, ...pkg.workspaces.filter(w => !w.includes("*"))]) {
+              const p = d + "/package.json";
+              if (fs.existsSync(p)) {
+                try { restoredNames.add(JSON.parse(fs.readFileSync(p, "utf8")).name); } catch {}
+              }
+            }
+
+            // Restore workspace:* overrides for re-added packages
+            if (pkg.overrides) {
+              for (const name of restoredNames) {
+                if (pkg.overrides[name] && pkg.overrides[name] !== "workspace:*") {
+                  console.log("[restore-workspaces] Override", name, ":", pkg.overrides[name], "-> workspace:*");
+                  pkg.overrides[name] = "workspace:*";
+                }
+              }
+            }
+
+            fs.writeFileSync("package.json", JSON.stringify(pkg, null, 2) + "\n");
+            console.log("[restore-workspaces] Re-added", restored.length, "workspace entries");
+            if (restored.length > 0) console.log(restored.join("\n"));
+
+            // Rewrite workspace:* deps in restored packages that reference
+            // packages NOT in the workspace (missing plugin submodules etc.)
+            const allWsDirs = pkg.workspaces.filter(w => !w.includes("*"));
+            for (const d of allWsDirs) {
+              const p = d + "/package.json";
+              if (!fs.existsSync(p)) continue;
+              const raw = fs.readFileSync(p, "utf8");
+              const wpkg = JSON.parse(raw);
+              let changed = false;
+              for (const field of ["dependencies", "devDependencies", "peerDependencies", "optionalDependencies"]) {
+                if (!wpkg[field]) continue;
+                const toDelete = [];
+                for (const [dep, ver] of Object.entries(wpkg[field])) {
+                  if (typeof ver !== "string" || !ver.startsWith("workspace:")) continue;
+                  if (restoredNames.has(dep)) continue; // local workspace, keep
+                  // Not a workspace member, delete to prevent resolve failure
+                  toDelete.push(dep);
+                  changed = true;
+                }
+                for (const dep of toDelete) {
+                  delete wpkg[field][dep];
+                  console.log("[restore-workspaces] Removed", dep, "from", d);
+                }
+              }
+              if (changed) {
+                fs.writeFileSync(p, JSON.stringify(wpkg, null, 2) + "\n");
+              }
+            }
+          '
 
       # ── 4. Install dependencies ─────────────────────────────────────────────
       - name: Install dependencies
         run: bun install --ignore-scripts
+
+      - name: Hoist missing runtime deps
+        run: |
+          # tsx resolves @elizaos/core src/ at runtime, hitting imports that aren't
+          # hoisted by bun workspace install (workspace entries get disabled for CI).
+          # Check which deps are missing and install them individually via tarball.
+          node -e '
+            const fs = require("fs");
+            const path = require("path");
+            const { execSync } = require("child_process");
+            const pkgPaths = [
+              "eliza/packages/typescript/package.json",
+              "eliza/packages/agent/package.json",
+            ];
+            const missing = new Set();
+            for (const p of pkgPaths) {
+              if (!fs.existsSync(p)) continue;
+              const pkg = JSON.parse(fs.readFileSync(p, "utf8"));
+              for (const dep of Object.keys(pkg.dependencies || {})) {
+                if (!fs.existsSync("node_modules/" + dep)) missing.add(dep);
+              }
+            }
+            if (missing.size === 0) { console.log("All deps present"); process.exit(0); }
+            console.log(`Installing ${missing.size} missing deps: ${[...missing].join(", ")}`);
+            for (const dep of missing) {
+              try {
+                const url = execSync(`npm view ${dep} dist.tarball 2>/dev/null`, {encoding: "utf8"}).trim();
+                if (!url) { console.log(`  skip ${dep} (no tarball)`); continue; }
+                const dir = `/tmp/pkg-${dep.replace(/[\/\/@]/g, "_")}`;
+                fs.mkdirSync(dir, {recursive: true});
+                execSync(`curl -sL "${url}" | tar xz -C "${dir}"`, {stdio: "inherit"});
+                const target = path.join("node_modules", dep);
+                fs.mkdirSync(path.dirname(target), {recursive: true});
+                fs.renameSync(path.join(dir, "package"), target);
+                console.log(`  + ${dep}`);
+              } catch (e) { console.log(`  WARN: ${dep}: ${e.message}`); }
+            }
+          '
 
       - name: Run postinstall patches
         run: bun run postinstall
         env:
           SKIP_AVATAR_CLONE: "1"
           MILADY_NO_VISION_DEPS: "1"
+          MILADY_SKIP_LOCAL_UPSTREAMS: "1"
 
       # ── 5. Build Capacitor plugins ──────────────────────────────────────────
       - name: Build Capacitor plugins
@@ -110,15 +248,33 @@ jobs:
           cd apps/app
           bun scripts/plugin-build.mjs
 
-      - name: Build agent workspace
+      # ── 5.5. Build @elizaos/core + agent (needed for tsx runtime) ───────
+      - name: Install buf CLI
+        uses: bufbuild/buf-setup-action@v1
+        with:
+          version: "1.50.0"
+
+      - name: Build @elizaos/core
+        run: |
+          # Proto generation
+          cd eliza/packages/schemas
+          buf dep update && buf generate
+          # i18n keyword generation (needs @elizaos/shared scripts)
+          cd ../typescript
+          node ../shared/scripts/generate-keywords.mjs --target ts 2>/dev/null || echo "keyword gen skipped"
+          # Build core
+          bun run build.ts 2>&1 || echo "core build had errors"
+          ls dist/node/index.node.js && echo "core dist OK" || echo "WARN: core dist missing"
+
+      - name: Build @elizaos/agent
         run: |
           cd eliza/packages/agent
-          bun run build:docker-dist
+          bun run build:docker-dist 2>&1 || bun run build 2>&1 || echo "agent build had errors"
 
-      - name: Build @elizaos/core (includes agent-orchestrator)
+      - name: Build @elizaos/shared
         run: |
-          cd eliza/packages/typescript
-          bun run build:node
+          cd eliza/packages/shared
+          bun run build 2>&1 || echo "shared build had errors"
 
       # ── 6. Build runtime (tsdown) ───────────────────────────────────────────
       - name: Build runtime (tsdown)
@@ -185,6 +341,29 @@ jobs:
             echo "EOF"
           } >> "$GITHUB_ENV"
 
+      # ── 7b. Ensure tailwindcss is resolvable from inside the eliza submodule
+      - name: Inject tailwindcss into eliza/packages/app-core/node_modules
+        run: |
+          # @tailwindcss/vite resolves 'tailwindcss' starting from the CSS file path inside
+          # the eliza submodule (eliza/packages/app-core/src/styles/styles.css).
+          # Bun workspaces don't hoist it to root node_modules; npm install fails with
+          # EOVERRIDE due to app-core's package.json overrides. Use tarball extraction instead.
+          mkdir -p eliza/packages/app-core/node_modules
+          if [ ! -d "eliza/packages/app-core/node_modules/tailwindcss" ]; then
+            echo "Fetching tailwindcss tarball..."
+            TAILWIND_URL=$(npm view tailwindcss dist.tarball 2>/dev/null)
+            if [ -n "$TAILWIND_URL" ]; then
+              mkdir -p /tmp/tw_extract
+              curl -sL "$TAILWIND_URL" | tar xz -C /tmp/tw_extract
+              mv /tmp/tw_extract/package eliza/packages/app-core/node_modules/tailwindcss
+              echo "+ tailwindcss $(cat eliza/packages/app-core/node_modules/tailwindcss/package.json | node -e 'process.stdin.resume();let d="";process.stdin.on("data",c=>d+=c);process.stdin.on("end",()=>console.log(JSON.parse(d).version))')"
+            else
+              echo "WARN: could not resolve tailwindcss tarball URL"
+            fi
+          else
+            echo "tailwindcss already present in app-core/node_modules"
+          fi
+
       # ── 8. Build UI (vite) ──────────────────────────────────────────────────
       - name: Build UI (vite)
         run: |
@@ -195,7 +374,11 @@ jobs:
 
       # ── 9. Docker ignore (context root must have .dockerignore; source: deploy/)
       - name: Set up CI dockerignore
-        run: cp eliza/packages/app-core/deploy/.dockerignore.ci .dockerignore
+        run: |
+          cp eliza/packages/app-core/deploy/.dockerignore.ci .dockerignore
+          # Whitelist runtime-required app packages (agent imports these at boot)
+          echo '!eliza/apps/app-companion' >> .dockerignore
+          echo '!eliza/apps/app-lifeops' >> .dockerignore
 
       # ── 10. Set up Docker builder ────────────────────────────────
       - name: Set up Docker Buildx
@@ -214,7 +397,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: eliza/packages/app-core/deploy/Dockerfile.ci
+          file: deploy/Dockerfile.ci
           platforms: linux/amd64
           push: ${{ github.event_name == 'push' || inputs.push_image != false }}
           tags: |

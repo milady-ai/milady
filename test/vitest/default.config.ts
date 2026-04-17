@@ -15,7 +15,6 @@
  * eliza/packages/examples, eliza/packages/templates, eliza/packages/benchmarks.
  */
 import fs from "node:fs";
-import { createRequire } from "node:module";
 import path from "node:path";
 import { defineConfig } from "vitest/config";
 import {
@@ -58,13 +57,40 @@ const uiSourceRoot = getUiSourceRoot(repoRoot);
 const packageManifest: RootPackageManifest = JSON.parse(
   fs.readFileSync(path.join(repoRoot, "package.json"), "utf8"),
 );
-const elizaWorkspaceRequire = createRequire(
-  path.join(repoRoot, "eliza", "package.json"),
+const workspaceReactDir = path.join(repoRoot, "node_modules", "react");
+const workspaceReactDomDir = path.join(repoRoot, "node_modules", "react-dom");
+const workspaceReactTestRendererDir = path.join(
+  repoRoot,
+  "node_modules",
+  "react-test-renderer",
 );
-const elizaReactEntry = elizaWorkspaceRequire.resolve("react");
-const elizaReactDomEntry = elizaWorkspaceRequire.resolve("react-dom");
-const elizaReactDir = path.dirname(elizaReactEntry);
-const elizaReactDomDir = path.dirname(elizaReactDomEntry);
+const workspaceReactEntry = path.join(workspaceReactDir, "index.js");
+const workspaceReactJsxRuntimeEntry = path.join(
+  workspaceReactDir,
+  "jsx-runtime.js",
+);
+const workspaceReactJsxDevRuntimeEntry = path.join(
+  workspaceReactDir,
+  "jsx-dev-runtime.js",
+);
+const workspaceReactDomEntry = path.join(workspaceReactDomDir, "index.js");
+const workspaceReactDomClientEntry = path.join(
+  workspaceReactDomDir,
+  "client.js",
+);
+const workspaceReactDomServerEntry = path.join(
+  workspaceReactDomDir,
+  "server.js",
+);
+const workspaceReactDomTestUtilsEntry = path.join(
+  workspaceReactDomDir,
+  "test-utils.js",
+);
+const workspaceReactTestRendererEntry = path.join(
+  workspaceReactTestRendererDir,
+  "index.js",
+);
+const asViteFsPath = (targetPath: string) => `/@fs${targetPath}`;
 const workspacePluginPackageNames = Object.keys({
   ...(packageManifest.dependencies ?? {}),
   ...(packageManifest.devDependencies ?? {}),
@@ -133,24 +159,55 @@ const vitestInlineDeps = [
 
 export default defineConfig({
   resolve: {
+    preserveSymlinks: true,
     dedupe: ["react", "react-dom", "ethers", "@elizaos/core"],
     alias: [
       {
         // Keep React pinned to one installed copy so jsdom does not mix workspace and hoisted peers.
         find: /^react$/,
-        replacement: elizaReactEntry,
+        replacement: asViteFsPath(workspaceReactEntry),
+      },
+      {
+        find: /^react\/jsx-runtime$/,
+        replacement: asViteFsPath(workspaceReactJsxRuntimeEntry),
+      },
+      {
+        find: /^react\/jsx-dev-runtime$/,
+        replacement: asViteFsPath(workspaceReactJsxDevRuntimeEntry),
       },
       {
         find: /^react\/(.*)$/,
-        replacement: path.join(elizaReactDir, "$1"),
+        replacement: asViteFsPath(path.join(workspaceReactDir, "$1")),
       },
       {
         find: /^react-dom$/,
-        replacement: elizaReactDomEntry,
+        replacement: asViteFsPath(workspaceReactDomEntry),
+      },
+      {
+        find: /^react-dom\/client$/,
+        replacement: asViteFsPath(workspaceReactDomClientEntry),
+      },
+      {
+        find: /^react-dom\/server$/,
+        replacement: asViteFsPath(workspaceReactDomServerEntry),
+      },
+      {
+        find: /^react-dom\/test-utils$/,
+        replacement: asViteFsPath(workspaceReactDomTestUtilsEntry),
       },
       {
         find: /^react-dom\/(.*)$/,
-        replacement: path.join(elizaReactDomDir, "$1"),
+        replacement: asViteFsPath(path.join(workspaceReactDomDir, "$1")),
+      },
+      {
+        find: /^react-test-renderer$/,
+        replacement: asViteFsPath(workspaceReactTestRendererEntry),
+      },
+      {
+        find: /^react-test-renderer\/(.*)$/,
+        replacement: asViteFsPath(
+          path.join(workspaceReactTestRendererDir, "$1"),
+        ),
       },
       {
         // App-core tests mock this plugin, but Vitest still has to resolve the specifier.
@@ -246,6 +303,10 @@ export default defineConfig({
     pool: "forks",
     maxWorkers: isCI ? ciWorkers : localWorkers,
     restoreMocks: true,
+    // Some shard patterns (e.g. eliza/packages/agent/test) hold only test
+    // infrastructure, not *.test.ts files. Tolerate empty matches so those
+    // shards pass instead of aborting the whole suite.
+    passWithNoTests: true,
     // Give worker forks more heap to survive jsdom-heavy suites.
     execArgv: ["--max-old-space-size=4096"],
     include: [
@@ -293,7 +354,9 @@ export default defineConfig({
       "apps/chrome-extension/**/*.test.tsx",
       "test/helpers/**/*.test.ts",
     ],
-    setupFiles: ["eliza/packages/app-core/test/setup.ts"],
+    setupFiles: [
+      path.join(repoRoot, "eliza/packages/app-core/test/setup.ts"),
+    ],
     exclude: [
       "dist/**",
       "**/node_modules/**",

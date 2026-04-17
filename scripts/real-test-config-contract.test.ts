@@ -9,6 +9,7 @@ const configPath = path.join(
   "vitest",
   "real.config.ts",
 );
+const packageJsonPath = path.join(import.meta.dirname, "..", "package.json");
 
 describe("real test config contract", () => {
   it("keeps the PR real suite focused on non-e2e coverage", () => {
@@ -33,5 +34,19 @@ describe("real test config contract", () => {
     expect(source).toContain('find: "@elizaos/plugin-sql"');
     expect(source).not.toContain("**/*.live.e2e.test.ts");
     expect(source).not.toContain("**/*.real.e2e.test.ts");
+  });
+
+  it("runs the action invocation E2E suite with the live-e2e config", () => {
+    const packageJson = JSON.parse(
+      fs.readFileSync(packageJsonPath, "utf8"),
+    ) as {
+      scripts?: Record<string, string>;
+    };
+    const actionE2eScript = packageJson.scripts?.["test:action-e2e"];
+
+    expect(actionE2eScript).toContain("test/vitest/live-e2e.config.ts");
+    expect(actionE2eScript).toContain(
+      "eliza/packages/app-core/test/live-agent/action-invocation.live.e2e.test.ts",
+    );
   });
 });

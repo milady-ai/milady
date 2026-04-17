@@ -142,6 +142,36 @@ describe("applyUnpublishedPluginStubOverrides", () => {
       JSON.parse(fs.readFileSync(path.join(elizaRoot, "package.json"), "utf8")),
     ).not.toHaveProperty("overrides");
   });
+
+  it("keeps the real wechat plugin package name aligned with the CI stub", () => {
+    const stubPackage = JSON.parse(
+      fs.readFileSync(
+        path.join(
+          process.cwd(),
+          "scripts",
+          "ci-stubs",
+          "elizaos-plugin-wechat",
+          "package.json",
+        ),
+        "utf8",
+      ),
+    ) as { name?: string };
+    const realPackage = JSON.parse(
+      fs.readFileSync(
+        path.join(
+          process.cwd(),
+          "eliza",
+          "plugins",
+          "plugin-wechat",
+          "package.json",
+        ),
+        "utf8",
+      ),
+    ) as { name?: string };
+
+    expect(realPackage.name).toBe("@elizaos/plugin-wechat");
+    expect(realPackage.name).toBe(stubPackage.name);
+  });
 });
 
 describe("findInstalledPackageDir", () => {
