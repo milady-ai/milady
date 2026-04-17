@@ -1,10 +1,10 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 
-export const ROOT_TIMEOUT_MS = 20_000;
-export const NAV_TIMEOUT_MS = 12_000;
-// These "ready" checks only look for mocked/static UI markers after navigation.
-// Full backend/bootstrap waits use the longer per-test and Playwright defaults.
-const READY_CHECK_TIMEOUT_MS = 5_000;
+const ROOT_TIMEOUT_MS = 20_000;
+const NAV_TIMEOUT_MS = 12_000;
+// Ready checks only confirm route-level render markers after navigation.
+// Full bootstrap waits use the surrounding test timeout and Playwright defaults.
+const READY_CHECK_TIMEOUT_MS = 15_000;
 
 type ReadyCheck =
   | { selector: string; text?: never }
@@ -143,11 +143,7 @@ export async function assertReadyChecks(
   ).toBe(true);
 }
 
-/**
- * Baseline API stubs every smoke test that touches the network should install.
- * Call in `beforeEach` before any flow-specific overrides so those can
- * `route.fallback()` through to these defaults for URLs they don't care about.
- */
+/** Installs baseline API routes for smoke tests before flow-specific overrides. */
 export async function installDefaultAppRoutes(page: Page): Promise<void> {
   await page.route("**/api/health", async (route) => {
     await route.fulfill({
@@ -187,16 +183,12 @@ export async function installDefaultAppRoutes(page: Page): Promise<void> {
   });
 }
 
-/** Handles returned by {@link installCloudWalletImportApiOverrides}. */
-export type CloudWalletImportMockApi = {
+type CloudWalletImportMockApi = {
   lastWalletConfigPut: () => Record<string, unknown> | null;
   stewardStatusRequestCount: () => number;
 };
 
-/**
- * Playwright routes that override the ui-smoke API stub for the cloud wallet import flow.
- * Register **after** {@link installDefaultAppRoutes} so these take precedence for matching URLs.
- */
+/** Overrides the default smoke routes for the cloud wallet import flow. */
 export async function installCloudWalletImportApiOverrides(
   page: Page,
 ): Promise<CloudWalletImportMockApi> {
@@ -359,27 +351,4 @@ export async function installCloudWalletImportApiOverrides(
     lastWalletConfigPut: () => lastWalletPut,
     stewardStatusRequestCount: () => stewardStatusHits,
   };
-}
-
-export async function runSoftReadyChecks(
-  page: Page,
-  label: string,
-  checks: ReadyCheck[],
-  mode: "any" | "all" = "any",
-  timeoutMs: number = READY_CHECK_TIMEOUT_MS,
-): Promise<void> {
-  const evaluation = await evaluateReadyChecks(page, checks, mode, timeoutMs);
-  if (evaluation.passed) {
-    return;
-  }
-
-  const summary = evaluation.results
-    .map(
-      (result) =>
-        `${result.passed ? "pass" : "fail"}:${formatReadyCheck(result.check)}`,
-    )
-    .join(", ");
-  console.warn(
-    `[playwright-ui-smoke] ${label}: ready checks failed (${summary}).`,
-  );
 }

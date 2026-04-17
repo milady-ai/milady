@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["scripts/write-build-info.ts", "tsdown.config.ts"],
+  "exclude": ["node_modules", "dist"]
+}

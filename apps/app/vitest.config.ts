@@ -12,6 +12,7 @@ import {
 import {
   getAppCoreBridgeStubPath,
   getUiSourceAliases,
+  getWorkspaceAppAliases,
 } from "../../test/vitest/workspace-aliases";
 import { CAPACITOR_PLUGIN_NAMES } from "./scripts/capacitor-plugin-names.mjs";
 
@@ -33,6 +34,17 @@ const nativePluginAliasMap = Object.fromEntries(
     path.join(nativePluginsRoot, `${name}/src/index.ts`),
   ]),
 );
+const vitestInlineDeps = [
+  "@elizaos/agent",
+  "@elizaos/app-core",
+  "@elizaos/core",
+  "@testing-library/react",
+  "react",
+  "react-dom",
+  "react-test-renderer",
+  /^@elizaos\/plugin-/,
+  "zod",
+];
 
 /**
  * Redirects `@elizaos/app-core` bridge entrypoints to the test shim (matches
@@ -83,6 +95,17 @@ export default defineConfig({
       {
         find: /^@capacitor\/core$/,
         replacement: capacitorCoreEntry,
+      },
+      {
+        find: /^@elizaos\/plugin-sql$/,
+        replacement: path.join(
+          repoRoot,
+          "eliza",
+          "plugins",
+          "plugin-sql",
+          "typescript",
+          "index.node.ts",
+        ),
       },
       ...(appCorePackageRoot
         ? (() => {
@@ -145,6 +168,15 @@ export default defineConfig({
             },
           ]
         : []),
+      ...getWorkspaceAppAliases(repoRoot, [
+        "app-companion",
+        "app-task-coordinator",
+        "app-vincent",
+        "app-shopify",
+        "app-steward",
+        "app-lifeops",
+        "app-knowledge",
+      ]),
     ],
   },
   test: {
@@ -202,13 +234,7 @@ export default defineConfig({
     globals: true,
     server: {
       deps: {
-        inline: [
-          "@elizaos/app-core",
-          "@testing-library/react",
-          "react",
-          "react-dom",
-          "react-test-renderer",
-        ],
+        inline: vitestInlineDeps,
       },
     },
   },

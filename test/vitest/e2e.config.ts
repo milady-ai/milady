@@ -1,3 +1,4 @@
+import { defineConfig } from "vitest/config";
 import baseConfig from "./real.config";
 
 export const heavyOnlyE2EPaths = [
@@ -50,24 +51,25 @@ export const credentialDependentE2EPaths = [
   "eliza/packages/app-core/test/live-agent/telegram-connector.live.e2e.test.ts",
 ];
 
-export const defaultE2EInclude = [
-  "eliza/apps/**/*.live.e2e.test.ts",
-  "eliza/apps/**/*.real.e2e.test.ts",
-  "eliza/packages/**/*.live.e2e.test.ts",
-  "eliza/packages/**/*.real.e2e.test.ts",
+export const liveAndRealE2EInclude = [
+  "eliza/apps/**/*.{live,real}.e2e.test.{ts,tsx}",
+  "eliza/apps/**/*-{live,real}.e2e.test.{ts,tsx}",
+  "eliza/packages/**/*.{live,real}.e2e.test.{ts,tsx}",
+  "eliza/packages/**/*-{live,real}.e2e.test.{ts,tsx}",
 ];
 
-export default {
+export const baselineE2EExcludedPaths = [
+  ...heavyOnlyE2EPaths,
+  ...checkoutDependentE2EPaths,
+  ...specializedLiveE2EPaths,
+  ...credentialDependentE2EPaths,
+];
+
+export default defineConfig({
   ...baseConfig,
   test: {
     ...baseConfig.test,
-    include: defaultE2EInclude,
-    exclude: [
-      ...(baseConfig.test?.exclude ?? []),
-      ...heavyOnlyE2EPaths,
-      ...checkoutDependentE2EPaths,
-      ...specializedLiveE2EPaths,
-      ...credentialDependentE2EPaths,
-    ],
+    include: liveAndRealE2EInclude,
+    exclude: [...(baseConfig.test?.exclude ?? []), ...baselineE2EExcludedPaths],
   },
-};
+});

@@ -1,5 +1,6 @@
 import { spawn } from "node:child_process";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { getFreePort } from "../test/utils/get-free-port.mjs";
@@ -22,10 +23,55 @@ function resolvePlaywrightCommand() {
   return binaryName;
 }
 
+function resolveBunCommand() {
+  const bunFromEnv = process.env.BUN?.trim();
+  if (bunFromEnv && fs.existsSync(bunFromEnv)) {
+    return bunFromEnv;
+  }
+
+  if (
+    typeof process.versions.bun === "string" &&
+    typeof process.execPath === "string" &&
+    process.execPath.length > 0 &&
+    fs.existsSync(process.execPath)
+  ) {
+    return process.execPath;
+  }
+
+  const bunInstallRoot = process.env.BUN_INSTALL?.trim();
+  if (bunInstallRoot) {
+    const bunFromInstall = path.join(
+      bunInstallRoot,
+      "bin",
+      process.platform === "win32" ? "bun.exe" : "bun",
+    );
+    if (fs.existsSync(bunFromInstall)) {
+      return bunFromInstall;
+    }
+  }
+
+  const homeBun = path.join(
+    os.homedir(),
+    ".bun",
+    "bin",
+    process.platform === "win32" ? "bun.exe" : "bun",
+  );
+  if (fs.existsSync(homeBun)) {
+    return homeBun;
+  }
+
+  return process.platform === "win32" ? "bun.exe" : "bun";
+}
+
 const env = { ...process.env };
 delete env.NO_COLOR;
 delete env.FORCE_COLOR;
 delete env.CLICOLOR_FORCE;
+env.BUN = env.BUN || resolveBunCommand();
+
+const bunBinDir = path.dirname(env.BUN);
+const pathDelimiter = process.platform === "win32" ? ";" : ":";
+env.PATH = env.PATH ? `${bunBinDir}${pathDelimiter}${env.PATH}` : bunBinDir;
 
 if (
   playwrightArgs.includes("--config") &&

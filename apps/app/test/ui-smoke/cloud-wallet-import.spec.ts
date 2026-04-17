@@ -45,6 +45,28 @@ test("inventory cloud import uses the live wallet API", async ({ page }) => {
     .poll(() => walletConfigGetCount, { timeout: 15_000 })
     .toBeGreaterThanOrEqual(1);
 
+  const walletConfigResponse = await page.request.get("/api/wallet/config");
+  expect(walletConfigResponse.ok()).toBe(true);
+  const walletConfigBeforeImport = (await walletConfigResponse.json()) as {
+    evmAddress?: string | null;
+    solanaAddress?: string | null;
+    wallets?: Array<{ address?: string | null }>;
+  };
+  const hasConnectedWallet =
+    Boolean(walletConfigBeforeImport.evmAddress) ||
+    Boolean(walletConfigBeforeImport.solanaAddress) ||
+    Boolean(
+      walletConfigBeforeImport.wallets?.some(
+        (wallet) =>
+          typeof wallet.address === "string" &&
+          wallet.address.trim().length > 0,
+      ),
+    );
+  test.skip(
+    hasConnectedWallet,
+    "Wallet import CTA is hidden once the live stack already has a wallet connected.",
+  );
+
   const importBtn = page.getByRole("button", {
     name: "Import from Eliza Cloud",
   });
@@ -100,9 +122,10 @@ test("inventory cloud import uses the live wallet API", async ({ page }) => {
     .poll(() => walletConfigGetCount, { timeout: 15_000 })
     .toBeGreaterThanOrEqual(2);
 
-  const walletConfigResponse = await page.request.get("/api/wallet/config");
-  expect(walletConfigResponse.ok()).toBe(true);
-  const walletConfig = (await walletConfigResponse.json()) as {
+  const walletConfigAfterImportResponse =
+    await page.request.get("/api/wallet/config");
+  expect(walletConfigAfterImportResponse.ok()).toBe(true);
+  const walletConfig = (await walletConfigAfterImportResponse.json()) as {
     selectedRpcProviders?: Record<string, string>;
   };
   expect(walletConfig.selectedRpcProviders).toEqual({

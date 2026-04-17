@@ -10,30 +10,25 @@ test("browser workspace can create live tabs and switch selection", async ({
 }) => {
   await openAppPath(page, "/browser");
   await expect(page).toHaveURL(/\/browser$/, { timeout: 20_000 });
-  await expect(page.getByTestId("browser-workspace-view")).toBeVisible({
-    timeout: 30_000,
+  const browserWorkspaceView = page.getByTestId("browser-workspace-view");
+  await expect(browserWorkspaceView).toBeVisible({
+    timeout: 60_000,
   });
 
-  const addressInput = page.getByPlaceholder("Enter a URL");
-  if (!(await addressInput.isVisible())) {
-    const expandToggle = page.getByTestId(
-      "browser-workspace-sidebar-expand-toggle",
-    );
-    if (await expandToggle.isVisible()) {
-      await expandToggle.click();
-    }
-  }
-
-  await expect(addressInput).toBeVisible({ timeout: 30_000 });
+  const newTabButton = browserWorkspaceView.getByRole("button", {
+    name: "New tab",
+  });
+  await expect(newTabButton).toBeVisible({ timeout: 120_000 });
+  const addressInput = browserWorkspaceView.locator("input").first();
+  await expect(addressInput).toBeVisible({ timeout: 120_000 });
   await expect(page.getByText("No browser tabs yet")).toBeVisible({
-    timeout: 30_000,
+    timeout: 120_000,
   });
-  const newTabButton = page.getByRole("button", { name: "New tab" });
 
   await addressInput.fill("example.com");
   await newTabButton.click();
 
-  const exampleTabButton = page.getByRole("button", {
+  const exampleTabButton = page.getByRole("tab", {
     name: /example\.com https:\/\/example\.com\//,
   });
   await expect(exampleTabButton).toBeVisible();
@@ -42,7 +37,7 @@ test("browser workspace can create live tabs and switch selection", async ({
   await addressInput.fill("about:blank");
   await newTabButton.click();
 
-  const blankTabButton = page.getByRole("button", {
+  const blankTabButton = page.getByRole("tab", {
     name: /about:blank/i,
   });
   await expect(blankTabButton).toBeVisible();

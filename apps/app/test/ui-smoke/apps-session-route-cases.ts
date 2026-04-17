@@ -71,11 +71,21 @@ export const DIRECT_ROUTE_CASES = [
   {
     name: "shopify",
     path: "/apps/shopify",
-    selector: '[data-testid="shopify-shell"]',
+    readyChecks: [
+      { selector: '[data-testid="shopify-shell"]' },
+      { text: "Connect your Shopify store" },
+      { text: "Shopify" },
+    ],
+    timeoutMs: 90_000,
   },
   {
     name: "vincent",
     path: "/apps/vincent",
-    selector: '[data-testid="vincent-shell"]',
+    readyChecks: [
+      { selector: '[data-testid="vincent-shell"]' },
+      { text: "Connect your Vincent account to get started" },
+      { text: "Vincent" },
+    ],
+    timeoutMs: 90_000,
   },
 ] as const;

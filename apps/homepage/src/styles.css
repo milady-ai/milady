@@ -21,6 +21,12 @@
   --font-mono: "JetBrains Mono", "Cascadia Code", "Courier New", monospace;
   --font-display: "DM Sans", "Helvetica Neue", Arial, sans-serif;
 
+  --color-gold-300: #f7cf4a;
+  --color-gold-500: #f0b90b;
+  --color-gold-600: #d8a000;
+  --color-gold-700: #b07c00;
+  --color-gold-900: #6b4b00;
+
   /* Map to shared tokens */
   --color-dark: var(--bg);
   --color-dark-secondary: var(--bg-elevated);
@@ -44,6 +50,17 @@
   --color-status-paused: var(--warn);
   --color-status-stopped: var(--danger);
   --color-status-provisioning: var(--warn);
+}
+
+:root {
+  --gold-gradient-primary: linear-gradient(
+    135deg,
+    #f0b90b 0%,
+    #f7cf4a 55%,
+    #ffd966 100%
+  );
+  --gold-glow: 0 0 48px rgba(240, 185, 11, 0.22);
+  --gold-glow-soft: 0 0 32px rgba(240, 185, 11, 0.14);
 }
 
 html {
@@ -200,6 +217,28 @@ body {
   }
 }
 
+.skeleton-shimmer {
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 0%,
+    rgba(255, 255, 255, 0.1) 40%,
+    rgba(240, 185, 11, 0.06) 50%,
+    rgba(255, 255, 255, 0.1) 60%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: shimmer 2.4s linear infinite;
+  will-change: background-position;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shimmer {
+    animation: none;
+    background: rgba(255, 255, 255, 0.06);
+  }
+}
+
 @keyframes status-pulse {
   0%,
   100% {
@@ -219,6 +258,17 @@ body {
   100% {
     opacity: 0;
   }
+}
+
+/* Utility: hide scrollbar while preserving scroll. Used for horizontal
+   overflow rows (filter chips, tabs) so touch scroll is possible without
+   a visible bar cluttering the row. */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 /* ── Custom Scrollbars ─────────────────────────────────────────────── */

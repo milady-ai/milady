@@ -72,6 +72,10 @@ describe("release workflow path contract", () => {
     expect(workflow).toContain(
       "System git config failed; falling back to --global.",
     );
+    expect(workflow).toContain(
+      "node ../../scripts/build-electrobun-preload.mjs",
+    );
+    expect(workflow).not.toContain("run: bun run build:preload");
   });
 
   it("normalizes runner root ownership before snap builds", () => {
@@ -81,9 +85,81 @@ describe("release workflow path contract", () => {
 
     for (const workflow of [snapBuild, publishPackages, agentRelease]) {
       expect(workflow).toContain("Normalize runner root ownership for snapd");
-      expect(workflow).toContain("sudo chown root:root /");
-      expect(workflow).toContain('test "$(stat -c \'%u:%g\' /)" = "0:0"');
+      expect(workflow).toContain("ROOT_OWNER=\"$(stat -c '%u:%g' /)\"");
+      expect(workflow).toContain(`if [ "\${ROOT_OWNER}" = "0:0" ]; then`);
+      expect(workflow).toContain(
+        "if sudo -n chown root:root / 2>/dev/null; then",
+      );
     }
+  });
+
+  it("bootstraps generated data before the snap recipe runs the production build", () => {
+    const snapcraft = readElizaScript(
+      path.join("packages", "app-core", "packaging", "snap", "snapcraft.yaml"),
+    );
+
+    expect(snapcraft).toContain(
+      "node eliza/packages/app-core/scripts/ensure-shared-i18n-data.mjs",
+    );
+    expect(snapcraft).toContain(
+      "node eliza/packages/app-core/scripts/patch-deps.mjs || true",
+    );
+    expect(snapcraft).toContain(
+      "node eliza/packages/app-core/scripts/link-browser-server.mjs || true",
+    );
+  });
+
+  it("tests the snap using the milady command name", () => {
+    const snapBuild = readWorkflow("snap-build-test.yml");
+
+    expect(snapBuild).toContain("snap list milady");
+    expect(snapBuild).toContain("milady --version");
+    expect(snapBuild).toContain("milady --help");
+    expect(snapBuild).not.toContain("snap list elizaos-app");
+    expect(snapBuild).not.toContain("elizaos-app --version");
+  });
+
+  it("checks out the eliza submodule before packaging workflows use submodule paths", () => {
+    const testPackaging = readWorkflow("test-packaging.yml");
+    const publishPackages = readWorkflow("publish-packages.yml");
+    const agentRelease = readWorkflow("agent-release.yml");
+    const checkoutWithRecursiveSubmodules =
+      /uses: actions\/checkout@v4\s+with:\s+submodules: recursive/g;
+
+    expect(
+      Array.from(testPackaging.matchAll(checkoutWithRecursiveSubmodules))
+        .length,
+    ).toBeGreaterThanOrEqual(4);
+    expect(
+      Array.from(publishPackages.matchAll(checkoutWithRecursiveSubmodules))
+        .length,
+    ).toBeGreaterThanOrEqual(4);
+    expect(
+      Array.from(agentRelease.matchAll(checkoutWithRecursiveSubmodules)).length,
+    ).toBeGreaterThanOrEqual(4);
+  });
+
+  it("initializes tracked workspace submodules before packing JS tarballs", () => {
+    const testPackaging = readWorkflow("test-packaging.yml");
+
+    expect(testPackaging).toContain(
+      "pack-and-test-js:\n    name: Pack & Test JS Tarballs",
+    );
+    expect(testPackaging).toContain("run: node scripts/init-submodules.mjs");
+  });
+
+  it("hydrates eliza before nested submodule recursion in the release contract workflow", () => {
+    const releaseContract = readWorkflow("test-electrobun-release.yml");
+    const elizaInit = releaseContract.indexOf(
+      "git submodule update --init --depth=1 eliza",
+    );
+    const trackedInit = releaseContract.indexOf(
+      "run: node scripts/init-submodules.mjs",
+    );
+
+    expect(elizaInit).toBeGreaterThanOrEqual(0);
+    expect(trackedInit).toBeGreaterThanOrEqual(0);
+    expect(elizaInit).toBeLessThan(trackedInit);
   });
 
   it("keeps plugin-agent-orchestrator submodule init as the published release-check version source", () => {

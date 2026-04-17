@@ -1,0 +1,26 @@
+{
+  "id": "cross.failure-recovery.action-fails-agent-retries",
+  "title": "Agent degrades gracefully when a todo memory row is corrupt",
+  "domain": "cross-cutting",
+  "tags": [
+    "cross-cutting",
+    "failure-recovery"
+  ],
+  "status": "skipped",
+  "durationMs": 0,
+  "providerName": "none",
+  "startedAtIso": "2026-04-17T00:19:32.643Z",
+  "completedAtIso": "2026-04-17T00:19:33.371Z",
+  "turns": [],
+  "finalChecks": [],
+  "actionsCalled": [],
+  "cleanup": [],
+  "cost": {
+    "provider": "none",
+    "usd": 0,
+    "tokensIn": 0,
+    "tokensOut": 0
+  },
+  "llmCallCount": 0,
+  "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+}

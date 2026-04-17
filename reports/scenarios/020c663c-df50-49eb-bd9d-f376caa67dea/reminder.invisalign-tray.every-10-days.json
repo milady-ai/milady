@@ -1,0 +1,29 @@
+{
+  "id": "reminder.invisalign-tray.every-10-days",
+  "title": "Invisalign tray swap every 10 days",
+  "domain": "reminders",
+  "tags": [
+    "lifeops",
+    "reminders",
+    "smoke",
+    "critical",
+    "happy-path"
+  ],
+  "status": "skipped",
+  "durationMs": 0,
+  "providerName": "none",
+  "startedAtIso": "2026-04-17T00:16:39.388Z",
+  "completedAtIso": "2026-04-17T00:16:40.096Z",
+  "turns": [],
+  "finalChecks": [],
+  "actionsCalled": [],
+  "cleanup": [],
+  "cost": {
+    "provider": "none",
+    "usd": 0,
+    "tokensIn": 0,
+    "tokensOut": 0
+  },
+  "llmCallCount": 0,
+  "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+}

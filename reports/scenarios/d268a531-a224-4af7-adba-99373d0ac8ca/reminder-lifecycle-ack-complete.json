@@ -1,0 +1,25 @@
+{
+  "id": "reminder-lifecycle-ack-complete",
+  "title": "Compressed reminder lifecycle with ack and completion",
+  "domain": "lifeops",
+  "tags": [
+    "lifeops"
+  ],
+  "status": "skipped",
+  "durationMs": 0,
+  "providerName": "none",
+  "startedAtIso": "2026-04-17T00:22:50.848Z",
+  "completedAtIso": "2026-04-17T00:22:51.497Z",
+  "turns": [],
+  "finalChecks": [],
+  "actionsCalled": [],
+  "cleanup": [],
+  "cost": {
+    "provider": "none",
+    "usd": 0,
+    "tokensIn": 0,
+    "tokensOut": 0
+  },
+  "llmCallCount": 0,
+  "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+}
