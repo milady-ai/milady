@@ -1,0 +1,612 @@
+{
+  "runId": "eee42e79-07e3-494b-ad2c-dae37835721e",
+  "startedAtIso": "2026-04-17T00:10:06.287Z",
+  "completedAtIso": "2026-04-17T00:10:26.324Z",
+  "providerName": "none",
+  "scenarios": [
+    {
+      "id": "goal-sleep-basic",
+      "title": "Sleep goal save flow",
+      "domain": "goals",
+      "tags": [
+        "lifeops",
+        "goals",
+        "smoke"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:10:06.289Z",
+      "completedAtIso": "2026-04-17T00:10:08.198Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "brush-teeth-repeat-confirm",
+      "title": "Brush teeth ignores repeated save confirmation",
+      "domain": "tasks",
+      "tags": [
+        "lifeops",
+        "tasks"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:10:08.207Z",
+      "completedAtIso": "2026-04-17T00:10:08.991Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "brush-teeth-bedtime-wakeup",
+      "title": "Brush teeth from wake-up and bedtime phrasing",
+      "domain": "tasks",
+      "tags": [
+        "lifeops",
+        "tasks"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:10:08.999Z",
+      "completedAtIso": "2026-04-17T00:10:09.782Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "brush-teeth-night-owl",
+      "title": "Brush teeth for a night-owl phrasing",
+      "domain": "habits",
+      "tags": [
+        "lifeops",
+        "habits"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:10:09.790Z",
+      "completedAtIso": "2026-04-17T00:10:10.553Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "reminder-lifecycle-ack-complete",
+      "title": "Compressed reminder lifecycle with ack and completion",
+      "domain": "lifeops",
+      "tags": [
+        "lifeops"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:10:10.560Z",
+      "completedAtIso": "2026-04-17T00:10:11.292Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "one-off-mountain-time",
+      "title": "One-off reminder with full timezone phrase",
+      "domain": "tasks",
+      "tags": [
+        "lifeops",
+        "tasks"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:10:11.304Z",
+      "completedAtIso": "2026-04-17T00:10:12.050Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "vitamins-with-meals",
+      "title": "Vitamins tied to a meal window",
+      "domain": "habits",
+      "tags": [
+        "lifeops",
+        "habits"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:10:12.060Z",
+      "completedAtIso": "2026-04-17T00:10:12.798Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "invisalign-weekday-lunch",
+      "title": "Invisalign weekday lunch phrasing",
+      "domain": "habits",
+      "tags": [
+        "lifeops",
+        "habits"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:10:12.807Z",
+      "completedAtIso": "2026-04-17T00:10:13.534Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "workout-blocker-basic",
+      "title": "Workout blocker routine",
+      "domain": "habits",
+      "tags": [
+        "lifeops",
+        "habits"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:10:13.544Z",
+      "completedAtIso": "2026-04-17T00:10:14.287Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "brush-teeth-spanish",
+      "title": "Brush teeth from Spanish phrasing",
+      "domain": "tasks",
+      "tags": [
+        "lifeops",
+        "tasks"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:10:14.298Z",
+      "completedAtIso": "2026-04-17T00:10:15.040Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "brush-teeth-smalltalk-preference",
+      "title": "Brush teeth from smalltalk into preference update",
+      "domain": "tasks",
+      "tags": [
+        "lifeops",
+        "tasks"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:10:15.048Z",
+      "completedAtIso": "2026-04-17T00:10:15.792Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "shave-weekly-formal",
+      "title": "Formal weekly shave phrasing",
+      "domain": "habits",
+      "tags": [
+        "lifeops",
+        "habits"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:10:15.801Z",
+      "completedAtIso": "2026-04-17T00:10:16.528Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "brush-teeth-cancel",
+      "title": "Brush teeth cancel before save",
+      "domain": "tasks",
+      "tags": [
+        "lifeops",
+        "tasks"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:10:16.536Z",
+      "completedAtIso": "2026-04-17T00:10:17.301Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "shower-weekly-basic",
+      "title": "Shower weekly cadence",
+      "domain": "habits",
+      "tags": [
+        "lifeops",
+        "habits"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:10:17.308Z",
+      "completedAtIso": "2026-04-17T00:10:18.031Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "brush-teeth-retry-after-cancel",
+      "title": "Brush teeth retry after backing out",
+      "domain": "tasks",
+      "tags": [
+        "lifeops",
+        "tasks"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:10:18.034Z",
+      "completedAtIso": "2026-04-17T00:10:18.777Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "daily-left-today-variants",
+      "title": "Daily leftover overview phrasing variants",
+      "domain": "lifeops",
+      "tags": [
+        "lifeops"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:10:18.782Z",
+      "completedAtIso": "2026-04-17T00:10:19.561Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "reminder-lifecycle-snooze",
+      "title": "Compressed reminder lifecycle with snooze",
+      "domain": "lifeops",
+      "tags": [
+        "lifeops",
+        "smoke"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:10:19.571Z",
+      "completedAtIso": "2026-04-17T00:10:20.318Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "calendar-vague-followup",
+      "title": "Calendar vague follow-up routing",
+      "domain": "calendar",
+      "tags": [
+        "lifeops",
+        "calendar"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:10:20.327Z",
+      "completedAtIso": "2026-04-17T00:10:21.134Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "stretch-breaks",
+      "title": "Stretch default breaks during the day",
+      "domain": "tasks",
+      "tags": [
+        "lifeops",
+        "tasks"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:10:21.142Z",
+      "completedAtIso": "2026-04-17T00:10:21.917Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "water-default-frequency",
+      "title": "Drink water default daily frequency",
+      "domain": "tasks",
+      "tags": [
+        "lifeops",
+        "tasks"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:10:21.926Z",
+      "completedAtIso": "2026-04-17T00:10:22.733Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "gmail-suran-routing",
+      "title": "Narrative Gmail sender routing",
+      "domain": "gmail",
+      "tags": [
+        "lifeops",
+        "gmail"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:10:22.742Z",
+      "completedAtIso": "2026-04-17T00:10:23.490Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "gmail-retry-followup",
+      "title": "Gmail retry and refinement follow-up",
+      "domain": "gmail",
+      "tags": [
+        "lifeops",
+        "gmail"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:10:23.500Z",
+      "completedAtIso": "2026-04-17T00:10:24.281Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "brush-teeth-basic",
+      "title": "Brush teeth basic save flow",
+      "domain": "tasks",
+      "tags": [
+        "lifeops",
+        "tasks",
+        "smoke"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:10:24.289Z",
+      "completedAtIso": "2026-04-17T00:10:26.315Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    }
+  ],
+  "totalCount": 23,
+  "passedCount": 0,
+  "failedCount": 0,
+  "flakyPassedCount": 0,
+  "skippedCount": 23,
+  "totalCostUsd": 0
+}

@@ -1,5 +1,6 @@
 {
   "app": [
+    "apps/app/public/.DS_Store",
     "apps/app/public/android-chrome-192x192.png",
     "apps/app/public/android-chrome-512x512.png",
     "apps/app/public/apple-touch-icon.png",

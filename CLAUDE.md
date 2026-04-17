@@ -469,3 +469,18 @@ Be ruthless about quality and honest in assessment. The current state may be mes
 
 This is not a refactor for style points.
 This is a cleanup for correctness, maintainability, and architectural integrity.
+
+---
+
+## Git Workflow Rules
+
+**Motto: move fast and break things — but never lose work to dangling branches or stashes.**
+
+- **Never `git stash`.** Stashes are invisible state that gets forgotten and lost. If you need to set something aside, commit it.
+- **Always commit to the current branch.** Whatever branch is checked out is the branch you commit to. Use WIP commits liberally — they can always be amended, squashed, or rewritten later.
+- **Never switch branches unless explicitly told to.** No `git checkout <other-branch>`, no `git switch`, no implicit branch changes as part of "cleanup." If a task seems to require a different branch, ask first.
+- **Always commit work in the current worktree.** Don't move changes to another worktree, don't copy files across worktrees, don't `git worktree add` unless asked. The worktree you're in is where the work lands.
+- **Prefer many small commits over uncommitted changes.** A messy commit history on a pushed branch is recoverable. Lost work is not.
+- **Push proactively when work is meaningful.** A branch that exists only on the local machine is one disk failure away from gone. If a chunk of work is worth keeping, it's worth pushing.
+
+The principle: **every change must end up as a commit on the current branch in the current worktree, and ideally pushed.** No stashes, no branch hopping, no work that exists only in the working tree or in `git stash list`.

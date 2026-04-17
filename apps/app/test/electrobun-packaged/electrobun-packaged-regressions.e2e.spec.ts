@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { expect, type TestInfo, test } from "@playwright/test";
-import { type MockApiServer, startMockApiServer } from "./mock-api";
+import { startLiveApiServer, type TestApiServer } from "./live-api";
 import {
   PackagedDesktopHarness,
   resolvePackagedLauncher,
@@ -779,11 +779,11 @@ async function withPackagedHarness(
     "Packaged launcher is required for packaged desktop regressions.",
   ).toBeTruthy();
 
-  let api: MockApiServer | null = null;
+  let api: TestApiServer | null = null;
   let harness: PackagedDesktopHarness | null = null;
 
   try {
-    api = await startMockApiServer({ onboardingComplete: true, port: 0 });
+    api = await startLiveApiServer({ onboardingComplete: true, port: 0 });
     harness = new PackagedDesktopHarness({
       tempRoot,
       launcherPath: launcherPath as string,
@@ -875,27 +875,39 @@ async function withPackagedHarness(
     debugPackagedPhase("relaunch bootstrap requests observed");
 
     // Wait for the startup coordinator to finish transitioning past the
-    // StartupShell. Bootstrap requests prove the mock API is reachable, but
+    // StartupShell. Bootstrap requests prove the live API is reachable, but
     // the startup coordinator may still be in polling-backend → starting-runtime
-    // → hydrating phases. Poll until the root element has substantial content
-    // and the body text no longer shows startup-phase status strings.
+    // → hydrating phases. Poll until the startup shell DOM element is gone
+    // and the root element has substantial content.
+    //
+    // Previous approach used a regex on body text (/LOADING/i etc.) which
+    // false-positived on app-shell "Loading messages…" text in ChatView,
+    // causing the relaunch to stall even though the coordinator reached ready.
     await waitForEval<
-      EvalResult<{ ready: boolean; rootLength: number; bodySnippet: string }>
+      EvalResult<{
+        ready: boolean;
+        rootLength: number;
+        bodySnippet: string;
+        startupPhase: string | null;
+      }>
     >(
       harness,
       `(() => {
         try {
           const rootHtml = document.getElementById("root")?.innerHTML ?? "";
+          const startupShell = document.querySelector('[data-testid="startup-shell-loading"]');
+          const onboardingOverlay = document.querySelector('[data-testid="onboarding-ui-overlay"]');
+          const startupPhase = startupShell?.getAttribute("data-startup-phase") ?? null;
           const bodyText = (document.body?.innerText || "").replace(/\\s+/g, " ").trim();
-          const isStartup = /CONNECTING TO BACKEND|STARTING|INITIALIZING|LOADING/i.test(bodyText);
           return {
             ok: true,
-            ready: rootHtml.length > 200 && !isStartup,
+            ready: rootHtml.length > 200 && !startupShell && !onboardingOverlay,
             rootLength: rootHtml.length,
             bodySnippet: bodyText.slice(0, 120),
+            startupPhase,
           };
         } catch (e) {
-          return { ok: false, ready: false, rootLength: 0, bodySnippet: "" };
+          return { ok: false, ready: false, rootLength: 0, bodySnippet: "", startupPhase: null };
         }
       })()`,
       (r) => r.ok && r.ready,
@@ -913,7 +925,7 @@ async function withPackagedHarness(
     } catch (error) {
       const requestLog = api.requests.slice(-80).join("\n");
       throw new Error(
-        `${error instanceof Error ? error.message : String(error)}\nRecent mock API requests:\n${requestLog}`,
+        `${error instanceof Error ? error.message : String(error)}\nRecent packaged API requests:\n${requestLog}`,
       );
     }
   } finally {

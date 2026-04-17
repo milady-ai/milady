@@ -1,0 +1,10 @@
+[Unit]
+Description=Milady — run health probe every 5 minutes
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=5min
+AccuracySec=30s
+
+[Install]
+WantedBy=timers.target

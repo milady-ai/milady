@@ -23,6 +23,7 @@ import {
 } from "../../eliza/packages/shared/src/runtime-env.ts";
 import { syncElizaEnvAliases } from "../../scripts/lib/sync-eliza-env-aliases.mjs";
 import appConfig from "./app.config";
+import { CAPACITOR_PLUGIN_NAMES } from "./scripts/capacitor-plugin-names.mjs";
 import { resolveViteDevServerRuntime } from "./vite-dev-origin.ts";
 
 const _require = createRequire(import.meta.url);
@@ -53,12 +54,26 @@ function tryResolve(id: string): string | undefined {
 const capacitorKeyboardEntry = tryResolve("@capacitor/keyboard");
 const capacitorPreferencesEntry = tryResolve("@capacitor/preferences");
 const capacitorAppEntry = tryResolve("@capacitor/app");
-
-// Mirror MILADY_* env into ELIZA_* before the shared runtime helpers resolve ports.
-syncElizaEnvAliases();
+const patheEntry = _require.resolve("pathe");
 
 function ensureTrailingSlash(value: string): string {
   return value.endsWith("/") ? value : `${value}/`;
+}
+
+function normalizeEnvPrefix(value: string): string {
+  const normalized = value
+    .trim()
+    .replace(/[^A-Za-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .toUpperCase();
+  if (!normalized) {
+    throw new Error("App envPrefix must resolve to a non-empty identifier");
+  }
+  return normalized;
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function resolveAppShellMetadata() {
@@ -82,6 +97,41 @@ function resolveAppShellMetadata() {
 }
 
 const APP_SHELL_METADATA = resolveAppShellMetadata();
+const APP_ENV_PREFIX = normalizeEnvPrefix(
+  appConfig.envPrefix?.trim() || appConfig.cliName.trim(),
+);
+const APP_NAMESPACE = appConfig.namespace?.trim() || appConfig.cliName.trim();
+const BRANDED_ENV = {
+  apiPort: `${APP_ENV_PREFIX}_API_PORT`,
+  appSourcemap: `${APP_ENV_PREFIX}_APP_SOURCEMAP`,
+  assetBaseUrl: `${APP_ENV_PREFIX}_ASSET_BASE_URL`,
+  desktopFastDist: `${APP_ENV_PREFIX}_DESKTOP_VITE_FAST_DIST`,
+  devPolling: `${APP_ENV_PREFIX}_DEV_POLLING`,
+  hmrHost: `${APP_ENV_PREFIX}_HMR_HOST`,
+  settingsDebug: `${APP_ENV_PREFIX}_SETTINGS_DEBUG`,
+  ttsDebug: `${APP_ENV_PREFIX}_TTS_DEBUG`,
+  viteLoopbackOrigin: `${APP_ENV_PREFIX}_VITE_LOOPBACK_ORIGIN`,
+  viteOrigin: `${APP_ENV_PREFIX}_VITE_ORIGIN`,
+  viteSettingsDebug: `VITE_${APP_ENV_PREFIX}_SETTINGS_DEBUG`,
+};
+const DEFAULT_APP_ROUTE_PLUGIN_MODULES = [
+  "@elizaos/app-vincent/register-routes",
+  "@elizaos/app-shopify/register-routes",
+  "@elizaos/app-steward/register-routes",
+  "@elizaos/app-lifeops/register-routes",
+];
+
+// Mirror branded app env into ELIZA_* before the shared runtime helpers resolve ports.
+syncElizaEnvAliases({
+  brandedPrefix: APP_ENV_PREFIX,
+  cloudManagedAgentsApiSegment: APP_NAMESPACE,
+  appRoutePluginModules: DEFAULT_APP_ROUTE_PLUGIN_MODULES,
+});
+
+const NATIVE_PLUGIN_ALIAS_ENTRIES = CAPACITOR_PLUGIN_NAMES.map((name) => ({
+  find: new RegExp(`^@elizaos/capacitor-${escapeRegExp(name)}$`),
+  replacement: path.join(nativePluginsRoot, `${name}/src/index.ts`),
+}));
 
 function appShellMetadataPlugin(): Plugin {
   const manifest = `${JSON.stringify(
@@ -153,7 +203,7 @@ function appShellMetadataPlugin(): Plugin {
 /**
  * Pinned @elizaos/core from the repo root (must match the agent/runtime lock).
  */
-function getMiladyPinnedElizaCoreVersion(): string {
+function getPinnedElizaCoreVersion(): string {
   try {
     const raw = JSON.parse(
       fs.readFileSync(path.join(miladyRoot, "package.json"), "utf8"),
@@ -224,7 +274,7 @@ function findElizaCoreBundleInBunStore(
   } catch {
     return null;
   }
-  const pinned = getMiladyPinnedElizaCoreVersion();
+  const pinned = getPinnedElizaCoreVersion();
   const pinnedPrefix = `@elizaos+core@${pinned}+`;
 
   const withDist = entries.filter((dir) => {
@@ -349,13 +399,17 @@ function elizaCoreBrowserEntryFallbackPlugin(): Plugin {
   };
 }
 
-// The dev script sets MILADY_API_PORT; default to 31337 for standalone vite dev.
+// The dev script sets the branded API port env; default to 31337 for standalone vite dev.
 const apiPort = resolveDesktopApiPort(process.env);
 const uiPort = resolveDesktopUiPort(process.env);
-const viteDevServerRuntime = resolveViteDevServerRuntime(process.env, uiPort);
-const enableAppSourceMaps = process.env.MILADY_APP_SOURCEMAP === "1";
+const viteDevServerRuntime = resolveViteDevServerRuntime(
+  process.env,
+  uiPort,
+  APP_ENV_PREFIX,
+);
+const enableAppSourceMaps = process.env[BRANDED_ENV.appSourcemap] === "1";
 /** Set by eliza/packages/app-core/scripts/dev-platform.mjs for `vite build --watch` (Electrobun desktop). */
-const desktopFastDist = process.env.MILADY_DESKTOP_VITE_FAST_DIST === "1";
+const desktopFastDist = process.env[BRANDED_ENV.desktopFastDist] === "1";
 
 function pathIncludesAny(id: string, markers: string[]): boolean {
   return markers.some((marker) => id.includes(marker));
@@ -381,11 +435,9 @@ function resolveManualChunk(id: string): string | undefined {
       return "vendor-vrm";
     }
 
-    if (normalizedId.includes("/three/examples/")) {
-      return "vendor-three-extras";
-    }
-
-    if (pathIncludesAny(normalizedId, ["/three/build/", "/three/src/"])) {
+    // Collapse all three.js code into one chunk to avoid cross-chunk TDZ
+    // init ordering bugs with WebGPU/TSL enums (see fix/three-chunk-tdz).
+    if (normalizedId.includes("/three/")) {
       return "vendor-three";
     }
   }
@@ -419,60 +471,60 @@ function buildViteDevSettingsRows(
   const uiPort = resolveDesktopUiPort(process.env);
   const assetBase =
     process.env.VITE_ASSET_BASE_URL?.trim() ||
-    process.env.MILADY_ASSET_BASE_URL?.trim() ||
+    process.env[BRANDED_ENV.assetBaseUrl]?.trim() ||
     "—";
 
   return [
     {
-      setting: "MILADY_APP_SOURCEMAP",
-      effective: envFlagEffective("MILADY_APP_SOURCEMAP"),
-      source: envFlagSource("MILADY_APP_SOURCEMAP"),
-      change: "export MILADY_APP_SOURCEMAP=1 to enable; unset for off",
+      setting: BRANDED_ENV.appSourcemap,
+      effective: envFlagEffective(BRANDED_ENV.appSourcemap),
+      source: envFlagSource(BRANDED_ENV.appSourcemap),
+      change: `export ${BRANDED_ENV.appSourcemap}=1 to enable; unset for off`,
     },
     {
-      setting: "MILADY_DESKTOP_VITE_FAST_DIST",
-      effective: envFlagEffective("MILADY_DESKTOP_VITE_FAST_DIST"),
-      source: envFlagSource("MILADY_DESKTOP_VITE_FAST_DIST"),
+      setting: BRANDED_ENV.desktopFastDist,
+      effective: envFlagEffective(BRANDED_ENV.desktopFastDist),
+      source: envFlagSource(BRANDED_ENV.desktopFastDist),
       change:
         "set by dev orchestrator for Rollup watch; unset for normal dev server",
     },
     {
-      setting: "MILADY_TTS_DEBUG",
-      effective: process.env.MILADY_TTS_DEBUG?.trim() ? "set" : "—",
-      source: process.env.MILADY_TTS_DEBUG?.trim()
-        ? "env set — MILADY_TTS_DEBUG"
+      setting: BRANDED_ENV.ttsDebug,
+      effective: process.env[BRANDED_ENV.ttsDebug]?.trim() ? "set" : "—",
+      source: process.env[BRANDED_ENV.ttsDebug]?.trim()
+        ? `env set — ${BRANDED_ENV.ttsDebug}`
         : "default (unset)",
-      change: "export MILADY_TTS_DEBUG=1 for TTS trace logs",
+      change: `export ${BRANDED_ENV.ttsDebug}=1 for TTS trace logs`,
     },
     {
-      setting: "MILADY_SETTINGS_DEBUG / VITE_MILADY_SETTINGS_DEBUG",
+      setting: `${BRANDED_ENV.settingsDebug} / ${BRANDED_ENV.viteSettingsDebug}`,
       effective:
-        process.env.MILADY_SETTINGS_DEBUG?.trim() ||
-        process.env.VITE_MILADY_SETTINGS_DEBUG?.trim()
+        process.env[BRANDED_ENV.settingsDebug]?.trim() ||
+        process.env[BRANDED_ENV.viteSettingsDebug]?.trim()
           ? "set"
           : "—",
-      source: process.env.VITE_MILADY_SETTINGS_DEBUG?.trim()
-        ? "env set — VITE_MILADY_SETTINGS_DEBUG"
-        : process.env.MILADY_SETTINGS_DEBUG?.trim()
-          ? "env set — MILADY_SETTINGS_DEBUG"
+      source: process.env[BRANDED_ENV.viteSettingsDebug]?.trim()
+        ? `env set — ${BRANDED_ENV.viteSettingsDebug}`
+        : process.env[BRANDED_ENV.settingsDebug]?.trim()
+          ? `env set — ${BRANDED_ENV.settingsDebug}`
           : "default (unset)",
-      change: "export MILADY_SETTINGS_DEBUG=1 or VITE_MILADY_SETTINGS_DEBUG=1",
+      change: `export ${BRANDED_ENV.settingsDebug}=1 or ${BRANDED_ENV.viteSettingsDebug}=1`,
     },
     {
-      setting: "VITE_ASSET_BASE_URL / MILADY_ASSET_BASE_URL",
+      setting: `VITE_ASSET_BASE_URL / ${BRANDED_ENV.assetBaseUrl}`,
       effective: assetBase,
       source: process.env.VITE_ASSET_BASE_URL?.trim()
         ? "env set — VITE_ASSET_BASE_URL"
-        : process.env.MILADY_ASSET_BASE_URL?.trim()
-          ? "env set — MILADY_ASSET_BASE_URL"
+        : process.env[BRANDED_ENV.assetBaseUrl]?.trim()
+          ? `env set — ${BRANDED_ENV.assetBaseUrl}`
           : "default (unset — empty)",
-      change: "export VITE_ASSET_BASE_URL=… or MILADY_ASSET_BASE_URL=…",
+      change: `export VITE_ASSET_BASE_URL=… or ${BRANDED_ENV.assetBaseUrl}=…`,
     },
     {
-      setting: "MILADY_DEV_POLLING",
-      effective: envFlagEffective("MILADY_DEV_POLLING"),
-      source: envFlagSource("MILADY_DEV_POLLING"),
-      change: "export MILADY_DEV_POLLING=1 for watch polling (VM/file shares)",
+      setting: BRANDED_ENV.devPolling,
+      effective: envFlagEffective(BRANDED_ENV.devPolling),
+      source: envFlagSource(BRANDED_ENV.devPolling),
+      change: `export ${BRANDED_ENV.devPolling}=1 for watch polling (VM/file shares)`,
     },
     {
       setting: "API port (resolved)",
@@ -493,17 +545,17 @@ function buildViteDevSettingsRows(
       source: "derived",
       change:
         mode === "dev-server"
-          ? "bun run dev (default); MILADY_DESKTOP_VITE_BUILD_WATCH=1 for Rollup watch"
-          : "MILADY_DESKTOP_VITE_WATCH=1 + MILADY_DESKTOP_VITE_BUILD_WATCH=1",
+          ? `bun run dev (default); ${APP_ENV_PREFIX}_DESKTOP_VITE_BUILD_WATCH=1 for Rollup watch`
+          : `${APP_ENV_PREFIX}_DESKTOP_VITE_WATCH=1 + ${APP_ENV_PREFIX}_DESKTOP_VITE_BUILD_WATCH=1`,
     },
   ];
 }
 
 /** Print effective env once per Vite process (dev server or first Rollup watch tick). */
-function miladyDevSettingsBannerPlugin(): Plugin {
+function appDevSettingsBannerPlugin(): Plugin {
   let printedWatch = false;
   return {
-    name: "milady-dev-settings-banner",
+    name: "app-dev-settings-banner",
     configureServer() {
       return () => {
         console.log(
@@ -520,7 +572,7 @@ function miladyDevSettingsBannerPlugin(): Plugin {
       };
     },
     buildStart() {
-      if (process.env.MILADY_DESKTOP_VITE_FAST_DIST === "1" && !printedWatch) {
+      if (process.env[BRANDED_ENV.desktopFastDist] === "1" && !printedWatch) {
         printedWatch = true;
         console.log(
           colorizeDevSettingsStartupBanner(
@@ -690,6 +742,7 @@ function nativeModuleStubPlugin(): Plugin {
     "node-llama-cpp",
     "fs-extra",
     "pty-state-capture",
+    "pty-console",
     "electron",
     "undici",
     // Image native bindings — never load in the renderer; if a server-only
@@ -700,7 +753,16 @@ function nativeModuleStubPlugin(): Plugin {
     // prebundle proxy-agent and other Node-only HTTP deps for the browser.
     "puppeteer-core",
     "@puppeteer/browsers",
+    // Server-only plugins statically imported from the @elizaos/agent runtime.
+    // Their exports maps nest browser/node conditional exports that Vite 6's
+    // commonjs--resolver cannot walk. Stubbing returns an empty Proxy virtual
+    // module so the browser bundle never tries to execute server-only code.
     "@elizaos/plugin-local-embedding",
+    "@elizaos/plugin-anthropic",
+    "@elizaos/plugin-pdf",
+    "@elizaos/plugin-sql",
+    "@elizaos/plugin-agent-skills",
+    "@elizaos/plugin-agent-orchestrator",
   ]);
   const nativeScopeRe = /^@node-llama-cpp\//;
   // Capacitor native plugins — mobile-only, must never run in the browser.
@@ -1055,7 +1117,7 @@ function watchWorkspacePackagesPlugin(): Plugin {
             server.restart();
           } else {
             // Force a full reload on any other package file change (e.g. ts/tsx files)
-            server.ws.send({ type: "full-reload" });
+            server.hot.send({ type: "full-reload" });
           }
         }
       });
@@ -1136,20 +1198,20 @@ export default defineConfig({
   publicDir: path.resolve(here, "public"),
   define: {
     global: "globalThis",
-    // Mirror MILADY_TTS_DEBUG into the client bundle so one env enables UI + server TTS logs in dev.
-    "import.meta.env.MILADY_TTS_DEBUG": JSON.stringify(
-      process.env.MILADY_TTS_DEBUG ?? "",
+    // Mirror the branded TTS debug env into the client bundle so one env
+    // enables UI + server TTS logs in dev.
+    [`import.meta.env.${BRANDED_ENV.ttsDebug}`]: JSON.stringify(
+      process.env[BRANDED_ENV.ttsDebug] ?? "",
     ),
-    // Settings load/save trace (MiladyClient + shared isMiladySettingsDebugEnabled).
-    "import.meta.env.MILADY_SETTINGS_DEBUG": JSON.stringify(
-      process.env.MILADY_SETTINGS_DEBUG ?? "",
+    [`import.meta.env.${BRANDED_ENV.settingsDebug}`]: JSON.stringify(
+      process.env[BRANDED_ENV.settingsDebug] ?? "",
     ),
-    "import.meta.env.VITE_MILADY_SETTINGS_DEBUG": JSON.stringify(
-      process.env.VITE_MILADY_SETTINGS_DEBUG ?? "",
+    [`import.meta.env.${BRANDED_ENV.viteSettingsDebug}`]: JSON.stringify(
+      process.env[BRANDED_ENV.viteSettingsDebug] ?? "",
     ),
     "import.meta.env.VITE_ASSET_BASE_URL": JSON.stringify(
       process.env.VITE_ASSET_BASE_URL ??
-        process.env.MILADY_ASSET_BASE_URL ??
+        process.env[BRANDED_ENV.assetBaseUrl] ??
         "",
     ),
   },
@@ -1164,7 +1226,7 @@ export default defineConfig({
     tailwindcss(),
     react(),
     desktopCorsPlugin(),
-    miladyDevSettingsBannerPlugin(),
+    appDevSettingsBannerPlugin(),
   ],
   esbuild: {
     // Override tsconfig target — some extended configs use ES2024 which older
@@ -1183,7 +1245,7 @@ export default defineConfig({
     alias: [
       // Bare Node built-in polyfills for browser — pathe provides ESM path,
       // events is pre-bundled via optimizeDeps.
-      { find: /^path$/, replacement: "pathe" },
+      { find: /^path$/, replacement: patheEntry },
       { find: /^@capacitor\/core$/, replacement: capacitorCoreEntry },
       // Aliases for Capacitor packages that may not be hoisted to root node_modules
       // by bun workspaces. Apps/app resolves them; eliza submodule sources cannot.
@@ -1225,56 +1287,7 @@ export default defineConfig({
         },
       ]),
       // Capacitor plugins — resolve to local plugin sources
-      {
-        find: /^@elizaos\/capacitor-agent$/,
-        replacement: path.join(nativePluginsRoot, "agent/src/index.ts"),
-      },
-      {
-        find: /^@elizaos\/capacitor-camera$/,
-        replacement: path.join(nativePluginsRoot, "camera/src/index.ts"),
-      },
-      {
-        find: /^@elizaos\/capacitor-canvas$/,
-        replacement: path.join(nativePluginsRoot, "canvas/src/index.ts"),
-      },
-      {
-        find: /^@elizaos\/capacitor-desktop$/,
-        replacement: path.join(nativePluginsRoot, "desktop/src/index.ts"),
-      },
-      {
-        find: /^@elizaos\/capacitor-gateway$/,
-        replacement: path.join(nativePluginsRoot, "gateway/src/index.ts"),
-      },
-      {
-        find: /^@elizaos\/capacitor-location$/,
-        replacement: path.join(nativePluginsRoot, "location/src/index.ts"),
-      },
-      {
-        find: /^@elizaos\/capacitor-mobile-signals$/,
-        replacement: path.join(
-          nativePluginsRoot,
-          "mobile-signals/src/index.ts",
-        ),
-      },
-      {
-        find: /^@elizaos\/capacitor-screencapture$/,
-        replacement: path.join(nativePluginsRoot, "screencapture/src/index.ts"),
-      },
-      {
-        find: /^@elizaos\/capacitor-swabble$/,
-        replacement: path.join(nativePluginsRoot, "swabble/src/index.ts"),
-      },
-      {
-        find: /^@elizaos\/capacitor-talkmode$/,
-        replacement: path.join(nativePluginsRoot, "talkmode/src/index.ts"),
-      },
-      {
-        find: /^@elizaos\/capacitor-websiteblocker$/,
-        replacement: path.join(
-          nativePluginsRoot,
-          "websiteblocker/src/index.ts",
-        ),
-      },
+      ...NATIVE_PLUGIN_ALIAS_ENTRIES,
       // Force local @elizaos/ui source paths when the app bundles linked
       // @elizaos/app-core sources directly.
       {
@@ -1570,8 +1583,9 @@ export default defineConfig({
     exclude: [
       "node-llama-cpp",
       "@node-llama-cpp/mac-arm64-metal",
-      // Contains native-only pty-state-capture import; skip pre-bundling.
+      // Contains native-only pty-state-capture / pty-console imports; skip pre-bundling.
       "@elizaos/plugin-agent-orchestrator",
+      "pty-console",
       // @elizaos/plugin-secrets-manager is now built into @elizaos/core features
       // Node-only HTTP client — crashes in browser, stub via nativeModuleStubPlugin
       "undici",
@@ -1605,6 +1619,7 @@ export default defineConfig({
         if (
           [
             "pty-state-capture",
+            "pty-console",
             "electron",
             "node-llama-cpp",
             "pty-manager",
@@ -1683,7 +1698,7 @@ export default defineConfig({
     },
     watch: {
       // Polling is only needed in Docker/WSL where native fs events are unreliable
-      usePolling: process.env.MILADY_DEV_POLLING === "1",
+      usePolling: process.env[BRANDED_ENV.devPolling] === "1",
       // Electrobun postBuild copies renderer HTML/assets into electrobun/build/.
       // Watching those paths triggers full reloads while deps are still optimizing,
       // which breaks with "chunk-*.js does not exist" in node_modules/.vite/deps.

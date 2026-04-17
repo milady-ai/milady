@@ -27,4 +27,17 @@ test("chat, apps, and settings routes render through the real shell", async ({
   await page.getByTestId("header-nav-button-settings").click();
   await expect(page).toHaveURL(/\/settings$/);
   await expect(page.getByTestId("settings-shell")).toBeVisible();
+  await expect(page.locator("#capabilities")).toBeVisible();
+  await expect(
+    page.locator("#capabilities").getByText("Capabilities", { exact: true }),
+  ).toBeVisible();
+  await expect(page.locator("#permissions")).toBeVisible();
+  await expect(
+    page.locator("#permissions").getByText("Permissions", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.locator("#capabilities").getByText("Enable Computer Use", {
+      exact: true,
+    }),
+  ).toBeVisible();
 });

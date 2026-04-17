@@ -147,6 +147,11 @@ export default defineConfig({
       "**/*.live.e2e.test.tsx",
       "**/*.real.e2e.test.ts",
       "**/*.real.e2e.test.tsx",
+      // --- server/runtime route tests must live in the live/real lane ---
+      "eliza/packages/app-core/src/api/**/*.test.{ts,tsx}",
+      "eliza/packages/app-core/src/services/**/*.test.{ts,tsx}",
+      "eliza/apps/*/src/**/*routes.test.{ts,tsx}",
+      "eliza/apps/*/src/services/**/*.test.{ts,tsx}",
     ],
     server: {
       deps: {

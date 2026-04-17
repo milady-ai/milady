@@ -74,8 +74,8 @@ Uses WebSocket via Slack's Socket Mode API. Requires an app-level token (`xapp-.
   "connectors": {
     "slack": {
       "mode": "socket",
-      "botToken": "xoxb-...",
-      "appToken": "xapp-..."
+      "botToken": "<SLACK_BOT_TOKEN>",
+      "appToken": "<SLACK_APP_TOKEN>"
     }
   }
 }
@@ -90,7 +90,7 @@ Receives events via HTTP webhooks. Requires a signing secret for request verific
   "connectors": {
     "slack": {
       "mode": "http",
-      "botToken": "xoxb-...",
+      "botToken": "<SLACK_BOT_TOKEN>",
       "signingSecret": "your-signing-secret",
       "webhookPath": "/slack/events"
     }
@@ -251,8 +251,8 @@ Per-channel settings under `channels.<channel-id>`:
   "connectors": {
     "slack": {
       "accounts": {
-        "workspace-1": { "botToken": "xoxb-...", "appToken": "xapp-..." },
-        "workspace-2": { "botToken": "xoxb-...", "appToken": "xapp-..." }
+        "workspace-1": { "botToken": "<SLACK_BOT_TOKEN>", "appToken": "<SLACK_APP_TOKEN>" },
+        "workspace-2": { "botToken": "<SLACK_BOT_TOKEN>", "appToken": "<SLACK_APP_TOKEN>" }
       }
     }
   }

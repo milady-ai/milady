@@ -18,6 +18,8 @@ describe("syncElizaEnvAliases", () => {
     "MILADY_API_TOKEN",
     "ELIZA_API_TOKEN",
     "ELIZA_CLOUD_MANAGED_AGENTS_API_SEGMENT",
+    "ORBIT_API_PORT",
+    "ORBIT_PORT",
   ];
   const saved: Record<string, string | undefined> = {};
 
@@ -111,5 +113,15 @@ describe("syncElizaEnvAliases", () => {
     expect(process.env.ELIZA_API_PORT).toBe("1");
     expect(process.env.ELIZA_UI_PORT).toBe("2");
     expect(process.env.ELIZA_API_TOKEN).toBe("tok");
+  });
+
+  it("supports a custom branded prefix", () => {
+    process.env.ORBIT_API_PORT = "4242";
+    process.env.ORBIT_PORT = "5151";
+
+    syncElizaEnvAliases({ brandedPrefix: "orbit" });
+
+    expect(process.env.ELIZA_API_PORT).toBe("4242");
+    expect(process.env.ELIZA_UI_PORT).toBe("5151");
   });
 });

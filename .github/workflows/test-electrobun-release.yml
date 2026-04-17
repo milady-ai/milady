@@ -42,15 +42,18 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
-      - name: Initialize tracked workspace submodules
-        run: bun run scripts/init-submodules.mjs
-
       - name: Initialize eliza submodule for version resolution
         run: git submodule update --init --depth=1 eliza
+
+      - name: Initialize tracked workspace submodules
+        run: node scripts/init-submodules.mjs
 
       - name: Initialize release-check plugin version source
         run: |
           if [ -f eliza/.gitmodules ]; then
+            # release-check resolves the published alpha pin from the tracked
+            # plugin package.json, so the published fallback install does not
+            # need a separate @elizaos/plugin-agent-orchestrator add step.
             git -C eliza submodule update --init plugins/plugin-agent-orchestrator
           fi
 

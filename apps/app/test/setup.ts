@@ -11,7 +11,7 @@ import {
   createMemoryStorage,
   hasStorageApi,
   suppressReactTestConsoleErrors,
-} from "../../../test/helpers/browser-mocks";
+} from "../../../eliza/packages/app-core/test/helpers/browser-mocks";
 
 declare global {
   var IS_REACT_ACT_ENVIRONMENT: boolean | undefined;
@@ -157,7 +157,6 @@ function createBridgeMock(extraExports: Record<string, unknown> = {}) {
 vi.mock("@elizaos/app-core", () =>
   createBridgeMock({
     platform: "web",
-    isWeb: () => true,
     isNative: false,
     isIOS: false,
     isAndroid: false,
@@ -332,6 +331,8 @@ if (typeof globalThis.window !== "undefined") {
     typeof originalEmit === "function" &&
     !originalEmit[JSDOM_EMIT_PATCH_MARK]
   ) {
+    // Installed as a side-effect into jsdom's window; not imported
+    // elsewhere. CodeFlow's unused-function heuristic mis-flags this.
     const patchedEmit = function patchedEmit(eventName, ...args) {
       const [firstArg] = args;
       if (
@@ -415,9 +416,15 @@ if (typeof globalThis.window === "undefined") {
   Object.defineProperty(globalThis, "window", {
     value: {
       close: vi.fn(),
+      encodeURIComponent,
       focus: vi.fn(),
       open: vi.fn(),
-      location: { reload: vi.fn() },
+      location: {
+        href: "http://localhost/",
+        origin: "http://localhost",
+        pathname: "/",
+        reload: vi.fn(),
+      },
       screenX: 0,
       screenY: 0,
       outerWidth: 1920,

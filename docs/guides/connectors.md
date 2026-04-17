@@ -213,8 +213,8 @@ Connectors are configured in the `connectors` section of `milady.json`. Common f
     "slack": {
       "enabled": true,
       "mode": "socket",
-      "botToken": "xoxb-...",
-      "appToken": "xapp-...",
+      "botToken": "<SLACK_BOT_TOKEN>",
+      "appToken": "<SLACK_APP_TOKEN>",
       "groupPolicy": "allowlist",
       "channels": {
         "CHANNEL_ID": {
@@ -1040,7 +1040,7 @@ Gmail Watch is enabled via the `features.gmailWatch` flag or environment variabl
 {
   connectors: {
     lens: {
-      apiKey: "your-lens-api-key",
+      apiKey: "<LENS_API_KEY>",
     }
   }
 }

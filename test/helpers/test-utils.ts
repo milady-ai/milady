@@ -1,1 +1,1 @@
-export * from "../../eliza/packages/app-core/test/helpers/test-utils";
+export * from "../../eliza/packages/app-core/test/helpers/test-utils.ts";

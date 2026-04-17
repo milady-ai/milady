@@ -1,0 +1,28 @@
+[Unit]
+Description=Milady bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Populated by deploy/systemd/install.sh from deploy/systemd/milady.env.
+# Unit template variables (%h = user home) are resolved by systemd at
+# load time; shell env vars from EnvironmentFile are resolved by the
+# service's own PATH / arg expansion.
+EnvironmentFile=%h/.config/milady/env
+WorkingDirectory=__MILADY_WORKDIR__
+ExecStartPre=%h/bin/milady-refresh-oauth.sh
+ExecStart=__BUN_BIN__ run start
+Restart=always
+RestartSec=10
+# Burst guard: after 10 restarts in 10 minutes, stop trying. Catches
+# crashloops from real (non-transient) bugs without hammering the API.
+StartLimitBurst=10
+StartLimitIntervalSec=600
+StandardOutput=append:__MILADY_LOG__
+StandardError=append:__MILADY_LOG__
+KillSignal=SIGTERM
+TimeoutStopSec=20
+
+[Install]
+WantedBy=default.target

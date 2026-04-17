@@ -75,7 +75,7 @@ describe("restore-local-eliza-workspace", () => {
     const windowsScriptPath =
       "C:\\repo\\scripts\\restore-local-eliza-workspace.mjs";
     const toWindowsFileUrl = (value: string) =>
-      new URL(`file:///${value.replace(/\\\\/g, "/")}`);
+      new URL(`file:///${value.replace(/\\/g, "/")}`);
 
     expect(
       isDirectRun(

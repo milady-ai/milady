@@ -1,0 +1,26 @@
+{
+  "id": "vitamins-with-meals",
+  "title": "Vitamins tied to a meal window",
+  "domain": "habits",
+  "tags": [
+    "lifeops",
+    "habits"
+  ],
+  "status": "skipped",
+  "durationMs": 0,
+  "providerName": "none",
+  "startedAtIso": "2026-04-17T00:17:19.398Z",
+  "completedAtIso": "2026-04-17T00:17:20.129Z",
+  "turns": [],
+  "finalChecks": [],
+  "actionsCalled": [],
+  "cleanup": [],
+  "cost": {
+    "provider": "none",
+    "usd": 0,
+    "tokensIn": 0,
+    "tokensOut": 0
+  },
+  "llmCallCount": 0,
+  "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+}

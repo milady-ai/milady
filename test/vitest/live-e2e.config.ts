@@ -1,25 +1,12 @@
+import { defineConfig, mergeConfig } from "vitest/config";
+import { liveAndRealE2EInclude } from "./e2e.config";
 import baseConfig from "./real.config";
 
-export default {
-  ...baseConfig,
-  test: {
-    ...baseConfig.test,
-    include: [
-      "eliza/packages/app-core/test/**/*.live.test.ts",
-      "eliza/packages/app-core/test/**/*.live.test.tsx",
-      "eliza/packages/app-core/test/**/*-live.test.ts",
-      "eliza/packages/app-core/test/**/*-live.test.tsx",
-      "eliza/packages/app-core/test/**/*.live.e2e.test.ts",
-      "eliza/packages/app-core/test/**/*.live.e2e.test.tsx",
-      "eliza/packages/app-core/test/**/*.real.e2e.test.ts",
-      "eliza/packages/app-core/test/**/*.real.e2e.test.tsx",
-      "eliza/packages/app-core/test/**/*-live.e2e.test.ts",
-      "eliza/packages/app-core/test/**/*-live.e2e.test.tsx",
-      "eliza/apps/*/test/**/*.live.e2e.test.ts",
-      "eliza/apps/*/test/**/*.live.e2e.test.tsx",
-      "eliza/apps/*/test/**/*.real.e2e.test.ts",
-      "eliza/apps/*/test/**/*.real.e2e.test.tsx",
-    ],
-    exclude: [...(baseConfig.test?.exclude ?? [])],
-  },
-};
+export default mergeConfig(
+  baseConfig,
+  defineConfig({
+    test: {
+      include: liveAndRealE2EInclude,
+    },
+  }),
+);
