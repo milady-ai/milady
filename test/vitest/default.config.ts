@@ -303,6 +303,10 @@ export default defineConfig({
     pool: "forks",
     maxWorkers: isCI ? ciWorkers : localWorkers,
     restoreMocks: true,
+    // Some shard patterns (e.g. eliza/packages/agent/test) hold only test
+    // infrastructure, not *.test.ts files. Tolerate empty matches so those
+    // shards pass instead of aborting the whole suite.
+    passWithNoTests: true,
     // Give worker forks more heap to survive jsdom-heavy suites.
     execArgv: ["--max-old-space-size=4096"],
     include: [
