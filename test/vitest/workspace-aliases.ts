@@ -16,8 +16,7 @@ type MiladyAliasOptions = {
   includeMiladyAlias?: boolean;
 };
 
-export type AgentSourceAliasOptions = FallbackAliasOptions &
-  MiladyAliasOptions;
+export type AgentSourceAliasOptions = FallbackAliasOptions & MiladyAliasOptions;
 
 export type AppCoreSourceAliasOptions = FallbackAliasOptions & {
   bridgeReplacement?: string;

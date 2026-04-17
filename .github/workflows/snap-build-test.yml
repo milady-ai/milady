@@ -44,6 +44,27 @@ jobs:
       - name: Initialize tracked workspace submodules
         run: node scripts/init-submodules.mjs
 
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.11"
+
+      - name: Generate protobuf types
+        run: |
+          if [ -d eliza/packages/schemas ] && [ -f eliza/packages/schemas/buf.gen.yaml ] && [ ! -d eliza/packages/typescript/src/types/generated ]; then
+            cd eliza/packages/schemas
+            bun install --ignore-scripts
+            node node_modules/@bufbuild/buf/install.js 2>/dev/null || true
+            bunx @bufbuild/buf@1.67.0 generate
+          fi
+
+      - name: Mirror milady.mjs → elizaos-app.mjs for snapcraft entry
+        run: |
+          if [ -f milady.mjs ] && [ ! -f elizaos-app.mjs ]; then
+            cp milady.mjs elizaos-app.mjs
+            echo "Mirrored milady.mjs → elizaos-app.mjs so the elizaos-app snap entry file is present in the snapcraft source."
+          fi
+
       - name: Prepare snapcraft.yaml
         run: |
           mkdir -p snap
@@ -86,13 +107,13 @@ jobs:
         run: |
           sudo snap install ${{ steps.snapcraft.outputs.snap }} --dangerous
           echo "=== Installed snap ==="
-          snap list milady
+          snap list elizaos-app
 
           echo "=== Version check ==="
-          milady --version || echo "Version check completed (exit $?)"
+          elizaos-app --version || echo "Version check completed (exit $?)"
 
           echo "=== Help check ==="
-          milady --help 2>&1 | head -20 || echo "Help check completed (exit $?)"
+          elizaos-app --help 2>&1 | head -20 || echo "Help check completed (exit $?)"
 
       - name: Upload snap artifact
         uses: actions/upload-artifact@v4
