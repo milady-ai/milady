@@ -69,7 +69,6 @@ import {
 } from "@elizaos/app-companion";
 import "@elizaos/app-companion/register";
 import {
-  AppBlockerSettingsCard,
   LifeOpsBrowserSetupPanel,
   LifeOpsPageView,
   WebsiteBlockerSettingsCard,
@@ -88,7 +87,7 @@ import {
 import { FineTuningView } from "@elizaos/app-training/ui";
 import "@elizaos/app-shopify/register";
 import "@elizaos/app-vincent/client";
-import { useVincentState } from "@elizaos/app-vincent/ui";
+import { useVincentState } from "@elizaos/app-vincent/useVincentState";
 import "@elizaos/app-vincent/register";
 import { shouldUseCloudOnlyBranding } from "@elizaos/app-core";
 import {
@@ -233,7 +232,6 @@ const appBootConfig: AppBootConfig = {
   envAliases: APP_ENV_ALIASES,
   lifeOpsPageView: LifeOpsPageView,
   lifeOpsBrowserSetupPanel: LifeOpsBrowserSetupPanel,
-  appBlockerSettingsCard: AppBlockerSettingsCard,
   websiteBlockerSettingsCard: WebsiteBlockerSettingsCard,
   clientMiddleware: {
     forceFreshOnboarding:
