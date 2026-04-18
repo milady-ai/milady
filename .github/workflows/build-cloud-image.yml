@@ -102,6 +102,9 @@ jobs:
           restore-keys: |
             bun-store-${{ runner.os }}-
 
+      - name: Init eliza checkout
+        run: git submodule update --init --depth=1 eliza
+
       - name: Init non-eliza submodules
         run: |
           node scripts/init-submodules.mjs

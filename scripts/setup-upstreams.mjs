@@ -1314,6 +1314,23 @@ export async function bootstrapBundledBunInstall(
     return false;
   }
 
+  const bunExecutableRelativePath = path.join(
+    "node_modules",
+    "bun",
+    "bin",
+    "bun.exe",
+  );
+  const bunExecutablePath = path.join(workspaceRoot, bunExecutableRelativePath);
+  if (pathExists(bunExecutablePath)) {
+    try {
+      await runCommandImpl(bunExecutableRelativePath, ["--version"], {
+        cwd: workspaceRoot,
+        label: `${bunExecutableRelativePath} --version (eliza bun bootstrap probe)`,
+      });
+      return false;
+    } catch {}
+  }
+
   const bunInstallScriptRelativePath = path.join(
     "node_modules",
     "bun",

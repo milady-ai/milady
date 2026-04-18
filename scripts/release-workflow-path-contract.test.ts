@@ -188,6 +188,9 @@ describe("release workflow path contract", () => {
     const buildCloudImage = readWorkflow("build-cloud-image.yml");
 
     expect(buildCloudImage).toContain(
+      "git submodule update --init --depth=1 eliza",
+    );
+    expect(buildCloudImage).toContain(
       "bash scripts/install-published-workspace-fallback-deps.sh",
     );
     expect(buildCloudImage).toContain("uses: bufbuild/buf-setup-action@v1");

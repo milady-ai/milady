@@ -212,9 +212,49 @@ describe("bootstrapBundledBunInstall", () => {
     expect(runCommandImpl).not.toHaveBeenCalled();
   });
 
-  it("runs Bun's bundled install script after ignore-scripts installs", async () => {
+  it("skips the install script when the bundled Bun executable already works", async () => {
     const runCommandImpl = vi.fn().mockResolvedValue(undefined);
     const workspaceRoot = "/repo/eliza";
+    const bunExecutablePath = path.join(
+      workspaceRoot,
+      "node_modules",
+      "bun",
+      "bin",
+      "bun.exe",
+    );
+
+    await expect(
+      bootstrapBundledBunInstall(workspaceRoot, {
+        env: { MILADY_NO_VISION_DEPS: "1" },
+        pathExists: (targetPath) => targetPath === bunExecutablePath,
+        runCommandImpl,
+      }),
+    ).resolves.toBe(false);
+
+    expect(runCommandImpl).toHaveBeenCalledWith(
+      path.join("node_modules", "bun", "bin", "bun.exe"),
+      ["--version"],
+      {
+        cwd: workspaceRoot,
+        label:
+          "node_modules/bun/bin/bun.exe --version (eliza bun bootstrap probe)",
+      },
+    );
+  });
+
+  it("runs Bun's bundled install script after ignore-scripts installs", async () => {
+    const runCommandImpl = vi
+      .fn()
+      .mockRejectedValueOnce(new Error("bun probe failed"))
+      .mockResolvedValueOnce(undefined);
+    const workspaceRoot = "/repo/eliza";
+    const bunExecutablePath = path.join(
+      workspaceRoot,
+      "node_modules",
+      "bun",
+      "bin",
+      "bun.exe",
+    );
     const bunInstallScriptPath = path.join(
       workspaceRoot,
       "node_modules",
@@ -225,12 +265,24 @@ describe("bootstrapBundledBunInstall", () => {
     await expect(
       bootstrapBundledBunInstall(workspaceRoot, {
         env: { MILADY_NO_VISION_DEPS: "1" },
-        pathExists: (targetPath) => targetPath === bunInstallScriptPath,
+        pathExists: (targetPath) =>
+          targetPath === bunExecutablePath || targetPath === bunInstallScriptPath,
         runCommandImpl,
       }),
     ).resolves.toBe(true);
 
-    expect(runCommandImpl).toHaveBeenCalledWith(
+    expect(runCommandImpl).toHaveBeenNthCalledWith(
+      1,
+      path.join("node_modules", "bun", "bin", "bun.exe"),
+      ["--version"],
+      {
+        cwd: workspaceRoot,
+        label:
+          "node_modules/bun/bin/bun.exe --version (eliza bun bootstrap probe)",
+      },
+    );
+    expect(runCommandImpl).toHaveBeenNthCalledWith(
+      2,
       "node",
       [path.join("node_modules", "bun", "install.js")],
       {
