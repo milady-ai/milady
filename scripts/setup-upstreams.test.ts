@@ -266,7 +266,8 @@ describe("bootstrapBundledBunInstall", () => {
       bootstrapBundledBunInstall(workspaceRoot, {
         env: { MILADY_NO_VISION_DEPS: "1" },
         pathExists: (targetPath) =>
-          targetPath === bunExecutablePath || targetPath === bunInstallScriptPath,
+          targetPath === bunExecutablePath ||
+          targetPath === bunInstallScriptPath,
         runCommandImpl,
       }),
     ).resolves.toBe(true);
