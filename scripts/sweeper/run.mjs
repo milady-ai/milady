@@ -67,10 +67,10 @@ for (const svc of servicesToRun) {
     const mod = await import(modulePath);
     const sweepFn = mod.default ?? mod.sweep;
     if (typeof sweepFn !== "function") {
-      console.error(
-        `❌ ${svc}: ${modulePath} does not export a default function`,
-      );
+      const reason = `${modulePath} does not export a default function`;
+      console.error(`❌ ${svc}: ${reason}`);
       anyHardFailure = true;
+      results.push({ service: svc, status: "error", reason });
       continue;
     }
     const started = Date.now();
