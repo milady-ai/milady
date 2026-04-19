@@ -197,8 +197,14 @@ export class ActionSpy {
     }
 
     return new Promise<SpiedAction>((resolve, reject) => {
-      const timer = setTimeout(() => {
-        const idx = this.waiters.findIndex((w) => w.resolve === resolve);
+      let timer: ReturnType<typeof setTimeout>;
+      const wrappedResolve = (action: SpiedAction) => {
+        clearTimeout(timer);
+        resolve(action);
+      };
+
+      timer = setTimeout(() => {
+        const idx = this.waiters.findIndex((w) => w.resolve === wrappedResolve);
         if (idx !== -1) {
           this.waiters.splice(idx, 1);
         }
@@ -211,10 +217,7 @@ export class ActionSpy {
 
       this.waiters.push({
         normalizedName: normalized,
-        resolve: (action) => {
-          clearTimeout(timer);
-          resolve(action);
-        },
+        resolve: wrappedResolve,
       });
     });
   }
