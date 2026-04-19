@@ -3,6 +3,46 @@ title: Registro de cambios
 description: Novedades en Milady — funcionalidades, mejoras y correcciones.
 ---
 
+<Update label="2026-04-17" description="Semana del 17 de abril; conectores de cuentas personales para life-ops, Google multi-cuenta, aprovisionamiento de billetera en la nube con Steward" tags={["Feature", "Update", "Fix"]}>
+
+<div id="life-ops-personal-account-connectors">
+## Conectores de cuentas personales para life-ops
+</div>
+
+Tu agente ahora puede conectarse a tus cuentas personales de Signal, Discord y Telegram — no solo cuentas de bot — para agregar mensajes al sistema de [life-ops](/es/rest/lifeops). Signal usa emparejamiento por código QR de dispositivo vinculado, Discord usa OAuth2, y Telegram admite autenticación por teléfono/código/2FA. Una vez conectados, los mensajes de estas plataformas fluyen hacia la bandeja de entrada unificada de tu agente junto con Gmail y Calendar, dándole a tu agente una imagen más completa de tus comunicaciones.
+
+<div id="multi-account-google-connector">
+## Conector de Google multi-cuenta
+</div>
+
+La integración de Google en [life-ops](/es/rest/lifeops) ahora admite múltiples cuentas de Google por lado — tanto para ti (el propietario) como para tu agente. Los eventos de calendario y los mensajes de Gmail se agregan en todas las cuentas conectadas, para que tengas una vista unificada incluso si usas cuentas de Google separadas para trabajo y personal. Un nuevo panel de administración de cuentas en la configuración te permite agregar, eliminar y configurar cada cuenta individualmente. Las configuraciones existentes de cuenta única continúan funcionando sin ningún cambio.
+
+<div id="steward-wallet-auto-provisioning-on-cloud-login">
+## Aprovisionamiento automático de billetera Steward al iniciar sesión en la nube
+</div>
+
+Cuando inicias sesión en [Eliza Cloud](/es/guides/cloud) desde la aplicación de escritorio, ahora se aprovisiona automáticamente una billetera gestionada por [Steward](/es/guides/wallet). Ya no necesitas configurar manualmente las credenciales de Steward después de conectarte a la nube — la página de billetera, las políticas de gasto y la firma de transacciones funcionan de inmediato en cuanto inicias sesión.
+
+<div id="updates">
+## Actualizaciones
+</div>
+
+- **Hooks de pipeline** — Un nuevo sistema de hooks permite al runtime ejecutar lógica personalizada en puntos clave del pipeline del agente, dando a los autores de plugins y usuarios avanzados más control sobre cómo se procesan las solicitudes.
+- **Limpieza de la UI de life-ops** — Se han eliminado descripciones redundantes y texto de relleno de los paneles de configuración de life-ops, haciendo que la configuración de conectores sea más limpia y fácil de escanear.
+- **Etiquetas de idioma multiplataforma** — Las referencias a "on this Mac" en toda la interfaz se han actualizado a "on this device" para que la redacción sea precisa en Windows, Linux y dispositivos móviles.
+- **Mejoras en la URL de autenticación OAuth** — El flujo de Google OAuth en life-ops ahora muestra la URL de autorización de forma más fiable, corrigiendo casos en los que el enlace no se mostraba al conectar una nueva cuenta.
+- **Mejoras en la compilación de la app móvil** — Las compilaciones de iOS ahora compilan los cuatro plugins oficiales de Capacitor desde el código fuente mediante CocoaPods con compatibilidad con Xcode 16, y las compilaciones de Android gestionan la identidad de la aplicación dinámicamente desde la configuración.
+
+<div id="bug-fixes">
+## Correcciones de errores
+</div>
+
+- Se corrigió que la aplicación de escritorio se quedara colgada tras un relanzamiento de compilación empaquetada debido a una verificación de preparación falso positivo que coincidía con texto de carga en la vista de chat
+- Se corrigieron las compilaciones de iOS que fallaban bajo el stripping de binarios de Swift Package Manager con Xcode 16
+- Seguridad: se actualizó Vite a 6.4.2 y DOMPurify a 3.4.0 para abordar vulnerabilidades de recorrido de rutas y XSS en dependencias transitivas
+
+</Update>
+
 <Update label="2026-04-10" description="Semana del 10 de abril; Eliza Cloud para agentes de codificación, vista de contactos, selector de paquetes de contenido, configuración de Discord en la nube, overlay de conexión perdida" tags={["Feature", "Update", "Fix"]}>
 
 <div id="eliza-cloud-as-a-provider-for-coding-agents">
