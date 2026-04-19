@@ -625,3 +625,5 @@ free to use, free to modify, free to distribute. see [LICENSE](LICENSE) for deta
 ---
 
 *built by agents. tested by humans. that's the split.*
+
+<!-- last reviewed: 2026-04-19 -->
