@@ -7,6 +7,7 @@ export default scenario({
   tags: ["remote", "vnc", "happy-path", "not-yet-implemented"],
   description:
     "User asks agent to open a remote-help session; agent opens a VNC/Tailscale channel and returns connection info. Requires T9a remote-control data plane.",
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

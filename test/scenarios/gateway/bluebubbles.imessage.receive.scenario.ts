@@ -13,6 +13,7 @@ export default scenario({
   ],
   description:
     "Inbound iMessage hits the BlueBubbles bridge and is delivered to the user's agent. Requires T5e (BlueBubbles iMessage connector).",
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

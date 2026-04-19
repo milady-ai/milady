@@ -92,6 +92,10 @@ export function copyLegacyScriptsCompatDir(sourceDir, targetDir) {
     const sourcePath = path.join(sourceDir, entry.name);
     const targetPath = path.join(targetDir, entry.name);
 
+    if (fs.existsSync(targetPath)) {
+      continue;
+    }
+
     if (entry.name === "smoke-test-windows.ps1") {
       writeLegacyWindowsSmokeScript(sourcePath, targetPath);
       continue;
@@ -151,16 +155,45 @@ export function ensureLegacyElectrobunCompatDir({
         continue;
       }
 
-      if (fs.existsSync(targetPath)) {
-        continue;
-      }
-
+      // The scripts dir often already exists (because ensure-whisper-model.sh
+      // is git-tracked under apps/app/electrobun/scripts/), but its other
+      // wrapper files (hdiutil-wrapper.sh, xcrun-wrapper.sh, zip-wrapper.sh)
+      // are NOT tracked and must be merged in. copyScriptsDir handles a
+      // pre-existing target dir and skips already-present entries.
       if (entry.name === "scripts") {
         copyScriptsDir(sourcePath, targetPath);
         continue;
       }
 
+      if (fs.existsSync(targetPath)) {
+        continue;
+      }
+
       copyEntry(sourcePath, targetPath);
+    }
+
+    // The build/ and artifacts/ dirs don't exist yet (electrobun creates
+    // them during the build / artifact-staging steps), but
+    // release-electrobun.yml hard-codes `apps/app/electrobun/build` and
+    // `apps/app/electrobun/artifacts` in its post-build steps (find
+    // Resources, sign-windows.ps1, MSIX, version.json injection,
+    // stage-macos-release-artifacts.sh, upload-artifact globs).
+    // Pre-create dangling symlinks so once electrobun writes to the
+    // canonical paths, the legacy paths resolve correctly.
+    for (const dirName of ["build", "artifacts"]) {
+      const link = path.join(legacyDir, dirName);
+      if (
+        fs.existsSync(link) ||
+        fs.lstatSync(link, { throwIfNoEntry: false })
+      ) {
+        continue;
+      }
+      const canonical = path.join(canonicalDir, dirName);
+      fs.symlinkSync(
+        path.relative(legacyDir, canonical),
+        link,
+        process.platform === "win32" ? "junction" : "dir",
+      );
     }
 
     writeWrapper(

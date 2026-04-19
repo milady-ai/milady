@@ -5,6 +5,7 @@ export default scenario({
   title: "Setting an alarm fires on both Mac and iOS",
   domain: "todos",
   tags: ["lifeops", "todos", "cross-platform-inconsistency"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

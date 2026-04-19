@@ -15,6 +15,7 @@ export default scenario({
   tags: ["lifeops", "goals", "experience-loop", "plugin-disabled"],
   description:
     "Seed a completed goal + lessons. Propose a similar new goal and expect the agent to reference prior lessons. Requires T9f: experience-loop learning.",
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

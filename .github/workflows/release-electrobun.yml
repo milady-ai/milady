@@ -376,6 +376,27 @@ jobs:
             artifact-name: linux-x64
 
     steps:
+      - name: Enable Git long paths (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          function Set-GitLongPaths([string]$Scope) {
+            & git config $Scope core.longpaths true
+            if ($LASTEXITCODE -ne 0) {
+              throw "git config $Scope core.longpaths true failed with exit code $LASTEXITCODE"
+            }
+          }
+
+          try {
+            Set-GitLongPaths "--system"
+            Write-Host "Enabled Git long paths in system config."
+          } catch {
+            Write-Warning "System git config failed; falling back to --global. $($_.Exception.Message)"
+            Set-GitLongPaths "--global"
+            Write-Host "Enabled Git long paths in global config."
+          }
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -629,6 +650,11 @@ jobs:
           ELIZA_ELECTROBUN_NOTARIZE: 0
           ELECTROBUN_REAL_XCRUN: /usr/bin/xcrun
           ELECTROBUN_REAL_ZIP: /usr/bin/zip
+          # Flat release root rsynced to releases@milady.ai:/var/www/releases/
+          # by the upload step below. Env is encoded in the platform prefix
+          # (canary-macos-arm64-update.json etc.), so the baseUrl has no env
+          # subdir. Enables Electrobun's release.generatePatch flow.
+          ELIZA_RELEASE_URL: https://releases.milady.ai/
 
       # Inject version.json into the packaged Resources directory.
       # The bun entry getVersionInfo() reads ../Resources/version.json and
@@ -736,15 +762,15 @@ jobs:
           Write-Host "Extracted top-level structure:"
           Get-ChildItem -Path $extractDir -Recurse -Depth 3 | ForEach-Object { Write-Host "  $($_.FullName)" }
 
-          # Verify the expected milady-dist entry point exists
+          # Verify the expected eliza-dist entry point exists
           $appRoot = Get-ChildItem -Path $extractDir -Directory | Select-Object -First 1
           if ($appRoot) {
-            $entryCheck = Join-Path $appRoot.FullName "Resources\app\milady-dist\entry.js"
+            $entryCheck = Join-Path $appRoot.FullName "Resources\app\eliza-dist\entry.js"
             Write-Host "Checking for: $entryCheck"
             if (Test-Path $entryCheck) {
-              Write-Host "milady-dist/entry.js found"
+              Write-Host "eliza-dist/entry.js found"
             } else {
-              Write-Host "WARNING: milady-dist/entry.js NOT found"
+              Write-Host "WARNING: eliza-dist/entry.js NOT found"
               Write-Host "Resources/app contents:"
               $resApp = Join-Path $appRoot.FullName "Resources\app"
               if (Test-Path $resApp) {
@@ -773,7 +799,7 @@ jobs:
         if: matrix.platform.os == 'windows'
         shell: pwsh
         run: |
-          $installer = Get-ChildItem -Path "apps/app/electrobun/artifacts" -File -Filter "Milady-Setup-*.exe" -ErrorAction SilentlyContinue |
+          $installer = Get-ChildItem -Path "apps/app/electrobun/artifacts" -File -Filter "ElizaOSApp-Setup-*.exe" -ErrorAction SilentlyContinue |
             Sort-Object LastWriteTime -Descending |
             Select-Object -First 1
 
@@ -841,6 +867,14 @@ jobs:
           ELIZA_TEST_WINDOWS_LAUNCHER_DIR: ${{ runner.temp }}\milady-windows-ui-launcher
           MILADY_TEST_WINDOWS_LAUNCHER_PATH_FILE: ${{ runner.temp }}\milady-windows-ui-launcher.txt
           ELIZA_TEST_WINDOWS_LAUNCHER_PATH_FILE: ${{ runner.temp }}\milady-windows-ui-launcher.txt
+          # Inno installer (ElizaOSApp-Setup-*.exe) is built into apps/app/electrobun/artifacts;
+          # the smoke script's default path points to eliza/packages/app-core/platforms/electrobun/artifacts
+          # which only contains the legacy electrobun-built zip. Steer the script at the canonical
+          # Inno installer dir so the right .exe is selected for the install/launch test.
+          MILADY_TEST_WINDOWS_ARTIFACTS_DIR: ${{ github.workspace }}\apps\app\electrobun\artifacts
+          ELIZA_TEST_WINDOWS_ARTIFACTS_DIR: ${{ github.workspace }}\apps\app\electrobun\artifacts
+          MILADY_TEST_WINDOWS_BUILD_DIR: ${{ github.workspace }}\apps\app\electrobun\build
+          ELIZA_TEST_WINDOWS_BUILD_DIR: ${{ github.workspace }}\apps\app\electrobun\build
         run: |
           Remove-Item $env:MILADY_TEST_WINDOWS_INSTALL_DIR -Recurse -Force -ErrorAction SilentlyContinue
           Remove-Item $env:MILADY_TEST_WINDOWS_LAUNCHER_DIR -Recurse -Force -ErrorAction SilentlyContinue
@@ -918,7 +952,7 @@ jobs:
             exit 1
           }
           New-Item -ItemType Directory -Force -Path $artifactsDir | Out-Null
-          $publicInstaller = Get-ChildItem -Path $artifactsDir -File -Filter "Milady-Setup-*.exe" -ErrorAction SilentlyContinue |
+          $publicInstaller = Get-ChildItem -Path $artifactsDir -File -Filter "ElizaOSApp-Setup-*.exe" -ErrorAction SilentlyContinue |
             Sort-Object LastWriteTime -Descending |
             Select-Object -First 1
           foreach ($setupExecutable in $setupExecutables) {
@@ -984,7 +1018,7 @@ jobs:
         if: matrix.platform.os == 'windows'
         shell: pwsh
         run: |
-          $installer = Get-ChildItem -Path "apps/app/electrobun/artifacts" -File -Filter "Milady-Setup-*.exe" -ErrorAction SilentlyContinue |
+          $installer = Get-ChildItem -Path "apps/app/electrobun/artifacts" -File -Filter "ElizaOSApp-Setup-*.exe" -ErrorAction SilentlyContinue |
             Sort-Object LastWriteTime -Descending |
             Select-Object -First 1
 
@@ -1140,16 +1174,60 @@ jobs:
         shell: pwsh
         run: |
           $diagnosticsDir = Join-Path $PWD "apps/app/electrobun/artifacts/windows-smoke-diagnostics"
-          $startupLog = Join-Path $env:APPDATA "Milady\\milady-startup.log"
-          $wrapperRoot = Join-Path $env:LOCALAPPDATA "com.miladyai.milady"
+          $appDataRoot = if ($env:MILADY_TEST_WINDOWS_APPDATA_PATH) { $env:MILADY_TEST_WINDOWS_APPDATA_PATH } else { $env:APPDATA }
+          $localAppDataRoot = if ($env:MILADY_TEST_WINDOWS_LOCALAPPDATA_PATH) { $env:MILADY_TEST_WINDOWS_LOCALAPPDATA_PATH } else { $env:LOCALAPPDATA }
+          $startupLog = Join-Path $appDataRoot "Milady\milady-startup.log"
+          $wrapperRoot = Join-Path $localAppDataRoot "com.miladyai.milady"
+
+          Write-Host "Diagnostics roots:"
+          Write-Host "  appDataRoot      = $appDataRoot"
+          Write-Host "  localAppDataRoot = $localAppDataRoot"
+          Write-Host "  startupLog       = $startupLog"
+          Write-Host "  wrapperRoot      = $wrapperRoot"
 
           Remove-Item $diagnosticsDir -Recurse -Force -ErrorAction SilentlyContinue
           New-Item -ItemType Directory -Force -Path $diagnosticsDir | Out-Null
 
           if (Test-Path $startupLog) {
             Copy-Item $startupLog -Destination (Join-Path $diagnosticsDir "milady-startup.log") -Force
+            Write-Host "--- milady-startup.log ---"
+            Get-Content $startupLog -Tail 200 | ForEach-Object { Write-Host $_ }
+            Write-Host "--- end milady-startup.log ---"
           } else {
             Write-Warning "Windows startup log not found at $startupLog"
+            $miladyDir = Join-Path $appDataRoot "Milady"
+            if (Test-Path $miladyDir) {
+              Write-Host "Contents of $miladyDir :"
+              Get-ChildItem -Path $miladyDir -Recurse -File -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "  $($_.FullName)" }
+            }
+          }
+
+          foreach ($pattern in @("eliza-windows-smoke-*.state.json", "eliza-windows-smoke-*.events.jsonl", "milady-startup-trace-*.state.json")) {
+            $traceGlob = Join-Path $env:RUNNER_TEMP $pattern
+            $traceFiles = Get-ChildItem -Path $traceGlob -ErrorAction SilentlyContinue
+            if ($traceFiles) {
+              foreach ($f in $traceFiles) {
+                $dest = Join-Path $diagnosticsDir $f.Name
+                Copy-Item $f.FullName -Destination $dest -Force
+                Write-Host "--- startup-trace: $($f.Name) ---"
+                Get-Content $f.FullName -Tail 400 | ForEach-Object { Write-Host $_ }
+                Write-Host "--- end $($f.Name) ---"
+              }
+            }
+          }
+
+          # Also capture any startup-session.json bootstrap files inside the install root.
+          foreach ($root in @($wrapperRoot, "C:\\mi", "D:\\a\\_temp\\mi")) {
+            if (Test-Path $root) {
+              Get-ChildItem -Path $root -Recurse -File -Filter "startup-session.json" -ErrorAction SilentlyContinue |
+                ForEach-Object {
+                  $dest = Join-Path $diagnosticsDir ("startup-session-" + ($_.FullName -replace '[\\:]', '_') + ".json")
+                  Copy-Item $_.FullName -Destination $dest -Force
+                  Write-Host "--- $($_.FullName) ---"
+                  Get-Content $_.FullName | ForEach-Object { Write-Host $_ }
+                  Write-Host "--- end ---"
+                }
+            }
           }
 
           if (Test-Path $wrapperRoot) {
@@ -1190,7 +1268,7 @@ jobs:
         shell: pwsh
         run: |
           $artifactsDir = Join-Path $PWD "apps/app/electrobun/artifacts"
-          $canonicalInstallers = Get-ChildItem -Path $artifactsDir -File -Filter "Milady-Setup-*.exe" -ErrorAction SilentlyContinue |
+          $canonicalInstallers = Get-ChildItem -Path $artifactsDir -File -Filter "ElizaOSApp-Setup-*.exe" -ErrorAction SilentlyContinue |
             Sort-Object LastWriteTime -Descending
           if (-not $canonicalInstallers) {
             Write-Error "No canonical Windows installer found before compression."
@@ -1234,7 +1312,7 @@ jobs:
           Remove-Item $publicCanaryDir -Recurse -Force -ErrorAction SilentlyContinue
           New-Item -ItemType Directory -Force -Path $publicCanaryDir | Out-Null
 
-          $canonicalInstallers = Get-ChildItem -Path $artifactsDir -File -Filter "Milady-Setup-*.exe" -ErrorAction SilentlyContinue |
+          $canonicalInstallers = Get-ChildItem -Path $artifactsDir -File -Filter "ElizaOSApp-Setup-*.exe" -ErrorAction SilentlyContinue |
             Sort-Object LastWriteTime -Descending
           if ($canonicalInstallers) {
             if ($canonicalInstallers.Count -gt 1) {
@@ -1245,7 +1323,7 @@ jobs:
             $canonicalInstaller = $canonicalInstallers | Select-Object -First 1
             Copy-Item $canonicalInstaller.FullName -Destination $publicCanaryDir -Force
           } else {
-            $canonicalInstallerZips = Get-ChildItem -Path $artifactsDir -File -Filter "Milady-Setup-*.exe.zip" -ErrorAction SilentlyContinue |
+            $canonicalInstallerZips = Get-ChildItem -Path $artifactsDir -File -Filter "ElizaOSApp-Setup-*.exe.zip" -ErrorAction SilentlyContinue |
               Sort-Object LastWriteTime -Descending
             if (-not $canonicalInstallerZips) {
               Write-Error "No canonical Windows installer (or zip fallback) found for canary artifact publishing."
@@ -1261,7 +1339,7 @@ jobs:
             Expand-Archive -Path $canonicalInstallerZip.FullName -DestinationPath $publicCanaryDir -Force
           }
 
-          $publicInstallers = Get-ChildItem -Path $publicCanaryDir -File -Filter "Milady-Setup-*.exe" -ErrorAction SilentlyContinue |
+          $publicInstallers = Get-ChildItem -Path $publicCanaryDir -File -Filter "ElizaOSApp-Setup-*.exe" -ErrorAction SilentlyContinue |
             Sort-Object LastWriteTime -Descending
           if (-not $publicInstallers) {
             Write-Error "Failed to stage a public Windows installer under $publicCanaryDir"
@@ -1281,7 +1359,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: electrobun-${{ matrix.platform.artifact-name }}-public-installer
-          path: apps/app/electrobun/artifacts/public-canary-installer/Milady-Setup-*.exe
+          path: apps/app/electrobun/artifacts/public-canary-installer/ElizaOSApp-Setup-*.exe
           if-no-files-found: error
           retention-days: 30
           compression-level: 0
@@ -1343,8 +1421,8 @@ jobs:
           # installer, not the raw Electrobun bootstrap stub.
           find release-artifacts -type f \( \
             -name "*.dmg" -o \
-            -name "Milady-Setup-*.exe" -o \
-            -name "Milady-Setup-*.exe.zip" -o \
+            -name "ElizaOSApp-Setup-*.exe" -o \
+            -name "ElizaOSApp-Setup-*.exe.zip" -o \
             -name "*Setup*.tar.gz" -o \
             -name "*.msix" \
           \) -exec cp {} release-files/ \; 2>/dev/null || true

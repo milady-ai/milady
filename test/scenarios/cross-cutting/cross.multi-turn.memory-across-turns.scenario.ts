@@ -29,14 +29,14 @@ export default scenario({
       kind: "message",
       name: "state-fact",
       room: "main",
-      text: "Remember: my favorite color is blue.",
+      text: "Please remember this fact for later: my favorite color is blue. Just acknowledge, don't update any profile fields.",
     },
     {
       kind: "message",
       name: "recall-fact",
       room: "main",
-      text: "What's my favorite color?",
-      responseIncludesAny: ["blue", "Blue"],
+      text: "A moment ago I told you my favorite color. What color did I say? Please reply with the color name.",
+      responseIncludesAny: ["blue", "Blue", "BLUE"],
     },
   ],
 

@@ -7,6 +7,7 @@ export default scenario({
   tags: ["lifeops", "selfcontrol", "not-yet-implemented", "time-of-day-edge"],
   description:
     "User schedules a nightly block that starts at 10pm. Exercising this path end-to-end requires the check-in / schedule engine (T9f) plus a scheduler that fires the block action at the configured time.",
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

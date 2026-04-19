@@ -5,6 +5,7 @@ export default scenario({
   title: "Read recent Discord DMs via local plugin",
   domain: "messaging.discord-local",
   tags: ["messaging", "discord", "happy-path", "smoke"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

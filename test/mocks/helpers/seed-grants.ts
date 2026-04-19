@@ -1,7 +1,6 @@
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import type { IAgentRuntime } from "@elizaos/core";
 import { resolveOAuthDir } from "@elizaos/agent/config/paths";
 import {
   googleCapabilitiesToScopes,
@@ -11,6 +10,7 @@ import {
   createLifeOpsConnectorGrant,
   LifeOpsRepository,
 } from "@elizaos/app-lifeops/lifeops/repository";
+import type { IAgentRuntime } from "@elizaos/core";
 import type {
   LifeOpsConnectorSide,
   LifeOpsGoogleCapability,
@@ -70,7 +70,9 @@ function writeMockGoogleToken(args: {
   return tokenRef;
 }
 
-export async function ensureLifeOpsSchema(runtime: IAgentRuntime): Promise<void> {
+export async function ensureLifeOpsSchema(
+  runtime: IAgentRuntime,
+): Promise<void> {
   const repoClass = LifeOpsRepository as unknown as {
     bootstrapSchema?: (r: IAgentRuntime) => Promise<void>;
   };

@@ -321,7 +321,8 @@ The inbox aggregates messages from every connected platform (iMessage, Telegram,
 | `POST` | `/api/skills/:id/open` | Open a skill directory |
 | `GET` | `/api/skills/:id/source` | Get skill source code |
 | `PUT` | `/api/skills/:id/source` | Update skill source code |
-| `PUT` | `/api/skills/:id` | Update skill configuration (enable/disable) |
+| `POST` | `/api/skills/:id/enable` | Enable a skill (honors scan acknowledgments) |
+| `POST` | `/api/skills/:id/disable` | Disable a skill |
 | `DELETE` | `/api/skills/:id` | Delete a skill |
 
 ### Skills Catalog (Marketplace)

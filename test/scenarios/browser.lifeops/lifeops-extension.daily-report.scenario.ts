@@ -18,6 +18,8 @@ export default scenario({
   description:
     "User asks for a daily screen-time report. Agent should aggregate app + site time into a summary. NotYetImplemented until T8d.",
 
+  status: "pending",
+
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

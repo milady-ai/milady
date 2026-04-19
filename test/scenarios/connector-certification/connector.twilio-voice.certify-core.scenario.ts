@@ -9,17 +9,17 @@ export default buildConnectorCertificationScenario({
   turns: [
     {
       name: "twilio-voice-propose",
-      text: "Prepare the Twilio voice call but wait for my confirmation before dialing.",
+      text: "Create a Twilio voice call draft with CALL_EXTERNAL to Downtown Dental using the spoken message 'This is a connector certification call.' Keep confirmed false so it waits for approval.",
       responseIncludesAny: ["call", "twilio", "confirm"],
-      acceptedActions: ["CALL_USER", "CALL_EXTERNAL"],
-      includesAny: ["call", "twilio", "confirm"],
+      acceptedActions: ["CALL_EXTERNAL"],
+      includesAny: ["call", "twilio", "confirm", "downtown"],
     },
     {
       name: "twilio-voice-confirm",
-      text: "Confirmed, place the call now.",
+      text: "Set confirmed true and place that CALL_EXTERNAL Twilio voice call to Downtown Dental now.",
       responseIncludesAny: ["call", "placed", "dialing"],
-      acceptedActions: ["CALL_USER", "CALL_EXTERNAL"],
-      includesAny: ["call", "place", "dial"],
+      acceptedActions: ["CALL_EXTERNAL"],
+      includesAny: ["call", "place", "dial", "downtown"],
     },
   ],
   finalChecks: [

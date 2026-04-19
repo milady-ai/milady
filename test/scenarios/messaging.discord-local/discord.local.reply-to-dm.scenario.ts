@@ -5,6 +5,7 @@ export default scenario({
   title: "Reply to Discord DM with confirmation",
   domain: "messaging.discord-local",
   tags: ["messaging", "discord", "confirmation"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

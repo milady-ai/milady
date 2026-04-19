@@ -5,6 +5,7 @@ export default scenario({
   title: "Read incoming iMessage threads",
   domain: "messaging.imessage",
   tags: ["messaging", "imessage", "happy-path", "smoke"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

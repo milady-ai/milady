@@ -17,6 +17,8 @@ export default scenario({
   description:
     "User asks 'Any unread X DMs?'. Agent summarizes unread DMs without redirecting to X. NotYetImplemented until T8g.",
 
+  status: "pending",
+
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

@@ -17,6 +17,8 @@ export default scenario({
   description:
     "Tests the extension → agent UI surface. User asks the agent to confirm the extension is connected and reporting. NotYetImplemented until T8e.",
 
+  status: "pending",
+
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

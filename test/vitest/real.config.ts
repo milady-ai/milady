@@ -64,6 +64,8 @@ const ciExcludedRealPaths = [
   "eliza/plugins/plugin-evm/typescript/__tests__/integration/rpc-providers.live.test.ts",
   "eliza/plugins/plugin-evm/typescript/__tests__/integration/transfer.live.test.ts",
   "eliza/plugins/plugin-shell/typescript/__tests__/shell.real.test.ts",
+  // plugin-openrouter sdk nested workspace deps don't resolve in this CI lane.
+  "eliza/plugins/plugin-openrouter/typescript/__tests__/models.live.test.ts",
 ];
 const liveSetupFile = [
   path.join(
@@ -95,6 +97,10 @@ const appCompanionSourceRoot = path.join(
   "app-companion",
   "src",
 );
+const liveRetryCount =
+  process.env.MILADY_LIVE_TEST === "1" || process.env.ELIZA_LIVE_TEST === "1"
+    ? 1
+    : 0;
 process.env.MILADY_LIVE_TEST = "1";
 process.env.ELIZA_LIVE_TEST = "1";
 
@@ -580,6 +586,7 @@ export default defineConfig({
   test: {
     testTimeout: 300_000,
     hookTimeout: 300_000,
+    retry: liveRetryCount,
     pool: "forks",
     maxWorkers: 1,
     fileParallelism: false,

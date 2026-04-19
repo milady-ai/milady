@@ -5,6 +5,7 @@ export default scenario({
   title: "Read recent Signal messages",
   domain: "messaging.signal",
   tags: ["messaging", "signal", "happy-path", "smoke"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

@@ -17,6 +17,8 @@ export default scenario({
   description:
     "User is on a web page; asks the agent 'What am I looking at right now?'. The agent reads URL + title + selection from the extension. NotYetImplemented until T8e.",
 
+  status: "pending",
+
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

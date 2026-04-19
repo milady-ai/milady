@@ -113,9 +113,7 @@ export async function startMocks(opts?: {
   const dataPaths = envs.map((e) => path.resolve(ENVS_DIR, `${e}.json`));
   const missing = dataPaths.filter((p) => !fs.existsSync(p));
   if (missing.length > 0) {
-    throw new Error(
-      `Mockoon environment files missing: ${missing.join(", ")}`,
-    );
+    throw new Error(`Mockoon environment files missing: ${missing.join(", ")}`);
   }
 
   const ports = await pickFreePorts(envs.length);

@@ -12,6 +12,7 @@ export default scenario({
   ],
   description:
     "Agent sends an SMS through the Twilio gateway and the resulting usage charge is recorded with the 20% Eliza Cloud markup. Requires T9d (billing markup) and T9e (Twilio gateway outbound).",
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

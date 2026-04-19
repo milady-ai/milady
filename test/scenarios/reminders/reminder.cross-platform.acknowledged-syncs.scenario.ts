@@ -5,6 +5,7 @@ export default scenario({
   title: "Acknowledging a reminder on one device stops it on the other",
   domain: "reminders",
   tags: ["reminders", "lifeops", "cross-platform", "not-yet-implemented"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

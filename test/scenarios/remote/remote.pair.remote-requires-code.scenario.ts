@@ -7,6 +7,7 @@ export default scenario({
   tags: ["remote", "pairing", "permission-denied-edge", "not-yet-implemented"],
   description:
     "When the companion client connects from outside the LAN, the agent must refuse pairing without a one-time code. Needs T9a remote-control data plane with pairing code issuance/verification.",
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

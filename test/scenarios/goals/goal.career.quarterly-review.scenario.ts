@@ -13,6 +13,7 @@ export default scenario({
   tags: ["lifeops", "goals", "career", "plugin-disabled"],
   description:
     "Seed a Q1 career goal and ask how Q1 went. Requires T9f: check-in engine extended to quarterly review.",
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

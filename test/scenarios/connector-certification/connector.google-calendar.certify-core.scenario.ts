@@ -25,5 +25,9 @@ export default buildConnectorCertificationScenario({
       actionName: "CALENDAR_ACTION",
       includesAny: ["availability", "create", "cancel", "reschedule"],
     },
+    {
+      type: "memoryWriteOccurred",
+      table: ["messages", "facts"],
+    },
   ],
 });

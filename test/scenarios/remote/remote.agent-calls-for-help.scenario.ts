@@ -12,6 +12,7 @@ export default scenario({
   ],
   description:
     "Agent hits a blocking condition and escalates by triggering an outbound call/push to the user. Requires T9a (remote-control data plane) plus T9e (Twilio calling gateway).",
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

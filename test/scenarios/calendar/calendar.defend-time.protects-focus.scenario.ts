@@ -5,6 +5,7 @@ export default scenario({
   title: "Agent protects calendar focus blocks from meeting requests",
   domain: "calendar",
   tags: ["lifeops", "calendar", "not-yet-implemented"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

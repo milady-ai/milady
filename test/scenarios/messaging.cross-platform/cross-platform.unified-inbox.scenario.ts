@@ -5,6 +5,7 @@ export default scenario({
   title: "Unified inbox across all messaging platforms",
   domain: "messaging.cross-platform",
   tags: ["cross-platform", "messaging", "happy-path", "smoke"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

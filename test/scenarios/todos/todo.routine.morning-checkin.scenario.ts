@@ -5,6 +5,7 @@ export default scenario({
   title: "Morning check-in surfaces today's todos",
   domain: "todos",
   tags: ["lifeops", "todos", "smoke", "plugin-disabled"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

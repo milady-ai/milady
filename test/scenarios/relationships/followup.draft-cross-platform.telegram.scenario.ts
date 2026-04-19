@@ -14,6 +14,8 @@ export default scenario({
   description:
     "User asks the agent to draft a follow-up Telegram message to Alice. Cross-platform draft action not yet in catalog.",
 
+  status: "pending",
+
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

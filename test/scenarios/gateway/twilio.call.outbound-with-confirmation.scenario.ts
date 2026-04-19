@@ -13,6 +13,7 @@ export default scenario({
   ],
   description:
     "Agent proposes placing a phone call via Twilio, user confirms, then the call is initiated. Requires T9e (Twilio calling gateway outbound + confirmation UX).",
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

@@ -7,6 +7,7 @@ export default scenario({
   tags: ["remote", "sso", "credentials-missing-edge", "not-yet-implemented"],
   description:
     "User authenticates to the remote-access surface via Google/Gmail SSO through Eliza Cloud. Requires T9a (remote-control data plane auth integration).",
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

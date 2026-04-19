@@ -761,29 +761,11 @@ _Generated on: 2026-04-16. Total actions: 151._
 - **Handler:** ✅ yes
 - **Examples:** ✅ yes
 
-### GET_SKILL_GUIDANCE
-
-- **File:** `eliza/plugins/plugin-agent-skills/typescript/src/actions/get-skill-guidance.ts`
-- **Description:** Search for and get skill instructions. Use when user asks to find a skill or when you need instructions for a capability.
-- **Similes:** `FIND_SKILL`, `SEARCH_SKILLS`, `SKILL_HELP`, `HOW_TO`, `GET_INSTRUCTIONS`, `LEARN_SKILL`, `LOOKUP_SKILL`
-- **Validate:** ❌ no
-- **Handler:** ✅ yes
-- **Examples:** ✅ yes
-
 ### INSTALL_SKILL
 
 - **File:** `eliza/plugins/plugin-agent-skills/typescript/src/actions/install-skill.ts`
 - **Description:** Install a skill from the ClawHub registry. The skill will be security-scanned before activation.
 - **Similes:** `DOWNLOAD_SKILL`, `ADD_SKILL`, `GET_SKILL`
-- **Validate:** ❌ no
-- **Handler:** ✅ yes
-- **Examples:** ✅ yes
-
-### RUN_SKILL_SCRIPT
-
-- **File:** `eliza/plugins/plugin-agent-skills/typescript/src/actions/run-skill-script.ts`
-- **Description:** Execute a script bundled with an installed skill. Provide skill slug and script name.
-- **Similes:** `EXECUTE_SKILL_SCRIPT`, `SKILL_SCRIPT`
 - **Validate:** ❌ no
 - **Handler:** ✅ yes
 - **Examples:** ✅ yes

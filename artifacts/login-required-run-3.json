@@ -1,0 +1,481 @@
+{
+  "runId": "77f3c00f-2c3a-4c62-ac21-3b53e20e6a78",
+  "startedAtIso": "2026-04-18T11:48:10.502Z",
+  "completedAtIso": "2026-04-18T11:48:16.878Z",
+  "providerName": "groq",
+  "scenarios": [
+    {
+      "id": "subscriptions.login-required",
+      "title": "Subscription cancellation that needs login",
+      "domain": "browser.lifeops",
+      "tags": [
+        "browser",
+        "subscriptions",
+        "human-handoff"
+      ],
+      "status": "failed",
+      "durationMs": 4922,
+      "turns": [
+        {
+          "name": "cancel-login-required",
+          "kind": "message",
+          "text": "Cancel my Fixture Login Required subscription.",
+          "responseText": "Please log in to cancel your subscription, and then I can assist you with cancelling the Fixture Login Required subscription.Email send requires a subject.",
+          "actionsCalled": [
+            {
+              "actionName": "REPLY",
+              "parameters": {
+                "actionContext": {
+                  "previousResults": [
+                    {
+                      "text": "Please log in to cancel your subscription, and then I can assist you with cancelling the Fixture Login Required subscription.",
+                      "values": {
+                        "success": true,
+                        "responded": true,
+                        "lastReply": "Please log in to cancel your subscription, and then I can assist you with cancelling the Fixture Login Required subscription.",
+                        "lastReplyTime": 1776512894837,
+                        "thoughtProcess": "The user needs to log in to cancel the Fixture Login Required subscription."
+                      },
+                      "data": {
+                        "actionName": "REPLY",
+                        "responseThought": "The user needs to log in to cancel the Fixture Login Required subscription.",
+                        "responseText": "Please log in to cancel your subscription, and then I can assist you with cancelling the Fixture Login Required subscription.",
+                        "thought": "The user needs to log in to cancel the Fixture Login Required subscription.",
+                        "messageGenerated": true
+                      },
+                      "success": true
+                    },
+                    {
+                      "text": "Email send requires a subject.",
+                      "success": false,
+                      "values": {
+                        "success": false,
+                        "error": "MISSING_SUBJECT",
+                        "channel": "email"
+                      },
+                      "data": {
+                        "actionName": "CROSS_CHANNEL_SEND",
+                        "channel": "email"
+                      }
+                    }
+                  ]
+                },
+                "actionPlan": {
+                  "totalSteps": 2,
+                  "currentStep": 1,
+                  "steps": [
+                    {
+                      "action": "REPLY",
+                      "status": "pending"
+                    },
+                    {
+                      "action": "CROSS_CHANNEL_SEND",
+                      "status": "pending"
+                    }
+                  ],
+                  "thought": "Received a message to cancel a subscription.  The user needs to log in to cancel the Fixture Login Required subscription."
+                }
+              },
+              "result": {
+                "success": true,
+                "data": {
+                  "actionName": "REPLY",
+                  "responseThought": "The user needs to log in to cancel the Fixture Login Required subscription.",
+                  "responseText": "Please log in to cancel your subscription, and then I can assist you with cancelling the Fixture Login Required subscription.",
+                  "thought": "The user needs to log in to cancel the Fixture Login Required subscription.",
+                  "messageGenerated": true
+                },
+                "values": {
+                  "success": true,
+                  "responded": true,
+                  "lastReply": "Please log in to cancel your subscription, and then I can assist you with cancelling the Fixture Login Required subscription.",
+                  "lastReplyTime": 1776512894837,
+                  "thoughtProcess": "The user needs to log in to cancel the Fixture Login Required subscription."
+                },
+                "text": "Please log in to cancel your subscription, and then I can assist you with cancelling the Fixture Login Required subscription.",
+                "raw": {
+                  "text": "Please log in to cancel your subscription, and then I can assist you with cancelling the Fixture Login Required subscription.",
+                  "values": {
+                    "success": true,
+                    "responded": true,
+                    "lastReply": "Please log in to cancel your subscription, and then I can assist you with cancelling the Fixture Login Required subscription.",
+                    "lastReplyTime": 1776512894837,
+                    "thoughtProcess": "The user needs to log in to cancel the Fixture Login Required subscription."
+                  },
+                  "data": {
+                    "actionName": "REPLY",
+                    "responseThought": "The user needs to log in to cancel the Fixture Login Required subscription.",
+                    "responseText": "Please log in to cancel your subscription, and then I can assist you with cancelling the Fixture Login Required subscription.",
+                    "thought": "The user needs to log in to cancel the Fixture Login Required subscription.",
+                    "messageGenerated": true
+                  },
+                  "success": true
+                }
+              }
+            },
+            {
+              "actionName": "CROSS_CHANNEL_SEND",
+              "parameters": {
+                "parameters": {
+                  "channel": "email",
+                  "target": "user email",
+                  "message": "Please log in to cancel the Fixture Login Required subscription.",
+                  "confirmed": true
+                },
+                "actionContext": {
+                  "previousResults": [
+                    {
+                      "text": "Please log in to cancel your subscription, and then I can assist you with cancelling the Fixture Login Required subscription.",
+                      "values": {
+                        "success": true,
+                        "responded": true,
+                        "lastReply": "Please log in to cancel your subscription, and then I can assist you with cancelling the Fixture Login Required subscription.",
+                        "lastReplyTime": 1776512894837,
+                        "thoughtProcess": "The user needs to log in to cancel the Fixture Login Required subscription."
+                      },
+                      "data": {
+                        "actionName": "REPLY",
+                        "responseThought": "The user needs to log in to cancel the Fixture Login Required subscription.",
+                        "responseText": "Please log in to cancel your subscription, and then I can assist you with cancelling the Fixture Login Required subscription.",
+                        "thought": "The user needs to log in to cancel the Fixture Login Required subscription.",
+                        "messageGenerated": true
+                      },
+                      "success": true
+                    },
+                    {
+                      "text": "Email send requires a subject.",
+                      "success": false,
+                      "values": {
+                        "success": false,
+                        "error": "MISSING_SUBJECT",
+                        "channel": "email"
+                      },
+                      "data": {
+                        "actionName": "CROSS_CHANNEL_SEND",
+                        "channel": "email"
+                      }
+                    }
+                  ]
+                },
+                "actionPlan": {
+                  "totalSteps": 2,
+                  "currentStep": 2,
+                  "steps": [
+                    {
+                      "action": "REPLY",
+                      "status": "completed",
+                      "result": {
+                        "text": "Please log in to cancel your subscription, and then I can assist you with cancelling the Fixture Login Required subscription.",
+                        "values": {
+                          "success": true,
+                          "responded": true,
+                          "lastReply": "Please log in to cancel your subscription, and then I can assist you with cancelling the Fixture Login Required subscription.",
+                          "lastReplyTime": 1776512894837,
+                          "thoughtProcess": "The user needs to log in to cancel the Fixture Login Required subscription."
+                        },
+                        "data": {
+                          "actionName": "REPLY",
+                          "responseThought": "The user needs to log in to cancel the Fixture Login Required subscription.",
+                          "responseText": "Please log in to cancel your subscription, and then I can assist you with cancelling the Fixture Login Required subscription.",
+                          "thought": "The user needs to log in to cancel the Fixture Login Required subscription.",
+                          "messageGenerated": true
+                        },
+                        "success": true
+                      }
+                    },
+                    {
+                      "action": "CROSS_CHANNEL_SEND",
+                      "status": "pending"
+                    }
+                  ],
+                  "thought": "Received a message to cancel a subscription.  The user needs to log in to cancel the Fixture Login Required subscription."
+                }
+              },
+              "result": {
+                "success": false,
+                "data": {
+                  "actionName": "CROSS_CHANNEL_SEND",
+                  "channel": "email"
+                },
+                "values": {
+                  "success": false,
+                  "error": "MISSING_SUBJECT",
+                  "channel": "email"
+                },
+                "text": "Email send requires a subject.",
+                "raw": {
+                  "text": "Email send requires a subject.",
+                  "success": false,
+                  "values": {
+                    "success": false,
+                    "error": "MISSING_SUBJECT",
+                    "channel": "email"
+                  },
+                  "data": {
+                    "actionName": "CROSS_CHANNEL_SEND",
+                    "channel": "email"
+                  }
+                }
+              }
+            }
+          ],
+          "durationMs": 4894,
+          "failedAssertions": [
+            "assertTurn: expected SUBSCRIPTIONS to run",
+            "responseIncludesAny: response missing any of [needs,sign in,cancellation]"
+          ]
+        }
+      ],
+      "finalChecks": [
+        {
+          "label": "selectedAction",
+          "type": "selectedAction",
+          "status": "failed",
+          "detail": "no selected action in [SUBSCRIPTIONS]. Called: REPLY,CROSS_CHANNEL_SEND"
+        },
+        {
+          "label": "browserTaskNeedsHuman",
+          "type": "browserTaskNeedsHuman",
+          "status": "failed",
+          "detail": "expected browserTaskNeedsHuman=true, saw false"
+        },
+        {
+          "label": "browserTaskCompleted",
+          "type": "browserTaskCompleted",
+          "status": "passed",
+          "detail": "browserTaskCompleted=false"
+        }
+      ],
+      "actionsCalled": [
+        {
+          "actionName": "REPLY",
+          "parameters": {
+            "actionContext": {
+              "previousResults": [
+                {
+                  "text": "Please log in to cancel your subscription, and then I can assist you with cancelling the Fixture Login Required subscription.",
+                  "values": {
+                    "success": true,
+                    "responded": true,
+                    "lastReply": "Please log in to cancel your subscription, and then I can assist you with cancelling the Fixture Login Required subscription.",
+                    "lastReplyTime": 1776512894837,
+                    "thoughtProcess": "The user needs to log in to cancel the Fixture Login Required subscription."
+                  },
+                  "data": {
+                    "actionName": "REPLY",
+                    "responseThought": "The user needs to log in to cancel the Fixture Login Required subscription.",
+                    "responseText": "Please log in to cancel your subscription, and then I can assist you with cancelling the Fixture Login Required subscription.",
+                    "thought": "The user needs to log in to cancel the Fixture Login Required subscription.",
+                    "messageGenerated": true
+                  },
+                  "success": true
+                },
+                {
+                  "text": "Email send requires a subject.",
+                  "success": false,
+                  "values": {
+                    "success": false,
+                    "error": "MISSING_SUBJECT",
+                    "channel": "email"
+                  },
+                  "data": {
+                    "actionName": "CROSS_CHANNEL_SEND",
+                    "channel": "email"
+                  }
+                }
+              ]
+            },
+            "actionPlan": {
+              "totalSteps": 2,
+              "currentStep": 1,
+              "steps": [
+                {
+                  "action": "REPLY",
+                  "status": "pending"
+                },
+                {
+                  "action": "CROSS_CHANNEL_SEND",
+                  "status": "pending"
+                }
+              ],
+              "thought": "Received a message to cancel a subscription.  The user needs to log in to cancel the Fixture Login Required subscription."
+            }
+          },
+          "result": {
+            "success": true,
+            "data": {
+              "actionName": "REPLY",
+              "responseThought": "The user needs to log in to cancel the Fixture Login Required subscription.",
+              "responseText": "Please log in to cancel your subscription, and then I can assist you with cancelling the Fixture Login Required subscription.",
+              "thought": "The user needs to log in to cancel the Fixture Login Required subscription.",
+              "messageGenerated": true
+            },
+            "values": {
+              "success": true,
+              "responded": true,
+              "lastReply": "Please log in to cancel your subscription, and then I can assist you with cancelling the Fixture Login Required subscription.",
+              "lastReplyTime": 1776512894837,
+              "thoughtProcess": "The user needs to log in to cancel the Fixture Login Required subscription."
+            },
+            "text": "Please log in to cancel your subscription, and then I can assist you with cancelling the Fixture Login Required subscription.",
+            "raw": {
+              "text": "Please log in to cancel your subscription, and then I can assist you with cancelling the Fixture Login Required subscription.",
+              "values": {
+                "success": true,
+                "responded": true,
+                "lastReply": "Please log in to cancel your subscription, and then I can assist you with cancelling the Fixture Login Required subscription.",
+                "lastReplyTime": 1776512894837,
+                "thoughtProcess": "The user needs to log in to cancel the Fixture Login Required subscription."
+              },
+              "data": {
+                "actionName": "REPLY",
+                "responseThought": "The user needs to log in to cancel the Fixture Login Required subscription.",
+                "responseText": "Please log in to cancel your subscription, and then I can assist you with cancelling the Fixture Login Required subscription.",
+                "thought": "The user needs to log in to cancel the Fixture Login Required subscription.",
+                "messageGenerated": true
+              },
+              "success": true
+            }
+          }
+        },
+        {
+          "actionName": "CROSS_CHANNEL_SEND",
+          "parameters": {
+            "parameters": {
+              "channel": "email",
+              "target": "user email",
+              "message": "Please log in to cancel the Fixture Login Required subscription.",
+              "confirmed": true
+            },
+            "actionContext": {
+              "previousResults": [
+                {
+                  "text": "Please log in to cancel your subscription, and then I can assist you with cancelling the Fixture Login Required subscription.",
+                  "values": {
+                    "success": true,
+                    "responded": true,
+                    "lastReply": "Please log in to cancel your subscription, and then I can assist you with cancelling the Fixture Login Required subscription.",
+                    "lastReplyTime": 1776512894837,
+                    "thoughtProcess": "The user needs to log in to cancel the Fixture Login Required subscription."
+                  },
+                  "data": {
+                    "actionName": "REPLY",
+                    "responseThought": "The user needs to log in to cancel the Fixture Login Required subscription.",
+                    "responseText": "Please log in to cancel your subscription, and then I can assist you with cancelling the Fixture Login Required subscription.",
+                    "thought": "The user needs to log in to cancel the Fixture Login Required subscription.",
+                    "messageGenerated": true
+                  },
+                  "success": true
+                },
+                {
+                  "text": "Email send requires a subject.",
+                  "success": false,
+                  "values": {
+                    "success": false,
+                    "error": "MISSING_SUBJECT",
+                    "channel": "email"
+                  },
+                  "data": {
+                    "actionName": "CROSS_CHANNEL_SEND",
+                    "channel": "email"
+                  }
+                }
+              ]
+            },
+            "actionPlan": {
+              "totalSteps": 2,
+              "currentStep": 2,
+              "steps": [
+                {
+                  "action": "REPLY",
+                  "status": "completed",
+                  "result": {
+                    "text": "Please log in to cancel your subscription, and then I can assist you with cancelling the Fixture Login Required subscription.",
+                    "values": {
+                      "success": true,
+                      "responded": true,
+                      "lastReply": "Please log in to cancel your subscription, and then I can assist you with cancelling the Fixture Login Required subscription.",
+                      "lastReplyTime": 1776512894837,
+                      "thoughtProcess": "The user needs to log in to cancel the Fixture Login Required subscription."
+                    },
+                    "data": {
+                      "actionName": "REPLY",
+                      "responseThought": "The user needs to log in to cancel the Fixture Login Required subscription.",
+                      "responseText": "Please log in to cancel your subscription, and then I can assist you with cancelling the Fixture Login Required subscription.",
+                      "thought": "The user needs to log in to cancel the Fixture Login Required subscription.",
+                      "messageGenerated": true
+                    },
+                    "success": true
+                  }
+                },
+                {
+                  "action": "CROSS_CHANNEL_SEND",
+                  "status": "pending"
+                }
+              ],
+              "thought": "Received a message to cancel a subscription.  The user needs to log in to cancel the Fixture Login Required subscription."
+            }
+          },
+          "result": {
+            "success": false,
+            "data": {
+              "actionName": "CROSS_CHANNEL_SEND",
+              "channel": "email"
+            },
+            "values": {
+              "success": false,
+              "error": "MISSING_SUBJECT",
+              "channel": "email"
+            },
+            "text": "Email send requires a subject.",
+            "raw": {
+              "text": "Email send requires a subject.",
+              "success": false,
+              "values": {
+                "success": false,
+                "error": "MISSING_SUBJECT",
+                "channel": "email"
+              },
+              "data": {
+                "actionName": "CROSS_CHANNEL_SEND",
+                "channel": "email"
+              }
+            }
+          }
+        }
+      ],
+      "failedAssertions": [
+        {
+          "label": "cancel-login-required",
+          "detail": "assertTurn: expected SUBSCRIPTIONS to run"
+        },
+        {
+          "label": "cancel-login-required",
+          "detail": "responseIncludesAny: response missing any of [needs,sign in,cancellation]"
+        },
+        {
+          "label": "selectedAction",
+          "detail": "no selected action in [SUBSCRIPTIONS]. Called: REPLY,CROSS_CHANNEL_SEND"
+        },
+        {
+          "label": "browserTaskNeedsHuman",
+          "detail": "expected browserTaskNeedsHuman=true, saw false"
+        }
+      ],
+      "providerName": "groq"
+    }
+  ],
+  "totals": {
+    "passed": 0,
+    "failed": 1,
+    "skipped": 0,
+    "flakyPassed": 0,
+    "costUsd": 0
+  },
+  "totalCount": 1,
+  "passedCount": 0,
+  "failedCount": 1,
+  "skippedCount": 0,
+  "flakyPassedCount": 0,
+  "totalCostUsd": 0
+}

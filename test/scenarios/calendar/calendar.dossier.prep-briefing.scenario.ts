@@ -5,6 +5,7 @@ export default scenario({
   title: "Agent generates a meeting prep dossier for an upcoming event",
   domain: "calendar",
   tags: ["lifeops", "calendar", "not-yet-implemented"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

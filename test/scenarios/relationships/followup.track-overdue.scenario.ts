@@ -20,6 +20,8 @@ export default scenario({
   description:
     "Three contacts have varying lastContactedAt values. The agent should surface the overdue ones. Requires follow-up tracker service (T7c).",
 
+  status: "pending",
+
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

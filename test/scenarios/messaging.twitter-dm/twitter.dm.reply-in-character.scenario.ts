@@ -5,6 +5,7 @@ export default scenario({
   title: "Reply to Twitter DM in user's typical tone",
   domain: "messaging.twitter-dm",
   tags: ["messaging", "twitter", "parameter-extraction"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

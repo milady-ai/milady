@@ -3,6 +3,40 @@ title: Changelog
 description: What's new in Milady — features, improvements, and fixes.
 ---
 
+<Update label="2026-04-19" description="Week of April 19; dashboard redesign, n8n workflow automations, life-ops connector UI, mobile responsiveness" tags={["Feature", "Update", "Fix"]}>
+
+## Dashboard redesign
+
+The [cloud dashboard](/guides/cloud) homepage has been completely redesigned. Agent cards now use a data-first layout with cleaner instance grids and filter chips for quick browsing. A new persistent sidebar with vertical tabs replaces the previous navigation, and the hero section is now typography-focused for a quieter, more readable landing experience. You can provision new cloud agents directly from the dashboard with an inline modal — no more navigating away to create an agent. Deleting cloud agents and managing card actions are also restored.
+
+## n8n workflow automations
+
+Your agent now supports [n8n](https://n8n.io) workflow automations through a new plugin. A dedicated Workflows pane in the Automations view lets you browse, activate, deactivate, and delete workflows. The n8n sidecar starts automatically when the plugin is enabled, and status updates poll in real time. The legacy n8n plugin has been retired in favor of this new integration.
+
+## Life-ops connector UI overhaul
+
+The [life-ops](/rest/lifeops) connector setup panels have been redesigned with a flat, borderless card layout. Each connector — Signal, Discord, Telegram, and iMessage — now shows a clear connect button and platform-aware permissions panel. Redundant borders and card containers have been stripped out, and the cloud warning banner has been demoted to muted inline text so the interface stays clean and scannable.
+
+## Updates
+
+- **Mobile-responsive homepage** — The dashboard homepage is now fully responsive on phones and tablets. The topbar is sticky so the menu button stays reachable on long pages, filter chips scroll horizontally on narrow screens, tap targets meet touch-friendly sizing, and horizontal overflow is eliminated across all viewport widths.
+- **Settings panels compacted** — The Cloud and AI Model settings panels have been streamlined. Placeholder UI like the agents grid, usage metrics, and dead external links have been removed. Model selection dropdowns now appear correctly even before explicitly connecting to the cloud.
+- **OpenRouter SDK upgraded** — The OpenRouter plugin has been upgraded to `@openrouter/ai-sdk-provider` v2.0.0 for improved model routing and compatibility.
+- **Discord task agent cleanup** — [Coding agent](/guides/coding-swarms) messages in Discord are now much cleaner. Heartbeat updates show real elapsed time instead of internal tool names, and debug-level messages like session state and validator analysis no longer leak into the channel.
+- **Homepage accessibility** — Modals and runtime cards now meet accessibility parity standards with proper ARIA attributes, and contrast has been improved across micro-labels, status hints, and sidebar rows.
+
+## Bug fixes
+
+- Fixed the agent web UI showing a blank screen in browsers without WebGPU support (Chrome without flag, Safari, headless Chromium) — a polyfill now prevents the three.js initialization crash
+- Fixed the agent web UI showing a blank screen due to a "require is not defined" error when the browser bundle tried to resolve branding defaults
+- Fixed cloud wallet balance API returning 500 errors because the Steward wallet route stub was missing a subpath export
+- Fixed the "Open Milady" button on the homepage navigating to a dead port when no local runtime was running — it now shows install guidance instead
+- Fixed the cloud agent provisioning modal allowing duplicate agent creation when the submit button re-enabled after success
+- Fixed life-ops connector cards not displaying connect buttons
+- Fixed Vite 6 browser builds crashing from unresolved server-only plugin imports — these are now stubbed correctly
+
+</Update>
+
 <Update label="2026-04-17" description="Week of April 17; life-ops personal account connectors, multi-account Google, Steward cloud wallet provisioning" tags={["Feature", "Update", "Fix"]}>
 
 ## Life-ops personal account connectors

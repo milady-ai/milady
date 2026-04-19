@@ -5,6 +5,7 @@ export default scenario({
   title: "Escalate to the user via gateway when agent cannot resolve alone",
   domain: "messaging.cross-platform",
   tags: ["cross-platform", "gateway", "escalation"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

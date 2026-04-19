@@ -18,6 +18,8 @@ export default scenario({
   description:
     "Turn 1: draft, no POST_TWEET. Turn 2: user confirms; POST_TWEET fires. NotYetImplemented until T8g wires the confirmation gate.",
 
+  status: "pending",
+
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

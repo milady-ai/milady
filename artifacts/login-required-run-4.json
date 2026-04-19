@@ -1,0 +1,321 @@
+{
+  "runId": "d4fe11ac-0eef-40b9-9c7f-352845b18f04",
+  "startedAtIso": "2026-04-18T11:48:17.309Z",
+  "completedAtIso": "2026-04-18T11:48:23.976Z",
+  "providerName": "groq",
+  "scenarios": [
+    {
+      "id": "subscriptions.login-required",
+      "title": "Subscription cancellation that needs login",
+      "domain": "browser.lifeops",
+      "tags": [
+        "browser",
+        "subscriptions",
+        "human-handoff"
+      ],
+      "status": "passed",
+      "durationMs": 5155,
+      "turns": [
+        {
+          "name": "cancel-login-required",
+          "kind": "message",
+          "text": "Cancel my Fixture Login Required subscription.",
+          "responseText": "Please log in to cancel your Fixture Login Required subscription. You will be prompted to enter your login credentials.Fixture Login Required needs the user to sign in before cancellation can continue. sign in",
+          "actionsCalled": [
+            {
+              "actionName": "SUBSCRIPTIONS",
+              "parameters": {
+                "actionContext": {
+                  "previousResults": [
+                    {
+                      "success": true,
+                      "text": "Fixture Login Required needs the user to sign in before cancellation can continue. sign in",
+                      "data": {
+                        "cancellation": {
+                          "agentId": "546ac3ab-0468-01a2-9d5b-52dfa34bf9cc",
+                          "auditId": null,
+                          "candidateId": null,
+                          "serviceSlug": "fixture_login_required",
+                          "serviceName": "Fixture Login Required",
+                          "executor": "agent_browser",
+                          "status": "needs_login",
+                          "confirmed": false,
+                          "currentStep": "open",
+                          "browserSessionId": null,
+                          "evidenceSummary": "sign in",
+                          "artifactCount": 0,
+                          "managementUrl": "https://example.com/account/subscription",
+                          "error": null,
+                          "metadata": {
+                            "playbookKey": "fixture_login_required",
+                            "candidateState": null,
+                            "artifacts": []
+                          },
+                          "finishedAt": "2026-04-18T11:48:20.088Z",
+                          "id": "55a4251f-fe3a-43cc-a399-82fb48724854",
+                          "createdAt": "2026-04-18T11:48:20.086Z",
+                          "updatedAt": "2026-04-18T11:48:20.088Z"
+                        },
+                        "candidate": null,
+                        "browserTask": {
+                          "status": "needs_login",
+                          "completed": false,
+                          "needsHuman": true,
+                          "artifactCount": 0,
+                          "artifacts": []
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "result": {
+                "success": true,
+                "data": {
+                  "cancellation": {
+                    "agentId": "546ac3ab-0468-01a2-9d5b-52dfa34bf9cc",
+                    "auditId": null,
+                    "candidateId": null,
+                    "serviceSlug": "fixture_login_required",
+                    "serviceName": "Fixture Login Required",
+                    "executor": "agent_browser",
+                    "status": "needs_login",
+                    "confirmed": false,
+                    "currentStep": "open",
+                    "browserSessionId": null,
+                    "evidenceSummary": "sign in",
+                    "artifactCount": 0,
+                    "managementUrl": "https://example.com/account/subscription",
+                    "error": null,
+                    "metadata": {
+                      "playbookKey": "fixture_login_required",
+                      "candidateState": null,
+                      "artifacts": []
+                    },
+                    "finishedAt": "2026-04-18T11:48:20.088Z",
+                    "id": "55a4251f-fe3a-43cc-a399-82fb48724854",
+                    "createdAt": "2026-04-18T11:48:20.086Z",
+                    "updatedAt": "2026-04-18T11:48:20.088Z"
+                  },
+                  "candidate": null,
+                  "browserTask": {
+                    "status": "needs_login",
+                    "completed": false,
+                    "needsHuman": true,
+                    "artifactCount": 0,
+                    "artifacts": []
+                  }
+                },
+                "text": "Fixture Login Required needs the user to sign in before cancellation can continue. sign in",
+                "raw": {
+                  "success": true,
+                  "text": "Fixture Login Required needs the user to sign in before cancellation can continue. sign in",
+                  "data": {
+                    "cancellation": {
+                      "agentId": "546ac3ab-0468-01a2-9d5b-52dfa34bf9cc",
+                      "auditId": null,
+                      "candidateId": null,
+                      "serviceSlug": "fixture_login_required",
+                      "serviceName": "Fixture Login Required",
+                      "executor": "agent_browser",
+                      "status": "needs_login",
+                      "confirmed": false,
+                      "currentStep": "open",
+                      "browserSessionId": null,
+                      "evidenceSummary": "sign in",
+                      "artifactCount": 0,
+                      "managementUrl": "https://example.com/account/subscription",
+                      "error": null,
+                      "metadata": {
+                        "playbookKey": "fixture_login_required",
+                        "candidateState": null,
+                        "artifacts": []
+                      },
+                      "finishedAt": "2026-04-18T11:48:20.088Z",
+                      "id": "55a4251f-fe3a-43cc-a399-82fb48724854",
+                      "createdAt": "2026-04-18T11:48:20.086Z",
+                      "updatedAt": "2026-04-18T11:48:20.088Z"
+                    },
+                    "candidate": null,
+                    "browserTask": {
+                      "status": "needs_login",
+                      "completed": false,
+                      "needsHuman": true,
+                      "artifactCount": 0,
+                      "artifacts": []
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          "durationMs": 5127,
+          "failedAssertions": []
+        }
+      ],
+      "finalChecks": [
+        {
+          "label": "selectedAction",
+          "type": "selectedAction",
+          "status": "passed",
+          "detail": "selected SUBSCRIPTIONS"
+        },
+        {
+          "label": "browserTaskNeedsHuman",
+          "type": "browserTaskNeedsHuman",
+          "status": "passed",
+          "detail": "browserTaskNeedsHuman=true"
+        },
+        {
+          "label": "browserTaskCompleted",
+          "type": "browserTaskCompleted",
+          "status": "passed",
+          "detail": "browserTaskCompleted=false"
+        }
+      ],
+      "actionsCalled": [
+        {
+          "actionName": "SUBSCRIPTIONS",
+          "parameters": {
+            "actionContext": {
+              "previousResults": [
+                {
+                  "success": true,
+                  "text": "Fixture Login Required needs the user to sign in before cancellation can continue. sign in",
+                  "data": {
+                    "cancellation": {
+                      "agentId": "546ac3ab-0468-01a2-9d5b-52dfa34bf9cc",
+                      "auditId": null,
+                      "candidateId": null,
+                      "serviceSlug": "fixture_login_required",
+                      "serviceName": "Fixture Login Required",
+                      "executor": "agent_browser",
+                      "status": "needs_login",
+                      "confirmed": false,
+                      "currentStep": "open",
+                      "browserSessionId": null,
+                      "evidenceSummary": "sign in",
+                      "artifactCount": 0,
+                      "managementUrl": "https://example.com/account/subscription",
+                      "error": null,
+                      "metadata": {
+                        "playbookKey": "fixture_login_required",
+                        "candidateState": null,
+                        "artifacts": []
+                      },
+                      "finishedAt": "2026-04-18T11:48:20.088Z",
+                      "id": "55a4251f-fe3a-43cc-a399-82fb48724854",
+                      "createdAt": "2026-04-18T11:48:20.086Z",
+                      "updatedAt": "2026-04-18T11:48:20.088Z"
+                    },
+                    "candidate": null,
+                    "browserTask": {
+                      "status": "needs_login",
+                      "completed": false,
+                      "needsHuman": true,
+                      "artifactCount": 0,
+                      "artifacts": []
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "result": {
+            "success": true,
+            "data": {
+              "cancellation": {
+                "agentId": "546ac3ab-0468-01a2-9d5b-52dfa34bf9cc",
+                "auditId": null,
+                "candidateId": null,
+                "serviceSlug": "fixture_login_required",
+                "serviceName": "Fixture Login Required",
+                "executor": "agent_browser",
+                "status": "needs_login",
+                "confirmed": false,
+                "currentStep": "open",
+                "browserSessionId": null,
+                "evidenceSummary": "sign in",
+                "artifactCount": 0,
+                "managementUrl": "https://example.com/account/subscription",
+                "error": null,
+                "metadata": {
+                  "playbookKey": "fixture_login_required",
+                  "candidateState": null,
+                  "artifacts": []
+                },
+                "finishedAt": "2026-04-18T11:48:20.088Z",
+                "id": "55a4251f-fe3a-43cc-a399-82fb48724854",
+                "createdAt": "2026-04-18T11:48:20.086Z",
+                "updatedAt": "2026-04-18T11:48:20.088Z"
+              },
+              "candidate": null,
+              "browserTask": {
+                "status": "needs_login",
+                "completed": false,
+                "needsHuman": true,
+                "artifactCount": 0,
+                "artifacts": []
+              }
+            },
+            "text": "Fixture Login Required needs the user to sign in before cancellation can continue. sign in",
+            "raw": {
+              "success": true,
+              "text": "Fixture Login Required needs the user to sign in before cancellation can continue. sign in",
+              "data": {
+                "cancellation": {
+                  "agentId": "546ac3ab-0468-01a2-9d5b-52dfa34bf9cc",
+                  "auditId": null,
+                  "candidateId": null,
+                  "serviceSlug": "fixture_login_required",
+                  "serviceName": "Fixture Login Required",
+                  "executor": "agent_browser",
+                  "status": "needs_login",
+                  "confirmed": false,
+                  "currentStep": "open",
+                  "browserSessionId": null,
+                  "evidenceSummary": "sign in",
+                  "artifactCount": 0,
+                  "managementUrl": "https://example.com/account/subscription",
+                  "error": null,
+                  "metadata": {
+                    "playbookKey": "fixture_login_required",
+                    "candidateState": null,
+                    "artifacts": []
+                  },
+                  "finishedAt": "2026-04-18T11:48:20.088Z",
+                  "id": "55a4251f-fe3a-43cc-a399-82fb48724854",
+                  "createdAt": "2026-04-18T11:48:20.086Z",
+                  "updatedAt": "2026-04-18T11:48:20.088Z"
+                },
+                "candidate": null,
+                "browserTask": {
+                  "status": "needs_login",
+                  "completed": false,
+                  "needsHuman": true,
+                  "artifactCount": 0,
+                  "artifacts": []
+                }
+              }
+            }
+          }
+        }
+      ],
+      "failedAssertions": [],
+      "providerName": "groq"
+    }
+  ],
+  "totals": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "flakyPassed": 0,
+    "costUsd": 0
+  },
+  "totalCount": 1,
+  "passedCount": 1,
+  "failedCount": 0,
+  "skippedCount": 0,
+  "flakyPassedCount": 0,
+  "totalCostUsd": 0
+}

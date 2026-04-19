@@ -18,6 +18,8 @@ export default scenario({
   description:
     "User asks for activity detail; response must not expose query-string secrets or user identifiers. NotYetImplemented until T8d adds redaction.",
 
+  status: "pending",
+
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

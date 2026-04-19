@@ -19,6 +19,8 @@ export default scenario({
   description:
     "User asks for a summary of the top 5 tweets in their feed today. NotYetImplemented until T8g.",
 
+  status: "pending",
+
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

@@ -5,6 +5,7 @@ export default scenario({
   title: "Create a calendar event with travel-time awareness",
   domain: "calendar",
   tags: ["lifeops", "calendar", "not-yet-implemented"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

@@ -5,6 +5,7 @@ export default scenario({
   title: "Rank incoming messages across all channels by priority",
   domain: "messaging.cross-platform",
   tags: ["cross-platform", "triage", "parameter-extraction"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

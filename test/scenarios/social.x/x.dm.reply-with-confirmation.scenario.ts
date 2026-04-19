@@ -17,6 +17,8 @@ export default scenario({
   description:
     "Turn 1: draft, do not send. Turn 2: user confirms; agent sends the DM. NotYetImplemented until T8g.",
 
+  status: "pending",
+
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

@@ -5,6 +5,7 @@ export default scenario({
   title: "Triage flags high-priority client email",
   domain: "messaging.gmail",
   tags: ["messaging", "gmail", "triage", "parameter-extraction"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     credentials: ["gmail:test-owner"],

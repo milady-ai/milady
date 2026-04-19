@@ -529,11 +529,15 @@
       "dirName": "plugin-bluebubbles",
       "name": "Bluebubbles",
       "npmName": "@elizaos/plugin-bluebubbles",
-      "description": "Bluebubbles plugin for bluebubbles workflows.",
+      "description": "BlueBubbles connector for sending and receiving iMessage through a local BlueBubbles server.",
       "tags": [
+        "connector",
+        "social",
+        "social-chat",
+        "messaging",
         "bluebubbles"
       ],
-      "category": "feature",
+      "category": "connector",
       "envKey": null,
       "configKeys": [
         "BLUEBUBBLES_ENABLED",

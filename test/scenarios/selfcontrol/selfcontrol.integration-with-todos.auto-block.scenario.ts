@@ -7,6 +7,7 @@ export default scenario({
   tags: ["lifeops", "selfcontrol", "not-yet-implemented", "multi-turn"],
   description:
     "Requires the todo-integrated website blocker that observes todo completion state and auto-blocks when a gating todo is still open past a deadline. Blocked on T7g.",
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

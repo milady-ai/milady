@@ -18,6 +18,8 @@ export default scenario({
   description:
     "User asks the agent to create a group chat on X that routes messages back to them through the agent. NotYetImplemented until T8g + T9g.",
 
+  status: "pending",
+
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

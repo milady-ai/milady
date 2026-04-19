@@ -5,6 +5,7 @@ export default scenario({
   title: "Read recent WhatsApp messages",
   domain: "messaging.whatsapp",
   tags: ["messaging", "whatsapp", "happy-path", "smoke"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

@@ -17,6 +17,8 @@ export default scenario({
   description:
     "User asks a question that benefits from knowing what app they're in; the agent references it. NotYetImplemented until T8d exposes activityProvider.",
 
+  status: "pending",
+
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

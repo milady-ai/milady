@@ -5,6 +5,7 @@ export default scenario({
   title: "Reminder requests a native macOS alarm via helper",
   domain: "reminders",
   tags: ["reminders", "lifeops", "not-yet-implemented", "plugin-disabled"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

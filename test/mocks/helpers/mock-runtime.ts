@@ -7,15 +7,15 @@ import {
 import {
   MOCK_ENVIRONMENTS,
   type MockEnvironmentName,
-  startMocks,
   type StartedMocks,
+  startMocks,
 } from "../scripts/start-mocks.ts";
-import {
-  createBenchmarkRuntimeFixturesEnvironment,
-  type BenchmarkRuntimeFixturesEnvironment,
-} from "./benchmark-runtime-fixtures.ts";
+import { createBenchmarkRuntimeFixturesEnvironment } from "./benchmark-runtime-fixtures.ts";
 import { seedBenchmarkLifeOpsFixtures } from "./seed-benchmark-fixtures.ts";
-import { seedGoogleConnectorGrant, seedXConnectorGrant } from "./seed-grants.ts";
+import {
+  seedGoogleConnectorGrant,
+  seedXConnectorGrant,
+} from "./seed-grants.ts";
 
 export interface MockedTestRuntime {
   runtime: RealTestRuntimeResult["runtime"];
@@ -26,9 +26,9 @@ export interface MockedTestRuntime {
 export interface MockedTestEnvironment {
   mocks: StartedMocks;
   envVars: Record<string, string>;
-  applyRuntimeFixtures?(runtime: RealTestRuntimeResult["runtime"]): Promise<
-    (() => Promise<void> | void) | void
-  >;
+  applyRuntimeFixtures?(
+    runtime: RealTestRuntimeResult["runtime"],
+  ): Promise<(() => Promise<void> | void) | void>;
   cleanup(): Promise<void>;
 }
 

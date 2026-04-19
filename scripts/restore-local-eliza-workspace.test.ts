@@ -49,7 +49,7 @@ describe("restore-local-eliza-workspace", () => {
 
     expect(restoreLocalElizaWorkspace(repoRoot, { log })).toBe(false);
     expect(log).toHaveBeenCalledWith(
-      "restore-local-eliza-workspace: .eliza.ci-disabled not present; skipping restore.",
+      "restore-local-eliza-workspace: .eliza.ci-disabled not present and eliza/ is missing; skipping restore.",
     );
   });
 

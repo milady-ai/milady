@@ -21,6 +21,8 @@ export default scenario({
   description:
     "User asks 'How much time did I spend on twitter.com today?'. Requires the LifeOps browser extension to feed per-site data to the activity collector. NotYetImplemented until T8d + T8e.",
 
+  status: "pending",
+
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

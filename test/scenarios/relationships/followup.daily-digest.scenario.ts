@@ -17,6 +17,8 @@ export default scenario({
   description:
     "User asks for their morning digest. Agent should include overdue relationships. Requires follow-up tracker service (T7c).",
 
+  status: "pending",
+
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

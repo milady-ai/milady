@@ -4,7 +4,15 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const target = path.resolve(here, "..", "eliza", "packages", "app-core", "scripts", "validate-cdn-assets.mjs");
+const target = path.resolve(
+  here,
+  "..",
+  "eliza",
+  "packages",
+  "app-core",
+  "scripts",
+  "validate-cdn-assets.mjs",
+);
 
 const result = spawnSync(process.execPath, [target, ...process.argv.slice(2)], {
   stdio: "inherit",

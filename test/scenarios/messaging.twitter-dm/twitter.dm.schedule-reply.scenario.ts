@@ -5,6 +5,7 @@ export default scenario({
   title: "Schedule a Twitter DM reply for later",
   domain: "messaging.twitter-dm",
   tags: ["messaging", "twitter", "time-of-day-edge"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

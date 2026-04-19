@@ -5,6 +5,7 @@ export default scenario({
   title: "Gmail send requires explicit confirmation after draft",
   domain: "messaging.gmail",
   tags: ["messaging", "gmail", "confirmation", "safety"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     credentials: ["gmail:test-owner"],

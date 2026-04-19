@@ -19,7 +19,8 @@ The skills API covers three areas: **local skills** (agent-specific TypeScript a
 | POST | `/api/skills/:id/open` | Open a skill file in the default editor |
 | GET | `/api/skills/:id/source` | Read the source code of a skill |
 | PUT | `/api/skills/:id/source` | Write updated source code for a skill |
-| PUT | `/api/skills/:id` | Update skill preferences (enabled, priority, etc.) |
+| POST | `/api/skills/:id/enable` | Enable a skill (honors scan acknowledgments) |
+| POST | `/api/skills/:id/disable` | Disable a skill |
 
 ### Skills Catalog
 
@@ -184,17 +185,9 @@ Write updated source code to a skill file. The server validates basic syntax bef
 
 ---
 
-### PUT /api/skills/:id
+### POST /api/skills/:id/enable
 
-Update runtime preferences for a skill (enabled state, priority, custom config).
-
-**Request Body**
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `enabled` | boolean | No | Whether the skill is active |
-| `priority` | number | No | Sort priority (lower runs first) |
-| `config` | object | No | Arbitrary skill-specific configuration |
+Enable an installed skill. Returns 409 if the skill has unacknowledged scan findings — acknowledge via `POST /api/skills/:id/acknowledge` first.
 
 **Response**
 
@@ -203,9 +196,28 @@ Update runtime preferences for a skill (enabled state, priority, custom config).
   "ok": true,
   "skill": {
     "id": "my-skill",
-    "enabled": true,
-    "priority": 10
-  }
+    "enabled": true
+  },
+  "scanStatus": null
+}
+```
+
+---
+
+### POST /api/skills/:id/disable
+
+Disable an installed skill.
+
+**Response**
+
+```json
+{
+  "ok": true,
+  "skill": {
+    "id": "my-skill",
+    "enabled": false
+  },
+  "scanStatus": null
 }
 ```
 

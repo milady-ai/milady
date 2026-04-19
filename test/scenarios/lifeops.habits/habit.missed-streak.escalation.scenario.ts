@@ -15,6 +15,7 @@ export default scenario({
   tags: ["lifeops", "habits", "ambiguity", "plugin-disabled"],
   description:
     "Seed missed-day memories and expect the morning check-in to reference a broken streak. Requires T9f: morning/night check-in routine engine.",
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

@@ -14,6 +14,7 @@ export default scenario({
   tags: ["lifeops", "goals", "experience-loop", "plugin-disabled"],
   description:
     "User asks 'review my week'. Requires T9f: check-in engine weekly review path.",
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

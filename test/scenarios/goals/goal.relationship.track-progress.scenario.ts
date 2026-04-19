@@ -13,6 +13,7 @@ export default scenario({
   tags: ["lifeops", "goals", "relationships", "plugin-disabled"],
   description:
     "Seed a relationship goal and ask for progress. Requires T7b: Rolodex relationship goals + interaction history.",
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

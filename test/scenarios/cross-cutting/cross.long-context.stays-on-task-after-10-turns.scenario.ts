@@ -69,7 +69,11 @@ export default scenario({
       kind: "message",
       name: "chat-7",
       room: "main",
-      text: "I should really go on a run more often.",
+      // NOTE: do NOT reference running/exercise/sleep/steps here — some
+      // LifeOps actions route those to a health-bridge that throws when
+      // no HealthKit/GoogleFit backend is configured. Keep the small talk
+      // health-neutral so this scenario tests long-context pivot only.
+      text: "That new bakery on Main Street has great pastries.",
     },
     {
       kind: "message",

@@ -7,6 +7,7 @@ export default scenario({
   tags: ["gateway", "twilio", "call", "smoke", "not-yet-implemented"],
   description:
     "Inbound phone call hits the Twilio voice webhook and is handled by the user's agent (transcription + response). Requires T9e (Twilio calling gateway).",
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

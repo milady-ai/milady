@@ -1,5 +1,5 @@
-import { afterEach, describe, expect, it } from "vitest";
 import { LifeOpsService } from "@elizaos/app-lifeops/lifeops/service";
+import { afterEach, describe, expect, it } from "vitest";
 import { createMockedTestRuntime } from "../helpers/mock-runtime.ts";
 
 const INTERNAL_URL = new URL("http://127.0.0.1:31337");
@@ -39,19 +39,26 @@ describe("mock runtime seeding", () => {
     const [triage, calendarResponse] = await Promise.all([
       service.getGmailTriage(INTERNAL_URL, { maxResults: 4, forceSync: true }),
       fetch(
-        `${process.env.MILADY_MOCK_GOOGLE_BASE}/calendar/v3/calendars/primary/events?${new URLSearchParams({
-          singleEvents: "true",
-          orderBy: "startTime",
-          showDeleted: "false",
-          maxResults: "50",
-          timeMin: new Date().toISOString(),
-          timeMax: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-          fields:
-            "items(id,status,summary,description,location,htmlLink,hangoutLink,iCalUID,recurringEventId,created,updated,start,end,organizer(email,displayName,self),attendees(email,displayName,responseStatus,self,organizer,optional),conferenceData(entryPoints(uri,label,entryPointType)))",
-        })}`,
-      ).then((response) => response.json() as Promise<{
-        items?: Array<{ summary?: string }>;
-      }>),
+        `${process.env.MILADY_MOCK_GOOGLE_BASE}/calendar/v3/calendars/primary/events?${new URLSearchParams(
+          {
+            singleEvents: "true",
+            orderBy: "startTime",
+            showDeleted: "false",
+            maxResults: "50",
+            timeMin: new Date().toISOString(),
+            timeMax: new Date(
+              Date.now() + 7 * 24 * 60 * 60 * 1000,
+            ).toISOString(),
+            fields:
+              "items(id,status,summary,description,location,htmlLink,hangoutLink,iCalUID,recurringEventId,created,updated,start,end,organizer(email,displayName,self),attendees(email,displayName,responseStatus,self,organizer,optional),conferenceData(entryPoints(uri,label,entryPointType)))",
+          },
+        )}`,
+      ).then(
+        (response) =>
+          response.json() as Promise<{
+            items?: Array<{ summary?: string }>;
+          }>,
+      ),
     ]);
 
     expect(triage.messages.map((message) => message.subject)).toEqual(

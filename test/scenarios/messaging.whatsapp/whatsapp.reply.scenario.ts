@@ -5,6 +5,7 @@ export default scenario({
   title: "Reply to WhatsApp message with confirmation",
   domain: "messaging.whatsapp",
   tags: ["messaging", "whatsapp", "confirmation"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

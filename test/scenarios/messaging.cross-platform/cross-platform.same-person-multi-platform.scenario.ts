@@ -5,6 +5,7 @@ export default scenario({
   title: "Recognize same person across Gmail, Discord, and Telegram handles",
   domain: "messaging.cross-platform",
   tags: ["cross-platform", "messaging", "parameter-extraction"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

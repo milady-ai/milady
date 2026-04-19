@@ -10,7 +10,14 @@
 import type { CapturedAction } from "@elizaos/scenario-schema";
 import { scenario } from "@elizaos/scenario-schema";
 
-const ACCEPTED_ACTIONS = ["SCHEDULE_FOLLOW_UP", "CREATE_TASK", "LIFE"];
+const ACCEPTED_ACTIONS = [
+  "SCHEDULE_FOLLOW_UP",
+  "CREATE_TASK",
+  "LIFE",
+  // LifeOps' RELATIONSHIP action handles contact-scoped follow-up scheduling
+  // when the utterance mentions a specific person + a follow-up time.
+  "RELATIONSHIP",
+];
 
 function extractParamText(action: CapturedAction): string {
   const parts: string[] = [];

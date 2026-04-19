@@ -7,6 +7,7 @@ export default scenario({
   tags: ["remote", "pairing", "smoke", "not-yet-implemented"],
   description:
     "When the companion client connects from the same machine/LAN as the agent, no pairing code is required. Exercising this end-to-end needs the remote-control data plane (T9a).",
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

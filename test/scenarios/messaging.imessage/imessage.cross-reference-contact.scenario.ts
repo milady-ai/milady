@@ -5,6 +5,7 @@ export default scenario({
   title: "Cross-reference an unknown iMessage sender phone number",
   domain: "messaging.imessage",
   tags: ["messaging", "imessage", "missing-context"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

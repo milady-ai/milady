@@ -3,6 +3,46 @@ title: Journal des modifications
 description: Nouveautés de Milady — fonctionnalités, améliorations et correctifs.
 ---
 
+<Update label="2026-04-17" description="Semaine du 17 avril ; connecteurs de comptes personnels life-ops, Google multi-comptes, provisionnement de portefeuille Steward dans le cloud" tags={["Feature", "Update", "Fix"]}>
+
+<div id="life-ops-personal-account-connectors">
+## Connecteurs de comptes personnels life-ops
+</div>
+
+Votre agent peut désormais se connecter à vos comptes personnels Signal, Discord et Telegram — pas seulement des comptes bot — pour agréger les messages dans le système [life-ops](/fr/rest/lifeops). Signal utilise l'appairage par QR code d'appareil lié, Discord utilise OAuth2, et Telegram prend en charge l'authentification par téléphone/code/2FA. Une fois connectés, les messages de ces plateformes affluent dans la boîte de réception unifiée de votre agent aux côtés de Gmail et Calendar, donnant à votre agent une image plus complète de vos communications.
+
+<div id="multi-account-google-connector">
+## Connecteur Google multi-comptes
+</div>
+
+L'intégration Google de [life-ops](/fr/rest/lifeops) prend désormais en charge plusieurs comptes Google par côté — à la fois pour vous (le propriétaire) et pour votre agent. Les événements de calendrier et les messages Gmail sont agrégés sur tous les comptes connectés, vous offrant une vue unifiée même si vous utilisez des comptes Google séparés pour le travail et le personnel. Un nouveau panneau de gestion des comptes dans les paramètres vous permet d'ajouter, supprimer et configurer chaque compte individuellement. Les configurations existantes à compte unique continuent de fonctionner sans aucune modification.
+
+<div id="steward-wallet-auto-provisioning-on-cloud-login">
+## Provisionnement automatique du portefeuille Steward à la connexion cloud
+</div>
+
+Lorsque vous vous connectez à [Eliza Cloud](/fr/guides/cloud) depuis l'application de bureau, un portefeuille géré par [Steward](/fr/guides/wallet) est désormais provisionné automatiquement. Vous n'avez plus besoin de configurer manuellement les identifiants Steward après la connexion au cloud — la page du portefeuille, les politiques de dépenses et la signature des transactions fonctionnent directement dès que vous vous connectez.
+
+<div id="updates">
+## Mises à jour
+</div>
+
+- **Hooks de pipeline** — Un nouveau système de hooks permet au runtime d'exécuter une logique personnalisée aux points clés du pipeline de l'agent, donnant aux auteurs de plugins et aux utilisateurs avancés plus de contrôle sur le traitement des requêtes.
+- **Nettoyage de l'interface life-ops** — Les descriptions redondantes et le texte de remplissage ont été supprimés des panneaux de configuration life-ops, rendant la configuration des connecteurs plus propre et plus facile à parcourir.
+- **Labels de langue multiplateformes** — Les références à "on this Mac" dans l'interface ont été mises à jour en "on this device" pour que le libellé soit précis sur Windows, Linux et mobile.
+- **Améliorations de l'URL d'authentification OAuth** — Le flux OAuth Google dans life-ops affiche désormais l'URL d'autorisation de manière plus fiable, corrigeant les cas où le lien ne s'affichait pas lors de la connexion d'un nouveau compte.
+- **Améliorations de la compilation de l'app mobile** — Les builds iOS compilent désormais les quatre plugins officiels Capacitor depuis les sources via CocoaPods avec compatibilité Xcode 16, et les builds Android gèrent l'identité de l'application dynamiquement depuis la configuration.
+
+<div id="bug-fixes">
+## Corrections de bugs
+</div>
+
+- Correction de l'application de bureau qui se figeait après un relancement de build empaqueté en raison d'une vérification de disponibilité faux positif qui correspondait au texte de chargement dans la vue de chat
+- Correction des builds iOS échouant sous le stripping de binaires Swift Package Manager avec Xcode 16
+- Sécurité : mise à jour de Vite vers 6.4.2 et DOMPurify vers 3.4.0 pour corriger des vulnérabilités de traversée de chemin et XSS dans les dépendances transitives
+
+</Update>
+
 <Update label="2026-04-10" description="Semaine du 10 avril ; Eliza Cloud pour les agents de codage, vue contacts, sélecteur de packs de contenu, paramètres Discord cloud, overlay de connexion perdue" tags={["Feature", "Update", "Fix"]}>
 
 <div id="eliza-cloud-as-a-provider-for-coding-agents">

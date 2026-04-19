@@ -6,6 +6,7 @@ export default scenario({
     "Agent refuses to schedule during a blackout and suggests alternatives",
   domain: "calendar",
   tags: ["lifeops", "calendar", "not-yet-implemented"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

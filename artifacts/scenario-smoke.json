@@ -1,0 +1,148 @@
+{
+  "runId": "46695218-5dee-4697-805b-95502091374e",
+  "startedAtIso": "2026-04-17T22:52:06.382Z",
+  "completedAtIso": "2026-04-17T22:52:15.791Z",
+  "providerName": "groq",
+  "scenarios": [
+    {
+      "id": "convo.echo-self-test",
+      "title": "Convo framework self-test: ECHO_TEST action is captured",
+      "domain": "convo",
+      "tags": [
+        "smoke",
+        "convo",
+        "self-test"
+      ],
+      "status": "passed",
+      "durationMs": 3959,
+      "turns": [
+        {
+          "name": "echo-hello-world",
+          "kind": "message",
+          "text": "Please echo this message back to me: hello world",
+          "responseText": "Echo: Please echo this message back to me: hello worldhello world",
+          "actionsCalled": [
+            {
+              "actionName": "ECHO_TEST",
+              "parameters": {
+                "actionContext": {
+                  "previousResults": [
+                    {
+                      "success": true,
+                      "text": "Echo: Please echo this message back to me: hello world"
+                    }
+                  ]
+                }
+              },
+              "result": {
+                "success": true,
+                "text": "Echo: Please echo this message back to me: hello world"
+              }
+            }
+          ],
+          "durationMs": 3932,
+          "failedAssertions": []
+        }
+      ],
+      "finalChecks": [
+        {
+          "label": "actionCalled",
+          "type": "actionCalled",
+          "status": "passed",
+          "detail": "ECHO_TEST called 1x"
+        }
+      ],
+      "actionsCalled": [
+        {
+          "actionName": "ECHO_TEST",
+          "parameters": {
+            "actionContext": {
+              "previousResults": [
+                {
+                  "success": true,
+                  "text": "Echo: Please echo this message back to me: hello world"
+                }
+              ]
+            }
+          },
+          "result": {
+            "success": true,
+            "text": "Echo: Please echo this message back to me: hello world"
+          }
+        }
+      ],
+      "failedAssertions": [],
+      "providerName": "groq"
+    },
+    {
+      "id": "convo.greeting-dynamic",
+      "title": "Convo framework: greeting triggers non-empty response (scripted port)",
+      "domain": "convo",
+      "tags": [
+        "smoke",
+        "convo",
+        "greeting"
+      ],
+      "status": "passed",
+      "durationMs": 4105,
+      "turns": [
+        {
+          "name": "greet-hello",
+          "kind": "message",
+          "text": "Hello!",
+          "responseText": "Hello! How can I assist you today?Hello there! Great to meet you. You said: \"Hello!\"Hello! How can I help you today?",
+          "actionsCalled": [
+            {
+              "actionName": "GREET_USER",
+              "parameters": {
+                "actionContext": {
+                  "previousResults": [
+                    {
+                      "success": true,
+                      "text": "Hello there! Great to meet you. You said: \"Hello!\""
+                    }
+                  ]
+                }
+              },
+              "result": {
+                "success": true,
+                "text": "Hello there! Great to meet you. You said: \"Hello!\""
+              }
+            }
+          ],
+          "durationMs": 4099,
+          "failedAssertions": []
+        }
+      ],
+      "finalChecks": [],
+      "actionsCalled": [
+        {
+          "actionName": "GREET_USER",
+          "parameters": {
+            "actionContext": {
+              "previousResults": [
+                {
+                  "success": true,
+                  "text": "Hello there! Great to meet you. You said: \"Hello!\""
+                }
+              ]
+            }
+          },
+          "result": {
+            "success": true,
+            "text": "Hello there! Great to meet you. You said: \"Hello!\""
+          }
+        }
+      ],
+      "failedAssertions": [],
+      "providerName": "groq"
+    }
+  ],
+  "totals": {
+    "passed": 2,
+    "failed": 0,
+    "skipped": 0
+  },
+  "totalCount": 2,
+  "failedCount": 0
+}

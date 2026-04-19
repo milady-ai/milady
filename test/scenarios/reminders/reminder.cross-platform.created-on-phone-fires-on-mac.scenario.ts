@@ -5,6 +5,7 @@ export default scenario({
   title: "Reminder created on phone fires on Mac via device bus",
   domain: "reminders",
   tags: ["reminders", "lifeops", "cross-platform", "not-yet-implemented"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

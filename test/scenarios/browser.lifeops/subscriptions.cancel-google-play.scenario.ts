@@ -17,7 +17,9 @@ export default scenario({
       type: "custom",
       name: "attach-fake-computeruse",
       apply: (ctx) => {
-        const runtime = ctx.runtime as { getService?: (serviceType: string) => unknown };
+        const runtime = ctx.runtime as {
+          getService?: (serviceType: string) => unknown;
+        };
         attachFakeSubscriptionComputerUse(
           runtime,
           new FakeSubscriptionComputerUseService("google_play"),

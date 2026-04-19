@@ -298,8 +298,17 @@ function normalizeModuleId(id: string | undefined): string {
   return (id ?? "").split(path.sep).join("/");
 }
 
+function tryResolveElizaCorePkgDir(): string | null {
+  try {
+    return path.dirname(_require.resolve("@elizaos/core/package.json"));
+  } catch {
+    return null;
+  }
+}
+
 function resolveElizaCoreSourceBrowserPath(): string | null {
-  const pkgDir = path.dirname(_require.resolve("@elizaos/core/package.json"));
+  const pkgDir = tryResolveElizaCorePkgDir();
+  if (!pkgDir) return null;
   const sourceBrowserEntry = path.join(pkgDir, "src/index.browser.ts");
   return fs.existsSync(sourceBrowserEntry) ? sourceBrowserEntry : null;
 }
@@ -325,37 +334,39 @@ function isElizaCoreBrowserDistId(id: string | undefined): boolean {
  * built artifacts and then the bun install cache copy.
  */
 function resolveElizaCoreBundlePath(): string {
-  const pkgDir = path.dirname(_require.resolve("@elizaos/core/package.json"));
+  const pkgDir = tryResolveElizaCorePkgDir();
   const sourceBrowserEntry = resolveElizaCoreSourceBrowserPath();
-  const browserEntry = path.join(pkgDir, "dist/browser/index.browser.js");
-  const nodeEntry = path.join(pkgDir, "dist/node/index.node.js");
-  const rootBrowserEntry = path.join(pkgDir, "dist/index.browser.js");
-  const rootNodeEntry = path.join(pkgDir, "dist/index.node.js");
-  const hasBrowserShimTarget = fs.existsSync(browserEntry);
-  const hasNodeShimTarget = fs.existsSync(nodeEntry);
   if (sourceBrowserEntry) return sourceBrowserEntry;
-  if (fs.existsSync(browserEntry)) return browserEntry;
-  if (fs.existsSync(rootBrowserEntry) && hasBrowserShimTarget)
-    return rootBrowserEntry;
-  if (fs.existsSync(nodeEntry)) {
-    console.warn(
-      "[milady][vite] @elizaos/core dist/browser is missing; using dist/node for the client bundle. " +
-        "For a linked eliza workspace, run `bun run build` in that checkout (e.g. packages/typescript). " +
-        "Or reinstall with ELIZA_SKIP_LOCAL_ELIZA=1 to use the published npm package.",
-    );
-    return nodeEntry;
-  }
-  if (fs.existsSync(rootNodeEntry) && hasNodeShimTarget) {
-    console.warn(
-      "[milady][vite] @elizaos/core dist/browser is missing; using dist/index.node.js for the client bundle. " +
-        "This usually means the local core workspace only has a flat dist/ build artifact.",
-    );
-    return rootNodeEntry;
+  if (pkgDir) {
+    const browserEntry = path.join(pkgDir, "dist/browser/index.browser.js");
+    const nodeEntry = path.join(pkgDir, "dist/node/index.node.js");
+    const rootBrowserEntry = path.join(pkgDir, "dist/index.browser.js");
+    const rootNodeEntry = path.join(pkgDir, "dist/index.node.js");
+    const hasBrowserShimTarget = fs.existsSync(browserEntry);
+    const hasNodeShimTarget = fs.existsSync(nodeEntry);
+    if (fs.existsSync(browserEntry)) return browserEntry;
+    if (fs.existsSync(rootBrowserEntry) && hasBrowserShimTarget)
+      return rootBrowserEntry;
+    if (fs.existsSync(nodeEntry)) {
+      console.warn(
+        "[milady][vite] @elizaos/core dist/browser is missing; using dist/node for the client bundle. " +
+          "For a linked eliza workspace, run `bun run build` in that checkout (e.g. packages/typescript). " +
+          "Or reinstall with ELIZA_SKIP_LOCAL_ELIZA=1 to use the published npm package.",
+      );
+      return nodeEntry;
+    }
+    if (fs.existsSync(rootNodeEntry) && hasNodeShimTarget) {
+      console.warn(
+        "[milady][vite] @elizaos/core dist/browser is missing; using dist/index.node.js for the client bundle. " +
+          "This usually means the local core workspace only has a flat dist/ build artifact.",
+      );
+      return rootNodeEntry;
+    }
   }
   const bunBrowser = findElizaCoreBundleInBunStore("browser");
   if (bunBrowser) {
     console.warn(
-      `[milady][vite] Linked @elizaos/core at ${pkgDir} has no dist/; using bun cache build at ${bunBrowser}. ` +
+      `[milady][vite] @elizaos/core not resolvable from apps/app${pkgDir ? ` (pkgDir=${pkgDir} has no dist/)` : ""}; using bun cache build at ${bunBrowser}. ` +
         "Run `bun run build` in your eliza checkout or ELIZA_SKIP_LOCAL_ELIZA=1 bun install to align versions.",
     );
     return bunBrowser;
@@ -363,12 +374,12 @@ function resolveElizaCoreBundlePath(): string {
   const bunNode = findElizaCoreBundleInBunStore("node");
   if (bunNode) {
     console.warn(
-      `[milady][vite] Linked @elizaos/core at ${pkgDir} has no dist/; using bun cache node bundle at ${bunNode}.`,
+      `[milady][vite] @elizaos/core not resolvable from apps/app${pkgDir ? ` (pkgDir=${pkgDir})` : ""}; using bun cache node bundle at ${bunNode}.`,
     );
     return bunNode;
   }
   throw new Error(
-    `[milady][vite] @elizaos/core has no built artifacts under ${pkgDir} and none in node_modules/.bun. ` +
+    `[milady][vite] @elizaos/core has no built artifacts${pkgDir ? ` under ${pkgDir}` : " (not resolvable from apps/app)"} and none in node_modules/.bun. ` +
       "Expected src/index.browser.ts, dist/browser/index.browser.js, dist/index.browser.js, dist/node/index.node.js, or dist/index.node.js. " +
       "Build your local eliza workspace or run `ELIZA_SKIP_LOCAL_ELIZA=1 bun install`.",
   );

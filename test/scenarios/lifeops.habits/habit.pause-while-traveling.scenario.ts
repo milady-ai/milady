@@ -16,6 +16,7 @@ export default scenario({
   tags: ["lifeops", "habits", "cancel-mid-flow", "plugin-disabled"],
   description:
     "User asks to pause morning habits for a travel trip. Requires T9f: check-in engine + definition pause directive.",
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

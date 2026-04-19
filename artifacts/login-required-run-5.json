@@ -1,0 +1,179 @@
+{
+  "runId": "2a028d43-ec4c-4dfd-8264-42dff7db2835",
+  "startedAtIso": "2026-04-18T11:48:24.676Z",
+  "completedAtIso": "2026-04-18T11:48:37.332Z",
+  "providerName": "groq",
+  "scenarios": [
+    {
+      "id": "subscriptions.login-required",
+      "title": "Subscription cancellation that needs login",
+      "domain": "browser.lifeops",
+      "tags": [
+        "browser",
+        "subscriptions",
+        "human-handoff"
+      ],
+      "status": "failed",
+      "durationMs": 11099,
+      "turns": [
+        {
+          "name": "cancel-login-required",
+          "kind": "message",
+          "text": "Cancel my Fixture Login Required subscription.",
+          "responseText": "Can you please confirm if this subscription is a LifeOps subscription and if you have access to the LifeOps provider?No new messages to triage.",
+          "actionsCalled": [
+            {
+              "actionName": "INBOX",
+              "parameters": {
+                "actionContext": {
+                  "previousResults": [
+                    {
+                      "text": "No new messages to triage.",
+                      "success": true,
+                      "values": {
+                        "success": true,
+                        "triaged": 0
+                      },
+                      "data": {
+                        "actionName": "INBOX",
+                        "subaction": "triage"
+                      }
+                    }
+                  ]
+                }
+              },
+              "result": {
+                "success": true,
+                "data": {
+                  "actionName": "INBOX",
+                  "subaction": "triage"
+                },
+                "values": {
+                  "success": true,
+                  "triaged": 0
+                },
+                "text": "No new messages to triage.",
+                "raw": {
+                  "text": "No new messages to triage.",
+                  "success": true,
+                  "values": {
+                    "success": true,
+                    "triaged": 0
+                  },
+                  "data": {
+                    "actionName": "INBOX",
+                    "subaction": "triage"
+                  }
+                }
+              }
+            }
+          ],
+          "durationMs": 11063,
+          "failedAssertions": [
+            "assertTurn: expected SUBSCRIPTIONS to run",
+            "responseIncludesAny: response missing any of [needs,sign in,cancellation]"
+          ]
+        }
+      ],
+      "finalChecks": [
+        {
+          "label": "selectedAction",
+          "type": "selectedAction",
+          "status": "failed",
+          "detail": "no selected action in [SUBSCRIPTIONS]. Called: INBOX"
+        },
+        {
+          "label": "browserTaskNeedsHuman",
+          "type": "browserTaskNeedsHuman",
+          "status": "failed",
+          "detail": "expected browserTaskNeedsHuman=true, saw false"
+        },
+        {
+          "label": "browserTaskCompleted",
+          "type": "browserTaskCompleted",
+          "status": "passed",
+          "detail": "browserTaskCompleted=false"
+        }
+      ],
+      "actionsCalled": [
+        {
+          "actionName": "INBOX",
+          "parameters": {
+            "actionContext": {
+              "previousResults": [
+                {
+                  "text": "No new messages to triage.",
+                  "success": true,
+                  "values": {
+                    "success": true,
+                    "triaged": 0
+                  },
+                  "data": {
+                    "actionName": "INBOX",
+                    "subaction": "triage"
+                  }
+                }
+              ]
+            }
+          },
+          "result": {
+            "success": true,
+            "data": {
+              "actionName": "INBOX",
+              "subaction": "triage"
+            },
+            "values": {
+              "success": true,
+              "triaged": 0
+            },
+            "text": "No new messages to triage.",
+            "raw": {
+              "text": "No new messages to triage.",
+              "success": true,
+              "values": {
+                "success": true,
+                "triaged": 0
+              },
+              "data": {
+                "actionName": "INBOX",
+                "subaction": "triage"
+              }
+            }
+          }
+        }
+      ],
+      "failedAssertions": [
+        {
+          "label": "cancel-login-required",
+          "detail": "assertTurn: expected SUBSCRIPTIONS to run"
+        },
+        {
+          "label": "cancel-login-required",
+          "detail": "responseIncludesAny: response missing any of [needs,sign in,cancellation]"
+        },
+        {
+          "label": "selectedAction",
+          "detail": "no selected action in [SUBSCRIPTIONS]. Called: INBOX"
+        },
+        {
+          "label": "browserTaskNeedsHuman",
+          "detail": "expected browserTaskNeedsHuman=true, saw false"
+        }
+      ],
+      "providerName": "groq"
+    }
+  ],
+  "totals": {
+    "passed": 0,
+    "failed": 1,
+    "skipped": 0,
+    "flakyPassed": 0,
+    "costUsd": 0
+  },
+  "totalCount": 1,
+  "passedCount": 0,
+  "failedCount": 1,
+  "skippedCount": 0,
+  "flakyPassedCount": 0,
+  "totalCostUsd": 0
+}

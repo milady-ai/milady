@@ -2,10 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import {
-  MOCK_ENVIRONMENTS,
-  startMocks,
-} from "../scripts/start-mocks.ts";
+import { MOCK_ENVIRONMENTS, startMocks } from "../scripts/start-mocks.ts";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ENVS_DIR = path.resolve(__dirname, "..", "environments");

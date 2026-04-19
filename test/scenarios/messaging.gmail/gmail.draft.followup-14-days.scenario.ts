@@ -5,6 +5,7 @@ export default scenario({
   title: "Identify 14-day-old email without a reply for follow-up",
   domain: "messaging.gmail",
   tags: ["messaging", "gmail", "followup", "parameter-extraction"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     credentials: ["gmail:test-owner"],

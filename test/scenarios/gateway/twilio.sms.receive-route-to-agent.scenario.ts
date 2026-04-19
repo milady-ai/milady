@@ -7,6 +7,7 @@ export default scenario({
   tags: ["gateway", "twilio", "sms", "smoke", "not-yet-implemented"],
   description:
     "Inbound SMS hits the Twilio webhook and is routed to the user's agent as a message. Requires T9e (Twilio gateway inbound routing to user-agent).",
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

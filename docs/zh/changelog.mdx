@@ -3,6 +3,46 @@ title: 更新日志
 description: Milady 的最新动态——新功能、改进和修复。
 ---
 
+<Update label="2026-04-17" description="4月17日当周；life-ops 个人账户连接器、Google 多账户、Steward 云端钱包自动配置" tags={["Feature", "Update", "Fix"]}>
+
+<div id="life-ops-personal-account-connectors">
+## Life-ops 个人账户连接器
+</div>
+
+你的代理现在可以连接到你的个人 Signal、Discord 和 Telegram 账户——不仅仅是机器人账户——将消息聚合到 [life-ops](/zh/rest/lifeops) 系统中。Signal 使用关联设备二维码配对，Discord 使用 OAuth2，Telegram 支持手机/验证码/2FA 认证。连接后，来自这些平台的消息会与 Gmail 和 Calendar 一起流入代理的统一收件箱，让你的代理对你的通信有更全面的了解。
+
+<div id="multi-account-google-connector">
+## Google 多账户连接器
+</div>
+
+[life-ops](/zh/rest/lifeops) 的 Google 集成现在支持每侧多个 Google 账户——包括你（所有者）和你的代理。日历事件和 Gmail 消息在所有已连接账户中聚合，即使你为工作和个人使用不同的 Google 账户，也能获得统一视图。设置中新增的账户管理面板允许你单独添加、删除和配置每个账户。现有的单账户设置无需任何更改即可继续工作。
+
+<div id="steward-wallet-auto-provisioning-on-cloud-login">
+## 云端登录时 Steward 钱包自动配置
+</div>
+
+当你从桌面应用程序登录 [Eliza Cloud](/zh/guides/cloud) 时，现在会自动配置一个由 [Steward](/zh/guides/wallet) 管理的钱包。你不再需要在连接到云端后手动配置 Steward 凭证——钱包页面、支出策略和交易签名在你登录后即可开箱即用。
+
+<div id="updates">
+## 更新
+</div>
+
+- **Pipeline hooks** — 新的 hooks 系统允许运行时在代理 pipeline 的关键节点执行自定义逻辑，为插件作者和高级用户提供对请求处理方式的更多控制。
+- **Life-ops UI 清理** — life-ops 设置面板中的冗余描述和填充文本已被移除，使连接器配置更清晰、更易于浏览。
+- **跨平台地区标签** — 界面中对 "on this Mac" 的引用已更新为 "on this device"，使措辞在 Windows、Linux 和移动设备上准确无误。
+- **OAuth 认证 URL 改进** — life-ops 中的 Google OAuth 流程现在更可靠地显示授权 URL，修复了连接新账户时链接未显示的情况。
+- **移动应用构建改进** — iOS 构建现在通过 CocoaPods 从源代码编译所有四个官方 Capacitor 插件并兼容 Xcode 16，Android 构建从配置中动态处理应用身份。
+
+<div id="bug-fixes">
+## 错误修复
+</div>
+
+- 修复了桌面应用在打包构建重启后卡住的问题，原因是误报的就绪检查匹配了聊天视图中的加载文本
+- 修复了 iOS 构建在 Xcode 16 下 Swift Package Manager 二进制剥离失败的问题
+- 安全：将 Vite 升级到 6.4.2，DOMPurify 升级到 3.4.0，以解决传递依赖中的路径遍历和 XSS 漏洞
+
+</Update>
+
 <Update label="2026-04-10" description="4月10日当周；Eliza Cloud 用于编程代理、联系人视图、内容包选择器、Discord 云端设置、连接丢失覆盖层" tags={["Feature", "Update", "Fix"]}>
 
 <div id="eliza-cloud-as-a-provider-for-coding-agents">

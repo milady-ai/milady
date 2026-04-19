@@ -16,6 +16,8 @@ export default scenario({
   description:
     "Agent's browser action fails; it must escalate to the user rather than silently retry or fabricate success. NotYetImplemented until T9a.",
 
+  status: "pending",
+
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

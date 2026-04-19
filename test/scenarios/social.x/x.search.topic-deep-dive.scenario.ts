@@ -18,6 +18,8 @@ export default scenario({
   description:
     "User asks for recent tweets about elizaOS; agent returns a summary. NotYetImplemented until T8g.",
 
+  status: "pending",
+
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

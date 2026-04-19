@@ -17,6 +17,8 @@ export default scenario({
   description:
     "User asks for a weekly per-app average. NotYetImplemented until T8d.",
 
+  status: "pending",
+
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

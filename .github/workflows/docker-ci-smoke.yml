@@ -54,6 +54,15 @@ jobs:
       - name: Run Docker CI smoke path
         run: bash eliza/packages/app-core/scripts/docker-ci-smoke.sh --tag gha-${{ github.run_id }}
 
+      - name: Upload container logs + inspect on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-ci-smoke-artifacts-${{ github.run_id }}
+          path: .tmp/qa/docker-ci-smoke-*
+          if-no-files-found: warn
+          retention-days: 7
+
       - name: Summarize Docker smoke result
         if: always()
         run: |

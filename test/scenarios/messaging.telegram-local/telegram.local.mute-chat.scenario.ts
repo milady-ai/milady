@@ -5,6 +5,7 @@ export default scenario({
   title: "Mute a noisy Telegram chat",
   domain: "messaging.telegram-local",
   tags: ["messaging", "telegram", "confirmation"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

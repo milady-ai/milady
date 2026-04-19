@@ -46,7 +46,7 @@ Port env vars (never hardcoded — the dev orchestrator auto-shifts to the next 
 
 ## Skills + Training Architecture
 
-- `USE_SKILL` is the canonical entry point for invoking an enabled skill. `RUN_SKILL_SCRIPT` and `GET_SKILL_GUIDANCE` exist as similes for back-compat; new work should use `USE_SKILL` directly.
+- `USE_SKILL` is the canonical and only TypeScript entry point for invoking an enabled skill. Legacy `RUN_SKILL_SCRIPT` / `GET_SKILL_GUIDANCE` actions have been removed; `RUN_SKILL` and `INVOKE_SKILL` remain as similes on `USE_SKILL` so older inbound callers still resolve.
 - The `enabled_skills` provider runs at position `-10` and surfaces enabled + eligible skills to the planner on every turn.
 - Trajectory persistence is on by default. Every turn lands in the `trajectories` table unless `ELIZA_DISABLE_TRAJECTORY_LOGGING=1` (see above).
 - Native optimization (`--backend native`) is the default training backend: MIPRO / GEPA / bootstrap-fewshot run against trajectory data, and outputs land as prompt artifacts under `~/.milady/optimized-prompts/<task>/`. `OptimizedPromptService` auto-loads those at boot.

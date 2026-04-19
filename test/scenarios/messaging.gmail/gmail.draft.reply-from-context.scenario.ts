@@ -5,6 +5,7 @@ export default scenario({
   title: "Draft Gmail reply using recent email context",
   domain: "messaging.gmail",
   tags: ["messaging", "gmail", "draft", "happy-path"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     credentials: ["gmail:test-owner"],

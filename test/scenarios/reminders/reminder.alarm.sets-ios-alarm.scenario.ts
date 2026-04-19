@@ -5,6 +5,7 @@ export default scenario({
   title: "Reminder requests a real iOS alarm on paired device",
   domain: "reminders",
   tags: ["reminders", "lifeops", "not-yet-implemented", "credentials-missing"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

@@ -20,6 +20,8 @@ export default scenario({
   description:
     "User asks 'Break down my social media time today'. Agent should return a per-site split across X, Instagram, Facebook, etc. NotYetImplemented until T8d + T8e.",
 
+  status: "pending",
+
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

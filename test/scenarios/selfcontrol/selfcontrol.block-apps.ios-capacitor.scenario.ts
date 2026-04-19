@@ -7,6 +7,7 @@ export default scenario({
   tags: ["lifeops", "selfcontrol", "not-yet-implemented", "ios"],
   description:
     "Specific iOS variant: the Capacitor companion must accept a BLOCK_APPS intent and wire into the FamilyControls / ManagedSettings framework. Blocked on T8c.",
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

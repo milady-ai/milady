@@ -21,9 +21,18 @@ function scenarioForUrl(url: string): FakeSubscriptionScenario | null {
     return "google_play";
   }
   if (
-    normalized.includes("account.apple.com/account/manage/section/subscriptions")
+    normalized.includes(
+      "account.apple.com/account/manage/section/subscriptions",
+    )
   ) {
     return "apple_subscriptions";
+  }
+  if (
+    normalized.includes("/services/netflix") ||
+    normalized.includes("/services/hulu") ||
+    normalized.includes("/services/fixture-streaming")
+  ) {
+    return "fixture_streaming";
   }
   if (normalized.includes("/services/login-required")) {
     return "fixture_login_required";
@@ -104,7 +113,8 @@ export class FakeSubscriptionComputerUseService {
           message: "page snapshot",
         };
       case "click": {
-        const clickLabel = `${params.text ?? ""} ${params.selector ?? ""}`.toLowerCase();
+        const clickLabel =
+          `${params.text ?? ""} ${params.selector ?? ""}`.toLowerCase();
         if (clickLabel.includes("confirm")) {
           this.state.completed = true;
         } else if (clickLabel.includes("cancel")) {

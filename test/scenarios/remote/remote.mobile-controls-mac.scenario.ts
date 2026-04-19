@@ -12,6 +12,7 @@ export default scenario({
   ],
   description:
     "iOS companion app sends click/keystroke events to the paired Mac agent. Requires T9c iOS remote companion UX plus T9a data plane for input event delivery.",
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

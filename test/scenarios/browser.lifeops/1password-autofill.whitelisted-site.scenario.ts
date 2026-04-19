@@ -19,6 +19,8 @@ export default scenario({
   description:
     "User asks the agent to log into GitHub. Agent should autofill credentials via 1Password through the extension. NotYetImplemented until T8f.",
 
+  status: "pending",
+
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

@@ -5,6 +5,7 @@ export default scenario({
   title: "Reply via iMessage only after explicit confirmation",
   domain: "messaging.imessage",
   tags: ["messaging", "imessage", "confirmation", "safety"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

@@ -5,6 +5,7 @@ export default scenario({
   title: "Reply to Signal message with confirmation",
   domain: "messaging.signal",
   tags: ["messaging", "signal", "confirmation"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

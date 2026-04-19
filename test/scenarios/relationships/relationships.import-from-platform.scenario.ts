@@ -15,6 +15,8 @@ export default scenario({
   description:
     "User asks to import their top 20 Discord DM partners into the Rolodex. Requires Rolodex core service extension (T7b).",
 
+  status: "pending",
+
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

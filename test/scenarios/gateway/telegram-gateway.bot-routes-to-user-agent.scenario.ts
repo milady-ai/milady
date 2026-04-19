@@ -12,6 +12,7 @@ export default scenario({
   ],
   description:
     "A shared Telegram bot receives a DM and routes it to the specific user's agent. Requires T5c (Telegram gateway bot with per-user routing).",
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

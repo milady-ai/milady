@@ -18,6 +18,8 @@ export default scenario({
   description:
     "User asks 'Which apps did I use most today?'. NotYetImplemented until T8d (activity tracker).",
 
+  status: "pending",
+
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

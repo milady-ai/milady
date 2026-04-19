@@ -18,6 +18,7 @@
  *   - LIFEOPS_JUDGE_THRESHOLD: minimum LLM judge score (default 0.8). Forwarded
  *     to the CLI via LIFEOPS_LIVE_JUDGE_MIN_SCORE.
  *   - SCENARIO_FILTER: comma-separated scenario IDs (forwards as --scenario).
+ *   - SCENARIO_INCLUDE_PENDING=1: include scenarios marked status="pending".
  *   - SKIP_REASON: required when any scenario is intentionally skipped.
  *   - REPORT_PATH: where to write the JSON report (default: artifacts/lifeops-scenario-report.json).
  *
@@ -83,7 +84,8 @@ const reportPath =
 mkdirSync(path.dirname(reportPath), { recursive: true });
 
 const args = [
-  "run",
+  "--import",
+  "tsx",
   SCENARIO_CLI,
   "run",
   SCENARIO_ROOT,
@@ -105,10 +107,14 @@ const env = {
 };
 
 console.log(
-  `[run-live-scenarios] threshold=${judgeThreshold} report=${reportPath} args=${args.slice(2).join(" ")}`,
+  `[run-live-scenarios] threshold=${judgeThreshold} pending=${env.SCENARIO_INCLUDE_PENDING === "1" ? "included" : "excluded"} report=${reportPath} args=${args.slice(2).join(" ")}`,
 );
 
-const child = spawn("bun", args, { cwd: REPO_ROOT, env, stdio: "inherit" });
+const child = spawn(process.execPath, args, {
+  cwd: REPO_ROOT,
+  env,
+  stdio: "inherit",
+});
 child.on("exit", (code, signal) => {
   if (signal) {
     console.error(`[run-live-scenarios] killed by signal ${signal}`);

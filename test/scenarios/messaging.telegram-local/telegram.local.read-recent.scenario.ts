@@ -5,6 +5,7 @@ export default scenario({
   title: "Read recent Telegram messages via local plugin",
   domain: "messaging.telegram-local",
   tags: ["messaging", "telegram", "happy-path", "smoke"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

@@ -7,6 +7,7 @@ export default scenario({
   tags: ["lifeops", "selfcontrol", "not-yet-implemented", "permission-denied"],
   description:
     "User asks for an early unblock. Agent must require a pairing code / password before lifting the block. Blocked on T9a (remote / pairing auth).",
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

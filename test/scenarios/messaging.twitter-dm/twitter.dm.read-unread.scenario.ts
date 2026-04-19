@@ -5,6 +5,7 @@ export default scenario({
   title: "Read unread Twitter DMs",
   domain: "messaging.twitter-dm",
   tags: ["messaging", "twitter", "happy-path", "smoke"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

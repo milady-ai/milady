@@ -5,6 +5,7 @@ export default scenario({
   title: "Morning routine pushes several overdue todos forcefully",
   domain: "todos",
   tags: ["lifeops", "todos", "plugin-disabled"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

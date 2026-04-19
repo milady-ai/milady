@@ -20,7 +20,7 @@
           "latency": 0,
           "statusCode": 200,
           "label": "OK",
-          "headers": [{"key": "Content-Type", "value": "application/json"}],
+          "headers": [{ "key": "Content-Type", "value": "application/json" }],
           "default": true,
           "bodyType": "INLINE",
           "filePath": "",
@@ -51,7 +51,7 @@
           "latency": 0,
           "statusCode": 200,
           "label": "OK",
-          "headers": [{"key": "Content-Type", "value": "application/json"}],
+          "headers": [{ "key": "Content-Type", "value": "application/json" }],
           "default": true,
           "bodyType": "INLINE",
           "filePath": "",
@@ -71,8 +71,8 @@
     }
   ],
   "rootChildren": [
-    {"type": "route", "uuid": "00000001-0000-4000-8000-000cloudmgd0"},
-    {"type": "route", "uuid": "00000003-0000-4000-8000-000cloudmgd0"}
+    { "type": "route", "uuid": "00000001-0000-4000-8000-000cloudmgd0" },
+    { "type": "route", "uuid": "00000003-0000-4000-8000-000cloudmgd0" }
   ],
   "folders": [],
   "data": [],
@@ -80,7 +80,15 @@
   "proxyMode": false,
   "proxyHost": "",
   "proxyRemovePrefix": false,
-  "tlsOptions": {"enabled": false, "type": "CERT", "pfxPath": "", "certPath": "", "keyPath": "", "caPath": "", "passphrase": ""},
+  "tlsOptions": {
+    "enabled": false,
+    "type": "CERT",
+    "pfxPath": "",
+    "certPath": "",
+    "keyPath": "",
+    "caPath": "",
+    "passphrase": ""
+  },
   "cors": true,
   "headers": [],
   "proxyReqHeaders": [],

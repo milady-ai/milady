@@ -1,5 +1,5 @@
-import type { IAgentRuntime } from "@elizaos/core";
 import { LifeOpsService } from "@elizaos/app-lifeops/lifeops/service";
+import type { IAgentRuntime } from "@elizaos/core";
 import { ensureLifeOpsSchema } from "./seed-grants.ts";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -54,6 +54,32 @@ export async function seedBenchmarkLifeOpsFixtures(
     tags: ["friend", "close"],
     relationshipType: "friend",
     lastContactedAt: isoOffsetFromNow(-3 * DAY_MS),
+    metadata: { mocked: true },
+  });
+
+  await service.upsertRelationship({
+    name: "Downtown Dental",
+    primaryChannel: "twilio_voice",
+    primaryHandle: "+15555550110",
+    email: "appointments@downtowndental.example.com",
+    phone: "+15555550110",
+    notes: "Dentist office for cleanings and appointment changes.",
+    tags: ["dentist", "doctor", "appointment", "medical"],
+    relationshipType: "vendor",
+    lastContactedAt: isoOffsetFromNow(-45 * DAY_MS),
+    metadata: { mocked: true },
+  });
+
+  await service.upsertRelationship({
+    name: "Comet Cable Support",
+    primaryChannel: "twilio_voice",
+    primaryHandle: "+15555550111",
+    email: "support@cometcable.example.com",
+    phone: "+15555550111",
+    notes: "Cable and internet support line for outages and billing.",
+    tags: ["cable", "internet", "support", "outage"],
+    relationshipType: "vendor",
+    lastContactedAt: isoOffsetFromNow(-30 * DAY_MS),
     metadata: { mocked: true },
   });
 
@@ -122,7 +148,9 @@ export async function seedBenchmarkLifeOpsFixtures(
   const dates = new Set<string>();
   for (const session of sessions) {
     const startMs = Date.parse(session.startAt);
-    const endAt = new Date(startMs + session.durationSeconds * 1000).toISOString();
+    const endAt = new Date(
+      startMs + session.durationSeconds * 1000,
+    ).toISOString();
     dates.add(dateFromIso(session.startAt));
     await service.recordScreenTimeEvent({
       source: session.source,

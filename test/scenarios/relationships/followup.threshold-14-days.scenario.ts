@@ -19,6 +19,8 @@ export default scenario({
   description:
     "Contacts cross a 14-day threshold. The agent should respect the rule. Requires follow-up tracker service (T7c).",
 
+  status: "pending",
+
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

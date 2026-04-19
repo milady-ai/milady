@@ -17,7 +17,9 @@ export default scenario({
       type: "custom",
       name: "attach-fake-computeruse",
       apply: (ctx) => {
-        const runtime = ctx.runtime as { getService?: (serviceType: string) => unknown };
+        const runtime = ctx.runtime as {
+          getService?: (serviceType: string) => unknown;
+        };
         attachFakeSubscriptionComputerUse(
           runtime,
           new FakeSubscriptionComputerUseService("fixture_login_required"),
@@ -30,7 +32,7 @@ export default scenario({
       id: "main",
       source: "dashboard",
       channelType: "DM",
-      title: "Subscription needs login",
+      title: "Fixture Login Required subscription",
     },
   ],
   turns: [

@@ -7,6 +7,7 @@ export default scenario({
   tags: ["lifeops", "selfcontrol", "not-yet-implemented", "multi-turn"],
   description:
     "User asks the agent to block a site until a todo completes. Requires the website-blocker chat integration that reconciles block lifecycle with todo completion (T7g).",
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

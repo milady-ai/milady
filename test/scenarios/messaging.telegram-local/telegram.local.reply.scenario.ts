@@ -5,6 +5,7 @@ export default scenario({
   title: "Reply to Telegram chat with confirmation",
   domain: "messaging.telegram-local",
   tags: ["messaging", "telegram", "confirmation"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

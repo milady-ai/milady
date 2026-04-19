@@ -14,6 +14,8 @@ export default scenario({
   description:
     "User declares a relationship goal for Alice. Requires Rolodex core service extension (T7b).",
 
+  status: "pending",
+
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

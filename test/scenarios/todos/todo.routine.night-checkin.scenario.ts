@@ -5,6 +5,7 @@ export default scenario({
   title: "Night check-in reviews today's todos",
   domain: "todos",
   tags: ["lifeops", "todos", "plugin-disabled"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

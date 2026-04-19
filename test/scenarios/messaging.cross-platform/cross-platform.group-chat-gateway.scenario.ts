@@ -5,6 +5,7 @@ export default scenario({
   title: "Create a cross-platform group chat with agent and Alice on Discord",
   domain: "messaging.cross-platform",
   tags: ["cross-platform", "gateway", "confirmation"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

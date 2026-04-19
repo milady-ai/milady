@@ -13,6 +13,7 @@ export default scenario({
   ],
   description:
     "Agent proposes sending an SMS via Twilio, user confirms, then outbound message is delivered. Requires T9e (Twilio gateway outbound SMS action).",
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

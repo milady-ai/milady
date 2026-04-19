@@ -312,7 +312,9 @@ async function main() {
         await writeFile(outFile, buffer);
       }
 
-      console.log(`ok → ${entry.outputs.map((output) => output.file).join(", ")}`);
+      console.log(
+        `ok → ${entry.outputs.map((output) => output.file).join(", ")}`,
+      );
       generated += 1;
     } catch (error) {
       console.log(

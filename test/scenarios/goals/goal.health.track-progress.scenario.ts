@@ -14,6 +14,7 @@ export default scenario({
   tags: ["lifeops", "goals", "health", "plugin-disabled"],
   description:
     "Seed a health goal + a weigh-in memory and ask how things are going. Requires T9f: check-in engine progress surfacing.",
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

@@ -1,11 +1,9 @@
 import crypto from "node:crypto";
 import http from "node:http";
 import type { AddressInfo } from "node:net";
-import type { AgentRuntime } from "@elizaos/core";
 import { Capacitor } from "@capacitor/core";
-import {
-  FakeSubscriptionComputerUseService,
-} from "../../helpers/subscription-computer-use-fixture.ts";
+import type { AgentRuntime } from "@elizaos/core";
+import { FakeSubscriptionComputerUseService } from "../../helpers/subscription-computer-use-fixture.ts";
 
 const MOCK_SCREENSHOT_BASE64 =
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO7+R4QAAAAASUVORK5CYII=";
@@ -241,7 +239,7 @@ function createBenchmarkComputerUseService() {
 }
 
 function registerBenchmarkSendHandlers(runtime: AgentRuntime): void {
-  const channels = ["discord", "signal"] as const;
+  const channels = ["telegram", "discord", "signal"] as const;
   for (const channel of channels) {
     runtime.registerSendHandler(channel, async () => {});
   }
@@ -261,8 +259,7 @@ export async function createBenchmarkRuntimeFixturesEnvironment(): Promise<Bench
       MILADY_DEVICE_BUS_TOKEN: "mock-device-bus-token",
       MILADY_SUBSCRIPTION_FIXTURE_BASE_URL: fixtureServer.baseUrl,
       MILADY_E2E_TWILIO_RECIPIENT: "+15555550199",
-      TWILIO_CALL_EXTERNAL_ALLOWLIST:
-        "+15555550110 +15555550111 +15555550199",
+      TWILIO_CALL_EXTERNAL_ALLOWLIST: "+15555550110 +15555550111 +15555550199",
     },
     async applyRuntimeFixtures(runtime) {
       registerBenchmarkSendHandlers(runtime);

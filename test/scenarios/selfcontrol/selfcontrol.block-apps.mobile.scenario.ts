@@ -7,6 +7,7 @@ export default scenario({
   tags: ["lifeops", "selfcontrol", "not-yet-implemented", "cross-device"],
   description:
     "User asks the agent to block social apps on their iOS/Android device. Requires a companion app that enforces Screen Time / Digital Wellbeing intents (T8c).",
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

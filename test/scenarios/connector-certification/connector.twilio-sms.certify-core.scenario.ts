@@ -9,14 +9,14 @@ export default buildConnectorCertificationScenario({
   turns: [
     {
       name: "twilio-sms-propose",
-      text: "Draft an SMS through Twilio and only send it after I explicitly confirm.",
+      text: "Create an SMS draft on channel sms to target +15555550101 with message 'Running 10 minutes late for lunch.' Keep confirmed false so it waits for approval, and do not place a voice call.",
       responseIncludesAny: ["sms", "twilio", "confirm", "draft"],
       acceptedActions: ["CROSS_CHANNEL_SEND"],
-      includesAny: ["sms", "confirm", "draft", "twilio"],
+      includesAny: ["sms", "confirm", "draft", "15555550101"],
     },
     {
       name: "twilio-sms-confirm",
-      text: "Confirmed, send the Twilio SMS now.",
+      text: "Set channel sms and confirmed true, then send that SMS text to +15555550101 now. Do not place a voice call.",
       responseIncludesAny: ["sms", "sent", "twilio"],
       acceptedActions: ["CROSS_CHANNEL_SEND"],
       includesAny: ["sms", "send", "twilio"],

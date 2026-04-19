@@ -24,6 +24,8 @@ export default scenario({
   description:
     "Turn 1: 'Delete all my todos' — agent asks for confirmation, no destructive action fires. Turn 2: 'Yes, confirm.' — agent performs the deletion.",
 
+  status: "pending",
+
   isolation: "per-scenario",
 
   rooms: [

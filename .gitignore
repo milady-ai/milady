@@ -107,6 +107,11 @@ biome-report.json
 # Local audit outputs
 report/
 
+# Action benchmark reports (local eval output; never committed)
+/action-benchmark-report/
+/action-benchmark-report-*/
+/action-benchmark-report*.md
+
 # Agent learning docs & knowledge base
 knowledge/
 !src/knowledge/

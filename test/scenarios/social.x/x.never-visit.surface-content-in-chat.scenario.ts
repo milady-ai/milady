@@ -18,6 +18,8 @@ export default scenario({
   description:
     "User should never be redirected to X; tweet content must appear in the response. NotYetImplemented until T8g.",
 
+  status: "pending",
+
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

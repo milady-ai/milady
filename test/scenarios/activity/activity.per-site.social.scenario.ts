@@ -18,6 +18,8 @@ export default scenario({
   description:
     "User asks which social sites took the most time. Requires T8d + T8e.",
 
+  status: "pending",
+
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

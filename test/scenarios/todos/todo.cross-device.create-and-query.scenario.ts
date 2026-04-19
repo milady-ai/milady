@@ -5,6 +5,7 @@ export default scenario({
   title: "Create a todo on the dashboard, query it from mobile",
   domain: "todos",
   tags: ["lifeops", "todos", "smoke", "cross-platform-inconsistency"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

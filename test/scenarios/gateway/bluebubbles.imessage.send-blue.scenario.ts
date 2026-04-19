@@ -13,6 +13,7 @@ export default scenario({
   ],
   description:
     "Agent proposes sending an outbound iMessage to an Apple contact (blue bubble); after user confirmation, BlueBubbles delivers it. Requires T5e (BlueBubbles outbound send action).",
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

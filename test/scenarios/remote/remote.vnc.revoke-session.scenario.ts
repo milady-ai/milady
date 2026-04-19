@@ -7,6 +7,7 @@ export default scenario({
   tags: ["remote", "vnc", "cancel-mid-flow-edge", "not-yet-implemented"],
   description:
     "Agent terminates an active remote-help session when the user asks. Requires T9a remote-control data plane (session lifecycle, connection teardown).",
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],

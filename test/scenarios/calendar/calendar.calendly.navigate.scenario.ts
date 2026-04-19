@@ -5,6 +5,7 @@ export default scenario({
   title: "Agent books an intro call via Calendly link",
   domain: "calendar",
   tags: ["lifeops", "calendar", "not-yet-implemented"],
+  status: "pending",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],
