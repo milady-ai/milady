@@ -484,3 +484,7 @@ This is a cleanup for correctness, maintainability, and architectural integrity.
 - **Push proactively when work is meaningful.** A branch that exists only on the local machine is one disk failure away from gone. If a chunk of work is worth keeping, it's worth pushing.
 
 The principle: **every change must end up as a commit on the current branch in the current worktree, and ideally pushed.** No stashes, no branch hopping, no work that exists only in the working tree or in `git stash list`.
+
+## agent-home
+
+The canonical public app-hosting surface is at https://milady.nubs.site — see eliza/apps/app-core/README for build steps.
