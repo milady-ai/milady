@@ -1,0 +1,24 @@
+{
+  "name": "@milady/plugin-exercisedb",
+  "version": "0.1.0",
+  "description": "elizaOS action that fetches exercise gifs from the exercisedb API",
+  "type": "module",
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": [
+    "src"
+  ],
+  "peerDependencies": {
+    "@elizaos/core": "*"
+  },
+  "keywords": [
+    "elizaos",
+    "plugin",
+    "exercisedb",
+    "fitness",
+    "workout"
+  ],
+  "license": "MIT"
+}
