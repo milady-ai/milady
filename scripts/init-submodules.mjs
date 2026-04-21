@@ -231,6 +231,26 @@ export function runInitSubmodules({
     exists,
   });
 
+  // Re-align every submodule's .git/config remote URL with .gitmodules before
+  // doing anything else. Without this, flipping a submodule URL upstream (e.g.
+  // retargeting eliza between elizaOS/eliza and milady-ai/eliza) leaves the
+  // local .git/modules/<name>/config stuck on the old remote — so `git pull`
+  // later fails to fetch commits that only exist on the new remote. The
+  // per-submodule sync below only runs when `needsInit` is true, which misses
+  // the common case where the submodule is still checked out cleanly.
+  try {
+    exec("git submodule sync --recursive", {
+      cwd: rootDir,
+      stdio: "inherit",
+    });
+  } catch (err) {
+    logError(
+      `[init-submodules] git submodule sync --recursive failed: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+    );
+  }
+
   let initialized = 0;
   let alreadyInitialized = 0;
   let failed = 0;

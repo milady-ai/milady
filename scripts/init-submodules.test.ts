@@ -204,7 +204,7 @@ describe("init-submodules", () => {
         return "";
       }
 
-      if (command === "git submodule sync --recursive" && cwd === elizaRoot) {
+      if (command === "git submodule sync --recursive") {
         return "";
       }
 
@@ -322,7 +322,7 @@ describe("init-submodules", () => {
         return "";
       }
 
-      if (command === "git submodule sync --recursive" && cwd === elizaRoot) {
+      if (command === "git submodule sync --recursive") {
         return "";
       }
 
