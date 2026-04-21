@@ -1,13 +1,21 @@
+import type { AgentRuntime } from "@elizaos/core";
 import { scenario } from "@elizaos/scenario-schema";
+import {
+  listTriggerTasks,
+  readTriggerConfig,
+} from "@elizaos/agent/triggers/runtime";
+import {
+  expectScenarioToCallAction,
+  expectTurnToCallAction,
+} from "../_helpers/action-assertions.ts";
 
 export default scenario({
   id: "twitter.dm.schedule-reply",
-  title: "Twitter/X DM schedule request stays blocked until scheduling exists",
+  title: "Schedule a Twitter/X DM reply for later delivery",
   domain: "messaging.twitter-dm",
-  tags: ["messaging", "twitter", "routing", "not-yet-implemented"],
+  tags: ["messaging", "twitter", "routing", "trigger"],
   description:
-    "X can read DMs and send confirmed replies, but it cannot schedule a DM reply for later yet. This scenario must fail closed until a scheduler exists.",
-  status: "pending",
+    "A future-dated X DM reply should create a real trigger task instead of trying to send immediately through REPLY_X_DM.",
   isolation: "per-scenario",
   requires: {
     plugins: ["@elizaos/plugin-agent-skills"],
@@ -26,24 +34,72 @@ export default scenario({
       name: "schedule reply",
       room: "main",
       text: "Schedule a reply to @devfriend's Twitter DM for 9am tomorrow saying thanks for the intro.",
+      assertTurn: expectTurnToCallAction({
+        acceptedActions: ["SCHEDULE_X_DM_REPLY"],
+        description: "scheduled X DM reply",
+        includesAny: ["devfriend", "thanks for the intro", "send X DM"],
+      }),
     },
   ],
   finalChecks: [
     {
+      type: "selectedAction",
+      actionName: "SCHEDULE_X_DM_REPLY",
+    },
+    {
       type: "custom",
-      name: "twitter-dm-schedule-routing",
+      name: "twitter-dm-schedule-action-coverage",
+      predicate: expectScenarioToCallAction({
+        acceptedActions: ["SCHEDULE_X_DM_REPLY"],
+        description: "scheduled X DM reply",
+        includesAny: ["devfriend", "thanks for the intro", "send X DM"],
+      }),
+    },
+    {
+      type: "custom",
+      name: "twitter-dm-schedule-creates-trigger",
       predicate: async (ctx) => {
-        const fallbackActions = ctx.actionsCalled
-          .map((entry) => entry.actionName)
-          .filter((actionName) =>
-            ["REPLY_X_DM", "OWNER_CALENDAR", "OWNER_INBOX"].includes(
-              actionName,
-            ),
-          );
-        if (fallbackActions.length > 0) {
-          return `unexpected fallback action(s) used for scheduled X DM reply: ${fallbackActions.join(", ")}`;
+        const runtime = ctx.runtime as AgentRuntime | undefined;
+        if (!runtime) {
+          return "scenario runtime unavailable";
         }
-        return "NotYetImplemented: X DM scheduling is not available yet. REPLY_X_DM can draft or send, but it cannot queue a 9am delivery.";
+        const hit = ctx.actionsCalled.find(
+          (entry) => entry.actionName === "SCHEDULE_X_DM_REPLY",
+        );
+        const data =
+          hit?.result?.data && typeof hit.result.data === "object"
+            ? (hit.result.data as {
+                taskId?: string | null;
+                recipient?: string;
+                text?: string;
+                sendAtIso?: string;
+              })
+            : null;
+        if (!data?.taskId || !data.recipient || !data.text || !data.sendAtIso) {
+          return "expected scheduled X DM result to include taskId, recipient, text, and sendAtIso";
+        }
+        const tasks = await listTriggerTasks(runtime);
+        const task = tasks.find((entry) => entry.id === data.taskId);
+        if (!task) {
+          return `expected trigger task ${data.taskId}`;
+        }
+        const trigger = readTriggerConfig(task);
+        if (!trigger) {
+          return "expected trigger metadata on the scheduled X DM task";
+        }
+        if (trigger.triggerType !== "once") {
+          return `expected once trigger, got ${trigger.triggerType}`;
+        }
+        if (!trigger.instructions.includes("REPLY_X_DM")) {
+          return "expected trigger instructions to route through REPLY_X_DM";
+        }
+        if (!trigger.instructions.includes(`recipient: ${data.recipient}`)) {
+          return "expected trigger instructions to include the DM recipient";
+        }
+        if (!trigger.instructions.includes(data.text)) {
+          return "expected trigger instructions to include the queued DM body";
+        }
+        return undefined;
       },
     },
   ],

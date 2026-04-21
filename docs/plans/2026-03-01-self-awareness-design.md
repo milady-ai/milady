@@ -106,7 +106,7 @@ Located at `src/awareness/registry.ts`.
 
 | pos | id | summary example | invalidateOn | cacheTtl |
 |-----|-----|------|------|------|
-| 10 | runtime | `Model: claude-opus-4-6 via anthropic \| OS: darwin \| pending restart: shell enabled` | config-changed, runtime-restarted | 300s |
+| 10 | runtime | `Model: claude-opus-4-7 via anthropic \| OS: darwin \| pending restart: shell enabled` | config-changed, runtime-restarted | 300s |
 | 20 | permissions | `Perms: shell✓ a11y✓ camera✗ mic✗ screen✗` | permission-changed | 120s |
 | 30 | wallet | `Wallet: 0x12..ab (local-signer) \| SOL: none` | wallet-updated | 60s |
 | 40 | provider | `Provider: anthropic (fallback: openai)` | provider-changed | 300s |

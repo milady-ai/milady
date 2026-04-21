@@ -72,7 +72,7 @@ export OPENROUTER_API_KEY=sk-or-...
     "profiles": {
       "default": {
         "provider": "openrouter",
-        "model": "anthropic/claude-sonnet-4-5"
+        "model": "anthropic/claude-sonnet-4.6"
       }
     }
   }
@@ -108,8 +108,8 @@ OpenRouter fournit l'accès aux modèles de tous les principaux fournisseurs. Ut
 
 | ID du modèle | Description |
 |--------------|-------------|
-| `anthropic/claude-opus-4` | Claude le plus performant |
-| `anthropic/claude-sonnet-4-5` | Claude équilibré |
+| `anthropic/claude-opus-4.7` | Claude le plus performant |
+| `anthropic/claude-sonnet-4.6` | Claude équilibré |
 | `anthropic/claude-haiku-4` | Claude le plus rapide |
 
 <div id="meta-via-openrouter">
@@ -145,7 +145,7 @@ Parcourez tous les modèles sur [openrouter.ai/models](https://openrouter.ai/mod
 | Type de modèle elizaOS | Modèle OpenRouter par défaut |
 |------------------------|----------------------------|
 | `TEXT_SMALL` | `anthropic/claude-haiku-4` |
-| `TEXT_LARGE` | `anthropic/claude-sonnet-4-5` |
+| `TEXT_LARGE` | `anthropic/claude-sonnet-4.6` |
 
 <div id="features">
 
@@ -176,7 +176,7 @@ OpenRouter prend en charge les préférences de routage par coût, latence ou d�
     "profiles": {
       "default": {
         "provider": "openrouter",
-        "model": "anthropic/claude-sonnet-4-5",
+        "model": "anthropic/claude-sonnet-4.6",
         "providerPreferences": {
           "order": ["Anthropic", "AWS Bedrock"],
           "allowFallbacks": true

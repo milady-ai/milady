@@ -183,7 +183,7 @@ En `~/.milady/milady.json`, especifica el modelo usando el formato `provider/mod
   agents: {
     defaults: {
       model: {
-        primary: "anthropic/claude-sonnet-4-20250514",
+        primary: "anthropic/claude-sonnet-4.6",
       },
     },
   },
@@ -209,7 +209,7 @@ Milady soporta una cadena de respaldo ordenada. Si el modelo principal falla (l�
   agents: {
     defaults: {
       model: {
-        primary: "anthropic/claude-sonnet-4-20250514",
+        primary: "anthropic/claude-sonnet-4.6",
         fallbacks: [
           "openai/gpt-4o",
           "groq/llama-3.3-70b-versatile",
@@ -255,8 +255,8 @@ Con esta configuración, los cuatro proveedores están disponibles. Puedes estab
   agents: {
     defaults: {
       model: {
-        primary: "anthropic/claude-sonnet-4-20250514",
-        fallbacks: ["openrouter/anthropic/claude-sonnet-4-20250514"],
+        primary: "anthropic/claude-sonnet-4.6",
+        fallbacks: ["openrouter/anthropic/claude-sonnet-4.6"],
       },
       imageModel: {
         primary: "openai/gpt-4o",

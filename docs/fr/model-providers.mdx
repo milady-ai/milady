@@ -210,7 +210,7 @@ Dans `~/.milady/milady.json`, spécifiez le modèle au format `provider/model` :
   agents: {
     defaults: {
       model: {
-        primary: "anthropic/claude-sonnet-4-20250514",
+        primary: "anthropic/claude-sonnet-4.6",
       },
     },
   },
@@ -238,7 +238,7 @@ Milady prend en charge une chaîne de repli ordonnée. Si le modèle principal �
   agents: {
     defaults: {
       model: {
-        primary: "anthropic/claude-sonnet-4-20250514",
+        primary: "anthropic/claude-sonnet-4.6",
         fallbacks: [
           "openai/gpt-4o",
           "groq/llama-3.3-70b-versatile",
@@ -286,8 +286,8 @@ Avec cette configuration, les quatre fournisseurs sont disponibles. Vous pouvez 
   agents: {
     defaults: {
       model: {
-        primary: "anthropic/claude-sonnet-4-20250514",
-        fallbacks: ["openrouter/anthropic/claude-sonnet-4-20250514"],
+        primary: "anthropic/claude-sonnet-4.6",
+        fallbacks: ["openrouter/anthropic/claude-sonnet-4.6"],
       },
       imageModel: {
         primary: "openai/gpt-4o",

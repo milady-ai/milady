@@ -1,7 +1,7 @@
 ---
 title: "Anthropic 插件"
 sidebarTitle: "Anthropic"
-description: "Milady 的 Anthropic Claude 模型提供者 — Claude Opus 4.6、Sonnet 4.6、Haiku 4.5 以及扩展思维模型。"
+description: "Milady 的 Anthropic Claude 模型提供者 — Claude Opus 4.7、Sonnet 4.6、Haiku 4.5 以及扩展思维模型。"
 ---
 
 Anthropic 插件将 Milady 代理连接到 Anthropic 的 Claude API，提供对 Claude 4.6、4.5、4 和 3 模型系列的访问，包括 Opus、Sonnet 和 Haiku 变体。
@@ -56,7 +56,7 @@ export ANTHROPIC_API_KEY=sk-ant-...
     "profiles": {
       "default": {
         "provider": "anthropic",
-        "model": "claude-sonnet-4-20250514"
+        "model": "claude-sonnet-4-6"
       }
     }
   }
@@ -77,7 +77,7 @@ export ANTHROPIC_API_KEY=sk-ant-...
 
 | 模型 | 上下文 | 最适合 |
 |------|--------|--------|
-| `claude-opus-4-6` | 200k | 最强大，复杂推理，可用 1M 上下文 |
+| `claude-opus-4-7` | 200k | 最强大，复杂推理，可用 1M 上下文 |
 | `claude-sonnet-4-6` | 200k | 最新 Sonnet，性能与成本平衡 |
 | `claude-haiku-4-5-20251001` | 200k | 快速、轻量任务 |
 
@@ -89,9 +89,9 @@ export ANTHROPIC_API_KEY=sk-ant-...
 
 | 模型 | 上下文 | 最适合 |
 |------|--------|--------|
-| `claude-opus-4-20250514` | 200k | 复杂推理 |
-| `claude-sonnet-4-20250514` | 200k | 性能与成本平衡 |
-| `claude-sonnet-4.5` | 200k | 改进的编程能力 |
+| `claude-opus-4-7` | 200k | 复杂推理 |
+| `claude-sonnet-4-6` | 200k | 性能与成本平衡 |
+| `claude-sonnet-4-6` | 200k | 改进的编程能力 |
 | `claude-3-5-haiku-20241022` | 200k | 快速响应 |
 
 <div id="claude-37-family">
@@ -136,9 +136,9 @@ export ANTHROPIC_API_KEY=sk-ant-...
 | elizaOS 模型类型 | Anthropic 模型 |
 |-----------------|---------------|
 | `TEXT_SMALL` | `claude-3-5-haiku-20241022` |
-| `TEXT_LARGE` | `claude-sonnet-4-20250514` |
+| `TEXT_LARGE` | `claude-sonnet-4-6` |
 | `OBJECT_SMALL` | `claude-3-5-haiku-20241022` |
-| `OBJECT_LARGE` | `claude-sonnet-4-20250514` |
+| `OBJECT_LARGE` | `claude-sonnet-4-6` |
 
 <div id="features">
 
@@ -149,7 +149,7 @@ export ANTHROPIC_API_KEY=sk-ant-...
 - 流式响应
 - 工具使用（函数调用）
 - 视觉（所有模型支持图像输入）
-- 扩展思维（claude-3-7-sonnet、claude-opus-4-6）
+- 扩展思维（claude-3-7-sonnet、claude-opus-4-7）
 - 通过工具使用实现结构化 JSON 输出
 - 所有模型均支持 200k token 上下文窗口
 - 提示缓存，降低重复上下文的成本
@@ -160,7 +160,7 @@ export ANTHROPIC_API_KEY=sk-ant-...
 
 </div>
 
-Claude 3.7 Sonnet 和 Claude Opus 4（`claude-opus-4-20250514`）支持扩展思维——一种模型在回答之前逐步推理的模式。这对于复杂推理、数学和多步骤规划特别有效。
+Claude 3.7 Sonnet 和 Claude Opus 4（`claude-opus-4-7`）支持扩展思维——一种模型在回答之前逐步推理的模式。这对于复杂推理、数学和多步骤规划特别有效。
 
 ```typescript
 const response = await runtime.useModel("TEXT_LARGE", {

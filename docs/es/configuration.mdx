@@ -93,7 +93,7 @@ esquema de configuración persistida. Los campos canónicos persistidos son:
     llmText: {
       backend: "anthropic",
       transport: "direct",
-      primaryModel: "anthropic/claude-sonnet-4-5",
+      primaryModel: "anthropic/claude-sonnet-4.6",
     },
     tts: {
       backend: "elizacloud",
@@ -276,7 +276,7 @@ Los agentes se definen bajo `agents.list`. La sección `agents.defaults` proporc
 {
   agents: {
     defaults: {
-      model: { primary: "anthropic/claude-sonnet-4-5" },
+      model: { primary: "anthropic/claude-sonnet-4.6" },
       workspace: "~/projects/my-agent",
       thinkingDefault: "medium",
       timeoutSeconds: 120,
@@ -287,7 +287,7 @@ Los agentes se definen bajo `agents.list`. La sección `agents.defaults` proporc
         id: "mila",
         default: true,
         name: "Mila",
-        model: "anthropic/claude-opus-4-5",
+        model: "anthropic/claude-opus-4.7",
         workspace: "~/projects/mila-workspace",
         // Personality (set during onboarding)
         bio: ["A helpful AI assistant"],
@@ -348,7 +348,7 @@ Los agentes se definen bajo `agents.list`. La sección `agents.defaults` proporc
 {
   agents: {
     defaults: {
-      model: { primary: "anthropic/claude-sonnet-4-5", fallbacks: ["openai/gpt-4o"] },
+      model: { primary: "anthropic/claude-sonnet-4.6", fallbacks: ["openai/gpt-4o"] },
       workspace: "~/agent-workspace",
       thinkingDefault: "medium",       // off | minimal | low | medium | high | xhigh
       verboseDefault: "off",           // off | on | full
@@ -404,7 +404,7 @@ La forma más sencilla de configurar modelos es a través de `agents.defaults.mo
   agents: {
     defaults: {
       model: {
-        primary: "anthropic/claude-sonnet-4-5",
+        primary: "anthropic/claude-sonnet-4.6",
         fallbacks: ["openai/gpt-4o", "groq/llama-3.3-70b"],
       },
     },
@@ -421,7 +421,7 @@ La sección `models` a nivel superior le permite definir proveedores personaliza
     mode: "merge",
     // Quick model aliases set during onboarding
     small: "claude-haiku",
-    large: "claude-sonnet-4-5",
+    large: "claude-sonnet-4-6",
     // Custom or self-hosted providers
     providers: {
       "my-provider": {
@@ -1540,7 +1540,7 @@ Una configuración completa mostrando las opciones más comunes:
   // Agent configuration
   agents: {
     defaults: {
-      model: { primary: "anthropic/claude-sonnet-4-5" },
+      model: { primary: "anthropic/claude-sonnet-4.6" },
       workspace: "~/agent-workspace",
       thinkingDefault: "medium",
       sandbox: { mode: "non-main" },

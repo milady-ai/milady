@@ -1,7 +1,7 @@
 ---
 title: "Anthropic Plugin"
 sidebarTitle: "Anthropic"
-description: "Anthropic Claude model provider for Milady — Claude Opus 4.6, Sonnet 4.6, Haiku 4.5, and the extended thinking models."
+description: "Anthropic Claude model provider for Milady — Claude Opus 4.7, Sonnet 4.6, Haiku 4.5, and the extended thinking models."
 ---
 
 The Anthropic plugin connects Milady agents to Anthropic's Claude API, providing access to the Claude 4.6, 4.5, 4, and 3 model families including Opus, Sonnet, and Haiku variants.
@@ -40,7 +40,7 @@ export ANTHROPIC_API_KEY=sk-ant-...
     "profiles": {
       "default": {
         "provider": "anthropic",
-        "model": "claude-sonnet-4-20250514"
+        "model": "claude-sonnet-4-6"
       }
     }
   }
@@ -53,7 +53,7 @@ export ANTHROPIC_API_KEY=sk-ant-...
 
 | Model | Context | Best For |
 |-------|---------|---------|
-| `claude-opus-4-6` | 200k | Most capable, complex reasoning, 1M context available |
+| `claude-opus-4-7` | 200k | Most capable, complex reasoning, 1M context available |
 | `claude-sonnet-4-6` | 200k | Latest Sonnet, balanced performance and cost |
 | `claude-haiku-4-5-20251001` | 200k | Fast, lightweight tasks |
 
@@ -61,9 +61,9 @@ export ANTHROPIC_API_KEY=sk-ant-...
 
 | Model | Context | Best For |
 |-------|---------|---------|
-| `claude-opus-4-20250514` | 200k | Complex reasoning |
-| `claude-sonnet-4-20250514` | 200k | Balanced performance and cost |
-| `claude-sonnet-4.5` | 200k | Improved coding |
+| `claude-opus-4-7` | 200k | Complex reasoning |
+| `claude-sonnet-4-6` | 200k | Balanced performance and cost |
+| `claude-sonnet-4-6` | 200k | Improved coding |
 | `claude-3-5-haiku-20241022` | 200k | Fast responses |
 
 ### Claude 3.7 Family
@@ -92,23 +92,23 @@ export ANTHROPIC_API_KEY=sk-ant-...
 | elizaOS Model Type | Anthropic Model |
 |-------------------|----------------|
 | `TEXT_SMALL` | `claude-3-5-haiku-20241022` |
-| `TEXT_LARGE` | `claude-sonnet-4-20250514` |
+| `TEXT_LARGE` | `claude-sonnet-4-6` |
 | `OBJECT_SMALL` | `claude-3-5-haiku-20241022` |
-| `OBJECT_LARGE` | `claude-sonnet-4-20250514` |
+| `OBJECT_LARGE` | `claude-sonnet-4-6` |
 
 ## Features
 
 - Streaming responses
 - Tool use (function calling)
 - Vision (image input on all models)
-- Extended thinking (claude-3-7-sonnet, claude-opus-4-6)
+- Extended thinking (claude-3-7-sonnet, claude-opus-4-7)
 - Structured JSON output via tool use
 - 200k token context window on all models
 - Prompt caching for cost reduction on repeated context
 
 ## Extended Thinking
 
-Claude 3.7 Sonnet and Claude Opus 4 (`claude-opus-4-20250514`) support extended thinking — a mode where the model reasons step-by-step before answering. This is particularly effective for complex reasoning, math, and multi-step planning.
+Claude 3.7 Sonnet and Claude Opus 4 (`claude-opus-4-7`) support extended thinking — a mode where the model reasons step-by-step before answering. This is particularly effective for complex reasoning, math, and multi-step planning.
 
 ```typescript
 const response = await runtime.useModel("TEXT_LARGE", {

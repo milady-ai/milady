@@ -238,7 +238,7 @@ Get a structured summary of the agent's current state, capabilities, wallet stat
   "generatedAt": "2026-04-09T12:00:00.000Z",
   "state": "running",
   "agentName": "Milady",
-  "model": "anthropic/claude-sonnet-4-20250514",
+  "model": "anthropic/claude-sonnet-4.6",
   "provider": "anthropic",
   "automationMode": "connectors-only",
   "tradePermissionMode": "ask",

@@ -1,7 +1,7 @@
 ---
 title: "Plugin Anthropic"
 sidebarTitle: "Anthropic"
-description: "Fournisseur de modèles Anthropic Claude pour Milady — Claude Opus 4.6, Sonnet 4.6, Haiku 4.5 et les modèles de réflexion étendue."
+description: "Fournisseur de modèles Anthropic Claude pour Milady — Claude Opus 4.7, Sonnet 4.6, Haiku 4.5 et les modèles de réflexion étendue."
 ---
 
 Le plugin Anthropic connecte les agents Milady à l'API Claude d'Anthropic, fournissant l'accès aux familles de modèles Claude 4.6, 4.5, 4 et 3, y compris les variantes Opus, Sonnet et Haiku.
@@ -56,7 +56,7 @@ export ANTHROPIC_API_KEY=sk-ant-...
     "profiles": {
       "default": {
         "provider": "anthropic",
-        "model": "claude-sonnet-4-20250514"
+        "model": "claude-sonnet-4-6"
       }
     }
   }
@@ -77,7 +77,7 @@ export ANTHROPIC_API_KEY=sk-ant-...
 
 | Modèle | Contexte | Idéal pour |
 |--------|----------|------------|
-| `claude-opus-4-6` | 200k | Le plus performant, raisonnement complexe, contexte de 1M disponible |
+| `claude-opus-4-7` | 200k | Le plus performant, raisonnement complexe, contexte de 1M disponible |
 | `claude-sonnet-4-6` | 200k | Dernier Sonnet, performance et coût équilibrés |
 | `claude-haiku-4-5-20251001` | 200k | Tâches rapides et légères |
 
@@ -89,9 +89,9 @@ export ANTHROPIC_API_KEY=sk-ant-...
 
 | Modèle | Contexte | Idéal pour |
 |--------|----------|------------|
-| `claude-opus-4-20250514` | 200k | Raisonnement complexe |
-| `claude-sonnet-4-20250514` | 200k | Performance et coût équilibrés |
-| `claude-sonnet-4.5` | 200k | Programmation améliorée |
+| `claude-opus-4-7` | 200k | Raisonnement complexe |
+| `claude-sonnet-4-6` | 200k | Performance et coût équilibrés |
+| `claude-sonnet-4-6` | 200k | Programmation améliorée |
 | `claude-3-5-haiku-20241022` | 200k | Réponses rapides |
 
 <div id="claude-37-family">
@@ -136,9 +136,9 @@ export ANTHROPIC_API_KEY=sk-ant-...
 | Type de modèle elizaOS | Modèle Anthropic |
 |------------------------|-----------------|
 | `TEXT_SMALL` | `claude-3-5-haiku-20241022` |
-| `TEXT_LARGE` | `claude-sonnet-4-20250514` |
+| `TEXT_LARGE` | `claude-sonnet-4-6` |
 | `OBJECT_SMALL` | `claude-3-5-haiku-20241022` |
-| `OBJECT_LARGE` | `claude-sonnet-4-20250514` |
+| `OBJECT_LARGE` | `claude-sonnet-4-6` |
 
 <div id="features">
 
@@ -149,7 +149,7 @@ export ANTHROPIC_API_KEY=sk-ant-...
 - Réponses en streaming
 - Utilisation d'outils (appel de fonctions)
 - Vision (entrée d'images sur tous les modèles)
-- Réflexion étendue (claude-3-7-sonnet, claude-opus-4-6)
+- Réflexion étendue (claude-3-7-sonnet, claude-opus-4-7)
 - Sortie JSON structurée via l'utilisation d'outils
 - Fenêtre de contexte de 200k tokens sur tous les modèles
 - Mise en cache des prompts pour réduction des coûts sur les contextes répétés
@@ -160,7 +160,7 @@ export ANTHROPIC_API_KEY=sk-ant-...
 
 </div>
 
-Claude 3.7 Sonnet et Claude Opus 4 (`claude-opus-4-20250514`) prennent en charge la réflexion étendue — un mode où le modèle raisonne étape par étape avant de répondre. C'est particulièrement efficace pour le raisonnement complexe, les mathématiques et la planification en plusieurs étapes.
+Claude 3.7 Sonnet et Claude Opus 4 (`claude-opus-4-7`) prennent en charge la réflexion étendue — un mode où le modèle raisonne étape par étape avant de répondre. C'est particulièrement efficace pour le raisonnement complexe, les mathématiques et la planification en plusieurs étapes.
 
 ```typescript
 const response = await runtime.useModel("TEXT_LARGE", {

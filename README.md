@@ -361,7 +361,7 @@ When running, milady shows a live terminal interface:
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
 │  Agent: mila                                                │
-│  Model: anthropic/claude-opus-4-5                           │
+│  Model: anthropic/claude-opus-4.7                           │
 │  Sessions: 2 active                                         │
 │                                                             │
 │  ┌─ Activity ──────────────────────────────────────────┐    │
@@ -454,7 +454,7 @@ Lives at `~/.milady/milady.json` (override with `MILADY_CONFIG_PATH` or `MILADY_
 {
   agent: {
     name: "mila",
-    model: "anthropic/claude-opus-4-5",
+    model: "anthropic/claude-opus-4.7",
   },
   env: {
     ANTHROPIC_API_KEY: "<ANTHROPIC_API_KEY>",

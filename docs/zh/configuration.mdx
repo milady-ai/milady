@@ -91,7 +91,7 @@ Milady 保存的运行时拓扑不再从单个 `connection` blob 推断，
     llmText: {
       backend: "anthropic",
       transport: "direct",
-      primaryModel: "anthropic/claude-sonnet-4-5",
+      primaryModel: "anthropic/claude-sonnet-4.6",
     },
     tts: {
       backend: "elizacloud",
@@ -274,7 +274,7 @@ Milady 从两个来源加载环境变量：
 {
   agents: {
     defaults: {
-      model: { primary: "anthropic/claude-sonnet-4-5" },
+      model: { primary: "anthropic/claude-sonnet-4.6" },
       workspace: "~/projects/my-agent",
       thinkingDefault: "medium",
       timeoutSeconds: 120,
@@ -285,7 +285,7 @@ Milady 从两个来源加载环境变量：
         id: "mila",
         default: true,
         name: "Mila",
-        model: "anthropic/claude-opus-4-5",
+        model: "anthropic/claude-opus-4.7",
         workspace: "~/projects/mila-workspace",
         // Personality (set during onboarding)
         bio: ["A helpful AI assistant"],
@@ -346,7 +346,7 @@ Milady 从两个来源加载环境变量：
 {
   agents: {
     defaults: {
-      model: { primary: "anthropic/claude-sonnet-4-5", fallbacks: ["openai/gpt-4o"] },
+      model: { primary: "anthropic/claude-sonnet-4.6", fallbacks: ["openai/gpt-4o"] },
       workspace: "~/agent-workspace",
       thinkingDefault: "medium",       // off | minimal | low | medium | high | xhigh
       verboseDefault: "off",           // off | on | full
@@ -402,7 +402,7 @@ Milady 从两个来源加载环境变量：
   agents: {
     defaults: {
       model: {
-        primary: "anthropic/claude-sonnet-4-5",
+        primary: "anthropic/claude-sonnet-4.6",
         fallbacks: ["openai/gpt-4o", "groq/llama-3.3-70b"],
       },
     },
@@ -419,7 +419,7 @@ Milady 从两个来源加载环境变量：
     mode: "merge",
     // Quick model aliases set during onboarding
     small: "claude-haiku",
-    large: "claude-sonnet-4-5",
+    large: "claude-sonnet-4-6",
     // Custom or self-hosted providers
     providers: {
       "my-provider": {
@@ -1537,7 +1537,7 @@ milady config show --json   # Raw JSON output
   // Agent configuration
   agents: {
     defaults: {
-      model: { primary: "anthropic/claude-sonnet-4-5" },
+      model: { primary: "anthropic/claude-sonnet-4.6" },
       workspace: "~/agent-workspace",
       thinkingDefault: "medium",
       sandbox: { mode: "non-main" },

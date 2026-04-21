@@ -166,7 +166,7 @@ In `~/.milady/milady.json`, specify the model using `provider/model` format:
   agents: {
     defaults: {
       model: {
-        primary: "anthropic/claude-sonnet-4-20250514",
+        primary: "anthropic/claude-sonnet-4.6",
       },
     },
   },
@@ -190,7 +190,7 @@ Milady supports an ordered fallback chain. If the primary model fails (rate limi
   agents: {
     defaults: {
       model: {
-        primary: "anthropic/claude-sonnet-4-20250514",
+        primary: "anthropic/claude-sonnet-4.6",
         fallbacks: [
           "openai/gpt-4o",
           "groq/llama-3.3-70b-versatile",
@@ -234,8 +234,8 @@ With this setup, all four providers are available. You can set different models 
   agents: {
     defaults: {
       model: {
-        primary: "anthropic/claude-sonnet-4-20250514",
-        fallbacks: ["openrouter/anthropic/claude-sonnet-4-20250514"],
+        primary: "anthropic/claude-sonnet-4.6",
+        fallbacks: ["openrouter/anthropic/claude-sonnet-4.6"],
       },
       imageModel: {
         primary: "openai/gpt-4o",
