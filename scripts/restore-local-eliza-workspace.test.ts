@@ -53,12 +53,7 @@ describe("restore-local-eliza-workspace", () => {
 
     fs.mkdirSync(path.join(disabledDir, "packages"), { recursive: true });
     fs.mkdirSync(
-      path.join(
-        repoRoot,
-        "scripts",
-        "ci-stubs",
-        "elizaos-plugin-app-control",
-      ),
+      path.join(repoRoot, "scripts", "ci-stubs", "elizaos-plugin-app-control"),
       { recursive: true },
     );
     fs.writeFileSync(
