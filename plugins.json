@@ -250,7 +250,7 @@
           "description": "Override the default Anthropic small model identifier used by the plugin",
           "required": false,
           "sensitive": false,
-          "default": "claude-haiku-4-5-20251001"
+          "default": "claude-haiku-4-5-20251001-5-20251001"
         },
         "ANTHROPIC_LARGE_MODEL": {
           "type": "string",
@@ -1550,7 +1550,7 @@
         },
         "ELIZAOS_CLOUD_SMALL_MODEL": {
           "type": "string",
-          "description": "Small/fast model for quick tasks (overrides SMALL_MODEL). Available: gpt-5-mini, gpt-5, claude-3-5-sonnet, gemini-2.0-flash",
+          "description": "Small/fast model for quick tasks (overrides SMALL_MODEL). Available: gpt-5-mini, gpt-5, claude-sonnet-4-6, gemini-2.0-flash",
           "required": false,
           "sensitive": false
         },
@@ -1563,7 +1563,7 @@
         },
         "ELIZAOS_CLOUD_LARGE_MODEL": {
           "type": "string",
-          "description": "Large/powerful model for complex tasks (overrides LARGE_MODEL). Available: gpt-5-mini, gpt-5, claude-3-5-sonnet, gemini-2.0-flash",
+          "description": "Large/powerful model for complex tasks (overrides LARGE_MODEL). Available: gpt-5-mini, gpt-5, claude-sonnet-4-6, gemini-2.0-flash",
           "required": false,
           "sensitive": false
         },
@@ -3822,7 +3822,7 @@
           "description": "Claude model to use",
           "required": false,
           "sensitive": false,
-          "default": "claude-3-opus-20240229"
+          "default": "claude-opus-4-7"
         },
         "PLUGIN_DATA_DIR": {
           "type": "string",

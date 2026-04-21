@@ -63,7 +63,7 @@ where to get the credentials, minimum required fields, and tips for optional fie
 **Variables:**
 - `OPENROUTER_API_KEY` — From openrouter.ai/keys
 - `OPENROUTER_SMALL_MODEL` — e.g. `openai/gpt-4o-mini` or `meta-llama/llama-3.3-70b`
-- `OPENROUTER_LARGE_MODEL` — e.g. `anthropic/claude-3.5-sonnet`
+- `OPENROUTER_LARGE_MODEL` — e.g. `anthropic/claude-sonnet-4-6`
 - `OPENROUTER_IMAGE_MODEL` — e.g. `openai/gpt-4o` (for vision tasks)
 - `OPENROUTER_IMAGE_GENERATION_MODEL` — e.g. `openai/dall-e-3`
 - `OPENROUTER_EMBEDDING_MODEL` — e.g. `openai/text-embedding-3-small`

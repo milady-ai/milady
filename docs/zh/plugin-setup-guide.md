@@ -89,7 +89,7 @@ description: Milady 连接器、AI 提供者和直播推流插件的完整设置
 **变量：**
 - `OPENROUTER_API_KEY` — 来自 openrouter.ai/keys
 - `OPENROUTER_SMALL_MODEL` — 例如 `openai/gpt-4o-mini` 或 `meta-llama/llama-3.3-70b`
-- `OPENROUTER_LARGE_MODEL` — 例如 `anthropic/claude-3.5-sonnet`
+- `OPENROUTER_LARGE_MODEL` — 例如 `anthropic/claude-sonnet-4-6`
 - `OPENROUTER_IMAGE_MODEL` — 例如 `openai/gpt-4o`（用于视觉任务）
 - `OPENROUTER_IMAGE_GENERATION_MODEL` — 例如 `openai/dall-e-3`
 - `OPENROUTER_EMBEDDING_MODEL` — 例如 `openai/text-embedding-3-small`

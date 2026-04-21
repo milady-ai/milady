@@ -110,7 +110,7 @@ OpenRouter proporciona acceso a modelos de todos los proveedores principales. Us
 |---------------|-------------|
 | `anthropic/claude-opus-4.7` | Claude más capaz |
 | `anthropic/claude-sonnet-4.6` | Claude equilibrado |
-| `anthropic/claude-haiku-4` | Claude más rápido |
+| `anthropic/claude-haiku-4.5` | Claude más rápido |
 
 <div id="meta-via-openrouter">
 
@@ -144,7 +144,7 @@ Explora todos los modelos en [openrouter.ai/models](https://openrouter.ai/models
 
 | Tipo de modelo elizaOS | Modelo OpenRouter predeterminado |
 |------------------------|--------------------------------|
-| `TEXT_SMALL` | `anthropic/claude-haiku-4` |
+| `TEXT_SMALL` | `anthropic/claude-haiku-4.5` |
 | `TEXT_LARGE` | `anthropic/claude-sonnet-4.6` |
 
 <div id="features">
