@@ -3,7 +3,7 @@ import { defineConfig } from "@playwright/test";
 export default defineConfig({
   testDir: "./test/electrobun-packaged",
   testMatch: ["**/*.e2e.spec.ts"],
-  timeout: 600_000,
+  timeout: 300_000,
   expect: {
     timeout: 30_000,
   },

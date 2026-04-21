@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "skipLibCheck": true,
+    "types": ["node", "vite/client"],
+    "declaration": false,
+    "noEmit": true,
+    "baseUrl": "../../",
+    "paths": {
+      "@miladyai/plugin-selfcontrol": [
+        "./packages/plugin-selfcontrol/src/index.ts"
+      ],
+      "@miladyai/plugin-selfcontrol/*": ["./packages/plugin-selfcontrol/src/*"],
+      "@miladyai/ui": ["./packages/ui/src/index.ts"],
+      "@miladyai/ui/*": ["./packages/ui/src/*"],
+      "@miladyai/agent/*": ["./packages/agent/src/*"],
+      "@miladyai/shared": ["./packages/shared/src/index.ts"],
+      "@miladyai/shared/*": ["./packages/shared/src/*"],
+      "@elizaos/core": ["./eliza/packages/typescript/src/index.ts"],
+      "@elizaos/core/*": ["./eliza/packages/typescript/src/*"],
+      "@elizaos/*": ["./node_modules/@elizaos/*"]
+    }
+  },
+  "exclude": [
+    "src/**/*.stories.ts",
+    "src/**/*.stories.tsx",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx"
+  ],
+  "include": ["src", "../agent/src/external-modules.d.ts"]
+}

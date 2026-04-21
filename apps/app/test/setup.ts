@@ -1,16 +1,19 @@
 /**
- * Shared jsdom setup for app tests.
+ * Test setup — mocks browser APIs for Node.js vitest environment.
  *
- * Navigator sub-objects are installed as `vi.fn()` stubs so tests can spy on them.
+ * All navigator sub-objects (mediaDevices, geolocation, permissions, clipboard)
+ * are created here with vi.fn() stubs so tests can vi.spyOn() them freely.
  */
 
 import React from "react";
 import { vi } from "vitest";
 import {
-  createMemoryStorage,
+  createMockStorage,
   hasStorageApi,
+  installCanvasMocks,
+  installMediaElementMocks,
   suppressReactTestConsoleErrors,
-} from "../../../eliza/packages/app-core/test/helpers/browser-mocks";
+} from "../../../test/helpers/browser-mocks";
 
 declare global {
   var IS_REACT_ACT_ENVIRONMENT: boolean | undefined;
@@ -23,27 +26,10 @@ globalThis.React = React;
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
 suppressReactTestConsoleErrors();
-
-function ensureStorage(
-  target: Record<string, unknown>,
-  key: "localStorage" | "sessionStorage",
-  fallback?: Storage,
-): Storage {
-  const existing = target[key];
-  if (hasStorageApi(existing)) {
-    return existing;
-  }
-  const storage = fallback ?? createMemoryStorage();
-  Object.defineProperty(target, key, {
-    value: storage,
-    writable: true,
-    configurable: true,
-  });
-  return storage;
-}
+installMediaElementMocks();
 
 // ---------------------------------------------------------------------------
-// Mock @elizaos/app-core bridge modules — the real electrobun RPC module
+// Mock @miladyai/app-core bridge modules — the real electrobun RPC module
 // relies on native Electrobun bindings that are unavailable in the test
 // environment.
 // ---------------------------------------------------------------------------
@@ -153,9 +139,14 @@ function createBridgeMock(extraExports: Record<string, unknown> = {}) {
   };
 }
 
-vi.mock("@elizaos/app-core", () =>
+vi.mock("@miladyai/app-core/bridge/electrobun-rpc.js", () =>
+  createBridgeMock(),
+);
+
+vi.mock("@miladyai/app-core/bridge", () =>
   createBridgeMock({
     platform: "web",
+    isWeb: () => true,
     isNative: false,
     isIOS: false,
     isAndroid: false,
@@ -330,8 +321,6 @@ if (typeof globalThis.window !== "undefined") {
     typeof originalEmit === "function" &&
     !originalEmit[JSDOM_EMIT_PATCH_MARK]
   ) {
-    // Patched through jsdom's window side effects, so static analysis may not
-    // see a direct import site.
     const patchedEmit = function patchedEmit(eventName, ...args) {
       const [firstArg] = args;
       if (
@@ -402,36 +391,36 @@ if (typeof globalThis.document === "undefined") {
   });
 }
 
-const sharedLocalStorage = ensureStorage(
-  globalThis as Record<string, unknown>,
-  "localStorage",
-);
-const sharedSessionStorage = ensureStorage(
-  globalThis as Record<string, unknown>,
-  "sessionStorage",
-);
+if (!hasStorageApi(globalThis.localStorage)) {
+  Object.defineProperty(globalThis, "localStorage", {
+    value: createMockStorage(),
+    writable: true,
+    configurable: true,
+  });
+}
+if (!hasStorageApi(globalThis.sessionStorage)) {
+  Object.defineProperty(globalThis, "sessionStorage", {
+    value: createMockStorage(),
+    writable: true,
+    configurable: true,
+  });
+}
 
 if (typeof globalThis.window === "undefined") {
   Object.defineProperty(globalThis, "window", {
     value: {
       close: vi.fn(),
-      encodeURIComponent,
       focus: vi.fn(),
       open: vi.fn(),
-      location: {
-        href: "http://localhost/",
-        origin: "http://localhost",
-        pathname: "/",
-        reload: vi.fn(),
-      },
+      location: { reload: vi.fn() },
       screenX: 0,
       screenY: 0,
       outerWidth: 1920,
       outerHeight: 1080,
       addEventListener: vi.fn(),
       removeEventListener: vi.fn(),
-      localStorage: sharedLocalStorage,
-      sessionStorage: sharedSessionStorage,
+      localStorage: globalThis.localStorage,
+      sessionStorage: globalThis.sessionStorage,
       navigator: globalThis.navigator,
     },
     writable: true,
@@ -439,8 +428,20 @@ if (typeof globalThis.window === "undefined") {
   });
 } else {
   const win = globalThis.window as Record<string, unknown>;
-  ensureStorage(win, "sessionStorage", sharedSessionStorage);
-  ensureStorage(win, "localStorage", sharedLocalStorage);
+  if (!hasStorageApi(win.sessionStorage)) {
+    Object.defineProperty(win, "sessionStorage", {
+      value: globalThis.sessionStorage,
+      writable: true,
+      configurable: true,
+    });
+  }
+  if (!hasStorageApi(win.localStorage)) {
+    Object.defineProperty(win, "localStorage", {
+      value: globalThis.localStorage,
+      writable: true,
+      configurable: true,
+    });
+  }
   if (!win.navigator) {
     Object.defineProperty(win, "navigator", {
       value: globalThis.navigator,
@@ -449,6 +450,8 @@ if (typeof globalThis.window === "undefined") {
     });
   }
 }
+
+installCanvasMocks();
 
 if (typeof globalThis.WebSocket === "undefined") {
   class MockWebSocket {

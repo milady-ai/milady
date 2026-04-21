@@ -1,0 +1,618 @@
+/**
+ * Native Module Verification Tests
+ *
+ * Tests to verify that native Node.js modules required for vision and ML
+ * capabilities are properly installed and functional:
+ *
+ *   1. TensorFlow.js Node bindings (@tensorflow/tfjs-node)
+ *   2. Sharp image processing
+ *   3. Canvas for face-api.js
+ *   4. TensorFlow models (coco-ssd, mobilenet, pose-detection)
+ *   5. Plugin-vision service availability
+ *
+ * These tests ensure Electron compatibility by verifying native modules
+ * can be loaded and initialized correctly.
+ *
+ * In bun/npm workspaces, dependencies may be hoisted to the repo root
+ * node_modules rather than living in the package-local node_modules.
+ * All path checks use findPackagePath() to search both locations.
+ *
+ * Tests are automatically skipped when the corresponding native modules
+ * are not installed (e.g. CI without vision deps, MILADY_NO_VISION_DEPS=1).
+ */
+import fs from "node:fs";
+import path from "node:path";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
+import { describe, expect, it } from "vitest";
+import { itIf } from "../../../test/helpers/conditional-tests.ts";
+
+// ---------------------------------------------------------------------------
+// Environment
+// ---------------------------------------------------------------------------
+
+const testDir = path.dirname(fileURLToPath(import.meta.url));
+const packageRoot = path.resolve(testDir, "..");
+const repoRoot = path.resolve(packageRoot, "..", "..");
+const workspaceRequirePaths = [
+  path.join(packageRoot, "package.json"),
+  path.join(repoRoot, "package.json"),
+];
+
+// ---------------------------------------------------------------------------
+// Helper Functions
+// ---------------------------------------------------------------------------
+
+/**
+ * Finds a package in node_modules, checking both local and hoisted (repo root) locations.
+ */
+function findPackagePath(...segments: string[]): string | null {
+  const local = path.join(packageRoot, "node_modules", ...segments);
+  if (fs.existsSync(local)) return local;
+  const hoisted = path.join(repoRoot, "node_modules", ...segments);
+  if (fs.existsSync(hoisted)) return hoisted;
+  return null;
+}
+
+/**
+ * Attempts to require/import a module and returns success status
+ */
+async function canImportModule(
+  moduleName: string,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    await import(moduleName);
+    return { success: true };
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : String(err),
+    };
+  }
+}
+
+function runModuleSnippet(
+  source: string,
+  absolutePathOverrides: Record<string, string> = {},
+): {
+  success: boolean;
+  error?: string;
+  stdout: string;
+  stderr: string;
+} {
+  const module = [
+    'import { createRequire } from "node:module";',
+    'import { pathToFileURL } from "node:url";',
+    // Map of specifier → absolute on-disk entry file. When present, the
+    // subprocess imports the file:// URL directly and skips bare-specifier
+    // resolution entirely. Used for modules that bun places under a
+    // per-workspace node_modules symlink unreachable via
+    // `createRequire(workspacePackageJson).resolve(specifier)` in CI.
+    `const __absolutePathOverrides = ${JSON.stringify(absolutePathOverrides)};`,
+    `const importFromWorkspace = async (specifier) => {
+			if (Object.prototype.hasOwnProperty.call(__absolutePathOverrides, specifier)) {
+				return await import(pathToFileURL(__absolutePathOverrides[specifier]).href);
+			}
+			const resolutionErrors = [];
+			for (const requestPath of ${JSON.stringify(workspaceRequirePaths)}) {
+				try {
+					const requireFromWorkspace = createRequire(requestPath);
+					const resolved = requireFromWorkspace.resolve(specifier);
+					return await import(pathToFileURL(resolved).href);
+				} catch (error) {
+					resolutionErrors.push(
+						error instanceof Error ? error.message : String(error),
+					);
+				}
+			}
+			throw new Error(
+				\`Unable to resolve \${specifier} from workspace roots: \${resolutionErrors.join(" | ")}\`,
+			);
+		};`,
+    source,
+  ].join("\n\n");
+
+  const result = spawnSync(
+    process.execPath,
+    ["--input-type=module", "--eval", module],
+    {
+      cwd: repoRoot,
+      encoding: "utf8",
+      timeout: 30_000,
+    },
+  );
+
+  if (result.status === 0) {
+    return {
+      success: true,
+      stdout: result.stdout ?? "",
+      stderr: result.stderr ?? "",
+    };
+  }
+
+  return {
+    success: false,
+    error:
+      result.error?.message ??
+      result.stderr ??
+      result.stdout ??
+      `process exited with code ${String(result.status)}`,
+    stdout: result.stdout ?? "",
+    stderr: result.stderr ?? "",
+  };
+}
+
+async function canImportModuleInSubprocess(
+  moduleName: string,
+  absolutePathOverrides: Record<string, string> = {},
+): Promise<{ success: boolean; error?: string }> {
+  const result = runModuleSnippet(
+    `await importFromWorkspace(${JSON.stringify(moduleName)});`,
+    absolutePathOverrides,
+  );
+  return result.success
+    ? { success: true }
+    : { success: false, error: result.error };
+}
+
+/**
+ * Resolves a package's main entry file using the outer process, where
+ * `findPackagePath` has working filesystem access to bun's per-workspace
+ * symlinks. Returns an absolute file path or null.
+ *
+ * This exists because the `importFromWorkspace` helper inside
+ * `runModuleSnippet` relies on bare-specifier resolution via
+ * `createRequire(workspacePackageJson).resolve(specifier)`. That works for
+ * packages with a root-level `node_modules/<pkg>` symlink (created when the
+ * package is declared in the root `package.json`, e.g. sharp) but fails in
+ * CI for packages only declared in a leaf workspace (e.g. canvas, which is
+ * a dep of `packages/agent` only). Bun places those under
+ * `node_modules/.bun/<pkg>@<ver>/` and links them into the leaf's
+ * `node_modules`, but Node's bare-specifier resolver in the spawned
+ * subprocess can't always reach them from the workspace package.json alone.
+ * Resolving to an absolute on-disk path in the outer process and passing the
+ * file:// URL into the subprocess sidesteps bare-specifier resolution.
+ */
+function findPackageMainFile(moduleName: string): string | null {
+  const pkgDir = findPackagePath(moduleName);
+  if (!pkgDir) return null;
+  const pkgJsonPath = path.join(pkgDir, "package.json");
+  if (!fs.existsSync(pkgJsonPath)) return null;
+  try {
+    const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, "utf-8"));
+    const main =
+      typeof pkg.main === "string" && pkg.main.length > 0
+        ? pkg.main
+        : "index.js";
+    const mainPath = path.resolve(pkgDir, main);
+    if (fs.existsSync(mainPath)) return mainPath;
+    const fallback = path.join(pkgDir, "index.js");
+    if (fs.existsSync(fallback)) return fallback;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Checks if a native binding file exists for a module
+ */
+function hasNativeBinding(modulePath: string, patterns: string[]): boolean {
+  try {
+    const nodeModulesPath =
+      findPackagePath(modulePath) ??
+      path.join(packageRoot, "node_modules", modulePath);
+    if (!fs.existsSync(nodeModulesPath)) return false;
+
+    // Recursively search for .node files
+    const findNodeFiles = (dir: string): string[] => {
+      const results: string[] = [];
+      try {
+        const entries = fs.readdirSync(dir, { withFileTypes: true });
+        for (const entry of entries) {
+          const fullPath = path.join(dir, entry.name);
+          if (entry.isDirectory()) {
+            results.push(...findNodeFiles(fullPath));
+          } else if (patterns.some((p) => entry.name.includes(p))) {
+            results.push(fullPath);
+          }
+        }
+      } catch {
+        // Ignore permission errors
+      }
+      return results;
+    };
+
+    const nodeFiles = findNodeFiles(nodeModulesPath);
+    return nodeFiles.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Reads package.json from both local and repo root, merging all deps.
+ */
+function getAllWorkspaceDeps(): Record<string, string> {
+  const localPkg = JSON.parse(
+    fs.readFileSync(path.join(packageRoot, "package.json"), "utf-8"),
+  );
+  const repoRootPkgPath = path.join(repoRoot, "package.json");
+  const repoRootPkg = fs.existsSync(repoRootPkgPath)
+    ? JSON.parse(fs.readFileSync(repoRootPkgPath, "utf-8"))
+    : {};
+  return {
+    ...(repoRootPkg.dependencies || {}),
+    ...(repoRootPkg.devDependencies || {}),
+    ...(localPkg.dependencies || {}),
+    ...(localPkg.devDependencies || {}),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Pre-compute availability flags (evaluated once at module load)
+// ---------------------------------------------------------------------------
+
+const hasTfjsNode = !!findPackagePath("@tensorflow", "tfjs-node");
+const hasTfjsNodeBinding = hasNativeBinding("@tensorflow/tfjs-node", [
+  "tfjs_binding.node",
+  ".node",
+]);
+const hasTfjsCore = !!findPackagePath("@tensorflow", "tfjs-core");
+const hasCocoSsd = !!findPackagePath("@tensorflow-models", "coco-ssd");
+const hasMobilenet = !!findPackagePath("@tensorflow-models", "mobilenet");
+const hasPoseDetection = !!findPackagePath(
+  "@tensorflow-models",
+  "pose-detection",
+);
+const hasSharp = !!findPackagePath("sharp");
+const hasCanvas = !!findPackagePath("canvas");
+const hasCanvasBinding = hasNativeBinding("canvas", ["canvas.node", ".node"]);
+const hasFaceApi = !!findPackagePath("face-api.js");
+const hasTesseract = !!findPackagePath("tesseract.js");
+const hasPluginVision = !!findPackagePath("@elizaos", "plugin-vision");
+const hasNodePty = !!findPackagePath("node-pty");
+const hasLydellNodePty = [
+  path.join(packageRoot, "node_modules", ".bun", "@lydell+node-pty@1.1.0"),
+  path.join(packageRoot, "node_modules", "@lydell", "node-pty"),
+  path.join(repoRoot, "node_modules", ".bun", "@lydell+node-pty@1.1.0"),
+  path.join(repoRoot, "node_modules", "@lydell", "node-pty"),
+].some((p) => fs.existsSync(p));
+const hasPtyManager = !!findPackagePath("pty-manager");
+
+const allDeps = getAllWorkspaceDeps();
+const hasAnyNativeModuleDep = ["sharp", "canvas", "@tensorflow/tfjs-node"].some(
+  (d) => !!allDeps[d],
+);
+const hasPtyDeps = !!allDeps["node-pty"] || !!allDeps["pty-manager"];
+const hasEmbeddingDeps =
+  !!allDeps["node-llama-cpp"] || !!allDeps["whisper-node"];
+
+const electrobunPkgPath = (() => {
+  const localPath = path.join(
+    packageRoot,
+    "apps",
+    "app",
+    "electrobun",
+    "package.json",
+  );
+  const repoPath = path.join(
+    repoRoot,
+    "apps",
+    "app",
+    "electrobun",
+    "package.json",
+  );
+  if (fs.existsSync(localPath)) return localPath;
+  if (fs.existsSync(repoPath)) return repoPath;
+  return null;
+})();
+
+const copyRuntimeScript =
+  [
+    path.join(packageRoot, "scripts", "copy-runtime-node-modules.ts"),
+    path.join(repoRoot, "scripts", "copy-runtime-node-modules.ts"),
+  ].find((p) => fs.existsSync(p)) ?? null;
+
+const releaseWorkflow =
+  [
+    path.join(packageRoot, ".github", "workflows", "release-electrobun.yml"),
+    path.join(repoRoot, ".github", "workflows", "release-electrobun.yml"),
+  ].find((p) => fs.existsSync(p)) ?? null;
+
+const corePluginsPath = (() => {
+  const candidate = path.join(packageRoot, "src", "runtime", "core-plugins.ts");
+  if (fs.existsSync(candidate)) return candidate;
+  const jsCandidate = path.join(
+    packageRoot,
+    "src",
+    "runtime",
+    "core-plugins.js",
+  );
+  if (fs.existsSync(jsCandidate)) return jsCandidate;
+  return null;
+})();
+
+const elizaTsPath =
+  [
+    path.join(packageRoot, "src", "runtime", "eliza.ts"),
+    path.join(repoRoot, "src", "runtime", "eliza.ts"),
+    path.join(
+      packageRoot,
+      "packages",
+      "autonomous",
+      "src",
+      "runtime",
+      "eliza.ts",
+    ),
+    path.join(repoRoot, "packages", "autonomous", "src", "runtime", "eliza.ts"),
+  ].find((p) => fs.existsSync(p)) ?? null;
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+
+describe("Native Module Installation Verification", () => {
+  describe("TensorFlow.js", () => {
+    itIf(hasTfjsNode)("@tensorflow/tfjs-node is installed", async () => {
+      const packagePath = findPackagePath("@tensorflow", "tfjs-node");
+      expect(fs.existsSync(packagePath!)).toBe(true);
+    });
+
+    itIf(hasTfjsNode)(
+      "@tensorflow/tfjs-node has native binding",
+      () => {
+        const hasBinding = hasNativeBinding("@tensorflow/tfjs-node", [
+          "tfjs_binding.node",
+          ".node",
+        ]);
+        expect(hasBinding).toBe(true);
+      },
+    );
+
+    itIf(hasTfjsCore)("@tensorflow/tfjs-core is installed", async () => {
+      const packagePath = findPackagePath("@tensorflow", "tfjs-core");
+      expect(fs.existsSync(packagePath!)).toBe(true);
+    });
+  });
+
+  describe("TensorFlow Models", () => {
+    itIf(hasCocoSsd)("@tensorflow-models/coco-ssd is installed", () => {
+      const packagePath = findPackagePath("@tensorflow-models", "coco-ssd");
+      expect(fs.existsSync(packagePath!)).toBe(true);
+    });
+
+    itIf(hasMobilenet)(
+      "@tensorflow-models/mobilenet is installed",
+      () => {
+        const packagePath = findPackagePath("@tensorflow-models", "mobilenet");
+        expect(fs.existsSync(packagePath!)).toBe(true);
+      },
+    );
+
+    itIf(hasPoseDetection)(
+      "@tensorflow-models/pose-detection is installed",
+      () => {
+        const packagePath = findPackagePath(
+          "@tensorflow-models",
+          "pose-detection",
+        );
+        expect(fs.existsSync(packagePath!)).toBe(true);
+      },
+    );
+  });
+
+  describe("Sharp Image Processing", () => {
+    itIf(hasSharp)("sharp is installed", () => {
+      const packagePath = findPackagePath("sharp");
+      expect(fs.existsSync(packagePath!)).toBe(true);
+    });
+
+    itIf(hasSharp)("sharp can be imported", async () => {
+      const result = await canImportModuleInSubprocess("sharp");
+      expect(result.success).toBe(true);
+    });
+
+    itIf(hasSharp)("sharp can process an image buffer", async () => {
+      const result = runModuleSnippet(`
+					const sharp = (await importFromWorkspace("sharp")).default;
+					const buffer = await sharp({
+						create: {
+							width: 1,
+							height: 1,
+							channels: 3,
+							background: { r: 255, g: 0, b: 0 },
+						},
+					}).png().toBuffer();
+					process.stdout.write(String(buffer.length));
+				`);
+
+      expect(result.success, result.error).toBe(true);
+      expect(Number(result.stdout.trim())).toBeGreaterThan(0);
+    });
+  });
+
+  describe("Canvas for Face Recognition", () => {
+    itIf(hasCanvas)("canvas is installed", () => {
+      const packagePath = findPackagePath("canvas");
+      expect(fs.existsSync(packagePath!)).toBe(true);
+    });
+
+    itIf(hasCanvasBinding)("canvas has native binding", () => {
+      const hasBinding = hasNativeBinding("canvas", ["canvas.node", ".node"]);
+      expect(hasBinding).toBe(true);
+    });
+
+    itIf(hasCanvasBinding)("canvas can be imported", async () => {
+      // Pre-resolve canvas's main entry file in the outer process. Bun places
+      // canvas under `node_modules/.bun/canvas@<ver>/node_modules/canvas/`
+      // and only links it into `packages/agent/node_modules/canvas`, which
+      // bare-specifier resolution in the spawned subprocess can't reliably
+      // reach in CI. Passing the absolute path sidesteps that entirely.
+      const canvasMainFile = findPackageMainFile("canvas");
+      expect(canvasMainFile, "canvas main file not resolvable").toBeTruthy();
+      const result = await canImportModuleInSubprocess("canvas", {
+        canvas: canvasMainFile!,
+      });
+      expect(result.success, result.error).toBe(true);
+    });
+
+    itIf(hasCanvasBinding)("canvas can create a 2D context", async () => {
+      const canvasMainFile = findPackageMainFile("canvas");
+      expect(canvasMainFile, "canvas main file not resolvable").toBeTruthy();
+      const result = runModuleSnippet(
+        `
+					const { createCanvas } = await importFromWorkspace("canvas");
+					const canvas = createCanvas(100, 100);
+					const ctx = canvas.getContext("2d");
+					if (!ctx) throw new Error("2D context missing");
+					ctx.fillStyle = "red";
+					ctx.fillRect(0, 0, 50, 50);
+					const imageData = ctx.getImageData(0, 0, 1, 1);
+					process.stdout.write(String(imageData.data[0]));
+				`,
+        { canvas: canvasMainFile! },
+      );
+
+      expect(result.success, result.error).toBe(true);
+      expect(Number(result.stdout.trim())).toBe(255);
+    });
+  });
+
+  describe("Face-API.js", () => {
+    itIf(hasFaceApi)("face-api.js is installed", () => {
+      const packagePath = findPackagePath("face-api.js");
+      expect(fs.existsSync(packagePath!)).toBe(true);
+    });
+
+    itIf(hasFaceApi)("face-api.js can be imported", async () => {
+      const result = await canImportModule("face-api.js");
+      expect(result.success).toBe(true);
+    });
+  });
+
+  describe("Tesseract.js OCR", () => {
+    itIf(hasTesseract)("tesseract.js is installed", () => {
+      const packagePath = findPackagePath("tesseract.js");
+      expect(fs.existsSync(packagePath!)).toBe(true);
+    });
+
+    itIf(hasTesseract)("tesseract.js can be imported", async () => {
+      const result = await canImportModule("tesseract.js");
+      expect(result.success).toBe(true);
+    });
+  });
+});
+
+describe("Plugin-Vision Availability", () => {
+  itIf(hasPluginVision)("@elizaos/plugin-vision is installed", () => {
+    const packagePath = findPackagePath("@elizaos", "plugin-vision");
+    expect(fs.existsSync(packagePath!)).toBe(true);
+  });
+
+  itIf(hasPluginVision)(
+    "@elizaos/plugin-vision can be imported",
+    async () => {
+      const result = await canImportModule("@elizaos/plugin-vision");
+      expect(result.success).toBe(true);
+    },
+  );
+
+  itIf(hasPluginVision)("plugin-vision has required dependencies", () => {
+    const visionPkgDir = findPackagePath("@elizaos", "plugin-vision");
+    const visionPkgPath = path.join(visionPkgDir!, "package.json");
+    expect(fs.existsSync(visionPkgPath)).toBe(true);
+
+    const visionPkgContent = fs.readFileSync(visionPkgPath, "utf-8");
+
+    expect(visionPkgContent).toContain('"sharp"');
+    expect(visionPkgContent).toContain('"canvas"');
+    expect(visionPkgContent).toContain('"face-api.js"');
+    expect(visionPkgContent).toContain('"tesseract.js"');
+  });
+
+  itIf(hasPluginVision)(
+    "vision dependencies are installed in node_modules",
+    () => {
+      const sharpPath = findPackagePath("sharp");
+      expect(!!sharpPath).toBe(true);
+      const tesseractPath = findPackagePath("tesseract.js");
+      expect(!!tesseractPath).toBe(true);
+    },
+  );
+});
+
+describe("Electrobun Native Module Configuration", () => {
+  itIf(electrobunPkgPath)(
+    "electrobun app package is present and depends on electrobun",
+    () => {
+      const electrobunPkg = JSON.parse(
+        fs.readFileSync(electrobunPkgPath!, "utf-8"),
+      );
+      expect(electrobunPkg.dependencies || {}).toHaveProperty("electrobun");
+    },
+  );
+
+  itIf(hasAnyNativeModuleDep)(
+    "root runtime declares native module dependencies for desktop packaging",
+    () => {
+      expect(hasAnyNativeModuleDep).toBe(true);
+    },
+  );
+
+  itIf(copyRuntimeScript || !releaseWorkflow)(
+    "desktop packaging scripts exist for runtime dependency bundling",
+    () => {
+      expect(fs.existsSync(copyRuntimeScript!)).toBe(true);
+      expect(fs.existsSync(releaseWorkflow!)).toBe(true);
+    },
+  );
+});
+
+describe("Core Plugins with Vision Integration", () => {
+  itIf(corePluginsPath)(
+    "plugin-vision is in OPTIONAL_CORE_PLUGINS",
+    async () => {
+      const { OPTIONAL_CORE_PLUGINS } = await import(
+        "../src/runtime/core-plugins"
+      );
+      expect(OPTIONAL_CORE_PLUGINS).toContain("@elizaos/plugin-vision");
+    },
+  );
+
+  itIf(elizaTsPath)("plugin-vision has static import in eliza.ts", () => {
+    const elizaContent = fs.readFileSync(elizaTsPath!, "utf-8");
+    expect(elizaContent).toContain("plugin-vision");
+  });
+});
+
+describe("PTY Native Modules", () => {
+  itIf(hasNodePty)("node-pty is installed", () => {
+    const packagePath = findPackagePath("node-pty");
+    expect(fs.existsSync(packagePath!)).toBe(true);
+  });
+
+  itIf(hasLydellNodePty)("@lydell/node-pty is available", () => {
+    expect(hasLydellNodePty).toBe(true);
+  });
+
+  itIf(hasPtyManager)("pty-manager is installed", () => {
+    const packagePath = findPackagePath("pty-manager");
+    expect(fs.existsSync(packagePath!)).toBe(true);
+  });
+
+  itIf(hasPtyDeps)("root runtime declares PTY dependencies", () => {
+    expect(!!allDeps["pty-manager"]).toBe(true);
+  });
+});
+
+describe("Local Embedding Native Modules", () => {
+  itIf(hasEmbeddingDeps)(
+    "root runtime declares local embedding dependencies",
+    () => {
+      expect(!!allDeps["node-llama-cpp"] || !!allDeps["whisper-node"]).toBe(
+        true,
+      );
+    },
+  );
+});

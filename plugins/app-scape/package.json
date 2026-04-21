@@ -1,0 +1,117 @@
+{
+  "name": "@elizaos/app-scape",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "'scape — first-class agent integration for xRSPS. Autonomous RuneScape-alike agent with TOON-encoded state, Scape Journal, and directed-prompt operator control.",
+  "main": "./src/index.ts",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": "./src/index.ts",
+    "./routes": "./src/routes.ts"
+  },
+  "keywords": [
+    "game",
+    "runescape",
+    "xrsps",
+    "agents",
+    "autonomous"
+  ],
+  "dependencies": {
+    "@elizaos/core": "workspace:*",
+    "@miladyai/shared": "workspace:*",
+    "@toon-format/toon": "^2.1.0"
+  },
+  "agentConfig": {
+    "pluginParameters": {
+      "SCAPE_BOT_SDK_TOKEN": {
+        "type": "string",
+        "description": "Shared secret for the xRSPS bot-SDK endpoint. Must match the server's BOT_SDK_TOKEN env var. Without this set, the plugin will not connect and the agent will not enter the world.",
+        "required": true,
+        "sensitive": true
+      },
+      "SCAPE_AGENT_PASSWORD": {
+        "type": "string",
+        "description": "Password for the agent's xRSPS account. Auto-registers on the first spawn, verified via scrypt on every reconnect. Treat like any other account password.",
+        "required": true,
+        "sensitive": true
+      },
+      "SCAPE_BOT_SDK_URL": {
+        "type": "string",
+        "description": "WebSocket URL of the xRSPS bot-SDK endpoint. Default points at localhost for dev.",
+        "required": false,
+        "sensitive": false,
+        "default": "ws://127.0.0.1:43595"
+      },
+      "SCAPE_CLIENT_URL": {
+        "type": "string",
+        "description": "URL the /viewer iframe loads — the xRSPS React client. Default is the local craco dev server; override for a deployed build.",
+        "required": false,
+        "sensitive": false,
+        "default": "http://localhost:3000"
+      },
+      "SCAPE_AGENT_NAME": {
+        "type": "string",
+        "description": "In-game display name for the agent. Becomes the account username (normalized, max 12 chars). Must not conflict with any human player's name.",
+        "required": false,
+        "sensitive": false,
+        "default": "scape-agent"
+      },
+      "SCAPE_AGENT_ID": {
+        "type": "string",
+        "description": "Stable identifier across reconnects. Used as the journal filename. Defaults to 'scape-{SCAPE_AGENT_NAME}'.",
+        "required": false,
+        "sensitive": false
+      },
+      "SCAPE_AGENT_PERSONA": {
+        "type": "string",
+        "description": "Optional persona string fed into the LLM's system prompt so the agent keeps a consistent voice across sessions.",
+        "required": false,
+        "sensitive": false
+      },
+      "SCAPE_LOOP_INTERVAL_MS": {
+        "type": "string",
+        "description": "Autonomous LLM step interval in milliseconds. Lower = more expensive, more responsive. Minimum 1000.",
+        "required": false,
+        "sensitive": false,
+        "default": "15000"
+      },
+      "SCAPE_MODEL_SIZE": {
+        "type": "string",
+        "description": "Which model tier the autonomous loop uses. Smaller = cheaper, larger = smarter.",
+        "required": false,
+        "sensitive": false,
+        "default": "TEXT_SMALL",
+        "options": ["TEXT_NANO", "TEXT_SMALL", "TEXT_MEDIUM", "TEXT_LARGE", "TEXT_MEGA"]
+      }
+    }
+  },
+  "elizaos": {
+    "kind": "app",
+    "app": {
+      "displayName": "'scape",
+      "category": "game",
+      "launchType": "connect",
+      "launchUrl": "http://localhost:3000",
+      "capabilities": [
+        "autonomous",
+        "game",
+        "journal",
+        "operator-steering"
+      ],
+      "runtimePlugin": "@elizaos/app-scape",
+      "viewer": {
+        "url": "/api/apps/scape/viewer",
+        "sandbox": "allow-scripts allow-same-origin allow-popups allow-forms"
+      },
+      "session": {
+        "mode": "spectate-and-steer",
+        "features": [
+          "commands",
+          "telemetry",
+          "suggestions"
+        ]
+      }
+    }
+  }
+}

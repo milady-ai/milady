@@ -38,7 +38,10 @@
       "@elizaos/ui": ["./eliza/packages/ui/src/index.ts"],
       "@elizaos/ui/*": ["./eliza/packages/ui/src/*"],
       "@elizaos/app-steward": ["./eliza/apps/app-steward/src/index.ts"],
-      "@elizaos/app-steward/*": ["./eliza/apps/app-steward/src/*"]
+      "@elizaos/app-steward/*": ["./eliza/apps/app-steward/src/*"],
+      "@elizaos/plugin-computeruse": ["./types/stubs/elizaos-plugin-computeruse.ts"],
+      "@elizaos/plugin-telegram": ["./eliza/plugins/plugin-telegram/src/index.ts"],
+      "@elizaos/plugin-telegram/*": ["./eliza/plugins/plugin-telegram/src/*"]
     }
   },
   "include": ["eliza/packages/app-core/src/**/*"],

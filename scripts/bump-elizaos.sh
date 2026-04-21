@@ -18,8 +18,8 @@
 #
 # What this does:
 #   1. Normalises the version to 2.0.0-alpha.{N}
-#   2. Updates package.json: pins @elizaos/agent, @elizaos/core,
-#      @elizaos/app-core, @elizaos/app-core, @elizaos/prompts,
+#   2. Updates package.json: pins @miladyai/agent, @elizaos/core,
+#      @miladyai/app-core, @miladyai/ui, @elizaos/prompts,
 #      @elizaos/sweagent-root to the target version
 #   3. Checks if @elizaos/core at that version ships dist/node/index.node.js
 #      (the native node binding needed for production)
@@ -106,10 +106,10 @@ $DRY_RUN && warn "DRY RUN — no files will be modified"
 # ── Packages to pin ───────────────────────────────────────────────────────────
 # These are the elizaOS packages that move together in the same release
 ELIZAOS_PACKAGES=(
-  "@elizaos/agent"
+  "@miladyai/agent"
   "@elizaos/core"
-  "@elizaos/app-core"
-  "@elizaos/app-core"
+  "@miladyai/app-core"
+  "@miladyai/ui"
   "@elizaos/prompts"
   "@elizaos/sweagent-root"
 )
@@ -434,5 +434,5 @@ else
   echo "    2. Install: bun install"
   # Extract alpha number for tag
   ALPHA_NUM="${VERSION##*alpha.}"
-  echo "    3. Build:   bash eliza/packages/app-core/scripts/build-image.sh --tag v${ALPHA_NUM}"
+  echo "    3. Build:   ./scripts/build-image.sh --tag v${ALPHA_NUM}"
 fi

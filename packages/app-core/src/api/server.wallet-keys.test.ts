@@ -1,0 +1,516 @@
+import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+import type { AgentRuntime } from "@elizaos/core";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { req } from "../../../../test/helpers/http";
+import { startApiServer } from "./server";
+
+vi.mock("../services/mcp-marketplace", () => ({
+  searchMcpMarketplace: vi.fn().mockResolvedValue({ results: [] }),
+  getMcpServerDetails: vi.fn().mockResolvedValue(null),
+}));
+
+async function cleanupTempDir(dir: string): Promise<void> {
+  try {
+    await fs.rm(dir, {
+      recursive: true,
+      force: true,
+      maxRetries: 3,
+      retryDelay: 100,
+    });
+  } catch {
+    // ignore
+  }
+}
+
+function resolveFetchCallUrl(input: Parameters<typeof fetch>[0]): URL {
+  if (typeof input === "string") {
+    return new URL(input);
+  }
+  if (input instanceof URL) {
+    return input;
+  }
+  return new URL(input.url);
+}
+
+const RUNTIME_STUB = {
+  character: { name: "Eliza" },
+  plugins: [],
+  getService: () => null,
+  getRoomsByWorld: async () => [],
+  getMemories: async () => [],
+  getCache: async () => null,
+  setCache: async () => {},
+} as unknown as AgentRuntime;
+
+const ENV_KEYS_TO_SAVE = [
+  "NODE_ENV",
+  "ELIZA_STATE_DIR",
+  "MILADY_STATE_DIR",
+  "MILADY_CONFIG_PATH",
+  "ELIZA_API_TOKEN",
+  "MILADY_API_TOKEN",
+  "MILADY_DEV_AUTH_BYPASS",
+  "EVM_PRIVATE_KEY",
+  "SOLANA_PRIVATE_KEY",
+] as const;
+
+describe("GET /api/wallet/keys", () => {
+  const savedEnv = new Map<string, string | undefined>();
+  let tempDir: string;
+
+  beforeEach(async () => {
+    for (const key of ENV_KEYS_TO_SAVE) {
+      savedEnv.set(key, process.env[key]);
+      delete process.env[key];
+    }
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "eliza-wallet-keys-"));
+    process.env.NODE_ENV = "production";
+    process.env.ELIZA_STATE_DIR = tempDir;
+    process.env.MILADY_STATE_DIR = tempDir;
+  });
+
+  afterEach(async () => {
+    for (const key of ENV_KEYS_TO_SAVE) {
+      const original = savedEnv.get(key);
+      if (original === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = original;
+      }
+    }
+    await cleanupTempDir(tempDir);
+  });
+
+  it("returns 403 when onboarding is complete", async () => {
+    await fs.writeFile(
+      path.join(tempDir, "eliza.json"),
+      JSON.stringify({
+        meta: { onboardingComplete: true },
+        logging: { level: "error" },
+      }),
+    );
+    process.env.ELIZA_API_TOKEN = "onboarding-token";
+    process.env.MILADY_API_TOKEN = "onboarding-token";
+
+    const server = await startApiServer({ port: 0, runtime: RUNTIME_STUB });
+    try {
+      const { status, data } = await req(
+        server.port,
+        "GET",
+        "/api/wallet/keys",
+        undefined,
+        { "x-eliza-token": "onboarding-token" },
+      );
+      expect(status).toBe(403);
+      expect(data.error).toBeTruthy();
+    } finally {
+      await server.close();
+    }
+  });
+
+  it("returns 401 without a token when auth is required", async () => {
+    await fs.writeFile(
+      path.join(tempDir, "eliza.json"),
+      JSON.stringify({ logging: { level: "error" } }),
+    );
+    process.env.ELIZA_API_TOKEN = "test-secret-token";
+    process.env.MILADY_API_TOKEN = "test-secret-token";
+
+    const server = await startApiServer({ port: 0, runtime: RUNTIME_STUB });
+    try {
+      const { status } = await req(server.port, "GET", "/api/wallet/keys");
+      expect(status).toBe(401);
+    } finally {
+      await server.close();
+    }
+  });
+
+  it("rejects loopback requests without a token during active onboarding in production", async () => {
+    process.env.NODE_ENV = "production";
+    await fs.writeFile(
+      path.join(tempDir, "eliza.json"),
+      JSON.stringify({
+        meta: { onboardingComplete: false },
+        logging: { level: "error" },
+      }),
+    );
+
+    const server = await startApiServer({ port: 0, runtime: RUNTIME_STUB });
+    try {
+      const { status } = await req(server.port, "GET", "/api/wallet/keys");
+      expect(status).toBe(403);
+    } finally {
+      await server.close();
+    }
+  });
+
+  it("allows loopback development requests without a token during active onboarding", async () => {
+    process.env.NODE_ENV = "development";
+    process.env.MILADY_DEV_AUTH_BYPASS = "1";
+    await fs.writeFile(
+      path.join(tempDir, "eliza.json"),
+      JSON.stringify({
+        meta: { onboardingComplete: false },
+        logging: { level: "error" },
+      }),
+    );
+
+    const server = await startApiServer({ port: 0, runtime: RUNTIME_STUB });
+    try {
+      const { status } = await req(server.port, "GET", "/api/wallet/keys");
+      expect(status).toBe(200);
+    } finally {
+      await server.close();
+    }
+  });
+
+  it("includes an explicit loopback-only guard in the route handler", async () => {
+    const serverSource = await fs.readFile(
+      path.resolve(import.meta.dirname, "server.ts"),
+      "utf-8",
+    );
+    expect(serverSource).toContain("handleWalletCompatRoutes(req, res, state)");
+
+    const routeSource = await fs.readFile(
+      path.resolve(import.meta.dirname, "wallet-compat-routes.ts"),
+      "utf-8",
+    );
+    const routeIdx = routeSource.indexOf('"/api/wallet/keys"');
+    expect(routeIdx).toBeGreaterThan(-1);
+
+    const nearbyCode = routeSource.slice(routeIdx, routeIdx + 400);
+    expect(nearbyCode).toContain(
+      "isLoopbackRemoteAddress(req.socket.remoteAddress)",
+    );
+    expect(nearbyCode).toContain('"loopback only"');
+  });
+
+  it("returns 200 with a valid auth token during onboarding", async () => {
+    await fs.writeFile(
+      path.join(tempDir, "eliza.json"),
+      JSON.stringify({
+        meta: { onboardingComplete: false },
+        logging: { level: "error" },
+      }),
+    );
+    process.env.ELIZA_API_TOKEN = "valid-token";
+    process.env.MILADY_API_TOKEN = "valid-token";
+
+    const server = await startApiServer({ port: 0, runtime: RUNTIME_STUB });
+    try {
+      const { status, data } = await req(
+        server.port,
+        "GET",
+        "/api/wallet/keys",
+        undefined,
+        { "x-eliza-token": "valid-token" },
+      );
+      expect(status).toBe(200);
+      expect(typeof data.evmPrivateKey).toBe("string");
+    } finally {
+      await server.close();
+    }
+  });
+});
+
+describe("POST /api/agent/reset", () => {
+  const savedEnv = new Map<string, string | undefined>();
+  let tempDir: string;
+
+  beforeEach(async () => {
+    for (const key of ENV_KEYS_TO_SAVE) {
+      savedEnv.set(key, process.env[key]);
+      delete process.env[key];
+    }
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "eliza-agent-reset-"));
+    process.env.NODE_ENV = "production";
+    process.env.ELIZA_STATE_DIR = tempDir;
+    process.env.MILADY_STATE_DIR = tempDir;
+  });
+
+  afterEach(async () => {
+    for (const key of ENV_KEYS_TO_SAVE) {
+      const original = savedEnv.get(key);
+      if (original === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = original;
+      }
+    }
+    await cleanupTempDir(tempDir);
+  });
+
+  it("returns 401 when a configured token is missing from the request", async () => {
+    await fs.writeFile(
+      path.join(tempDir, "eliza.json"),
+      JSON.stringify({ logging: { level: "error" } }),
+    );
+    process.env.ELIZA_API_TOKEN = "reset-token";
+    process.env.MILADY_API_TOKEN = "reset-token";
+
+    const server = await startApiServer({ port: 0, runtime: RUNTIME_STUB });
+    try {
+      const { status } = await req(server.port, "POST", "/api/agent/reset");
+      expect(status).toBe(401);
+    } finally {
+      await server.close();
+    }
+  });
+
+  it("clears onboarding, agent list, and cloud state when auth succeeds", async () => {
+    const workspaceDir = path.join(tempDir, "workspace");
+    const dbDir = path.join(workspaceDir, ".eliza", ".elizadb");
+    await fs.mkdir(dbDir, { recursive: true });
+
+    await fs.writeFile(
+      path.join(tempDir, "eliza.json"),
+      JSON.stringify({
+        meta: { onboardingComplete: true },
+        agents: {
+          defaults: {
+            workspace: workspaceDir,
+            adminEntityId: "legacy-admin",
+            subscriptionProvider: "openai-codex",
+            model: { primary: "openai" },
+          },
+          list: [{ name: "Chen" }],
+        },
+        cloud: {
+          enabled: true,
+          apiKey: "cloud-key",
+          inferenceMode: "cloud",
+          remoteApiBase: "https://api.example.test",
+          remoteAccessToken: "remote-token",
+          services: { inference: true },
+        },
+        messages: {
+          tts: {
+            provider: "elevenlabs",
+            mode: "cloud",
+            elevenlabs: {
+              voiceId: "pNInz6obpgDQGcFmaJgB",
+              modelId: "eleven_flash_v2_5",
+            },
+          },
+        },
+        models: {
+          small: "small-model",
+          large: "large-model",
+          embedding: "keep-me",
+        },
+        env: {
+          vars: {
+            OPENAI_API_KEY: "sk-test",
+            ELIZA_USE_PI_AI: "1",
+            KEEP_ME: "still-here",
+          },
+          GROQ_API_KEY: "gsk-test",
+          KEEP_ROOT: "still-here-root",
+        },
+        logging: { level: "error" },
+      }),
+    );
+    process.env.ELIZA_API_TOKEN = "reset-token";
+    process.env.MILADY_API_TOKEN = "reset-token";
+
+    const server = await startApiServer({ port: 0, runtime: RUNTIME_STUB });
+    try {
+      const { status, data } = await req(
+        server.port,
+        "POST",
+        "/api/agent/reset",
+        undefined,
+        { "x-eliza-token": "reset-token" },
+      );
+      expect(status).toBe(200);
+      expect(data).toMatchObject({ ok: true });
+
+      const savedConfig = JSON.parse(
+        await fs.readFile(path.join(tempDir, "eliza.json"), "utf8"),
+      ) as Record<string, unknown>;
+      expect(savedConfig.meta).toEqual({});
+      expect(savedConfig.agents).toEqual({ list: [] });
+      expect(savedConfig.cloud).toBeUndefined();
+      expect(savedConfig.messages).toBeUndefined();
+      expect(savedConfig.models).toEqual({ embedding: "keep-me" });
+      expect(savedConfig.env).toMatchObject({
+        vars: { KEEP_ME: "still-here" },
+        KEEP_ROOT: "still-here-root",
+      });
+      expect(
+        (savedConfig.env as { vars?: Record<string, string> }).vars
+          ?.OPENAI_API_KEY,
+      ).toBeUndefined();
+      expect(
+        (savedConfig.env as Record<string, unknown>).GROQ_API_KEY,
+      ).toBeUndefined();
+      expect(
+        (savedConfig.env as { vars?: Record<string, string> }).vars
+          ?.ELIZA_USE_PI_AI,
+      ).toBeUndefined();
+      await expect(fs.access(dbDir)).rejects.toThrow();
+    } finally {
+      await server.close();
+    }
+  });
+
+  it("still resets successfully when the config has no meta block", async () => {
+    const workspaceDir = path.join(tempDir, "workspace");
+    const dbDir = path.join(workspaceDir, ".eliza", ".elizadb");
+    await fs.mkdir(dbDir, { recursive: true });
+
+    await fs.writeFile(
+      path.join(tempDir, "eliza.json"),
+      JSON.stringify({
+        agents: {
+          defaults: {
+            workspace: workspaceDir,
+            adminEntityId: "legacy-admin",
+          },
+          list: [{ name: "Chen" }],
+        },
+        cloud: { enabled: true },
+        env: { vars: { OPENAI_API_KEY: "sk-test" } },
+        logging: { level: "error" },
+      }),
+    );
+    process.env.ELIZA_API_TOKEN = "reset-token";
+    process.env.MILADY_API_TOKEN = "reset-token";
+
+    const server = await startApiServer({ port: 0, runtime: RUNTIME_STUB });
+    try {
+      const { status } = await req(
+        server.port,
+        "POST",
+        "/api/agent/reset",
+        undefined,
+        {
+          "x-eliza-token": "reset-token",
+        },
+      );
+      expect(status).toBe(200);
+
+      const savedConfig = JSON.parse(
+        await fs.readFile(path.join(tempDir, "eliza.json"), "utf8"),
+      ) as Record<string, unknown>;
+      expect(savedConfig.meta).toBeUndefined();
+      expect(savedConfig.agents).toEqual({ list: [] });
+      expect(savedConfig.cloud).toBeUndefined();
+      expect(
+        (savedConfig.env as { vars?: Record<string, string> | undefined })?.vars
+          ?.OPENAI_API_KEY,
+      ).toBeUndefined();
+      await expect(fs.access(dbDir)).rejects.toThrow();
+    } finally {
+      await server.close();
+    }
+  });
+
+  it("clears live conversations, knowledge docs, and trajectories before wiping onboarding state", async () => {
+    const workspaceDir = path.join(tempDir, "workspace");
+    const dbDir = path.join(workspaceDir, ".eliza", ".elizadb");
+    await fs.mkdir(dbDir, { recursive: true });
+    await fs.writeFile(
+      path.join(tempDir, "eliza.json"),
+      JSON.stringify({
+        meta: { onboardingComplete: true },
+        agents: {
+          defaults: {
+            workspace: workspaceDir,
+          },
+          list: [{ name: "Chen" }],
+        },
+        logging: { level: "error" },
+      }),
+    );
+    process.env.ELIZA_API_TOKEN = "reset-token";
+    process.env.MILADY_API_TOKEN = "reset-token";
+    const server = await startApiServer({ port: 0, runtime: RUNTIME_STUB });
+    try {
+      const originalFetch = globalThis.fetch;
+      const fetchSpy = vi
+        .spyOn(globalThis, "fetch")
+        .mockImplementation(async (input, init) => {
+          const url = resolveFetchCallUrl(input);
+          const method = (init?.method ?? "GET").toUpperCase();
+
+          if (url.port !== String(server.port)) {
+            return originalFetch(input, init);
+          }
+
+          if (method === "GET" && url.pathname === "/api/conversations") {
+            return new Response(
+              JSON.stringify({ conversations: [{ id: "conversation-1" }] }),
+              { status: 200 },
+            );
+          }
+          if (
+            method === "DELETE" &&
+            url.pathname === "/api/conversations/conversation-1"
+          ) {
+            return new Response(JSON.stringify({ ok: true }), { status: 200 });
+          }
+          if (method === "GET" && url.pathname === "/api/knowledge/documents") {
+            return new Response(
+              JSON.stringify({ documents: [{ id: "document-1" }] }),
+              { status: 200 },
+            );
+          }
+          if (
+            method === "DELETE" &&
+            url.pathname === "/api/knowledge/documents/document-1"
+          ) {
+            return new Response(JSON.stringify({ ok: true }), { status: 200 });
+          }
+          if (method === "DELETE" && url.pathname === "/api/trajectories") {
+            return new Response(JSON.stringify({ ok: true }), { status: 200 });
+          }
+
+          throw new Error(
+            `Unexpected loopback reset fetch: ${method} ${url.pathname}`,
+          );
+        });
+      try {
+        const { status, data } = await req(
+          server.port,
+          "POST",
+          "/api/agent/reset",
+          undefined,
+          { "x-eliza-token": "reset-token" },
+        );
+        expect(status).toBe(200);
+        expect(data).toMatchObject({ ok: true });
+
+        const loopbackCalls = fetchSpy.mock.calls
+          .map(([input, init]) => ({
+            pathname: resolveFetchCallUrl(input).pathname,
+            method: (init?.method ?? "GET").toUpperCase(),
+          }))
+          .filter(({ pathname }) => pathname.startsWith("/api/"));
+
+        expect(loopbackCalls).toEqual(
+          expect.arrayContaining([
+            { pathname: "/api/conversations", method: "GET" },
+            {
+              pathname: "/api/conversations/conversation-1",
+              method: "DELETE",
+            },
+            { pathname: "/api/knowledge/documents", method: "GET" },
+            {
+              pathname: "/api/knowledge/documents/document-1",
+              method: "DELETE",
+            },
+            { pathname: "/api/trajectories", method: "DELETE" },
+          ]),
+        );
+        await expect(fs.access(dbDir)).rejects.toThrow();
+      } finally {
+        fetchSpy.mockRestore();
+      }
+    } finally {
+      await server.close();
+    }
+  });
+});

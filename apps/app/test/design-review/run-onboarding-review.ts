@@ -10,6 +10,7 @@
  */
 
 import { mkdir, rm, writeFile } from "node:fs/promises";
+import net from "node:net";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -20,7 +21,6 @@ import {
 } from "@playwright/test";
 import { createServer as createViteServer, type ViteDevServer } from "vite";
 import { startMockApiServer } from "../electrobun-packaged/mock-api";
-import { getFreePort } from "../utils/get-free-port";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -287,6 +287,25 @@ const steps: StepSpec[] = [
 // ---------------------------------------------------------------------------
 // Infra helpers (simplified from design-review runner)
 // ---------------------------------------------------------------------------
+
+async function getFreePort(): Promise<number> {
+  return await new Promise((resolve, reject) => {
+    const server = net.createServer();
+    server.once("error", reject);
+    server.listen(0, "127.0.0.1", () => {
+      const address = server.address();
+      if (!address || typeof address === "string") {
+        server.close();
+        reject(new Error("Could not allocate port"));
+        return;
+      }
+      server.close((error) => {
+        if (error) reject(error);
+        else resolve(address.port);
+      });
+    });
+  });
+}
 
 async function startAppServer(apiBaseUrl: string): Promise<{
   server: ViteDevServer;

@@ -1,4 +1,12 @@
 #!/usr/bin/env node
+/**
+ * Post-install script to initialize git submodules if they haven't been.
+ * This ensures tracked submodules from .gitmodules are initialized when
+ * cloning the repo or installing dependencies.
+ *
+ * Run automatically via the `postinstall` hook, or manually:
+ *   node scripts/init-submodules.mjs
+ */
 import { execSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
@@ -12,39 +20,31 @@ const skipLocalUpstreams =
   process.env.ELIZA_SKIP_LOCAL_UPSTREAMS === "1";
 const SUBMODULE_READINESS_MARKERS = {
   eliza: ["package.json", "packages/typescript/package.json"],
+  "plugins/plugin-agent-orchestrator": ["package.json"],
+  "test/contracts/lib/openzeppelin-contracts": [
+    "package.json",
+    "contracts/package.json",
+  ],
 };
 
-// plugin-openrouter contains Windows-incompatible PGlite fixture paths; skip
-// checkout until elizaos-plugins/plugin-openrouter#25 is merged.
-const SKIP_SUBMODULES = new Set(["eliza/plugins/plugin-openrouter"]);
-
-// Initialize nested eliza submodules in a second pass from inside eliza/ so
-// nested skip rules (for example plugin-openrouter on Windows) actually apply.
-const NO_RECURSE_SUBMODULES = new Set(["eliza"]);
-
-const LEGACY_ROOT_SUBMODULE_PATHS = ["cloud", "steward-fi"];
+// plugin-openrouter contains PGlite :memory:<UUID> paths committed under
+// typescript/ that Windows git rejects as invalid filenames. Skip checkout
+// on Windows only; Linux/macOS CI and dev machines clone it normally.
+function skipOpenrouterSubmodule() {
+  return process.platform === "win32";
+}
 
 function getSubmoduleSkipReason(
   submodulePath,
   { skipLocal = skipLocalUpstreams } = {},
 ) {
-  if (SKIP_SUBMODULES.has(submodulePath)) {
-    return "it is in the explicit skip list";
+  if (submodulePath === "plugins/plugin-openrouter" && skipOpenrouterSubmodule()) {
+    return "Windows git rejects invalid filenames in this submodule";
   }
   if (skipLocal && submodulePath === "eliza") {
     return "local upstreams are disabled";
   }
   return null;
-}
-
-function getNestedElizaSubmoduleSkipArgs() {
-  return [...SKIP_SUBMODULES]
-    .filter((submodulePath) => submodulePath.startsWith("eliza/"))
-    .map(
-      (submodulePath) =>
-        `-c submodule.${submodulePath.slice("eliza/".length)}.update=none`,
-    )
-    .join(" ");
 }
 
 export function shouldSkipSubmoduleInit(
@@ -84,62 +84,6 @@ export function loadTrackedSubmodules({ exec = execSync, cwd = root } = {}) {
   }
 }
 
-export function pruneLegacyRootSubmodulesMovedUnderEliza(
-  rootDir,
-  { exec = execSync, log = console.log, logError = console.error } = {},
-) {
-  const tracked = new Set(
-    loadTrackedSubmodules({ exec, cwd: rootDir }).map((s) => s.path),
-  );
-
-  for (const rel of LEGACY_ROOT_SUBMODULE_PATHS) {
-    if (tracked.has(rel)) {
-      continue;
-    }
-
-    let mode = "";
-    try {
-      const line = exec(`git ls-files -s -- "${rel}"`, {
-        cwd: rootDir,
-        encoding: "utf8",
-        stdio: ["ignore", "pipe", "ignore"],
-      }).trim();
-      if (!line) {
-        continue;
-      }
-      mode = line.split(/\s+/)[0] ?? "";
-    } catch {
-      continue;
-    }
-
-    if (mode !== "160000") {
-      continue;
-    }
-
-    log(
-      `[init-submodules] Removing stale top-level submodule "${rel}" (now under eliza/). Deinitializing…`,
-    );
-    try {
-      exec(`git submodule deinit -f -- "${rel}"`, {
-        cwd: rootDir,
-        stdio: "inherit",
-      });
-    } catch {}
-    try {
-      exec(`git rm -f -- "${rel}"`, {
-        cwd: rootDir,
-        stdio: "inherit",
-      });
-    } catch (err) {
-      logError(
-        `[init-submodules] Could not drop stale submodule "${rel}" from the index: ${
-          err instanceof Error ? err.message : String(err)
-        }`,
-      );
-    }
-  }
-}
-
 export function getSubmoduleReadinessMarkerPaths(
   submodulePath,
   { rootDir = root } = {},
@@ -163,32 +107,6 @@ export function isSubmoduleCheckoutReady(
   return markerPaths.every((markerPath) => exists(markerPath));
 }
 
-export function isTrackedAsGitlink(
-  submodulePath,
-  { exec = execSync, cwd = root } = {},
-) {
-  try {
-    const output = exec(`git ls-files -s -- "${submodulePath}"`, {
-      cwd,
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "ignore"],
-    }).trim();
-    if (!output) {
-      return false;
-    }
-
-    const lines = output.split("\n").filter(Boolean);
-    if (lines.length !== 1) {
-      return false;
-    }
-
-    const [mode, , , trackedPath] = lines[0].split(/\s+/, 4);
-    return mode === "160000" && trackedPath === submodulePath;
-  } catch {
-    return false;
-  }
-}
-
 export function runInitSubmodules({
   rootDir = root,
   exists = existsSync,
@@ -197,6 +115,7 @@ export function runInitSubmodules({
   logError = console.error,
   shouldSkipSubmodule = shouldSkipSubmoduleInit,
 } = {}) {
+  // Check if we're in a git repository
   const gitDir = resolve(rootDir, ".git");
   if (!exists(gitDir)) {
     log("[init-submodules] Not a git repository — skipping");
@@ -215,22 +134,6 @@ export function runInitSubmodules({
     return { initialized: 0, alreadyInitialized: 0, failed: 0, submodules: [] };
   }
 
-  const hasLegacyRootCloudPaths = submodules.some(
-    (s) => s.path === "cloud" || s.path === "steward-fi",
-  );
-  if (hasLegacyRootCloudPaths) {
-    log(
-      "[init-submodules] This .gitmodules still lists cloud/ or steward-fi/ at the repo root. Pull the latest branch where those repos are nested under eliza/, or edit .gitmodules to match.",
-    );
-  }
-
-  pruneLegacyRootSubmodulesMovedUnderEliza(rootDir, {
-    exec,
-    log,
-    logError,
-    exists,
-  });
-
   let initialized = 0;
   let alreadyInitialized = 0;
   let failed = 0;
@@ -240,13 +143,6 @@ export function runInitSubmodules({
     if (shouldSkipSubmodule(submodule.path)) {
       log(
         `[init-submodules] Skipping ${submodule.name} (${submodule.path}) because ${skipReason ?? "local upstreams are disabled"}`,
-      );
-      continue;
-    }
-
-    if (!isTrackedAsGitlink(submodule.path, { exec, cwd: rootDir })) {
-      log(
-        `[init-submodules] Skipping ${submodule.name} (${submodule.path}) because the parent repo tracks that path as regular files, not a gitlink`,
       );
       continue;
     }
@@ -268,10 +164,13 @@ export function runInitSubmodules({
         needsInit = true;
         initReason = "submodule is not initialized";
       } else if (status.startsWith("+")) {
+        // Submodule HEAD differs from the commit recorded in the parent
+        // index — local commits or a branch checkout exist.
         log(
           `[init-submodules] ⚠ ${submodule.name} (${submodule.path}) has commits not recorded in the parent repo`,
         );
       }
+      // Warn about uncommitted changes in initialized submodules.
       if (!status.startsWith("-")) {
         try {
           const smRoot = resolve(rootDir, submodule.path);
@@ -285,9 +184,12 @@ export function runInitSubmodules({
               `[init-submodules] ⚠ ${submodule.name} (${submodule.path}) has uncommitted local changes`,
             );
           }
-        } catch {}
+        } catch {
+          // Cannot check — not critical, just skip the warning.
+        }
       }
     } catch {
+      // If status lookup fails, attempt initialization directly.
       needsInit = true;
       if (!initReason) {
         initReason = "status check failed";
@@ -305,43 +207,10 @@ export function runInitSubmodules({
       }...`,
     );
     try {
-      const recurseFlag = NO_RECURSE_SUBMODULES.has(submodule.path)
-        ? ""
-        : " --recursive";
-      try {
-        exec(`git submodule sync -- "${submodule.path}"`, {
-          cwd: rootDir,
-          stdio: "inherit",
-        });
-      } catch {}
-      try {
-        exec(`git submodule update --init${recurseFlag} "${submodule.path}"`, {
-          cwd: rootDir,
-          stdio: "inherit",
-        });
-      } catch (_shallowErr) {
-        log(
-          `[init-submodules] Shallow init failed for ${submodule.name}, retrying with full fetch...`,
-        );
-        try {
-          exec(`git submodule init "${submodule.path}"`, {
-            cwd: rootDir,
-            stdio: "inherit",
-          });
-        } catch {}
-        const smRoot = resolve(rootDir, submodule.path);
-        if (exists(smRoot) && exists(resolve(smRoot, ".git"))) {
-          exec("git fetch --unshallow || git fetch --all", {
-            cwd: smRoot,
-            stdio: "inherit",
-            shell: true,
-          });
-        }
-        exec(`git submodule update${recurseFlag} "${submodule.path}"`, {
-          cwd: rootDir,
-          stdio: "inherit",
-        });
-      }
+      exec(`git submodule update --init --recursive "${submodule.path}"`, {
+        cwd: rootDir,
+        stdio: "inherit",
+      });
       if (
         !isSubmoduleCheckoutReady(submodule.path, {
           rootDir,
@@ -359,97 +228,6 @@ export function runInitSubmodules({
       const message = err instanceof Error ? err.message : String(err);
       logError(
         `[init-submodules] Failed to initialize ${submodule.name} (${submodule.path}): ${message}`,
-      );
-    }
-  }
-
-  if (
-    !shouldSkipSubmodule("eliza") &&
-    exists(resolve(rootDir, "eliza", ".gitmodules"))
-  ) {
-    const elizaRoot = resolve(rootDir, "eliza");
-    log(
-      "[init-submodules] Ensuring nested checkouts under eliza/ (cloud, steward-fi, plugins, …)…",
-    );
-    try {
-      // Sync nested config first so git does not keep stale URLs from older
-      // eliza merges around in .git/config.
-      exec("git submodule sync --recursive", {
-        cwd: elizaRoot,
-        stdio: "inherit",
-      });
-
-      const nestedSubmodules = loadTrackedSubmodules({
-        exec,
-        cwd: elizaRoot,
-      });
-
-      for (const nestedSubmodule of nestedSubmodules) {
-        const rootRelativePath = `eliza/${nestedSubmodule.path}`;
-        const skipReason = getSubmoduleSkipReason(rootRelativePath, {
-          skipLocal: false,
-        });
-        if (skipReason) {
-          log(
-            `[init-submodules] Skipping nested ${nestedSubmodule.name} (${rootRelativePath}) because ${skipReason}`,
-          );
-          continue;
-        }
-
-        if (
-          !isTrackedAsGitlink(nestedSubmodule.path, {
-            exec,
-            cwd: elizaRoot,
-          })
-        ) {
-          log(
-            `[init-submodules] Skipping nested ${nestedSubmodule.name} (${rootRelativePath}) because eliza tracks that path as regular files, not a gitlink`,
-          );
-          continue;
-        }
-
-        let needsInit = true;
-        try {
-          const status = exec(
-            `git submodule status -- "${nestedSubmodule.path}"`,
-            {
-              cwd: elizaRoot,
-              encoding: "utf8",
-              stdio: ["ignore", "pipe", "ignore"],
-            },
-          ).trim();
-          needsInit = status.startsWith("-");
-        } catch {
-          needsInit = true;
-        }
-
-        if (!needsInit) {
-          continue;
-        }
-
-        const nestedSkipArgs = getNestedElizaSubmoduleSkipArgs();
-        try {
-          exec(
-            `git ${nestedSkipArgs} submodule update --init --recursive -- "${nestedSubmodule.path}"`.trim(),
-            {
-              cwd: elizaRoot,
-              stdio: "inherit",
-            },
-          );
-        } catch (err) {
-          failed++;
-          logError(
-            `[init-submodules] Failed to initialize nested ${nestedSubmodule.name} (${rootRelativePath}): ${
-              err instanceof Error ? err.message : String(err)
-            }`,
-          );
-        }
-      }
-    } catch (err) {
-      logError(
-        `[init-submodules] Unexpected error initializing nested eliza submodules: ${
-          err instanceof Error ? err.message : String(err)
-        }`,
       );
     }
   }

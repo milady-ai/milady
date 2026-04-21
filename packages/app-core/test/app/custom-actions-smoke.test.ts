@@ -1,0 +1,443 @@
+// @vitest-environment jsdom
+
+import type { CustomActionDef } from "@miladyai/app-core/api";
+import React, { useEffect, useState } from "react";
+import TestRenderer, { act } from "react-test-renderer";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { text, findButtonByText, flush } from "../../../../test/helpers/react-test";
+
+function translateTest(
+  key: string,
+  vars?: {
+    defaultValue?: string;
+  },
+): string {
+  if (key === "common.save") return "Save";
+  return vars?.defaultValue ?? key;
+}
+
+const { mockClient, mockUseApp, mockUseVoiceChat } = vi.hoisted(() => ({
+  mockClient: {
+    getCodingAgentStatus: vi.fn(async () => null),
+    listCustomActions: vi.fn(),
+    generateCustomAction: vi.fn(),
+    createCustomAction: vi.fn(),
+    updateCustomAction: vi.fn(),
+    deleteCustomAction: vi.fn(),
+    testCustomAction: vi.fn(),
+  },
+  mockUseApp: vi.fn(),
+  mockUseVoiceChat: vi.fn(),
+}));
+
+vi.mock("@miladyai/app-core/state", () => ({
+  useApp: () => mockUseApp(),
+  useChatComposer: () => {
+    const context = mockUseApp();
+    return {
+      chatInput: context.chatInput ?? "",
+      chatSending: context.chatSending ?? false,
+      chatPendingImages: context.chatPendingImages ?? [],
+      setChatInput: vi.fn(),
+      setChatPendingImages: context.setChatPendingImages ?? vi.fn(),
+    };
+  },
+  usePtySessions: () => ({ ptySessions: [] }),
+  getVrmPreviewUrl: () => null,
+}));
+
+vi.mock("@miladyai/app-core/platform", () => ({
+  isDesktopPlatform: () => false,
+}));
+
+vi.mock("@miladyai/app-core/hooks", async () => {
+  const actual = await vi.importActual<
+    typeof import("@miladyai/app-core/hooks")
+  >("@miladyai/app-core/hooks");
+  return {
+    ...actual,
+    useVoiceChat: () => mockUseVoiceChat(),
+    useTimeout: () => ({
+      setTimeout: (fn: () => void, ms: number) => globalThis.setTimeout(fn, ms),
+      clearTimeout: (id: ReturnType<typeof globalThis.setTimeout>) =>
+        globalThis.clearTimeout(id),
+    }),
+    useDocumentVisibility: () => true,
+    useBugReport: () => ({ isOpen: false, open: vi.fn(), close: vi.fn() }),
+    BugReportProvider: ({ children }: { children: React.ReactNode }) => children,
+  };
+});
+
+vi.mock("../../src/components/chat/ChatAvatar", () => ({
+  ChatAvatar: () => null,
+}));
+
+vi.mock("../../src/components/chat/MessageContent", () => ({
+  MessageContent: ({ message }: { message: { text: string } }) =>
+    React.createElement("span", null, message.text),
+}));
+
+vi.mock("@miladyai/app-core/api", () => ({
+  client: mockClient,
+}));
+
+// Mock @miladyai/ui components to render inline (no Radix portals)
+// so react-test-renderer does not crash with parentInstance.children.indexOf.
+vi.mock("@miladyai/ui", async (importOriginal) => {
+  const actual = await importOriginal<Record<string, unknown>>();
+  const React = require("react");
+  const passthrough = ({
+    children,
+    ...props
+  }: React.PropsWithChildren<Record<string, unknown>>) =>
+    React.createElement("div", props, children);
+  return {
+    ...actual,
+    Button: ({
+      children,
+      ...props
+    }: React.ButtonHTMLAttributes<HTMLButtonElement>) =>
+      React.createElement("button", { type: "button", ...props }, children),
+    Input: (props: React.InputHTMLAttributes<HTMLInputElement>) =>
+      React.createElement("input", props),
+    Textarea: (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) =>
+      React.createElement("textarea", props),
+    Select: passthrough,
+    SelectContent: passthrough,
+    SelectItem: ({
+      children,
+      ...props
+    }: React.PropsWithChildren<Record<string, unknown>>) =>
+      React.createElement("option", props, children),
+    SelectTrigger: passthrough,
+    SelectValue: passthrough,
+    Switch: passthrough,
+    Checkbox: passthrough,
+    Dialog: ({
+      children,
+      open,
+    }: React.PropsWithChildren<{ open?: boolean }>) =>
+      open !== false
+        ? React.createElement(React.Fragment, null, children)
+        : null,
+    DialogContent: passthrough,
+    DialogHeader: passthrough,
+    DialogTitle: passthrough,
+    DialogDescription: passthrough,
+    DialogFooter: passthrough,
+    ConfirmDelete: passthrough,
+  };
+});
+
+interface ChatViewContextStub {
+  agentStatus: { agentName: string } | null;
+  chatInput: string;
+  chatSending: boolean;
+  chatFirstTokenReceived: boolean;
+  conversationMessages: Array<{
+    id: string;
+    role: "user" | "assistant";
+    text: string;
+    timestamp: number;
+    source?: string;
+  }>;
+  handleChatSend: (mode: "simple" | "power") => Promise<void>;
+  handleChatStop: () => void;
+  handleChatRetry: (id: string) => void;
+  handleChatEdit: (id: string, text: string) => Promise<boolean>;
+  setState: (key: string, value: unknown) => void;
+  droppedFiles: string[];
+  shareIngestNotice: string;
+  selectedVrmIndex: number;
+  chatPendingImages: Array<{ data: string; mimeType: string; name: string }>;
+  setChatPendingImages: (
+    updater:
+      | Array<{ data: string; mimeType: string; name: string }>
+      | ((
+          prev: Array<{ data: string; mimeType: string; name: string }>,
+        ) => Array<{ data: string; mimeType: string; name: string }>),
+  ) => void;
+}
+
+function createContext(
+  overrides?: Partial<ChatViewContextStub>,
+): ChatViewContextStub {
+  return {
+    agentStatus: { agentName: "Milady" },
+    chatInput: "",
+    chatSending: false,
+    chatFirstTokenReceived: false,
+    conversationMessages: [],
+    handleChatSend: vi.fn(async () => {}),
+    handleChatStop: vi.fn(),
+    handleChatRetry: vi.fn(),
+    handleChatEdit: vi.fn(async () => true),
+    setState: vi.fn(),
+    droppedFiles: [],
+    shareIngestNotice: "",
+    selectedVrmIndex: 0,
+    chatPendingImages: [],
+    setChatPendingImages: vi.fn(),
+    ...overrides,
+    uiLanguage: "en" as const,
+    t: translateTest,
+  };
+}
+
+function findInputByPlaceholder(
+  root: TestRenderer.ReactTestRenderer,
+  placeholder: string,
+): TestRenderer.ReactTestInstance {
+  const found = root.root.findAll(
+    (n) =>
+      n.type === "input" &&
+      typeof n.props.placeholder === "string" &&
+      n.props.placeholder.includes(placeholder),
+  );
+  expect(found.length).toBeGreaterThan(0);
+  return found[0];
+}
+
+import { ChatView } from "../../src/components/pages/ChatView";
+import { CustomActionEditor } from "../../src/components/custom-actions/CustomActionEditor";
+import { CustomActionsPanel } from "../../src/components/custom-actions/CustomActionsPanel";
+
+function FlowHarness({
+  onSaved,
+}: {
+  onSaved: (action: CustomActionDef) => void;
+}) {
+  const [panelOpen, setPanelOpen] = useState(false);
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [editingAction, setEditingAction] = useState<CustomActionDef | null>(
+    null,
+  );
+
+  useEffect(() => {
+    const handler = () => setPanelOpen((open) => !open);
+    window.addEventListener("toggle-custom-actions-panel", handler);
+    return () =>
+      window.removeEventListener("toggle-custom-actions-panel", handler);
+  }, []);
+
+  return React.createElement(
+    "div",
+    null,
+    React.createElement(ChatView),
+    React.createElement(CustomActionsPanel, {
+      open: panelOpen,
+      onClose: () => setPanelOpen(false),
+      onOpenEditor: (action?: CustomActionDef | null) => {
+        setEditingAction(action ?? null);
+        setEditorOpen(true);
+      },
+    }),
+    React.createElement(CustomActionEditor, {
+      open: editorOpen,
+      action: editingAction,
+      onSave: (action: CustomActionDef) => {
+        onSaved(action);
+        setEditorOpen(false);
+        setEditingAction(null);
+      },
+      onClose: () => {
+        setEditorOpen(false);
+        setEditingAction(null);
+      },
+    }),
+  );
+}
+
+describe("custom actions smoke flow", () => {
+  beforeEach(() => {
+    mockUseApp.mockReset();
+    mockUseVoiceChat.mockReset();
+    mockUseApp.mockReturnValue(createContext());
+    mockUseVoiceChat.mockReturnValue({
+      supported: false,
+      isListening: false,
+      captureMode: "idle",
+      interimTranscript: "",
+      toggleListening: vi.fn(),
+      startListening: vi.fn(),
+      stopListening: vi.fn(),
+      mouthOpen: 0,
+      isSpeaking: false,
+      usingAudioAnalysis: false,
+      speak: vi.fn(),
+      queueAssistantSpeech: vi.fn(),
+      stopSpeaking: vi.fn(),
+    });
+
+    for (const fn of Object.values(mockClient)) {
+      if (typeof fn === "function" && "mockReset" in fn) {
+        fn.mockReset();
+      }
+    }
+
+    const listeners = new Map<string, Set<(event: Event) => void>>();
+    Object.assign(window, {
+      addEventListener: (type: string, handler: (event: Event) => void) => {
+        const set = listeners.get(type) ?? new Set();
+        set.add(handler);
+        listeners.set(type, set);
+      },
+      removeEventListener: (type: string, handler: (event: Event) => void) => {
+        const set = listeners.get(type);
+        if (set) {
+          set.delete(handler);
+        }
+      },
+      dispatchEvent: (event: Event) => {
+        const set = listeners.get(event.type) ?? new Set();
+        for (const handler of set) {
+          handler(event);
+        }
+        return true;
+      },
+    });
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("opens action panel, generates and saves an action", async () => {
+    mockClient.listCustomActions.mockResolvedValue([]);
+    mockClient.generateCustomAction.mockResolvedValue({
+      ok: true,
+      generated: {
+        name: "check_site",
+        description: "Checks if a URL responds.",
+        handlerType: "http",
+        handler: {
+          type: "http",
+          method: "GET",
+          url: "https://example.com/{{url}}",
+          headers: {
+            accept: "application/json",
+          },
+          bodyTemplate: '{"ping": true}',
+        },
+        parameters: [
+          {
+            name: "url",
+            description: "Target URL",
+            required: true,
+          },
+        ],
+        similes: ["site", "health check"],
+      },
+    });
+    mockClient.createCustomAction.mockImplementation(
+      async (payload: CustomActionDef) => ({
+        ...payload,
+        id: "act-1",
+      }),
+    );
+
+    const onSaved = vi.fn();
+
+    let tree: TestRenderer.ReactTestRenderer | null = null;
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(FlowHarness, { onSaved }));
+    });
+    if (!tree) throw new Error("failed to render FlowHarness");
+
+    // The ChatView no longer renders an "Actions" button — the panel is toggled
+    // via a custom event. Dispatch it directly to open the panel.
+
+    await act(async () => {
+      window.dispatchEvent(new Event("toggle-custom-actions-panel"));
+    });
+    await flush();
+
+    expect(mockClient.listCustomActions).toHaveBeenCalledTimes(1);
+
+    const title = tree?.root.findAll(
+      (node: TestRenderer.ReactTestInstance) =>
+        node.type === "h2" && text(node) === "customactionspanel.CustomActions",
+    );
+    expect(title.length).toBe(1);
+
+    const createButton = findButtonByText(
+      tree.root,
+      "customactionspanel.NewCustomAction",
+    );
+    await act(async () => {
+      createButton.props.onClick();
+    });
+    await flush();
+
+    const editorHeader = tree?.root.findAll(
+      (node: TestRenderer.ReactTestInstance) =>
+        (node.type === "h2" || node.type === "div") && text(node) === "New Custom Action",
+    );
+    expect(editorHeader.length).toBeGreaterThanOrEqual(1);
+
+    const promptInput = findInputByPlaceholder(
+      tree,
+      "customactioneditor.eGCheckIfAWebs",
+    );
+    await act(async () => {
+      promptInput.props.onChange({
+        target: { value: "Build a URL health check action" },
+      });
+    });
+    await flush();
+
+    const generateButton = findButtonByText(tree.root, "Generate");
+    await act(async () => {
+      generateButton.props.onClick();
+    });
+    await flush();
+
+    expect(mockClient.generateCustomAction).toHaveBeenCalledWith(
+      "Build a URL health check action",
+    );
+
+    const nameInput = findInputByPlaceholder(
+      tree,
+      "customactioneditor.MYACTION",
+    );
+    expect(nameInput.props.value).toBe("CHECK_SITE");
+
+    const descriptionArea = tree?.root.findAll(
+      (node: TestRenderer.ReactTestInstance) =>
+        node.type === "textarea" &&
+        node.props.placeholder === "customactioneditor.WhatDoesThisActio",
+    )[0];
+    expect(descriptionArea.props.value).toBe("Checks if a URL responds.");
+
+    const saveButton = findButtonByText(tree.root, "Save");
+    await act(async () => {
+      saveButton.props.onClick();
+    });
+    await flush();
+
+    expect(mockClient.createCustomAction).toHaveBeenCalledWith({
+      name: "CHECK_SITE",
+      description: "Checks if a URL responds.",
+      similes: ["SITE", "HEALTH_CHECK"],
+      parameters: [
+        {
+          name: "url",
+          description: "Target URL",
+          required: true,
+        },
+      ],
+      handler: {
+        type: "http",
+        method: "GET",
+        url: "https://example.com/{{url}}",
+        headers: {
+          accept: "application/json",
+        },
+        bodyTemplate: '{"ping": true}',
+      },
+      enabled: true,
+    });
+
+    expect(onSaved).toHaveBeenCalledTimes(1);
+  });
+});

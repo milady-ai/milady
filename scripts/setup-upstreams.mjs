@@ -9,11 +9,9 @@ import {
   realpathSync,
   rmSync,
   symlinkSync,
-  writeFileSync,
 } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { readPackageJson } from "./lib/read-package-json.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -62,110 +60,10 @@ export const ELIZA_BUILD_STEPS = [
   },
 ];
 
-const OPTIONAL_ELIZA_PLUGIN_FALLBACK_TAG = "alpha";
-const ELIZA_INSTALL_RETRY_DELAY_MS = 3_000;
-
-// Plugins referenced as @elizaos/* workspace:* inside the eliza workspace but
-// provided by a CI stub in the root repo rather than published on npm. Before
-// `bun install --cwd eliza`, we inject an override into eliza/package.json so
-// the workspace:* specifier resolves to the stub instead of failing.
-const UNPUBLISHED_ELIZA_PLUGIN_CI_STUBS = [
-  {
-    packageName: "@elizaos/plugin-wechat",
-    workspaceEntry: "plugins/plugin-wechat",
-    /** Relative from eliza/ to the CI stub directory. */
-    stubRelativePath: "../scripts/ci-stubs/elizaos-plugin-wechat",
-  },
-];
-
-const OPTIONAL_ELIZA_PLUGIN_PACKAGES = [
-  {
-    submodulePath: "plugins/plugin-sql",
-    workspaceEntry: "plugins/plugin-sql/typescript",
-    packageName: "@elizaos/plugin-sql",
-  },
-  {
-    submodulePath: "plugins/plugin-ollama",
-    workspaceEntry: "plugins/plugin-ollama/typescript",
-    packageName: "@elizaos/plugin-ollama",
-  },
-  {
-    submodulePath: "plugins/plugin-local-ai",
-    workspaceEntry: "plugins/plugin-local-ai/typescript",
-    packageName: "@elizaos/plugin-local-ai",
-  },
-];
-
 const PACKAGE_LINK_ROOTS = [
   ["node_modules"],
   ["apps", "app", "node_modules"],
   ["apps", "home", "node_modules"],
-];
-const INBOX_REPLY_HINT_LEGACY =
-  "Sent through the connected {{source}} account on this Mac.";
-const INBOX_REPLY_HINT_PLATFORM_NEUTRAL =
-  "Sent through the connected {{source}} account on this device.";
-const MILADY_COPY_PATCH_RELATIVE_PATHS = [
-  path.join(
-    "packages",
-    "app-core",
-    "src",
-    "components",
-    "pages",
-    "ChatView.tsx",
-  ),
-  path.join("packages", "app-core", "src", "i18n", "locales", "en.json"),
-];
-const PLUGIN_ANTHROPIC_CLAUDE_CLI_RELATIVE_PATH = path.join(
-  "plugins",
-  "plugin-anthropic",
-  "typescript",
-  "utils",
-  "claude-cli.ts",
-);
-const PLUGIN_ANTHROPIC_INIT_RELATIVE_PATH = path.join(
-  "plugins",
-  "plugin-anthropic",
-  "typescript",
-  "init.ts",
-);
-const PLUGIN_ANTHROPIC_CLAUDE_CLI_REPLACEMENTS = [
-  [
-    "    inputTokens: number;\n    outputTokens: number;\n",
-    "    promptTokens: number;\n    completionTokens: number;\n",
-  ],
-  [
-    "    inputTokens: entry.inputTokens,\n    outputTokens: entry.outputTokens,\n",
-    "    promptTokens: entry.inputTokens,\n    completionTokens: entry.outputTokens,\n",
-  ],
-  [
-    "      promptTokens: usage.inputTokens,\n      completionTokens: usage.outputTokens,\n",
-    "      promptTokens: usage.promptTokens,\n      completionTokens: usage.completionTokens,\n",
-  ],
-  [
-    "                promptTokens: usage.inputTokens,\n                completionTokens: usage.outputTokens,\n",
-    "                promptTokens: usage.promptTokens,\n                completionTokens: usage.completionTokens,\n",
-  ],
-];
-const PLUGIN_ANTHROPIC_INIT_BUN_REPLACEMENTS = [
-  [
-    `        const result = Bun.spawnSync(["claude", "--version"], {\n          stdout: "pipe",\n          stderr: "pipe",\n        });\n        if (result.exitCode !== 0) throw new Error("claude not found");\n`,
-    `        const bunRuntime = (globalThis as typeof globalThis & {\n          Bun?: {\n            spawnSync(\n              args: string[],\n              options: { stdout: "pipe"; stderr: "pipe" },\n            ): { exitCode: number };\n          };\n        }).Bun;\n        const result = bunRuntime?.spawnSync(["claude", "--version"], {\n          stdout: "pipe",\n          stderr: "pipe",\n        });\n        if (!result || result.exitCode !== 0) throw new Error("claude not found");\n`,
-  ],
-];
-const PLUGIN_ANTHROPIC_CLAUDE_CLI_BUN_REPLACEMENTS = [
-  [
-    `function parseUsage(\n  modelUsage: Record<string, ClaudeCliModelUsage> | undefined,\n): CliGenerateResult["usage"] {\n  const entry = modelUsage ? Object.values(modelUsage)[0] : undefined;\n  if (!entry) return null;\n  return {\n    inputTokens: entry.inputTokens,\n    outputTokens: entry.outputTokens,\n    totalTokens: entry.inputTokens + entry.outputTokens,\n  };\n}\n\n/**\n * Run a prompt through \`claude -p\` (non-streaming).\n */\n`,
-    `function parseUsage(\n  modelUsage: Record<string, ClaudeCliModelUsage> | undefined,\n): CliGenerateResult["usage"] {\n  const entry = modelUsage ? Object.values(modelUsage)[0] : undefined;\n  if (!entry) return null;\n  return {\n    promptTokens: entry.inputTokens,\n    completionTokens: entry.outputTokens,\n    totalTokens: entry.inputTokens + entry.outputTokens,\n  };\n}\n\nfunction getBunRuntime() {\n  const bunRuntime = (globalThis as typeof globalThis & {\n    Bun?: {\n      spawn(\n        args: string[],\n        options: { stdout: "pipe"; stderr: "pipe" },\n      ): {\n        stdout: ReadableStream<Uint8Array>;\n        stderr: ReadableStream<Uint8Array>;\n        exited: Promise<number>;\n      };\n    };\n  }).Bun;\n\n  if (!bunRuntime) {\n    throw new Error("[Anthropic CLI] Bun runtime is required for CLI mode");\n  }\n\n  return bunRuntime;\n}\n\n/**\n * Run a prompt through \`claude -p\` (non-streaming).\n */\n`,
-  ],
-  [
-    `function parseUsage(\n  modelUsage: Record<string, ClaudeCliModelUsage> | undefined,\n): CliGenerateResult["usage"] {\n  const entry = modelUsage ? Object.values(modelUsage)[0] : undefined;\n  if (!entry) return null;\n  return {\n    promptTokens: entry.inputTokens,\n    completionTokens: entry.outputTokens,\n    totalTokens: entry.inputTokens + entry.outputTokens,\n  };\n}\n\n/**\n * Run a prompt through \`claude -p\` (non-streaming).\n */\n`,
-    `function parseUsage(\n  modelUsage: Record<string, ClaudeCliModelUsage> | undefined,\n): CliGenerateResult["usage"] {\n  const entry = modelUsage ? Object.values(modelUsage)[0] : undefined;\n  if (!entry) return null;\n  return {\n    promptTokens: entry.inputTokens,\n    completionTokens: entry.outputTokens,\n    totalTokens: entry.inputTokens + entry.outputTokens,\n  };\n}\n\nfunction getBunRuntime() {\n  const bunRuntime = (globalThis as typeof globalThis & {\n    Bun?: {\n      spawn(\n        args: string[],\n        options: { stdout: "pipe"; stderr: "pipe" },\n      ): {\n        stdout: ReadableStream<Uint8Array>;\n        stderr: ReadableStream<Uint8Array>;\n        exited: Promise<number>;\n      };\n    };\n  }).Bun;\n\n  if (!bunRuntime) {\n    throw new Error("[Anthropic CLI] Bun runtime is required for CLI mode");\n  }\n\n  return bunRuntime;\n}\n\n/**\n * Run a prompt through \`claude -p\` (non-streaming).\n */\n`,
-  ],
-  [
-    `const proc = Bun.spawn(args, { stdout: "pipe", stderr: "pipe" });`,
-    `const proc = getBunRuntime().spawn(args, { stdout: "pipe", stderr: "pipe" });`,
-  ],
 ];
 
 function toDisplayPath(targetPath) {
@@ -213,113 +111,14 @@ function commandExists(command) {
   return result.status === 0;
 }
 
-function writePackageJson(packagePath, raw, nextPackageJson) {
-  const indent = raw.match(/^(\s+)"/m)?.[1] ?? "  ";
-  writeFileSync(
-    packagePath,
-    `${JSON.stringify(nextPackageJson, null, indent)}\n`,
-  );
-}
-
-export function applyMiladyCopyPatches(elizaRoot) {
-  let patchedFiles = 0;
-  let staleFiles = 0;
-
-  for (const relativePath of MILADY_COPY_PATCH_RELATIVE_PATHS) {
-    const filePath = path.join(elizaRoot, relativePath);
-    if (!existsSync(filePath)) {
-      continue;
-    }
-
-    const raw = readFileSync(filePath, "utf8");
-    if (raw.includes(INBOX_REPLY_HINT_PLATFORM_NEUTRAL)) {
-      continue;
-    }
-
-    const next = raw
-      .split(INBOX_REPLY_HINT_LEGACY)
-      .join(INBOX_REPLY_HINT_PLATFORM_NEUTRAL);
-
-    if (next === raw) {
-      staleFiles += 1;
-      continue;
-    }
-
-    writeFileSync(filePath, next);
-    patchedFiles += 1;
-  }
-
-  if (patchedFiles > 0) {
-    console.log(
-      `[setup-upstreams] Applied ${patchedFiles} Milady copy patch(es) for inbox reply hint`,
+function readPackageJson(packageDir) {
+  try {
+    return JSON.parse(
+      readFileSync(path.join(packageDir, "package.json"), "utf8"),
     );
-  } else if (staleFiles > 0) {
-    console.warn(
-      "[setup-upstreams] WARNING: inbox reply hint legacy string not found — patch may need updating",
-    );
+  } catch {
+    return null;
   }
-
-  return patchedFiles;
-}
-
-function applyTextReplacements(filePath, replacements, { label }) {
-  if (!existsSync(filePath)) {
-    return 0;
-  }
-
-  const raw = readFileSync(filePath, "utf8");
-  let next = raw;
-  let patchedReplacements = 0;
-  let staleReplacements = 0;
-
-  for (const [from, to] of replacements) {
-    if (next.includes(to)) {
-      continue;
-    }
-    if (!next.includes(from)) {
-      staleReplacements += 1;
-      continue;
-    }
-    const replacementsApplied = next.split(from).length - 1;
-    next = next.split(from).join(to);
-    patchedReplacements += replacementsApplied;
-  }
-
-  if (next !== raw) {
-    writeFileSync(filePath, next);
-    console.log(
-      `[setup-upstreams] Applied ${label} (${patchedReplacements} replacement${patchedReplacements === 1 ? "" : "s"})`,
-    );
-  } else if (staleReplacements > 0) {
-    console.warn(
-      `[setup-upstreams] WARNING: ${label} no longer matches upstream source`,
-    );
-  }
-
-  return patchedReplacements;
-}
-
-export function applyPluginAnthropicBunRuntimePatch(elizaRoot) {
-  let patchedReplacements = 0;
-  patchedReplacements += applyTextReplacements(
-    path.join(elizaRoot, PLUGIN_ANTHROPIC_INIT_RELATIVE_PATH),
-    PLUGIN_ANTHROPIC_INIT_BUN_REPLACEMENTS,
-    { label: "plugin-anthropic Bun runtime init patch" },
-  );
-  patchedReplacements += applyTextReplacements(
-    path.join(elizaRoot, PLUGIN_ANTHROPIC_CLAUDE_CLI_RELATIVE_PATH),
-    PLUGIN_ANTHROPIC_CLAUDE_CLI_BUN_REPLACEMENTS,
-    { label: "plugin-anthropic Bun runtime CLI patch" },
-  );
-  return patchedReplacements;
-}
-
-export function applyPluginAnthropicCliUsagePatch(elizaRoot) {
-  return applyTextReplacements(
-    path.join(elizaRoot, PLUGIN_ANTHROPIC_CLAUDE_CLI_RELATIVE_PATH),
-    PLUGIN_ANTHROPIC_CLAUDE_CLI_REPLACEMENTS,
-    { label: "plugin-anthropic Claude CLI usage patch" },
-  );
 }
 
 function uniqueLinks(links) {
@@ -328,319 +127,6 @@ function uniqueLinks(links) {
     deduped.set(link.linkPath, link);
   }
   return [...deduped.values()];
-}
-
-function walkWorkspaceFiles(dirPath, visit) {
-  let entries;
-  try {
-    entries = readdirSync(dirPath, { withFileTypes: true });
-  } catch {
-    return;
-  }
-
-  for (const entry of entries) {
-    const entryPath = path.join(dirPath, entry.name);
-    if (entry.isDirectory()) {
-      if (
-        [
-          ".git",
-          "android",
-          "build",
-          "dist",
-          "ios",
-          "node_modules",
-          "out",
-          "target",
-        ].includes(entry.name)
-      ) {
-        continue;
-      }
-      walkWorkspaceFiles(entryPath, visit);
-      continue;
-    }
-
-    visit(entryPath);
-  }
-}
-
-function collectPackageJsonPaths(rootDir) {
-  const packageJsonPaths = [path.join(rootDir, "package.json")];
-
-  for (const rootName of ["packages", "plugins", "apps"]) {
-    walkWorkspaceFiles(path.join(rootDir, rootName), (entryPath) => {
-      if (path.basename(entryPath) === "package.json") {
-        packageJsonPaths.push(entryPath);
-      }
-    });
-  }
-
-  return packageJsonPaths;
-}
-
-function getMissingOptionalElizaPlugins(
-  elizaRoot,
-  { pathExists = existsSync } = {},
-) {
-  return OPTIONAL_ELIZA_PLUGIN_PACKAGES.filter(({ workspaceEntry }) => {
-    return !pathExists(path.join(elizaRoot, workspaceEntry, "package.json"));
-  });
-}
-
-function getPresentOptionalElizaPlugins(
-  elizaRoot,
-  { pathExists = existsSync } = {},
-) {
-  return OPTIONAL_ELIZA_PLUGIN_PACKAGES.filter(({ workspaceEntry }) => {
-    return pathExists(path.join(elizaRoot, workspaceEntry, "package.json"));
-  });
-}
-
-export function getTemporaryElizaWorkspaceEntries(
-  elizaRoot,
-  { pathExists = existsSync } = {},
-) {
-  const optionalPluginWorkspaceEntries = getPresentOptionalElizaPlugins(
-    elizaRoot,
-    { pathExists },
-  ).map(({ workspaceEntry }) => workspaceEntry);
-
-  const unpublishedStubWorkspaceEntries =
-    UNPUBLISHED_ELIZA_PLUGIN_CI_STUBS.filter(
-      ({ stubRelativePath, workspaceEntry }) => {
-        return (
-          pathExists(path.join(elizaRoot, stubRelativePath, "package.json")) &&
-          !pathExists(path.join(elizaRoot, workspaceEntry, "package.json"))
-        );
-      },
-    ).map(({ stubRelativePath }) => stubRelativePath);
-
-  return [
-    ...optionalPluginWorkspaceEntries,
-    ...unpublishedStubWorkspaceEntries,
-  ];
-}
-
-async function withTemporaryOptionalElizaPluginWorkspaces(elizaRoot, callback) {
-  const packageJsonPath = path.join(elizaRoot, "package.json");
-  const raw = readFileSync(packageJsonPath, "utf8");
-  let pkg;
-  try {
-    pkg = JSON.parse(raw);
-  } catch (error) {
-    throw new Error(
-      `Failed to parse ${packageJsonPath} while staging optional eliza plugin workspaces`,
-      { cause: error },
-    );
-  }
-
-  if (!Array.isArray(pkg.workspaces)) {
-    return callback();
-  }
-
-  const missingWorkspaceEntries = getTemporaryElizaWorkspaceEntries(
-    elizaRoot,
-  ).filter((workspaceEntry) => !pkg.workspaces.includes(workspaceEntry));
-
-  if (missingWorkspaceEntries.length === 0) {
-    return callback();
-  }
-
-  pkg.workspaces = [...pkg.workspaces, ...missingWorkspaceEntries];
-  writePackageJson(packageJsonPath, raw, pkg);
-  console.log(
-    `[setup-upstreams] Temporarily enabling eliza workspace entries (${missingWorkspaceEntries.join(", ")})`,
-  );
-
-  try {
-    return await callback();
-  } finally {
-    writeFileSync(packageJsonPath, raw);
-  }
-}
-
-async function maybeInitOptionalElizaPluginSubmodules(elizaRoot) {
-  const missing = getMissingOptionalElizaPlugins(elizaRoot);
-  if (missing.length === 0 || !existsSync(path.join(elizaRoot, ".git"))) {
-    return missing;
-  }
-
-  try {
-    await runCommand(
-      "git",
-      [
-        "submodule",
-        "update",
-        "--init",
-        "--recursive",
-        ...missing.map(({ submodulePath }) => submodulePath),
-      ],
-      {
-        cwd: elizaRoot,
-        label: "git submodule update (optional eliza plugins)",
-      },
-    );
-  } catch {
-    // If these optional submodules are unavailable in CI, we fall back to
-    // published packages below instead of hard-failing the whole setup.
-  }
-
-  return getMissingOptionalElizaPlugins(elizaRoot);
-}
-
-function shouldApplyOptionalElizaPluginFallback(env = process.env) {
-  const localUpstreamsDisabled = LOCAL_UPSTREAM_SKIP_ENVS.some(
-    (key) => env[key] === "1",
-  );
-  return env.CI === "true" && localUpstreamsDisabled;
-}
-
-function applyOptionalElizaPluginFallback(elizaRoot, missingPlugins) {
-  if (missingPlugins.length === 0) {
-    return 0;
-  }
-
-  const missingWorkspaceEntries = new Set(
-    missingPlugins.map(({ workspaceEntry }) => workspaceEntry),
-  );
-  const missingPackageNames = new Set(
-    missingPlugins.map(({ packageName }) => packageName),
-  );
-  let changedFiles = 0;
-
-  for (const packageJsonPath of collectPackageJsonPaths(elizaRoot)) {
-    const raw = readFileSync(packageJsonPath, "utf8");
-    let pkg;
-    try {
-      pkg = JSON.parse(raw);
-    } catch (error) {
-      throw new Error(
-        `Failed to parse ${packageJsonPath} while applying optional eliza plugin fallback`,
-        { cause: error },
-      );
-    }
-
-    let changed = false;
-
-    if (
-      packageJsonPath === path.join(elizaRoot, "package.json") &&
-      Array.isArray(pkg.workspaces)
-    ) {
-      const nextWorkspaces = pkg.workspaces.filter(
-        (entry) => !missingWorkspaceEntries.has(entry),
-      );
-      if (nextWorkspaces.length !== pkg.workspaces.length) {
-        pkg.workspaces = nextWorkspaces;
-        changed = true;
-      }
-    }
-
-    for (const section of [
-      "dependencies",
-      "devDependencies",
-      "optionalDependencies",
-      "peerDependencies",
-    ]) {
-      if (!pkg[section] || typeof pkg[section] !== "object") {
-        continue;
-      }
-      for (const packageName of missingPackageNames) {
-        if (pkg[section][packageName] === "workspace:*") {
-          pkg[section][packageName] = OPTIONAL_ELIZA_PLUGIN_FALLBACK_TAG;
-          changed = true;
-        }
-      }
-    }
-
-    if (!changed) {
-      continue;
-    }
-
-    writePackageJson(packageJsonPath, raw, pkg);
-    changedFiles += 1;
-  }
-
-  return changedFiles;
-}
-
-/**
- * Inject overrides into `eliza/package.json` for @elizaos/* plugins that live
- * in the root repo's CI stub directory but are not published on npm. Without
- * these overrides, `bun install --cwd eliza` fails to resolve the workspace:*
- * specifiers in eliza/packages/agent and eliza/packages/app-core because the
- * local plugin package uses a different npm scope (@miladyai/*).
- *
- * The overrides are idempotent: re-running is safe if they are already present.
- */
-export function applyUnpublishedPluginStubOverrides(
-  elizaRoot,
-  { pathExists = existsSync } = {},
-) {
-  const packageJsonPath = path.join(elizaRoot, "package.json");
-  if (!pathExists(packageJsonPath)) {
-    return 0;
-  }
-
-  const raw = readFileSync(packageJsonPath, "utf8");
-  let pkg;
-  try {
-    pkg = JSON.parse(raw);
-  } catch {
-    return 0;
-  }
-
-  if (typeof pkg !== "object" || pkg === null) {
-    return 0;
-  }
-
-  const overrides =
-    typeof pkg.overrides === "object" && pkg.overrides !== null
-      ? pkg.overrides
-      : {};
-  let changed = false;
-
-  for (const {
-    packageName,
-    stubRelativePath,
-    workspaceEntry,
-  } of UNPUBLISHED_ELIZA_PLUGIN_CI_STUBS) {
-    const stubAbsolutePath = path.resolve(elizaRoot, stubRelativePath);
-    const stubPackageJsonPath = path.join(stubAbsolutePath, "package.json");
-    const realWorkspacePackageJsonPath = path.join(
-      elizaRoot,
-      workspaceEntry,
-      "package.json",
-    );
-    const specifier = `file:${stubRelativePath}`;
-    const shouldUseStub =
-      pathExists(stubPackageJsonPath) &&
-      !pathExists(realWorkspacePackageJsonPath);
-
-    if (!shouldUseStub) {
-      if (overrides[packageName] === specifier) {
-        delete overrides[packageName];
-        changed = true;
-      }
-      continue;
-    }
-
-    if (overrides[packageName] === specifier) {
-      continue;
-    }
-    overrides[packageName] = specifier;
-    changed = true;
-  }
-
-  if (!changed) {
-    return 0;
-  }
-
-  if (Object.keys(overrides).length === 0) {
-    delete pkg.overrides;
-  } else {
-    pkg.overrides = overrides;
-  }
-  writePackageJson(packageJsonPath, raw, pkg);
-  return UNPUBLISHED_ELIZA_PLUGIN_CI_STUBS.length;
 }
 
 function getForceEnvKey(env = process.env) {
@@ -652,7 +138,7 @@ export function getRepoElizaRoot(repoRoot = DEFAULT_REPO_ROOT) {
 }
 
 export function getRepoPluginsRoot(repoRoot = DEFAULT_REPO_ROOT) {
-  return path.resolve(repoRoot, "eliza", "plugins");
+  return path.resolve(repoRoot, "plugins");
 }
 
 export function getElizaWorkspaceSkipReason(
@@ -952,33 +438,31 @@ function ensurePackageBinLinks(
   return linkedBins;
 }
 
-export function findInstalledPackageDir(
+function findInstalledPackageDir(
   repoRoot,
   packageName,
   preferredVersion,
   localTargetPath = null,
-  { searchRoots = [repoRoot] } = {},
 ) {
-  const resolvedLocalTarget =
-    localTargetPath && existsSync(localTargetPath)
-      ? realpathSync(localTargetPath)
-      : null;
-  const uniqueSearchRoots = [
-    ...new Set(searchRoots.map((root) => path.resolve(root))),
-  ];
+  const directPackagePath = path.join(
+    repoRoot,
+    "node_modules",
+    ...packageName.split("/"),
+  );
+  try {
+    const resolved = realpathSync(directPackagePath);
+    const resolvedLocalTarget =
+      localTargetPath && existsSync(localTargetPath)
+        ? realpathSync(localTargetPath)
+        : null;
+    if (existsSync(resolved) && resolved !== resolvedLocalTarget) {
+      return directPackagePath;
+    }
+  } catch {}
 
-  for (const searchRoot of uniqueSearchRoots) {
-    const directPackagePath = path.join(
-      searchRoot,
-      "node_modules",
-      ...packageName.split("/"),
-    );
-    try {
-      const resolved = realpathSync(directPackagePath);
-      if (existsSync(resolved) && resolved !== resolvedLocalTarget) {
-        return directPackagePath;
-      }
-    } catch {}
+  const bunCacheRoot = path.join(repoRoot, "node_modules", ".bun");
+  if (!existsSync(bunCacheRoot)) {
+    return null;
   }
 
   const packagePrefix = `${packageName.replace("/", "+")}@`;
@@ -986,46 +470,34 @@ export function findInstalledPackageDir(
     preferredVersion === undefined
       ? null
       : `${packageName.replace("/", "+")}@${preferredVersion}+`;
+  const matches = [];
 
-  for (const searchRoot of uniqueSearchRoots) {
-    const bunCacheRoot = path.join(searchRoot, "node_modules", ".bun");
-    if (!existsSync(bunCacheRoot)) {
+  for (const entry of readdirSync(bunCacheRoot, { withFileTypes: true })) {
+    if (!entry.isDirectory() || !entry.name.startsWith(packagePrefix)) {
       continue;
     }
 
-    const matches = [];
-
-    for (const entry of readdirSync(bunCacheRoot, { withFileTypes: true })) {
-      if (!entry.isDirectory() || !entry.name.startsWith(packagePrefix)) {
-        continue;
-      }
-
-      const candidate = path.join(
-        bunCacheRoot,
-        entry.name,
-        "node_modules",
-        ...packageName.split("/"),
-      );
-      if (!existsSync(candidate)) {
-        continue;
-      }
-
-      matches.push({
-        candidate,
-        preferred:
-          preferredPrefix !== null && entry.name.startsWith(preferredPrefix),
-      });
-    }
-
-    matches.sort(
-      (left, right) => Number(right.preferred) - Number(left.preferred),
+    const candidate = path.join(
+      bunCacheRoot,
+      entry.name,
+      "node_modules",
+      ...packageName.split("/"),
     );
-    if (matches[0]?.candidate) {
-      return matches[0].candidate;
+    if (!existsSync(candidate)) {
+      continue;
     }
+
+    matches.push({
+      candidate,
+      preferred:
+        preferredPrefix !== null && entry.name.startsWith(preferredPrefix),
+    });
   }
 
-  return null;
+  matches.sort(
+    (left, right) => Number(right.preferred) - Number(left.preferred),
+  );
+  return matches[0]?.candidate ?? null;
 }
 
 export function ensurePluginDependencyLinks(
@@ -1033,7 +505,6 @@ export function ensurePluginDependencyLinks(
   pluginsRoot = getRepoPluginsRoot(repoRoot),
 ) {
   let linkedDependencies = 0;
-  const searchRoots = [repoRoot, getRepoElizaRoot(repoRoot)];
 
   for (const packageDir of discoverPluginPackageDirs(pluginsRoot)) {
     const packageJson = readPackageJson(packageDir);
@@ -1062,9 +533,6 @@ export function ensurePluginDependencyLinks(
       const installedDependencyDir = findInstalledPackageDir(
         repoRoot,
         dependencyName,
-        undefined,
-        null,
-        { searchRoots },
       );
       if (!installedDependencyDir) {
         continue;
@@ -1226,165 +694,19 @@ async function ensureRepoLocalEliza(repoRoot) {
 
 async function ensureElizaDependencies(elizaRoot) {
   if (hasInstalledElizaDependencies(elizaRoot)) {
-    await bootstrapBundledBunInstall(elizaRoot);
     return;
-  }
-
-  const missingOptionalPlugins =
-    await maybeInitOptionalElizaPluginSubmodules(elizaRoot);
-  if (
-    missingOptionalPlugins.length > 0 &&
-    shouldApplyOptionalElizaPluginFallback()
-  ) {
-    const changedFiles = applyOptionalElizaPluginFallback(
-      elizaRoot,
-      missingOptionalPlugins,
-    );
-    console.log(
-      `[setup-upstreams] Falling back to published optional eliza plugins for CI (${missingOptionalPlugins
-        .map(({ packageName }) => packageName)
-        .join(", ")}); updated ${changedFiles} package.json file${
-        changedFiles === 1 ? "" : "s"
-      }.`,
-    );
-  }
-
-  const stubOverrides = applyUnpublishedPluginStubOverrides(elizaRoot);
-  if (stubOverrides > 0) {
-    console.log(
-      `[setup-upstreams] Added ${stubOverrides} unpublished plugin stub override(s) to eliza/package.json`,
-    );
   }
 
   console.log(
     `[setup-upstreams] Installing eliza workspace dependencies in ${toDisplayPath(elizaRoot)}`,
   );
-  await withTemporaryOptionalElizaPluginWorkspaces(elizaRoot, async () => {
-    await runElizaInstallWithRetry(elizaRoot);
-    await bootstrapBundledBunInstall(elizaRoot);
+  await runCommand("bun", ["install"], {
+    cwd: elizaRoot,
+    label: "bun install (eliza)",
   });
-}
-
-export function getElizaInstallArgs(env = process.env) {
-  return env.MILADY_NO_VISION_DEPS === "1"
-    ? ["install", "--ignore-scripts"]
-    : ["install"];
-}
-
-export async function runElizaInstallWithRetry(
-  elizaRoot,
-  {
-    env = process.env,
-    retryDelayMs = ELIZA_INSTALL_RETRY_DELAY_MS,
-    runCommandImpl = runCommand,
-    wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
-  } = {},
-) {
-  const installArgs = getElizaInstallArgs(env);
-
-  for (let attempt = 1; attempt <= 2; attempt += 1) {
-    try {
-      await runCommandImpl("bun", installArgs, {
-        cwd: elizaRoot,
-        label: "bun install (eliza)",
-      });
-      return;
-    } catch (error) {
-      if (attempt >= 2) {
-        throw error;
-      }
-
-      console.warn(
-        `[setup-upstreams] bun install (eliza) failed on attempt ${attempt}; retrying once after ${retryDelayMs}ms to recover from transient dependency fetch errors`,
-      );
-      await wait(retryDelayMs);
-    }
-  }
-}
-
-export async function bootstrapBundledBunInstall(
-  workspaceRoot,
-  {
-    env = process.env,
-    pathExists = existsSync,
-    runCommandImpl = runCommand,
-  } = {},
-) {
-  if (env.MILADY_NO_VISION_DEPS !== "1") {
-    return false;
-  }
-
-  const bunExecutableRelativePath = path.join(
-    "node_modules",
-    "bun",
-    "bin",
-    "bun.exe",
-  );
-  const bunExecutablePath = path.join(workspaceRoot, bunExecutableRelativePath);
-  if (pathExists(bunExecutablePath)) {
-    try {
-      await runCommandImpl(bunExecutableRelativePath, ["--version"], {
-        cwd: workspaceRoot,
-        label: `${bunExecutableRelativePath} --version (eliza bun bootstrap probe)`,
-      });
-      return false;
-    } catch {}
-  }
-
-  const bunInstallScriptRelativePath = path.join(
-    "node_modules",
-    "bun",
-    "install.js",
-  );
-  const bunInstallScriptPath = path.join(
-    workspaceRoot,
-    bunInstallScriptRelativePath,
-  );
-
-  if (!pathExists(bunInstallScriptPath)) {
-    throw new Error(
-      `[setup-upstreams] Expected ${bunInstallScriptRelativePath} after bun install --ignore-scripts in ${toDisplayPath(
-        workspaceRoot,
-      )}, but it was missing.`,
-    );
-  }
-
-  await runCommandImpl("node", [bunInstallScriptRelativePath], {
-    cwd: workspaceRoot,
-    label: "node node_modules/bun/install.js (eliza bun bootstrap)",
-  });
-  return true;
-}
-
-async function ensureElizaGeneratedKeywordData(elizaRoot) {
-  const generatedKeywordDataPath = path.join(
-    elizaRoot,
-    "packages",
-    "typescript",
-    "src",
-    "i18n",
-    "generated",
-    "validation-keyword-data.ts",
-  );
-
-  if (existsSync(generatedKeywordDataPath)) {
-    return;
-  }
-
-  console.log("[setup-upstreams] Generating eliza i18n keyword data");
-  await runCommand(
-    "node",
-    ["packages/shared/scripts/generate-keywords.mjs", "--target", "ts"],
-    {
-      cwd: elizaRoot,
-      label: "node packages/shared/scripts/generate-keywords.mjs --target ts",
-    },
-  );
 }
 
 async function ensureElizaBuildOutputs(elizaRoot) {
-  await ensureElizaGeneratedKeywordData(elizaRoot);
-
   for (const step of ELIZA_BUILD_STEPS) {
     if (existsSync(path.join(elizaRoot, step.check))) {
       continue;
@@ -1398,88 +720,10 @@ async function ensureElizaBuildOutputs(elizaRoot) {
   }
 }
 
-/**
- * Ensure plugin-anthropic's tsconfig.build.json explicitly loads @types/bun.
- *
- * When tsc runs `bun run build` for plugin-anthropic on fresh CI checkouts,
- * it reports TS2868 "Cannot find name 'Bun'" on init.ts / utils/claude-cli.ts
- * because the build config extends tsconfig.json but does not carry the
- * `compilerOptions.types` array forward deterministically. We force the
- * setting in-place so every CI/dev checkout sees a build config that
- * resolves @types/bun without relying on extends inheritance.
- *
- * Idempotent: only writes when the desired types list is not already present.
- */
-export function ensurePluginAnthropicBunTypes(
-  pluginsRoot,
-  { pathExists = existsSync } = {},
-) {
-  const buildConfigPath = path.join(
-    pluginsRoot,
-    "plugin-anthropic",
-    "typescript",
-    "tsconfig.build.json",
-  );
-
-  if (!pathExists(buildConfigPath)) {
-    return false;
-  }
-
-  const raw = readFileSync(buildConfigPath, "utf8");
-  let parsed;
-  try {
-    parsed = JSON.parse(raw);
-  } catch (error) {
-    console.warn(
-      `[setup-upstreams] Could not parse ${toDisplayPath(buildConfigPath)}: ${
-        error instanceof Error ? error.message : String(error)
-      }`,
-    );
-    return false;
-  }
-
-  const compilerOptions =
-    parsed && typeof parsed === "object" && parsed.compilerOptions
-      ? parsed.compilerOptions
-      : {};
-  const existingTypes = Array.isArray(compilerOptions.types)
-    ? compilerOptions.types
-    : null;
-
-  if (existingTypes?.includes("bun")) {
-    return false;
-  }
-
-  const nextTypes = existingTypes ? [...existingTypes] : ["node"];
-  if (!nextTypes.includes("bun")) {
-    nextTypes.push("bun");
-  }
-
-  const nextCompilerOptions = {
-    ...compilerOptions,
-    types: nextTypes,
-  };
-  const nextParsed = {
-    ...parsed,
-    compilerOptions: nextCompilerOptions,
-  };
-
-  const indent = raw.match(/^(\s+)"/m)?.[1] ?? "\t";
-  writeFileSync(
-    buildConfigPath,
-    `${JSON.stringify(nextParsed, null, indent)}\n`,
-  );
-  console.log(
-    `[setup-upstreams] Patched ${toDisplayPath(buildConfigPath)} to load @types/bun`,
-  );
-  return true;
-}
-
 export async function ensurePluginBuildOutputs(
   pluginsRoot,
   { pathExists = existsSync, runCommandImpl = runCommand } = {},
 ) {
-  ensurePluginAnthropicBunTypes(pluginsRoot, { pathExists });
   for (const packageDir of discoverPluginPackageDirs(pluginsRoot)) {
     const packageJson = readPackageJson(packageDir);
     if (!packageJson?.name?.startsWith("@elizaos/")) {
@@ -1524,32 +768,6 @@ export async function setupUpstreams(repoRoot = DEFAULT_REPO_ROOT) {
   if (skipReason) {
     if (skipReason.endsWith("=1")) {
       ensurePublishedElizaPackageLinks(repoRoot);
-      // Strip missing optional plugin workspace entries from eliza/package.json
-      // so that any subsequent `bun install --cwd eliza` doesn't fail on
-      // workspace paths that don't exist when plugin submodules are absent.
-      // Guard: eliza/ may have been renamed by disable-local-eliza-workspace.mjs.
-      const elizaRoot = getRepoElizaRoot(repoRoot);
-      if (existsSync(path.join(elizaRoot, "package.json"))) {
-        const missingPlugins = getMissingOptionalElizaPlugins(elizaRoot);
-        if (missingPlugins.length > 0) {
-          const patched = applyOptionalElizaPluginFallback(
-            elizaRoot,
-            missingPlugins,
-          );
-          if (patched > 0) {
-            console.log(
-              `[setup-upstreams] Stripped ${missingPlugins.length} missing optional plugin workspace(s) from eliza/package.json`,
-            );
-          }
-        }
-        const stubOverrides = applyUnpublishedPluginStubOverrides(elizaRoot);
-        if (stubOverrides > 0) {
-          console.log(
-            `[setup-upstreams] Added ${stubOverrides} unpublished plugin stub override(s) to eliza/package.json`,
-          );
-        }
-        applyMiladyCopyPatches(elizaRoot);
-      }
     }
     console.log(`[setup-upstreams] Skipping: ${skipReason}`);
     return { skipped: true, reason: skipReason };
@@ -1568,14 +786,11 @@ export async function setupUpstreams(repoRoot = DEFAULT_REPO_ROOT) {
   }
 
   const elizaRoot = await ensureRepoLocalEliza(repoRoot);
-  applyMiladyCopyPatches(elizaRoot);
   await ensureElizaDependencies(elizaRoot);
   await ensureElizaBuildOutputs(elizaRoot);
 
   const pluginsRoot = getRepoPluginsRoot(repoRoot);
   ensurePluginDependencyLinks(repoRoot, pluginsRoot);
-  applyPluginAnthropicBunRuntimePatch(elizaRoot);
-  applyPluginAnthropicCliUsagePatch(elizaRoot);
   await ensurePluginBuildOutputs(pluginsRoot);
   const updatedLinks = linkUpstreamPackages(repoRoot, {
     elizaRoot,

@@ -1,0 +1,52 @@
+From 389ad828117b9de97885bcf5471a2eff71bfcbff Mon Sep 17 00:00:00 2001
+From: dutch <dutchiono@gmail.com>
+Date: Thu, 9 Apr 2026 11:45:20 -0400
+Subject: [PATCH] fix: update zod records and settings type cast for @elizaos/core
+ compat
+
+z.record() now requires explicit key schema as first argument (Zod v4 compat).
+CharacterSettings spread cast via typeof to preserve the correct mapped type.
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+---
+ typescript/src/evaluators/character-evolution.ts  | 2 +-
+ typescript/src/services/character-file-manager.ts | 4 ++--
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/typescript/src/evaluators/character-evolution.ts b/typescript/src/evaluators/character-evolution.ts
+index e40892a..1f46d6f 100644
+--- a/typescript/src/evaluators/character-evolution.ts
++++ b/typescript/src/evaluators/character-evolution.ts
+@@ -42,7 +42,7 @@ const CharacterEvolutionSchema = z.object({
+       .optional()
+       .describe("Updates to communication style"),
+     settings: z
+-      .record(z.union([z.string(), z.number(), z.boolean(), z.null()]))
++      .record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.null()]))
+       .optional()
+       .describe("New setting values to add"),
+   }),
+diff --git a/typescript/src/services/character-file-manager.ts b/typescript/src/services/character-file-manager.ts
+index c182242..b2a488c 100644
+--- a/typescript/src/services/character-file-manager.ts
++++ b/typescript/src/services/character-file-manager.ts
+@@ -40,7 +40,7 @@ const CharacterModificationSchema = z.object({
+       post: z.array(z.string()).optional(),
+     })
+     .optional(),
+-  settings: z.record(z.union([z.string(), z.number(), z.boolean(), z.null()])).optional(),
++  settings: z.record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.null()])).optional(),
+ });
+ 
+ type CharacterModification = z.infer<typeof CharacterModificationSchema>;
+@@ -381,7 +381,7 @@ export class CharacterFileManager extends Service {
+         currentCharacter.settings = {
+           ...currentCharacter.settings,
+           ...modification.settings,
+-        };
++        } as typeof currentCharacter.settings;
+       }
+ 
+       // Update runtime character
+-- 
+2.52.0.windows.1

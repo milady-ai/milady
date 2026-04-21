@@ -1,5 +1,4 @@
 import fs from "node:fs";
-import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Plugin } from "vite";
@@ -7,64 +6,37 @@ import { defineConfig } from "vitest/config";
 import {
   getAppCoreSourceRoot,
   getAutonomousSourceRoot,
-  getUiSourceRoot,
 } from "../../test/eliza-package-paths";
-import {
-  getAppCoreBridgeStubPath,
-  getUiSourceAliases,
-  getWorkspaceAppAliases,
-} from "../../test/vitest/workspace-aliases";
-import { CAPACITOR_PLUGIN_NAMES } from "./scripts/capacitor-plugin-names.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const repoRoot = path.resolve(here, "../..");
-const _require = createRequire(import.meta.url);
-const nativePluginsRoot = path.join(
-  here,
-  "../../eliza/packages/native-plugins",
-);
 const appCorePackageRoot = getAppCoreSourceRoot(here);
 const agentSourceRoot = getAutonomousSourceRoot(here);
-const uiSourceRoot = getUiSourceRoot(here);
-const bridgeStubPath = getAppCoreBridgeStubPath(repoRoot);
-const capacitorCoreEntry = _require.resolve("@capacitor/core");
-const nativePluginAliasMap = Object.fromEntries(
-  CAPACITOR_PLUGIN_NAMES.map((name) => [
-    `@elizaos/capacitor-${name}`,
-    path.join(nativePluginsRoot, `${name}/src/index.ts`),
-  ]),
+
+const bridgeStubPath = path.join(
+  here,
+  "..",
+  "..",
+  "test",
+  "stubs",
+  "app-core-bridge.ts",
 );
-const vitestInlineDeps = [
-  "@elizaos/agent",
-  "@elizaos/app-core",
-  "@elizaos/core",
-  "@testing-library/react",
-  "react",
-  "react-dom",
-  "react-test-renderer",
-  /^@elizaos\/plugin-/,
-  "zod",
-];
 
 /**
- * Redirects `@elizaos/app-core` bridge entrypoints to the test shim (matches
- * package exports: `./bridge`, `./bridge/electrobun-rpc`, `./bridge/electrobun-runtime`).
- * Legacy specifiers without `/bridge/` are still stubbed for older call sites.
+ * Custom Vite plugin that redirects @miladyai/app-core/bridge imports to
+ * the test stub before Vite's built-in resolver tries to resolve through
+ * the package's exports map (which may reference native bindings that are
+ * unavailable in the test environment).
  */
 function appCoreBridgeStubPlugin(): Plugin {
-  const stubbed = new Set([
-    "@elizaos/app-core",
-    "@elizaos/app-core/bridge",
-    "@elizaos/app-core/bridge/electrobun-rpc",
-    "@elizaos/app-core/bridge/electrobun-runtime",
-    "@elizaos/app-core/electrobun-rpc",
-    "@elizaos/app-core/electrobun-runtime",
-  ]);
   return {
     name: "app-core-bridge-stub",
     enforce: "pre",
     resolveId(source) {
-      if (stubbed.has(source)) {
+      if (
+        source === "@miladyai/app-core/bridge/electrobun-rpc" ||
+        source === "@miladyai/app-core/bridge/electrobun-runtime" ||
+        source === "@miladyai/app-core/bridge"
+      ) {
         return bridgeStubPath;
       }
       return null;
@@ -77,35 +49,24 @@ export default defineConfig({
   resolve: {
     alias: [
       {
-        find: /^react$/,
+        // Stub the broken @lookingglass/webxr ESM chain for tests
+        find: /^@lookingglass\/.*/,
+        replacement: path.join(
+          here,
+          "..",
+          "..",
+          "test",
+          "stubs",
+          "lookingglass-webxr.ts",
+        ),
+      },
+      {
+        find: "react",
         replacement: path.join(here, "node_modules/react"),
       },
       {
-        find: /^react\/(.*)$/,
-        replacement: path.join(here, "node_modules/react", "$1"),
-      },
-      {
-        find: /^react-dom$/,
+        find: "react-dom",
         replacement: path.join(here, "node_modules/react-dom"),
-      },
-      {
-        find: /^react-dom\/(.*)$/,
-        replacement: path.join(here, "node_modules/react-dom", "$1"),
-      },
-      {
-        find: /^@capacitor\/core$/,
-        replacement: capacitorCoreEntry,
-      },
-      {
-        find: /^@elizaos\/plugin-sql$/,
-        replacement: path.join(
-          repoRoot,
-          "eliza",
-          "plugins",
-          "plugin-sql",
-          "typescript",
-          "index.node.ts",
-        ),
       },
       ...(appCorePackageRoot
         ? (() => {
@@ -124,8 +85,8 @@ export default defineConfig({
               if (typeof value === "string") {
                 const aliasKey =
                   key === "."
-                    ? "@elizaos/app-core"
-                    : `@elizaos/app-core/${key.replace(/^\.\//, "")}`;
+                    ? "@miladyai/app-core"
+                    : `@miladyai/app-core/${key.replace(/^\.\//, "")}`;
                 const targetPath = path.resolve(
                   appCorePackageRoot,
                   "..",
@@ -144,7 +105,7 @@ export default defineConfig({
                 }
               }
             }
-            // Catch-all: resolve any @elizaos/app-core sub-path imports
+            // Catch-all: resolve any @miladyai/app-core sub-path imports
             // not explicitly listed in the exports map directly to the
             // source tree (e.g. components/Header → src/components/Header).
             generatedAliases.push({
@@ -158,55 +119,34 @@ export default defineConfig({
             return generatedAliases;
           })()
         : []),
-      ...getUiSourceAliases(uiSourceRoot),
-      // Resolve @elizaos/agent sub-path imports to the source tree
+      // Resolve @miladyai/agent sub-path imports to the source tree
       ...(agentSourceRoot
         ? [
             {
-              find: /^@elizaos\/agent\/(.*)/,
+              find: /^@miladyai\/agent\/(.*)/,
               replacement: path.join(agentSourceRoot, "$1"),
             },
           ]
         : []),
-      ...getWorkspaceAppAliases(repoRoot, [
-        "app-companion",
-        "app-task-coordinator",
-        "app-vincent",
-        "app-shopify",
-        "app-steward",
-        "app-lifeops",
-        "app-knowledge",
-      ]),
     ],
   },
   test: {
-    // apps/app test/vite/** alias/bridge regressions live here; the root
-    // default Vitest config intentionally does not glob apps/app/**.
     // Use POSIX-style relative globs so test discovery works on Windows too.
     include: [
       "test/**/*.test.ts",
       "test/**/*.test.tsx",
-      "../../eliza/packages/app-core/test/**/*.test.ts",
-      "../../eliza/packages/app-core/test/**/*.test.tsx",
+      "../../packages/app-core/test/**/*.test.ts",
+      "../../packages/app-core/test/**/*.test.tsx",
     ],
     // Live/real QA browser checks are opt-in and should not run as part of the
     // default app suite, even if the developer shell exports live-test env.
     exclude: [
-      "../../eliza/packages/app-core/test/benchmarks/**",
-      "../../eliza/packages/app-core/test/**/*.e2e.test.ts",
-      "../../eliza/packages/app-core/test/**/*.e2e.test.tsx",
-      "../../eliza/packages/app-core/test/**/*-real.test.ts",
-      "../../eliza/packages/app-core/test/**/*-real.test.tsx",
-      "../../eliza/packages/app-core/test/**/*.real.test.ts",
-      "../../eliza/packages/app-core/test/**/*.real.test.tsx",
-      "../../eliza/packages/app-core/test/**/*.live.e2e.test.ts",
-      "../../eliza/packages/app-core/test/**/*.live.e2e.test.tsx",
-      "../../eliza/packages/app-core/test/**/*-live.test.ts",
-      "../../eliza/packages/app-core/test/**/*-live.test.tsx",
-      "../../eliza/packages/app-core/test/**/*.live.test.ts",
-      "../../eliza/packages/app-core/test/**/*.live.test.tsx",
-      "../../eliza/packages/app-core/test/**/*.real.e2e.test.ts",
-      "../../eliza/packages/app-core/test/**/*.real.e2e.test.tsx",
+      "../../packages/app-core/test/**/*.e2e.test.ts",
+      "../../packages/app-core/test/**/*.e2e.test.tsx",
+      "../../packages/app-core/test/**/*.live.e2e.test.ts",
+      "../../packages/app-core/test/**/*.live.e2e.test.tsx",
+      "../../packages/app-core/test/**/*.real.e2e.test.ts",
+      "../../packages/app-core/test/**/*.real.e2e.test.tsx",
       "test/**/*-live.test.ts",
       "test/**/*-live.test.tsx",
       "test/**/*.live.test.ts",
@@ -217,33 +157,67 @@ export default defineConfig({
       "test/**/*.live.e2e.test.tsx",
       "test/**/*.real.e2e.test.ts",
       "test/**/*.real.e2e.test.tsx",
-      "../../eliza/packages/app-core/test/**/*-live.test.ts",
-      "../../eliza/packages/app-core/test/**/*-live.test.tsx",
-      "../../eliza/packages/app-core/test/**/*.live.test.ts",
-      "../../eliza/packages/app-core/test/**/*.live.test.tsx",
-      "../../eliza/packages/app-core/test/**/*-live.e2e.test.ts",
-      "../../eliza/packages/app-core/test/**/*-live.e2e.test.tsx",
-      "../../eliza/packages/app-core/test/**/*.live.e2e.test.ts",
-      "../../eliza/packages/app-core/test/**/*.live.e2e.test.tsx",
-      "../../eliza/packages/app-core/test/**/*.real.e2e.test.ts",
-      "../../eliza/packages/app-core/test/**/*.real.e2e.test.tsx",
+      "../../packages/app-core/test/**/*-live.test.ts",
+      "../../packages/app-core/test/**/*-live.test.tsx",
+      "../../packages/app-core/test/**/*.live.test.ts",
+      "../../packages/app-core/test/**/*.live.test.tsx",
+      "../../packages/app-core/test/**/*-live.e2e.test.ts",
+      "../../packages/app-core/test/**/*-live.e2e.test.tsx",
+      "../../packages/app-core/test/**/*.live.e2e.test.ts",
+      "../../packages/app-core/test/**/*.live.e2e.test.tsx",
+      "../../packages/app-core/test/**/*.real.e2e.test.ts",
+      "../../packages/app-core/test/**/*.real.e2e.test.tsx",
     ],
     setupFiles: [path.join(here, "test/setup.ts")],
     environment: "node",
     alias: {
-      "@elizaos/skills": path.join(
+      "@elizaos/skills": path.join(here, "test/__mocks__/elizaos-skills.ts"),
+      "@miladyai/capacitor-gateway": path.join(
         here,
-        "test",
-        "doubles",
-        "elizaos-skills.ts",
+        "plugins/gateway/src/index.ts",
       ),
-      ...nativePluginAliasMap,
+      "@miladyai/capacitor-swabble": path.join(
+        here,
+        "plugins/swabble/src/index.ts",
+      ),
+      "@miladyai/capacitor-talkmode": path.join(
+        here,
+        "plugins/talkmode/src/index.ts",
+      ),
+      "@miladyai/capacitor-camera": path.join(
+        here,
+        "plugins/camera/src/index.ts",
+      ),
+      "@miladyai/capacitor-location": path.join(
+        here,
+        "plugins/location/src/index.ts",
+      ),
+      "@miladyai/capacitor-screencapture": path.join(
+        here,
+        "plugins/screencapture/src/index.ts",
+      ),
+      "@miladyai/capacitor-canvas": path.join(
+        here,
+        "plugins/canvas/src/index.ts",
+      ),
+      "@miladyai/capacitor-desktop": path.join(
+        here,
+        "plugins/desktop/src/index.ts",
+      ),
+      "@miladyai/capacitor-agent": path.join(
+        here,
+        "plugins/agent/src/index.ts",
+      ),
+      "@miladyai/capacitor-websiteblocker": path.join(
+        here,
+        "plugins/websiteblocker/src/index.ts",
+      ),
     },
     testTimeout: 30000,
     globals: true,
     server: {
       deps: {
-        inline: vitestInlineDeps,
+        inline: ["@miladyai/app-core"],
       },
     },
   },

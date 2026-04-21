@@ -1,0 +1,51 @@
+import fs from "node:fs";
+import path from "node:path";
+
+import { describe, expect, it } from "vitest";
+
+const STAGE_MACOS_RELEASE_ARTIFACTS_PATH = path.resolve(
+  import.meta.dirname,
+  "../../scripts/stage-macos-release-artifacts.sh",
+);
+
+describe("stage-macos-release-artifacts.sh", () => {
+  it("rebuilds the direct launcher using the packaged launcher architecture", () => {
+    const script = fs.readFileSync(STAGE_MACOS_RELEASE_ARTIFACTS_PATH, "utf8");
+
+    expect(script).toContain(
+      'LAUNCHER_ARCHES="$(lipo -archs "$LAUNCHER_PATH" 2>/dev/null || true)"',
+    );
+    expect(script).toContain("clang_arch_args=()");
+    expect(script).toContain('clang_arch_args+=(-arch "$arch")');
+    expect(script).toContain(
+      'echo "stage-macos-release-artifacts: unsupported launcher architecture: $arch"',
+    );
+    // biome-ignore lint/suspicious/noTemplateCurlyInString: bash variable expansion in shell script assertion
+    expect(script).toContain('"${clang_arch_args[@]}"');
+  });
+
+  it("uses an extended stapler retry window for notarized DMGs", () => {
+    const script = fs.readFileSync(STAGE_MACOS_RELEASE_ARTIFACTS_PATH, "utf8");
+
+    expect(script).toContain(
+      'retry_command 8 20 xcrun stapler staple "$TEMP_DMG_PATH"',
+    );
+  });
+
+  it("submits notarization once and polls status with the real xcrun binary", () => {
+    const script = fs.readFileSync(STAGE_MACOS_RELEASE_ARTIFACTS_PATH, "utf8");
+
+    expect(script).toContain(
+      `REAL_XCRUN="\${ELECTROBUN_REAL_XCRUN:-/usr/bin/xcrun}"`,
+    );
+    expect(script).toContain("wait_for_notary_acceptance()");
+    expect(script).toContain('"$REAL_XCRUN" notarytool submit \\');
+    expect(script).toContain("--output-format json \\");
+    expect(script).toContain(
+      'NOTARY_SUBMISSION_ID="$(parse_notary_submission_id "$NOTARY_SUBMIT_OUTPUT_PATH" || true)"',
+    );
+    expect(script).toContain('"$REAL_XCRUN" notarytool info \\');
+    expect(script).toContain('"$REAL_XCRUN" notarytool log \\');
+    expect(script).not.toContain("--wait \\");
+  });
+});

@@ -1,0 +1,293 @@
+import fs from "node:fs";
+import path from "node:path";
+
+import { describe, expect, it } from "vitest";
+import {
+  bundlesDependency,
+  findFloatingDependencySpecs,
+  findLocalPackHotspots,
+  findMismatchedSharedAgentDependencySpecs,
+  findMissingPatchedElectrobunCliSnippets,
+  hasLifecycleScriptReferencingMissingFile,
+  isExactVersion,
+  isExactVersionSpecifier,
+  isNpmOverrideConflictError,
+  isPackPathCoveredByFilesList,
+  isWorkspaceSpecifier,
+  parseBunPackDryRunOutput,
+  shouldSkipExactPackDryRun,
+} from "./release-check";
+
+const PATCHED_ELECTROBUN_CLI_PATH = path.resolve(
+  import.meta.dirname,
+  "build-patched-electrobun-cli.mjs",
+);
+
+describe("release-check local pack behavior", () => {
+  it("detects configured local pack hotspots", () => {
+    const hotspots = findLocalPackHotspots(
+      ["dist/node_modules", "apps/app/dist/vrms", "apps/app/dist/animations"],
+      (candidate) => candidate !== "apps/app/dist/animations",
+    );
+
+    expect(hotspots).toEqual(["dist/node_modules", "apps/app/dist/vrms"]);
+  });
+
+  it("skips exact pack dry-run only for local hotspot-heavy runs", () => {
+    expect(
+      shouldSkipExactPackDryRun(["dist/node_modules"], {
+        CI: "",
+        GITHUB_ACTIONS: "",
+        MILADY_FORCE_PACK_DRY_RUN: "",
+      }),
+    ).toBe(true);
+    expect(
+      shouldSkipExactPackDryRun(["dist/node_modules"], {
+        CI: "1",
+        GITHUB_ACTIONS: "",
+        MILADY_FORCE_PACK_DRY_RUN: "",
+      }),
+    ).toBe(false);
+    expect(
+      shouldSkipExactPackDryRun(["dist/node_modules"], {
+        CI: "",
+        GITHUB_ACTIONS: "",
+        MILADY_FORCE_PACK_DRY_RUN: "1",
+      }),
+    ).toBe(false);
+    expect(
+      shouldSkipExactPackDryRun([], {
+        CI: "",
+        GITHUB_ACTIONS: "",
+        MILADY_FORCE_PACK_DRY_RUN: "",
+      }),
+    ).toBe(false);
+  });
+});
+
+describe("release-check package guards", () => {
+  it("treats parent directory file entries as covering required publish files", () => {
+    expect(
+      isPackPathCoveredByFilesList("dist/index.js", [
+        "dist",
+        "scripts/run-repo-setup.mjs",
+      ]),
+    ).toBe(true);
+    expect(
+      isPackPathCoveredByFilesList("scripts/lib/some-other-script.mjs", [
+        "dist",
+        "scripts/run-repo-setup.mjs",
+      ]),
+    ).toBe(false);
+  });
+
+  it("accepts both bundleDependencies and bundledDependencies spellings", () => {
+    expect(
+      bundlesDependency(
+        {
+          bundleDependencies: ["@elizaos/plugin-agent-orchestrator"],
+        },
+        "@elizaos/plugin-agent-orchestrator",
+      ),
+    ).toBe(true);
+    expect(
+      bundlesDependency(
+        {
+          bundledDependencies: ["@elizaos/plugin-agent-orchestrator"],
+        },
+        "@elizaos/plugin-agent-orchestrator",
+      ),
+    ).toBe(true);
+  });
+
+  it("accepts exact pinned version specifiers", () => {
+    expect(isExactVersion("0.3.14")).toBe(true);
+    expect(isExactVersion("1.0.0")).toBe(true);
+    expect(isExactVersion("2.0.0-alpha.87")).toBe(true);
+    expect(isExactVersion("0.0.1-beta.1")).toBe(true);
+    expect(isExactVersion("3.2.1-rc.0")).toBe(true);
+  });
+
+  it("flags floating release dependencies in the cloud-agent template", () => {
+    expect(
+      findFloatingDependencySpecs(
+        {
+          dependencies: {
+            "@elizaos/core": "alpha",
+            "@elizaos/plugin-elizacloud": "2.0.0-alpha.7",
+            "@elizaos/plugin-sql": "^2.0.0-alpha.17",
+          },
+        },
+        ["@elizaos/core", "@elizaos/plugin-elizacloud", "@elizaos/plugin-sql"],
+      ),
+    ).toEqual([
+      { name: "@elizaos/core", specifier: "alpha" },
+      { name: "@elizaos/plugin-sql", specifier: "^2.0.0-alpha.17" },
+    ]);
+  });
+
+  it("accepts only strict semver specifiers for orchestrator release pins", () => {
+    expect(isExactVersionSpecifier("0.3.14")).toBe(true);
+    expect(isExactVersionSpecifier("2.0.0-alpha.1")).toBe(true);
+    expect(isExactVersionSpecifier("1.2.3+build.4")).toBe(true);
+    expect(isExactVersionSpecifier(undefined)).toBe(false);
+    expect(isExactVersionSpecifier("next")).toBe(false);
+    expect(isExactVersionSpecifier("latest")).toBe(false);
+    expect(isExactVersionSpecifier("^0.3.14")).toBe(false);
+    expect(isExactVersionSpecifier("~0.3.14")).toBe(false);
+    expect(isExactVersionSpecifier("workspace:*")).toBe(false);
+  });
+
+  it("detects workspace protocol specifiers for local plugin submodules", () => {
+    expect(isWorkspaceSpecifier("workspace:*")).toBe(true);
+    expect(isWorkspaceSpecifier("workspace:^")).toBe(true);
+    expect(isWorkspaceSpecifier("0.5.0")).toBe(false);
+    expect(isWorkspaceSpecifier(undefined)).toBe(false);
+  });
+
+  it("rejects floating tags and range specifiers", () => {
+    expect(isExactVersion("next")).toBe(false);
+    expect(isExactVersion("latest")).toBe(false);
+    expect(isExactVersion("^0.3.14")).toBe(false);
+    expect(isExactVersion("~1.0.0")).toBe(false);
+    expect(isExactVersion(">=1.0.0")).toBe(false);
+    expect(isExactVersion("*")).toBe(false);
+    expect(isExactVersion("<2.0.0")).toBe(false);
+    expect(isExactVersion("")).toBe(false);
+  });
+
+  it("rejects workspace, npm, and URL specifiers", () => {
+    expect(isExactVersion("workspace:*")).toBe(false);
+    expect(isExactVersion("npm:foo@1.0.0")).toBe(false);
+    expect(isExactVersion("file:../local-pkg")).toBe(false);
+    expect(isExactVersion("git+https://github.com/foo/bar")).toBe(false);
+    expect(
+      isExactVersion("https://registry.npmjs.org/foo/-/foo-1.0.0.tgz"),
+    ).toBe(false);
+  });
+
+  it("flags shared agent dependencies that drift from the root's exact elizaOS pins", () => {
+    expect(
+      findMismatchedSharedAgentDependencySpecs(
+        {
+          dependencies: {
+            "@elizaos/core": "2.0.0-alpha.113",
+            "@elizaos/plugin-openai": "2.0.0-alpha.15",
+          },
+        },
+        {
+          dependencies: {
+            "@elizaos/core": "alpha",
+            "@elizaos/plugin-openai": "2.0.0-alpha.15",
+            "@elizaos/plugin-shell": "alpha",
+          },
+        },
+      ),
+    ).toEqual([
+      {
+        name: "@elizaos/core",
+        rootSpecifier: "2.0.0-alpha.113",
+        agentSpecifier: "alpha",
+      },
+    ]);
+  });
+
+  it("keeps packages/agent aligned with the root's exact elizaOS pins", () => {
+    const rootPackage = JSON.parse(
+      fs.readFileSync(
+        path.join(import.meta.dirname, "..", "package.json"),
+        "utf8",
+      ),
+    ) as { dependencies?: Record<string, string> };
+    const agentPackage = JSON.parse(
+      fs.readFileSync(
+        path.join(import.meta.dirname, "..", "packages/agent/package.json"),
+        "utf8",
+      ),
+    ) as { dependencies?: Record<string, string> };
+
+    expect(
+      findMismatchedSharedAgentDependencySpecs(rootPackage, agentPackage),
+    ).toEqual([]);
+  });
+
+  it("flags lifecycle hooks that reference missing files", () => {
+    expect(
+      hasLifecycleScriptReferencingMissingFile(
+        {
+          scripts: {
+            postinstall: "node ./scripts/ensure-node-pty.mjs",
+          },
+        },
+        "/tmp/plugin-agent-orchestrator",
+        "postinstall",
+        "./scripts/ensure-node-pty.mjs",
+        () => false,
+      ),
+    ).toBe(true);
+
+    expect(
+      hasLifecycleScriptReferencingMissingFile(
+        {
+          scripts: {
+            postinstall: "node ./scripts/ensure-node-pty.mjs",
+          },
+        },
+        "/tmp/plugin-agent-orchestrator",
+        "postinstall",
+        "./scripts/ensure-node-pty.mjs",
+        () => true,
+      ),
+    ).toBe(false);
+  });
+
+  it("parses Bun dry-run pack output into publish file entries", () => {
+    const results = parseBunPackDryRunOutput(`bun pack v1.3.10
+
+packed 9.97KB package.json
+packed 1.51KB dist/entry.js
+packed 4.70KB scripts/run-repo-setup.mjs
+bundled @elizaos/plugin-agent-orchestrator
+
+miladyai-2.0.0-alpha.92.tgz
+`);
+
+    expect(results).toEqual([
+      {
+        files: [
+          { path: "package.json" },
+          { path: "dist/entry.js" },
+          { path: "scripts/run-repo-setup.mjs" },
+        ],
+      },
+    ]);
+  });
+
+  it("detects npm override conflicts for pack fallback", () => {
+    expect(
+      isNpmOverrideConflictError({
+        name: "Error",
+        message: "pack failed",
+        stdout: '{"error":{"code":"EOVERRIDE"}}',
+        stderr:
+          "npm error code EOVERRIDE\nnpm error Override for @elizaos/core conflicts with direct dependency",
+      }),
+    ).toBe(false);
+
+    const error = new Error("pack failed") as Error & {
+      stdout?: string;
+      stderr?: string;
+    };
+    error.stdout = '{"error":{"code":"EOVERRIDE"}}';
+    error.stderr =
+      "npm error code EOVERRIDE\nnpm error Override for @elizaos/core conflicts with direct dependency";
+
+    expect(isNpmOverrideConflictError(error)).toBe(true);
+  });
+
+  it("accepts the patched Electrobun CLI helper contract", () => {
+    const helperSource = fs.readFileSync(PATCHED_ELECTROBUN_CLI_PATH, "utf8");
+
+    expect(findMissingPatchedElectrobunCliSnippets(helperSource)).toEqual([]);
+  });
+});

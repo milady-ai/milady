@@ -1,19 +1,27 @@
-# scripts/
+# `scripts/` — build, dev orchestration, tooling
 
-Repo-level helper scripts. Most are invoked via `bun run <name>` from the
-root `package.json`.
+Most scripts here are invoked from **root `package.json`** (`bun run …`). This README highlights the **desktop dev orchestrator**; deeper rationale lives in the docs site.
 
-### Action-planner auto-tuning
-Run after the action benchmark to improve planner accuracy:
-  1. `bun run test:benchmark:actions:mocked`   # generate trajectories
-  2. `bun run action:trajectories-to-dataset`  # trajectories -> JSONL
-  3. `bun run action:optimize-planner`         # MIPRO-style tuning
+## Desktop: `dev-platform.mjs`
 
-Re-run step 1 to measure improvement. The `OptimizedPromptService`
-loads the new artifact at next runtime boot; the action planner
-prompt is automatically substituted.
+| npm script | Entry |
+|------------|--------|
+| `bun run dev:desktop` | `bun scripts/dev-platform.mjs` |
+| `bun run dev:desktop:watch` | `MILADY_DESKTOP_VITE_WATCH=1` + same |
 
-The dataset is written to
-`eliza/apps/app-training/datasets/action_planner_from_benchmark.jsonl`
-(plus a sibling `.meta.json`), and artifacts land under
-`~/.milady/optimized-prompts/action_planner/`.
+**Why a dedicated script:** Electrobun needs a renderer URL, often a running API, and (in dev) a root `dist/` bundle. Starting each piece by hand drifts on ports and env vars; one orchestrator keeps **startup and shutdown** symmetric.
+
+**Full guide (WHYs for signals, `detached`, HMR vs Rollup watch, multiple `bun` PIDs):** [Desktop local development](../docs/apps/desktop-local-development.md)
+
+### Bun Version (Windows)
+
+- Recommended: **Bun 1.3.x stable** for `dev:win` flows.
+- Canary builds can change ESM/CJS interop behavior. `dev-ui.mjs` prints a startup advisory when it detects canary or non-1.3 Bun.
+
+### Supporting modules (`scripts/lib/`)
+
+| Module | Why it exists |
+|--------|----------------|
+| `vite-renderer-dist-stale.mjs` | Cheap mtime check so `vite build` is skipped when `apps/app/dist` is still fresh — avoids redundant multi‑minute production builds on restart. |
+| `kill-ui-listen-port.mjs` | Clears the UI port before Vite binds; Unix uses `lsof`, Windows uses `netstat` + `taskkill` because `lsof` is not standard there. |
+| `kill-process-tree.mjs` | Kills **only** the PID tree rooted at each spawned child — avoids `pkill bun` style collateral damage to other workspaces. |

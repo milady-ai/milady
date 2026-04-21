@@ -1,0 +1,239 @@
+import type http from "node:http";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import {
+  createEnvSandbox,
+  createMockHeadersRequest,
+} from "./../test-support/test-helpers";
+import { resolveWebSocketUpgradeRejection } from "./server";
+
+function mockReq(
+  headers: http.IncomingHttpHeaders = {},
+): Pick<http.IncomingMessage, "headers"> {
+  return createMockHeadersRequest(headers) as Pick<
+    http.IncomingMessage,
+    "headers"
+  >;
+}
+
+describe("resolveWebSocketUpgradeRejection", () => {
+  const env = createEnvSandbox([
+    "ELIZA_API_TOKEN",
+    "MILADY_API_TOKEN",
+    "ELIZA_ALLOW_WS_QUERY_TOKEN",
+    "MILADY_ALLOW_WS_QUERY_TOKEN",
+    "ELIZA_ALLOWED_ORIGINS",
+    "MILADY_ALLOWED_ORIGINS",
+    "ELIZA_ALLOW_NULL_ORIGIN",
+    "MILADY_ALLOW_NULL_ORIGIN",
+  ]);
+
+  beforeEach(() => {
+    env.clear();
+  });
+
+  afterEach(() => {
+    env.restore();
+  });
+
+  it("rejects non-/ws paths", () => {
+    const rejection = resolveWebSocketUpgradeRejection(
+      mockReq() as http.IncomingMessage,
+      new URL("ws://localhost/not-ws"),
+    );
+    expect(rejection).toEqual({ status: 404, reason: "Not found" });
+  });
+
+  it("rejects disallowed origins", () => {
+    delete process.env.ELIZA_API_TOKEN;
+    const rejection = resolveWebSocketUpgradeRejection(
+      mockReq({ origin: "https://evil.example" }) as http.IncomingMessage,
+      new URL("ws://localhost/ws"),
+    );
+    expect(rejection).toEqual({ status: 403, reason: "Origin not allowed" });
+  });
+
+  it("allows upgrades without handshake auth so clients can authenticate after open", () => {
+    process.env.ELIZA_API_TOKEN = "test-token";
+    const rejection = resolveWebSocketUpgradeRejection(
+      mockReq() as http.IncomingMessage,
+      new URL("ws://localhost/ws"),
+    );
+    expect(rejection).toBeNull();
+  });
+
+  it("accepts valid bearer token", () => {
+    process.env.ELIZA_API_TOKEN = "test-token";
+    const rejection = resolveWebSocketUpgradeRejection(
+      mockReq({ authorization: "Bearer test-token" }) as http.IncomingMessage,
+      new URL("ws://localhost/ws"),
+    );
+    expect(rejection).toBeNull();
+  });
+
+  it("rejects query token auth by default", () => {
+    process.env.ELIZA_API_TOKEN = "test-token";
+    delete process.env.ELIZA_ALLOW_WS_QUERY_TOKEN;
+
+    const rejection = resolveWebSocketUpgradeRejection(
+      mockReq() as http.IncomingMessage,
+      new URL("ws://localhost/ws?token=test-token"),
+    );
+    expect(rejection).toEqual({ status: 401, reason: "Unauthorized" });
+  });
+
+  it("accepts valid query token when explicitly enabled", () => {
+    process.env.ELIZA_API_TOKEN = "test-token";
+    process.env.ELIZA_ALLOW_WS_QUERY_TOKEN = "1";
+    const rejection = resolveWebSocketUpgradeRejection(
+      mockReq() as http.IncomingMessage,
+      new URL("ws://localhost/ws?token=test-token"),
+    );
+    expect(rejection).toBeNull();
+  });
+
+  it("accepts when token auth is disabled and origin is local", () => {
+    delete process.env.ELIZA_API_TOKEN;
+    const rejection = resolveWebSocketUpgradeRejection(
+      mockReq({ origin: "http://localhost:5173" }) as http.IncomingMessage,
+      new URL("ws://localhost/ws"),
+    );
+    expect(rejection).toBeNull();
+  });
+
+  it.each([
+    "http://[::1]:5173",
+    "http://[0:0:0:0:0:0:0:1]:5173",
+  ])("accepts IPv6 local origin when token auth is disabled (%s)", (origin) => {
+    delete process.env.ELIZA_API_TOKEN;
+    const rejection = resolveWebSocketUpgradeRejection(
+      mockReq({ origin }) as http.IncomingMessage,
+      new URL("ws://localhost/ws"),
+    );
+    expect(rejection).toBeNull();
+  });
+
+  it("rejects invalid bearer token", () => {
+    process.env.ELIZA_API_TOKEN = "test-token";
+    const rejection = resolveWebSocketUpgradeRejection(
+      mockReq({ authorization: "Bearer wrong-token" }) as http.IncomingMessage,
+      new URL("ws://localhost/ws"),
+    );
+    expect(rejection).toEqual({ status: 401, reason: "Unauthorized" });
+  });
+
+  it("accepts X-Eliza-Token header auth", () => {
+    process.env.ELIZA_API_TOKEN = "test-token";
+    const rejection = resolveWebSocketUpgradeRejection(
+      mockReq({ "x-eliza-token": "test-token" }) as http.IncomingMessage,
+      new URL("ws://localhost/ws"),
+    );
+    expect(rejection).toBeNull();
+  });
+
+  it("rejects wrong query token when query auth enabled", () => {
+    process.env.ELIZA_API_TOKEN = "test-token";
+    process.env.ELIZA_ALLOW_WS_QUERY_TOKEN = "1";
+    const rejection = resolveWebSocketUpgradeRejection(
+      mockReq() as http.IncomingMessage,
+      new URL("ws://localhost/ws?token=wrong-token"),
+    );
+    expect(rejection).toEqual({ status: 401, reason: "Unauthorized" });
+  });
+
+  it.each([
+    "capacitor://localhost",
+    "app://localhost",
+    "electrobun://localhost",
+    "app://-",
+  ])("accepts app-protocol origins (%s)", (origin) => {
+    delete process.env.ELIZA_API_TOKEN;
+    const rejection = resolveWebSocketUpgradeRejection(
+      mockReq({ origin }) as http.IncomingMessage,
+      new URL("ws://localhost/ws"),
+    );
+    expect(rejection).toBeNull();
+  });
+
+  it("accepts custom allowlisted origins via env", () => {
+    delete process.env.ELIZA_API_TOKEN;
+    process.env.ELIZA_ALLOWED_ORIGINS = "https://trusted.example.com";
+    const rejection = resolveWebSocketUpgradeRejection(
+      mockReq({
+        origin: "https://trusted.example.com",
+      }) as http.IncomingMessage,
+      new URL("ws://localhost/ws"),
+    );
+    expect(rejection).toBeNull();
+  });
+
+  it("accepts upgrade when no origin header is present", () => {
+    delete process.env.ELIZA_API_TOKEN;
+    const rejection = resolveWebSocketUpgradeRejection(
+      mockReq() as http.IncomingMessage,
+      new URL("ws://localhost/ws"),
+    );
+    expect(rejection).toBeNull();
+  });
+
+  it("allows whitespace-only bearer token to fall back to post-open auth", () => {
+    process.env.ELIZA_API_TOKEN = "test-token";
+    const rejection = resolveWebSocketUpgradeRejection(
+      mockReq({ authorization: "Bearer   " }) as http.IncomingMessage,
+      new URL("ws://localhost/ws"),
+    );
+    expect(rejection).toBeNull();
+  });
+
+  it("accepts query token via apiKey param when enabled", () => {
+    process.env.ELIZA_API_TOKEN = "test-token";
+    process.env.ELIZA_ALLOW_WS_QUERY_TOKEN = "1";
+    const rejection = resolveWebSocketUpgradeRejection(
+      mockReq() as http.IncomingMessage,
+      new URL("ws://localhost/ws?apiKey=test-token"),
+    );
+    expect(rejection).toBeNull();
+  });
+
+  it("accepts query token via api_key param when enabled", () => {
+    process.env.ELIZA_API_TOKEN = "test-token";
+    process.env.ELIZA_ALLOW_WS_QUERY_TOKEN = "1";
+    const rejection = resolveWebSocketUpgradeRejection(
+      mockReq() as http.IncomingMessage,
+      new URL("ws://localhost/ws?api_key=test-token"),
+    );
+    expect(rejection).toBeNull();
+  });
+
+  it("accepts null origin when ELIZA_ALLOW_NULL_ORIGIN=1", () => {
+    delete process.env.ELIZA_API_TOKEN;
+    process.env.ELIZA_ALLOW_NULL_ORIGIN = "1";
+    const rejection = resolveWebSocketUpgradeRejection(
+      mockReq({ origin: "null" }) as http.IncomingMessage,
+      new URL("ws://localhost/ws"),
+    );
+    expect(rejection).toBeNull();
+  });
+
+  it("prefers MILADY_ALLOWED_ORIGINS over ELIZA aliases", () => {
+    delete process.env.ELIZA_API_TOKEN;
+    process.env.MILADY_ALLOWED_ORIGINS = "https://milady.example.com";
+    process.env.ELIZA_ALLOWED_ORIGINS = "https://legacy.example.com";
+    const rejection = resolveWebSocketUpgradeRejection(
+      mockReq({
+        origin: "https://legacy.example.com",
+      }) as http.IncomingMessage,
+      new URL("ws://localhost/ws"),
+    );
+    expect(rejection).toEqual({ status: 403, reason: "Origin not allowed" });
+  });
+
+  it("accepts null origin when MILADY_ALLOW_NULL_ORIGIN=1", () => {
+    delete process.env.ELIZA_API_TOKEN;
+    process.env.MILADY_ALLOW_NULL_ORIGIN = "1";
+    const rejection = resolveWebSocketUpgradeRejection(
+      mockReq({ origin: "null" }) as http.IncomingMessage,
+      new URL("ws://localhost/ws"),
+    );
+    expect(rejection).toBeNull();
+  });
+});

@@ -1,0 +1,104 @@
+From 659c87ce997d6f8b02e524ae4cb3072573c93bf2 Mon Sep 17 00:00:00 2001
+From: dutch <dutchiono@gmail.com>
+Date: Thu, 9 Apr 2026 13:10:07 -0400
+Subject: [PATCH] fix: use ModelType enum and cast EventPayload for
+ @elizaos/core API compat
+
+---
+ typescript/index.ts        | 24 ++++++++++++------------
+ typescript/utils/events.ts |  4 ++--
+ 2 files changed, 14 insertions(+), 14 deletions(-)
+
+diff --git a/typescript/index.ts b/typescript/index.ts
+index 074eee5..dcde607 100644
+--- a/typescript/index.ts
++++ b/typescript/index.ts
+@@ -9,7 +9,7 @@ import type {
+   TextEmbeddingParams,
+ } from "@elizaos/core";
+ import * as ElizaCore from "@elizaos/core";
+-import { logger } from "@elizaos/core";
++import { ModelType, logger } from "@elizaos/core";
+ import { GoogleGenAI } from "@google/genai";
+ import { initializeGoogleGenAI, type PluginConfig } from "./init";
+ import {
+@@ -70,7 +70,7 @@ const pluginTests = [
+         name: "google_test_text_embedding",
+         fn: async (runtime: IAgentRuntime) => {
+           try {
+-            const embedding = await runtime.useModel(TEXT_EMBEDDING_MODEL_TYPE, {
++            const embedding = await runtime.useModel(ModelType.TEXT_EMBEDDING, {
+               text: "Hello, world!",
+             });
+             logger.log(`Embedding dimension: ${embedding.length}`);
+@@ -89,7 +89,7 @@ const pluginTests = [
+         name: "google_test_text_small",
+         fn: async (runtime: IAgentRuntime) => {
+           try {
+-            const text = await runtime.useModel(TEXT_SMALL_MODEL_TYPE, {
++            const text = await runtime.useModel(ModelType.TEXT_SMALL, {
+               prompt: "What is the nature of reality in 10 words?",
+             });
+             if (text.length === 0) {
+@@ -108,7 +108,7 @@ const pluginTests = [
+         name: "google_test_text_large",
+         fn: async (runtime: IAgentRuntime) => {
+           try {
+-            const text = await runtime.useModel(TEXT_LARGE_MODEL_TYPE, {
++            const text = await runtime.useModel(ModelType.TEXT_LARGE, {
+               prompt: "Explain quantum mechanics in simple terms.",
+             });
+             if (text.length === 0) {
+@@ -128,12 +128,12 @@ const pluginTests = [
+         fn: async (runtime: IAgentRuntime) => {
+           try {
+             const result = await runtime.useModel(
+-              IMAGE_DESCRIPTION_MODEL_TYPE,
++              ModelType.IMAGE_DESCRIPTION,
+               "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Vitalik_Buterin_TechCrunch_London_2015_%28cropped%29.jpg/537px-Vitalik_Buterin_TechCrunch_London_2015_%28cropped%29.jpg"
+             );
+
+             if (
+-              result &&
++              result != null &&
+               typeof result === "object" &&
+               "title" in result &&
+               "description" in result
+@@ -164,14 +164,14 @@ const pluginTests = [
+               required: ["name", "age", "hobbies"],
+             };
+
+-            const result = await runtime.useModel(OBJECT_SMALL_MODEL_TYPE, {
++            const result = await runtime.useModel(ModelType.OBJECT_SMALL, {
+               prompt: "Generate a person profile with name, age, and hobbies.",
+               schema,
+-            });
++            }) as Record<string, unknown>;
+
+             logger.log("Generated object:", JSON.stringify(result));
+
+-            if (!result.name || !result.age || !result.hobbies) {
++            if (!result?.name || !result?.age || !result?.hobbies) {
+               throw new Error("Generated object missing required fields");
+             }
+           } catch (error) {
+diff --git a/typescript/utils/events.ts b/typescript/utils/events.ts
+index eb19a83..c44864a 100644
+--- a/typescript/utils/events.ts
++++ b/typescript/utils/events.ts
+@@ -1,4 +1,4 @@
+-import type { IAgentRuntime, ModelTypeName } from "@elizaos/core";
++import type { EventPayload, IAgentRuntime, ModelTypeName } from "@elizaos/core";
+
+ const MODEL_USED_EVENT = "MODEL_USED";
+
+@@ -22,5 +22,5 @@ export function emitModelUsageEvent(
+       completion: usage.completionTokens,
+       total: usage.totalTokens,
+     },
+-  });
++  } as EventPayload);
+ }
+--
+2.52.0.windows.1
+

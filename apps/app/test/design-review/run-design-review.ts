@@ -1,4 +1,5 @@
 import { mkdir, rm, writeFile } from "node:fs/promises";
+import net from "node:net";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -13,7 +14,6 @@ import {
   type MockApiServer,
   startMockApiServer,
 } from "../electrobun-packaged/mock-api";
-import { getFreePort } from "../utils/get-free-port";
 
 type ShellMode = "companion" | "native";
 type ViewId =
@@ -210,7 +210,10 @@ const views: ViewSpec[] = [
     path: "/character-select",
     shellMode: "native",
     lastNativeTab: "character",
-    readyChecks: [{ selector: '[data-testid="character-editor-view"]' }],
+    readyChecks: [
+      { selector: '[data-testid="character-roster-grid"]' },
+      { selector: '[data-testid="character-customize-toggle"]' },
+    ],
   },
   {
     id: "wallets",
@@ -259,10 +262,10 @@ const views: ViewSpec[] = [
     shellMode: "native",
     lastNativeTab: "advanced",
     readyChecks: [
-      { selector: '[data-testid="advanced-subtab-nav"]' },
-      { text: "Build Dataset" },
+      { text: "Ollama" },
+      { text: "Streaming" },
+      { text: "Plugins" },
     ],
-    readyCheckMode: "any",
   },
 ];
 
@@ -327,6 +330,25 @@ function buildCaptureSpecs(filters: CliFilters): CaptureSpec[] {
     : captures;
 }
 
+async function getFreePort(): Promise<number> {
+  return await new Promise((resolve, reject) => {
+    const server = net.createServer();
+    server.once("error", reject);
+    server.listen(0, "127.0.0.1", () => {
+      const address = server.address();
+      if (!address || typeof address === "string") {
+        server.close();
+        reject(new Error("Could not allocate port"));
+        return;
+      }
+      server.close((error) => {
+        if (error) reject(error);
+        else resolve(address.port);
+      });
+    });
+  });
+}
+
 async function startAppServer(apiBaseUrl: string): Promise<{
   server: ViteDevServer;
   baseUrl: string;
@@ -378,6 +400,26 @@ async function isReadyCheckVisible(
       .catch(() => false);
   }
   return false;
+}
+
+async function waitForAnySelector(
+  page: Page,
+  selectors: string[],
+  timeoutMs = 10_000,
+): Promise<void> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    for (const selector of selectors) {
+      const visible = await page
+        .locator(selector)
+        .first()
+        .isVisible()
+        .catch(() => false);
+      if (visible) return;
+    }
+    await page.waitForTimeout(150);
+  }
+  throw new Error(`Timed out waiting for selectors: ${selectors.join(", ")}`);
 }
 
 async function resetOutputDir(): Promise<void> {
@@ -641,11 +683,11 @@ async function applyState(page: Page, capture: CaptureSpec): Promise<void> {
     return;
   }
   if (capture.stateId === "customize-open") {
-    await page.getByText("Style", { exact: true }).first().click();
-    await page.locator('[data-testid="style-section-all"]').waitFor({
-      state: "visible",
-      timeout: 10_000,
-    });
+    await page.locator('[data-testid="character-customize-toggle"]').click();
+    await waitForAnySelector(page, [
+      '[data-testid="character-edit-toolbar"]',
+      '[data-testid="character-customize-grid"]',
+    ]);
   }
 }
 

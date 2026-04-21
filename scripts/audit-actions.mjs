@@ -293,7 +293,7 @@ function findViolations(action, source) {
     /\bmessageText\s*\(|\bmessage\.content\?\.text/.test(block);
   const handlerCallsInfer =
     /\binfer(Subaction|PasswordManager|Kind|Surface)\w*\s*\(/.test(block);
-  if (fileHasInferFn && handlerCallsInfer) {
+  if (fileHasInferFn && handlerReferencesText && handlerCallsInfer) {
     violations.push({
       severity: "high",
       rule: "regex-intent-inference",

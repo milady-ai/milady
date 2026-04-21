@@ -1,53 +1,87 @@
 import { expect, test } from "@playwright/test";
-import { openAppPath, readLocalStorage, seedAppStorage } from "./helpers";
-
-const VRM_POWER_KEY = "eliza:companion-vrm-power";
-const HALF_FRAMERATE_KEY = "eliza:companion-half-framerate";
-const ANIMATE_WHEN_HIDDEN_KEY = "eliza:companion-animate-when-hidden";
+import {
+  installDefaultAppMocks,
+  openAppPath,
+  readLocalStorage,
+  seedAppStorage,
+} from "./helpers";
 
 test.beforeEach(async ({ page }) => {
-  await seedAppStorage(page);
+  await installDefaultAppMocks(page, { includeConfig: true });
+  await seedAppStorage(page, {
+    "eliza:ui-language": "en",
+    "eliza:companion-vrm-power": "balanced",
+    "eliza:companion-half-framerate": "when_saving_power",
+    "eliza:companion-animate-when-hidden": "0",
+  });
 });
 
-test("companion media settings persist across reloads", async ({ page }) => {
+test("companion 3D settings persist across navigation", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
   await openAppPath(page, "/voice");
-  await expect(page.getByTestId("settings-shell")).toBeVisible();
 
-  await page
-    .getByTestId("settings-companion-vrm-power")
-    .getByRole("button", { name: "Always quality" })
-    .click();
-  await page
-    .getByTestId("settings-companion-half-framerate")
-    .getByRole("button", { name: "Always half" })
-    .click();
+  const vrmCard = page.getByTestId("settings-companion-vrm-power");
+  const halfCard = page.getByTestId("settings-companion-half-framerate");
+  const animateCard = page.getByTestId(
+    "settings-companion-animate-when-hidden",
+  );
 
-  const animateSwitch = page
-    .getByTestId("settings-companion-animate-when-hidden")
-    .getByRole("switch", { name: "Animate in background" });
-  await animateSwitch.click();
+  await expect(vrmCard).toBeVisible();
 
+  await vrmCard.getByRole("button", { name: "Always efficient" }).click();
   await expect
-    .poll(async () => readLocalStorage(page, VRM_POWER_KEY))
-    .toBe("quality");
+    .poll(async () => readLocalStorage(page, "eliza:companion-vrm-power"))
+    .toBe("efficiency");
+
+  await halfCard.getByRole("button", { name: "Always half" }).click();
   await expect
-    .poll(async () => readLocalStorage(page, HALF_FRAMERATE_KEY))
+    .poll(async () => readLocalStorage(page, "eliza:companion-half-framerate"))
     .toBe("always");
+
+  const animateSwitch = animateCard.getByRole("switch");
+  await animateSwitch.click();
   await expect
-    .poll(async () => readLocalStorage(page, ANIMATE_WHEN_HIDDEN_KEY))
+    .poll(async () =>
+      readLocalStorage(page, "eliza:companion-animate-when-hidden"),
+    )
     .toBe("1");
 
-  await page.reload({ waitUntil: "domcontentloaded" });
-  await expect(page.getByTestId("settings-shell")).toBeVisible();
+  await openAppPath(page, "/companion");
+  await openAppPath(page, "/settings");
+
+  const mediaNav = page
+    .getByTestId("settings-sidebar")
+    .getByRole("button", { name: "Media" });
+  await mediaNav.click();
+  await expect(vrmCard).toBeVisible();
+
   await expect(
-    page
-      .getByTestId("settings-companion-vrm-power")
-      .getByRole("button", { name: "Always quality" }),
-  ).toHaveAttribute("aria-pressed", "true");
+    vrmCard.getByRole("button", { name: "Always efficient", pressed: true }),
+  ).toBeVisible();
   await expect(
-    page
-      .getByTestId("settings-companion-half-framerate")
-      .getByRole("button", { name: "Always half" }),
-  ).toHaveAttribute("aria-pressed", "true");
-  await expect(animateSwitch).toHaveAttribute("aria-checked", "true");
+    halfCard.getByRole("button", { name: "Always half", pressed: true }),
+  ).toBeVisible();
+  await expect(animateSwitch).toHaveAttribute("data-state", "checked");
+
+  await animateSwitch.click();
+  await expect
+    .poll(async () =>
+      readLocalStorage(page, "eliza:companion-animate-when-hidden"),
+    )
+    .toBe("0");
+
+  await vrmCard
+    .getByRole("button", { name: "Depends on power source" })
+    .first()
+    .click();
+  await expect
+    .poll(async () => readLocalStorage(page, "eliza:companion-vrm-power"))
+    .toBe("balanced");
+
+  await halfCard
+    .getByRole("button", { name: "Depends on power source" })
+    .click();
+  await expect
+    .poll(async () => readLocalStorage(page, "eliza:companion-half-framerate"))
+    .toBe("when_saving_power");
 });

@@ -1,0 +1,1072 @@
+/**
+ * Unit tests for the Electrobun DesktopManager native module.
+ *
+ * Covers:
+ * - openExternal — http/https allow-list, invalid URL rejection
+ * - showItemInFolder — absolute path enforcement
+ * - isPackaged — NODE_ENV / ELECTROBUN_DEV env vars
+ * - setAutoLaunch macOS — plist write, launchctl load/unload, dir creation
+ * - setAutoLaunch Linux — .desktop file write/unlink
+ * - setAutoLaunch Windows — reg add/delete via Bun.spawn
+ * - getAutoLaunchStatus — per-platform enabled detection
+ * - getPath — known name mapping + unknown name fallback
+ */
+
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+const bunGlobal = globalThis as typeof globalThis & {
+  Bun?: { spawn: unknown };
+};
+bunGlobal.Bun ??= { spawn: vi.fn() };
+const bunRuntime = bunGlobal.Bun;
+
+// ---------------------------------------------------------------------------
+// Mocks — vi.fn() INSIDE factories to avoid hoisting issues.
+// ---------------------------------------------------------------------------
+
+vi.mock("../mac-window-effects", () => ({
+  isAppActive: vi.fn(() => false),
+  isKeyWindow: vi.fn(() => false),
+  makeKeyAndOrderFront: vi.fn(() => true),
+  orderOut: vi.fn(() => true),
+}));
+
+vi.mock("node:fs", () => {
+  const existsSyncFn = vi.fn(() => false);
+  const writeFileSyncFn = vi.fn();
+  const mkdirSyncFn = vi.fn();
+  const unlinkSyncFn = vi.fn();
+  const readFileSyncFn = vi.fn(() => "");
+  const fns = {
+    existsSync: existsSyncFn,
+    writeFileSync: writeFileSyncFn,
+    mkdirSync: mkdirSyncFn,
+    unlinkSync: unlinkSyncFn,
+    readFileSync: readFileSyncFn,
+  };
+  return { default: fns, ...fns };
+});
+
+vi.mock("node:os", () => {
+  const homedirFn = vi.fn(() => "/mock/home");
+  const fns = { homedir: homedirFn };
+  return { default: fns, ...fns };
+});
+
+vi.mock("../rpc-schema", () => ({}));
+
+// electrobun/bun must be mocked before module import so PATH_NAME_MAP (which
+// reads Utils.paths.* at module load time) resolves to the mock values.
+vi.mock("electrobun/bun", () => {
+  const electrobunEvents = {
+    on: vi.fn(),
+    off: vi.fn(),
+  };
+  const createBrowserWindowInstance = () => ({
+    id: 99,
+    frame: { width: 1180, height: 860 },
+    webview: {
+      remove: vi.fn(),
+    },
+    on: vi.fn(),
+    focus: vi.fn(),
+    setTitle: vi.fn(),
+  });
+
+  const createBrowserViewInstance = (options: { url?: string | null }) => ({
+    id: 77,
+    url: options.url ?? null,
+    loadURL: vi.fn(),
+    remove: vi.fn(),
+  });
+
+  // biome-ignore lint/complexity/useArrowFunction: constructor mock requires a regular function
+  const MockBrowserWindow = vi.fn(function () {
+    return createBrowserWindowInstance();
+  });
+  // biome-ignore lint/complexity/useArrowFunction: constructor mock requires a regular function
+  const MockBrowserView = vi.fn(function (
+    options: { url?: string | null } = {},
+  ) {
+    return createBrowserViewInstance(options);
+  });
+  // biome-ignore lint/complexity/useArrowFunction: constructor mock requires a regular function
+  const MockTray = vi.fn(function () {
+    return {
+      on: vi.fn(),
+      off: vi.fn(),
+      setTitle: vi.fn(),
+      setImage: vi.fn(),
+      setMenu: vi.fn(),
+      remove: vi.fn(),
+    };
+  });
+
+  return {
+    default: {
+      BrowserWindow: MockBrowserWindow,
+      events: electrobunEvents,
+    },
+    Utils: {
+      paths: {
+        home: "/mock/home",
+        appData: "/mock/appdata",
+        userData: "/mock/userdata",
+        temp: "/tmp",
+        cache: "/mock/cache",
+        logs: "/mock/logs",
+        documents: "/mock/documents",
+        downloads: "/mock/downloads",
+        desktop: "/mock/desktop",
+      },
+      quit: vi.fn(),
+      openExternal: vi.fn(),
+      showItemInFolder: vi.fn(),
+      openPath: vi.fn(),
+      clipboardWriteText: vi.fn(),
+      clipboardReadText: vi.fn(() => ""),
+      clipboardReadImage: vi.fn(() => null),
+      clipboardWriteImage: vi.fn(),
+      clipboardClear: vi.fn(),
+      clipboardAvailableFormats: vi.fn(() => ["text/plain"]),
+      showNotification: vi.fn(),
+      isDockIconVisible: vi.fn(() => true),
+      setDockIconVisible: vi.fn(),
+    },
+    Tray: MockTray,
+    GlobalShortcut: { register: vi.fn(), unregister: vi.fn() },
+    Updater: {
+      localInfo: { version: vi.fn(async () => "2.0.0") },
+      getLocallocalInfo: vi.fn(async () => ({
+        version: "2.0.0",
+        hash: "hash1234",
+        baseUrl: "https://milady.ai/releases/",
+        channel: "stable",
+        name: "Milady",
+        identifier: "sh.blackboard.milady",
+      })),
+      updateInfo: vi.fn(() => ({
+        version: "2.0.1",
+        hash: "hash5678",
+        updateAvailable: false,
+        updateReady: false,
+        error: "",
+      })),
+      getStatusHistory: vi.fn(() => []),
+      checkForUpdate: vi.fn(async () => ({
+        version: "2.0.1",
+        hash: "hash5678",
+        updateAvailable: false,
+        updateReady: false,
+        error: "",
+      })),
+      downloadUpdate: vi.fn(() => Promise.resolve()),
+      applyUpdate: vi.fn(),
+    },
+    BuildConfig: {
+      get: vi.fn(async () => ({
+        defaultRenderer: "native",
+        availableRenderers: ["native"],
+        bunVersion: "1.2.3",
+      })),
+    },
+    ContextMenu: {
+      on: vi.fn(),
+      showContextMenu: vi.fn(),
+    },
+    Session: {
+      defaultSession: {
+        partition: "persist:default",
+        cookies: {
+          get: vi.fn(() => []),
+          clear: vi.fn(),
+        },
+        clearStorageData: vi.fn(),
+      },
+      fromPartition: vi.fn((partition: string) => ({
+        partition,
+        cookies: {
+          get: vi.fn(() => []),
+          clear: vi.fn(),
+        },
+        clearStorageData: vi.fn(),
+      })),
+    },
+    BrowserView: MockBrowserView,
+    BrowserWindow: MockBrowserWindow,
+    Electrobun: { events: electrobunEvents },
+  };
+});
+
+// Bun global is non-configurable on globalThis but Bun.spawn is writable; assign directly.
+// Bun.version is non-writable/non-configurable — the real version is used for tests that read it.
+bunRuntime.spawn = vi.fn(() => makeSpawnResult(""));
+
+// ---------------------------------------------------------------------------
+// Module under test (after mocks)
+// ---------------------------------------------------------------------------
+
+import * as nodeFs from "node:fs";
+import * as electrobunBun from "electrobun/bun";
+import { DesktopManager, resetDesktopManagerForTesting } from "../desktop";
+import * as macEffects from "../mac-window-effects";
+
+const ORIGINAL_EXEC_PATH = process.execPath;
+const mockExistsSync = nodeFs.existsSync as ReturnType<typeof vi.fn>;
+const mockWriteFileSync = nodeFs.writeFileSync as ReturnType<typeof vi.fn>;
+const mockMkdirSync = nodeFs.mkdirSync as ReturnType<typeof vi.fn>;
+const mockUnlinkSync = nodeFs.unlinkSync as ReturnType<typeof vi.fn>;
+const mockReadFileSync = nodeFs.readFileSync as ReturnType<typeof vi.fn>;
+const mockOpenExternal = electrobunBun.Utils.openExternal as ReturnType<
+  typeof vi.fn
+>;
+const mockShowItemInFolder = electrobunBun.Utils.showItemInFolder as ReturnType<
+  typeof vi.fn
+>;
+const mockSetDockIconVisible = electrobunBun.Utils
+  .setDockIconVisible as ReturnType<typeof vi.fn>;
+const mockIsDockIconVisible = electrobunBun.Utils
+  .isDockIconVisible as ReturnType<typeof vi.fn>;
+const mockContextMenuOn = electrobunBun.ContextMenu.on as ReturnType<
+  typeof vi.fn
+>;
+const mockShowContextMenu = electrobunBun.ContextMenu
+  .showContextMenu as ReturnType<typeof vi.fn>;
+const mockBuildConfigGet = electrobunBun.BuildConfig.get as ReturnType<
+  typeof vi.fn
+>;
+const mockUpdaterApplyUpdate = electrobunBun.Updater.applyUpdate as ReturnType<
+  typeof vi.fn
+>;
+const mockSessionFromPartition = electrobunBun.Session
+  .fromPartition as ReturnType<typeof vi.fn>;
+const mockBrowserView = electrobunBun.BrowserView as unknown as ReturnType<
+  typeof vi.fn
+>;
+const mockBrowserWindow = (
+  electrobunBun.default as unknown as {
+    BrowserWindow: ReturnType<typeof vi.fn>;
+  }
+).BrowserWindow;
+const mockTray = electrobunBun.Tray as unknown as ReturnType<typeof vi.fn>;
+const mockElectrobunEventsOn = (
+  electrobunBun.default as unknown as {
+    events: { on: ReturnType<typeof vi.fn>; off: ReturnType<typeof vi.fn> };
+  }
+).events.on;
+const mockElectrobunEventsOff = (
+  electrobunBun.default as unknown as {
+    events: { on: ReturnType<typeof vi.fn>; off: ReturnType<typeof vi.fn> };
+  }
+).events.off;
+const mockSpawn = (
+  globalThis as unknown as { Bun: { spawn: ReturnType<typeof vi.fn> } }
+).Bun.spawn;
+const mockIsAppActive = macEffects.isAppActive as ReturnType<typeof vi.fn>;
+const mockMakeKeyAndOrderFront = macEffects.makeKeyAndOrderFront as ReturnType<
+  typeof vi.fn
+>;
+const mockQuit = electrobunBun.Utils.quit as ReturnType<typeof vi.fn>;
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+function makeSpawnResult(stdout: string) {
+  const encoded = new TextEncoder().encode(stdout);
+  const stream = new ReadableStream<Uint8Array>({
+    start(c) {
+      c.enqueue(encoded);
+      c.close();
+    },
+  });
+  return { exited: Promise.resolve(0), stdout: stream };
+}
+
+function setPlatform(platform: string) {
+  Object.defineProperty(process, "platform", {
+    value: platform,
+    configurable: true,
+  });
+}
+
+function setExecPath(execPath: string) {
+  Object.defineProperty(process, "execPath", {
+    value: execPath,
+    configurable: true,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+
+describe("DesktopManager", () => {
+  let manager: DesktopManager;
+
+  beforeEach(() => {
+    resetDesktopManagerForTesting();
+    manager = new DesktopManager();
+    vi.useRealTimers();
+    mockExistsSync.mockReset().mockReturnValue(false);
+    mockWriteFileSync.mockReset();
+    mockMkdirSync.mockReset();
+    mockUnlinkSync.mockReset();
+    mockReadFileSync.mockReset().mockReturnValue("");
+    mockOpenExternal.mockReset();
+    mockShowItemInFolder.mockReset();
+    mockSetDockIconVisible.mockReset();
+    mockIsDockIconVisible.mockReset().mockReturnValue(true);
+    mockContextMenuOn.mockReset();
+    mockShowContextMenu.mockReset();
+    mockBuildConfigGet.mockReset().mockResolvedValue({
+      defaultRenderer: "native",
+      availableRenderers: ["native"],
+      bunVersion: "1.2.3",
+    });
+    mockUpdaterApplyUpdate.mockReset();
+    mockSessionFromPartition
+      .mockReset()
+      .mockImplementation((partition: string) => ({
+        partition,
+        cookies: {
+          get: vi.fn(() => []),
+          clear: vi.fn(),
+        },
+        clearStorageData: vi.fn(),
+      }));
+    mockBrowserView.mockClear();
+    mockBrowserWindow.mockClear();
+    mockTray.mockClear();
+    mockElectrobunEventsOn.mockReset();
+    mockElectrobunEventsOff.mockReset();
+    mockSpawn.mockReset().mockReturnValue(makeSpawnResult(""));
+    mockIsAppActive.mockReset().mockReturnValue(false);
+    mockMakeKeyAndOrderFront.mockReset().mockReturnValue(true);
+    mockQuit.mockReset();
+  });
+
+  afterEach(() => {
+    resetDesktopManagerForTesting();
+    // Restore platform to darwin (test host)
+    setPlatform("darwin");
+    setExecPath(ORIGINAL_EXEC_PATH);
+    delete process.env.NODE_ENV;
+    delete process.env.ELECTROBUN_DEV;
+    vi.useRealTimers();
+  });
+
+  // ── openExternal — URL security ───────────────────────────────────────────
+
+  describe("openExternal", () => {
+    it("allows http:// URLs", async () => {
+      await expect(
+        manager.openExternal({ url: "http://example.com" }),
+      ).resolves.toBeUndefined();
+      expect(mockOpenExternal).toHaveBeenCalledWith("http://example.com");
+    });
+
+    it("allows https:// URLs", async () => {
+      await expect(
+        manager.openExternal({ url: "https://milady.ai" }),
+      ).resolves.toBeUndefined();
+      expect(mockOpenExternal).toHaveBeenCalledWith("https://milady.ai");
+    });
+
+    it("lets the in-app external handler capture trusted Eliza URLs", async () => {
+      const handler = vi.fn(
+        async (url: string) =>
+          url.includes("elizacloud.ai") || url.includes("elizaos.ai"),
+      );
+      manager.setOpenExternalHandler(handler);
+
+      await expect(
+        manager.openExternal({ url: "https://www.elizaos.ai/auth/cli-login" }),
+      ).resolves.toBeUndefined();
+
+      expect(handler).toHaveBeenCalledWith(
+        "https://www.elizaos.ai/auth/cli-login",
+      );
+      expect(mockOpenExternal).not.toHaveBeenCalled();
+    });
+
+    it("falls back to the system browser when the handler declines the URL", async () => {
+      const handler = vi.fn(() => false);
+      manager.setOpenExternalHandler(handler);
+
+      await expect(
+        manager.openExternal({ url: "https://milady.ai/docs" }),
+      ).resolves.toBeUndefined();
+
+      expect(handler).toHaveBeenCalledWith("https://milady.ai/docs");
+      expect(mockOpenExternal).toHaveBeenCalledWith("https://milady.ai/docs");
+    });
+
+    it("blocks non-http(s) protocols", async () => {
+      await expect(
+        manager.openExternal({ url: "file:///etc/passwd" }),
+      ).rejects.toThrow("Blocked openExternal");
+      expect(mockOpenExternal).not.toHaveBeenCalled();
+    });
+
+    it("blocks custom app schemes", async () => {
+      await expect(
+        manager.openExternal({ url: "milady://action" }),
+      ).rejects.toThrow("Blocked openExternal");
+    });
+
+    it("throws on invalid (non-parseable) URL", async () => {
+      await expect(manager.openExternal({ url: "not-a-url" })).rejects.toThrow(
+        "Invalid URL",
+      );
+    });
+
+    it("throws on empty string URL", async () => {
+      await expect(manager.openExternal({ url: "" })).rejects.toThrow();
+    });
+  });
+
+  // ── showItemInFolder ──────────────────────────────────────────────────────
+
+  describe("showItemInFolder", () => {
+    it("accepts an absolute path", async () => {
+      await expect(
+        manager.showItemInFolder({ path: "/Users/home/file.txt" }),
+      ).resolves.toBeUndefined();
+      expect(mockShowItemInFolder).toHaveBeenCalledWith("/Users/home/file.txt");
+    });
+
+    it("throws on a relative path", async () => {
+      await expect(
+        manager.showItemInFolder({ path: "relative/path" }),
+      ).rejects.toThrow("absolute path");
+    });
+
+    it("throws on empty string", async () => {
+      await expect(manager.showItemInFolder({ path: "" })).rejects.toThrow(
+        "absolute path",
+      );
+    });
+  });
+
+  // ── isPackaged ────────────────────────────────────────────────────────────
+
+  describe("isPackaged", () => {
+    it("returns true when NODE_ENV is production", async () => {
+      process.env.NODE_ENV = "production";
+      delete process.env.ELECTROBUN_DEV;
+      expect((await manager.isPackaged()).packaged).toBe(true);
+    });
+
+    it("returns false when ELECTROBUN_DEV is set", async () => {
+      process.env.NODE_ENV = "development";
+      process.env.ELECTROBUN_DEV = "1";
+      expect((await manager.isPackaged()).packaged).toBe(false);
+    });
+
+    it("returns true when ELECTROBUN_DEV is absent (regardless of NODE_ENV)", async () => {
+      delete process.env.NODE_ENV;
+      delete process.env.ELECTROBUN_DEV;
+      expect((await manager.isPackaged()).packaged).toBe(true);
+    });
+  });
+
+  // ── getPath ───────────────────────────────────────────────────────────────
+
+  describe("getPath", () => {
+    it("resolves 'home' to the mock home path", async () => {
+      const result = await manager.getPath({ name: "home" });
+      expect(result.path).toBe("/mock/home");
+    });
+
+    it("resolves 'userData' to the mock userData path", async () => {
+      const result = await manager.getPath({ name: "userData" });
+      expect(result.path).toBe("/mock/userdata");
+    });
+
+    it("resolves 'downloads' to the mock downloads path", async () => {
+      const result = await manager.getPath({ name: "downloads" });
+      expect(result.path).toBe("/mock/downloads");
+    });
+
+    it("falls back to userData for unknown path names", async () => {
+      const result = await manager.getPath({ name: "unknownName" });
+      // Falls back to Utils.paths.userData
+      expect(result.path).toBe("/mock/userdata");
+    });
+  });
+
+  // ── release / build surface ──────────────────────────────────────────────
+
+  describe("release center primitives", () => {
+    it("returns BuildConfig-backed runtime metadata", async () => {
+      mockBuildConfigGet.mockResolvedValueOnce({
+        defaultRenderer: "cef",
+        availableRenderers: ["native", "cef"],
+        bunVersion: "1.2.3",
+        cefVersion: "130.1.2",
+        runtime: { exitOnLastWindowClosed: true },
+      });
+      setPlatform("linux");
+
+      const info = await manager.getBuildInfo();
+
+      expect(info.platform).toBe("linux");
+      expect(info.arch).toBe(process.arch);
+      expect(info.defaultRenderer).toBe("cef");
+      expect(info.availableRenderers).toEqual(["native", "cef"]);
+      expect(info.cefVersion).toBe("130.1.2");
+    });
+
+    it("shows the native selection context menu with Electrobun actions", async () => {
+      const result = await manager.showSelectionContextMenu({
+        text: "Selected release text",
+      });
+
+      expect(result).toEqual({ shown: true });
+      expect(mockShowContextMenu).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            label: "Ask Agent",
+            action: "ask-agent",
+            data: { text: "Selected release text" },
+          }),
+          expect.objectContaining({
+            label: "Copy Selection",
+            action: "copy-selection",
+            data: { text: "Selected release text" },
+          }),
+        ]),
+      );
+    });
+
+    it("uses explicit Session APIs to inspect and clear partition storage", async () => {
+      const clearFn = vi.fn();
+      const clearCookiesFn = vi.fn();
+      mockSessionFromPartition.mockReturnValueOnce({
+        partition: "persist:milady-release-notes",
+        cookies: {
+          get: vi.fn(() => [
+            {
+              name: "release",
+              domain: "milady.ai",
+              path: "/",
+              secure: true,
+              httpOnly: false,
+              session: false,
+              expirationDate: 1234,
+            },
+          ]),
+          clear: vi.fn(),
+        },
+        clearStorageData: vi.fn(),
+      });
+      mockSessionFromPartition.mockReturnValueOnce({
+        partition: "persist:milady-release-notes",
+        cookies: {
+          get: vi.fn(() => []),
+          clear: clearCookiesFn,
+        },
+        clearStorageData: clearFn,
+      });
+      mockSessionFromPartition.mockReturnValueOnce({
+        partition: "persist:milady-release-notes",
+        cookies: {
+          get: vi.fn(() => []),
+          clear: vi.fn(),
+        },
+        clearStorageData: vi.fn(),
+      });
+
+      const snapshot = await manager.getSessionSnapshot({
+        partition: "persist:milady-release-notes",
+      });
+      const cleared = await manager.clearSessionData({
+        partition: "persist:milady-release-notes",
+        storageTypes: "all",
+        clearCookies: true,
+      });
+
+      expect(snapshot.cookieCount).toBe(1);
+      expect(snapshot.cookies[0]?.name).toBe("release");
+      expect(clearCookiesFn).toHaveBeenCalled();
+      expect(clearFn).toHaveBeenCalledWith("all");
+      expect(cleared.cookieCount).toBe(0);
+    });
+
+    it("opens release notes in a dedicated BrowserView window", async () => {
+      await manager.openReleaseNotesWindow({
+        url: "https://milady.ai/releases/",
+      });
+
+      expect(mockBrowserWindow).toHaveBeenCalled();
+      expect(mockBrowserView).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: "https://milady.ai/releases/",
+          partition: "persist:milady-release-notes",
+          sandbox: true,
+        }),
+      );
+    });
+
+    it("toggles dock visibility through Electrobun on macOS", async () => {
+      setPlatform("darwin");
+
+      await manager.setDockIconVisibility({ visible: false });
+
+      expect(mockSetDockIconVisible).toHaveBeenCalledWith(false);
+    });
+
+    it("reports auto-updates as unavailable outside Applications on macOS", async () => {
+      setPlatform("darwin");
+      setExecPath("/Volumes/Milady/Milady.app/Contents/MacOS/Milady");
+
+      const snapshot = await manager.getUpdaterState();
+
+      expect(snapshot.appBundlePath).toContain("Volumes");
+      expect(snapshot.appBundlePath).toContain("Milady.app");
+      expect(snapshot.canAutoUpdate).toBe(false);
+      expect(snapshot.autoUpdateDisabledReason).toContain(
+        "Move Milady.app to /Applications",
+      );
+    });
+
+    it("blocks applying updates outside Applications on macOS", async () => {
+      setPlatform("darwin");
+      setExecPath("/Volumes/Milady/Milady.app/Contents/MacOS/Milady");
+
+      await expect(manager.applyUpdate()).rejects.toThrow(
+        "Move Milady.app to /Applications",
+      );
+      expect(mockUpdaterApplyUpdate).not.toHaveBeenCalled();
+    });
+
+    it("allows applying updates from Applications on macOS", async () => {
+      setPlatform("darwin");
+      setExecPath("/Applications/Milady.app/Contents/MacOS/Milady");
+
+      await expect(manager.applyUpdate()).resolves.toBeUndefined();
+      expect(mockUpdaterApplyUpdate).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  // ── setAutoLaunch — macOS ─────────────────────────────────────────────────
+
+  describe("setAutoLaunch (macOS)", () => {
+    beforeEach(() => setPlatform("darwin"));
+
+    it("writes a plist file when enabling", async () => {
+      mockExistsSync.mockReturnValue(true); // dir exists
+      await manager.setAutoLaunch({ enabled: true });
+
+      expect(mockWriteFileSync).toHaveBeenCalledTimes(1);
+      const [filePath, content] = mockWriteFileSync.mock.calls[0] as [
+        string,
+        string,
+      ];
+      expect(filePath).toContain("com.miladyai.milady.plist");
+      expect(content).toContain("<key>RunAtLoad</key>");
+      expect(content).toContain(process.execPath);
+    });
+
+    it("creates LaunchAgents directory if missing", async () => {
+      mockExistsSync.mockReturnValue(false);
+      await manager.setAutoLaunch({ enabled: true });
+      expect(mockMkdirSync).toHaveBeenCalledWith(
+        expect.stringContaining("LaunchAgents"),
+        { recursive: true },
+      );
+    });
+
+    it("calls launchctl load after writing plist", async () => {
+      mockExistsSync.mockReturnValue(true);
+      await manager.setAutoLaunch({ enabled: true });
+
+      expect(mockSpawn).toHaveBeenCalledWith(
+        expect.arrayContaining(["launchctl", "load"]),
+        expect.any(Object),
+      );
+    });
+
+    it("calls launchctl unload then unlinks plist when disabling", async () => {
+      mockExistsSync.mockReturnValue(true); // plist exists
+      await manager.setAutoLaunch({ enabled: false });
+
+      expect(mockSpawn).toHaveBeenCalledWith(
+        expect.arrayContaining(["launchctl", "unload"]),
+        expect.any(Object),
+      );
+      expect(mockUnlinkSync).toHaveBeenCalledWith(
+        expect.stringContaining("com.miladyai.milady.plist"),
+      );
+    });
+
+    it("does nothing when disabling and plist does not exist", async () => {
+      mockExistsSync.mockReturnValue(false);
+      await manager.setAutoLaunch({ enabled: false });
+      expect(mockSpawn).not.toHaveBeenCalled();
+      expect(mockUnlinkSync).not.toHaveBeenCalled();
+    });
+
+    it("includes --hidden arg in plist ProgramArguments when openAsHidden is true", async () => {
+      mockExistsSync.mockReturnValue(true);
+      await manager.setAutoLaunch({ enabled: true, openAsHidden: true });
+      const [, content] = mockWriteFileSync.mock.calls[0] as [string, string];
+      expect(content).toContain("--hidden");
+    });
+
+    it("does not include --hidden arg in plist when openAsHidden is false", async () => {
+      mockExistsSync.mockReturnValue(true);
+      await manager.setAutoLaunch({ enabled: true, openAsHidden: false });
+      const [, content] = mockWriteFileSync.mock.calls[0] as [string, string];
+      expect(content).not.toContain("--hidden");
+    });
+  });
+
+  // ── setAutoLaunch — Linux ─────────────────────────────────────────────────
+
+  describe("setAutoLaunch (Linux)", () => {
+    beforeEach(() => setPlatform("linux"));
+
+    it("writes a .desktop file when enabling", async () => {
+      mockExistsSync.mockReturnValue(true); // dir exists
+      await manager.setAutoLaunch({ enabled: true });
+
+      expect(mockWriteFileSync).toHaveBeenCalledTimes(1);
+      const [filePath, content] = mockWriteFileSync.mock.calls[0] as [
+        string,
+        string,
+      ];
+      expect(filePath).toContain("milady.desktop");
+      expect(content).toContain("[Desktop Entry]");
+      expect(content).toContain(process.execPath);
+    });
+
+    it("creates autostart directory if missing", async () => {
+      mockExistsSync.mockReturnValue(false);
+      await manager.setAutoLaunch({ enabled: true });
+      expect(mockMkdirSync).toHaveBeenCalledWith(
+        expect.stringContaining("autostart"),
+        { recursive: true },
+      );
+    });
+
+    it("unlinks .desktop file when disabling", async () => {
+      mockExistsSync.mockReturnValue(true);
+      await manager.setAutoLaunch({ enabled: false });
+      expect(mockUnlinkSync).toHaveBeenCalledWith(
+        expect.stringContaining("milady.desktop"),
+      );
+    });
+
+    it("does nothing when disabling and .desktop does not exist", async () => {
+      mockExistsSync.mockReturnValue(false);
+      await manager.setAutoLaunch({ enabled: false });
+      expect(mockUnlinkSync).not.toHaveBeenCalled();
+    });
+
+    it("appends --hidden to Exec line when openAsHidden is true", async () => {
+      mockExistsSync.mockReturnValue(true);
+      await manager.setAutoLaunch({ enabled: true, openAsHidden: true });
+      const [, content] = mockWriteFileSync.mock.calls[0] as [string, string];
+      expect(content).toContain(`${process.execPath} --hidden`);
+    });
+
+    it("does not append --hidden to Exec line when openAsHidden is false", async () => {
+      mockExistsSync.mockReturnValue(true);
+      await manager.setAutoLaunch({ enabled: true, openAsHidden: false });
+      const [, content] = mockWriteFileSync.mock.calls[0] as [string, string];
+      expect(content).not.toContain("--hidden");
+    });
+  });
+
+  // ── setAutoLaunch — Windows ───────────────────────────────────────────────
+
+  describe("setAutoLaunch (Windows)", () => {
+    beforeEach(() => setPlatform("win32"));
+
+    it("calls reg add when enabling", async () => {
+      await manager.setAutoLaunch({ enabled: true });
+      expect(mockSpawn).toHaveBeenCalledWith(
+        expect.arrayContaining(["reg", "add"]),
+        expect.any(Object),
+      );
+    });
+
+    it("includes the app path in the reg add command", async () => {
+      await manager.setAutoLaunch({ enabled: true });
+      const [args] = mockSpawn.mock.calls[0] as [string[]];
+      expect(args).toContain(process.execPath);
+    });
+
+    it("calls reg delete when disabling", async () => {
+      await manager.setAutoLaunch({ enabled: false });
+      expect(mockSpawn).toHaveBeenCalledWith(
+        expect.arrayContaining(["reg", "delete"]),
+        expect.any(Object),
+      );
+    });
+
+    it("appends --hidden to registry value when openAsHidden is true", async () => {
+      await manager.setAutoLaunch({ enabled: true, openAsHidden: true });
+      const [args] = mockSpawn.mock.calls[0] as [string[]];
+      const valueIdx = args.indexOf("/d") + 1;
+      expect(args[valueIdx]).toBe(`${process.execPath} --hidden`);
+    });
+
+    it("does not append --hidden to registry value when openAsHidden is false", async () => {
+      await manager.setAutoLaunch({ enabled: true, openAsHidden: false });
+      const [args] = mockSpawn.mock.calls[0] as [string[]];
+      const valueIdx = args.indexOf("/d") + 1;
+      expect(args[valueIdx]).toBe(process.execPath);
+    });
+  });
+
+  // ── getAutoLaunchStatus ───────────────────────────────────────────────────
+
+  describe("getAutoLaunchStatus", () => {
+    it("returns enabled: true on macOS when plist exists", async () => {
+      setPlatform("darwin");
+      mockExistsSync.mockReturnValue(true);
+      mockReadFileSync.mockReturnValue("<key>RunAtLoad</key>");
+      const status = await manager.getAutoLaunchStatus();
+      expect(status.enabled).toBe(true);
+      expect(status.openAsHidden).toBe(false);
+    });
+
+    it("returns openAsHidden: true on macOS when plist contains --hidden", async () => {
+      setPlatform("darwin");
+      mockExistsSync.mockReturnValue(true);
+      mockReadFileSync.mockReturnValue("<string>--hidden</string>");
+      expect((await manager.getAutoLaunchStatus()).openAsHidden).toBe(true);
+    });
+
+    it("returns enabled: false on macOS when plist is missing", async () => {
+      setPlatform("darwin");
+      mockExistsSync.mockReturnValue(false);
+      expect((await manager.getAutoLaunchStatus()).enabled).toBe(false);
+    });
+
+    it("returns enabled: true on Linux when .desktop file exists", async () => {
+      setPlatform("linux");
+      mockExistsSync.mockReturnValue(true);
+      mockReadFileSync.mockReturnValue("Exec=/path/to/app");
+      expect((await manager.getAutoLaunchStatus()).enabled).toBe(true);
+    });
+
+    it("returns openAsHidden: true on Linux when .desktop Exec contains --hidden", async () => {
+      setPlatform("linux");
+      mockExistsSync.mockReturnValue(true);
+      mockReadFileSync.mockReturnValue("Exec=/path/to/app --hidden");
+      expect((await manager.getAutoLaunchStatus()).openAsHidden).toBe(true);
+    });
+
+    it("returns enabled: false on Linux when .desktop file is missing", async () => {
+      setPlatform("linux");
+      mockExistsSync.mockReturnValue(false);
+      expect((await manager.getAutoLaunchStatus()).enabled).toBe(false);
+    });
+
+    it("returns enabled: true on Windows when reg query includes 'Milady'", async () => {
+      setPlatform("win32");
+      mockSpawn.mockReturnValue(
+        makeSpawnResult("Milady    REG_SZ    /path/to/app"),
+      );
+      expect((await manager.getAutoLaunchStatus()).enabled).toBe(true);
+    });
+
+    it("returns openAsHidden: true on Windows when reg value contains --hidden", async () => {
+      setPlatform("win32");
+      mockSpawn.mockReturnValue(
+        makeSpawnResult("Milady    REG_SZ    /path/to/app --hidden"),
+      );
+      expect((await manager.getAutoLaunchStatus()).openAsHidden).toBe(true);
+    });
+
+    it("returns enabled: false on Windows when reg query output lacks 'Milady'", async () => {
+      setPlatform("win32");
+      mockSpawn.mockReturnValue(
+        makeSpawnResult(
+          "ERROR: The system was unable to find the specified registry key",
+        ),
+      );
+      expect((await manager.getAutoLaunchStatus()).enabled).toBe(false);
+    });
+
+    it("returns enabled: false on unsupported platform", async () => {
+      setPlatform("freebsd");
+      expect((await manager.getAutoLaunchStatus()).enabled).toBe(false);
+    });
+  });
+
+  describe("window restore", () => {
+    it("restores and shows a replacement window when the cached handle is stale", async () => {
+      const restoredWindow = {
+        show: vi.fn(),
+        focus: vi.fn(),
+        on: vi.fn(),
+        off: vi.fn(),
+        isMaximized: vi.fn(() => false),
+        isMinimized: vi.fn(() => false),
+      };
+      const staleWindow = {
+        show: vi.fn(() => {
+          throw new Error("stale window");
+        }),
+        focus: vi.fn(),
+        on: vi.fn(),
+        off: vi.fn(),
+        isMaximized: vi.fn(() => false),
+        isMinimized: vi.fn(() => false),
+      };
+      const restoreWindow = vi.fn(() => {
+        manager.setMainWindow(
+          restoredWindow as unknown as Parameters<
+            DesktopManager["setMainWindow"]
+          >[0],
+        );
+      });
+
+      manager.setRestoreMainWindowCallback(restoreWindow);
+      manager.setMainWindow(
+        staleWindow as unknown as Parameters<
+          DesktopManager["setMainWindow"]
+        >[0],
+      );
+
+      await manager.showWindow();
+
+      expect(staleWindow.show).toHaveBeenCalledTimes(1);
+      expect(restoreWindow).toHaveBeenCalledTimes(1);
+      expect(restoredWindow.show).toHaveBeenCalledTimes(1);
+      expect(restoredWindow.focus).toHaveBeenCalledTimes(1);
+    });
+
+    it("restores the same background process when the tray icon is clicked after close", async () => {
+      const restoredWindow = {
+        show: vi.fn(),
+        focus: vi.fn(),
+        on: vi.fn(),
+        off: vi.fn(),
+        isMaximized: vi.fn(() => false),
+        isMinimized: vi.fn(() => false),
+      };
+      const restoreWindow = vi.fn(() => {
+        manager.setMainWindow(
+          restoredWindow as unknown as Parameters<
+            DesktopManager["setMainWindow"]
+          >[0],
+        );
+      });
+
+      manager.setRestoreMainWindowCallback(restoreWindow);
+      await manager.createTray({
+        icon: "/mock/icon.png",
+        title: "Milady",
+        menu: [
+          { id: "tray-show-window", label: "Show Window", type: "normal" },
+        ],
+      });
+      manager.clearMainWindow();
+
+      const trayInstance = mockTray.mock.results.at(-1)?.value as {
+        on: ReturnType<typeof vi.fn>;
+      };
+      const trayClickHandler = trayInstance.on.mock.calls.find(
+        ([event]) => event === "tray-clicked",
+      )?.[1] as (() => void) | undefined;
+
+      expect(trayClickHandler).toBeTypeOf("function");
+      trayClickHandler?.();
+      await Promise.resolve();
+
+      expect(restoreWindow).toHaveBeenCalledTimes(1);
+      expect(restoredWindow.show).toHaveBeenCalledTimes(1);
+      expect(restoredWindow.focus).toHaveBeenCalledTimes(1);
+    });
+
+    it("restores the same background process from the tray show action after close", async () => {
+      const restoredWindow = {
+        show: vi.fn(),
+        focus: vi.fn(),
+        on: vi.fn(),
+        off: vi.fn(),
+        isMaximized: vi.fn(() => false),
+        isMinimized: vi.fn(() => false),
+      };
+      const restoreWindow = vi.fn(() => {
+        manager.setMainWindow(
+          restoredWindow as unknown as Parameters<
+            DesktopManager["setMainWindow"]
+          >[0],
+        );
+      });
+
+      manager.setRestoreMainWindowCallback(restoreWindow);
+      await manager.createTray({
+        icon: "/mock/icon.png",
+        title: "Milady",
+        menu: [
+          { id: "tray-show-window", label: "Show Window", type: "normal" },
+        ],
+      });
+      manager.clearMainWindow();
+
+      const contextMenuHandler = mockElectrobunEventsOn.mock.calls.find(
+        ([event]) => event === "tray-clicked",
+      )?.[1] as ((event: { data?: { action?: string } }) => void) | undefined;
+
+      expect(contextMenuHandler).toBeTypeOf("function");
+      contextMenuHandler?.({ data: { action: "tray-show-window" } });
+      await Promise.resolve();
+
+      expect(restoreWindow).toHaveBeenCalledTimes(1);
+      expect(restoredWindow.show).toHaveBeenCalledTimes(1);
+      expect(restoredWindow.focus).toHaveBeenCalledTimes(1);
+    });
+
+    it("still quits from the tray menu when no window is attached", async () => {
+      await manager.createTray({
+        icon: "/mock/icon.png",
+        title: "Milady",
+        menu: [{ id: "quit", label: "Quit", type: "normal" }],
+      });
+      manager.clearMainWindow();
+
+      const contextMenuHandler = mockElectrobunEventsOn.mock.calls.find(
+        ([event]) => event === "tray-clicked",
+      )?.[1] as ((event: { data?: { action?: string } }) => void) | undefined;
+
+      expect(contextMenuHandler).toBeTypeOf("function");
+      contextMenuHandler?.({ data: { action: "quit" } });
+
+      expect(mockQuit).toHaveBeenCalledTimes(1);
+    });
+
+    it("restores a minimized macOS window when the app becomes active", async () => {
+      vi.useFakeTimers();
+      setPlatform("darwin");
+
+      const fakeWindow = {
+        ptr: Symbol("window"),
+        isMinimized: vi.fn(() => true),
+        show: vi.fn(),
+        focus: vi.fn(),
+        on: vi.fn(),
+      };
+
+      mockIsAppActive.mockReturnValue(false);
+      manager.setMainWindow(
+        fakeWindow as unknown as Parameters<DesktopManager["setMainWindow"]>[0],
+      );
+
+      await vi.advanceTimersByTimeAsync(600);
+      expect(mockMakeKeyAndOrderFront).not.toHaveBeenCalled();
+
+      mockIsAppActive.mockReturnValue(true);
+      await vi.advanceTimersByTimeAsync(600);
+
+      expect(mockMakeKeyAndOrderFront).toHaveBeenCalledWith(fakeWindow.ptr);
+    });
+  });
+});
