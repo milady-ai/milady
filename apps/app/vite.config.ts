@@ -35,6 +35,10 @@ const nativePluginsRoot = path.join(
   "eliza/packages/native-plugins",
 );
 const appCoreSrcRoot = path.join(miladyRoot, "eliza/packages/app-core/src");
+const wechatPluginEntry = path.join(
+  miladyRoot,
+  "eliza/plugins/plugin-wechat/src/index.ts",
+);
 const appCoreNativePluginEntrypoints = path.join(
   appCoreSrcRoot,
   "platform/native-plugin-entrypoints.ts",
@@ -1293,6 +1297,7 @@ export default defineConfig({
       // events is pre-bundled via optimizeDeps.
       { find: /^path$/, replacement: patheEntry },
       { find: /^@capacitor\/core$/, replacement: capacitorCoreEntry },
+      { find: /^@miladyai\/plugin-wechat$/, replacement: wechatPluginEntry },
       // Aliases for Capacitor packages that may not be hoisted to root node_modules
       // by bun workspaces. Apps/app resolves them; eliza submodule sources cannot.
       ...(capacitorKeyboardEntry
