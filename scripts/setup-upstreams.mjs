@@ -72,7 +72,7 @@ const ELIZA_INSTALL_RETRY_DELAY_MS = 3_000;
 const UNPUBLISHED_ELIZA_PLUGIN_CI_STUBS = [
   {
     packageName: "@elizaos/plugin-app-control",
-    workspaceEntry: "plugins/plugin-app-control",
+    workspaceEntry: "plugins/plugin-app-control/typescript",
     /** Relative from eliza/ to the CI stub directory. */
     stubRelativePath: "../scripts/ci-stubs/elizaos-plugin-app-control",
   },

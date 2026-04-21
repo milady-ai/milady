@@ -82,6 +82,26 @@ describe("getTemporaryElizaWorkspaceEntries", () => {
     ]);
   });
 
+  it("uses the installable app-control workspace path when deciding whether to keep the stub", () => {
+    const elizaRoot = "/repo/eliza";
+    const existingPaths = new Set([
+      path.join(
+        elizaRoot,
+        "..",
+        "scripts",
+        "ci-stubs",
+        "elizaos-plugin-app-control",
+        "package.json",
+      ),
+    ]);
+
+    expect(
+      getTemporaryElizaWorkspaceEntries(elizaRoot, {
+        pathExists: (targetPath) => existingPaths.has(targetPath),
+      }),
+    ).toContain("../scripts/ci-stubs/elizaos-plugin-app-control");
+  });
+
   it("skips the wechat CI stub when the real plugin workspace exists", () => {
     const elizaRoot = "/repo/eliza";
     const existingPaths = new Set([
@@ -132,6 +152,8 @@ describe("applyUnpublishedPluginStubOverrides", () => {
         {
           name: "eliza",
           overrides: {
+            "@elizaos/plugin-app-control":
+              "file:../scripts/ci-stubs/elizaos-plugin-app-control",
             "@elizaos/plugin-wechat":
               "file:../scripts/ci-stubs/elizaos-plugin-wechat",
           },
@@ -146,10 +168,31 @@ describe("applyUnpublishedPluginStubOverrides", () => {
         "..",
         "scripts",
         "ci-stubs",
+        "elizaos-plugin-app-control",
+        "package.json",
+      ),
+      '{"name":"@elizaos/plugin-app-control"}\n',
+    );
+    writeFile(
+      path.join(
+        elizaRoot,
+        "..",
+        "scripts",
+        "ci-stubs",
         "elizaos-plugin-wechat",
         "package.json",
       ),
       '{"name":"@elizaos/plugin-wechat"}\n',
+    );
+    writeFile(
+      path.join(
+        elizaRoot,
+        "plugins",
+        "plugin-app-control",
+        "typescript",
+        "package.json",
+      ),
+      '{"name":"@elizaos/plugin-app-control"}\n',
     );
     writeFile(
       path.join(elizaRoot, "plugins", "plugin-wechat", "package.json"),

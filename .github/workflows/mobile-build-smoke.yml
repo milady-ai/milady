@@ -62,6 +62,8 @@ jobs:
         run: node --max-old-space-size=8192 eliza/packages/app-core/scripts/run-mobile-build.mjs ios
         env:
           LANG: en_US.UTF-8
+          MILADY_IOS_BUILD_DESTINATION: "generic/platform=iOS Simulator"
+          MILADY_IOS_BUILD_SDK: "iphonesimulator"
           NODE_OPTIONS: "--max-old-space-size=8192"
 
       - name: Verify .app exists
@@ -161,6 +163,9 @@ jobs:
             node node_modules/@bufbuild/buf/install.js 2>/dev/null || true
             bunx @bufbuild/buf@1.67.0 generate
           fi
+
+      - name: Accept Android SDK licenses
+        run: yes | sdkmanager --licenses >/dev/null
 
       - name: Build Android debug app
         run: node --max-old-space-size=8192 eliza/packages/app-core/scripts/run-mobile-build.mjs android
