@@ -15,7 +15,6 @@ import {
   isElectrobunRuntime,
 } from "@elizaos/app-core";
 import { CharacterEditor } from "@elizaos/app-core";
-import { PhoneCompanionApp } from "@elizaos/app-core";
 import type { BrandingConfig } from "@elizaos/app-core";
 import {
   type AppBootConfig,
@@ -35,6 +34,7 @@ import {
 import {
   applyForceFreshOnboardingReset,
   applyLaunchConnectionFromUrl,
+  dispatchQueuedLifeOpsGithubCallbackFromUrl,
   installDesktopPermissionsClientPatch,
   installForceFreshOnboardingClientPatch,
   installLocalProviderCloudPreferencePatch,
@@ -43,7 +43,6 @@ import {
   shouldInstallMainWindowOnboardingPatches,
   syncDetachedShellLocation,
 } from "@elizaos/app-core";
-import { dispatchQueuedLifeOpsGithubCallbackFromUrl } from "@elizaos/app-lifeops/platform";
 import type { ShareTargetPayload } from "@elizaos/app-core/platform";
 import {
   DESKTOP_TRAY_MENU_ITEMS,
@@ -70,20 +69,11 @@ import {
 } from "@elizaos/app-companion";
 import "@elizaos/app-companion/register";
 // Side-effect: register LifeOps sidebar widgets + client methods on ElizaClient.
-import "@elizaos/app-lifeops/widgets";
-// Side-effect: register game operator surfaces + detail extensions.
-import "@elizaos/app-babylon/ui";
-import "@elizaos/app-scape/ui";
-import "@elizaos/app-hyperscape/ui";
-import "@elizaos/app-2004scape/ui";
-import "@elizaos/app-defense-of-the-agents/ui";
 import {
-  AppBlockerSettingsCard,
   LifeOpsBrowserSetupPanel,
   LifeOpsPageView,
   WebsiteBlockerSettingsCard,
 } from "@elizaos/app-lifeops/ui";
-import { LifeOpsActivitySignalsEffect } from "@elizaos/app-lifeops/components/LifeOpsActivitySignalsEffect";
 import {
   ApprovalQueue,
   StewardLogo,
@@ -98,7 +88,7 @@ import {
 import { FineTuningView } from "@elizaos/app-training/ui";
 import "@elizaos/app-shopify/register";
 import "@elizaos/app-vincent/client";
-import { useVincentState } from "@elizaos/app-vincent/ui";
+import { useVincentState } from "@elizaos/app-vincent";
 import "@elizaos/app-vincent/register";
 import { shouldUseCloudOnlyBranding } from "@elizaos/app-core";
 import {
@@ -243,7 +233,6 @@ const appBootConfig: AppBootConfig = {
   envAliases: APP_ENV_ALIASES,
   lifeOpsPageView: LifeOpsPageView,
   lifeOpsBrowserSetupPanel: LifeOpsBrowserSetupPanel,
-  appBlockerSettingsCard: AppBlockerSettingsCard,
   websiteBlockerSettingsCard: WebsiteBlockerSettingsCard,
   clientMiddleware: {
     forceFreshOnboarding:
@@ -520,27 +509,15 @@ function setupPlatformStyles(): void {
   root.style.setProperty("--keyboard-height", "0px");
 }
 
-function isPhoneCompanionMode(): boolean {
-  if (typeof window === "undefined") return false;
-  const params = new URLSearchParams(
-    window.location.search || window.location.hash.split("?")[1] || "",
-  );
-  return params.get("mode") === "companion";
-}
-
 function mountReactApp(): void {
   const rootEl = document.getElementById("root");
   if (!rootEl) throw new Error("Root element #root not found");
-
-  const phoneCompanion = isPhoneCompanionMode();
 
   createRoot(rootEl).render(
     <ErrorBoundary>
       <StrictMode>
         <AppProvider branding={APP_BRANDING}>
-          {phoneCompanion ? (
-            <PhoneCompanionApp />
-          ) : isDetachedWindowShell(windowShellRoute) ? (
+          {isDetachedWindowShell(windowShellRoute) ? (
             <div className="flex h-screen min-h-0 w-screen flex-col overflow-hidden">
               <DetachedShellRoot route={windowShellRoute} />
             </div>
@@ -549,7 +526,6 @@ function mountReactApp(): void {
               <DesktopOnboardingRuntime />
               <DesktopSurfaceNavigationRuntime />
               <DesktopTrayRuntime />
-              <LifeOpsActivitySignalsEffect />
               <App />
             </>
           )}
