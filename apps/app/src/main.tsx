@@ -35,7 +35,6 @@ import {
 import {
   applyForceFreshOnboardingReset,
   applyLaunchConnectionFromUrl,
-  applyLaunchConnection,
   installDesktopPermissionsClientPatch,
   installForceFreshOnboardingClientPatch,
   installLocalProviderCloudPreferencePatch,
@@ -418,14 +417,9 @@ function handleDeepLink(url: string): void {
             parsed.searchParams.get("token") ??
             parsed.searchParams.get("accessToken") ??
             null;
-          const connection = applyLaunchConnection({
-            kind: "remote",
-            apiBase: validatedUrl.href,
-            token,
-          });
           dispatchAppEvent(CONNECT_EVENT, {
-            gatewayUrl: connection.apiBase,
-            token: connection.token ?? undefined,
+            gatewayUrl: validatedUrl.href,
+            token: token ?? undefined,
           });
         } catch {
           console.error(`${APP_LOG_PREFIX} Invalid gateway URL format`);

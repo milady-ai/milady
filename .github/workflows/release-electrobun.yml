@@ -1308,7 +1308,7 @@ jobs:
         shell: pwsh
         run: |
           $artifactsDir = Join-Path $PWD "apps/app/electrobun/artifacts"
-          $canonicalInstallers = Get-ChildItem -Path $artifactsDir -File -Filter "ElizaOSApp-Setup-*.exe" -ErrorAction SilentlyContinue |
+          $canonicalInstallers = Get-ChildItem -Path $artifactsDir -File -Filter "Milady-Setup-*.exe" -ErrorAction SilentlyContinue |
             Sort-Object LastWriteTime -Descending
           if (-not $canonicalInstallers) {
             Write-Error "No canonical Windows installer found before compression."
@@ -1352,7 +1352,7 @@ jobs:
           Remove-Item $publicCanaryDir -Recurse -Force -ErrorAction SilentlyContinue
           New-Item -ItemType Directory -Force -Path $publicCanaryDir | Out-Null
 
-          $canonicalInstallers = Get-ChildItem -Path $artifactsDir -File -Filter "ElizaOSApp-Setup-*.exe" -ErrorAction SilentlyContinue |
+          $canonicalInstallers = Get-ChildItem -Path $artifactsDir -File -Filter "Milady-Setup-*.exe" -ErrorAction SilentlyContinue |
             Sort-Object LastWriteTime -Descending
           if ($canonicalInstallers) {
             if ($canonicalInstallers.Count -gt 1) {
@@ -1363,7 +1363,7 @@ jobs:
             $canonicalInstaller = $canonicalInstallers | Select-Object -First 1
             Copy-Item $canonicalInstaller.FullName -Destination $publicCanaryDir -Force
           } else {
-            $canonicalInstallerZips = Get-ChildItem -Path $artifactsDir -File -Filter "ElizaOSApp-Setup-*.exe.zip" -ErrorAction SilentlyContinue |
+            $canonicalInstallerZips = Get-ChildItem -Path $artifactsDir -File -Filter "Milady-Setup-*.exe.zip" -ErrorAction SilentlyContinue |
               Sort-Object LastWriteTime -Descending
             if (-not $canonicalInstallerZips) {
               Write-Error "No canonical Windows installer (or zip fallback) found for canary artifact publishing."
@@ -1379,7 +1379,7 @@ jobs:
             Expand-Archive -Path $canonicalInstallerZip.FullName -DestinationPath $publicCanaryDir -Force
           }
 
-          $publicInstallers = Get-ChildItem -Path $publicCanaryDir -File -Filter "ElizaOSApp-Setup-*.exe" -ErrorAction SilentlyContinue |
+          $publicInstallers = Get-ChildItem -Path $publicCanaryDir -File -Filter "Milady-Setup-*.exe" -ErrorAction SilentlyContinue |
             Sort-Object LastWriteTime -Descending
           if (-not $publicInstallers) {
             Write-Error "Failed to stage a public Windows installer under $publicCanaryDir"
@@ -1399,7 +1399,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: electrobun-${{ matrix.platform.artifact-name }}-public-installer
-          path: apps/app/electrobun/artifacts/public-canary-installer/ElizaOSApp-Setup-*.exe
+          path: apps/app/electrobun/artifacts/public-canary-installer/Milady-Setup-*.exe
           if-no-files-found: error
           retention-days: 30
           compression-level: 0

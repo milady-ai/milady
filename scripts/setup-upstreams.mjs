@@ -173,6 +173,33 @@ const PLUGIN_ANTHROPIC_CLAUDE_CLI_BUN_REPLACEMENTS = [
     `const proc = getBunRuntime().spawn(args, { stdout: "pipe", stderr: "pipe" });`,
   ],
 ];
+const TS_IGNORE_DEPRECATIONS_COMPAT_FILES = [
+  path.join("packages", "typescript", "tsconfig.json"),
+  path.join("packages", "typescript", "tsconfig.declarations.json"),
+  path.join("packages", "shared", "tsconfig.json"),
+  path.join("packages", "interop", "tsconfig.json"),
+  path.join("plugins", "plugin-shopify", "tsconfig.json"),
+];
+const TS_IGNORE_DEPRECATIONS_COMPAT_REPLACEMENTS = [
+  ['"ignoreDeprecations": "6.0"', '"ignoreDeprecations": "5.0"'],
+];
+const LIFEOPS_SETTINGS_SECTION_RELATIVE_PATH = path.join(
+  "apps",
+  "app-lifeops",
+  "src",
+  "components",
+  "LifeOpsSettingsSection.tsx",
+);
+const LIFEOPS_LUCIDE_GITHUB_REPLACEMENTS = [
+  [
+    'import { Copy, ExternalLink, Github } from "lucide-react";',
+    'import { Copy, ExternalLink, GitBranch } from "lucide-react";',
+  ],
+  [
+    '<Github className="h-4 w-4 shrink-0" />',
+    '<GitBranch className="h-4 w-4 shrink-0" />',
+  ],
+];
 
 function toDisplayPath(targetPath) {
   return path.normalize(targetPath);
@@ -325,6 +352,28 @@ export function applyPluginAnthropicCliUsagePatch(elizaRoot) {
     path.join(elizaRoot, PLUGIN_ANTHROPIC_CLAUDE_CLI_RELATIVE_PATH),
     PLUGIN_ANTHROPIC_CLAUDE_CLI_REPLACEMENTS,
     { label: "plugin-anthropic Claude CLI usage patch" },
+  );
+}
+
+export function applyTypeScriptIgnoreDeprecationsCompatPatch(elizaRoot) {
+  let patchedReplacements = 0;
+  for (const relativePath of TS_IGNORE_DEPRECATIONS_COMPAT_FILES) {
+    patchedReplacements += applyTextReplacements(
+      path.join(elizaRoot, relativePath),
+      TS_IGNORE_DEPRECATIONS_COMPAT_REPLACEMENTS,
+      {
+        label: `TypeScript ignoreDeprecations compatibility patch (${relativePath})`,
+      },
+    );
+  }
+  return patchedReplacements;
+}
+
+export function applyLifeOpsLucideCompatPatch(elizaRoot) {
+  return applyTextReplacements(
+    path.join(elizaRoot, LIFEOPS_SETTINGS_SECTION_RELATIVE_PATH),
+    LIFEOPS_LUCIDE_GITHUB_REPLACEMENTS,
+    { label: "LifeOps lucide-react icon compatibility patch" },
   );
 }
 
@@ -1569,6 +1618,8 @@ export async function setupUpstreams(repoRoot = DEFAULT_REPO_ROOT) {
           );
         }
         applyMiladyCopyPatches(elizaRoot);
+        applyTypeScriptIgnoreDeprecationsCompatPatch(elizaRoot);
+        applyLifeOpsLucideCompatPatch(elizaRoot);
       }
     }
     console.log(`[setup-upstreams] Skipping: ${skipReason}`);
@@ -1589,6 +1640,8 @@ export async function setupUpstreams(repoRoot = DEFAULT_REPO_ROOT) {
 
   const elizaRoot = await ensureRepoLocalEliza(repoRoot);
   applyMiladyCopyPatches(elizaRoot);
+  applyTypeScriptIgnoreDeprecationsCompatPatch(elizaRoot);
+  applyLifeOpsLucideCompatPatch(elizaRoot);
   await ensureElizaDependencies(elizaRoot);
   await ensureElizaBuildOutputs(elizaRoot);
 
