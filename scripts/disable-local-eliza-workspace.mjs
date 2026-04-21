@@ -28,3 +28,26 @@ fs.renameSync(elizaRoot, disabledElizaRoot);
 console.log(
   `[disable-local-eliza-workspace] Disabled repo-local eliza workspace at ${elizaRoot}`,
 );
+
+// `bun install` resolves every workspace glob; paths under `eliza/` break once
+// this directory is renamed away for docker-smoke (published @elizaos/* only).
+const packageJsonPath = path.join(repoRoot, "package.json");
+const rawPkg = fs.readFileSync(packageJsonPath, "utf8");
+const pkg = JSON.parse(rawPkg);
+if (Array.isArray(pkg.workspaces)) {
+	const before = pkg.workspaces.length;
+	pkg.workspaces = pkg.workspaces.filter(
+		(entry) => typeof entry !== "string" || !entry.startsWith("eliza/"),
+	);
+	const removed = before - pkg.workspaces.length;
+	if (removed > 0) {
+		fs.writeFileSync(
+			packageJsonPath,
+			`${JSON.stringify(pkg, null, 2)}\n`,
+			"utf8",
+		);
+		console.log(
+			`[disable-local-eliza-workspace] Dropped ${removed} eliza/* workspace entr${removed === 1 ? "y" : "ies"} from package.json`,
+		);
+	}
+}

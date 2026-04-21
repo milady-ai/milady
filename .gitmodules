@@ -60,7 +60,7 @@
 	branch = alpha
 [submodule "plugins/plugin-imessage"]
 	path = plugins/plugin-imessage
-	url = https://github.com/elizaOS-plugins/plugin-imessage.git
+	url = https://github.com/elizaos-plugins/plugin-imessage.git
 	branch = alpha
 [submodule "plugins/plugin-local-embedding"]
 	path = plugins/plugin-local-embedding
