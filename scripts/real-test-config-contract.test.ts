@@ -10,6 +10,16 @@ const configPath = path.join(
   "real.config.ts",
 );
 const packageJsonPath = path.join(import.meta.dirname, "..", "package.json");
+const rootTestRunnerPath = path.join(
+  import.meta.dirname,
+  "..",
+  "eliza",
+  "packages",
+  "app-core",
+  "test",
+  "scripts",
+  "test-runner.mjs",
+);
 
 describe("real test config contract", () => {
   it("keeps the PR real suite focused on non-e2e coverage", () => {
@@ -48,5 +58,25 @@ describe("real test config contract", () => {
     expect(actionE2eScript).toContain(
       "eliza/packages/app-core/test/live-agent/action-invocation.live.e2e.test.ts",
     );
+  });
+
+  it("runs the deterministic E2E matrix from bun run test", () => {
+    const packageJson = JSON.parse(
+      fs.readFileSync(packageJsonPath, "utf8"),
+    ) as {
+      scripts?: Record<string, string>;
+    };
+    const rootTestScript = packageJson.scripts?.test;
+    const deterministicE2E = packageJson.scripts?.["test:e2e"];
+    const heavyE2E = packageJson.scripts?.["test:e2e:heavy"];
+    const runnerSource = fs.readFileSync(rootTestRunnerPath, "utf8");
+
+    expect(rootTestScript).toContain(
+      "eliza/packages/app-core/test/scripts/test-runner.mjs",
+    );
+    expect(deterministicE2E).not.toContain("MILADY_LIVE_BROWSER_SUITE=1");
+    expect(heavyE2E).toContain("MILADY_LIVE_BROWSER_SUITE=1");
+    expect(runnerSource).toContain('args: ["run", "test:e2e"]');
+    expect(runnerSource).not.toContain('args: ["run", "test:e2e:all"]');
   });
 });

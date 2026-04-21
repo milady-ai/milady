@@ -21,6 +21,16 @@ test("browser workspace can create live tabs and switch selection", async ({
   await expect(newTabButton).toBeVisible({ timeout: 120_000 });
   const addressInput = browserWorkspaceView.locator("input").first();
   await expect(addressInput).toBeVisible({ timeout: 120_000 });
+  const chatSidebar = browserWorkspaceView.getByTestId(
+    "browser-workspace-view-chat-sidebar",
+  );
+  await expect(chatSidebar).toBeVisible({ timeout: 120_000 });
+  const chatSidebarBox = await chatSidebar.boundingBox();
+  const addressInputBox = await addressInput.boundingBox();
+  if (!chatSidebarBox || !addressInputBox) {
+    throw new Error("Browser workspace layout elements did not render boxes.");
+  }
+  expect(chatSidebarBox.y).toBeLessThan(addressInputBox.y);
   await expect(page.getByText("No browser tabs yet")).toBeVisible({
     timeout: 120_000,
   });

@@ -316,6 +316,8 @@ describe("disable-local-eliza-workspace", () => {
     );
     expect(rootPackage.overrides).toMatchObject({
       "@elizaos/ui": resolveCiOverrideSpecifiers(repoRoot)["@elizaos/ui"],
+      "@elizaos/plugin-app-control":
+        CI_OVERRIDE_SPECIFIERS["@elizaos/plugin-app-control"],
       "@elizaos/plugin-wechat":
         CI_OVERRIDE_SPECIFIERS["@elizaos/plugin-wechat"],
     });
@@ -353,6 +355,8 @@ describe("disable-local-eliza-workspace", () => {
     );
     expect(rootPackage.overrides).toMatchObject({
       "@elizaos/ui": resolveCiOverrideSpecifiers(repoRoot)["@elizaos/ui"],
+      "@elizaos/plugin-app-control":
+        CI_OVERRIDE_SPECIFIERS["@elizaos/plugin-app-control"],
       "@elizaos/plugin-wechat":
         CI_OVERRIDE_SPECIFIERS["@elizaos/plugin-wechat"],
     });
@@ -390,6 +394,8 @@ describe("disable-local-eliza-workspace", () => {
     );
     expect(elizaPackage.overrides).toMatchObject({
       "@elizaos/ui": ELIZA_RUNTIME_CI_OVERRIDE_SPECIFIERS["@elizaos/ui"],
+      "@elizaos/plugin-app-control":
+        ELIZA_RUNTIME_CI_OVERRIDE_SPECIFIERS["@elizaos/plugin-app-control"],
       "@elizaos/plugin-wechat":
         ELIZA_RUNTIME_CI_OVERRIDE_SPECIFIERS["@elizaos/plugin-wechat"],
     });

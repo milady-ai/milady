@@ -882,6 +882,12 @@ _Generated on: 2026-04-16. Total actions: 151._
 
 ## App / app-lifeops
 
+> This generated inventory is incomplete for LifeOps. The canonical action
+> registration is `appLifeOpsPlugin.actions` in
+> `eliza/apps/app-lifeops/src/plugin.ts`, which currently includes browser
+> companion, inbox, approvals, travel, check-in, follow-up, scheduling, and
+> activity actions beyond the legacy subset below.
+
 ### BLOCK_APPS
 
 - **File:** `eliza/apps/app-lifeops/src/actions/app-blocker.ts`

@@ -371,6 +371,7 @@ export default defineConfig({
     exclude: [
       "dist/**",
       "**/node_modules/**",
+      ".claude/**",
       // --- live/real/integration/e2e tests have their own configs ---
       "**/*-live.test.{ts,tsx}",
       "**/*.live.test.{ts,tsx}",

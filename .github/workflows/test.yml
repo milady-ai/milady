@@ -230,9 +230,8 @@ jobs:
         if: runner.os == 'Linux'
         shell: bash
         run: |
-          # test:selfcontrol:e2e includes selfcontrol-desktop.live.e2e.test.ts,
-          # which boots the Electrobun desktop shell. Keep a virtual display on
-          # Linux even though the test assertions themselves are HTTP-driven.
+          # The blocking cross-platform lane covers the Vite-backed dev stack.
+          # Electrobun desktop startup has a dedicated smoke lane below.
           xvfb-run -a bun run test:selfcontrol:e2e
 
       - name: Run website blocker E2E suites
@@ -306,16 +305,18 @@ jobs:
         env:
           SKIP_AVATAR_CLONE: "1"
           MILADY_NO_VISION_DEPS: "1"
-        run: bun install --no-frozen-lockfile
+        run: bun install --cwd eliza --no-frozen-lockfile --ignore-scripts
 
       - name: Build @elizaos/core dist (required by dev-stack imports)
         shell: bash
         run: |
           # Run bun's own postinstall (skipped by --ignore-scripts) so its
           # runtime-embedded build plugins can execute.
-          if [ -d node_modules/bun ] && [ -f node_modules/bun/install.js ]; then
-            (cd node_modules/bun && node install.js) || true
-          fi
+          for bun_package_dir in node_modules/bun eliza/node_modules/bun; do
+            if [ -f "${bun_package_dir}/install.js" ]; then
+              (cd "${bun_package_dir}" && node install.js)
+            fi
+          done
           if [ -d eliza/packages/schemas ] && [ -f eliza/packages/schemas/buf.gen.yaml ] && [ ! -d eliza/packages/typescript/src/types/generated ]; then
             cd eliza/packages/schemas
             bunx @bufbuild/buf@1.67.0 generate
@@ -370,16 +371,18 @@ jobs:
         env:
           SKIP_AVATAR_CLONE: "1"
           MILADY_NO_VISION_DEPS: "1"
-        run: bun install --no-frozen-lockfile
+        run: bun install --cwd eliza --no-frozen-lockfile --ignore-scripts
 
       - name: Build @elizaos/core dist (required by dev-stack imports)
         shell: bash
         run: |
           # Run bun's own postinstall (skipped by --ignore-scripts) so its
           # runtime-embedded build plugins can execute.
-          if [ -d node_modules/bun ] && [ -f node_modules/bun/install.js ]; then
-            (cd node_modules/bun && node install.js) || true
-          fi
+          for bun_package_dir in node_modules/bun eliza/node_modules/bun; do
+            if [ -f "${bun_package_dir}/install.js" ]; then
+              (cd "${bun_package_dir}" && node install.js)
+            fi
+          done
           if [ -d eliza/packages/schemas ] && [ -f eliza/packages/schemas/buf.gen.yaml ] && [ ! -d eliza/packages/typescript/src/types/generated ]; then
             cd eliza/packages/schemas
             bunx @bufbuild/buf@1.67.0 generate
@@ -805,6 +808,11 @@ jobs:
         if: steps.provider-check.outputs.skip != 'true'
         shell: bash
         run: |
+          for bun_package_dir in node_modules/bun eliza/node_modules/bun; do
+            if [ -f "${bun_package_dir}/install.js" ]; then
+              (cd "${bun_package_dir}" && node install.js)
+            fi
+          done
           if [ -d eliza/packages/schemas ] && [ -f eliza/packages/schemas/buf.gen.yaml ] && [ ! -d eliza/packages/typescript/src/types/generated ]; then
             cd eliza/packages/schemas
             bunx @bufbuild/buf@1.67.0 generate

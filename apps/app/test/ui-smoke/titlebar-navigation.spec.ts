@@ -83,11 +83,11 @@ test("desktop titlebar keeps navigation clickable and title area draggable", asy
 
   await openAppPath(page, "/chat");
 
-  const title = page.getByTestId("desktop-window-titlebar-label");
-  await expect(title).toBeVisible();
-  await expect.poll(() => getAppRegion(title)).toBe("drag");
+  const titleDragZone = page.getByTestId("desktop-window-titlebar-drag-zone");
+  await expect(titleDragZone).toBeVisible();
+  await expect.poll(() => getAppRegion(titlebar)).toBe("drag");
 
-  const box = await title.boundingBox();
+  const box = await titleDragZone.boundingBox();
   expect(box, "Expected draggable title bounds").not.toBeNull();
   if (!box) return;
 

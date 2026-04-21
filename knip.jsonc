@@ -80,6 +80,69 @@
       "entry": ["src/index.ts"],
       "project": ["src/**/*.{ts,tsx}"]
     },
+    "eliza/apps/app-lifeops": {
+      "entry": [
+        "src/index.ts",
+        "src/client.ts",
+        "src/ui.ts",
+        "src/plugin.ts",
+        "src/public.ts",
+        "src/agent-lifeops.ts",
+        "src/lifeops/index.ts",
+        "src/widgets/index.ts",
+        "src/api/client-lifeops.ts",
+        "src/routes/plugin.ts",
+        "src/components/AppBlockerSettingsCard.tsx",
+        "src/components/LifeOpsBrowserSetupPanel.tsx",
+        "src/components/LifeOpsPageSections.tsx",
+        "src/components/LifeOpsPageView.tsx",
+        "src/components/LifeOpsSettingsSection.tsx",
+        "src/components/LifeOpsWorkspaceView.tsx",
+        "src/components/WebsiteBlockerSettingsCard.tsx",
+        "src/components/chat/widgets/plugins/*.tsx"
+      ],
+      "project": ["src/**/*.{ts,tsx}"],
+      "ignoreDependencies": ["@elizaos/ui", "lucide-react"],
+      "ignore": [
+        "dist/**",
+        "build/**",
+        "coverage/**",
+        "test/**",
+        "**/*.test.ts",
+        "**/*.test.tsx",
+        "**/*.live.test.ts",
+        "**/*.real.test.ts",
+        "**/*.integration.test.ts",
+        "**/*.e2e.test.ts"
+      ]
+    },
+    "eliza/apps/app-lifeops/extensions/lifeops-browser": {
+      "entry": [
+        "entrypoints/*.ts",
+        "scripts/*.mjs",
+        "src/api-client.ts",
+        "src/dom-actions.ts",
+        "src/page-extract.ts",
+        "src/popup-model.ts",
+        "src/protocol.ts",
+        "src/storage.ts",
+        "src/tab-cache.ts",
+        "src/webextension.ts"
+      ],
+      "project": [
+        "entrypoints/**/*.{ts,tsx}",
+        "src/**/*.{ts,tsx}",
+        "scripts/**/*.{mjs,js,ts}"
+      ],
+      "ignore": [
+        "dist/**",
+        "build/**",
+        "coverage/**",
+        "**/*.test.ts",
+        "**/*.test.tsx",
+        "src/test-dom-setup.ts"
+      ]
+    },
     "apps/app": {
       "entry": [
         "src/main.tsx",

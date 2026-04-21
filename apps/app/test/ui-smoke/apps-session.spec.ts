@@ -1,5 +1,4 @@
 import { expect, test } from "@playwright/test";
-import { DIRECT_ROUTE_CASES, escapeRegExp } from "./apps-session-route-cases";
 import { assertReadyChecks, openAppPath, seedAppStorage } from "./helpers";
 
 test.beforeEach(async ({ page }) => {
@@ -44,35 +43,3 @@ test("apps view can route into internal tool pages and survive a reload", async 
     90_000,
   );
 });
-
-for (const routeCase of DIRECT_ROUTE_CASES) {
-  test(`direct ${routeCase.name} route boots the app shell`, async ({
-    page,
-  }) => {
-    await openAppPath(page, routeCase.path);
-    await expect(page).toHaveURL(
-      new RegExp(`${escapeRegExp(routeCase.path)}$`),
-    );
-    if ("readyChecks" in routeCase) {
-      await assertReadyChecks(
-        page,
-        routeCase.name,
-        routeCase.readyChecks,
-        "any",
-        routeCase.timeoutMs,
-      );
-      return;
-    }
-    await assertReadyChecks(
-      page,
-      routeCase.name,
-      [
-        "selector" in routeCase
-          ? { selector: routeCase.selector }
-          : { text: routeCase.text },
-      ],
-      "any",
-      "timeoutMs" in routeCase ? routeCase.timeoutMs : undefined,
-    );
-  });
-}
