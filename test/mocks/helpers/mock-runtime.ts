@@ -179,14 +179,11 @@ export async function createMockedTestRuntime(
   const localEnvironment = sharedEnvironment
     ? null
     : await prepareMockedTestEnvironment({ envs });
-  if (!sharedEnvironment && !localEnvironment) {
-    throw new Error(
-      "createMockedTestRuntime: expected local mocked environment",
-    );
-  }
   const environment = sharedEnvironment ?? localEnvironment;
   if (!environment) {
-    throw new Error("createMockedTestRuntime: mocked environment missing");
+    throw new Error(
+      "createMockedTestRuntime: expected sharedEnvironment or localEnvironment to be available",
+    );
   }
   const mocks = environment.mocks;
   let cleanupRuntimeFixtures: (() => Promise<void> | void) | void;

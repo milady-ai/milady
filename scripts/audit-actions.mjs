@@ -289,8 +289,6 @@ function findViolations(action, source) {
     /function\s+infer(Subaction|PasswordManager|Kind|Surface)\w*\s*\(/.test(
       source,
     );
-  const handlerReferencesText =
-    /\bmessageText\s*\(|\bmessage\.content\?\.text/.test(block);
   const handlerCallsInfer =
     /\binfer(Subaction|PasswordManager|Kind|Surface)\w*\s*\(/.test(block);
   if (fileHasInferFn && handlerReferencesText && handlerCallsInfer) {
