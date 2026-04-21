@@ -4,6 +4,7 @@ import { execSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { applyUnpublishedPluginStubOverrides } from "./setup-upstreams.mjs";
 
 const NESTED_ELIZA_SUBMODULE_SKIP_ARGS = [
   "-c",
@@ -110,6 +111,30 @@ function restoreRootPackageJson(repoRoot, { log, errorLog }) {
   }
 }
 
+function restoreElizaPackageOverrides(repoRoot, { log, errorLog }) {
+  const elizaRoot = path.join(repoRoot, "eliza");
+  if (!fs.existsSync(path.join(elizaRoot, "package.json"))) {
+    return 0;
+  }
+
+  try {
+    const changed = applyUnpublishedPluginStubOverrides(elizaRoot);
+    if (changed > 0) {
+      log(
+        "restore-local-eliza-workspace: restored unpublished plugin stub overrides in eliza/package.json.",
+      );
+    }
+    return changed;
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    const message =
+      "restore-local-eliza-workspace: failed to restore unpublished plugin stub overrides: " +
+      detail;
+    errorLog(message);
+    throw new Error(message, { cause: error });
+  }
+}
+
 export function restoreLocalElizaWorkspace(
   repoRoot = process.cwd(),
   { log = console.log, errorLog = console.error } = {},
@@ -127,6 +152,7 @@ export function restoreLocalElizaWorkspace(
     }
     ensureNestedElizaSubmodules(repoRoot, { log, errorLog });
     restoreRootPackageJson(repoRoot, { log, errorLog });
+    restoreElizaPackageOverrides(repoRoot, { log, errorLog });
     log(
       "restore-local-eliza-workspace: eliza/ already present; nothing to restore.",
     );
@@ -136,6 +162,7 @@ export function restoreLocalElizaWorkspace(
   if (fs.existsSync(elizaRoot)) {
     ensureNestedElizaSubmodules(repoRoot, { log, errorLog });
     restoreRootPackageJson(repoRoot, { log, errorLog });
+    restoreElizaPackageOverrides(repoRoot, { log, errorLog });
     log("restore-local-eliza-workspace: eliza/ already present; skipping.");
     return false;
   }
@@ -144,6 +171,7 @@ export function restoreLocalElizaWorkspace(
     fs.renameSync(disabledElizaRoot, elizaRoot);
     ensureNestedElizaSubmodules(repoRoot, { log, errorLog });
     restoreRootPackageJson(repoRoot, { log, errorLog });
+    restoreElizaPackageOverrides(repoRoot, { log, errorLog });
     log(
       "restore-local-eliza-workspace: restored eliza/ from .eliza.ci-disabled/.",
     );
