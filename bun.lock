@@ -16,7 +16,6 @@
         "@elizaos/plugin-agent-orchestrator": "workspace:*",
         "@elizaos/plugin-agent-skills": "workspace:*",
         "@elizaos/plugin-anthropic": "workspace:*",
-        "@elizaos/plugin-app-control": "workspace:*",
         "@elizaos/plugin-bluebubbles": "workspace:*",
         "@elizaos/plugin-commands": "workspace:*",
         "@elizaos/plugin-cron": "workspace:*",
@@ -2401,10 +2400,6 @@
     "@elizaos/plugin-anthropic": ["@elizaos/plugin-anthropic@workspace:eliza/plugins/plugin-anthropic/typescript"],
 
     "@elizaos/plugin-anthropic-root": ["@elizaos/plugin-anthropic-root@workspace:eliza/plugins/plugin-anthropic"],
-
-    "@elizaos/plugin-app-control": ["@elizaos/plugin-app-control@workspace:eliza/plugins/plugin-app-control/typescript"],
-
-    "@elizaos/plugin-app-control-root": ["@elizaos/plugin-app-control-root@workspace:eliza/plugins/plugin-app-control"],
 
     "@elizaos/plugin-bluebubbles": ["@elizaos/plugin-bluebubbles@workspace:eliza/plugins/plugin-bluebubbles/typescript"],
 
