@@ -134,10 +134,36 @@ export function restoreLocalElizaWorkspace(
   }
 
   if (fs.existsSync(elizaRoot)) {
-    ensureNestedElizaSubmodules(repoRoot, { log, errorLog });
-    restoreRootPackageJson(repoRoot, { log, errorLog });
-    log("restore-local-eliza-workspace: eliza/ already present; skipping.");
-    return false;
+    let st;
+    try {
+      st = fs.lstatSync(elizaRoot);
+    } catch {
+      st = null;
+    }
+    if (st?.isSymbolicLink()) {
+      const resolved = path.resolve(
+        path.dirname(elizaRoot),
+        fs.readlinkSync(elizaRoot),
+      );
+      if (resolved === disabledElizaRoot) {
+        fs.unlinkSync(elizaRoot);
+        log(
+          "restore-local-eliza-workspace: removed eliza/ symlink to .eliza.ci-disabled",
+        );
+      } else {
+        ensureNestedElizaSubmodules(repoRoot, { log, errorLog });
+        restoreRootPackageJson(repoRoot, { log, errorLog });
+        log(
+          "restore-local-eliza-workspace: eliza/ is an unrelated symlink; skipping.",
+        );
+        return false;
+      }
+    } else {
+      ensureNestedElizaSubmodules(repoRoot, { log, errorLog });
+      restoreRootPackageJson(repoRoot, { log, errorLog });
+      log("restore-local-eliza-workspace: eliza/ already present; skipping.");
+      return false;
+    }
   }
 
   try {
