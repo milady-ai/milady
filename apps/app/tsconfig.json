@@ -52,6 +52,8 @@
       "@elizaos/core/*": ["./eliza/packages/typescript/src/*"],
       "@elizaos/shared": ["./eliza/packages/shared/src/index.ts"],
       "@elizaos/shared/*": ["./eliza/packages/shared/src/*"],
+      "@miladyai/plugin-wechat": ["./packages/plugin-wechat/src/index.ts"],
+      "@miladyai/plugin-wechat/*": ["./packages/plugin-wechat/src/*"],
       "@elizaos/capacitor-agent": [
         "./eliza/packages/native-plugins/agent/src/index.ts"
       ],

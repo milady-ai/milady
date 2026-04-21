@@ -71,6 +71,12 @@ const ELIZA_INSTALL_RETRY_DELAY_MS = 3_000;
 // the workspace:* specifier resolves to the stub instead of failing.
 const UNPUBLISHED_ELIZA_PLUGIN_CI_STUBS = [
   {
+    packageName: "@elizaos/plugin-app-control",
+    workspaceEntry: "plugins/plugin-app-control",
+    /** Relative from eliza/ to the CI stub directory. */
+    stubRelativePath: "../scripts/ci-stubs/elizaos-plugin-app-control",
+  },
+  {
     packageName: "@elizaos/plugin-wechat",
     workspaceEntry: "plugins/plugin-wechat",
     /** Relative from eliza/ to the CI stub directory. */
