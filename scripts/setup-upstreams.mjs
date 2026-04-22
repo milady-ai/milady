@@ -256,16 +256,10 @@ const TS_IGNORE_DEPRECATIONS_COMPAT_FILES = [
   path.join("packages", "shared", "tsconfig.json"),
   path.join("packages", "interop", "tsconfig.json"),
 ];
-const TS_IGNORE_DEPRECATIONS_COMPAT_REPLACEMENTS = [
-  ['"ignoreDeprecations": "5.0"', '"ignoreDeprecations": "6.0"'],
-];
 const TSUP_IGNORE_DEPRECATIONS_COMPAT_FILES = [
   path.join("plugins", "plugin-calendly", "tsconfig.json"),
   path.join("plugins", "plugin-github", "tsconfig.json"),
   path.join("plugins", "plugin-shopify", "tsconfig.json"),
-];
-const TSUP_IGNORE_DEPRECATIONS_COMPAT_REPLACEMENTS = [
-  ['"ignoreDeprecations": "6.0"', '"ignoreDeprecations": "5.0"'],
 ];
 const LIFEOPS_SETTINGS_SECTION_RELATIVE_PATH = path.join(
   "apps",
@@ -336,6 +330,42 @@ function writePackageJson(packagePath, raw, nextPackageJson) {
     packagePath,
     `${JSON.stringify(nextPackageJson, null, indent)}\n`,
   );
+}
+
+function parseFirstNumericVersionSegment(versionSpecifier) {
+  if (typeof versionSpecifier !== "string") {
+    return null;
+  }
+
+  const match = versionSpecifier.match(/(\d+)(?:\.\d+)?(?:\.\d+)?/);
+  if (!match) {
+    return null;
+  }
+
+  const major = Number.parseInt(match[1], 10);
+  return Number.isFinite(major) ? major : null;
+}
+
+export function resolveTypeScriptIgnoreDeprecationsTarget(
+  repoRoot = DEFAULT_REPO_ROOT,
+) {
+  const rootPackageJson = readPackageJson(repoRoot);
+  const versionSpecifier =
+    rootPackageJson?.devDependencies?.typescript ??
+    rootPackageJson?.dependencies?.typescript;
+  const major = parseFirstNumericVersionSegment(versionSpecifier);
+
+  return major !== null && major >= 6 ? "6.0" : "5.0";
+}
+
+function buildIgnoreDeprecationsCompatibilityReplacements(targetVersion) {
+  const alternateVersion = targetVersion === "6.0" ? "5.0" : "6.0";
+  return [
+    [
+      `"ignoreDeprecations": "${alternateVersion}"`,
+      `"ignoreDeprecations": "${targetVersion}"`,
+    ],
+  ];
 }
 
 export function applyMiladyCopyPatches(elizaRoot) {
@@ -439,12 +469,18 @@ export function applyPluginAnthropicCliUsagePatch(elizaRoot) {
   );
 }
 
-export function applyTypeScriptIgnoreDeprecationsCompatPatch(elizaRoot) {
+export function applyTypeScriptIgnoreDeprecationsCompatPatch(
+  elizaRoot,
+  { repoRoot = DEFAULT_REPO_ROOT } = {},
+) {
   let patchedReplacements = 0;
+  const targetVersion = resolveTypeScriptIgnoreDeprecationsTarget(repoRoot);
+  const tsConfigReplacements =
+    buildIgnoreDeprecationsCompatibilityReplacements(targetVersion);
   for (const relativePath of TS_IGNORE_DEPRECATIONS_COMPAT_FILES) {
     patchedReplacements += applyTextReplacements(
       path.join(elizaRoot, relativePath),
-      TS_IGNORE_DEPRECATIONS_COMPAT_REPLACEMENTS,
+      tsConfigReplacements,
       {
         label: `TypeScript ignoreDeprecations compatibility patch (${relativePath})`,
       },
@@ -453,7 +489,7 @@ export function applyTypeScriptIgnoreDeprecationsCompatPatch(elizaRoot) {
   for (const relativePath of TSUP_IGNORE_DEPRECATIONS_COMPAT_FILES) {
     patchedReplacements += applyTextReplacements(
       path.join(elizaRoot, relativePath),
-      TSUP_IGNORE_DEPRECATIONS_COMPAT_REPLACEMENTS,
+      buildIgnoreDeprecationsCompatibilityReplacements("5.0"),
       {
         label: `tsup ignoreDeprecations compatibility patch (${relativePath})`,
       },

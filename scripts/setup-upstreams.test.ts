@@ -16,6 +16,7 @@ import {
   getElizaInstallArgs,
   getTemporaryElizaWorkspaceEntries,
   getUpstreamPackageLinks,
+  resolveTypeScriptIgnoreDeprecationsTarget,
   runElizaInstallWithRetry,
 } from "./setup-upstreams.mjs";
 
@@ -812,8 +813,9 @@ describe("applyMiladyCopyPatches", () => {
 });
 
 describe("applyTypeScriptIgnoreDeprecationsCompatPatch", () => {
-  it("upgrades TypeScript 5 deprecation silencing to TypeScript 6", () => {
+  it("targets TypeScript 5 deprecation silencing when the repo toolchain is TypeScript 5", () => {
     const elizaRoot = makeTempDir();
+    const repoRoot = makeTempDir();
     const declarationsPath = path.join(
       elizaRoot,
       "packages",
@@ -822,31 +824,44 @@ describe("applyTypeScriptIgnoreDeprecationsCompatPatch", () => {
     );
 
     writeFile(
-      declarationsPath,
-      '{\n  "compilerOptions": {\n    "ignoreDeprecations": "5.0",\n    "baseUrl": "./src"\n  }\n}\n',
+      path.join(repoRoot, "package.json"),
+      JSON.stringify({ devDependencies: { typescript: "^5.9.3" } }, null, 2),
     );
-
-    expect(applyTypeScriptIgnoreDeprecationsCompatPatch(elizaRoot)).toBe(1);
-    expect(fs.readFileSync(declarationsPath, "utf8")).toContain(
-      '"ignoreDeprecations": "6.0"',
-    );
-  });
-
-  it("does not downgrade TypeScript 6 deprecation silencing", () => {
-    const elizaRoot = makeTempDir();
-    const declarationsPath = path.join(
-      elizaRoot,
-      "packages",
-      "typescript",
-      "tsconfig.declarations.json",
-    );
-
     writeFile(
       declarationsPath,
       '{\n  "compilerOptions": {\n    "ignoreDeprecations": "6.0",\n    "baseUrl": "./src"\n  }\n}\n',
     );
 
-    expect(applyTypeScriptIgnoreDeprecationsCompatPatch(elizaRoot)).toBe(0);
+    expect(
+      applyTypeScriptIgnoreDeprecationsCompatPatch(elizaRoot, { repoRoot }),
+    ).toBe(1);
+    expect(fs.readFileSync(declarationsPath, "utf8")).toContain(
+      '"ignoreDeprecations": "5.0"',
+    );
+  });
+
+  it("upgrades TypeScript 5 deprecation silencing to TypeScript 6 when the repo toolchain is TypeScript 6", () => {
+    const elizaRoot = makeTempDir();
+    const repoRoot = makeTempDir();
+    const declarationsPath = path.join(
+      elizaRoot,
+      "packages",
+      "typescript",
+      "tsconfig.declarations.json",
+    );
+
+    writeFile(
+      path.join(repoRoot, "package.json"),
+      JSON.stringify({ devDependencies: { typescript: "^6.0.0" } }, null, 2),
+    );
+    writeFile(
+      declarationsPath,
+      '{\n  "compilerOptions": {\n    "ignoreDeprecations": "5.0",\n    "baseUrl": "./src"\n  }\n}\n',
+    );
+
+    expect(
+      applyTypeScriptIgnoreDeprecationsCompatPatch(elizaRoot, { repoRoot }),
+    ).toBe(1);
     expect(fs.readFileSync(declarationsPath, "utf8")).toContain(
       '"ignoreDeprecations": "6.0"',
     );
@@ -870,6 +885,27 @@ describe("applyTypeScriptIgnoreDeprecationsCompatPatch", () => {
     expect(fs.readFileSync(calendlyPath, "utf8")).toContain(
       '"ignoreDeprecations": "5.0"',
     );
+  });
+});
+
+describe("resolveTypeScriptIgnoreDeprecationsTarget", () => {
+  it("defaults to the TypeScript 5-compatible ignoreDeprecations value when the repo is missing a typescript pin", () => {
+    const repoRoot = makeTempDir();
+
+    writeFile(path.join(repoRoot, "package.json"), JSON.stringify({}, null, 2));
+
+    expect(resolveTypeScriptIgnoreDeprecationsTarget(repoRoot)).toBe("5.0");
+  });
+
+  it("returns the TypeScript 6-compatible ignoreDeprecations value when the repo pins TypeScript 6", () => {
+    const repoRoot = makeTempDir();
+
+    writeFile(
+      path.join(repoRoot, "package.json"),
+      JSON.stringify({ devDependencies: { typescript: "^6.0.0" } }, null, 2),
+    );
+
+    expect(resolveTypeScriptIgnoreDeprecationsTarget(repoRoot)).toBe("6.0");
   });
 });
 
