@@ -175,6 +175,19 @@ curl -X POST http://localhost:2138/api/agent/autonomy \
 | `GET` | `/api/health` | 结构化子系统健康检查（运行时、数据库、插件、连接器、就绪状态） |
 | `GET` | `/api/runtime` | 获取运行时详情（已加载的插件、服务、能力） |
 
+`GET /api/status` 响应示例：
+
+```json
+{
+  "name": "Milady",
+  "status": "running",
+  "model": "anthropic/claude-sonnet-4-6",
+  "uptime": 3600,
+  "autonomy": { "enabled": true },
+  "pendingRestart": false
+}
+```
+
 ---
 
 <div id="agent-lifecycle">

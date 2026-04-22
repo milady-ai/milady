@@ -96,7 +96,7 @@ Algunos paquetes `@elizaos` (por ejemplo, `@elizaos/plugin-sql`) publican un `pa
 ## Fijado: `@elizaos/plugin-openrouter`
 </div>
 
-Este repositorio actualmente resuelve **`@elizaos/plugin-openrouter`** vía un enlace local del workspace (**`workspace:*`**) durante el desarrollo. La nota importante sobre el artefacto publicado no cambia: **`2.0.0-alpha.10`** es el último tarball npm conocido como bueno, mientras que **`2.0.0-alpha.12`** envió entrypoints de dist rotos.
+Este repositorio actualmente resuelve **`@elizaos/plugin-openrouter`** vía un enlace local del workspace (**`workspace:*`**) durante el desarrollo. Cuando no se usa el checkout local, el `package.json` raíz fija **`2.0.0-alpha.13`** (el tarball npm actual conocido como bueno). **`2.0.0-alpha.12`** envió entrypoints de dist rotos y debe evitarse.
 
 <div id="what-went-wrong-in-200-alpha12">
 ### Qué salió mal en `2.0.0-alpha.12`
@@ -106,7 +106,7 @@ El tarball npm publicado para **`2.0.0-alpha.12`** contiene salidas JavaScript *
 
 **Por qué Bun da error:** Cuando el runtime carga el plugin, Bun construye/transpila ese archivo de entrada y falla con errores como *`openrouterPlugin` is not declared in this file* — los símbolos se exportan pero nunca se definen. El build CommonJS (`dist/cjs/index.node.cjs`) está incompleto de la misma manera (los getters de exportación referencian un chunk `import_plugin` faltante).
 
-**Por qué no parcheamos el dist en postinstall:** La release rota le falta el cuerpo entero del plugin, no un solo identificador incorrecto (contrasta con `@elizaos/plugin-pdf`, donde un pequeño string replace arregla un alias de exportación malo). Reconstruir el plugin desde el código fuente dentro de Milady sería bifurcar upstream y sería frágil. Cuando no estés usando el checkout local del workspace, prefiere el artefacto publicado **`2.0.0-alpha.10`** conocido como bueno.
+**Por qué no parcheamos el dist en postinstall:** La release rota le falta el cuerpo entero del plugin, no un solo identificador incorrecto (contrasta con `@elizaos/plugin-pdf`, donde un pequeño string replace arregla un alias de exportación malo). Reconstruir el plugin desde el código fuente dentro de Milady sería bifurcar upstream y sería frágil. Cuando no estés usando el checkout local del workspace, prefiere el artefacto publicado **`2.0.0-alpha.13`** conocido como bueno.
 
 <div id="maintainer-notes">
 ### Notas para mantenedores

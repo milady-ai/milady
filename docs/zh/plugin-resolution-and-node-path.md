@@ -96,7 +96,7 @@ env.NODE_PATH = ...;
 ## 固定：`@elizaos/plugin-openrouter`
 </div>
 
-此仓库目前在开发期间通过本地工作空间链接（**`workspace:*`**）解析 **`@elizaos/plugin-openrouter`**。关于已发布工件的重要说明不变：**`2.0.0-alpha.10`** 是最后已知良好的 npm tarball，而 **`2.0.0-alpha.12`** 发布了损坏的 dist 入口点。
+当不使用本地签出时，根 `package.json` 固定为 **`2.0.0-alpha.13`**（当前已知良好的 npm tarball）。**`2.0.0-alpha.12`** 发布了损坏的 dist 入口点，必须避免使用。
 
 <div id="what-went-wrong-in-200-alpha12">
 ### `2.0.0-alpha.12` 出了什么问题
@@ -106,14 +106,14 @@ env.NODE_PATH = ...;
 
 **为什么 Bun 报错：** 当运行时加载插件时，Bun 构建/转译该入口文件并以类似 *`openrouterPlugin` is not declared in this file* 的错误失败 — 符号被导出但从未定义。CommonJS 构建（`dist/cjs/index.node.cjs`）以相同方式不完整（导出 getter 引用缺失的 `import_plugin` chunk）。
 
-**为什么我们不在 postinstall 中修补 dist：** 损坏的发布缺少整个插件主体，而非单个错误标识符（对比 `@elizaos/plugin-pdf`，其中一个小的字符串替换即可修复错误的导出别名）。在 Milady 中从源码重建插件将会 fork 上游且很脆弱。当你不使用本地工作空间签出时，请优先使用已知良好的 **`2.0.0-alpha.10`** 发布工件。
+**为什么我们不在 postinstall 中修补 dist：** 损坏的发布缺少整个插件主体，而非单个错误标识符（对比 `@elizaos/plugin-pdf`，其中一个小的字符串替换即可修复错误的导出别名）。在 Milady 中从源码重建插件将会 fork 上游且很脆弱。当你不使用本地工作空间签出时，请优先使用已知良好的 **`2.0.0-alpha.13`** 发布工件。
 
 <div id="maintainer-notes">
 ### 维护者说明
 </div>
 
 - **在升级** OpenRouter 依赖之前，验证 npm 上的**已发布 tarball**：打开 `dist/node/index.node.js` 并确认它定义了 default export / `openrouterPlugin`，或在安装后运行 `bun build node_modules/@elizaos/plugin-openrouter/dist/node/index.node.js --target=bun`。
-- **在上游发布修复版本且你已确认工件之前，不要将工作空间链接替换为无约束的 semver 范围**。**原因：** `^2.0.0-alpha.10` 允许 Bun 解析到 **`alpha.12`**，这破坏了升级 lockfile 的安装。
+- **在上游发布修复版本且你已确认工件之前，不要将工作空间链接替换为无约束的 semver 范围**。**原因：** `^2.0.0-alpha.13` 允许 Bun 解析到损坏的版本，这破坏了升级 lockfile 的安装。
 
 OpenRouter 本身的面向用户的上下文和配置位于 **[OpenRouter 插件](plugin-registry/llm/openrouter.md)**（Mintlify：`/plugin-registry/llm/openrouter`）。
 

@@ -175,6 +175,19 @@ curl -X POST http://localhost:2138/api/agent/autonomy \
 | `GET` | `/api/health` | Verificación estructurada del estado de los subsistemas (runtime, base de datos, plugins, conectores, preparación) |
 | `GET` | `/api/runtime` | Obtener detalles del runtime (plugins cargados, servicios, capacidades) |
 
+Ejemplo de respuesta de `GET /api/status`:
+
+```json
+{
+  "name": "Milady",
+  "status": "running",
+  "model": "anthropic/claude-sonnet-4-6",
+  "uptime": 3600,
+  "autonomy": { "enabled": true },
+  "pendingRestart": false
+}
+```
+
 ---
 
 <div id="agent-lifecycle">

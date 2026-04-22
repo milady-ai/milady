@@ -14,7 +14,7 @@ El plugin de OpenRouter conecta los agentes de Milady con la pasarela de inferen
 
 </div>
 
-En el monorepo de Milady, **`@elizaos/plugin-openrouter` está fijado en `2.0.0-alpha.10`** (versión exacta en el `package.json` raíz, reflejado en `bun.lock`).
+En el monorepo de Milady, **`@elizaos/plugin-openrouter` está fijado en `2.0.0-alpha.13`** (versión exacta en el `package.json` raíz, reflejado en `bun.lock`).
 
 **Por qué se fija**
 

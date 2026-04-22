@@ -4,7 +4,7 @@ sidebarTitle: Vue d'ensemble
 description: Le système de plugins de Milady fournit des capacités modulaires — fournisseurs de modèles, connecteurs de plateformes, intégrations DeFi et fonctionnalités personnalisées.
 ---
 
-Les plugins sont le mécanisme d'extension principal de Milady. Chaque capacité au-delà du runtime principal — des fournisseurs de LLM aux interactions blockchain — est livrée sous forme de plugin.
+Les plugins sont le mécanisme d'extension principal d'elizaOS. Chaque capacité au-delà du runtime principal — des fournisseurs de LLM aux interactions blockchain — est livrée sous forme de plugin.
 
 <div id="what-is-a-plugin">
 

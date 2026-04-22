@@ -17,29 +17,29 @@ Milady prend en charge **18 backends d'inférence** prêts à l'emploi. Les plug
 Le tableau ci-dessous est la liste complète des plugins fournisseurs pris en charge, issue du catalogue de fournisseurs de Milady.
 
 <Note>
-Les fournisseurs marqués **bundled** sont livrés avec chaque installation de Milady. Les autres sont installés à la demande la première fois qu'ils sont nécessaires — aucune installation manuelle de plugin n'est requise.
+Les fournisseurs marqués **bundled** sont pré-installés et se chargent instantanément. Les autres sont installés **à la demande** — ils sont automatiquement installés la première fois qu'ils sont nécessaires, sans intervention manuelle.
 </Note>
 
-| Fournisseur | Package du plugin | Variable(s) d'env. | Bundled | Notes |
+| Fournisseur | Package du plugin | Variable(s) d'env. | Installation | Notes |
 |-------------|-------------------|---------------------|---------|-------|
-| [Anthropic](https://anthropic.com) | `@elizaos/plugin-anthropic` | `ANTHROPIC_API_KEY` ou `CLAUDE_API_KEY` | Non | **Recommandé.** Modèles Claude (Opus, Sonnet, Haiku). |
-| [OpenAI](https://openai.com) | `@elizaos/plugin-openai` | `OPENAI_API_KEY` | Oui | GPT-4o, o1, o3, GPT-4.1. |
-| [Google Gemini](https://ai.google.dev) | `@elizaos/plugin-google-genai` | `GOOGLE_API_KEY` ou `GOOGLE_GENERATIVE_AI_API_KEY` | Non | Gemini Pro, Flash, Ultra. |
-| [Google Antigravity](https://cloud.google.com/vertex-ai) | `@elizaos/plugin-google-antigravity` | `GOOGLE_CLOUD_API_KEY` | Non | Modèles Google Cloud / Vertex AI. |
-| [Vercel AI Gateway](https://sdk.vercel.ai) | `@elizaos/plugin-vercel-ai-gateway` | `AI_GATEWAY_API_KEY` ou `AIGATEWAY_API_KEY` | Non | Passerelle unifiée vers plusieurs fournisseurs. |
-| [OpenRouter](https://openrouter.ai) | `@elizaos/plugin-openrouter` | `OPENROUTER_API_KEY` | Oui | Plus de 100 modèles derrière une seule clé API. |
-| [Groq](https://groq.com) | `@elizaos/plugin-groq` | `GROQ_API_KEY` | Oui | Inférence ultra-rapide (LPU). |
-| [xAI](https://x.ai) | `@elizaos/plugin-xai` | `XAI_API_KEY` ou `GROK_API_KEY` | Non | Modèles Grok. |
-| [DeepSeek](https://deepseek.com) | `@elizaos/plugin-deepseek` | `DEEPSEEK_API_KEY` | Non | Modèles de raisonnement et de code. |
-| [Ollama](https://ollama.ai) | `@elizaos/plugin-ollama` | `OLLAMA_BASE_URL` | Oui | **Modèles locaux.** Aucune clé API nécessaire. |
-| [Qwen](https://qwen.ai) | `@elizaos/plugin-qwen` | — | Non | Modèles Qwen d'Alibaba. Configuration via l'entrée du plugin. |
-| [MiniMax](https://minimaxi.com) | `@elizaos/plugin-minimax` | — | Non | Modèles de langage MiniMax. Configuration via l'entrée du plugin. |
-| [Together AI](https://together.ai) | `@elizaos/plugin-together` | `TOGETHER_API_KEY` | Non | Hébergement de modèles open source. |
-| [Mistral](https://mistral.ai) | `@elizaos/plugin-mistral` | `MISTRAL_API_KEY` | Non | Modèles Mistral et Mixtral. |
-| [Cohere](https://cohere.com) | `@elizaos/plugin-cohere` | `COHERE_API_KEY` | Non | Modèles Command R+ et embed. |
-| [Perplexity](https://perplexity.ai) | `@elizaos/plugin-perplexity` | `PERPLEXITY_API_KEY` | Non | Génération augmentée par la recherche. |
-| [Zai](https://homunculuslabs.com) | `@homunculuslabs/plugin-zai` | `ZAI_API_KEY` | Non | Modèles Zai de Homunculus Labs. |
-| [Eliza Cloud](https://elizacloud.ai) | `@elizaos/plugin-elizacloud` | `ELIZAOS_CLOUD_API_KEY` | Oui | Route d'inférence gérée dans le cloud. Peut être sélectionnée indépendamment de l'emplacement d'exécution de Milady. |
+| [Anthropic](https://anthropic.com) | `@elizaos/plugin-anthropic` | `ANTHROPIC_API_KEY` ou `CLAUDE_API_KEY` | À la demande | **Recommandé.** Modèles Claude (Opus, Sonnet, Haiku). |
+| [OpenAI](https://openai.com) | `@elizaos/plugin-openai` | `OPENAI_API_KEY` | Inclus | GPT-4o, o1, o3, GPT-4.1. |
+| [Google Gemini](https://ai.google.dev) | `@elizaos/plugin-google-genai` | `GOOGLE_API_KEY` ou `GOOGLE_GENERATIVE_AI_API_KEY` | À la demande | Gemini Pro, Flash, Ultra. |
+| [Google Antigravity](https://cloud.google.com/vertex-ai) | `@elizaos/plugin-google-antigravity` | `GOOGLE_CLOUD_API_KEY` | À la demande | Modèles Google Cloud / Vertex AI. |
+| [Vercel AI Gateway](https://sdk.vercel.ai) | `@elizaos/plugin-vercel-ai-gateway` | `AI_GATEWAY_API_KEY` ou `AIGATEWAY_API_KEY` | À la demande | Passerelle unifiée vers plusieurs fournisseurs. |
+| [OpenRouter](https://openrouter.ai) | `@elizaos/plugin-openrouter` | `OPENROUTER_API_KEY` | Inclus | Plus de 100 modèles derrière une seule clé API. |
+| [Groq](https://groq.com) | `@elizaos/plugin-groq` | `GROQ_API_KEY` | Inclus | Inférence ultra-rapide (LPU). |
+| [xAI](https://x.ai) | `@elizaos/plugin-xai` | `XAI_API_KEY` ou `GROK_API_KEY` | À la demande | Modèles Grok. |
+| [DeepSeek](https://deepseek.com) | `@elizaos/plugin-deepseek` | `DEEPSEEK_API_KEY` | À la demande | Modèles de raisonnement et de code. |
+| [Ollama](https://ollama.ai) | `@elizaos/plugin-ollama` | `OLLAMA_BASE_URL` | Inclus | **Modèles locaux.** Aucune clé API nécessaire. Nécessite un serveur [Ollama](https://ollama.ai) en cours d'exécution. |
+| [Qwen](https://qwen.ai) | `@elizaos/plugin-qwen` | — | À la demande | Modèles Qwen d'Alibaba. Configuration via l'entrée du plugin. |
+| [MiniMax](https://minimaxi.com) | `@elizaos/plugin-minimax` | — | À la demande | Modèles de langage MiniMax. Configuration via l'entrée du plugin. |
+| [Together AI](https://together.ai) | `@elizaos/plugin-together` | `TOGETHER_API_KEY` | À la demande | Hébergement de modèles open source. |
+| [Mistral](https://mistral.ai) | `@elizaos/plugin-mistral` | `MISTRAL_API_KEY` | À la demande | Modèles Mistral et Mixtral. |
+| [Cohere](https://cohere.com) | `@elizaos/plugin-cohere` | `COHERE_API_KEY` | À la demande | Modèles Command R+ et embed. |
+| [Perplexity](https://perplexity.ai) | `@elizaos/plugin-perplexity` | `PERPLEXITY_API_KEY` | À la demande | Génération augmentée par la recherche. |
+| [Zai](https://homunculuslabs.com) | `@homunculuslabs/plugin-zai` | `ZAI_API_KEY` | À la demande | Modèles Zai de Homunculus Labs. |
+| [Eliza Cloud](https://elizacloud.ai) | `@elizaos/plugin-elizacloud` | `ELIZAOS_CLOUD_API_KEY` | Inclus | Route d'inférence gérée dans le cloud. Peut être sélectionnée indépendamment de l'emplacement d'exécution de Milady. |
 
 ---
 
