@@ -18,6 +18,7 @@ import { ChatMessageActions } from "./chat-message-actions";
 import type { ChatMessageData, ChatMessageLabels } from "./chat-types";
 
 export interface ChatMessageProps {
+  alignLeft?: boolean;
   agentName?: string;
   children?: React.ReactNode;
   isGrouped?: boolean;
@@ -94,6 +95,7 @@ function SenderAvatar({
 }
 
 export const ChatMessage = memo(function ChatMessage({
+  alignLeft = false,
   message,
   isGrouped = false,
   agentName = "Agent",
@@ -117,7 +119,8 @@ export const ChatMessage = memo(function ChatMessage({
   const [savingEdit, setSavingEdit] = useState(false);
   const articleRef = useRef<HTMLElement | null>(null);
   const editTextareaRef = useRef<HTMLTextAreaElement | null>(null);
-  const isUser = message.role === "user";
+  const isAssistantGreeting = message.source === "agent_greeting";
+  const isUser = message.role === "user" && !isAssistantGreeting;
   const canEdit =
     isUser &&
     typeof onEdit === "function" &&
@@ -283,7 +286,7 @@ export const ChatMessage = memo(function ChatMessage({
   return (
     <article
       ref={articleRef}
-      className={`flex items-start gap-2 sm:gap-3 ${isUser ? "justify-end" : "justify-start"} ${
+      className={`flex items-start gap-2 sm:gap-3 ${alignLeft ? "justify-start" : isUser ? "justify-end" : "justify-start"} ${
         isGrouped ? "mt-1" : "mt-4"
       }`}
       data-testid="chat-message"
@@ -300,7 +303,9 @@ export const ChatMessage = memo(function ChatMessage({
       } message`}
     >
       <div
-        className={`max-w-[88%] min-w-0 sm:max-w-[80%] ${isUser ? "mr-1" : ""}`}
+        className={`max-w-[88%] min-w-0 sm:max-w-[80%] ${
+          alignLeft ? "" : isUser ? "mr-1" : ""
+        }`}
       >
         {!isUser && !isGrouped ? (
           <div className="mb-1 text-[12px] font-semibold text-accent">
@@ -308,8 +313,10 @@ export const ChatMessage = memo(function ChatMessage({
           </div>
         ) : null}
         {showSenderHeader ? (
-          <div className="mb-1 flex items-center justify-end gap-2">
-            <div className="min-w-0 text-right">
+          <div
+            className={`mb-1 flex items-center gap-2 ${alignLeft ? "justify-start" : "justify-end"}`}
+          >
+            <div className={`min-w-0 ${alignLeft ? "text-left" : "text-right"}`}>
               <div className="truncate text-[12px] font-semibold text-txt-strong">
                 {senderPrimaryLabel}
               </div>
@@ -319,17 +326,18 @@ export const ChatMessage = memo(function ChatMessage({
                 </div>
               ) : null}
             </div>
-            <SenderAvatar
-              avatarUrl={message.avatarUrl}
-              label={senderPrimaryLabel}
-            />
+            <SenderAvatar avatarUrl={message.avatarUrl} label={senderPrimaryLabel} />
           </div>
         ) : null}
         <ChatBubble
           tone={isUser ? "user" : "assistant"}
           source={normalizedSource}
           className={`relative group rounded-[18px] px-4 py-3 text-[15px] leading-[1.7] whitespace-pre-wrap break-words ${
-            isUser ? "rounded-br-[6px]" : "rounded-bl-[6px]"
+            alignLeft
+              ? "rounded-bl-[6px]"
+              : isUser
+                ? "rounded-br-[6px]"
+                : "rounded-bl-[6px]"
           }`}
           style={{ fontFamily: "var(--font-chat)" }}
         >
@@ -388,9 +396,11 @@ export const ChatMessage = memo(function ChatMessage({
             <div
               className={cn(
                 "absolute top-0 flex items-center gap-1 transition-opacity duration-200",
-                isUser
-                  ? "left-0 -translate-x-full"
-                  : "right-0 translate-x-full",
+                alignLeft
+                  ? "right-0 translate-x-full"
+                  : isUser
+                    ? "left-0 -translate-x-full"
+                    : "right-0 translate-x-full",
                 actionsVisible
                   ? "opacity-100"
                   : "pointer-events-none opacity-0",

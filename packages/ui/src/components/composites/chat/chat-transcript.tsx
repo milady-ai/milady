@@ -11,6 +11,7 @@ import type {
 } from "./chat-types";
 
 export interface ChatTranscriptProps {
+  alignMessagesLeft?: boolean;
   agentName?: string;
   carryoverMessages?: ChatMessageData[];
   carryoverOpacity?: number;
@@ -33,6 +34,9 @@ function renderTranscriptMessageContent(
 }
 
 function getMessageGroupingKey(message: ChatMessageData): string {
+  if (message.source === "agent_greeting") {
+    return "assistant";
+  }
   if (message.role !== "user") {
     return message.role;
   }
@@ -50,6 +54,7 @@ function getMessageGroupingKey(message: ChatMessageData): string {
 }
 
 export const ChatTranscript = memo(function ChatTranscript({
+  alignMessagesLeft = false,
   agentName = "Agent",
   carryoverMessages = [],
   carryoverOpacity = 1,
@@ -66,20 +71,31 @@ export const ChatTranscript = memo(function ChatTranscript({
   if (variant === "game-modal") {
     return (
       <div className="flex min-h-full w-full flex-col justify-end gap-4 px-1 py-4">
-        {carryoverMessages.map((message) => {
-          const isUser = message.role === "user";
+      {carryoverMessages.map((message) => {
+          const isUser =
+            message.role === "user" && message.source !== "agent_greeting";
           return (
             <div
               key={`carryover-${message.id}`}
               data-testid="companion-message-row"
               data-companion-carryover="true"
-              className={`flex w-full ${isUser ? "justify-end" : "justify-start"}`}
+              className={`flex w-full ${
+                alignMessagesLeft
+                  ? "justify-start"
+                  : isUser
+                    ? "justify-end"
+                    : "justify-start"
+              }`}
               style={{ opacity: carryoverOpacity }}
             >
               <ChatBubble
                 tone={isUser ? "user" : "assistant"}
                 className={`max-w-[min(85%,24rem)] rounded-2xl px-4 py-3 text-[15px] leading-relaxed backdrop-blur-md ${
-                  isUser ? "rounded-br-sm" : "rounded-bl-sm"
+                  alignMessagesLeft
+                    ? "rounded-bl-sm"
+                    : isUser
+                      ? "rounded-br-sm"
+                      : "rounded-bl-sm"
                 }`}
               >
                 <div
@@ -96,17 +112,28 @@ export const ChatTranscript = memo(function ChatTranscript({
           );
         })}
         {messages.map((message) => {
-          const isUser = message.role === "user";
+          const isUser =
+            message.role === "user" && message.source !== "agent_greeting";
           return (
             <div
               key={message.id}
               data-testid="companion-message-row"
-              className={`flex w-full ${isUser ? "justify-end" : "justify-start"}`}
+              className={`flex w-full ${
+                alignMessagesLeft
+                  ? "justify-start"
+                  : isUser
+                    ? "justify-end"
+                    : "justify-start"
+              }`}
             >
               <ChatBubble
                 tone={isUser ? "user" : "assistant"}
                 className={`max-w-[min(85%,24rem)] rounded-2xl px-4 py-3 text-[15px] leading-relaxed backdrop-blur-md ${
-                  isUser ? "rounded-br-sm" : "rounded-bl-sm"
+                  alignMessagesLeft
+                    ? "rounded-bl-sm"
+                    : isUser
+                      ? "rounded-br-sm"
+                      : "rounded-bl-sm"
                 }`}
               >
                 <div
@@ -140,6 +167,7 @@ export const ChatTranscript = memo(function ChatTranscript({
         return (
           <ChatMessage
             key={message.id}
+            alignLeft={alignMessagesLeft}
             message={message}
             isGrouped={isGrouped}
             agentName={agentName}

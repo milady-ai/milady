@@ -232,6 +232,25 @@ describe("ChatTranscript", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("keeps greeting bootstrap messages on the assistant side", () => {
+    render(
+      <ChatTranscript
+        messages={[
+          {
+            id: "greeting-1",
+            role: "user",
+            text: "Hello there",
+            source: "agent_greeting",
+          },
+        ]}
+      />,
+    );
+
+    const bubble = screen.getByText("Hello there").closest("article");
+    expect(bubble?.className).toContain("justify-start");
+    expect(bubble?.className).not.toContain("justify-end");
+  });
+
   it("does not group consecutive user messages from different senders", () => {
     render(
       <ChatTranscript
