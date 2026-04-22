@@ -15,6 +15,7 @@ import {
   DialogTitle,
   PageLayout,
   PagePanel,
+  PromptDialog,
   Sidebar,
   SidebarContent,
   SidebarHeader,
@@ -27,6 +28,7 @@ import {
   Copy,
   EllipsisVertical,
   Link,
+  Pencil,
   RefreshCw,
   Settings,
   Shield,
@@ -59,6 +61,34 @@ import { ConfigPageView } from "./ConfigPageView";
 /* ── Component ─────────────────────────────────────────────────────── */
 
 /* ── Wallet Settings Popup Components ────────────────────────────────── */
+
+const WALLET_ACCOUNT_LABEL_STORAGE_KEY = "milady:wallet-account-label";
+const DEFAULT_WALLET_ACCOUNT_LABEL = "Account 1";
+
+function loadWalletAccountLabel(): string {
+  if (typeof window === "undefined") {
+    return DEFAULT_WALLET_ACCOUNT_LABEL;
+  }
+
+  try {
+    return (
+      window.localStorage.getItem(WALLET_ACCOUNT_LABEL_STORAGE_KEY)?.trim() ||
+      DEFAULT_WALLET_ACCOUNT_LABEL
+    );
+  } catch {
+    return DEFAULT_WALLET_ACCOUNT_LABEL;
+  }
+}
+
+function saveWalletAccountLabel(label: string): void {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.localStorage.setItem(WALLET_ACCOUNT_LABEL_STORAGE_KEY, label);
+  } catch {
+    // ignore storage failures
+  }
+}
 
 function SettingsCopyableAddress({
   label,
@@ -646,7 +676,8 @@ export function InventoryView() {
   const [trackedBscTokens, _setTrackedBscTokens] =
     useState(loadTrackedBscTokens);
 
-  const accountLabel = "Account 1";
+  const [accountLabel, setAccountLabel] = useState(loadWalletAccountLabel);
+  const [accountRenameOpen, setAccountRenameOpen] = useState(false);
 
   // ── Wallet settings popup state ──────────────────────────────────
   const [walletRpcOpen, setWalletRpcOpen] = useState(false);
@@ -875,6 +906,13 @@ export function InventoryView() {
     [copyToClipboard, setActionNotice, t],
   );
 
+  const handleRenameAccount = useCallback((nextLabel: string) => {
+    const trimmed = nextLabel.trim();
+    if (!trimmed) return;
+    setAccountLabel(trimmed);
+    saveWalletAccountLabel(trimmed);
+  }, []);
+
   const walletSidebar = (
     <Sidebar
       testId="wallets-sidebar"
@@ -883,8 +921,21 @@ export function InventoryView() {
         <SidebarHeader className="space-y-3">
           <div className="flex flex-col gap-1.5 rounded-2xl border border-border/40 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_90%,transparent),color-mix(in_srgb,var(--bg)_96%,transparent))] px-3 py-2 shadow-sm">
             <div className="min-w-0 flex-1">
-              <div className="truncate text-[14px] font-medium text-txt">
-                {accountLabel}
+              <div className="flex items-center gap-1.5">
+                <div className="truncate text-[14px] font-medium text-txt">
+                  {accountLabel}
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-5 w-5 shrink-0 rounded-sm text-muted hover:text-txt"
+                  data-testid="wallet-header-rename-account"
+                  onClick={() => setAccountRenameOpen(true)}
+                  aria-label="Rename wallet account"
+                >
+                  <Pencil className="h-3 w-3" />
+                </Button>
               </div>
               <div className="flex items-center gap-1.5">
                 <div className="flex items-center gap-1 rounded-full border border-border/30 bg-bg/40 px-1.5 py-0.5">
@@ -1183,6 +1234,21 @@ export function InventoryView() {
           </div>
         </div>
       </PageLayout>
+
+      <PromptDialog
+        open={accountRenameOpen}
+        title="Rename Account"
+        message="Choose a display name for this wallet account."
+        defaultValue={accountLabel}
+        placeholder="Account 1"
+        confirmLabel="Save"
+        cancelLabel="Cancel"
+        onCancel={() => setAccountRenameOpen(false)}
+        onConfirm={(value) => {
+          handleRenameAccount(value);
+          setAccountRenameOpen(false);
+        }}
+      />
 
       {/* ── Wallet & RPC popup ── */}
       <Dialog open={walletRpcOpen} onOpenChange={setWalletRpcOpen}>
