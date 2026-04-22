@@ -248,6 +248,12 @@ jobs:
           MILADY_NO_VISION_DEPS: "1"
           MILADY_SKIP_LOCAL_UPSTREAMS: "1"
 
+      - name: Build vendored plugin-sql
+        run: |
+          cd eliza/plugins/plugin-sql/typescript
+          bun run build
+          ls dist/node/index.node.js && echo "plugin-sql build OK"
+
       # ── 5. Build Capacitor plugins ──────────────────────────────────────────
       - name: Build Capacitor plugins
         run: |
