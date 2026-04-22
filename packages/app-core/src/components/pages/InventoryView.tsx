@@ -169,80 +169,6 @@ function WalletLogoStack() {
   );
 }
 
-export function WalletChatBadges() {
-  const accountBadges = [
-    { chain: "ethereum", ring: "border-[#f2b86a]/35 bg-[rgba(242,184,106,0.08)]" },
-    { chain: "base", ring: "border-[#60a5fa]/35 bg-[rgba(96,165,250,0.08)]" },
-    { chain: "bsc", ring: "border-[#f59e0b]/35 bg-[rgba(245,158,11,0.08)]" },
-    { chain: "solana", ring: "border-[#2dd4ff]/35 bg-[rgba(45,212,255,0.08)]" },
-    { chain: "avax", ring: "border-[#ff6b8b]/30 bg-[rgba(255,107,139,0.08)]" },
-    { chain: "mainnet", ring: "border-[#c4b5fd]/30 bg-[rgba(196,181,253,0.08)]" },
-  ];
-
-  const badgeShell =
-    "rounded-[16px] border border-border/32 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_88%,transparent),color-mix(in_srgb,var(--bg)_96%,transparent))] text-txt shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_12px_18px_-18px_rgba(15,23,42,0.12)] backdrop-blur-sm transition-[border-color,background-color,box-shadow] duration-200 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_14px_22px_-18px_rgba(0,0,0,0.24)]";
-  const badgeLabelClass =
-    "relative z-10 text-center text-[12px] font-semibold tracking-wide text-muted-strong";
-  const badgeValueClass =
-    "relative z-10 mt-0.5 text-center text-[18px] font-light leading-none text-txt";
-
-  return (
-    <div
-      data-testid="wallet-chat-badges"
-      className="flex flex-wrap items-start justify-start gap-2.5"
-    >
-      <div
-        className="relative flex h-[66px] w-[220px] max-w-full flex-col items-center justify-center overflow-hidden px-4 text-center"
-      >
-        <svg
-          aria-hidden="true"
-          className="absolute inset-0 h-full w-full"
-          viewBox="0 0 220 66"
-          preserveAspectRatio="none"
-        >
-          <path
-            d="M28 0H220V66H0V28Z"
-            fill="var(--card)"
-            stroke="var(--border)"
-            strokeWidth="1"
-          />
-        </svg>
-        <span className={badgeLabelClass}>Token</span>
-        <span className={badgeValueClass}>Trades</span>
-      </div>
-
-      <div className={`${badgeShell} flex h-[66px] w-[132px] max-w-full flex-col items-center justify-center px-3 text-center`}>
-        <span className={badgeLabelClass}>APY</span>
-        <span className={badgeValueClass}>8.54%</span>
-      </div>
-
-      <div className={`${badgeShell} flex h-[66px] w-[150px] max-w-full flex-col items-center justify-center px-3 text-center`}>
-        <span className={badgeLabelClass}>TVL</span>
-        <span className={badgeValueClass}>$30.93M</span>
-      </div>
-
-      <div className={`${badgeShell} flex h-[66px] w-[170px] max-w-full flex-col items-center justify-center px-3 text-center`}>
-        <span className={badgeLabelClass}>Accounts</span>
-        <div className="mt-1 flex items-center justify-center">
-          {accountBadges.map((badge, index) => (
-            <span
-              key={badge.chain}
-              className={`-ml-1.5 flex h-5.5 w-5.5 items-center justify-center rounded-full border shadow-sm first:ml-0 ${badge.ring} ${index === 0 ? "z-30" : index === 1 ? "z-20" : index === 2 ? "z-10" : "z-0"}`}
-            >
-              <ChainIcon chain={badge.chain} size="sm" className="h-3.5 w-3.5" />
-            </span>
-          ))}
-        </div>
-      </div>
-
-      <div className={`${badgeShell} flex h-[66px] w-[194px] max-w-full flex-col items-center justify-center px-3 text-center`}>
-        <span className={badgeLabelClass}>Daily Returns</span>
-        <span className={badgeValueClass}>1.31 ETH</span>
-      </div>
-    </div>
-  );
-}
-
 type SidebarTokenRow = {
   name: string;
   symbol: string;
@@ -1226,9 +1152,6 @@ export function InventoryView() {
         </div>
 
         <div className="mt-4 flex flex-1 min-h-0 flex-col">
-          <div className="mb-4">
-            <WalletChatBadges />
-          </div>
           <div className="flex flex-1 min-h-[600px] flex-col">
             <ChatView />
           </div>
