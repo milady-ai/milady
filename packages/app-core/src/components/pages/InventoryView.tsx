@@ -1230,7 +1230,7 @@ export function InventoryView() {
             <WalletChatBadges />
           </div>
           <div className="flex flex-1 min-h-[600px] flex-col">
-            <ChatView alignMessagesLeft />
+            <ChatView />
           </div>
         </div>
       </PageLayout>
