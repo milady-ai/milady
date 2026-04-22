@@ -15,18 +15,22 @@ const __dirname = path.dirname(scriptFile);
 const _appDir = path.resolve(__dirname, "..");
 
 // Only these values in a plugin's `platforms` array are treated as build-host
-// gates. Anything else (e.g. "node", "browser", "android", "ios") is a runtime
-// hint and does not block building on the current host.
+// gates. Anything else (e.g. "node", "browser") is a runtime hint and does
+// not block building on the current host.
 export const OS_PLATFORMS = new Set(["darwin", "linux", "win32"]);
 
 /**
  * Decide whether a plugin should be built on the current host, based on the
- * `milady.platforms` / `elizaos.platforms` allowlist in its package.json.
+ * `milady.platforms` / `elizaos.platforms` allowlist in its package.json, or
+ * by detecting Capacitor mobile plugins via their peer dependency.
  *
- * Only filters when `platforms` is a pure OS allowlist (darwin / linux /
- * win32) that excludes the host; arrays mixing runtime targets still build.
+ * Rules (in order):
+ * 1. Explicit `platforms` pure-OS allowlist → build only when host is listed.
+ * 2. `platforms` mixing runtime hints (e.g. "node", "browser") → build everywhere.
+ * 3. No `platforms` but `@capacitor/core` peer dep → mobile-only, skip on desktop.
+ * 4. No signal → build everywhere.
  *
- * @param {unknown} pkg         — parsed package.json (or undefined)
+ * @param {unknown} pkg          — parsed package.json (or undefined)
  * @param {string}  hostPlatform — the current `process.platform` value
  * @returns {boolean}
  */
@@ -34,14 +38,21 @@ export function shouldBuildPluginForHost(pkg, hostPlatform) {
   const platforms =
     (pkg && typeof pkg === "object" && pkg.milady?.platforms) ??
     (pkg && typeof pkg === "object" && pkg.elizaos?.platforms);
-  if (!Array.isArray(platforms) || platforms.length === 0) {
-    return true;
+  if (Array.isArray(platforms) && platforms.length > 0) {
+    const isPureOsAllowlist = platforms.every((p) => OS_PLATFORMS.has(p));
+    if (!isPureOsAllowlist) {
+      return true;
+    }
+    return platforms.includes(hostPlatform);
   }
-  const isPureOsAllowlist = platforms.every((p) => OS_PLATFORMS.has(p));
-  if (!isPureOsAllowlist) {
-    return true;
+  // No explicit metadata — @capacitor/core peer dep is a reliable mobile-only
+  // signal (every proper Capacitor plugin lists it). Skip on all desktop hosts.
+  const peerDeps =
+    (pkg && typeof pkg === "object" && pkg.peerDependencies) ?? {};
+  if ("@capacitor/core" in peerDeps) {
+    return false;
   }
-  return platforms.includes(hostPlatform);
+  return true;
 }
 
 function readPluginPackageJson(pluginsDir, name) {

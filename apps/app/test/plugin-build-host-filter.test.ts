@@ -20,4 +20,20 @@ describe("shouldBuildPluginForHost", () => {
     const pkg = { elizaos: { platforms: ["win32"] } };
     expect(shouldBuildPluginForHost(pkg, "win32")).toBe(true);
   });
+
+  it("skips Capacitor mobile plugins (peer dep heuristic) on all desktop hosts", () => {
+    const pkg = { peerDependencies: { "@capacitor/core": "^8.0.0" } };
+    expect(shouldBuildPluginForHost(pkg, "win32")).toBe(false);
+    expect(shouldBuildPluginForHost(pkg, "darwin")).toBe(false);
+    expect(shouldBuildPluginForHost(pkg, "linux")).toBe(false);
+  });
+
+  it("explicit platforms metadata takes precedence over Capacitor heuristic", () => {
+    const pkg = {
+      peerDependencies: { "@capacitor/core": "^8.0.0" },
+      milady: { platforms: ["darwin"] },
+    };
+    expect(shouldBuildPluginForHost(pkg, "darwin")).toBe(true);
+    expect(shouldBuildPluginForHost(pkg, "win32")).toBe(false);
+  });
 });
