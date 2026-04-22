@@ -8,7 +8,11 @@
  * - "Import from Eliza Cloud" only appears once
  */
 
+import React from "react";
+import TestRenderer from "react-test-renderer";
+import { act } from "react";
 import { describe, expect, it } from "vitest";
+import { WalletChatBadges } from "./InventoryView";
 
 // Test the hasAnyAddress logic extracted from InventoryView
 function hasAnyAddress(args: {
@@ -141,5 +145,35 @@ describe("BSC RPC banner visibility", () => {
         bscReady: false,
       }),
     ).toBe(false);
+  });
+});
+
+describe("wallet chat badge strip", () => {
+  it("renders the summary badges used above the wallet chat section", () => {
+    let tree: TestRenderer.ReactTestRenderer | null = null;
+    act(() => {
+      tree = TestRenderer.create(React.createElement(WalletChatBadges));
+    });
+    const mountedTree = tree;
+    if (!mountedTree) throw new Error("Failed to render wallet chat badges");
+    const badges = mountedTree.root.findByProps({
+      "data-testid": "wallet-chat-badges",
+    });
+    const collectText = (value: unknown): string[] => {
+      if (typeof value === "string") return [value];
+      if (Array.isArray(value)) return value.flatMap(collectText);
+      if (value && typeof value === "object" && "children" in value) {
+        return collectText((value as { children: unknown }).children);
+      }
+      return [];
+    };
+    const rendered = collectText(badges.children).join(" ");
+
+    expect(badges.children).toHaveLength(5);
+    expect(rendered).toContain("Token");
+    expect(rendered).toContain("APY");
+    expect(rendered).toContain("TVL");
+    expect(rendered).toContain("Accounts");
+    expect(rendered).toContain("Daily Returns");
   });
 });
