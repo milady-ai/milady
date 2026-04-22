@@ -3,6 +3,32 @@ title: Changelog
 description: What's new in Milady — features, improvements, and fixes.
 ---
 
+<Update label="2026-04-22" description="Week of April 22; life-ops page redesign, chat UI refresh, calendar event editor, schedule reliability" tags={["Feature", "Update", "Fix"]}>
+
+## Life-ops page redesign
+
+The [life-ops](/rest/lifeops) page has been completely rebuilt with a new layout. A vertical nav rail on the left lets you switch between dashboard, inbox, calendar, reminders, and setup sections without leaving the page. The inbox and calendar now have their own dedicated views — browse messages from all connected platforms in the inbox section, and view your week at a glance in the calendar section. A right-side chat panel stays visible alongside whichever section you're in, so you can talk to your agent while reviewing your schedule or triaging messages.
+
+## Calendar event editor
+
+You can now edit calendar events directly from the [life-ops](/rest/lifeops) calendar view. Click any event to open an editor drawer where you can update details without switching to Google Calendar. The editor connects to your real calendar data, so changes sync back to Google automatically.
+
+## Chat UI refresh
+
+The chat interface is cleaner and more compact. Message bubbles are flatter with tighter spacing, the composer uses icon-only buttons instead of text labels, and user messages now show a "You" label for clarity. The typing indicator no longer displays an avatar, and chat panels stretch to full height so you use more of the available screen space.
+
+## Updates
+
+- **Life-ops sidebar widgets split** — The life-ops sidebar now uses four separate widgets instead of one monolithic block, with improved density so more information fits without scrolling.
+- **Life-ops schedule accuracy** — Schedule widgets no longer show stale meal windows whose start time has already passed. Bedtime targets, minute humanization, and confidence labels have also been corrected for more accurate daily schedule displays.
+
+## Bug fixes
+
+- Fixed the terminal panel getting stuck on "Starting terminal…" when spawning a shell session — the panel now loads correctly
+- Fixed chat placement in the browser workspace view appearing in the wrong position
+
+</Update>
+
 <Update label="2026-04-21" description="Week of April 21; cloud travel booking, feature toggles, automations UX overhaul, action surface consolidation" tags={["Feature", "Update", "Fix"]}>
 
 ## Cloud travel booking
