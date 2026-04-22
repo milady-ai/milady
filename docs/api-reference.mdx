@@ -680,6 +680,13 @@ Routes under `/api/cloud/v1/` are forwarded as `/api/v1/` on the cloud backend, 
 | `POST` | `/api/wallet/export` | Export private keys (requires confirmation) |
 | `POST` | `/api/wallet/production-defaults` | Apply production-ready wallet trading defaults |
 
+### Wallet Cloud
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/api/wallet/primary` | Set the primary wallet source (local or cloud) for a chain. Gated by `ENABLE_CLOUD_WALLET` |
+| `POST` | `/api/wallet/refresh-cloud` | Re-query Eliza Cloud for the latest cloud wallet descriptors. Gated by `ENABLE_CLOUD_WALLET` |
+
 ### Wallet Trading
 
 | Method | Path | Description |

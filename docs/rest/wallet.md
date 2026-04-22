@@ -84,6 +84,8 @@ Get NFTs held by the agent across EVM chains and Solana. Requires `ALCHEMY_API_K
 
 Get the wallet API key configuration status, RPC provider selections, and current wallet addresses. Key values are not returned — only their set/unset status.
 
+When the cloud wallet feature is enabled (`ENABLE_CLOUD_WALLET=1`), the response includes additional `wallets` and `primary` fields that describe all available wallets (local and cloud) and which source is primary for each chain. The `evmAddress` and `solanaAddress` fields reflect whichever wallet is currently primary.
+
 **Response**
 
 ```json
@@ -106,7 +108,50 @@ Get the wallet API key configuration status, RPC provider selections, and curren
   "birdeyeKeySet": false,
   "evmChains": ["ethereum", "base"],
   "evmAddress": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
-  "solanaAddress": "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgHU"
+  "solanaAddress": "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgHU",
+  "walletSource": "local",
+  "automationMode": "user-sign-only",
+  "pluginEvmLoaded": true,
+  "pluginEvmRequired": false,
+  "executionReady": true,
+  "executionBlockedReason": null,
+  "solanaSigningAvailable": true
+}
+```
+
+**Additional fields when cloud wallet is enabled**
+
+When `ENABLE_CLOUD_WALLET` is active, the response also includes:
+
+```json
+{
+  "wallets": [
+    {
+      "source": "local",
+      "chain": "evm",
+      "address": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+      "provider": "local",
+      "primary": false
+    },
+    {
+      "source": "cloud",
+      "chain": "evm",
+      "address": "0x1234...abcd",
+      "provider": "privy",
+      "primary": true
+    },
+    {
+      "source": "local",
+      "chain": "solana",
+      "address": "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgHU",
+      "provider": "local",
+      "primary": true
+    }
+  ],
+  "primary": {
+    "evm": "cloud",
+    "solana": "local"
+  }
 }
 ```
 
@@ -125,14 +170,32 @@ Get the wallet API key configuration status, RPC provider selections, and curren
 | `heliusKeySet` | boolean | Whether a Helius API key is configured |
 | `birdeyeKeySet` | boolean | Whether a Birdeye API key is configured |
 | `evmChains` | string[] | List of active EVM chains |
-| `evmAddress` | string \| null | Current EVM wallet address |
-| `solanaAddress` | string \| null | Current Solana wallet address |
+| `evmAddress` | string \| null | Current primary EVM wallet address |
+| `solanaAddress` | string \| null | Current primary Solana wallet address |
+| `walletSource` | string | Active wallet source (`"local"`, `"cloud"`, etc.) |
+| `automationMode` | string | Current trade automation mode |
+| `pluginEvmLoaded` | boolean | Whether the EVM plugin is loaded |
+| `pluginEvmRequired` | boolean | Whether the EVM plugin is required |
+| `executionReady` | boolean | Whether trade execution is ready |
+| `executionBlockedReason` | string \| null | Reason execution is blocked, if any |
+| `solanaSigningAvailable` | boolean | Whether Solana transaction signing is available (local key or cloud primary) |
+| `wallets` | array | All wallet entries across local and cloud sources (only when cloud wallet is enabled) |
+| `wallets[].source` | string | `"local"` or `"cloud"` |
+| `wallets[].chain` | string | `"evm"` or `"solana"` |
+| `wallets[].address` | string | Wallet address |
+| `wallets[].provider` | string | `"local"`, `"privy"`, or `"steward"` |
+| `wallets[].primary` | boolean | Whether this wallet is the primary for its chain |
+| `primary` | object | Maps each chain to its primary wallet source (only when cloud wallet is enabled) |
+| `primary.evm` | string | `"local"` or `"cloud"` |
+| `primary.solana` | string | `"local"` or `"cloud"` |
 
 ---
 
 ### PUT /api/wallet/config
 
-Update wallet API keys and RPC provider selections. You can set API keys, switch RPC providers per chain, or both in a single request. Setting `HELIUS_API_KEY` also automatically configures `SOLANA_RPC_URL`. Triggers a runtime restart to apply changes.
+Update wallet API keys and RPC provider selections. You can set API keys, switch RPC providers per chain, or both in a single request. Setting `HELIUS_API_KEY` also automatically configures `SOLANA_RPC_URL`.
+
+When all RPC provider selections are set to `"eliza-cloud"`, the cloud wallet feature flag (`ENABLE_CLOUD_WALLET`) is automatically enabled.
 
 **Request (API keys)**
 
@@ -208,19 +271,21 @@ Import an existing private key for EVM or Solana. Chain is auto-detected if not 
 
 ### POST /api/wallet/generate
 
-Generate one or more new wallets. The generated private keys are saved to config and available immediately via `GET /api/wallet/addresses`.
+Generate one or more new wallets. By default, keys are generated locally and saved to config. When the Steward bridge is configured and `source` is not `"local"`, wallet generation is delegated to Steward.
 
 **Request**
 
 ```json
 {
-  "chain": "both"
+  "chain": "both",
+  "source": "local"
 }
 ```
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `chain` | string | No | `"evm"`, `"solana"`, or `"both"` (default: `"both"`) |
+| `source` | string | No | `"local"` or `"steward"`. When omitted, defaults to Steward if configured, otherwise local. Set to `"local"` to force local key generation even when Steward is available. |
 
 **Response**
 
@@ -230,9 +295,22 @@ Generate one or more new wallets. The generated private keys are saved to config
   "wallets": [
     { "chain": "evm", "address": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045" },
     { "chain": "solana", "address": "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgHU" }
-  ]
+  ],
+  "source": "local"
 }
 ```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `wallets` | array | Generated wallet addresses with their chain type |
+| `source` | string | `"local"` or `"steward"` — indicates which provider generated the wallets |
+
+**Errors**
+
+| Status | Condition |
+|--------|-----------|
+| 400 | `chain` is not `"evm"`, `"solana"`, or `"both"` |
+| 400 | `source` is not `"local"` or `"steward"` |
 
 ---
 
@@ -716,6 +794,110 @@ Apply opinionated production defaults for wallet trading configuration (trade pe
 |-------|------|-------------|
 | `applied` | string[] | List of configuration changes that were applied |
 | `tradePermissionMode` | string | The resulting trade permission mode |
+
+---
+
+## Cloud wallet
+
+These endpoints manage the dual-wallet (local + cloud) architecture. They are gated behind the `ENABLE_CLOUD_WALLET` feature flag and return `404` when the flag is off.
+
+<Info>
+Cloud wallets are provisioned through Eliza Cloud and support providers like Privy and Steward. When cloud wallet is enabled, the agent can hold both local and cloud-managed wallets for each chain, with one designated as primary.
+</Info>
+
+### POST /api/wallet/primary
+
+Set the primary wallet source for a chain. The primary wallet is used for balance lookups, trade execution, and address display. Changing the primary triggers a runtime reload to rebind wallet plugins.
+
+**Request**
+
+```json
+{
+  "chain": "evm",
+  "source": "cloud"
+}
+```
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chain` | string | Yes | `"evm"` or `"solana"` |
+| `source` | string | Yes | `"local"` or `"cloud"` |
+
+**Response**
+
+```json
+{
+  "ok": true,
+  "chain": "evm",
+  "source": "cloud",
+  "restarting": true
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `chain` | string | The chain that was updated |
+| `source` | string | The new primary source |
+| `restarting` | boolean | Whether the runtime is restarting to apply the change |
+| `warnings` | string[] | Optional warnings (e.g. config save issues) |
+
+**Errors**
+
+| Status | Condition |
+|--------|-----------|
+| 400 | `chain` is not `"evm"` or `"solana"` |
+| 400 | `source` is not `"local"` or `"cloud"` |
+| 404 | Cloud wallet feature is not enabled |
+| 500 | Failed to persist configuration |
+
+---
+
+### POST /api/wallet/refresh-cloud
+
+Re-query Eliza Cloud for the latest cloud wallet descriptors and update the local cache. This re-fetches all chains to pick up upstream address changes such as wallet rotation or migration. If a chain fails to refresh, the previously cached descriptor is preserved.
+
+Changing the primary triggers a runtime reload when wallet bindings have changed.
+
+**Request**
+
+No request body required.
+
+**Response**
+
+```json
+{
+  "ok": true,
+  "restarting": true,
+  "wallets": {
+    "evm": {
+      "address": "0x1234...abcd",
+      "provider": "privy"
+    },
+    "solana": {
+      "address": "Abc123...xyz",
+      "provider": "steward"
+    }
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `restarting` | boolean | Whether the runtime is restarting due to changed wallet bindings |
+| `wallets.evm` | object \| null | Refreshed EVM cloud wallet descriptor |
+| `wallets.solana` | object \| null | Refreshed Solana cloud wallet descriptor |
+| `wallets.*.address` | string | Cloud wallet address |
+| `wallets.*.provider` | string | Wallet provider (`"privy"` or `"steward"`) |
+| `warnings` | string[] | Optional warnings for partial failures or config save issues |
+
+**Errors**
+
+| Status | Condition |
+|--------|-----------|
+| 400 | Cloud not linked — no API key configured |
+| 400 | No agent configured |
+| 404 | Cloud wallet feature is not enabled |
+| 502 | Cloud wallet refresh failed (upstream error) |
 
 ---
 

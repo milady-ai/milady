@@ -30,6 +30,8 @@ Start the Eliza Cloud login flow. Creates a session on the cloud and returns a b
 
 Poll the status of a login session. When status is `"authenticated"`, the API key is automatically saved to config and applied to the process environment.
 
+When the cloud wallet feature is enabled (`ENABLE_CLOUD_WALLET=1`), a successful login also triggers best-effort cloud wallet provisioning. The agent attempts to import EVM and Solana wallets from Eliza Cloud and set them as the primary wallet source. If provisioning fails, the login still succeeds — the API key is saved, and the wallet provisioning failure is logged without affecting the authentication response. You can manually retry wallet provisioning later using `POST /api/wallet/refresh-cloud`.
+
 **Query Parameters**
 
 | Parameter | Type | Required | Description |
