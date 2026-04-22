@@ -40,6 +40,14 @@ RUN set -x; \
     # NOTE: Do NOT copy src/ - tsx will prefer raw .ts over compiled dist/
     # cp -a eliza/packages/agent/src node_modules/@elizaos/agent/src 2>/dev/null || true; \
     ls node_modules/@elizaos/agent/dist/ 2>/dev/null | head -3 && echo "@elizaos/agent dist OK" || echo "WARN: agent dist missing"; \
+    # @elizaos/plugin-sql: replace broken npm alpha with vendored submodule build.
+    # The published alpha lacks object-form countMemories() support and does not
+    # register the memoryStorage service, which breaks cloud chat.
+    rm -rf node_modules/@elizaos/plugin-sql; \
+    mkdir -p node_modules/@elizaos/plugin-sql; \
+    cp eliza/plugins/plugin-sql/typescript/package.json node_modules/@elizaos/plugin-sql/; \
+    cp -a eliza/plugins/plugin-sql/typescript/dist node_modules/@elizaos/plugin-sql/dist 2>/dev/null || true; \
+    ls node_modules/@elizaos/plugin-sql/dist/node/index.node.js 2>/dev/null && echo "@elizaos/plugin-sql dist OK" || echo "WARN: plugin-sql dist missing"; \
     # @elizaos/shared: DON'T replace — the npm version or resolved workspace symlink works.
     # Workspace package.json exports point to ./src/*.ts (tsx handles this).
     # Replacing with dist-only breaks resolution since exports don't match dist layout.
@@ -69,11 +77,11 @@ RUN for app_dir in eliza/apps/app-coding eliza/apps/app-shopify; do \
         fi; \
       fi; \
     done
-# Remove broken nested @elizaos/core entries in eliza subdirs.
+# Remove broken nested @elizaos/core/plugin-sql entries in eliza subdirs.
 # bun creates workspace symlinks like eliza/apps/app-lifeops/node_modules/@elizaos/core
-# that resolve correctly in CI but point nowhere in Docker. Removing them forces
-# Node's module resolution to walk up to root node_modules/@elizaos/core instead.
-RUN find eliza -path '*/node_modules/@elizaos/core' -not -path '*/node_modules/.bun/*' \
+# and @elizaos/plugin-sql that resolve correctly in CI but point nowhere in Docker.
+# Removing them forces Node's module resolution to walk up to root node_modules.
+RUN find eliza \( -path '*/node_modules/@elizaos/core' -o -path '*/node_modules/@elizaos/plugin-sql' \) -not -path '*/node_modules/.bun/*' \
     | while read p; do rm -rf "$p" && echo "Removed nested: $p"; done; true
 
 # ===== End symlink replacement =====

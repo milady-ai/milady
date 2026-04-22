@@ -95,6 +95,9 @@ jobs:
           # Init eliza submodule first (needed for workspace resolution)
           # Full clone (not shallow) because eliza commit may not be in shallow history
           git submodule update --init eliza || echo "eliza submodule init failed, continuing"
+          # plugin-sql is a nested submodule inside eliza. We vendor its built dist/
+          # into the image to avoid the broken npm alpha package in cloud CI.
+          git -C eliza submodule update --init plugins/plugin-sql || echo "plugin-sql submodule init failed, continuing"
           # Apply cloud runtime patches to eliza submodule
           if [ -f cloud/patches/cloud-runtime-patches.patch ]; then
             echo "Applying cloud runtime patches to eliza submodule..."
@@ -112,6 +115,7 @@ jobs:
             fi
           fi
           ls eliza/package.json && echo "eliza submodule OK" || echo "WARN: eliza submodule missing"
+          ls eliza/plugins/plugin-sql/typescript/dist/node/index.node.js && echo "plugin-sql dist OK" || echo "WARN: plugin-sql dist missing"
           # Init other submodules (skip local upstreams to avoid nested plugin submodules)
           MILADY_SKIP_LOCAL_UPSTREAMS=1 node scripts/init-submodules.mjs || echo "Some submodules failed, continuing"
           # Disable workspace entries for missing plugin submodules
