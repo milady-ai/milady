@@ -129,6 +129,40 @@ jobs:
           # Disable workspace entries for missing plugin submodules
           MILADY_SKIP_LOCAL_UPSTREAMS=1 node scripts/disable-local-eliza-workspace.mjs || echo "Disable script failed, continuing"
 
+      - name: Patch ignoreDeprecations for TypeScript 5 toolchain
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+          const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          const tsVersion = pkg.devDependencies?.typescript ?? pkg.dependencies?.typescript ?? '';
+          if (!/^\^?5\./.test(tsVersion)) {
+            console.log('[ts-compat] root TypeScript is not 5.x, skipping');
+            process.exit(0);
+          }
+          let patched = 0;
+          function walk(dir) {
+            for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+              if (entry.name === 'node_modules' || entry.name === '.git') continue;
+              const full = path.join(dir, entry.name);
+              if (entry.isDirectory()) {
+                walk(full);
+                continue;
+              }
+              if (!entry.isFile() || !/^tsconfig(\..+)?\.json$/.test(entry.name)) continue;
+              const raw = fs.readFileSync(full, 'utf8');
+              const next = raw.replace(/"ignoreDeprecations"\s*:\s*"6\.0"/g, '"ignoreDeprecations": "5.0"');
+              if (next !== raw) {
+                fs.writeFileSync(full, next);
+                patched += 1;
+                console.log('[ts-compat] patched', full);
+              }
+            }
+          }
+          walk('eliza');
+          console.log('[ts-compat] patched files:', patched);
+          NODE
+
       # The disable script removes all eliza/* workspace entries and rewrites
       # workspace:* overrides, but the vite build needs app-core, ui, shared,
       # agent, and app packages that exist on disk. Re-add them.
