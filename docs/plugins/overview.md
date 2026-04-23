@@ -4,7 +4,7 @@ sidebarTitle: Overview
 description: Milady's plugin system provides modular capabilities — model providers, platform connectors, DeFi integrations, and custom features.
 ---
 
-Plugins are the primary extension mechanism for Eliza. Every capability beyond the core runtime — from LLM providers to blockchain interactions — is delivered as a plugin.
+Plugins are the primary extension mechanism for elizaOS. Every capability beyond the core runtime — from LLM providers to blockchain interactions — is delivered as a plugin.
 
 ## What is a Plugin?
 
@@ -20,15 +20,15 @@ A plugin is a self-contained module that registers one or more of:
 <CardGroup cols={2}>
 
 <Card title="Core Plugins" icon="cube" href="/plugin-registry/knowledge">
-  Essential plugins that ship with every Milady installation — sql, local-embedding, form, knowledge, trajectory-logger, agent-orchestrator, cron, shell, and agent-skills.
+  Essential plugins that ship with every Milady installation — sql, local-embedding, form, knowledge, trajectory-logger, agent-orchestrator, cron, shell, agent-skills, commands, plugin-manager, and roles.
 </Card>
 
 <Card title="Model Providers" icon="brain" href="/plugin-registry/llm/openai">
-  LLM integrations for OpenAI, Anthropic, Google Gemini, Google Antigravity, Groq, Ollama, OpenRouter, DeepSeek, xAI, Mistral, Cohere, Together, Qwen, Minimax, Perplexity, Zai, and Vercel AI Gateway. Eliza Cloud auto-enables separately via `ELIZAOS_CLOUD_API_KEY`.
+  LLM integrations for OpenAI, Anthropic, Google Gemini, Groq, Ollama, OpenRouter, xAI, Local AI, and Vercel AI Gateway ship as bundled plugins. Additional providers (Google Antigravity, DeepSeek, Mistral, Cohere, Together, Qwen, Minimax, Perplexity, Zai) are available from the remote registry and auto-enable when their API key env var is set. Eliza Cloud auto-enables separately via `ELIZAOS_CLOUD_API_KEY`.
 </Card>
 
 <Card title="Platform Connectors" icon="plug" href="/plugin-registry/platform/discord">
-  Bridges to 18 messaging platforms via auto-enable (Discord, Telegram, Twitter, Slack, WhatsApp, Signal, iMessage, Blooio, MS Teams, Google Chat, Mattermost, Farcaster, Twitch, Feishu, Matrix, Nostr, Lens, WeChat). Additional connectors (Bluesky, Instagram, LINE, Zalo, Twilio, GitHub, Gmail Watch, Nextcloud Talk, Tlon) are available in the elizaOS registry.
+  22 connector plugins in the bundled registry. 18 auto-enable via connector config (Discord, Telegram, Twitter, Slack, WhatsApp, Signal, iMessage, Blooio, MS Teams, Google Chat, Mattermost, Farcaster, Twitch, Feishu, Matrix, Nostr, Lens, WeChat). Additional connectors (BlueBubbles, Bluesky, Instagram, LINE, Zalo, Nextcloud Talk, Tlon) are available and can be installed from the registry.
 </Card>
 
 <Card title="DeFi & Blockchain" icon="wallet" href="/plugin-registry/defi/evm">
@@ -47,7 +47,7 @@ Plugins are loaded during runtime initialization in this order:
 
 1. **Milady plugin** — The bridge plugin (`createElizaPlugin()`) providing workspace context, session keys, emotes, custom actions, and lifecycle actions. Always first in the plugins array.
 2. **Pre-registered plugins** — `@elizaos/plugin-sql` and `@elizaos/plugin-local-embedding` are pre-registered before `runtime.initialize()` to prevent race conditions.
-3. **Core plugins** — Always loaded: `sql`, `local-embedding`, `form`, `knowledge`, `trajectory-logger`, `agent-orchestrator`, `cron`, `shell`, `agent-skills` (see `packages/agent/src/runtime/core-plugins.ts`). Additional plugins like `pdf`, `cua`, `browser`, `computeruse`, `obsidian`, `code`, `repoprompt`, `claude-code-workbench`, `vision`, `cli`, `edge-tts`, `elevenlabs`, `discord`, `telegram`, and `twitch` are optional and loaded when their feature flags or environment variables are configured.
+3. **Core plugins** — Always loaded: `sql`, `local-embedding`, `form`, `knowledge`, `trajectory-logger`, `agent-orchestrator`, `cron`, `shell`, `agent-skills`, `commands`, `plugin-manager`, `roles` (see `packages/agent/src/runtime/core-plugins.ts`). Additional plugins like `pdf`, `cua`, `browser`, `computeruse`, `obsidian`, `code`, `repoprompt`, `claude-code-workbench`, `vision`, `cli`, `edge-tts`, `elevenlabs`, `discord`, `telegram`, and `twitch` are optional and loaded when their feature flags or environment variables are configured.
 4. **Auto-enabled plugins** — Connector, provider, feature, streaming, subscription, hooks (webhooks + Gmail Watch), and media generation plugins are auto-enabled based on config and environment variables (see [Architecture](/plugins/architecture) for the full maps).
 5. **Ejected plugins** — Local overrides discovered from `~/.milady/plugins/ejected/`. When an ejected copy exists, it takes priority over the npm-published version.
 6. **User-installed plugins** — Tracked in `plugins.installs` in `milady.json`. Collected before drop-in plugins; any plugin name already present here takes precedence.

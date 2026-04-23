@@ -27,6 +27,11 @@ export GROQ_API_KEY=gsk_...
 | Environment Variable | Required | Description |
 |---------------------|----------|-------------|
 | `GROQ_API_KEY` | Yes | Groq API key from [console.groq.com](https://console.groq.com) |
+| `GROQ_BASE_URL` | No | Custom base URL for API requests |
+| `GROQ_SMALL_MODEL` | No | Override the small model identifier |
+| `GROQ_LARGE_MODEL` | No | Override the large model identifier |
+| `GROQ_TTS_MODEL` | No | Override the text-to-speech model |
+| `GROQ_TTS_VOICE` | No | Voice profile for text-to-speech output |
 
 ### milady.json Example
 

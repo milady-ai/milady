@@ -25,13 +25,13 @@ The registry has two layers:
 
 ### Bundled Registry (`plugins.json`)
 
-A local JSON file shipped with Milady containing metadata for ~97 plugins from the elizaOS ecosystem. Each entry includes the plugin's id, npm package name, category, environment variables, version, dependencies, and detailed parameter definitions. This file follows the `plugin-index-v1` schema.
+A local JSON file shipped with Milady containing metadata for ~98 plugins from the elizaOS ecosystem. Each entry includes the plugin's id, npm package name, category, environment variables, version, dependencies, and detailed parameter definitions. This file follows the `plugin-index-v1` schema.
 
 ```json
 {
   "$schema": "plugin-index-v1",
-  "generatedAt": "2026-02-09T20:23:38.561Z",
-  "count": 97,
+  "generatedAt": "2026-04-11T01:55:50.795Z",
+  "count": 98,
   "plugins": [
     {
       "id": "telegram",
@@ -290,7 +290,7 @@ Each entry in the bundled `plugins.json` uses this schema:
 | `name` | `string` | Human-readable display name |
 | `npmName` | `string` | Full npm package name (e.g., `@elizaos/plugin-telegram`) |
 | `description` | `string` | What the plugin does |
-| `category` | `string` | Plugin category: `connector`, `model`, `tool`, `memory`, `automation` |
+| `category` | `string` | Plugin category: `ai-provider`, `connector`, `database`, `feature`, `app` |
 | `envKey` | `string` | Primary environment variable that activates this plugin |
 | `configKeys` | `string[]` | All environment variables this plugin reads |
 | `version` | `string` | Current published version |

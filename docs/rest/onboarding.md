@@ -173,7 +173,7 @@ and `largeModel` are rejected. Callers must send canonical
     "llmText": {
       "backend": "anthropic",
       "transport": "direct",
-      "primaryModel": "anthropic/claude-sonnet-4-5"
+      "primaryModel": "anthropic/claude-sonnet-4.6"
     }
   }
 }

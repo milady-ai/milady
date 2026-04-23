@@ -69,7 +69,7 @@ Computer use works best with a vision-capable model. The workflow:
 ```
 1. TAKE_SCREENSHOT
        ↓
-2. Send to vision model (e.g., GPT-4o, Claude claude-sonnet-4-5)
+2. Send to vision model (e.g., GPT-4o, Claude claude-sonnet-4-6)
        ↓
 3. Model describes what is on screen
        ↓
@@ -88,7 +88,7 @@ Configure a vision-capable model as the primary model:
     "profiles": {
       "default": {
         "provider": "anthropic",
-        "model": "claude-sonnet-4-5"
+        "model": "claude-sonnet-4-6"
       }
     }
   },

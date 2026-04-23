@@ -1,4 +1,4 @@
-import { scenario, type ScenarioContext } from "@elizaos/scenario-schema";
+import { type ScenarioContext, scenario } from "@elizaos/scenario-schema";
 import { expectTurnToCallAction } from "../_helpers/action-assertions.ts";
 
 function assertTwilioBillingResult(ctx: ScenarioContext): string | undefined {
@@ -66,8 +66,7 @@ export default scenario({
       kind: "message",
       name: "send-sms-for-billing",
       room: "main",
-      text:
-        'Draft a Twilio SMS to my coworker and hold it for approval. Exact SMS: "I checked the plan, the vendor push is complete, the updated deck is in the shared folder, the QA notes are attached, the launch checklist is green, the finance numbers have been reconciled, and we are still on track for the afternoon review as long as nobody adds new scope before noon or changes the agenda without telling me. Please reply in the thread if anything changes, because I need a clean handoff, a stable agenda, and no surprises before the meeting starts. I am intentionally keeping this note detailed so the Twilio SMS spans multiple segments, exercises the markup path, and leaves a clear audit trail for billing. Add that the backup approval path is the same as last week, the escalation contact is still Sam, the summary needs to include the delta from the morning notes, and the final send should happen only after we confirm the exact recipient and time window."',
+      text: 'Draft a Twilio SMS to my coworker and hold it for approval. Exact SMS: "I checked the plan, the vendor push is complete, the updated deck is in the shared folder, the QA notes are attached, the launch checklist is green, the finance numbers have been reconciled, and we are still on track for the afternoon review as long as nobody adds new scope before noon or changes the agenda without telling me. Please reply in the thread if anything changes, because I need a clean handoff, a stable agenda, and no surprises before the meeting starts. I am intentionally keeping this note detailed so the Twilio SMS spans multiple segments, exercises the markup path, and leaves a clear audit trail for billing. Add that the backup approval path is the same as last week, the escalation contact is still Sam, the summary needs to include the delta from the morning notes, and the final send should happen only after we confirm the exact recipient and time window."',
       assertTurn: expectTurnToCallAction({
         acceptedActions: ["CROSS_CHANNEL_SEND"],
         description: "twilio sms draft",

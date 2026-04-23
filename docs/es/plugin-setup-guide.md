@@ -89,7 +89,7 @@ dónde obtener las credenciales, los campos mínimos requeridos y consejos para 
 **Variables:**
 - `OPENROUTER_API_KEY` — De openrouter.ai/keys
 - `OPENROUTER_SMALL_MODEL` — p. ej. `openai/gpt-4o-mini` o `meta-llama/llama-3.3-70b`
-- `OPENROUTER_LARGE_MODEL` — p. ej. `anthropic/claude-3.5-sonnet`
+- `OPENROUTER_LARGE_MODEL` — p. ej. `anthropic/claude-sonnet-4-6`
 - `OPENROUTER_IMAGE_MODEL` — p. ej. `openai/gpt-4o` (para tareas de visión)
 - `OPENROUTER_IMAGE_GENERATION_MODEL` — p. ej. `openai/dall-e-3`
 - `OPENROUTER_EMBEDDING_MODEL` — p. ej. `openai/text-embedding-3-small`
@@ -119,7 +119,7 @@ dónde obtener las credenciales, los campos mínimos requeridos y consejos para 
 </div>
 
 **Obtener credenciales:** No se necesita clave de API — instala Ollama localmente
-**Configuración:** https://ollama.ai — ejecuta `ollama pull llama3.2` para descargar un modelo
+**Configuración:** https://ollama.com — ejecuta `ollama pull llama3.2` para descargar un modelo
 **Mínimo requerido:** `OLLAMA_BASE_URL` = `http://localhost:11434` (disparador de auto-habilitación) o `OLLAMA_API_ENDPOINT` = `http://localhost:11434/api`
 **Variables:**
 - `OLLAMA_BASE_URL` — Disparador de auto-habilitación. Predeterminado: `http://localhost:11434`

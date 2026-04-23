@@ -38,7 +38,6 @@ jobs:
         run: |
           bun install --cwd eliza --no-frozen-lockfile --ignore-scripts
           bun install --cwd eliza/cloud --no-frozen-lockfile --ignore-scripts
-          bun install --cwd eliza/steward-fi --no-frozen-lockfile --ignore-scripts
 
       - name: Biome lint
         run: bun run verify:lint
@@ -71,7 +70,6 @@ jobs:
         run: |
           bun install --cwd eliza --no-frozen-lockfile --ignore-scripts
           bun install --cwd eliza/cloud --no-frozen-lockfile --ignore-scripts
-          bun install --cwd eliza/steward-fi --no-frozen-lockfile --ignore-scripts
 
       - name: Run type checker
         run: bun run verify:typecheck

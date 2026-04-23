@@ -4,7 +4,7 @@ sidebarTitle: 概述
 description: Milady 的插件系统提供模块化能力 — 模型提供者、平台连接器、DeFi 集成和自定义功能。
 ---
 
-插件是 Milady 的主要扩展机制。核心运行时之外的每项能力 — 从 LLM 提供者到区块链交互 — 都以插件的形式提供。
+插件是 elizaOS 的主要扩展机制。核心运行时之外的每项能力 — 从 LLM 提供者到区块链交互 — 都以插件的形式提供。
 
 <div id="what-is-a-plugin">
 

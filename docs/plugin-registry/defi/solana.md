@@ -22,9 +22,10 @@ milady plugins install solana
 
 | Environment Variable | Required | Description |
 |---------------------|----------|-------------|
-| `SOLANA_PRIVATE_KEY` | Yes | Base58-encoded private key for the agent's wallet |
+| `SOLANA_PRIVATE_KEY` | Yes | Base58-encoded private key for the agent's wallet (alias: `WALLET_PRIVATE_KEY`) |
 | `SOLANA_RPC_URL` | No | RPC endpoint (default: `https://api.mainnet-beta.solana.com`) |
-| `HELIUS_API_KEY` | No | Helius API key for enhanced RPC and webhooks |
+| `HELIUS_API_KEY` | No | Helius API key for enhanced RPC and webhooks (also the primary auto-enable trigger) |
+| `BIRDEYE_API_KEY` | No | Birdeye API key for token price and market data |
 
 ```json
 {

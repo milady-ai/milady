@@ -160,9 +160,7 @@ For replay benchmark workflows, keep captures and normalized artifacts separate:
 - raw captures: `.parallax/pty-captures/` (or exported into `captures/`)
 - normalized replay artifacts: `replays/`
 
-Reference runbook (kept as the benchmark example):
-
-- [solo-vs-swarm-replay-benchmark-runbook.md](../solo-vs-swarm-replay-benchmark-runbook.md)
+Reference: the solo-vs-swarm replay benchmark runbook is maintained in the repository for benchmark workflows.
 
 Useful benchmark env vars:
 

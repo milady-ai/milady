@@ -40,7 +40,7 @@ milady plugins install discord
 {
   "connectors": {
     "discord": {
-      "botToken": "YOUR_BOT_TOKEN"
+      "token": "YOUR_BOT_TOKEN"
     }
   }
 }
@@ -49,26 +49,30 @@ milady plugins install discord
 Or via environment variable:
 
 ```bash
-export DISCORD_BOT_TOKEN=YOUR_BOT_TOKEN
+export DISCORD_API_TOKEN=YOUR_BOT_TOKEN
 ```
 
 ## Configuration
 
 | Field | Required | Description |
 |-------|----------|-------------|
-| `botToken` | Yes | Discord bot token |
+| `token` | Yes | Discord bot token |
 | `enabled` | No | Set `false` to disable (default: `true`) |
-| `allowedChannels` | No | Array of channel IDs to respond in |
-| `ignoredChannels` | No | Array of channel IDs to ignore |
-| `prefix` | No | Command prefix (default: none, uses bot mentions) |
+| `groupPolicy` | No | Group join policy: `"open"`, `"disabled"`, or `"allowlist"` (default: `"allowlist"`) |
+| `dm.policy` | No | DM access policy: `"pairing"`, `"allowlist"`, `"open"`, or `"disabled"` (default: `"pairing"`) |
 
 ```json
 {
   "connectors": {
     "discord": {
-      "botToken": "YOUR_BOT_TOKEN",
-      "allowedChannels": ["1234567890123456789"],
-      "prefix": "!"
+      "token": "YOUR_BOT_TOKEN",
+      "guilds": {
+        "SERVER_ID": {
+          "channels": {
+            "CHANNEL_ID": { "allow": true }
+          }
+        }
+      }
     }
   }
 }
@@ -104,13 +108,13 @@ Response sent back to Discord channel/DM
 
 ## Auto-Enable
 
-The plugin auto-enables when the `connectors.discord` block contains a `botToken`:
+The plugin auto-enables when the `connectors.discord` block contains a `token` (or `botToken` / `apiKey` as aliases):
 
 ```json
 {
   "connectors": {
     "discord": {
-      "botToken": "YOUR_BOT_TOKEN"
+      "token": "YOUR_BOT_TOKEN"
     }
   }
 }
@@ -121,7 +125,7 @@ The plugin auto-enables when the `connectors.discord` block contains a `botToken
 The bot token can also be set via:
 
 ```bash
-export DISCORD_BOT_TOKEN=YOUR_BOT_TOKEN
+export DISCORD_API_TOKEN=YOUR_BOT_TOKEN
 ```
 
 ## Related

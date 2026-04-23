@@ -42,6 +42,8 @@ Démarre le flux de connexion Eliza Cloud. Crée une session sur le cloud et ren
 
 Sonde le statut d'une session de connexion. Lorsque le statut est `"authenticated"`, la clé API est automatiquement enregistrée dans la configuration et appliquée à l'environnement du processus.
 
+Lorsque la fonctionnalité de portefeuille cloud est activée (`ENABLE_CLOUD_WALLET=1`), une connexion réussie déclenche également un provisionnement « au mieux » du portefeuille cloud. L'agent tente d'importer les portefeuilles EVM et Solana depuis Eliza Cloud et de les définir comme source de portefeuille principale. Si le provisionnement échoue, la connexion reste réussie — la clé API est enregistrée, et l'échec du provisionnement du portefeuille est enregistré sans affecter la réponse d'authentification. Vous pouvez réessayer manuellement le provisionnement du portefeuille plus tard en utilisant `POST /api/wallet/refresh-cloud`.
+
 **Paramètres de requête**
 
 | Paramètre | Type | Requis | Description |

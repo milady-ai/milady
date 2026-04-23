@@ -255,7 +255,7 @@ When a trigger fires, the `injectAutonomousInstruction()` method on the Autonomy
 | Limit | Value | Purpose |
 |-------|-------|---------|
 | **Event buffer cap** | 240 events per agent | Bounds memory usage for the autonomous state cache |
-| **Max active triggers** | 100 per creator (default) | Prevents runaway trigger creation. Configurable via `MAX_ACTIVE_TRIGGERS` env var. |
+| **Max active triggers** | 100 per creator (default) | Prevents runaway trigger creation. Configurable via `MILADY_TRIGGERS_MAX_ACTIVE` env var or runtime setting. |
 | **Trigger maxRuns** | Per-trigger configurable | Limits how many times a trigger can execute before auto-deletion |
 
 ### SSRF Protection

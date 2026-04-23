@@ -147,6 +147,34 @@ const canonicalLocalPackHotspotPaths = [
   "apps/app/dist/vrms",
   "apps/app/dist/animations",
 ];
+const workflowSnippetCompatReplacements = [
+  [
+    "name: Build LifeOps Browser companions",
+    "name: Build Agent Browser Bridge companions",
+  ],
+  [
+    "if bun run lifeops:browser:package:release; then",
+    "if bun run browser-bridge:package:release; then",
+  ],
+  [
+    "LifeOps Browser packaging failed; desktop release will continue without browser companion bundles.",
+    "Agent Browser Bridge packaging failed; desktop release will continue without browser companion bundles.",
+  ],
+  [
+    "name: Upload LifeOps Browser release artifacts",
+    "name: Upload Agent Browser Bridge release artifacts",
+  ],
+  ["name: lifeops-browser-store-bundles", "name: browser-bridge-store-bundles"],
+  [
+    "name: Publish LifeOps Browser companions",
+    "name: Publish Agent Browser Bridge companions",
+  ],
+  [
+    "name: Attach LifeOps Browser assets to GitHub release",
+    "name: Attach Agent Browser Bridge assets to GitHub release",
+  ],
+  ["pattern: lifeops-browser-*", "pattern: browser-bridge-*"],
+];
 
 function getLocalPackHotspotPathsBlock(source) {
   return source.match(/const localPackHotspotPaths = \[[\s\S]*?\];/)?.[0];
@@ -211,6 +239,12 @@ export function applyReleaseCheckPackFallback(source) {
 
   if (!hasRequiredLocalPackHotspots(patched)) {
     patched = patchLocalPackHotspotPathsBlock(patched);
+  }
+
+  for (const [from, to] of workflowSnippetCompatReplacements) {
+    if (!patched.includes(to) && patched.includes(from)) {
+      patched = patched.replaceAll(from, to);
+    }
   }
 
   return patched;

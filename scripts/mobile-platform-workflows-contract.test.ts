@@ -10,11 +10,31 @@ const mobileWorkflowPath = path.join(
   "workflows",
   "mobile-build-smoke.yml",
 );
+const appleStoreWorkflowPath = path.join(
+  repoRoot,
+  ".github",
+  "workflows",
+  "apple-store-release.yml",
+);
 const windowsPreloadWorkflowPath = path.join(
   repoRoot,
   ".github",
   "workflows",
   "windows-desktop-preload-smoke.yml",
+);
+const mobileBuildScriptPath = path.join(
+  repoRoot,
+  "eliza",
+  "packages",
+  "app-core",
+  "scripts",
+  "run-mobile-build.mjs",
+);
+const miladyOsWorkflowPath = path.join(
+  repoRoot,
+  ".github",
+  "workflows",
+  "miladyos-cuttlefish.yml",
 );
 
 function readWorkflow(filePath: string) {
@@ -34,6 +54,27 @@ describe("mobile platform workflow contract", () => {
       "run: node --max-old-space-size=8192 eliza/packages/app-core/scripts/run-mobile-build.mjs android",
     );
     expect(workflow).toContain("com.miladyai.milady|ai.elizaos.app) ;;");
+  });
+
+  it("keeps the Apple release overlay target implemented by the mobile build helper", () => {
+    const workflow = readWorkflow(appleStoreWorkflowPath);
+    const mobileBuildScript = readWorkflow(mobileBuildScriptPath);
+
+    expect(workflow).toContain(
+      "node eliza/packages/app-core/scripts/run-mobile-build.mjs ios-overlay",
+    );
+    expect(mobileBuildScript).toContain('target !== "ios-overlay"');
+    expect(mobileBuildScript).toContain("prepareIosOverlay();");
+  });
+
+  it("keeps MiladyOS system-image validation wired to a Linux/KVM workflow", () => {
+    const workflow = readWorkflow(miladyOsWorkflowPath);
+
+    expect(workflow).toContain("runs-on: [self-hosted, linux, x64, kvm]");
+    expect(workflow).toContain("bun run build:android:system");
+    expect(workflow).toContain("bun run miladyos:validate");
+    expect(workflow).toContain("node scripts/miladyos/build-aosp.mjs");
+    expect(workflow).toContain("--boot-validate");
   });
 
   it("avoids broad package-local bun installs in the Windows preload smoke job", () => {

@@ -34,6 +34,10 @@ describe("restore-local-eliza-workspace", () => {
     const log = vi.fn();
 
     fs.mkdirSync(path.join(disabledDir, "packages"), { recursive: true });
+    fs.writeFileSync(
+      path.join(disabledDir, "package.json"),
+      JSON.stringify({ name: "eliza" }, null, 2),
+    );
 
     expect(restoreLocalElizaWorkspace(repoRoot, { log })).toBe(true);
     expect(fs.existsSync(disabledDir)).toBe(false);
@@ -41,6 +45,44 @@ describe("restore-local-eliza-workspace", () => {
     expect(log).toHaveBeenCalledWith(
       "restore-local-eliza-workspace: restored eliza/ from .eliza.ci-disabled/.",
     );
+  });
+
+  it("reapplies unpublished plugin stub overrides after restore", () => {
+    const repoRoot = makeTempDir();
+    const disabledDir = path.join(repoRoot, ".eliza.ci-disabled");
+
+    fs.mkdirSync(path.join(disabledDir, "packages"), { recursive: true });
+    fs.mkdirSync(
+      path.join(repoRoot, "scripts", "ci-stubs", "elizaos-plugin-app-control"),
+      { recursive: true },
+    );
+    fs.writeFileSync(
+      path.join(disabledDir, "package.json"),
+      JSON.stringify({ name: "eliza" }, null, 2),
+    );
+    fs.writeFileSync(
+      path.join(
+        repoRoot,
+        "scripts",
+        "ci-stubs",
+        "elizaos-plugin-app-control",
+        "package.json",
+      ),
+      JSON.stringify({ name: "@elizaos/plugin-app-control" }, null, 2),
+    );
+
+    expect(restoreLocalElizaWorkspace(repoRoot)).toBe(true);
+
+    const restoredPackageJson = JSON.parse(
+      fs.readFileSync(path.join(repoRoot, "eliza", "package.json"), "utf8"),
+    ) as {
+      overrides?: Record<string, string>;
+    };
+
+    expect(restoredPackageJson.overrides).toEqual({
+      "@elizaos/plugin-app-control":
+        "file:../scripts/ci-stubs/elizaos-plugin-app-control",
+    });
   });
 
   it("skips when there is no disabled eliza path", () => {

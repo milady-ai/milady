@@ -65,15 +65,15 @@ bun run milady --version
 
 ## 4) Repo map (mental model)
 
-Core areas (all under `packages/app-core/`):
+Core areas (all under `eliza/packages/app-core/`):
 
-- `packages/app-core/src/runtime/` — runtime startup, plugin orchestration, lifecycle
-- `packages/app-core/src/cli/` — CLI parsing, command registration, process behavior
-- `packages/app-core/src/config/` — config types, loading, resolution
-- `packages/app-core/src/api/` — dashboard API server and routes
-- `packages/app-core/src/services/` — business logic (plugin installer, updater, etc.)
-- `packages/app-core/src/connectors/` — connector integration code
-- `packages/agent/` — upstream elizaOS agent (core plugins, auto-enable maps)
+- `eliza/packages/app-core/src/runtime/` — runtime startup, plugin orchestration, lifecycle
+- `eliza/packages/app-core/src/cli/` — CLI parsing, command registration, process behavior
+- `eliza/packages/app-core/src/config/` — config types, loading, resolution
+- `eliza/packages/app-core/src/api/` — dashboard API server and routes
+- `eliza/packages/app-core/src/services/` — business logic (plugin installer, updater, etc.)
+- `eliza/packages/app-core/src/connectors/` — connector integration code
+- `eliza/packages/agent/` — upstream elizaOS agent (core plugins, auto-enable maps)
 - `apps/app/` — desktop/mobile UI app
 - `scripts/` — build/dev/release tooling
 - `test/` + colocated tests — verification
@@ -84,15 +84,15 @@ Core areas (all under `packages/app-core/`):
 
 Important files to understand first:
 
-1. `packages/app-core/src/entry.ts` (CLI process bootstrap)
-2. `packages/app-core/src/cli/run-main.ts` (dotenv + Commander + error handling)
-3. `packages/app-core/src/cli/program/*` (command registration)
-4. `packages/app-core/src/runtime/eliza.ts` (runtime boot sequence + plugin resolution)
-5. `packages/app-core/src/index.ts` (package exports)
+1. `eliza/packages/app-core/src/entry.ts` (CLI process bootstrap)
+2. `eliza/packages/app-core/src/cli/run-main.ts` (dotenv + Commander + error handling)
+3. `eliza/packages/app-core/src/cli/program/*` (command registration)
+4. `eliza/packages/app-core/src/runtime/eliza.ts` (runtime boot sequence + plugin resolution)
+5. `eliza/packages/app-core/src/index.ts` (package exports)
 
 ### Suggested reading order (first 60–90 min)
 
-1. Read `packages/app-core/src/entry.ts` top-to-bottom
+1. Read `eliza/packages/app-core/src/entry.ts` top-to-bottom
 2. Trace into `run-main.ts`
 3. Open one command registration file (`register.start.ts`, etc.)
 4. Read runtime lifecycle doc and compare to `eliza.ts`
@@ -114,7 +114,7 @@ CLI iteration examples:
 ```bash
 bun run milady --help
 bun run milady start --verbose
-bun run milady config get agent.name
+bun run milady config get agents.defaults.model
 ```
 
 When you touch logic, at minimum run:

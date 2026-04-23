@@ -1,7 +1,9 @@
 name: Scenario Matrix (develop)
 
 # Runs the full scenario matrix against real sandboxed external services.
-# - Triggered on every push to `develop` (post-merge) and manually via workflow_dispatch.
+# - Disabled by default on `develop` pushes; set repository variable
+#   `MILADY_SCENARIO_MATRIX_ENABLED=true` or use workflow_dispatch with
+#   `enabled=true` to run it.
 # - NOT run on PRs — PRs run the smaller `scenario-critical-subset` job defined in
 #   `.github/workflows/test.yml` once that job is added.
 # - All credentials are MILADY_E2E_* GitHub Actions secrets populated by
@@ -11,10 +13,8 @@ name: Scenario Matrix (develop)
 # self-hosted macOS runner tagged `milady-e2e-macos`; everything else runs on
 # GitHub-hosted `ubuntu-24.04`.
 #
-# This workflow is INACTIVE until `@elizaos/scenario-runner` publishes the
-# `milady-scenarios` CLI and the catalog at `test/scenarios/` is populated. Until
-# then it is gated on `workflow_dispatch` with the `enabled` input defaulting to
-# `false` — remove that gate once the runner lands.
+# This workflow remains opt-in until the scenario catalog is stable enough to be
+# a develop gate.
 
 on:
   push:
@@ -44,10 +44,20 @@ env:
   MILADY_LIVE_SCENARIO_TEST: "1"
 
 jobs:
+  disabled:
+    name: Scenario Matrix Disabled
+    if: ${{ inputs.enabled != 'true' && vars.MILADY_SCENARIO_MATRIX_ENABLED != 'true' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Explain disabled state
+        run: |
+          echo "Scenario Matrix is disabled for this run."
+          echo "Set repository variable MILADY_SCENARIO_MATRIX_ENABLED=true or dispatch with enabled=true to run it."
+
   matrix:
     name: "scenario-matrix: ${{ matrix.shard.name }}"
-    # Gate: workflow must be explicitly enabled or running on develop.
-    if: github.event_name == 'push' || inputs.enabled == 'true'
+    if: ${{ inputs.enabled == 'true' || vars.MILADY_SCENARIO_MATRIX_ENABLED == 'true' }}
     strategy:
       fail-fast: false
       max-parallel: 8
@@ -61,22 +71,22 @@ jobs:
             globs: "test/scenarios/messaging.imessage/**/*.scenario.ts test/scenarios/messaging.signal/**/*.scenario.ts"
           - name: todos-reminders
             runs-on: ubuntu-24.04
-            globs: "test/scenarios/todos.**/*.scenario.ts test/scenarios/reminders.**/*.scenario.ts"
+            globs: "test/scenarios/todos/**/*.scenario.ts test/scenarios/reminders/**/*.scenario.ts"
           - name: calendar
             runs-on: ubuntu-24.04
-            globs: "test/scenarios/calendar.**/*.scenario.ts"
+            globs: "test/scenarios/calendar/**/*.scenario.ts"
           - name: relationships
             runs-on: ubuntu-24.04
-            globs: "test/scenarios/relationships.**/*.scenario.ts"
+            globs: "test/scenarios/relationships/**/*.scenario.ts"
           - name: selfcontrol-activity
             runs-on: [self-hosted, milady-e2e-macos]
-            globs: "test/scenarios/selfcontrol.**/*.scenario.ts test/scenarios/activity.**/*.scenario.ts"
+            globs: "test/scenarios/selfcontrol/**/*.scenario.ts test/scenarios/activity/**/*.scenario.ts"
           - name: browser-social
             runs-on: ubuntu-24.04
-            globs: "test/scenarios/browser.**/*.scenario.ts test/scenarios/social.**/*.scenario.ts"
+            globs: "test/scenarios/browser.*/**/*.scenario.ts test/scenarios/social.*/**/*.scenario.ts"
           - name: cross-cutting-gateway
             runs-on: ubuntu-24.04
-            globs: "test/scenarios/cross-cutting.**/*.scenario.ts test/scenarios/gateway.**/*.scenario.ts test/scenarios/remote.**/*.scenario.ts test/scenarios/lifeops.**/*.scenario.ts test/scenarios/goals.**/*.scenario.ts test/scenarios/convo/**/*.scenario.ts"
+            globs: "test/scenarios/cross-cutting/**/*.scenario.ts test/scenarios/gateway/**/*.scenario.ts test/scenarios/remote/**/*.scenario.ts test/scenarios/lifeops/**/*.scenario.ts test/scenarios/lifeops.*/**/*.scenario.ts test/scenarios/goals/**/*.scenario.ts test/scenarios/convo/**/*.scenario.ts"
     runs-on: ${{ matrix.shard.runs-on }}
     timeout-minutes: 60
 
@@ -200,6 +210,7 @@ jobs:
       - name: Run scenario shard
         id: run
         run: |
+          set -f
           bun run milady-scenarios run \
             test/scenarios \
             --report-dir reports/scenarios/${{ github.run_id }}-${{ matrix.shard.name }} \
@@ -217,7 +228,7 @@ jobs:
   summary:
     name: Matrix summary
     needs: [matrix]
-    if: always()
+    if: ${{ always() && needs.matrix.result != 'skipped' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:

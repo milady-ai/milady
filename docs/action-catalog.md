@@ -1,11 +1,11 @@
 # Action Catalog
 
-_Generated on: 2026-04-16. Total actions: 151._
+_Generated on: 2026-04-16. Total actions: 147._
 
 ## Summary Statistics
 
-- **Total actions catalogued:** 151
-- **Actions with examples:** 140
+- **Total actions catalogued:** 147
+- **Actions with examples:** 136
 - **Actions with validate function:** 139
 - **Actions with handler function:** 139
 - **Actions without description:** 22
@@ -28,7 +28,6 @@ _Generated on: 2026-04-16. Total actions: 151._
 | `plugin-shopify` | 5 | PLUGIN |
 | `core/basic-capabilities` | 4 | CORE |
 | `plugin-signal` | 4 | PLUGIN |
-| `steward-fi` | 4 | STEWARD |
 | `app-app-steward` | 3 | APP |
 | `core/plugin-manager` | 3 | CORE |
 | `core/secrets` | 3 | CORE |
@@ -882,6 +881,12 @@ _Generated on: 2026-04-16. Total actions: 151._
 
 ## App / app-lifeops
 
+> This generated inventory is incomplete for LifeOps. The canonical action
+> registration is `appLifeOpsPlugin.actions` in
+> `eliza/apps/app-lifeops/src/plugin.ts`, which currently includes browser
+> companion, inbox, approvals, travel, check-in, follow-up, scheduling, and
+> activity actions beyond the legacy subset below.
+
 ### BLOCK_APPS
 
 - **File:** `eliza/apps/app-lifeops/src/actions/app-blocker.ts`
@@ -1186,40 +1191,6 @@ _Generated on: 2026-04-16. Total actions: 151._
 - **Similes:** `REACT_SIGNAL`, `SIGNAL_REACT`, `ADD_SIGNAL_REACTION`, `SIGNAL_EMOJI`
 - **Validate:** ✅ yes
 - **Handler:** ✅ yes
-- **Examples:** ✅ yes
-
-## Steward-Fi
-
-### STEWARD_CHECK_SPEND
-
-- **File:** `eliza/steward-fi/packages/eliza-plugin/src/actions/check-spend.ts`
-- **Description:** Check the agent wallet
-- **Validate:** ❌ no
-- **Handler:** ❌ no
-- **Examples:** ✅ yes
-
-### STEWARD_LIST_APPROVALS
-
-- **File:** `eliza/steward-fi/packages/eliza-plugin/src/actions/list-approvals.ts`
-- **Description:** List pending transaction approvals that need review
-- **Validate:** ❌ no
-- **Handler:** ❌ no
-- **Examples:** ✅ yes
-
-### STEWARD_SIGN_TRANSACTION
-
-- **File:** `eliza/steward-fi/packages/eliza-plugin/src/actions/sign-transaction.ts`
-- **Description:** Sign and broadcast a transaction through Steward
-- **Validate:** ❌ no
-- **Handler:** ❌ no
-- **Examples:** ✅ yes
-
-### STEWARD_TRANSFER
-
-- **File:** `eliza/steward-fi/packages/eliza-plugin/src/actions/transfer.ts`
-- **Description:** Send tokens to an address using the Steward-managed wallet
-- **Validate:** ❌ no
-- **Handler:** ❌ no
 - **Examples:** ✅ yes
 
 ## App / app-steward

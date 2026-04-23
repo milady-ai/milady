@@ -23,25 +23,25 @@ Les connecteurs sont des passerelles de plateforme qui permettent à votre agent
 11. [Google Chat](#google-chat)
 12. [Twitter](#twitter)
 13. [Farcaster](#farcaster)
-14. [Twitch](#twitch)
-15. [Mattermost](#mattermost)
-16. [WeChat](#wechat)
-17. [Matrix](#matrix)
-18. [Feishu / Lark](#feishu--lark)
-19. [Nostr](#nostr)
-21. [Lens](#lens)
-22. [Bluesky](#bluesky)
-23. [Instagram](#instagram)
-24. [LINE](#line)
-25. [Zalo](#zalo)
-26. [Twilio](#twilio)
-27. [GitHub](#github)
-28. [Gmail Watch](#gmail-watch)
-29. [Nextcloud Talk](#nextcloud-talk)
-30. [Tlon](#tlon)
-31. [Cycle de vie des connecteurs](#connector-lifecycle)
-32. [Support multi-comptes](#multi-account-support)
-33. [Gestion des sessions](#session-management)
+14. [Bluesky](#bluesky)
+15. [Instagram](#instagram)
+16. [Twitch](#twitch)
+17. [Mattermost](#mattermost)
+18. [WeChat](#wechat)
+19. [Matrix](#matrix)
+20. [Feishu / Lark](#feishu--lark)
+21. [Nostr](#nostr)
+22. [LINE](#line)
+23. [Zalo](#zalo)
+24. [Twilio](#twilio)
+25. [GitHub](#github)
+26. [Gmail Watch](#gmail-watch)
+27. [Nextcloud Talk](#nextcloud-talk)
+28. [Tlon](#tlon)
+29. [Lens](#lens)
+30. [Cycle de vie des connecteurs](#connector-lifecycle)
+31. [Support multi-comptes](#multi-account-support)
+32. [Gestion des sessions](#session-management)
 
 ---
 
@@ -1365,7 +1365,7 @@ Les options de `dmPolicy` sont :
 **Défaillances générales des connecteurs :**
 
 - Le plugin du connecteur ne se charge pas :
-  Vérifiez le mappage des ID de connecteur dans `src/config/plugin-auto-enable.ts`, la disponibilité du plugin et les surcharges de `plugins.entries`. La couche d'activation automatique mappe les clés de configuration du connecteur aux noms de packages de plugins — une incohérence signifie que le plugin est silencieusement ignoré.
+  Vérifiez le mappage des ID de connecteur dans `packages/agent/src/config/plugin-auto-enable.ts` (dans le sous-module `eliza`), la disponibilité du plugin et les surcharges de `plugins.entries`. La couche d'activation automatique mappe les clés de configuration du connecteur aux noms de packages de plugins — une incohérence signifie que le plugin est silencieusement ignoré.
 - L'authentification réussit mais aucun message n'arrive :
   Vérifiez les paramètres de webhook/socket de la plateforme et les portes de politique (`dmPolicy`, `groupPolicy`). Pour les connecteurs basés sur les webhooks, confirmez que l'URL de rappel est publiquement accessible.
 - Secrets de connecteur mal routés :
@@ -1508,19 +1508,14 @@ Les options de `dmPolicy` sont :
 ### Commandes de vérification
 </div>
 
+Ces chemins de test font référence à des fichiers dans le sous-module `eliza`. Exécutez `bun run setup:upstreams` d'abord pour l'initialiser.
+
 ```bash
-# Connector auto-enable and runtime loading
-bunx vitest run src/config/plugin-auto-enable.test.ts src/runtime/eliza.test.ts
+# Suite de tests complète (depuis la racine du dépôt)
+bun run test
 
-# Platform-specific connector tests
-bunx vitest run src/connectors/discord-connector.test.ts
-
-# Connector e2e tests
-bunx vitest run --config test/vitest/live-e2e.config.ts packages/agent/test/discord-connector.live.e2e.test.ts
-bunx vitest run --config test/vitest/integration.config.ts packages/agent/test/signal-connector.integration.test.ts
-
-# WhatsApp pairing
-bunx vitest run src/services/__tests__/whatsapp-pairing.test.ts src/api/__tests__/whatsapp-routes.test.ts
+# Tests de bout en bout
+bun run test:e2e
 
 bun run typecheck
 ```

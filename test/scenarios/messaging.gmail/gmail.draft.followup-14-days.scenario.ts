@@ -1,6 +1,5 @@
 import { scenario } from "@elizaos/scenario-schema";
 import {
-  expectScenarioToCallAction,
   expectTurnToCallAction,
   judgeRubric,
 } from "../_helpers/action-assertions.ts";
@@ -41,7 +40,6 @@ export default scenario({
         description: "overdue Gmail follow-up scan",
         includesAny: ["follow", "reply", "overdue", "14"],
       }),
-      responseIncludesAny: ["follow", "14", "day"],
       responseJudge: {
         minimumScore: 0.7,
         rubric:
@@ -51,22 +49,18 @@ export default scenario({
   ],
   finalChecks: [
     {
-      type: "selectedAction",
+      type: "gmailActionArguments",
       actionName: ["GMAIL_ACTION", "INBOX", "OWNER_RELATIONSHIP"],
+      subaction: "unresponded",
     },
     {
-      type: "selectedActionArguments",
-      actionName: ["GMAIL_ACTION", "INBOX", "OWNER_RELATIONSHIP"],
-      includesAny: ["follow", "reply", "overdue", "14"],
+      type: "gmailMockRequest",
+      method: "GET",
+      path: "/gmail/v1/users/me/threads",
+      minCount: 1,
     },
     {
-      type: "custom",
-      name: "gmail-followup-tracker-action-coverage",
-      predicate: expectScenarioToCallAction({
-        acceptedActions: ["GMAIL_ACTION", "INBOX", "OWNER_RELATIONSHIP"],
-        description: "overdue Gmail follow-up scan",
-        includesAny: ["follow", "reply", "overdue", "14"],
-      }),
+      type: "gmailNoRealWrite",
     },
     judgeRubric({
       name: "gmail-followup-tracker-rubric",

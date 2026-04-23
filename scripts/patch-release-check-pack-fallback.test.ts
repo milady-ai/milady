@@ -62,6 +62,16 @@ const upstreamLocalPackHotspotPathsBlock = `const localPackHotspotPaths = [
   "apps/app/dist/vrms",
   "apps/app/dist/animations",
 ];`;
+const upstreamLifeOpsWorkflowSnippetBlock = `const requiredWorkflowSnippets = [
+  "name: Build LifeOps Browser companions",
+  "if bun run lifeops:browser:package:release; then",
+  "LifeOps Browser packaging failed; desktop release will continue without browser companion bundles.",
+  "name: Upload LifeOps Browser release artifacts",
+  "name: lifeops-browser-store-bundles",
+  "name: Publish LifeOps Browser companions",
+  "name: Attach LifeOps Browser assets to GitHub release",
+  "pattern: lifeops-browser-*",
+];`;
 
 describe("patch-release-check-pack-fallback", () => {
   it("patches the upstream release-check pack fallback and hotspot blocks", () => {
@@ -83,6 +93,26 @@ describe("patch-release-check-pack-fallback", () => {
 
     expect(patched).toContain('  "dist",');
     expect(patched).toContain('  "apps/app/dist",');
+  });
+
+  it("rewrites stale LifeOps browser workflow snippets to the current Agent Browser Bridge naming", () => {
+    const patched = applyReleaseCheckPackFallback(
+      `before\n${upstreamLifeOpsWorkflowSnippetBlock}\nafter\n`,
+    );
+
+    expect(patched).toContain("name: Build Agent Browser Bridge companions");
+    expect(patched).toContain(
+      "if bun run browser-bridge:package:release; then",
+    );
+    expect(patched).toContain(
+      "Agent Browser Bridge packaging failed; desktop release will continue without browser companion bundles.",
+    );
+    expect(patched).toContain("name: browser-bridge-store-bundles");
+    expect(patched).toContain(
+      "name: Attach Agent Browser Bridge assets to GitHub release",
+    );
+    expect(patched).toContain("pattern: browser-bridge-*");
+    expect(patched).not.toContain("lifeops-browser-*");
   });
 
   it("patches hotspot blocks that drifted from the original upstream shape", () => {

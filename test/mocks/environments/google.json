@@ -226,16 +226,16 @@
     {
       "uuid": "0000000d-0000-4000-8000-00000google00",
       "type": "http",
-      "documentation": "Gmail get generic message fallback",
+      "documentation": "Gmail unknown message",
       "method": "get",
       "endpoint": "gmail/v1/users/me/messages/:id",
       "responses": [
         {
           "uuid": "0000000e-0000-4000-8000-00000google00",
-          "body": "{\"id\":\"{{urlParam 'id'}}\",\"threadId\":\"thr-generic\",\"labelIds\":[\"INBOX\"],\"snippet\":\"Mock Gmail message\",\"payload\":{\"mimeType\":\"text/plain\",\"headers\":[{\"name\":\"From\",\"value\":\"Mock Sender <mock@example.com>\"},{\"name\":\"To\",\"value\":\"Owner <owner@example.test>\"},{\"name\":\"Subject\",\"value\":\"Mock Gmail message\"},{\"name\":\"Date\",\"value\":\"{{now 'ddd, DD MMM YYYY HH:mm:ss [GMT]'}}\"}],\"body\":{\"data\":\"SGVsbG8gd29ybGQ=\",\"size\":11}},\"internalDate\":\"{{now 'x'}}\"}",
+          "body": "{\"error\":{\"code\":404,\"message\":\"Requested entity was not found.\",\"status\":\"NOT_FOUND\"}}",
           "latency": 0,
-          "statusCode": 200,
-          "label": "OK",
+          "statusCode": 404,
+          "label": "Not found",
           "headers": [
             {
               "key": "Content-Type",
@@ -340,7 +340,7 @@
       "responses": [
         {
           "uuid": "00000014-0000-4000-8000-00000google00",
-          "body": "{\"items\":[{\"id\":\"evt-julia\",\"summary\":\"Intro meeting with Julia Chen\",\"description\":\"Get background before the meeting.\",\"location\":\"Blue Bottle Coffee\",\"status\":\"confirmed\",\"htmlLink\":\"https://calendar.google.com/event?eid=julia\",\"start\":{\"dateTime\":\"2026-04-18T18:00:00Z\",\"timeZone\":\"America/Los_Angeles\"},\"end\":{\"dateTime\":\"2026-04-18T18:30:00Z\",\"timeZone\":\"America/Los_Angeles\"},\"attendees\":[{\"email\":\"julia.chen@example.com\",\"displayName\":\"Julia Chen\",\"responseStatus\":\"accepted\"}]},{\"id\":\"evt-focus\",\"summary\":\"Focus block\",\"status\":\"confirmed\",\"htmlLink\":\"https://calendar.google.com/event?eid=focus\",\"start\":{\"dateTime\":\"2026-04-18T21:00:00Z\",\"timeZone\":\"America/Los_Angeles\"},\"end\":{\"dateTime\":\"2026-04-18T22:00:00Z\",\"timeZone\":\"America/Los_Angeles\"}},{\"id\":\"evt-alex\",\"summary\":\"1:1 with Alex\",\"status\":\"confirmed\",\"htmlLink\":\"https://calendar.google.com/event?eid=alex\",\"start\":{\"dateTime\":\"2026-04-20T17:00:00Z\",\"timeZone\":\"America/Los_Angeles\"},\"end\":{\"dateTime\":\"2026-04-20T17:30:00Z\",\"timeZone\":\"America/Los_Angeles\"},\"attendees\":[{\"email\":\"alex@example.com\",\"displayName\":\"Alex\",\"responseStatus\":\"accepted\"}]},{\"id\":\"evt-dentist\",\"summary\":\"Dentist appointment\",\"status\":\"confirmed\",\"htmlLink\":\"https://calendar.google.com/event?eid=dentist\",\"start\":{\"dateTime\":\"2026-04-23T22:00:00Z\",\"timeZone\":\"America/Los_Angeles\"},\"end\":{\"dateTime\":\"2026-04-23T23:00:00Z\",\"timeZone\":\"America/Los_Angeles\"}}]}",
+          "body": "{\"items\":[]}",
           "latency": 0,
           "statusCode": 200,
           "label": "OK",

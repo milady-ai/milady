@@ -28,14 +28,14 @@ Milady is a cross-platform AI agent runtime built on top of [elizaOS](https://el
 +---------------------------------------------------------------+
 |                    Runtime Layer (elizaOS)                     |
 |  AgentRuntime + Plugin system                                 |
-|  9 core plugins + optional plugins + Milady plugin            |
+|  Core plugins + optional plugins + Milady plugin              |
 |  Providers, Actions, Services, Evaluators                     |
 +----------------------------+----------------------------------+
                              |
                              v
 +---------------------------------------------------------------+
 |                     API Server Layer                           |
-|  Node.js HTTP server (port 31337 dev / 2138 prod)             |
+|  Node.js HTTP server (port 31337 default, MILADY_API_PORT)    |
 |  REST endpoints (/api/*) + WebSocket (/ws)                    |
 |  SSE log streaming, static UI assets                          |
 +---------------------------------------------------------------+
@@ -131,7 +131,7 @@ The `startEliza()` function in `packages/app-core/src/runtime/eliza.ts` orchestr
     Call `runtime.initialize()` which registers all remaining plugins in parallel, starts services, and sets up the agent loop. Enable trajectory logging. Warm up the AgentSkillsService asynchronously.
   </Step>
   <Step title="Start API Server">
-    Launch the HTTP/WebSocket API server on port 2138 (default, or 31337 in dev mode). Register the restart handler for hot-reload support.
+    Launch the HTTP/WebSocket API server on port 31337 (default `MILADY_API_PORT`). Register the restart handler for hot-reload support.
   </Step>
   <Step title="Load Hooks System">
     Load webhook and hook configurations from the workspace. Fire the `gateway.startup` hook event.
@@ -220,7 +220,7 @@ Plugin resolution (`resolvePlugins()`) handles three tiers of plugins through a 
 
 `collectPluginNames()` builds a `Set<string>` of package names to load:
 
-1. Start with all 9 **core plugins** (`CORE_PLUGINS`)
+1. Start with all **core plugins** (`CORE_PLUGINS`)
 2. Add plugins from the **allow list** (`config.plugins.allow`) -- these are additive, not exclusive
 3. Add **connector plugins** for any configured channels (Discord, Telegram, Slack, etc.) using the `CHANNEL_PLUGIN_MAP`
 4. Add **model-provider plugins** when their API key environment variables are detected (e.g., `ANTHROPIC_API_KEY` triggers `@elizaos/plugin-anthropic`)
@@ -322,7 +322,7 @@ Local embeddings for memory search use `@elizaos/plugin-local-embedding` with co
 |---------|---------|-------------|
 | `embedding.model` | `nomic-embed-text-v1.5.Q5_K_M.gguf` | GGUF model file name |
 | `embedding.gpuLayers` | `auto` (Apple Silicon), `0` (others) | GPU acceleration layers |
-| `embedding.dimensions` | `384` (capped at boot) | Embedding vector dimensions |
+| `embedding.dimensions` | `768` | Embedding vector dimensions (native model default) |
 | `embedding.contextSize` | Auto-detected | Maximum input token context |
 
 On macOS with Apple Silicon, Metal GPU acceleration is enabled by default with `mmap` disabled to prevent known compatibility issues.
@@ -353,19 +353,29 @@ Routes are organized into domain-specific handler modules:
 | Module | Prefix | Purpose |
 |--------|--------|---------|
 | `agent-admin-routes.ts` | `/api/agent/*` | Agent name, bio, system prompt, style, examples |
-| `agent-lifecycle-routes.ts` | `/api/agent/*` | Start, stop, restart, status |
-| `auth-routes.ts` | `/api/auth/*` | Token validation, onboarding tokens |
-| `autonomy-routes.ts` | `/api/autonomy/*` | Autonomous mode state |
+| `agent-lifecycle-routes.ts` | `/api/agent/*` | Start, stop, restart, status, export/import |
+| `auth-routes.ts` | `/api/auth/*` | Token validation, pairing flow |
+| `autonomy-routes.ts` | `/api/agent/autonomy` | Autonomous mode state |
 | `character-routes.ts` | `/api/character/*` | Character CRUD, AI-assisted generation |
-| `cloud-routes.ts` | `/api/cloud/*` | Eliza Cloud integration |
-| `cloud-compat-routes.ts` | `/api/cloud/compat/*`, `/api/cloud/v1/*` | Cloud backend proxy (forwards to `/api/compat/*` and `/api/v1/*` respectively) |
+| `cloud-routes.ts` | `/api/cloud/*` | Eliza Cloud integration, billing, agents |
+| `cloud-compat-routes.ts` | `/api/cloud/compat/*`, `/api/cloud/v1/*` | Cloud backend proxy |
+| `connector-routes.ts` | `/api/connectors/*` | Messaging connector configuration |
+| `conversation-routes.ts` | `/api/conversations/*` | Web-chat conversations and messaging |
+| `inbox-routes.ts` | `/api/inbox/*` | Unified cross-channel inbox |
 | `knowledge-routes.ts` | `/api/knowledge/*` | Document upload, search, RAG management |
+| `memory-routes.ts` | `/api/memory/*`, `/api/context/*` | Memory persistence and context search |
 | `models-routes.ts` | `/api/models/*` | Model provider discovery and selection |
-| `plugin-validation.ts` | `/api/plugins/*` | Plugin config validation |
+| `onboarding-routes.ts` | `/api/onboarding/*` | First-run setup flow |
+| `plugin-routes.ts` | `/api/plugins/*` | Plugin management and installation |
 | `registry-routes.ts` | `/api/registry/*` | Plugin registry browsing |
+| `sandbox-routes.ts` | `/api/sandbox/*` | Container-based code execution |
+| `secrets-routes.ts` | `/api/secrets/*` | API key and credential management |
+| `skills-routes.ts` | `/api/skills/*` | Skill catalog and marketplace |
 | `training-routes.ts` | `/api/training/*` | Fine-tuning orchestration |
 | `trigger-routes.ts` | `/api/triggers/*` | Trigger task management |
-| `wallet-routes.ts` | `/api/wallet/*` | Wallet addresses, balances, NFTs |
+| `workbench-routes.ts` | `/api/workbench/*` | Tasks, todos, unified dashboard |
+| `automations-routes.ts` | `/api/automations/*`, `/api/n8n/*` | Unified automations and n8n workflows |
+| `wallet-routes.ts` | `/api/wallet/*` | Wallet addresses, balances, trading |
 | `apps-routes.ts` | `/api/apps/*` | elizaOS app marketplace |
 
 ### Authentication
@@ -380,7 +390,7 @@ If the API is bound to a non-loopback address (`MILADY_API_BIND` is not `127.0.0
 
 ## WebSocket Event System
 
-The API server exposes a WebSocket endpoint at `/ws` on the same port as the API (31337 in dev, 2138 in production).
+The API server exposes a WebSocket endpoint at `/ws` on the same port as the API (31337 by default, configurable via `MILADY_API_PORT`).
 
 ### Event Types
 
@@ -535,7 +545,7 @@ The same backend serves all platforms:
 | Platform | Delivery | Notes |
 |----------|----------|-------|
 | CLI | `milady start` | Direct Node.js process, runner script handles restart exit codes |
-| Web | Browser at `http://localhost:2138` | Vite dev proxy in development |
+| Web | Browser at `http://localhost:2138` (UI port) | Vite dev proxy forwards API calls to port 31337 |
 | Desktop | Electrobun wrapper | Bundles the API server + UI, uses the Electrobun updater for native updates |
 | iOS | Capacitor | Connects to local/remote API |
 | Android | Capacitor | Connects to local/remote API |

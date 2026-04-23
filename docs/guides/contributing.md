@@ -5,7 +5,11 @@ description: How to set up a development environment, follow code conventions, a
 
 # Contributing Guide
 
-Welcome to Milady! This guide will help you set up your development environment and contribute effectively.
+Welcome to Milady! This guide covers development environment setup and contribution workflow.
+
+<Info>
+For the full contribution process including the Agent Review Bot and agents-only PR workflow, see the [Contribution Guide](/guides/contribution-guide).
+</Info>
 
 ## Table of Contents
 
@@ -71,17 +75,14 @@ bun run dev
 ### Editor Setup
 
 **VS Code Extensions:**
-- ESLint
-- Prettier
+- Biome (handles both formatting and linting)
 - TypeScript
-- Biome (for formatting)
 
 **Settings (.vscode/settings.json):**
 ```json
 {
   "editor.formatOnSave": true,
-  "editor.defaultFormatter": "biomejs.biome",
-  "typescript.preferences.importModuleSpecifier": "relative"
+  "editor.defaultFormatter": "biomejs.biome"
 }
 ```
 
@@ -89,70 +90,49 @@ bun run dev
 
 ## Monorepo Structure
 
-Milady is a monorepo managed with Turborepo and Bun workspaces.
+Milady is a monorepo managed with Bun workspaces.
 
 ```
 milady/
-├── packages/                # Shared packages
-│   ├── typescript/          # @elizaos/core — Core TypeScript SDK
-│   ├── elizaos/             # CLI tool (milady command)
-│   ├── skills/              # Skills system and bundled skills
-│   ├── docs/                # Documentation site (Mintlify)
-│   ├── schemas/             # Protobuf schemas
-│   └── tui/                 # Terminal UI (disabled)
-├── plugins/                 # Official plugins (100+)
-│   ├── plugin-anthropic/    # Anthropic model provider
-│   ├── plugin-telegram/     # Telegram connector
-│   ├── plugin-discord/      # Discord connector
-│   └── ...
 ├── apps/
 │   ├── app/                 # Desktop/mobile app (Capacitor + React)
-│   └── ...                  # No shipped chrome-extension app in this release checkout
-├── src/                     # Milady runtime
-│   ├── runtime/             # elizaOS runtime bootstrap
-│   ├── plugins/             # Built-in Milady plugins
-│   ├── config/              # Configuration loading
-│   ├── services/            # Registry client, plugin manager
-│   └── api/                 # REST API server
-├── skills/                  # Workspace skills
+│   │   ├── electrobun/      # Electrobun desktop wrapper
+│   │   └── src/             # React UI components
+│   ├── browser-bridge/      # Browser extension bridge
+│   └── homepage/            # Marketing site
+├── eliza/                   # elizaOS submodule (core framework)
+│   └── packages/
+│       └── app-core/        # Main application package (runtime source of truth)
+├── skills/                  # Workspace skills and defaults
 ├── docs/                    # Documentation (this site)
 ├── scripts/                 # Build and utility scripts
 ├── test/                    # Test setup, helpers, e2e
 ├── AGENTS.md                # Repository guidelines
-├── plugins.json             # Plugin registry manifest
 └── tsdown.config.ts         # Build config
 ```
 
-### Turbo Build System
+### Build System
 
-Turborepo orchestrates builds across all packages with dependency-aware caching:
+Builds are run via Bun scripts defined in the root `package.json`:
 
 ```bash
-# Build everything (with caching)
-turbo run build
+# Full build (TypeScript + UI)
+bun run build
 
-# Build a specific package
-turbo run build --filter=@elizaos/core
+# Typecheck + lint
+bun run verify
 
-# Build a package and all its dependencies
-turbo run build --filter=@elizaos/plugin-telegram...
-
-# Run tests across all packages
-turbo run test
-
-# Lint all packages
-turbo run lint
+# Run tests
+bun run test
 ```
 
 ### Key Entry Points
 
 | File | Purpose |
 |------|---------|
-| `src/entry.ts` | CLI entry point |
-| `src/index.ts` | Library exports |
-| `src/runtime/eliza.ts` | elizaOS runtime initialization |
-| `src/runtime/milady-plugin.ts` | Main Milady plugin |
-| `milady.mjs` | npm bin entry |
+| `milady.mjs` | npm bin entry (CLI bootstrap) |
+| `eliza/packages/app-core/src/entry.ts` | CLI entry point |
+| `eliza/packages/app-core/src/runtime/eliza.ts` | elizaOS runtime initialization |
 
 ---
 
@@ -162,9 +142,6 @@ turbo run lint
 
 ```bash
 # Full build (TypeScript + UI)
-bun run build
-
-# TypeScript only
 bun run build
 
 # Desktop app (Electrobun)
@@ -180,17 +157,14 @@ bun run build:ios
 ### Development Mode
 
 ```bash
-# Run with auto-reload on changes
+# Start API + UI with hot reload
 bun run dev
 
-# Run CLI directly (via tsx)
-bun run milady start
-
-# UI development only
-bun run dev:ui
-
-# Desktop app development
+# Desktop app development (Electrobun)
 bun run dev:desktop
+
+# Desktop with HMR via Vite dev server
+bun run dev:desktop:watch
 ```
 
 ### Testing
@@ -430,12 +404,7 @@ Claude Code Review is enabled for automated initial feedback.
 
 Join the community Discord for help, discussions, and announcements:
 
-**[discord.gg/ai16z](https://discord.gg/ai16z)**
-
-Channels:
-- `#milady` — Milady-specific discussion
-- `#dev` — Development help
-- `#showcase` — Share what you've built
+**[discord.gg/milady](https://discord.gg/milady)**
 
 ### GitHub
 
@@ -494,4 +463,4 @@ What should happen
 - [Plugin Development Guide](/plugins/development) — Build plugins
 - [Skills Documentation](/plugins/skills) — Create skills
 - [Local Plugin Development](/plugins/local-plugins) — Develop locally
-- Browse the codebase: start with `src/runtime/milady-plugin.ts`
+- [First Extension Walkthrough](/guides/first-extension-walkthrough) — Build your first extension

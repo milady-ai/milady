@@ -1,6 +1,9 @@
-import { scenario } from "@elizaos/scenario-schema";
 import type { IAgentRuntime } from "@elizaos/core";
-import { executeRawSql, sqlQuote } from "../../../eliza/apps/app-lifeops/src/lifeops/sql.ts";
+import { scenario } from "@elizaos/scenario-schema";
+import {
+  executeRawSql,
+  sqlQuote,
+} from "../../../eliza/apps/app-lifeops/src/lifeops/sql.ts";
 import { seedCheckinDefinition } from "../_helpers/lifeops-seeds.ts";
 
 function scenarioNow(ctx: { now?: string | Date }): Date {
@@ -102,7 +105,9 @@ export default scenario({
         if (data.habitEscalationLevel !== 0) {
           return `expected habitEscalationLevel 0 while paused, got ${data.habitEscalationLevel ?? "(missing)"}`;
         }
-        const stretch = data.habitSummaries?.find((habit) => habit.title === "Stretch");
+        const stretch = data.habitSummaries?.find(
+          (habit) => habit.title === "Stretch",
+        );
         if (!stretch) {
           return "expected Stretch in habitSummaries";
         }

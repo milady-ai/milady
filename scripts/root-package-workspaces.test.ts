@@ -33,4 +33,21 @@ describe("root package workspace config", () => {
       "tsc --noEmit -p tsconfig.workspace.json",
     );
   });
+
+  it("keeps app native plugin aliases source-backed for CI typecheck", () => {
+    const tsconfigPath = path.join(
+      import.meta.dirname,
+      "..",
+      "apps",
+      "app",
+      "tsconfig.json",
+    );
+    const tsconfig = JSON.parse(fs.readFileSync(tsconfigPath, "utf8")) as {
+      compilerOptions?: { paths?: Record<string, string[]> };
+    };
+
+    expect(
+      tsconfig.compilerOptions?.paths?.["@elizaos/capacitor-llama"],
+    ).toEqual(["./eliza/packages/native-plugins/llama/src/index.ts"]);
+  });
 });

@@ -61,7 +61,13 @@ export const LOCAL_ONLY_WORKSPACE_GLOBS = [
   "eliza/packages/native-plugins/*",
   "eliza/apps/*",
 ];
-export const LOCAL_ONLY_WORKSPACE_PATHS = ["eliza/packages/shared"];
+export const LOCAL_ONLY_ELIZA_PACKAGE_PATHS = {
+  "@elizaos/plugin-browser-bridge": "packages/plugin-browser-bridge",
+};
+export const LOCAL_ONLY_WORKSPACE_PATHS = [
+  "eliza/packages/shared",
+  `eliza/${LOCAL_ONLY_ELIZA_PACKAGE_PATHS["@elizaos/plugin-browser-bridge"]}`,
+];
 export const NESTED_INSTALLABLE_PACKAGE_GLOBS = [
   // These package.json files are installed directly by CI/build scripts even
   // though they do not participate in the root workspace graph.
@@ -69,10 +75,17 @@ export const NESTED_INSTALLABLE_PACKAGE_GLOBS = [
 ];
 export const CI_OVERRIDE_SPECIFIERS = {
   "@elizaos/shared": "file:./eliza/packages/shared",
+  "@elizaos/plugin-app-control":
+    "file:./scripts/ci-stubs/elizaos-plugin-app-control",
+  "@elizaos/plugin-browser-bridge":
+    "file:./eliza/packages/plugin-browser-bridge",
   "@elizaos/plugin-wechat": "file:./scripts/ci-stubs/elizaos-plugin-wechat",
   "@elizaos/ui": "file:./eliza/packages/ui",
 };
 export const ELIZA_RUNTIME_CI_OVERRIDE_SPECIFIERS = {
+  "@elizaos/plugin-app-control":
+    "file:../scripts/ci-stubs/elizaos-plugin-app-control",
+  "@elizaos/plugin-browser-bridge": "file:./packages/plugin-browser-bridge",
   "@elizaos/plugin-wechat": "file:../scripts/ci-stubs/elizaos-plugin-wechat",
   "@elizaos/ui": "file:./packages/ui",
 };
@@ -107,9 +120,31 @@ export function resolveRootUiOverrideSpecifier(repoRoot = DEFAULT_REPO_ROOT) {
   return "file:./eliza/packages/ui";
 }
 
+export function resolveRootElizaPackageOverrideSpecifier(
+  elizaPackageRel,
+  repoRoot = DEFAULT_REPO_ROOT,
+) {
+  const disabledPackageJsonPath = path.join(
+    repoRoot,
+    ".eliza.ci-disabled",
+    elizaPackageRel,
+    "package.json",
+  );
+
+  if (fs.existsSync(disabledPackageJsonPath)) {
+    return `file:./.eliza.ci-disabled/${elizaPackageRel}`;
+  }
+
+  return `file:./eliza/${elizaPackageRel}`;
+}
+
 export function resolveCiOverrideSpecifiers(repoRoot = DEFAULT_REPO_ROOT) {
   return {
     ...CI_OVERRIDE_SPECIFIERS,
+    "@elizaos/plugin-browser-bridge": resolveRootElizaPackageOverrideSpecifier(
+      LOCAL_ONLY_ELIZA_PACKAGE_PATHS["@elizaos/plugin-browser-bridge"],
+      repoRoot,
+    ),
     "@elizaos/ui": resolveRootUiOverrideSpecifier(repoRoot),
   };
 }

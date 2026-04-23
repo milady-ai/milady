@@ -1,0 +1,51 @@
+name: MiladyOS Cuttlefish
+
+on:
+  workflow_dispatch:
+    inputs:
+      aosp-root:
+        description: "Existing AOSP checkout root on the Linux/KVM runner"
+        required: true
+        type: string
+      jobs:
+        description: "AOSP build parallelism"
+        required: false
+        default: "8"
+        type: string
+      launch:
+        description: "Launch Cuttlefish and run adb boot validation"
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  build-and-validate:
+    name: Build and validate MiladyOS
+    runs-on: [self-hosted, linux, x64, kvm]
+    timeout-minutes: 720
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install workspace dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build privileged Milady APK
+        run: bun run build:android:system
+
+      - name: Static MiladyOS validation
+        run: bun run miladyos:validate
+
+      - name: Sync, build, and optionally boot MiladyOS
+        run: |
+          ARGS=(
+            --aosp-root "${{ inputs.aosp-root }}"
+            --jobs "${{ inputs.jobs }}"
+          )
+          if [ "${{ inputs.launch }}" = "true" ]; then
+            ARGS+=(--launch --boot-validate)
+          fi
+          node scripts/miladyos/build-aosp.mjs "${ARGS[@]}"

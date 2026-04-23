@@ -1,6 +1,5 @@
 import { scenario } from "@elizaos/scenario-schema";
 import {
-  expectScenarioToCallAction,
   expectTurnToCallAction,
   judgeRubric,
 } from "../_helpers/action-assertions.ts";
@@ -27,46 +26,44 @@ export default scenario({
     {
       type: "gmailInbox",
       account: "test-owner",
-      fixture: "alice-recent.eml",
+      fixture: "sarah-product-brief.eml",
     },
   ],
   turns: [
     {
       kind: "message",
-      name: "draft reply to alice",
+      name: "draft reply to sarah",
       room: "main",
-      text: "Draft a reply to Alice's latest email saying I can review it Friday afternoon, but don't send it yet.",
+      text: "Draft a reply to Sarah's latest email saying I can review it Friday afternoon, but don't send it yet.",
       assertTurn: expectTurnToCallAction({
         acceptedActions: ["GMAIL_ACTION", "INBOX"],
         description: "gmail reply draft from recent context",
-        includesAny: ["Alice", "draft", "Friday", "review"],
+        includesAny: ["Sarah", "draft", "Friday", "review"],
       }),
-      responseIncludesAny: ["draft", "Alice", "Friday", "review"],
       responseJudge: {
         minimumScore: 0.7,
         rubric:
-          "The reply must present a draft email to Alice that includes the Friday-afternoon availability and must not claim it was already sent.",
+          "The reply must present a draft email to Sarah that includes the Friday-afternoon availability and must not claim it was already sent.",
       },
     },
   ],
   finalChecks: [
     {
-      type: "selectedAction",
+      type: "gmailActionArguments",
       actionName: ["GMAIL_ACTION", "INBOX"],
+      subaction: "draft_reply",
     },
     {
-      type: "selectedActionArguments",
-      actionName: ["GMAIL_ACTION", "INBOX"],
-      includesAny: ["Alice", "Friday", "review", "draft"],
+      type: "gmailDraftCreated",
     },
     {
-      type: "custom",
-      name: "gmail-draft-reply-from-context-action-coverage",
-      predicate: expectScenarioToCallAction({
-        acceptedActions: ["GMAIL_ACTION", "INBOX"],
-        description: "gmail reply draft from recent context",
-        includesAny: ["Alice", "draft", "Friday", "review"],
-      }),
+      type: "gmailMockRequest",
+      method: "POST",
+      path: "/gmail/v1/users/me/drafts",
+      minCount: 1,
+    },
+    {
+      type: "gmailNoRealWrite",
     },
     judgeRubric({
       name: "gmail-draft-reply-from-context-rubric",

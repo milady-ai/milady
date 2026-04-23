@@ -28,10 +28,14 @@ export GOOGLE_GENERATIVE_AI_API_KEY=AIza...
 
 | Environment Variable | Required | Description |
 |---------------------|----------|-------------|
-| `GOOGLE_API_KEY` | Yes* | Google AI Studio API key |
-| `GOOGLE_GENERATIVE_AI_API_KEY` | Yes* | Alias for `GOOGLE_API_KEY` |
+| `GOOGLE_GENERATIVE_AI_API_KEY` | Yes* | Google AI Studio API key |
+| `GOOGLE_API_KEY` | Yes* | Alias (also triggers auto-enable) |
+| `GOOGLE_SMALL_MODEL` | No | Override the small model identifier |
+| `GOOGLE_LARGE_MODEL` | No | Override the large model identifier |
+| `GOOGLE_EMBEDDING_MODEL` | No | Override the embedding model identifier |
+| `GOOGLE_IMAGE_MODEL` | No | Override the image generation model |
 
-*Either form is accepted.
+*Either `GOOGLE_GENERATIVE_AI_API_KEY` or `GOOGLE_API_KEY` is accepted.
 
 Get your API key from [aistudio.google.com](https://aistudio.google.com).
 

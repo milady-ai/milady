@@ -303,8 +303,8 @@ const sendMessageAction: Action = {
     const messageText = params.message as string;
     const platform = (params.platform as string) ?? "telegram";
 
-    // Actually send the message...
-    await runtime.sendMessage(targetUser, messageText, platform);
+    // Send the message via the appropriate connector service
+    // (implementation depends on the platform connector plugin)
 
     return {
       success: true,
@@ -821,11 +821,15 @@ Plugins can include an `elizaos.plugin.json` manifest file for rich metadata:
 
 | Kind | Description |
 |------|-------------|
+| `feature` | General-purpose feature plugins (most common) |
+| `ai-provider` | LLM and AI model providers |
+| `connector` | Messaging platform connectors |
+| `database` | Database adapters |
+| `app` | Launchable applications |
 | `memory` | Memory/storage adapters |
-| `channel` | Messaging platform connectors |
+| `channel` | Messaging platform connectors (alias for `connector`) |
 | `provider` | Context/data providers |
 | `skill` | Skill-based extensions |
-| `database` | Database adapters |
 
 ### PluginOrigin Types
 

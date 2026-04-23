@@ -50,18 +50,18 @@ signal-cli -a +1234567890 daemon --http localhost:8080
 
 | Field | Required | Description |
 |-------|----------|-------------|
-| `account` | Yes | Signal phone number (E.164 format) |
-| `httpUrl` | No | HTTP URL for signal-cli daemon (default: `http://localhost:8080`) |
-| `host` | No | Hostname alternative to `httpUrl` |
-| `port` | No | Port alternative to `httpUrl` |
+| `account` | Yes | Signal phone number (E.164 format, e.g., `+1234567890`) |
+| `httpUrl` | No | HTTP URL for signal-cli daemon (e.g., `http://localhost:8080`) |
+| `httpHost` | No | Hostname alternative to `httpUrl` |
+| `httpPort` | No | Port alternative to `httpUrl` |
 | `cliPath` | No | Path to signal-cli binary for auto-start |
-| `startupTimeout` | No | Seconds to wait for CLI startup (1-120, default: 30) |
-| `receiveMode` | No | `on-start` or `manual` (default: `on-start`) |
-| `includeAttachments` | No | Include attachments in messages (default: `true`) |
-| `includeStories` | No | Process story messages (default: `false`) |
-| `readReceipts` | No | Send read receipts (default: `true`) |
-| `reactionNotifications` | No | Reaction notification level |
-| `dmPolicy` | No | DM handling policy |
+| `startupTimeoutMs` | No | Milliseconds to wait for CLI startup (1000-120000) |
+| `receiveMode` | No | `"on-start"` or `"manual"` (default: `"on-start"`) |
+| `ignoreAttachments` | No | Ignore incoming attachments |
+| `ignoreStories` | No | Ignore story messages |
+| `sendReadReceipts` | No | Send read receipts for received messages |
+| `reactionNotifications` | No | `"off"`, `"own"`, `"all"`, or `"allowlist"` |
+| `dmPolicy` | No | `"pairing"`, `"allowlist"`, `"open"`, or `"disabled"` (default: `"pairing"`) |
 
 ## Features
 

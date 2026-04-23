@@ -53,6 +53,63 @@ All build commands are invoked via the `scripts/rt.sh` runtime wrapper from insi
 
 **Android signing:** Create a release keystore and configure it in `apps/app/android/app/build.gradle` under `signingConfigs`. Use `./gradlew bundleRelease` (AAB for Play Store) or `./gradlew assembleRelease` (APK for direct distribution) from the `android/` directory.
 
+## iOS Runtime Modes
+
+The iOS bundle supports three runtime modes. Use the root helper scripts so the Vite environment, native sync, CocoaPods, and Xcode project overlay stay aligned.
+
+The iOS target is one app. The first onboarding screen chooses the connection mode:
+remote Mac, Eliza Cloud, or Eliza Cloud plus donated phone compute. The mode-specific
+commands below only pre-seed development builds so Xcode opens with the expected
+defaults; users can still change the connection mode in onboarding.
+
+### 1. Phone build connected to this Mac
+
+Expose the Milady API on the Mac's LAN address, then build/open the iOS project with the phone pointed at that API:
+
+```bash
+MILADY_API_BIND=0.0.0.0 \
+MILADY_API_TOKEN=replace-with-a-short-lived-token \
+MILADY_ALLOWED_ORIGINS=capacitor://localhost,ionic://localhost \
+bun run dev
+
+MILADY_IOS_REMOTE_API_BASE=http://192.168.1.42:31337 \
+MILADY_IOS_REMOTE_API_TOKEN=replace-with-the-same-token \
+bun run dev:ios:remote-mac
+```
+
+If `MILADY_IOS_REMOTE_API_BASE` is omitted, the helper picks the first non-loopback IPv4 address and port `31337`. Run from Xcode with an Apple development team selected to install on a physical phone.
+
+### 2. Phone build running in cloud
+
+Build the bundled iOS shell with the cloud runtime defaults, then select Eliza Cloud
+in the first onboarding view:
+
+```bash
+bun run dev:ios:cloud
+```
+
+Set `MILADY_IOS_CLOUD_BASE` or `VITE_ELIZA_CLOUD_BASE` only when targeting a non-default Eliza Cloud environment.
+
+### 3. Cloud runtime plus donated phone compute
+
+Cloud-hybrid mode keeps the app on the cloud runtime and starts the existing device bridge so eligible local-inference work can route to the phone through the server-side routing preferences. Select the Cloud + phone compute option in the first onboarding view.
+
+```bash
+ELIZA_DEVICE_BRIDGE_ENABLED=1 \
+ELIZA_DEVICE_PAIRING_TOKEN=replace-with-a-short-lived-token \
+bun run dev
+
+MILADY_IOS_DEVICE_BRIDGE_API_BASE=https://agent-or-tunnel.example.com \
+MILADY_IOS_DEVICE_BRIDGE_TOKEN=replace-with-the-same-token \
+bun run dev:ios:cloud-hybrid
+```
+
+`MILADY_IOS_DEVICE_BRIDGE_API_BASE` derives `wss://.../api/local-inference/device-bridge`. Use `MILADY_IOS_DEVICE_BRIDGE_URL` when the bridge lives at a different URL. The server still decides which slots use the paired device through Local models routing; the phone does not override cloud routing on its own.
+
+<Warning>
+Build-time API and bridge tokens are embedded in the web bundle. Use short-lived development or TestFlight credentials, not long-lived production secrets.
+</Warning>
+
 ## Live Reload Development
 
 Live reload lets you see web-layer changes on a physical device or simulator without rebuilding native code. Capacitor achieves this by loading the app from your local Vite dev server instead of the bundled assets.

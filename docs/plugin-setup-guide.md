@@ -63,7 +63,7 @@ where to get the credentials, minimum required fields, and tips for optional fie
 **Variables:**
 - `OPENROUTER_API_KEY` — From openrouter.ai/keys
 - `OPENROUTER_SMALL_MODEL` — e.g. `openai/gpt-4o-mini` or `meta-llama/llama-3.3-70b`
-- `OPENROUTER_LARGE_MODEL` — e.g. `anthropic/claude-3.5-sonnet`
+- `OPENROUTER_LARGE_MODEL` — e.g. `anthropic/claude-sonnet-4-6`
 - `OPENROUTER_IMAGE_MODEL` — e.g. `openai/gpt-4o` (for vision tasks)
 - `OPENROUTER_IMAGE_GENERATION_MODEL` — e.g. `openai/dall-e-3`
 - `OPENROUTER_EMBEDDING_MODEL` — e.g. `openai/text-embedding-3-small`
@@ -85,7 +85,7 @@ where to get the credentials, minimum required fields, and tips for optional fie
 
 ### Ollama (Local Models)
 **Get credentials:** No API key needed — install Ollama locally
-**Setup:** https://ollama.ai — run `ollama pull llama3.2` to download a model
+**Setup:** https://ollama.com — run `ollama pull llama3.2` to download a model
 **Minimum required:** `OLLAMA_BASE_URL` = `http://localhost:11434` (auto-enable trigger) or `OLLAMA_API_ENDPOINT` = `http://localhost:11434/api`
 **Variables:**
 - `OLLAMA_BASE_URL` — Auto-enable trigger. Default: `http://localhost:11434`

@@ -6,6 +6,7 @@ import "@elizaos/app-core/platform/native-plugin-entrypoints";
 import { App as CapacitorApp } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";
 import { Keyboard } from "@capacitor/keyboard";
+import { Preferences } from "@capacitor/preferences";
 import { App } from "@elizaos/app-core";
 import { client } from "@elizaos/app-core";
 import {
@@ -19,6 +20,8 @@ import type { BrandingConfig } from "@elizaos/app-core";
 import {
   type AppBootConfig,
   getBootConfig,
+  MOBILE_RUNTIME_MODE_STORAGE_KEY,
+  normalizeMobileRuntimeMode,
   setBootConfig,
 } from "@elizaos/app-core";
 import {
@@ -28,11 +31,13 @@ import {
   COMMAND_PALETTE_EVENT,
   CONNECT_EVENT,
   dispatchAppEvent,
+  MOBILE_RUNTIME_MODE_CHANGED_EVENT,
   SHARE_TARGET_EVENT,
   TRAY_ACTION_EVENT,
 } from "@elizaos/app-core";
 import {
   applyForceFreshOnboardingReset,
+  applyLaunchConnection,
   applyLaunchConnectionFromUrl,
   dispatchQueuedLifeOpsGithubCallbackFromUrl,
   installDesktopPermissionsClientPatch,
@@ -55,6 +60,7 @@ import { AppProvider } from "@elizaos/app-core";
 import { applyUiTheme, loadUiTheme } from "@elizaos/app-core";
 import { Agent } from "@elizaos/capacitor-agent";
 import { Desktop } from "@elizaos/capacitor-desktop";
+import type { DeviceBridgeClient } from "@elizaos/capacitor-llama";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { CompanionShell } from "@elizaos/app-companion/ui";
@@ -69,7 +75,19 @@ import {
 } from "@elizaos/app-companion";
 import "@elizaos/app-companion/register";
 // Side-effect: register LifeOps sidebar widgets + client methods on ElizaClient.
+import "@elizaos/app-lifeops/widgets";
+// Side-effect: register coding-agent (task-coordinator) slots so app-core
+// slot wrappers (CodingAgentControlChip, PtyConsoleBase, etc.) render the
+// real components instead of nulls.
+import "@elizaos/app-task-coordinator/register-slots";
+// Side-effect: register game operator surfaces + detail extensions.
+import "@elizaos/app-babylon/ui";
+import "@elizaos/app-scape/ui";
+import "@elizaos/app-hyperscape/ui";
+import "@elizaos/app-2004scape/ui";
+import "@elizaos/app-defense-of-the-agents/ui";
 import {
+  AppBlockerSettingsCard,
   LifeOpsBrowserSetupPanel,
   LifeOpsPageView,
   WebsiteBlockerSettingsCard,
@@ -99,6 +117,11 @@ import {
 } from "./app-config";
 import { APP_ENV_ALIASES, APP_ENV_PREFIX } from "./brand-env";
 import { APP_CHARACTER_CATALOG } from "./character-catalog";
+import {
+  apiBaseToDeviceBridgeUrl,
+  type IosRuntimeConfig,
+  resolveIosRuntimeConfig,
+} from "./ios-runtime";
 
 declare global {
   interface Window {
@@ -154,6 +177,11 @@ const platform = Capacitor.getPlatform();
 const isNative = Capacitor.isNativePlatform();
 const isIOS = platform === "ios";
 const isAndroid = platform === "android";
+const IOS_RUNTIME_ENV_CONFIG = resolveIosRuntimeConfig(import.meta.env);
+const DEVICE_BRIDGE_ID_KEY = "milady_device_bridge_id";
+
+let mobileDeviceBridgeClient: DeviceBridgeClient | null = null;
+let mobileRuntimeModeListenerInstalled = false;
 
 function isDesktopPlatform(): boolean {
   return isElectrobunRuntime();
@@ -205,8 +233,7 @@ const appBootConfig: AppBootConfig = {
   assetBaseUrl:
     (import.meta.env.VITE_ASSET_BASE_URL as string | undefined)?.trim() ||
     undefined,
-  cloudApiBase:
-    (import.meta.env.VITE_CLOUD_BASE as string) ?? "https://www.elizacloud.ai",
+  cloudApiBase: IOS_RUNTIME_ENV_CONFIG.cloudApiBase,
   vrmAssets: APP_VRM_ASSETS,
   onboardingStyles: APP_STYLE_PRESETS,
   characterEditor: CharacterEditor,
@@ -233,6 +260,7 @@ const appBootConfig: AppBootConfig = {
   envAliases: APP_ENV_ALIASES,
   lifeOpsPageView: LifeOpsPageView,
   lifeOpsBrowserSetupPanel: LifeOpsBrowserSetupPanel,
+  appBlockerSettingsCard: AppBlockerSettingsCard,
   websiteBlockerSettingsCard: WebsiteBlockerSettingsCard,
   clientMiddleware: {
     forceFreshOnboarding:
@@ -294,6 +322,8 @@ async function initializePlatform(): Promise<void> {
   if (isIOS || isAndroid) {
     await initializeKeyboard();
     initializeAppLifecycle();
+    initializeMobileRuntimeModeListener();
+    await initializeMobileDeviceBridge();
   }
 
   if (isDesktopPlatform()) {
@@ -373,11 +403,22 @@ function handleDeepLink(url: string): void {
   }
 
   if (parsed.protocol !== `${APP_URL_SCHEME}:`) return;
-  const path = (parsed.pathname || parsed.host || "").replace(/^\/+/, "");
+  const path = getDeepLinkPath(parsed);
 
   switch (path) {
     case "chat":
       window.location.hash = "#chat";
+      break;
+    case "phone":
+    case "phone/call":
+      setHashRoute("phone", parsed.searchParams);
+      break;
+    case "messages":
+    case "messages/compose":
+      setHashRoute("messages", parsed.searchParams);
+      break;
+    case "contacts":
+      setHashRoute("contacts", parsed.searchParams);
       break;
     case "lifeops":
       window.location.hash = "#lifeops";
@@ -402,8 +443,18 @@ function handleDeepLink(url: string): void {
             );
             break;
           }
+          const token =
+            parsed.searchParams.get("token") ??
+            parsed.searchParams.get("accessToken") ??
+            null;
+          const connection = applyLaunchConnection({
+            kind: "remote",
+            apiBase: validatedUrl.href,
+            token,
+          });
           dispatchAppEvent(CONNECT_EVENT, {
-            gatewayUrl: validatedUrl.href,
+            gatewayUrl: connection.apiBase,
+            token: connection.token ?? undefined,
           });
         } catch {
           console.error(`${APP_LOG_PREFIX} Invalid gateway URL format`);
@@ -441,6 +492,17 @@ function handleDeepLink(url: string): void {
       console.warn(`${APP_LOG_PREFIX} Unknown deep link path:`, path);
       break;
   }
+}
+
+function getDeepLinkPath(parsed: URL): string {
+  const host = parsed.host.replace(/^\/+|\/+$/g, "");
+  const pathname = parsed.pathname.replace(/^\/+|\/+$/g, "");
+  return [host, pathname].filter(Boolean).join("/");
+}
+
+function setHashRoute(route: string, params: URLSearchParams): void {
+  const query = params.toString();
+  window.location.hash = query ? `#${route}?${query}` : `#${route}`;
 }
 
 async function initializeDesktopShell(): Promise<void> {
@@ -596,12 +658,114 @@ function injectDetachedShellApiBase(): void {
   if (apiBase) validateAndSetApiBase(apiBase);
 }
 
+function getCurrentIosRuntimeConfig(): IosRuntimeConfig {
+  if (typeof window === "undefined") return IOS_RUNTIME_ENV_CONFIG;
+  try {
+    const mode = normalizeMobileRuntimeMode(
+      window.localStorage.getItem(MOBILE_RUNTIME_MODE_STORAGE_KEY),
+    );
+    return mode ? { ...IOS_RUNTIME_ENV_CONFIG, mode } : IOS_RUNTIME_ENV_CONFIG;
+  } catch {
+    return IOS_RUNTIME_ENV_CONFIG;
+  }
+}
+
+function applyBuildTimeIosConnection(): void {
+  if (!isNative) return;
+  if (!IOS_RUNTIME_ENV_CONFIG.apiBase && !IOS_RUNTIME_ENV_CONFIG.apiToken)
+    return;
+
+  const current = getBootConfig();
+  const next: AppBootConfig = {
+    ...current,
+    ...(IOS_RUNTIME_ENV_CONFIG.apiToken
+      ? { apiToken: IOS_RUNTIME_ENV_CONFIG.apiToken }
+      : {}),
+  };
+  setBootConfig(next);
+
+  if (IOS_RUNTIME_ENV_CONFIG.apiBase) {
+    validateAndSetApiBase(IOS_RUNTIME_ENV_CONFIG.apiBase);
+  }
+}
+
+async function getOrCreateDeviceBridgeId(): Promise<string> {
+  const existing = await Preferences.get({ key: DEVICE_BRIDGE_ID_KEY });
+  if (existing.value?.trim()) return existing.value.trim();
+
+  const generated =
+    globalThis.crypto?.randomUUID?.() ??
+    `ios-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+  await Preferences.set({ key: DEVICE_BRIDGE_ID_KEY, value: generated });
+  return generated;
+}
+
+function resolveDeviceBridgeUrl(config: IosRuntimeConfig): string | null {
+  if (config.deviceBridgeUrl) {
+    return config.deviceBridgeUrl;
+  }
+  if (config.mode !== "cloud-hybrid") return null;
+  const apiBase = getBootConfig().apiBase?.trim();
+  if (!apiBase) return null;
+  try {
+    return apiBaseToDeviceBridgeUrl(apiBase);
+  } catch {
+    return null;
+  }
+}
+
+async function initializeMobileDeviceBridge(): Promise<void> {
+  const runtimeConfig = getCurrentIosRuntimeConfig();
+  if (!isNative || runtimeConfig.mode !== "cloud-hybrid") return;
+  if (mobileDeviceBridgeClient) return;
+
+  const agentUrl = resolveDeviceBridgeUrl(runtimeConfig);
+  if (!agentUrl) return;
+
+  try {
+    const [{ startDeviceBridgeClient }, deviceId] = await Promise.all([
+      import("@elizaos/capacitor-llama"),
+      getOrCreateDeviceBridgeId(),
+    ]);
+    mobileDeviceBridgeClient = startDeviceBridgeClient({
+      agentUrl,
+      ...(runtimeConfig.deviceBridgeToken
+        ? { pairingToken: runtimeConfig.deviceBridgeToken }
+        : {}),
+      deviceId,
+    });
+  } catch (error) {
+    console.warn(
+      `${APP_LOG_PREFIX} Device bridge unavailable:`,
+      error instanceof Error ? error.message : error,
+    );
+  }
+}
+
+function stopMobileDeviceBridge(): void {
+  mobileDeviceBridgeClient?.stop();
+  mobileDeviceBridgeClient = null;
+}
+
+function initializeMobileRuntimeModeListener(): void {
+  if (!isNative || mobileRuntimeModeListenerInstalled) return;
+  mobileRuntimeModeListenerInstalled = true;
+  document.addEventListener(MOBILE_RUNTIME_MODE_CHANGED_EVENT, () => {
+    if (getCurrentIosRuntimeConfig().mode === "cloud-hybrid") {
+      void initializeMobileDeviceBridge();
+      return;
+    }
+    stopMobileDeviceBridge();
+  });
+}
+
 function applyStoredDetachedShellTheme(): void {
   applyUiTheme(loadUiTheme());
 }
 
 async function main(): Promise<void> {
   setupPlatformStyles();
+  applyBuildTimeIosConnection();
 
   try {
     await applyLaunchConnectionFromUrl();

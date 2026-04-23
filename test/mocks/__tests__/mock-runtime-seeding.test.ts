@@ -1,8 +1,33 @@
+import { readLifeOpsOwnerProfile } from "@elizaos/app-lifeops/lifeops/owner-profile";
 import { LifeOpsService } from "@elizaos/app-lifeops/lifeops/service";
 import { afterEach, describe, expect, it } from "vitest";
 import { createMockedTestRuntime } from "../helpers/mock-runtime.ts";
+import { seedTestUserProfile } from "../helpers/seed-test-user-profile.ts";
 
 const INTERNAL_URL = new URL("http://127.0.0.1:31337");
+const SEEDED_OWNER_NAME = "Milady Test Owner";
+
+async function withLoadTestUserProfileFlag<T>(
+  value: "1" | undefined,
+  fn: () => Promise<T>,
+): Promise<T> {
+  const previous = process.env.LOAD_TEST_USER_PROFILE;
+  if (value === undefined) {
+    delete process.env.LOAD_TEST_USER_PROFILE;
+  } else {
+    process.env.LOAD_TEST_USER_PROFILE = value;
+  }
+
+  try {
+    return await fn();
+  } finally {
+    if (previous === undefined) {
+      delete process.env.LOAD_TEST_USER_PROFILE;
+    } else {
+      process.env.LOAD_TEST_USER_PROFILE = previous;
+    }
+  }
+}
 
 describe("mock runtime seeding", () => {
   const cleanups: Array<() => Promise<void>> = [];
@@ -16,7 +41,7 @@ describe("mock runtime seeding", () => {
     }
   });
 
-  it("seeds a connected Google grant with canonical capabilities and realistic feeds", async () => {
+  it("seeds a connected Google grant with canonical capabilities and an empty calendar by default", async () => {
     const mocked = await createMockedTestRuntime({
       envs: ["google"],
       seedX: false,
@@ -67,14 +92,7 @@ describe("mock runtime seeding", () => {
         "Can you review the product brief?",
       ]),
     );
-    expect(
-      (calendarResponse.items ?? []).map((event) => event.summary),
-    ).toEqual(
-      expect.arrayContaining([
-        "Intro meeting with Julia Chen",
-        "1:1 with Alex",
-      ]),
-    );
+    expect(calendarResponse.items ?? []).toEqual([]);
   });
 
   it("seeds an X connector grant when the X mock is enabled", async () => {
@@ -113,5 +131,85 @@ describe("mock runtime seeding", () => {
     expect(daily.map((row) => row.identifier)).toEqual(
       expect.arrayContaining(["com.apple.Safari", "com.microsoft.VSCode"]),
     );
+  });
+
+  it("does not seed the test user profile when LOAD_TEST_USER_PROFILE is off", async () => {
+    await withLoadTestUserProfileFlag(undefined, async () => {
+      const mocked = await createMockedTestRuntime({
+        envs: ["google"],
+        seedX: false,
+      });
+      cleanups.push(mocked.cleanup);
+
+      const service = new LifeOpsService(mocked.runtime);
+      const [profile, definitions] = await Promise.all([
+        readLifeOpsOwnerProfile(mocked.runtime),
+        service.listDefinitions(),
+      ]);
+
+      expect(profile.name).not.toBe(SEEDED_OWNER_NAME);
+      expect(definitions.map((entry) => entry.definition.title)).not.toContain(
+        "Invisalign",
+      );
+    });
+  });
+
+  it("seeds the test user profile and LifeOps routines when LOAD_TEST_USER_PROFILE is on", async () => {
+    await withLoadTestUserProfileFlag("1", async () => {
+      const mocked = await createMockedTestRuntime({
+        envs: ["google"],
+        seedX: false,
+      });
+      cleanups.push(mocked.cleanup);
+
+      const service = new LifeOpsService(mocked.runtime);
+      const profile = await readLifeOpsOwnerProfile(mocked.runtime);
+      expect(profile.name).toBe(SEEDED_OWNER_NAME);
+      expect(profile.location).toBe("Test City, CA");
+
+      const definitions = await service.listDefinitions();
+      const seededDefinitions = definitions.filter((entry) =>
+        String(entry.definition.metadata?.seedKey ?? "").startsWith(
+          "load-test-user-profile:",
+        ),
+      );
+      const seededTitles = seededDefinitions.map(
+        (entry) => entry.definition.title,
+      );
+
+      expect(seededTitles).toEqual(
+        expect.arrayContaining([
+          "Brush teeth",
+          "Invisalign",
+          "Stretch",
+          "Take vitamins",
+          "Workout",
+        ]),
+      );
+      expect(seededDefinitions).toHaveLength(5);
+      expect(
+        new Set(
+          seededDefinitions.map((entry) => entry.definition.metadata.seedKey),
+        ).size,
+      ).toBe(5);
+
+      await seedTestUserProfile(mocked.runtime);
+
+      const rerunDefinitions = await service.listDefinitions();
+      const rerunSeededDefinitions = rerunDefinitions.filter((entry) =>
+        String(entry.definition.metadata?.seedKey ?? "").startsWith(
+          "load-test-user-profile:",
+        ),
+      );
+
+      expect(rerunSeededDefinitions).toHaveLength(5);
+      expect(
+        new Set(
+          rerunSeededDefinitions.map(
+            (entry) => entry.definition.metadata.seedKey,
+          ),
+        ).size,
+      ).toBe(5);
+    });
   });
 });

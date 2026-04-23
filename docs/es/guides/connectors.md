@@ -23,25 +23,25 @@ Los conectores son puentes de plataforma que permiten a tu agente comunicarse a 
 11. [Google Chat](#google-chat)
 12. [Twitter](#twitter)
 13. [Farcaster](#farcaster)
-14. [Twitch](#twitch)
-15. [Mattermost](#mattermost)
-16. [WeChat](#wechat)
-17. [Matrix](#matrix)
-18. [Feishu / Lark](#feishu--lark)
-19. [Nostr](#nostr)
-21. [Lens](#lens)
-22. [Bluesky](#bluesky)
-23. [Instagram](#instagram)
-24. [LINE](#line)
-25. [Zalo](#zalo)
-26. [Twilio](#twilio)
-27. [GitHub](#github)
-28. [Gmail Watch](#gmail-watch)
-29. [Nextcloud Talk](#nextcloud-talk)
-30. [Tlon](#tlon)
-31. [Ciclo de vida del conector](#connector-lifecycle)
-32. [Soporte multi-cuenta](#multi-account-support)
-33. [Gestión de sesiones](#session-management)
+14. [Bluesky](#bluesky)
+15. [Instagram](#instagram)
+16. [Twitch](#twitch)
+17. [Mattermost](#mattermost)
+18. [WeChat](#wechat)
+19. [Matrix](#matrix)
+20. [Feishu / Lark](#feishu--lark)
+21. [Nostr](#nostr)
+22. [LINE](#line)
+23. [Zalo](#zalo)
+24. [Twilio](#twilio)
+25. [GitHub](#github)
+26. [Gmail Watch](#gmail-watch)
+27. [Nextcloud Talk](#nextcloud-talk)
+28. [Tlon](#tlon)
+29. [Lens](#lens)
+30. [Ciclo de vida del conector](#connector-lifecycle)
+31. [Soporte multi-cuenta](#multi-account-support)
+32. [Gestión de sesiones](#session-management)
 
 ---
 
@@ -1365,7 +1365,7 @@ Las opciones de `dmPolicy` son:
 **Fallos generales de conectores:**
 
 - El plugin del conector no se carga:
-  Verificar el mapeo de ID del conector en `src/config/plugin-auto-enable.ts`, la disponibilidad del plugin y las anulaciones de `plugins.entries`. La capa de habilitación automática mapea las claves de configuración del conector a nombres de paquetes de plugins — una discrepancia significa que el plugin se omite silenciosamente.
+  Verificar el mapeo de ID del conector en `packages/agent/src/config/plugin-auto-enable.ts` (en el submódulo `eliza`), la disponibilidad del plugin y las anulaciones de `plugins.entries`. La capa de habilitación automática mapea las claves de configuración del conector a nombres de paquetes de plugins — una discrepancia significa que el plugin se omite silenciosamente.
 - La autenticación tiene éxito pero no llegan mensajes:
   Verificar la configuración de webhook/socket de la plataforma y las puertas de política (`dmPolicy`, `groupPolicy`). Para conectores basados en webhook, confirmar que la URL de callback es accesible públicamente.
 - Secretos de conector mal enrutados:
@@ -1508,19 +1508,14 @@ Las opciones de `dmPolicy` son:
 ### Comandos de verificación
 </div>
 
+Estas rutas de prueba hacen referencia a archivos en el submódulo `eliza`. Ejecute `bun run setup:upstreams` primero para inicializarlo.
+
 ```bash
-# Connector auto-enable and runtime loading
-bunx vitest run src/config/plugin-auto-enable.test.ts src/runtime/eliza.test.ts
+# Suite de pruebas completa (desde la raíz del repositorio)
+bun run test
 
-# Platform-specific connector tests
-bunx vitest run src/connectors/discord-connector.test.ts
-
-# Connector e2e tests
-bunx vitest run --config test/vitest/live-e2e.config.ts packages/agent/test/discord-connector.live.e2e.test.ts
-bunx vitest run --config test/vitest/integration.config.ts packages/agent/test/signal-connector.integration.test.ts
-
-# WhatsApp pairing
-bunx vitest run src/services/__tests__/whatsapp-pairing.test.ts src/api/__tests__/whatsapp-routes.test.ts
+# Pruebas de extremo a extremo
+bun run test:e2e
 
 bun run typecheck
 ```

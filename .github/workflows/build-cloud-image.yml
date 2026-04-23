@@ -267,11 +267,37 @@ jobs:
             type=raw,value=cloud-app
             type=raw,value=cloud-app-${{ steps.version.outputs.version_clean }}
 
-      - name: Build and push cloud app image
+      - name: Build and push cloud app image with Depot
+        id: depot-build
+        continue-on-error: true
         uses: depot/build-push-action@v1
         with:
           project: ${{ env.DEPOT_PROJECT_ID }}
           token: ${{ secrets.DEPOT_TOKEN }}
+          context: .
+          file: eliza/packages/app-core/deploy/Dockerfile.cloud
+          platforms: linux/amd64
+          push: ${{ github.event_name == 'push' || inputs.push_image != false }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            APP_ENTRYPOINT=${{ env.APP_ENTRYPOINT }}
+            APP_CMD_START=${{ env.APP_CMD_START }}
+            APP_PORT=${{ env.APP_PORT }}
+            APP_API_BIND=${{ env.APP_API_BIND }}
+            OCI_SOURCE=${{ env.OCI_SOURCE }}
+            OCI_TITLE=${{ env.OCI_TITLE }}
+            OCI_DESCRIPTION=${{ env.OCI_DESCRIPTION }}
+            OCI_LICENSES=${{ env.OCI_LICENSES }}
+            VERSION=${{ steps.version.outputs.version }}
+            VERSION_CLEAN=${{ steps.version.outputs.version_clean }}
+            REVISION=${{ github.sha }}
+          provenance: false
+
+      - name: Build and push cloud app image with Buildx fallback
+        if: steps.depot-build.outcome == 'failure'
+        uses: docker/build-push-action@v6
+        with:
           context: .
           file: eliza/packages/app-core/deploy/Dockerfile.cloud
           platforms: linux/amd64

@@ -74,15 +74,13 @@ These services are available but not loaded by default — enable via admin pane
 | `@elizaos/plugin-code` | Code writing and file operations |
 | `@elizaos/plugin-repoprompt` | RepoPrompt CLI integration |
 | `@elizaos/plugin-claude-code-workbench` | Claude Code companion workflows |
-| `@elizaos/plugin-computeruse` | Computer use automation (platform-specific) |
+| `@elizaos/plugin-computeruse` | Computer use automation (platform-specific, requires platform binaries) |
 | `@elizaos/plugin-browser` | Browser automation (requires stagehand-server) |
 | `@elizaos/plugin-vision` | Visual understanding (feature-gated) |
 | `@elizaos/plugin-edge-tts` | Text-to-speech (Microsoft Edge TTS) |
 | `@elizaos/plugin-elevenlabs` | ElevenLabs text-to-speech |
-| `@elizaos/plugin-secrets-manager` | Encrypted credential storage (statically imported, may be re-enabled as core) |
-| `relationships` | Contact graph, relationship memory (statically imported, may be re-enabled as core) |
-| `@elizaos/plugin-plugin-manager` | Dynamic plugin install/uninstall at runtime (now a core plugin, always loaded) |
-| `@elizaos/plugin-computeruse` | Computer use automation (requires platform binaries) |
+| `@elizaos/plugin-secrets-manager` | Encrypted credential storage |
+| `relationships` | Contact graph, relationship memory |
 | `@elizaos/plugin-x402` | x402 HTTP micropayment protocol |
 
 ## Trajectory Logger Service

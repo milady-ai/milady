@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { execFileSync } from "node:child_process";
+import { existsSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { resolveRepoRoot } from "./lib/repo-root.mjs";
@@ -13,6 +14,13 @@ const OUTPUT_PATH = path.resolve(
 );
 const RELEASES_URL = `https://api.github.com/repos/${REPOSITORY}/releases?per_page=20`;
 const RELEASES_PAGE_URL = `https://github.com/${REPOSITORY}/releases`;
+
+class GitHubReleaseFetchError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "GitHubReleaseFetchError";
+  }
+}
 
 const installBaseUrl = "https://milady.ai";
 const scripts = {
@@ -290,7 +298,7 @@ function buildHeaders() {
 async function fetchReleases() {
   const response = await fetch(RELEASES_URL, { headers: buildHeaders() });
   if (!response.ok) {
-    throw new Error(
+    throw new GitHubReleaseFetchError(
       `GitHub API returned ${response.status} ${response.statusText}`,
     );
   }
@@ -311,7 +319,7 @@ async function fetchReleaseByTag(tag) {
   }
 
   if (!response.ok) {
-    throw new Error(
+    throw new GitHubReleaseFetchError(
       `GitHub API returned ${response.status} ${response.statusText} for tag ${tag}`,
     );
   }
@@ -364,18 +372,40 @@ async function writePayload(payload) {
 }
 
 async function main() {
-  const releases = await fetchReleases();
-  const stableReleases = sortReleasesByRecency(releases).filter(
-    (release) => !release.prerelease,
-  );
-  const stableRelease = await resolveStableRelease(stableReleases);
-  const releasePool =
-    stableRelease &&
-    !stableReleases.some(
-      (release) => release.tag_name === stableRelease.tag_name,
-    )
-      ? [stableRelease, ...stableReleases]
-      : stableReleases;
+  let stableRelease;
+  let releasePool;
+
+  try {
+    const releases = await fetchReleases();
+    const stableReleases = sortReleasesByRecency(releases).filter(
+      (release) => !release.prerelease,
+    );
+    stableRelease = await resolveStableRelease(stableReleases);
+    releasePool =
+      stableRelease &&
+      !stableReleases.some(
+        (release) => release.tag_name === stableRelease.tag_name,
+      )
+        ? [stableRelease, ...stableReleases]
+        : stableReleases;
+  } catch (error) {
+    if (!(error instanceof GitHubReleaseFetchError)) {
+      throw error;
+    }
+
+    const message = error instanceof Error ? error.message : String(error);
+    if (existsSync(OUTPUT_PATH)) {
+      console.warn(
+        `homepage release data refresh failed, keeping existing file: ${message}`,
+      );
+      return;
+    }
+    await writePayload(buildPayload(null));
+    console.warn(
+      `homepage release data refresh failed, wrote fallback file: ${message}`,
+    );
+  }
+
   await writePayload(buildPayload(stableRelease, releasePool));
   const tag = stableRelease?.tag_name ?? "no published stable release";
   console.log(`homepage release data: stable=${tag}`);

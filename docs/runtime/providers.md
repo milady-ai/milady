@@ -228,8 +228,7 @@ Providers registered in the Milady plugin follow this order:
 5. sessionKey         (session auth)
 6. ...sessionProviders
 7. uiCatalog          (UI components)
-8. emotes             (avatar animations)
-9. customActions      (user-defined actions)
+8. customActions      (user-defined actions)
 ```
 
 Order matters: context assembled later in the list appears closer to the end of the injected system context and may be more salient to some models.

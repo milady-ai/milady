@@ -10,7 +10,7 @@ The OpenRouter plugin connects Milady agents to OpenRouter's unified inference g
 
 ## Milady: pinned version and upstream bundle bug
 
-In the Milady monorepo, **`@elizaos/plugin-openrouter` is pinned to `2.0.0-alpha.10`** (exact version in root `package.json`, reflected in `bun.lock`).
+In the Milady monorepo, **`@elizaos/plugin-openrouter` is pinned to `2.0.0-alpha.13`** (exact version in root `package.json`, reflected in `bun.lock`).
 
 **Why pin**
 
@@ -43,6 +43,11 @@ export OPENROUTER_API_KEY=sk-or-...
 | Environment Variable | Required | Description |
 |---------------------|----------|-------------|
 | `OPENROUTER_API_KEY` | Yes | OpenRouter API key from [openrouter.ai](https://openrouter.ai) |
+| `OPENROUTER_BASE_URL` | No | Custom base URL for the OpenRouter API |
+| `OPENROUTER_SMALL_MODEL` | No | Override the small model identifier |
+| `OPENROUTER_LARGE_MODEL` | No | Override the large model identifier |
+| `OPENROUTER_EMBEDDING_MODEL` | No | Override the embedding model identifier |
+| `OPENROUTER_IMAGE_GENERATION_MODEL` | No | Override the image generation model |
 
 ### milady.json Example
 
@@ -52,7 +57,7 @@ export OPENROUTER_API_KEY=sk-or-...
     "profiles": {
       "default": {
         "provider": "openrouter",
-        "model": "anthropic/claude-sonnet-4-5"
+        "model": "anthropic/claude-sonnet-4.6"
       }
     }
   }
@@ -76,9 +81,9 @@ OpenRouter provides access to models from all major providers. Use the full prov
 
 | Model ID | Description |
 |---------|-------------|
-| `anthropic/claude-opus-4` | Most capable Claude |
-| `anthropic/claude-sonnet-4-5` | Balanced Claude |
-| `anthropic/claude-haiku-4` | Fastest Claude |
+| `anthropic/claude-opus-4.7` | Most capable Claude |
+| `anthropic/claude-sonnet-4.6` | Balanced Claude |
+| `anthropic/claude-haiku-4.5` | Fastest Claude |
 
 ### Meta via OpenRouter
 
@@ -100,8 +105,8 @@ Browse all models at [openrouter.ai/models](https://openrouter.ai/models).
 
 | elizaOS Model Type | Default OpenRouter Model |
 |-------------------|------------------------|
-| `TEXT_SMALL` | `anthropic/claude-haiku-4` |
-| `TEXT_LARGE` | `anthropic/claude-sonnet-4-5` |
+| `TEXT_SMALL` | `anthropic/claude-haiku-4.5` |
+| `TEXT_LARGE` | `anthropic/claude-sonnet-4.6` |
 
 ## Features
 
@@ -124,7 +129,7 @@ OpenRouter supports routing preferences for cost, latency, or throughput:
     "profiles": {
       "default": {
         "provider": "openrouter",
-        "model": "anthropic/claude-sonnet-4-5",
+        "model": "anthropic/claude-sonnet-4.6",
         "providerPreferences": {
           "order": ["Anthropic", "AWS Bedrock"],
           "allowFallbacks": true

@@ -29,6 +29,35 @@ const SOURCE_LABEL: Record<ManagedAgent["source"], string> = {
 type DeleteState = "idle" | "confirm" | "deleting";
 
 /**
+ * Copy + tooltip per non-running status. When the underlying container isn't
+ * reachable we replace the "open" button with a muted, disabled variant so
+ * users don't click through into a dead page.
+ */
+const OPEN_DISABLED_COPY: Partial<
+  Record<
+    import("../../lib/AgentProvider").ManagedAgent["status"],
+    { label: string; title: string }
+  >
+> = {
+  provisioning: {
+    label: "starting\u2026",
+    title: "Agent is booting up. This usually takes 30\u201360s.",
+  },
+  stopped: {
+    label: "stopped",
+    title: "Agent is stopped.",
+  },
+  paused: {
+    label: "paused",
+    title: "Agent is paused.",
+  },
+  unknown: {
+    label: "unreachable",
+    title: "Agent not responding to health checks.",
+  },
+};
+
+/**
  * Runtime card — typography + data, no image.
  *
  * Action model (post-H7):
@@ -94,6 +123,12 @@ export function InstanceCard({
   const runtimeLabel = agent.model ?? "milady runtime";
 
   const hasMenu = !!onDelete || !!onForget;
+
+  // Only allow opening the web UI when the runtime is actually reachable.
+  // During provisioning / boot / stopped states, the button flips to a muted,
+  // disabled variant with italic status text so nobody clicks into a dead page.
+  const canOpen = agent.status === "running";
+  const disabledCopy = canOpen ? null : OPEN_DISABLED_COPY[agent.status];
 
   const handleDeleteClick = async () => {
     if (!onDelete) return;
@@ -164,30 +199,53 @@ export function InstanceCard({
 
       {/* Row 3 — action strip */}
       <div className="mt-1 flex items-center gap-1.5">
-        <button
-          type="button"
-          onClick={onOpen}
-          className="group/btn flex flex-1 items-center justify-between rounded-md bg-brand/90 px-3 py-2 text-[12px] font-semibold text-black transition duration-200 hover:bg-brand active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand/70"
-        >
-          <span className="inline-flex items-center gap-1.5">
-            <svg
-              viewBox="0 0 24 24"
-              width="12"
-              height="12"
-              fill="currentColor"
-              aria-hidden="true"
-            >
-              <path d="M8 5v14l11-7z" />
-            </svg>
-            <span>open</span>
-          </span>
-          <span
-            aria-hidden="true"
-            className="transition group-hover/btn:translate-x-0.5"
+        {canOpen ? (
+          <button
+            type="button"
+            onClick={onOpen}
+            className="group/btn flex flex-1 items-center justify-between rounded-md bg-brand/90 px-3 py-2 text-[12px] font-semibold text-black transition duration-200 hover:bg-brand active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand/70"
           >
-            ↗
-          </span>
-        </button>
+            <span className="inline-flex items-center gap-1.5">
+              <svg
+                viewBox="0 0 24 24"
+                width="12"
+                height="12"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path d="M8 5v14l11-7z" />
+              </svg>
+              <span>open</span>
+            </span>
+            <span
+              aria-hidden="true"
+              className="transition group-hover/btn:translate-x-0.5"
+            >
+              ↗
+            </span>
+          </button>
+        ) : (
+          <button
+            type="button"
+            disabled
+            aria-disabled="true"
+            tabIndex={-1}
+            title={disabledCopy?.title}
+            className="flex flex-1 items-center justify-between rounded-md border border-brand/20 bg-brand/[0.06] px-3 py-2 text-[12px] font-medium text-brand/60 cursor-not-allowed"
+          >
+            <span className="inline-flex items-center gap-2">
+              {agent.status === "provisioning" ? (
+                <span
+                  aria-hidden="true"
+                  className="h-1.5 w-1.5 rounded-full bg-brand animate-pulse"
+                />
+              ) : null}
+              <span className="italic lowercase tracking-wide">
+                {disabledCopy?.label ?? "unavailable"}
+              </span>
+            </span>
+          </button>
+        )}
         <button
           type="button"
           onClick={onCopyUrl}

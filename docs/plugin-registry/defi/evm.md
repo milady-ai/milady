@@ -23,9 +23,10 @@ milady plugins install evm
 | Environment Variable | Required | Description |
 |---------------------|----------|-------------|
 | `EVM_PRIVATE_KEY` | Yes | Private key for the agent's wallet (hex, with or without `0x`) |
-| `EVM_RPC_URL` | No | Default RPC endpoint (mainnet) |
-| `ALCHEMY_API_KEY` | No | Alchemy API key for multi-chain RPC |
+| `EVM_RPC_PROVIDER` | No | Default RPC endpoint (mainnet) |
+| `ALCHEMY_API_KEY` | No | Alchemy API key for multi-chain RPC (also the primary auto-enable trigger) |
 | `INFURA_API_KEY` | No | Infura API key for RPC |
+| `ANKR_API_KEY` | No | Ankr API key for RPC |
 
 ```json
 {

@@ -33,17 +33,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Check report
+        id: report
+        env:
+          INTEGRATION_DOD_REPORT: INTEGRATION_DOD_MAP.md
+        run: |
+          if [[ -f "$INTEGRATION_DOD_REPORT" ]]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::${INTEGRATION_DOD_REPORT} not found; skipping gap issue sync"
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Initialize eliza submodule
+        if: steps.report.outputs.exists == 'true'
+        run: git submodule update --init eliza
+
       - name: Setup Node.js
+        if: steps.report.outputs.exists == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: "22"
           check-latest: false
 
       - name: Sync issues
+        if: steps.report.outputs.exists == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           INTEGRATION_DOD_REPORT: INTEGRATION_DOD_MAP.md
           DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false' }}
           CLOSE_RESOLVED_GAPS: ${{ github.event_name == 'workflow_dispatch' && inputs.close_resolved_gaps || 'true' }}
         run: node eliza/packages/app-core/scripts/sync-dod-gap-issues.mjs
-

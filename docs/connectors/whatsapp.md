@@ -93,16 +93,20 @@ The WhatsApp Business Cloud API is Meta's official API. Requires a WhatsApp Busi
 
 ## Environment Variables
 
-For Cloud API authentication, the following environment variables are used:
-
 | Variable | Description |
 |----------|-------------|
-| `WHATSAPP_ACCESS_TOKEN` | WhatsApp Business API access token |
-| `WHATSAPP_PHONE_NUMBER_ID` | Phone number ID from Meta Developer Dashboard |
+| `WHATSAPP_AUTH_METHOD` | Authentication method: `cloudapi` or `baileys` |
+| `WHATSAPP_ACCESS_TOKEN` | WhatsApp Business API access token (required for `cloudapi` auth) |
+| `WHATSAPP_PHONE_NUMBER_ID` | Phone number ID from Meta Developer Dashboard (required for `cloudapi` auth) |
+| `WHATSAPP_AUTH_DIR` | Directory for Baileys session files (required for `baileys` auth) |
+| `WHATSAPP_PRINT_QR` | Print QR code in terminal when using Baileys auth |
 | `WHATSAPP_WEBHOOK_VERIFY_TOKEN` | Webhook verification token |
 | `WHATSAPP_BUSINESS_ACCOUNT_ID` | WhatsApp Business Account ID |
+| `WHATSAPP_API_VERSION` | API version string |
+| `WHATSAPP_DM_POLICY` | DM policy (`allow`, `deny`, `allowlist`) |
+| `WHATSAPP_GROUP_POLICY` | Group message policy |
 
-These can also be placed in the `env` section of your config file. Baileys mode does not require any environment variables.
+These can also be placed in the `env` section of your config file. When using Baileys mode with the connector config, set `authDir` in the connector config instead of using the environment variable.
 
 ## Full Configuration Reference
 
@@ -115,7 +119,7 @@ All fields are defined under `connectors.whatsapp` in `milady.json`.
 | `accounts` | object | -- | Named account configurations (see Multi-Account below) |
 | `authDir` | string | -- | Directory for Baileys session files (single-account shorthand) |
 | `enabled` | boolean | -- | Explicitly enable/disable |
-| `dmPolicy` | `"pairing"` \| `"open"` \| `"closed"` | `"pairing"` | DM acceptance policy. `"open"` requires `allowFrom` to include `"*"` |
+| `dmPolicy` | `"pairing"` \| `"allowlist"` \| `"open"` \| `"disabled"` | `"pairing"` | DM acceptance policy. `"open"` requires `allowFrom` to include `"*"` |
 | `allowFrom` | string[] | -- | Allowlist of phone numbers (required when `dmPolicy: "open"`) |
 | `groupPolicy` | `"open"` \| `"disabled"` \| `"allowlist"` | `"allowlist"` | Group message policy |
 | `groupAllowFrom` | string[] | -- | Allowlist of group JIDs |

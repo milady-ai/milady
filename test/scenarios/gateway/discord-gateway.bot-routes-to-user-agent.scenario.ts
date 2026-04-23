@@ -72,7 +72,10 @@ export default scenario({
         }
 
         const blob = JSON.stringify(hit).toLowerCase();
-        if (!blob.includes("discord") || (!blob.includes("dm") && !blob.includes("channel"))) {
+        if (
+          !blob.includes("discord") ||
+          (!blob.includes("dm") && !blob.includes("channel"))
+        ) {
           return "expected Discord room metadata in the inbox action payload";
         }
         return undefined;

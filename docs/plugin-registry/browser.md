@@ -1,7 +1,7 @@
 ---
 title: "Browser Plugin"
 sidebarTitle: "Browser"
-description: "Browser automation plugin for Milady — web scraping, form submission, screenshot capture, and JavaScript execution via Playwright."
+description: "Browser automation plugin for Milady — web scraping, form submission, screenshot capture, and JavaScript execution."
 ---
 
 The Browser plugin gives Milady agents the ability to control a headless web browser — navigating pages, extracting content, filling forms, capturing screenshots, and executing JavaScript.
@@ -10,7 +10,7 @@ The Browser plugin gives Milady agents the ability to control a headless web bro
 
 ## Overview
 
-The Browser plugin uses Playwright under the hood to provide a full Chromium browser instance that agents can control programmatically. This enables agents to access any web content, interact with web applications, and perform research tasks that require JavaScript rendering.
+The Browser plugin uses a headless browser (via stagehand-server and Puppeteer/Chromium) that agents can control programmatically. This enables agents to access any web content, interact with web applications, and perform research tasks that require JavaScript rendering.
 
 ## Installation
 
@@ -18,7 +18,7 @@ The Browser plugin uses Playwright under the hood to provide a full Chromium bro
 milady plugins install browser
 ```
 
-The plugin automatically installs Playwright's Chromium browser on first run.
+The plugin requires a running stagehand-server instance for browser automation.
 
 ## Enable via Features
 
@@ -38,21 +38,22 @@ export MILADY_FEATURE_BROWSER=true
 
 ## Configuration
 
-| Setting | Description | Default |
-|---------|-------------|---------|
-| `browser.headless` | Run browser in headless mode | `true` |
-| `browser.timeout` | Navigation timeout in milliseconds | `30000` |
-| `browser.userAgent` | Custom user agent string | Playwright default |
-| `browser.proxy` | Proxy server URL | — |
-| `browser.maxPages` | Maximum concurrent pages | `3` |
+| Environment Variable | Required | Description |
+|---------------------|----------|-------------|
+| `OPENAI_API_KEY` | Yes* | Required for stagehand-server web extraction |
+| `ANTHROPIC_API_KEY` | No | Alternative LLM provider for stagehand |
+| `BROWSER_HEADLESS` | No | Run browser in headless mode (default: `true`) |
+| `BROWSERBASE_API_KEY` | No | API key for BrowserBase cloud browser service |
+| `BROWSERBASE_PROJECT_ID` | No | Project ID for BrowserBase |
+| `CAPSOLVER_API_KEY` | No | API key for CAPSolver CAPTCHA solving |
+
+*An LLM API key is required for content extraction. `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` can be used.
 
 ```json
 {
   "features": {
     "browser": {
-      "enabled": true,
-      "headless": true,
-      "timeout": 30000
+      "enabled": true
     }
   }
 }
@@ -87,7 +88,7 @@ After the plugin is loaded:
 
 The plugin extracts clean, readable text from web pages by:
 
-1. Navigating to the URL with Playwright
+1. Navigating to the URL with the headless browser
 2. Waiting for the page to fully load (including JavaScript)
 3. Extracting the main content using Readability
 4. Converting to Markdown for the LLM
@@ -109,7 +110,7 @@ const description = await runtime.useModel("IMAGE_DESCRIPTION", {
 
 ## Security
 
-The browser runs in a sandboxed Playwright context. Consider:
+The browser runs in a sandboxed context. Consider:
 
 - Restricting allowed domains if the agent operates in untrusted environments
 - Setting `browser.maxPages` to limit resource usage

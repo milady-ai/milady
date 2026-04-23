@@ -27,9 +27,12 @@ export XAI_API_KEY=xai-...
 | Environment Variable | Required | Description |
 |---------------------|----------|-------------|
 | `XAI_API_KEY` | Yes* | xAI API key from [console.x.ai](https://console.x.ai) |
-| `GROK_API_KEY` | Yes* | Alias for xAI API key |
+| `GROK_API_KEY` | Yes* | Alias that also triggers auto-enable |
+| `XAI_BASE_URL` | No | Custom base URL for the xAI API |
+| `XAI_SMALL_MODEL` | No | Override the small model identifier |
+| `XAI_EMBEDDING_MODEL` | No | Override the embedding model identifier |
 
-\* Either variable activates the plugin.
+\* Either `XAI_API_KEY` or `GROK_API_KEY` activates the plugin.
 
 ### milady.json Example
 

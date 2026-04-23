@@ -7,10 +7,6 @@ on:
     branches: [develop]
   workflow_dispatch:
 
-concurrency:
-  group: docker-ci-smoke-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
 
@@ -52,15 +48,40 @@ jobs:
             bun-${{ runner.os }}-
 
       - name: Run Docker CI smoke path
-        timeout-minutes: 30
-        # Wrap with 'timeout --preserve-status --kill-after' so bash gets
-        # SIGTERM 2 minutes before GHA's own kill, giving the script's
-        # EXIT trap time to dump logs and remove the container. Without
-        # this, GHA's step-level SIGTERM → SIGKILL sequence leaves the
-        # subsequent 'Dump container log' step skipped as 'cancelled'.
+        timeout-minutes: 45
+        # Run the smoke script in its own process group so a wedged docker
+        # child cannot outlive the wrapper timeout and keep the step active.
         run: |
-          timeout --preserve-status --kill-after=15s 28m \
-            bash eliza/packages/app-core/scripts/docker-ci-smoke.sh --tag gha-${{ github.run_id }}
+          set -euo pipefail
+
+          stop_smoke() {
+            if [[ -n "${smoke_pid:-}" ]] && kill -0 "$smoke_pid" 2>/dev/null; then
+              kill -TERM "-$smoke_pid" 2>/dev/null || kill -TERM "$smoke_pid" 2>/dev/null || true
+              sleep 10
+              kill -KILL "-$smoke_pid" 2>/dev/null || kill -KILL "$smoke_pid" 2>/dev/null || true
+            fi
+          }
+
+          trap 'stop_smoke; exit 130' INT
+          trap 'stop_smoke; exit 143' TERM
+
+          setsid bash eliza/packages/app-core/scripts/docker-ci-smoke.sh --tag gha-${{ github.run_id }} &
+          smoke_pid=$!
+          deadline=$((SECONDS + 40 * 60))
+
+          while kill -0 "$smoke_pid" 2>/dev/null; do
+            if (( SECONDS >= deadline )); then
+              echo "::error::Docker CI smoke path exceeded 40 minutes"
+              kill -TERM "-$smoke_pid" 2>/dev/null || kill -TERM "$smoke_pid" 2>/dev/null || true
+              sleep 15
+              kill -KILL "-$smoke_pid" 2>/dev/null || kill -KILL "$smoke_pid" 2>/dev/null || true
+              wait "$smoke_pid" || true
+              exit 124
+            fi
+            sleep 10
+          done
+
+          wait "$smoke_pid"
 
       # Inline log capture runs on failure (not cancelled).
       - name: Dump container log + inspect (inline)
@@ -68,9 +89,10 @@ jobs:
         timeout-minutes: 2
         run: |
           echo "::group::Docker containers"
-          docker ps -a
+          timeout 15 docker ps -a || echo "(docker ps timed out)"
           echo "::endgroup::"
-          for C in $(docker ps -a --format '{{.Names}}' | grep '^eliza-docker-smoke-' || true); do
+          timeout 15 docker ps -a --format '{{.Names}}' > /tmp/milady-docker-containers.txt || true
+          for C in $(grep '^eliza-docker-smoke-' /tmp/milady-docker-containers.txt || true); do
             echo "::group::docker logs $C"
             timeout 30 docker logs "$C" 2>&1 || echo "(docker logs timed out)"
             echo "::endgroup::"

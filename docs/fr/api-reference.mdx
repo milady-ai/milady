@@ -28,7 +28,7 @@ curl http://localhost:2138/api/status
 {
   "name": "Milady",
   "status": "running",
-  "model": "claude-sonnet-4-20250514",
+  "model": "claude-sonnet-4-6",
   "uptime": 3600
 }
 ```
@@ -174,6 +174,19 @@ curl -X POST http://localhost:2138/api/agent/autonomy \
 | `GET` | `/api/status` | Obtenir le statut actuel de l'agent, le nom, le modèle, le temps de fonctionnement, l'état d'autonomie et les informations de redémarrage en attente |
 | `GET` | `/api/health` | Vérification structurée de la santé des sous-systèmes (environnement d'exécution, base de données, plugins, connecteurs, état de préparation) |
 | `GET` | `/api/runtime` | Obtenir les détails de l'environnement d'exécution (plugins chargés, services, capacités) |
+
+Exemple de réponse de `GET /api/status` :
+
+```json
+{
+  "name": "Milady",
+  "status": "running",
+  "model": "anthropic/claude-sonnet-4-6",
+  "uptime": 3600,
+  "autonomy": { "enabled": true },
+  "pendingRestart": false
+}
+```
 
 ---
 
@@ -751,6 +764,15 @@ Les routes sous `/api/cloud/v1/` sont transmises en tant que `/api/v1/` vers le 
 | `POST` | `/api/wallet/import` | Importer une clé privée pour EVM ou Solana |
 | `POST` | `/api/wallet/generate` | Générer de nouveaux portefeuilles pour EVM, Solana ou les deux |
 | `POST` | `/api/wallet/export` | Exporter les clés privées (nécessite une confirmation) |
+
+<div id="wallet-cloud">
+### Wallet Cloud
+</div>
+
+| Méthode | Chemin | Description |
+|---------|--------|-------------|
+| `POST` | `/api/wallet/primary` | Définir la source de portefeuille principale (local ou cloud) pour une chaîne. Contrôlé par `ENABLE_CLOUD_WALLET` |
+| `POST` | `/api/wallet/refresh-cloud` | Interroger à nouveau Eliza Cloud pour obtenir les derniers descripteurs de portefeuille cloud. Contrôlé par `ENABLE_CLOUD_WALLET` |
 
 ---
 

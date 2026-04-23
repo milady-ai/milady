@@ -1,4 +1,5 @@
 {
+  // Root-only (write-build-info, tsdown config). Apps/packages use their own `tsc` via `miladyTypecheckSteps` in scripts/run-repo-checks.mjs.
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "types": ["node", "bun"]

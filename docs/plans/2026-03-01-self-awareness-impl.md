@@ -505,7 +505,7 @@ function fakeRuntime(overrides: Record<string, unknown> = {}): IAgentRuntime {
   return {
     plugins: overrides.plugins ?? [],
     character: overrides.character ?? {
-      settings: { model: "claude-opus-4-6" },
+      settings: { model: "claude-opus-4-7" },
     },
     getSetting: (key: string) => (overrides.settings as Record<string, string>)?.[key] ?? null,
     ...overrides,
@@ -1098,7 +1098,7 @@ function fakeRuntime(registry: AwarenessRegistry): IAgentRuntime {
   return {
     plugins: [{ name: "milady" }, { name: "test-plugin" }],
     character: {
-      settings: { model: "claude-opus-4-6" },
+      settings: { model: "claude-opus-4-7" },
     },
     getSetting: () => null,
     getService: (name: string) => {

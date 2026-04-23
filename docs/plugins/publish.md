@@ -38,10 +38,10 @@ Your plugin's `package.json` must include these fields:
     "url": "https://github.com/yourorg/plugin-my-feature"
   },
   "peerDependencies": {
-    "@elizaos/core": "workspace:*"
+    "@elizaos/core": ">=2.0.0"
   },
   "devDependencies": {
-    "@elizaos/core": "workspace:*",
+    "@elizaos/core": "alpha",
     "typescript": "^5.0.0"
   }
 }

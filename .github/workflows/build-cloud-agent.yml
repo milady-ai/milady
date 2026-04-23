@@ -68,7 +68,7 @@ jobs:
           ref: ${{ env.SOURCE_REF }}
           fetch-depth: 0
           submodules: false
-          token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_TOKEN || secrets.GH_PAT || secrets.GITHUB_TOKEN }}
 
       # ── 2. Set up Node + Bun ────────────────────────────────────────────────
       - name: Setup Node.js 22
@@ -93,7 +93,7 @@ jobs:
       # ── 3.5. Init submodules + patch workspace for CI ──────────────
       - name: Init submodules
         env:
-          GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN || secrets.GH_PAT || secrets.GITHUB_TOKEN }}
         run: |
           if [ -n "$GH_TOKEN" ]; then
             git config --global url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf "https://github.com/"
@@ -415,14 +415,17 @@ jobs:
       # ── 11. Login to GHCR ──────────────────────────────────────────────────
       - name: Login to GHCR
         uses: docker/login-action@v3
+        if: ${{ github.event_name == 'push' || inputs.push_image != false }}
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # ── 12. Build and push via Docker Buildx (temp fallback from Depot) ──
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v6
+      # ── 12. Build and push via Depot (persistent layer cache + Depot infra) ──
+      - name: Build and push Docker image with Depot
+        id: depot-build
+        continue-on-error: true
+        uses: depot/build-push-action@v1
         with:
           context: .
           file: deploy/Dockerfile.ci
@@ -445,6 +448,31 @@ jobs:
             REVISION=${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          provenance: false
+
+      - name: Build and push Docker image with Buildx fallback
+        if: steps.depot-build.outcome == 'failure'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deploy/Dockerfile.ci
+          platforms: linux/amd64
+          push: ${{ github.event_name == 'push' || inputs.push_image != false }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.latest_tag }}
+          build-args: |
+            APP_ENTRYPOINT=${{ env.APP_ENTRYPOINT }}
+            APP_CMD_START=${{ env.APP_CMD_START }}
+            APP_PORT=${{ env.APP_PORT }}
+            APP_API_BIND=${{ env.APP_API_BIND }}
+            OCI_SOURCE=${{ env.OCI_SOURCE }}
+            OCI_TITLE=${{ env.OCI_TITLE }}
+            OCI_DESCRIPTION=${{ env.OCI_DESCRIPTION }}
+            OCI_LICENSES=${{ env.OCI_LICENSES }}
+            VERSION=${{ steps.version.outputs.version }}
+            VERSION_CLEAN=${{ steps.version.outputs.version_clean }}
+            REVISION=${{ github.sha }}
           provenance: false
 
       # ── 13. Trigger production deploy webhook ──────────────────────────────

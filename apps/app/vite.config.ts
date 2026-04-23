@@ -132,6 +132,12 @@ const NATIVE_PLUGIN_ALIAS_ENTRIES = CAPACITOR_PLUGIN_NAMES.map((name) => ({
   find: new RegExp(`^@elizaos/capacitor-${escapeRegExp(name)}$`),
   replacement: path.join(nativePluginsRoot, `${name}/src/index.ts`),
 }));
+const CAPACITOR_BUILD_TARGET =
+  process.env.MILADY_CAPACITOR_BUILD_TARGET ??
+  process.env.ELIZA_CAPACITOR_BUILD_TARGET ??
+  "";
+const IS_CAPACITOR_MOBILE_BUILD =
+  CAPACITOR_BUILD_TARGET === "ios" || CAPACITOR_BUILD_TARGET === "android";
 
 function appShellMetadataPlugin(): Plugin {
   const manifest = `${JSON.stringify(
@@ -446,11 +452,9 @@ function resolveManualChunk(id: string): string | undefined {
       return "vendor-vrm";
     }
 
-    if (normalizedId.includes("/three/examples/")) {
-      return "vendor-three-extras";
-    }
-
-    if (pathIncludesAny(normalizedId, ["/three/build/", "/three/src/"])) {
+    // Collapse all three.js code into one chunk to avoid cross-chunk TDZ
+    // init ordering bugs with WebGPU/TSL enums (see fix/three-chunk-tdz).
+    if (normalizedId.includes("/three/")) {
       return "vendor-three";
     }
   }
@@ -753,9 +757,6 @@ function nativeModuleStubPlugin(): Plugin {
   // parsed by Vite's dev pipeline.
   const nativePackages = new Set([
     "node-llama-cpp",
-    // Mobile-only Capacitor llama.cpp runtime. Never loads in web/Electrobun;
-    // stub so Vite doesn't try to bundle its native pods/JNI metadata.
-    "llama-cpp-capacitor",
     "fs-extra",
     "pty-state-capture",
     "pty-console",
@@ -780,6 +781,12 @@ function nativeModuleStubPlugin(): Plugin {
     "@elizaos/plugin-agent-skills",
     "@elizaos/plugin-agent-orchestrator",
   ]);
+  if (!IS_CAPACITOR_MOBILE_BUILD) {
+    // Mobile-only Capacitor llama.cpp runtime. Web/Electrobun builds stub it,
+    // but iOS/Android builds must ship its JS bridge so the native plugin can
+    // register through @capacitor/core.
+    nativePackages.add("llama-cpp-capacitor");
+  }
   const nativeScopeRe = /^@node-llama-cpp\//;
   // Capacitor native plugins — mobile-only, must never run in the browser.
   // Stubbing prevents Rollup from failing when bun workspaces don't hoist them.
@@ -834,7 +841,9 @@ function nativeModuleStubPlugin(): Plugin {
       // Scoped: @node-llama-cpp/*
       if (nativeScopeRe.test(id)) return VIRTUAL_PREFIX + id;
       // Capacitor native plugins (@capacitor/* except @capacitor/core)
-      if (capacitorNativeScopeRe.test(id)) return VIRTUAL_PREFIX + id;
+      if (capacitorNativeScopeRe.test(id) && !IS_CAPACITOR_MOBILE_BUILD) {
+        return VIRTUAL_PREFIX + id;
+      }
       // sharp's optional platform packages (@img/sharp-wasm32, etc.)
       if (
         id.startsWith("@img/sharp") ||

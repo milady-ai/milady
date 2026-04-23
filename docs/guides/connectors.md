@@ -1,7 +1,7 @@
 ---
 title: "Platform Connectors"
 sidebarTitle: "Connectors"
-description: "Platform bridges for 27 messaging platforms — 18 auto-enabled from config (Discord, Telegram, Slack, WhatsApp, Signal, iMessage, Blooio, MS Teams, Google Chat, Twitter, Farcaster, Twitch, Mattermost, Matrix, Feishu, Nostr, Lens, WeChat) plus 9 installable from the registry (Bluesky, Instagram, LINE, Zalo, Twilio, GitHub, Gmail Watch, Nextcloud Talk, Tlon)."
+description: "Platform bridges for 28 messaging platforms — 18 auto-enabled from config (Discord, Telegram, Slack, WhatsApp, Signal, iMessage, Blooio, MS Teams, Google Chat, Twitter, Farcaster, Twitch, Mattermost, Matrix, Feishu, Nostr, Lens, WeChat) plus 10 installable from the registry (BlueBubbles, Bluesky, Instagram, LINE, Zalo, Twilio, GitHub, Gmail Watch, Nextcloud Talk, Tlon)."
 ---
 
 Connectors are platform bridges that allow your agent to communicate across messaging platforms and social networks. Each connector handles authentication, message routing, session management, and platform-specific features.
@@ -21,22 +21,23 @@ Connectors are platform bridges that allow your agent to communicate across mess
 11. [Google Chat](#google-chat)
 12. [Twitter](#twitter)
 13. [Farcaster](#farcaster)
-14. [Twitch](#twitch)
-15. [Mattermost](#mattermost)
-16. [WeChat](#wechat)
-17. [Matrix](#matrix)
-18. [Feishu / Lark](#feishu--lark)
-19. [Nostr](#nostr)
-21. [Lens](#lens)
-22. [Bluesky](#bluesky)
-23. [Instagram](#instagram)
-24. [LINE](#line)
-25. [Zalo](#zalo)
-26. [Twilio](#twilio)
-27. [GitHub](#github)
-28. [Gmail Watch](#gmail-watch)
-29. [Nextcloud Talk](#nextcloud-talk)
-30. [Tlon](#tlon)
+14. [BlueBubbles](#bluebubbles)
+15. [Bluesky](#bluesky)
+16. [Instagram](#instagram)
+17. [Twitch](#twitch)
+18. [Mattermost](#mattermost)
+19. [WeChat](#wechat)
+20. [Matrix](#matrix)
+21. [Feishu / Lark](#feishu--lark)
+22. [Nostr](#nostr)
+23. [LINE](#line)
+24. [Zalo](#zalo)
+25. [Twilio](#twilio)
+26. [GitHub](#github)
+27. [Gmail Watch](#gmail-watch)
+28. [Nextcloud Talk](#nextcloud-talk)
+29. [Tlon](#tlon)
+30. [Lens](#lens)
 31. [Connector Lifecycle](#connector-lifecycle)
 32. [Multi-Account Support](#multi-account-support)
 33. [Session Management](#session-management)
@@ -67,6 +68,7 @@ Connectors marked **Auto** load automatically when their config is present in `m
 | Feishu / Lark | App ID + secret | Yes | Yes (group chats) | No | Auto |
 | Nostr | Private key (nsec/hex) | Yes (NIP-04) | N/A | No | Auto |
 | Lens | API key | Yes | N/A | No | Auto |
+| BlueBubbles | Server password | Yes | Yes | No | Registry |
 | Bluesky | Account credentials | Posts | N/A | No | Registry |
 | Instagram | Username + password | DMs | N/A | No | Registry |
 | LINE | Channel access token + secret | Yes | Yes | No | Registry |
@@ -86,9 +88,9 @@ Connectors are configured in the `connectors` section of `milady.json`. Common f
 | Field | Type | Description |
 |-------|------|-------------|
 | `enabled` | boolean | Enable or disable the connector |
-| `dmPolicy` | string | DM acceptance: `"pairing"` (default), `"open"`, or `"closed"` |
-| `allowFrom` | string[] | Allowlist of user IDs (required when `dmPolicy: "open"`) |
-| `groupPolicy` | string | Group message policy: `"allowlist"` (default) or `"open"` |
+| `dmPolicy` | string | DM acceptance: `"pairing"` (default), `"allowlist"`, `"open"`, or `"disabled"` |
+| `allowFrom` | string[] | Allowlist of user IDs (required when `dmPolicy: "open"`, must include `"*"`) |
+| `groupPolicy` | string | Group message policy: `"allowlist"` (default), `"open"`, or `"disabled"` |
 | `groupAllowFrom` | string[] | Allowlist of group IDs |
 | `historyLimit` | number | Max messages to load from conversation history |
 | `dmHistoryLimit` | number | Max messages for DM history |
@@ -534,6 +536,42 @@ Connects to iMessage and SMS messaging via the Blooio service with signed webhoo
 
 ---
 
+## BlueBubbles
+
+### Setup Requirements
+
+- A Mac with Messages signed in and [BlueBubbles](https://bluebubbles.app) server running
+- BlueBubbles server URL and password
+
+### Key Configuration
+
+```json
+{
+  "connectors": {
+    "bluebubbles": {
+      "serverUrl": "http://192.168.1.10:1234",
+      "password": "your-bluebubbles-password"
+    }
+  }
+}
+```
+
+**Environment variables:** `BLUEBUBBLES_SERVER_URL`, `BLUEBUBBLES_PASSWORD`
+
+### Features
+
+- iMessage send/receive via BlueBubbles HTTP API
+- DM and group chat support
+- Read receipts
+- Webhook-based inbound messages
+- Network-accessible (works from any machine, not just the Mac running Messages)
+
+**Note:** This connector is available from the plugin registry. Install it with `milady plugins install @elizaos/plugin-bluebubbles`.
+
+**Docs:** [BlueBubbles connector](/connectors/bluebubbles)
+
+---
+
 ## Bluesky
 
 ### Setup Requirements
@@ -555,7 +593,7 @@ Connects to iMessage and SMS messaging via the Blooio service with signed webhoo
 }
 ```
 
-**Environment variables:** `BLUESKY_ENABLED`, `BLUESKY_DRY_RUN`, `BLUESKY_USERNAME`, `BLUESKY_PASSWORD`, `BLUESKY_HANDLE`
+**Environment variables:** `BLUESKY_HANDLE`, `BLUESKY_PASSWORD`, `BLUESKY_ENABLED`, `BLUESKY_DRY_RUN`, `BLUESKY_SERVICE`, `BLUESKY_ENABLE_DMS`
 
 ### Features
 
@@ -586,7 +624,7 @@ Connects to iMessage and SMS messaging via the Blooio service with signed webhoo
 }
 ```
 
-**Environment variables:** `INSTAGRAM_USERNAME`, `INSTAGRAM_PASSWORD`, `INSTAGRAM_DRY_RUN`, `INSTAGRAM_POLL_INTERVAL`, `INSTAGRAM_POST_INTERVAL_MIN`, `INSTAGRAM_POST_INTERVAL_MAX`
+**Environment variables:** `INSTAGRAM_USERNAME`, `INSTAGRAM_PASSWORD`, `INSTAGRAM_PROXY`, `INSTAGRAM_VERIFICATION_CODE`
 
 ### Features
 
@@ -653,7 +691,7 @@ Connects to iMessage and SMS messaging via the Blooio service with signed webhoo
 }
 ```
 
-**Environment variables:** `MATTERMOST_BOT_TOKEN`, `MATTERMOST_BASE_URL`
+**Environment variables:** `MATTERMOST_BOT_TOKEN`, `MATTERMOST_SERVER_URL`
 
 ### Features
 
@@ -847,7 +885,7 @@ operate yourself or explicitly trust for that message flow.
 }
 ```
 
-**Environment variables:** `LINE_CHANNEL_ACCESS_TOKEN`, `LINE_CHANNEL_SECRET`, `LINE_CUSTOM_GREETING`
+**Environment variables:** `LINE_CHANNEL_ACCESS_TOKEN`, `LINE_CHANNEL_SECRET`
 
 ### Features
 
@@ -878,7 +916,7 @@ operate yourself or explicitly trust for that message flow.
 }
 ```
 
-**Environment variables:** `ZALO_ACCESS_TOKEN`, `ZALO_REFRESH_TOKEN`, `ZALO_APP_ID`, `ZALO_APP_SECRET`
+**Environment variables:** `ZALO_ACCESS_TOKEN`, `ZALO_REFRESH_TOKEN`, `ZALO_APP_ID`, `ZALO_SECRET_KEY`
 
 ### Features
 
@@ -1115,8 +1153,9 @@ The `dmPolicy` options are:
 | Policy | Behavior |
 |--------|----------|
 | `pairing` | Default. Agent responds after a pairing/onboarding flow. |
+| `allowlist` | Agent responds only to users in the `allowFrom` list. |
 | `open` | Agent responds to all DMs. Requires `allowFrom: ["*"]`. |
-| `closed` | Agent does not respond to DMs. |
+| `disabled` | Agent does not respond to DMs. |
 
 ---
 
@@ -1135,7 +1174,7 @@ The `dmPolicy` options are:
 **General connector failures:**
 
 - Connector plugin not loading:
-  Check connector ID mapping in `src/config/plugin-auto-enable.ts`, plugin availability, and `plugins.entries` overrides. The auto-enable layer maps connector config keys to plugin package names — a mismatch means the plugin is silently skipped.
+  Check connector ID mapping in `packages/agent/src/config/plugin-auto-enable.ts` (in the `eliza` submodule), plugin availability, and `plugins.entries` overrides. The auto-enable layer maps connector config keys to plugin package names — a mismatch means the plugin is silently skipped.
 - Auth succeeds but no messages arrive:
   Check platform webhook/socket settings and policy gates (`dmPolicy`, `groupPolicy`). For webhook-based connectors, confirm the callback URL is publicly reachable.
 - Misrouted connector secrets:
@@ -1244,7 +1283,7 @@ The `dmPolicy` options are:
 **Bluesky:**
 
 - Authentication fails:
-  Confirm `BLUESKY_USERNAME` and `BLUESKY_PASSWORD` environment variables are set. Bluesky uses app passwords, not your main account password.
+  Confirm `BLUESKY_HANDLE` and `BLUESKY_PASSWORD` environment variables are set. Bluesky uses app passwords, not your main account password. Generate an app password at bsky.app/settings/app-passwords.
 
 **Instagram:**
 
@@ -1274,19 +1313,14 @@ The `dmPolicy` options are:
 
 ### Verification Commands
 
+These test paths reference files in the `eliza` submodule. Run `bun run setup:upstreams` first to initialize it.
+
 ```bash
-# Connector auto-enable and runtime loading
-bunx vitest run src/config/plugin-auto-enable.test.ts src/runtime/eliza.test.ts
+# Full test suite (from repo root)
+bun run test
 
-# Platform-specific connector tests
-bunx vitest run src/connectors/discord-connector.test.ts
-
-# Connector e2e tests
-bunx vitest run --config test/vitest/live-e2e.config.ts packages/agent/test/discord-connector.live.e2e.test.ts
-bunx vitest run --config test/vitest/integration.config.ts packages/agent/test/signal-connector.integration.test.ts
-
-# WhatsApp pairing
-bunx vitest run src/services/__tests__/whatsapp-pairing.test.ts src/api/__tests__/whatsapp-routes.test.ts
+# End-to-end tests
+bun run test:e2e
 
 bun run typecheck
 ```

@@ -1,12 +1,4 @@
 [submodule "eliza"]
 	path = eliza
-	url = https://github.com/milady-ai/eliza.git
-	branch = fix/cloud-agent-template-pin-versions
-[submodule "eliza/cloud"]
-	path = eliza/cloud
-	url = https://github.com/elizaOS/cloud.git
-	branch = dev
-[submodule "eliza/steward-fi"]
-	path = eliza/steward-fi
-	url = https://github.com/Steward-Fi/steward.git
+	url = https://github.com/elizaOS/eliza.git
 	branch = develop

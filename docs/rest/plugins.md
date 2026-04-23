@@ -6,6 +6,8 @@ description: "REST API endpoints for plugin management, the elizaOS plugin regis
 
 The plugins API manages the agent's plugin system. It covers three areas: **plugin management** (listing, configuring, enabling/disabling installed plugins), **plugin installation** (install, uninstall, eject, sync from npm), and the **plugin registry** (browsing the elizaOS community catalog).
 
+When `MILADY_API_TOKEN` is set, include it as a `Bearer` token in the `Authorization` header.
+
 ## Endpoints
 
 ### Plugin Management

@@ -3,6 +3,74 @@ title: Changelog
 description: What's new in Milady — features, improvements, and fixes.
 ---
 
+<Update label="2026-04-23" description="Week of April 23; dual-wallet and cloud wallet provisioning, Agent Browser Bridge, automation drafts, cloud agent provisioning UX, BlueBubbles connector" tags={["Feature", "Update", "Fix"]}>
+
+## Dual-wallet with cloud wallet provisioning
+
+Your agent now supports a dual-wallet architecture where [local and cloud wallets](/rest/wallet) coexist, with a primary source per chain. When you log into [Eliza Cloud](/guides/cloud) with the cloud wallet feature enabled, EVM and Solana wallets are imported from the cloud and set as primary automatically — no manual setup. You can switch the primary source at any time, and cloud wallet descriptors can be re-queried on demand. If provisioning fails during login, authentication still succeeds and you can retry wallet provisioning later.
+
+## Agent Browser Bridge
+
+The LifeOps Browser extension has been renamed and relocated as the **Agent Browser Bridge** — a standalone browser extension (Chrome and Safari) that lets your agent observe and act inside your browser sessions. The bridge runs as its own app with a dedicated setup panel, refreshed installer artifacts, and a new home tab in the browser workspace view. Existing LifeOps browser workflows continue to work against the new bridge.
+
+## Automation drafts
+
+The [automations](/guides/cloud) view now supports drafting workflows before activating them. A new draft pane lets you compose a workflow scoped to a specific room, normalize its title, and handle send errors gracefully if the draft can't be delivered. Drafts stay out of your live automation list until you're ready to ship them.
+
+## Cloud agent provisioning UX
+
+The cloud [dashboard](/guides/cloud) now handles non-running runtime cards clearly. The primary **Open** button is disabled and labeled with the agent's current state ("starting…", "stopped", "paused", "unreachable") while the card polls for readiness, with a pulsing status dot during provisioning and a tooltip explaining the expected boot time. The button flips back to the solid **Open** state automatically as soon as the health probe returns running. Deleting cloud agents and inline provisioning from the dashboard have also been restored.
+
+## BlueBubbles connector
+
+A new [BlueBubbles connector](/connectors/bluebubbles) lets your agent bridge to iMessage through a self-hosted [BlueBubbles](https://bluebubbles.app) server over HTTP. Unlike the native iMessage connector — which reads the local Messages database directly — BlueBubbles can be reached from any machine on the same network, making it a good fit when your agent doesn't run on the Mac that holds the Messages database.
+
+## Updates
+
+- **Chat and page polish** — Page-scoped chat context, chat widget heading, chat title, and chat sidebar have all been refined for cleaner layouts and more reliable context when switching between pages.
+- **Sidebar and apps view modernization** — The dashboard sidebar controls, [apps view](/dashboard/apps) catalog, and apps sidebar have been cleaned up with collapsed controls and tighter density. The character editor, [character](/agents/character-interface) layout, character panel, and character sidebar have also been polished for a more consistent navigation experience.
+- **Connector sidebar cleanup** — The connector configuration sidebar has been cleaned up and polished, with clearer toggles and connector switches for enabling/disabling individual platforms.
+- **Embedded knowledge uploads** — The [knowledge](/guides/knowledge) system now supports embedded uploads directly from the character editor, so you can attach reference material while configuring your agent's persona.
+- **X (Twitter) billing and status** — X connector billing is now surfaced alongside other cloud usage, and status reporting has been hardened with new test coverage.
+- **Cloud migration fix** — A migration issue affecting cloud-deployed agents has been resolved so upgrades apply cleanly on first boot.
+- **iOS runtime onboarding modes** — The iOS app now supports distinct runtime build and onboarding modes, giving mobile users a smoother first-run experience.
+- **Accessibility cleanup** — Dashboard micro-labels, page chrome, and status affordances have been cleaned up for better accessibility parity.
+
+## Bug fixes
+
+- Fixed the n8n sidecar not recovering cleanly in some configurations — the sidecar now starts and fails over reliably
+- Fixed automation deep links not scrolling to the correct section when opened from the sidebar — hash anchors now resolve correctly
+- Fixed the cloud dashboard allowing users to click the Open button on non-running runtime cards, which led to dead pages
+- Fixed the browser workspace tabs not resetting between sessions in the Agent Browser Bridge
+
+</Update>
+
+<Update label="2026-04-22" description="Week of April 22; life-ops page redesign, chat UI refresh, calendar event editor, schedule reliability" tags={["Feature", "Update", "Fix"]}>
+
+## Life-ops page redesign
+
+The [life-ops](/rest/lifeops) page has been completely rebuilt with a new layout. A vertical nav rail on the left lets you switch between dashboard, inbox, calendar, reminders, and setup sections without leaving the page. The inbox and calendar now have their own dedicated views — browse messages from all connected platforms in the inbox section, and view your week at a glance in the calendar section. A right-side chat panel stays visible alongside whichever section you're in, so you can talk to your agent while reviewing your schedule or triaging messages.
+
+## Calendar event editor
+
+You can now edit calendar events directly from the [life-ops](/rest/lifeops) calendar view. Click any event to open an editor drawer where you can update details without switching to Google Calendar. The editor connects to your real calendar data, so changes sync back to Google automatically.
+
+## Chat UI refresh
+
+The chat interface is cleaner and more compact. Message bubbles are flatter with tighter spacing, the composer uses icon-only buttons instead of text labels, and user messages now show a "You" label for clarity. The typing indicator no longer displays an avatar, and chat panels stretch to full height so you use more of the available screen space.
+
+## Updates
+
+- **Life-ops sidebar widgets split** — The life-ops sidebar now uses four separate widgets instead of one monolithic block, with improved density so more information fits without scrolling.
+- **Life-ops schedule accuracy** — Schedule widgets no longer show stale meal windows whose start time has already passed. Bedtime targets, minute humanization, and confidence labels have also been corrected for more accurate daily schedule displays.
+
+## Bug fixes
+
+- Fixed the terminal panel getting stuck on "Starting terminal…" when spawning a shell session — the panel now loads correctly
+- Fixed chat placement in the browser workspace view appearing in the wrong position
+
+</Update>
+
 <Update label="2026-04-21" description="Week of April 21; cloud travel booking, feature toggles, automations UX overhaul, action surface consolidation" tags={["Feature", "Update", "Fix"]}>
 
 ## Cloud travel booking

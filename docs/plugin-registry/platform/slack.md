@@ -76,10 +76,12 @@ Navigate to **OAuth & Permissions** and click **Install to Workspace**. Copy the
 | Field | Required | Description |
 |-------|----------|-------------|
 | `botToken` | Yes | Bot User OAuth Token (`xoxb-...`) |
-| `appToken` | No | App-Level Token for Socket Mode (`xapp-...`) |
-| `signingSecret` | No | Signing secret for webhook verification |
+| `appToken` | No | App-Level Token for Socket Mode (`xapp-...`). Required for Socket Mode (default transport) |
+| `mode` | No | Transport mode: `"socket"` (default) or `"http"` |
+| `signingSecret` | No | Signing secret for HTTP mode webhook verification (required when `mode` is `"http"`) |
+| `userToken` | No | User Token (`xoxp-...`) for user-scoped API calls |
 | `enabled` | No | Set `false` to disable (default: `true`) |
-| `allowedChannels` | No | Array of channel IDs to respond in |
+| `groupPolicy` | No | Group/channel join policy: `"open"`, `"disabled"`, or `"allowlist"` (default: `"allowlist"`) |
 
 ## Features
 
@@ -114,18 +116,22 @@ The plugin auto-enables when `connectors.slack.botToken` is set.
 
 ## Thread Behavior
 
-By default, responses are posted as thread replies to keep channels clean. To post top-level replies:
+Thread history scope is configurable. By default, threads maintain isolated conversation history:
 
 ```json
 {
   "connectors": {
     "slack": {
       "botToken": "<SLACK_BOT_TOKEN>",
-      "replyInThread": false
+      "thread": {
+        "historyScope": "thread"
+      }
     }
   }
 }
 ```
+
+Set `historyScope` to `"channel"` to reuse channel conversation history in threads. Set `inheritParent` to `true` to include the parent channel transcript when starting a new thread session.
 
 ## Related
 

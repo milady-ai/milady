@@ -123,7 +123,10 @@ jobs:
           key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: bun-${{ runner.os }}-
 
-      - name: Init non-eliza submodules
+      - name: Init eliza checkout for nightly tests
+        run: git submodule update --init eliza
+
+      - name: Init published-mode submodules
         run: |
           node scripts/init-submodules.mjs
           node scripts/disable-local-eliza-workspace.mjs
@@ -132,6 +135,17 @@ jobs:
         run: bun install --ignore-scripts
         env:
           npm_config_python: ${{ env.pythonLocation }}/bin/python3
+
+      - name: Install published-workspace fallback dependencies
+        run: bash scripts/install-published-workspace-fallback-deps.sh
+
+      - name: Restore eliza workspace paths for repo-local tests
+        run: node scripts/restore-local-eliza-workspace.mjs
+
+      - name: Install local eliza test dependencies
+        run: |
+          bun install --cwd eliza --no-frozen-lockfile --ignore-scripts
+          bun install --cwd eliza/cloud --no-frozen-lockfile --ignore-scripts
 
       - name: Run repository postinstall patches
         run: bun run postinstall
@@ -296,6 +310,9 @@ jobs:
 
       - name: Install dependencies (for npm publish file resolution)
         run: bun install --ignore-scripts
+
+      - name: Install published-workspace fallback dependencies
+        run: bash scripts/install-published-workspace-fallback-deps.sh
 
       - name: Publish with nightly dist-tag
         run: npm publish --tag nightly --access public

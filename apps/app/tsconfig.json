@@ -58,6 +58,9 @@
       "@elizaos/capacitor-desktop": [
         "./eliza/packages/native-plugins/desktop/src/index.ts"
       ],
+      "@elizaos/capacitor-llama": [
+        "./eliza/packages/native-plugins/llama/src/index.ts"
+      ],
       "@elizaos/native-activity-tracker": [
         "./eliza/packages/native-plugins/activity-tracker/src/index.ts"
       ],

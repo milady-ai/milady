@@ -53,10 +53,17 @@ The plugin auto-enables when any of these are present:
 
 ## Configuration
 
-| Variable | Required | Description |
-|----------|----------|-------------|
+| Field | Required | Description |
+|-------|----------|-------------|
 | `accessToken` | Yes* | Twitch OAuth access token |
 | `clientId` | Yes* | Twitch application Client ID |
+| `clientSecret` | No | Twitch client secret |
+| `refreshToken` | No | Refresh token for token renewal |
+| `username` | No | Twitch username for the bot |
+| `channel` | No | Primary channel name to join |
+| `channels` | No | Additional channel names to join |
+| `requireMention` | No | Only respond when mentioned |
+| `allowedRoles` | No | Comma-separated allowed roles |
 | `enabled` | No | Force-enable without credentials |
 
 \* At least one of `accessToken`, `clientId`, or `enabled: true` is required.

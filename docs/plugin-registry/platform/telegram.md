@@ -46,18 +46,24 @@ export TELEGRAM_BOT_TOKEN=123456789:ABCdef...
 |-------|----------|-------------|
 | `botToken` | Yes | Telegram bot token from BotFather |
 | `enabled` | No | Set `false` to disable (default: `true`) |
-| `allowedUsers` | No | Array of Telegram user IDs to accept messages from |
-| `allowedGroups` | No | Array of group/channel IDs to respond in |
+| `dmPolicy` | No | DM access policy: `"pairing"`, `"allowlist"`, `"open"`, or `"disabled"` (default: `"pairing"`) |
+| `allowFrom` | No | User IDs allowed to DM (required when `dmPolicy` is `"open"`, must include `"*"`) |
+| `groupPolicy` | No | Group join policy: `"open"`, `"disabled"`, or `"allowlist"` (default: `"allowlist"`) |
 | `webhookUrl` | No | Use webhook instead of polling (requires HTTPS URL) |
-| `webhookSecret` | No | Secret token for webhook verification |
+| `webhookSecret` | No | Secret token for webhook verification (required when `webhookUrl` is set) |
 
 ```json
 {
   "connectors": {
     "telegram": {
       "botToken": "123456789:ABCdef...",
-      "allowedUsers": [123456, 789012],
-      "allowedGroups": [-1001234567890]
+      "dmPolicy": "pairing",
+      "groupPolicy": "allowlist",
+      "groups": {
+        "-1001234567890": {
+          "requireMention": true
+        }
+      }
     }
   }
 }

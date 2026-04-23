@@ -130,7 +130,7 @@ Send a message and get the agent's response synchronously (non-streaming).
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `message` | string | Yes | User message text |
+| `text` | string | Yes | User message text |
 | `channelType` | string | No | Channel type override |
 | `images` | array | No | Attached image data |
 

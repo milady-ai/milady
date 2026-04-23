@@ -1,4 +1,5 @@
 import { scenario } from "@elizaos/scenario-schema";
+import { expectTurnToCallAction } from "../_helpers/action-assertions.ts";
 
 export default scenario({
   id: "gmail.triage.unread",
@@ -18,22 +19,40 @@ export default scenario({
       title: "Gmail Triage Unread",
     },
   ],
+  seed: [
+    {
+      type: "gmailInbox",
+      account: "test-owner",
+      fixture: "unread-inbox.eml",
+    },
+  ],
   turns: [
     {
       kind: "message",
       name: "triage unread",
       room: "main",
       text: "Triage my unread email",
-      expectedActions: ["GMAIL_ACTION"],
-      responseIncludesAny: ["unread", "inbox", "triage"],
+      assertTurn: expectTurnToCallAction({
+        acceptedActions: ["GMAIL_ACTION"],
+        description: "gmail unread triage",
+        includesAny: ["triage", "unread"],
+      }),
     },
   ],
   finalChecks: [
     {
-      type: "actionCalled",
+      type: "gmailActionArguments",
       actionName: "GMAIL_ACTION",
-      status: "success",
+      subaction: "triage",
+    },
+    {
+      type: "gmailMockRequest",
+      method: "GET",
+      path: "/gmail/v1/users/me/messages",
       minCount: 1,
+    },
+    {
+      type: "gmailNoRealWrite",
     },
   ],
   cleanup: [

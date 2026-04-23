@@ -128,9 +128,6 @@ Key Biome rules configured in `biome.json`:
 # Full build (TypeScript + UI)
 bun run build
 
-# Build using Node.js (instead of Bun runtime)
-bun run build
-
 # Desktop app (Electrobun)
 bun run build:desktop
 
@@ -312,31 +309,27 @@ milady/
 │   ├── app/                 # Desktop/mobile app (Capacitor + React)
 │   │   ├── electrobun/      # Electrobun desktop wrapper
 │   │   └── src/             # React UI components
+│   ├── browser-bridge/      # Browser extension bridge
+│   └── homepage/            # Marketing site
 ├── deploy/                  # Docker deployment configs
-├── docs/                    # Documentation site
-├── packages/                # Workspace packages
-├── plugins/                 # Workspace plugin packages
+├── docs/                    # Documentation site (Mintlify)
+├── eliza/                   # elizaOS submodule (core framework)
+│   └── packages/
+│       └── app-core/        # Main application package
+│           └── src/         # Runtime source of truth
+│               ├── actions/ # Agent actions
+│               ├── api/     # HTTP API routes
+│               ├── cli/     # CLI command definitions
+│               ├── config/  # Configuration handling
+│               ├── runtime/ # elizaOS runtime wrapper
+│               ├── services/# Background services
+│               └── ...
 ├── scripts/                 # Build, dev, and release tooling
-├── skills/                  # Skill catalog cache
-├── src/                     # Core source code
-│   ├── actions/             # Agent actions
-│   ├── api/                 # HTTP API routes
-│   ├── cli/                 # CLI command definitions
-│   ├── config/              # Configuration handling
-│   ├── hooks/               # Runtime hooks
-│   ├── plugins/             # Built-in plugins
-│   ├── providers/           # Context providers
-│   ├── runtime/             # elizaOS runtime wrapper
-│   ├── security/            # Security utilities
-│   ├── services/            # Background services
-│   ├── triggers/            # Trigger system
-│   ├── tui/                 # Terminal UI (disabled)
-│   └── utils/               # Helper utilities
+├── skills/                  # Workspace skills and defaults
 ├── test/                    # Test setup, helpers, e2e scripts
 ├── AGENTS.md                # Repository guidelines for agents
 ├── CONTRIBUTING.md          # Contribution philosophy
 ├── package.json             # Root package config
-├── plugins.json             # Plugin registry manifest
 ├── biome.json               # Biome linter/formatter config
 ├── tsconfig.json            # TypeScript config
 ├── tsdown.config.ts         # Build config (tsdown bundler)
@@ -348,11 +341,9 @@ milady/
 
 | File | Purpose |
 |------|---------|
-| `src/entry.ts` | CLI entry point |
-| `src/index.ts` | Library exports |
-| `src/runtime/eliza.ts` | elizaOS runtime initialization |
-| `src/runtime/milady-plugin.ts` | Main Milady plugin |
 | `milady.mjs` | npm bin entry (`"bin"` in package.json) |
+| `eliza/packages/app-core/src/entry.ts` | CLI entry point |
+| `eliza/packages/app-core/src/runtime/eliza.ts` | elizaOS runtime initialization |
 
 ---
 

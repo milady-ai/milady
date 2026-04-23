@@ -1,6 +1,5 @@
 import { scenario } from "@elizaos/scenario-schema";
 import {
-  expectScenarioToCallAction,
   expectTurnToCallAction,
   judgeRubric,
 } from "../_helpers/action-assertions.ts";
@@ -23,18 +22,24 @@ export default scenario({
       title: "Gmail Send With Confirmation",
     },
   ],
+  seed: [
+    {
+      type: "gmailInbox",
+      account: "test-owner",
+      fixture: "sarah-product-brief.eml",
+    },
+  ],
   turns: [
     {
       kind: "message",
       name: "draft reply saying thanks",
       room: "main",
-      text: "Draft a reply to Alice's latest email saying thanks and that I can review it Friday afternoon, but hold it for approval.",
+      text: "Draft a reply to Sarah's latest email saying thanks and that I can review it Friday afternoon, but hold it for approval.",
       assertTurn: expectTurnToCallAction({
         acceptedActions: ["GMAIL_ACTION", "INBOX"],
         description: "gmail approval-gated draft",
         includesAny: ["draft", "approval", "thanks", "Friday"],
       }),
-      responseIncludesAny: ["draft", "thanks", "approval"],
       responseJudge: {
         minimumScore: 0.7,
         rubric:
@@ -51,7 +56,6 @@ export default scenario({
         description: "gmail send after explicit confirmation",
         includesAny: ["send", "reply", "Gmail"],
       }),
-      responseIncludesAny: ["sent", "sending", "send"],
       responseJudge: {
         minimumScore: 0.7,
         rubric:
@@ -61,36 +65,40 @@ export default scenario({
   ],
   finalChecks: [
     {
-      type: "selectedAction",
+      type: "gmailActionArguments",
       actionName: ["GMAIL_ACTION", "INBOX"],
+      subaction: "draft_reply",
     },
     {
-      type: "custom",
-      name: "gmail-send-confirmation-two-step-gate",
-      predicate: async (ctx) => {
-        const firstBlob = JSON.stringify(ctx.turns?.[0]?.actionsCalled ?? []);
-        const secondBlob = JSON.stringify(ctx.turns?.[1]?.actionsCalled ?? []);
-        if (/send_reply|send_message|"confirmed":true/i.test(firstBlob)) {
-          return "first turn executed or confirmed a Gmail send instead of stopping at a draft";
-        }
-        const secondTurnText = String(ctx.turns?.[1]?.responseText ?? "");
-        if (
-          !/send_reply|send_message|"confirmed":true/i.test(secondBlob) &&
-          !/\bsent\b|\bsending\b/i.test(secondTurnText)
-        ) {
-          return "second turn did not clearly execute the send after explicit confirmation";
-        }
+      type: "gmailDraftCreated",
+    },
+    {
+      type: "gmailApproval",
+      state: "pending",
+    },
+    {
+      type: "gmailActionArguments",
+      actionName: ["GMAIL_ACTION", "INBOX"],
+      subaction: "send_reply",
+      fields: {
+        confirmed: true,
       },
     },
     {
-      type: "custom",
-      name: "gmail-send-confirmation-action-coverage",
-      predicate: expectScenarioToCallAction({
-        acceptedActions: ["GMAIL_ACTION", "INBOX"],
-        description: "gmail draft then send after confirmation",
-        includesAny: ["draft", "send", "reply", "approval"],
-        minCount: 2,
-      }),
+      type: "gmailApproval",
+      state: "confirmed",
+    },
+    {
+      type: "gmailMessageSent",
+    },
+    {
+      type: "gmailMockRequest",
+      method: "POST",
+      path: "/gmail/v1/users/me/messages/send",
+      minCount: 1,
+    },
+    {
+      type: "gmailNoRealWrite",
     },
     judgeRubric({
       name: "gmail-send-confirmation-rubric",

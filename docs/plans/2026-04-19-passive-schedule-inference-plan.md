@@ -40,7 +40,7 @@ LifeOps already has several pieces of the stack:
 - The app already captures page, app lifecycle, desktop power, and mobile health signals in [useLifeOpsActivitySignals.ts](/Users/shawwalters/eliza-workspace/milady/eliza/apps/app-lifeops/src/hooks/useLifeOpsActivitySignals.ts:102).
 - The mobile signals plugin already exposes HealthKit sleep and biometrics in [mobile-signals definitions](/Users/shawwalters/eliza-workspace/milady/eliza/packages/native-plugins/mobile-signals/src/definitions.ts:16).
 - The macOS native activity tracker already records foreground app focus transitions in [activity-collector.swift](/Users/shawwalters/eliza-workspace/milady/eliza/packages/native-plugins/activity-tracker/native/macos/activity-collector.swift:79).
-- Browser focus time is already captured by the LifeOps browser extension in [time-on-site.ts](/Users/shawwalters/eliza-workspace/milady/apps/browser-extension-lifeops/src/tracker/time-on-site.ts:28).
+- Browser focus time is captured by the canonical LifeOps browser companion in [page-extract.ts](/Users/shawwalters/eliza-workspace/milady/eliza/apps/app-lifeops/extensions/lifeops-browser/src/page-extract.ts:1) and persisted through the browser activity store.
 - Screen-time storage exists in [service-mixin-screentime.ts](/Users/shawwalters/eliza-workspace/milady/eliza/apps/app-lifeops/src/lifeops/service-mixin-screentime.ts:37).
 - Proactive GM/GN and pre-activity nudges already exist in [proactive-planner.ts](/Users/shawwalters/eliza-workspace/milady/eliza/apps/app-lifeops/src/activity-profile/proactive-planner.ts:81).
 

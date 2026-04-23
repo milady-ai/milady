@@ -14,7 +14,7 @@ OpenRouter 插件将 Milady 代理连接到 OpenRouter 的统一推理网关，�
 
 </div>
 
-在 Milady 的 monorepo 中，**`@elizaos/plugin-openrouter` 被固定为 `2.0.0-alpha.10`**（根 `package.json` 中的精确版本，反映在 `bun.lock` 中）。
+在 Milady 的 monorepo 中，**`@elizaos/plugin-openrouter` 被固定为 `2.0.0-alpha.13`**（根 `package.json` 中的精确版本，反映在 `bun.lock` 中）。
 
 **为什么要固定版本**
 
@@ -72,7 +72,7 @@ export OPENROUTER_API_KEY=sk-or-...
     "profiles": {
       "default": {
         "provider": "openrouter",
-        "model": "anthropic/claude-sonnet-4-5"
+        "model": "anthropic/claude-sonnet-4.6"
       }
     }
   }
@@ -108,9 +108,9 @@ OpenRouter 提供对所有主要提供者模型的访问。使用带有提供者
 
 | 模型 ID | 描述 |
 |---------|------|
-| `anthropic/claude-opus-4` | 最强大的 Claude |
-| `anthropic/claude-sonnet-4-5` | 均衡的 Claude |
-| `anthropic/claude-haiku-4` | 最快的 Claude |
+| `anthropic/claude-opus-4.7` | 最强大的 Claude |
+| `anthropic/claude-sonnet-4.6` | 均衡的 Claude |
+| `anthropic/claude-haiku-4.5` | 最快的 Claude |
 
 <div id="meta-via-openrouter">
 
@@ -144,8 +144,8 @@ OpenRouter 提供对所有主要提供者模型的访问。使用带有提供者
 
 | elizaOS 模型类型 | 默认 OpenRouter 模型 |
 |-----------------|-------------------|
-| `TEXT_SMALL` | `anthropic/claude-haiku-4` |
-| `TEXT_LARGE` | `anthropic/claude-sonnet-4-5` |
+| `TEXT_SMALL` | `anthropic/claude-haiku-4.5` |
+| `TEXT_LARGE` | `anthropic/claude-sonnet-4.6` |
 
 <div id="features">
 
@@ -176,7 +176,7 @@ OpenRouter 支持按成本、延迟或吞吐量设置路由偏好：
     "profiles": {
       "default": {
         "provider": "openrouter",
-        "model": "anthropic/claude-sonnet-4-5",
+        "model": "anthropic/claude-sonnet-4.6",
         "providerPreferences": {
           "order": ["Anthropic", "AWS Bedrock"],
           "allowFallbacks": true

@@ -42,6 +42,8 @@ Inicia el flujo de inicio de sesión de Eliza Cloud. Crea una sesión en la nube
 
 Sondea el estado de una sesión de inicio de sesión. Cuando el estado es `"authenticated"`, la clave API se guarda automáticamente en la configuración y se aplica al entorno del proceso.
 
+Cuando la función de wallet cloud está habilitada (`ENABLE_CLOUD_WALLET=1`), un inicio de sesión exitoso también desencadena el aprovisionamiento de wallet cloud de mejor esfuerzo. El agente intenta importar wallets EVM y Solana desde Eliza Cloud y establecerlas como la fuente de wallet principal. Si el aprovisionamiento falla, el inicio de sesión sigue siendo exitoso — la clave API se guarda, y el fallo del aprovisionamiento de wallet se registra sin afectar la respuesta de autenticación. Puede reintentar manualmente el aprovisionamiento de wallet más tarde usando `POST /api/wallet/refresh-cloud`.
+
 **Parámetros de consulta**
 
 | Parámetro | Tipo | Requerido | Descripción |

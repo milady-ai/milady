@@ -4,7 +4,7 @@ sidebarTitle: "Agents"
 description: "REST API endpoints for agent lifecycle, administration, and transfer (export/import)."
 ---
 
-All agent endpoints require the agent runtime to be initialized. The API server runs on port **2138** by default and all paths are prefixed with `/api/`. When `MILADY_API_TOKEN` is set, include it as a `Bearer` token in the `Authorization` header.
+All agent endpoints require the agent runtime to be initialized. The API server runs on port **31337** by default (`MILADY_API_PORT`). All paths are prefixed with `/api/`. When `MILADY_API_TOKEN` is set, include it as a `Bearer` token in the `Authorization` header.
 
 ## Endpoints
 
@@ -238,7 +238,7 @@ Get a structured summary of the agent's current state, capabilities, wallet stat
   "generatedAt": "2026-04-09T12:00:00.000Z",
   "state": "running",
   "agentName": "Milady",
-  "model": "anthropic/claude-sonnet-4-20250514",
+  "model": "anthropic/claude-sonnet-4.6",
   "provider": "anthropic",
   "automationMode": "connectors-only",
   "tradePermissionMode": "ask",

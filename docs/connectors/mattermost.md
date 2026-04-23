@@ -62,7 +62,7 @@ When the connector is loaded, the runtime pushes the following secrets from your
 | Variable | Source | Description |
 |----------|--------|-------------|
 | `MATTERMOST_BOT_TOKEN` | `botToken` | Bot token from Mattermost System Console |
-| `MATTERMOST_BASE_URL` | `baseUrl` | Base URL for the Mattermost server |
+| `MATTERMOST_SERVER_URL` | `baseUrl` | Server URL for the Mattermost server |
 
 ## Full Configuration Reference
 

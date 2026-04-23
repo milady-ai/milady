@@ -121,7 +121,7 @@ Analyze images to describe contents, identify objects, read text, or answer ques
 | Eliza Cloud | `cloud` (default) | Managed | `{cloudBaseUrl}/media/vision/analyze` |
 | OpenAI | `openai` | `gpt-4o` | `https://api.openai.com/v1/chat/completions` |
 | Google | `google` | `gemini-2.0-flash` | Google Generative Language API |
-| Anthropic | `anthropic` | `claude-sonnet-4-20250514` | `https://api.anthropic.com/v1/messages` |
+| Anthropic | `anthropic` | `claude-sonnet-4-6` | `https://api.anthropic.com/v1/messages` |
 | xAI | `xai` | `grok-2-vision-1212` | `https://api.x.ai/v1/chat/completions` |
 | Ollama | `ollama` | `llava` | `http://localhost:11434/api/chat` |
 
@@ -385,7 +385,7 @@ Google supports image generation (Imagen), video generation (Veo), and vision an
       "provider": "anthropic",
       "anthropic": {
         "apiKey": "your-anthropic-api-key",
-        "model": "claude-sonnet-4-20250514"
+        "model": "claude-sonnet-4-6"
       }
     }
   }

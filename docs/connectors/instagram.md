@@ -36,14 +36,12 @@ The Instagram connector is an elizaOS plugin that bridges your agent to Instagra
 
 ## Environment Variables
 
-| Variable | Description |
-|----------|-------------|
-| `INSTAGRAM_USERNAME` | Instagram username |
-| `INSTAGRAM_PASSWORD` | Instagram password |
-| `INSTAGRAM_DRY_RUN` | Set to `true` for testing without posting |
-| `INSTAGRAM_POLL_INTERVAL` | Polling interval in ms |
-| `INSTAGRAM_POST_INTERVAL_MIN` | Min seconds between posts |
-| `INSTAGRAM_POST_INTERVAL_MAX` | Max seconds between posts |
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `INSTAGRAM_USERNAME` | Yes | Instagram username for authentication |
+| `INSTAGRAM_PASSWORD` | Yes | Instagram password for authentication |
+| `INSTAGRAM_PROXY` | No | Proxy URL for Instagram API requests |
+| `INSTAGRAM_VERIFICATION_CODE` | No | Two-factor authentication verification code |
 
 ## Features
 

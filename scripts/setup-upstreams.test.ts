@@ -6,12 +6,17 @@ import {
   applyMiladyCopyPatches,
   applyPluginAnthropicBunRuntimePatch,
   applyPluginAnthropicCliUsagePatch,
+  applyTypeScriptIgnoreDeprecationsCompatPatch,
   applyUnpublishedPluginStubOverrides,
   bootstrapBundledBunInstall,
+  ensureElizaAgentSkillsPluginBuild,
   ensurePluginAnthropicBunTypes,
+  ensureRequiredElizaPluginBuilds,
   findInstalledPackageDir,
   getElizaInstallArgs,
   getTemporaryElizaWorkspaceEntries,
+  getUpstreamPackageLinks,
+  resolveTypeScriptIgnoreDeprecationsTarget,
   runElizaInstallWithRetry,
 } from "./setup-upstreams.mjs";
 
@@ -82,6 +87,26 @@ describe("getTemporaryElizaWorkspaceEntries", () => {
     ]);
   });
 
+  it("uses the installable app-control workspace path when deciding whether to keep the stub", () => {
+    const elizaRoot = "/repo/eliza";
+    const existingPaths = new Set([
+      path.join(
+        elizaRoot,
+        "..",
+        "scripts",
+        "ci-stubs",
+        "elizaos-plugin-app-control",
+        "package.json",
+      ),
+    ]);
+
+    expect(
+      getTemporaryElizaWorkspaceEntries(elizaRoot, {
+        pathExists: (targetPath) => existingPaths.has(targetPath),
+      }),
+    ).toContain("../scripts/ci-stubs/elizaos-plugin-app-control");
+  });
+
   it("skips the wechat CI stub when the real plugin workspace exists", () => {
     const elizaRoot = "/repo/eliza";
     const existingPaths = new Set([
@@ -102,6 +127,25 @@ describe("getTemporaryElizaWorkspaceEntries", () => {
       }),
     ).toEqual([]);
   });
+
+  it("includes cloud billing workspace when the nested package exists", () => {
+    const elizaRoot = "/repo/eliza";
+    const billingPkg = path.join(
+      elizaRoot,
+      "cloud",
+      "packages",
+      "services",
+      "billing",
+      "package.json",
+    );
+    const existingPaths = new Set([billingPkg]);
+
+    expect(
+      getTemporaryElizaWorkspaceEntries(elizaRoot, {
+        pathExists: (targetPath) => existingPaths.has(targetPath),
+      }),
+    ).toEqual(["cloud/packages/services/billing"]);
+  });
 });
 
 describe("applyUnpublishedPluginStubOverrides", () => {
@@ -113,6 +157,8 @@ describe("applyUnpublishedPluginStubOverrides", () => {
         {
           name: "eliza",
           overrides: {
+            "@elizaos/plugin-app-control":
+              "file:../scripts/ci-stubs/elizaos-plugin-app-control",
             "@elizaos/plugin-wechat":
               "file:../scripts/ci-stubs/elizaos-plugin-wechat",
           },
@@ -127,17 +173,38 @@ describe("applyUnpublishedPluginStubOverrides", () => {
         "..",
         "scripts",
         "ci-stubs",
+        "elizaos-plugin-app-control",
+        "package.json",
+      ),
+      '{"name":"@elizaos/plugin-app-control"}\n',
+    );
+    writeFile(
+      path.join(
+        elizaRoot,
+        "..",
+        "scripts",
+        "ci-stubs",
         "elizaos-plugin-wechat",
         "package.json",
       ),
       '{"name":"@elizaos/plugin-wechat"}\n',
     );
     writeFile(
+      path.join(
+        elizaRoot,
+        "plugins",
+        "plugin-app-control",
+        "typescript",
+        "package.json",
+      ),
+      '{"name":"@elizaos/plugin-app-control"}\n',
+    );
+    writeFile(
       path.join(elizaRoot, "plugins", "plugin-wechat", "package.json"),
       '{"name":"@elizaos/plugin-wechat"}\n',
     );
 
-    expect(applyUnpublishedPluginStubOverrides(elizaRoot)).toBe(1);
+    expect(applyUnpublishedPluginStubOverrides(elizaRoot)).toBe(2);
     expect(
       JSON.parse(fs.readFileSync(path.join(elizaRoot, "package.json"), "utf8")),
     ).not.toHaveProperty("overrides");
@@ -194,6 +261,298 @@ describe("findInstalledPackageDir", () => {
         searchRoots: [repoRoot, elizaRoot],
       }),
     ).toBe(path.dirname(elizaInstall));
+  });
+});
+
+describe("getUpstreamPackageLinks", () => {
+  it("links nested eliza plugin workspaces into eliza node_modules", () => {
+    const repoRoot = makeTempDir();
+    const elizaRoot = path.join(repoRoot, "eliza");
+    const pluginRoot = path.join(elizaRoot, "plugins", "plugin-agent-skills");
+    const pluginPackage = path.join(pluginRoot, "typescript");
+
+    writeFile(
+      path.join(pluginRoot, "package.json"),
+      '{"name":"@elizaos/plugin-agent-skills-root"}\n',
+    );
+    writeFile(
+      path.join(pluginPackage, "package.json"),
+      '{"name":"@elizaos/plugin-agent-skills"}\n',
+    );
+
+    const links = getUpstreamPackageLinks(repoRoot, {
+      elizaRoot,
+      pluginsRoot: path.join(elizaRoot, "plugins"),
+    });
+
+    expect(links).toContainEqual({
+      linkPath: path.join(
+        repoRoot,
+        "eliza",
+        "node_modules",
+        "@elizaos",
+        "plugin-agent-skills",
+      ),
+      targetPath: pluginPackage,
+    });
+    expect(
+      links.some((link) => link.linkPath.includes("plugin-agent-skills-root")),
+    ).toBe(false);
+  });
+
+  it("links local eliza packages into app workspace node_modules", () => {
+    const repoRoot = makeTempDir();
+    const elizaRoot = path.join(repoRoot, "eliza");
+    const agentPackage = path.join(elizaRoot, "packages", "agent");
+    const lifeopsPackage = path.join(elizaRoot, "apps", "app-lifeops");
+
+    writeFile(
+      path.join(agentPackage, "package.json"),
+      '{"name":"@elizaos/agent"}\n',
+    );
+    fs.mkdirSync(path.join(agentPackage, "node_modules"), {
+      recursive: true,
+    });
+    writeFile(
+      path.join(lifeopsPackage, "package.json"),
+      '{"name":"@elizaos/app-lifeops"}\n',
+    );
+    fs.mkdirSync(path.join(lifeopsPackage, "node_modules"), {
+      recursive: true,
+    });
+
+    const links = getUpstreamPackageLinks(repoRoot, {
+      elizaRoot,
+      pluginsRoot: path.join(elizaRoot, "plugins"),
+    });
+
+    expect(links).toContainEqual({
+      linkPath: path.join(lifeopsPackage, "node_modules", "@elizaos", "agent"),
+      targetPath: agentPackage,
+    });
+    expect(
+      links.some((link) =>
+        link.linkPath.includes(path.join("packages", "agent", "node_modules")),
+      ),
+    ).toBe(false);
+  });
+});
+
+describe("ensureElizaAgentSkillsPluginBuild", () => {
+  it("builds the nested agent-skills artifact when it is missing", async () => {
+    const repoRoot = makeTempDir();
+    const pluginPackage = path.join(
+      repoRoot,
+      "eliza",
+      "plugins",
+      "plugin-agent-skills",
+      "typescript",
+    );
+    writeFile(path.join(pluginPackage, "package.json"), "{}\n");
+
+    const runCommandImpl = vi.fn().mockResolvedValue(undefined);
+    const log = vi.fn();
+
+    await expect(
+      ensureElizaAgentSkillsPluginBuild(repoRoot, {
+        runCommandImpl,
+        log,
+      }),
+    ).resolves.toBe(true);
+
+    expect(runCommandImpl).toHaveBeenCalledWith(
+      "bun",
+      [
+        "build",
+        "./src/index.ts",
+        "--outdir",
+        "./dist",
+        "--target",
+        "node",
+        "--format",
+        "esm",
+        "--sourcemap=linked",
+        "--external",
+        "node:*",
+        "--external",
+        "@elizaos/core",
+        "--external",
+        "fflate",
+      ],
+      {
+        cwd: pluginPackage,
+        label:
+          "bun build ./src/index.ts --outdir ./dist --target node --format esm --sourcemap=linked --external node:* --external @elizaos/core --external fflate (@elizaos/plugin-agent-skills)",
+      },
+    );
+    expect(log).toHaveBeenCalledWith(
+      expect.stringContaining("@elizaos/plugin-agent-skills"),
+    );
+  });
+
+  it("skips the nested agent-skills build when the artifact is current", async () => {
+    const repoRoot = makeTempDir();
+    const pluginPackage = path.join(
+      repoRoot,
+      "eliza",
+      "plugins",
+      "plugin-agent-skills",
+      "typescript",
+    );
+    const manifestPath = path.join(pluginPackage, "package.json");
+    const artifactPath = path.join(pluginPackage, "dist", "index.js");
+    writeFile(manifestPath, "{}\n");
+    writeFile(artifactPath, "export {};\n");
+
+    const runCommandImpl = vi.fn();
+
+    await expect(
+      ensureElizaAgentSkillsPluginBuild(repoRoot, {
+        pathExists: (targetPath) =>
+          targetPath === manifestPath || targetPath === artifactPath,
+        stat: (targetPath) =>
+          ({
+            mtimeMs: targetPath === manifestPath ? 1 : 2,
+          }) as fs.Stats,
+        runCommandImpl,
+      }),
+    ).resolves.toBe(false);
+
+    expect(runCommandImpl).not.toHaveBeenCalled();
+  });
+});
+
+describe("ensureRequiredElizaPluginBuilds", () => {
+  it("builds plugin-telegram when the account auth subpath artifact is missing", async () => {
+    const repoRoot = makeTempDir();
+    const agentSkillsPackage = path.join(
+      repoRoot,
+      "eliza",
+      "plugins",
+      "plugin-agent-skills",
+      "typescript",
+    );
+    const telegramPackage = path.join(
+      repoRoot,
+      "eliza",
+      "plugins",
+      "plugin-telegram",
+    );
+    const edgeTtsPackage = path.join(
+      repoRoot,
+      "eliza",
+      "plugins",
+      "plugin-edge-tts",
+      "typescript",
+    );
+    writeFile(path.join(agentSkillsPackage, "package.json"), "{}\n");
+    writeFile(
+      path.join(agentSkillsPackage, "dist", "index.js"),
+      "export {};\n",
+    );
+    writeFile(path.join(telegramPackage, "package.json"), "{}\n");
+    writeFile(path.join(edgeTtsPackage, "package.json"), "{}\n");
+    writeFile(
+      path.join(edgeTtsPackage, "dist", "node", "index.node.js"),
+      "export {};\n",
+    );
+
+    const runCommandImpl = vi.fn().mockResolvedValue(undefined);
+    const log = vi.fn();
+
+    await expect(
+      ensureRequiredElizaPluginBuilds(repoRoot, {
+        pathExists: (targetPath) =>
+          targetPath.endsWith(path.join("package.json")) ||
+          targetPath.endsWith(
+            path.join("plugin-agent-skills", "typescript", "dist", "index.js"),
+          ) ||
+          targetPath.endsWith(
+            path.join(
+              "plugin-edge-tts",
+              "typescript",
+              "dist",
+              "node",
+              "index.node.js",
+            ),
+          ),
+        stat: () => ({ mtimeMs: 1 }) as fs.Stats,
+        runCommandImpl,
+        log,
+      }),
+    ).resolves.toBe(true);
+
+    expect(runCommandImpl).toHaveBeenCalledTimes(1);
+    expect(runCommandImpl).toHaveBeenCalledWith("bun", ["run", "build"], {
+      cwd: telegramPackage,
+      label: "bun run build (@elizaos/plugin-telegram)",
+    });
+    expect(log).toHaveBeenCalledWith(
+      expect.stringContaining("@elizaos/plugin-telegram"),
+    );
+  });
+
+  it("builds plugin-edge-tts when the node export artifact is missing", async () => {
+    const repoRoot = makeTempDir();
+    const agentSkillsPackage = path.join(
+      repoRoot,
+      "eliza",
+      "plugins",
+      "plugin-agent-skills",
+      "typescript",
+    );
+    const edgeTtsPackage = path.join(
+      repoRoot,
+      "eliza",
+      "plugins",
+      "plugin-edge-tts",
+      "typescript",
+    );
+    const telegramPackage = path.join(
+      repoRoot,
+      "eliza",
+      "plugins",
+      "plugin-telegram",
+    );
+    writeFile(path.join(agentSkillsPackage, "package.json"), "{}\n");
+    writeFile(
+      path.join(agentSkillsPackage, "dist", "index.js"),
+      "export {};\n",
+    );
+    writeFile(path.join(edgeTtsPackage, "package.json"), "{}\n");
+    writeFile(path.join(telegramPackage, "package.json"), "{}\n");
+    writeFile(
+      path.join(telegramPackage, "dist", "account-auth-service.js"),
+      "export {};\n",
+    );
+
+    const runCommandImpl = vi.fn().mockResolvedValue(undefined);
+    const log = vi.fn();
+
+    await expect(
+      ensureRequiredElizaPluginBuilds(repoRoot, {
+        pathExists: (targetPath) =>
+          targetPath.endsWith(path.join("package.json")) ||
+          targetPath.endsWith(
+            path.join("plugin-agent-skills", "typescript", "dist", "index.js"),
+          ) ||
+          targetPath.endsWith(
+            path.join("plugin-telegram", "dist", "account-auth-service.js"),
+          ),
+        stat: () => ({ mtimeMs: 1 }) as fs.Stats,
+        runCommandImpl,
+        log,
+      }),
+    ).resolves.toBe(true);
+
+    expect(runCommandImpl).toHaveBeenCalledTimes(1);
+    expect(runCommandImpl).toHaveBeenCalledWith("bun", ["run", "build"], {
+      cwd: edgeTtsPackage,
+      label: "bun run build (@elizaos/plugin-edge-tts)",
+    });
+    expect(log).toHaveBeenCalledWith(
+      expect.stringContaining("@elizaos/plugin-edge-tts"),
+    );
   });
 });
 
@@ -450,6 +809,123 @@ describe("applyMiladyCopyPatches", () => {
     );
 
     warnSpy.mockRestore();
+  });
+});
+
+describe("applyTypeScriptIgnoreDeprecationsCompatPatch", () => {
+  it("targets TypeScript 5 deprecation silencing when the repo toolchain is TypeScript 5", () => {
+    const elizaRoot = makeTempDir();
+    const repoRoot = makeTempDir();
+    const declarationsPath = path.join(
+      elizaRoot,
+      "packages",
+      "typescript",
+      "tsconfig.declarations.json",
+    );
+
+    writeFile(
+      path.join(repoRoot, "package.json"),
+      JSON.stringify({ devDependencies: { typescript: "^5.9.3" } }, null, 2),
+    );
+    writeFile(
+      declarationsPath,
+      '{\n  "compilerOptions": {\n    "ignoreDeprecations": "6.0",\n    "baseUrl": "./src"\n  }\n}\n',
+    );
+
+    expect(
+      applyTypeScriptIgnoreDeprecationsCompatPatch(elizaRoot, { repoRoot }),
+    ).toBe(1);
+    expect(fs.readFileSync(declarationsPath, "utf8")).toContain(
+      '"ignoreDeprecations": "5.0"',
+    );
+  });
+
+  it("upgrades TypeScript 5 deprecation silencing to TypeScript 6 when the repo toolchain is TypeScript 6", () => {
+    const elizaRoot = makeTempDir();
+    const repoRoot = makeTempDir();
+    const declarationsPath = path.join(
+      elizaRoot,
+      "packages",
+      "typescript",
+      "tsconfig.declarations.json",
+    );
+
+    writeFile(
+      path.join(repoRoot, "package.json"),
+      JSON.stringify({ devDependencies: { typescript: "^6.0.0" } }, null, 2),
+    );
+    writeFile(
+      declarationsPath,
+      '{\n  "compilerOptions": {\n    "ignoreDeprecations": "5.0",\n    "baseUrl": "./src"\n  }\n}\n',
+    );
+
+    expect(
+      applyTypeScriptIgnoreDeprecationsCompatPatch(elizaRoot, { repoRoot }),
+    ).toBe(1);
+    expect(fs.readFileSync(declarationsPath, "utf8")).toContain(
+      '"ignoreDeprecations": "6.0"',
+    );
+  });
+
+  it("downgrades tsup plugin configs to TypeScript 5-compatible deprecation silencing", () => {
+    const elizaRoot = makeTempDir();
+    const calendlyPath = path.join(
+      elizaRoot,
+      "plugins",
+      "plugin-calendly",
+      "tsconfig.json",
+    );
+
+    writeFile(
+      calendlyPath,
+      '{\n  "compilerOptions": {\n    "ignoreDeprecations": "6.0",\n    "baseUrl": "./src"\n  }\n}\n',
+    );
+
+    expect(applyTypeScriptIgnoreDeprecationsCompatPatch(elizaRoot)).toBe(1);
+    expect(fs.readFileSync(calendlyPath, "utf8")).toContain(
+      '"ignoreDeprecations": "5.0"',
+    );
+  });
+});
+
+describe("resolveTypeScriptIgnoreDeprecationsTarget", () => {
+  it("defaults to the TypeScript 5-compatible ignoreDeprecations value when the repo is missing a typescript pin", () => {
+    const repoRoot = makeTempDir();
+
+    writeFile(path.join(repoRoot, "package.json"), JSON.stringify({}, null, 2));
+
+    expect(resolveTypeScriptIgnoreDeprecationsTarget(repoRoot)).toBe("5.0");
+  });
+
+  it("returns the TypeScript 6-compatible ignoreDeprecations value when the repo pins TypeScript 6", () => {
+    const repoRoot = makeTempDir();
+
+    writeFile(
+      path.join(repoRoot, "package.json"),
+      JSON.stringify({ devDependencies: { typescript: "^6.0.0" } }, null, 2),
+    );
+
+    expect(resolveTypeScriptIgnoreDeprecationsTarget(repoRoot)).toBe("6.0");
+  });
+
+  it("prefers the nested workspace TypeScript pin before falling back to the root repo", () => {
+    const repoRoot = makeTempDir();
+    const elizaRoot = makeTempDir();
+
+    writeFile(
+      path.join(repoRoot, "package.json"),
+      JSON.stringify({ devDependencies: { typescript: "^5.9.3" } }, null, 2),
+    );
+    writeFile(
+      path.join(elizaRoot, "package.json"),
+      JSON.stringify({ devDependencies: { typescript: "^6.0.0" } }, null, 2),
+    );
+
+    expect(
+      resolveTypeScriptIgnoreDeprecationsTarget(elizaRoot, {
+        fallbackRoot: repoRoot,
+      }),
+    ).toBe("6.0");
   });
 });
 

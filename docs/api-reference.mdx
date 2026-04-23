@@ -4,7 +4,7 @@ sidebarTitle: API Reference
 description: Complete reference for all Milady REST API endpoints, organized by resource group.
 ---
 
-The Milady API server runs on port **2138** by default. All endpoints are prefixed with `/api/`. Authentication is required when `MILADY_API_TOKEN` is set.
+The Milady API server runs on port **31337** by default (`MILADY_API_PORT`). All endpoints are prefixed with `/api/`. Authentication is required when `MILADY_API_TOKEN` is set.
 
 <Warning>
 When `MILADY_API_TOKEN` is configured, include the token as a `Bearer` token in the `Authorization` header, or use the pairing flow to obtain it.
@@ -12,19 +12,19 @@ When `MILADY_API_TOKEN` is configured, include the token as a `Bearer` token in 
 
 ## Quick Start
 
-These examples assume the API is running on `localhost:2138`. Replace `YOUR_TOKEN` with the value of `MILADY_API_TOKEN` or the token received from the pairing flow.
+These examples assume the API is running on `localhost:31337`. Replace `YOUR_TOKEN` with the value of `MILADY_API_TOKEN` or the token received from the pairing flow.
 
 ### Check agent status
 
 ```bash
-curl http://localhost:2138/api/status
+curl http://localhost:31337/api/status
 ```
 
 ```json
 {
   "name": "Milady",
   "status": "running",
-  "model": "claude-sonnet-4-20250514",
+  "model": "claude-sonnet-4-6",
   "uptime": 3600
 }
 ```
@@ -34,7 +34,7 @@ curl http://localhost:2138/api/status
 When pairing is enabled, the agent displays a code in its terminal. Submit it to receive a token:
 
 ```bash
-curl -X POST http://localhost:2138/api/auth/pair \
+curl -X POST http://localhost:31337/api/auth/pair \
   -H "Content-Type: application/json" \
   -d '{"code": "ABCD-EFGH"}'
 ```
@@ -48,14 +48,14 @@ curl -X POST http://localhost:2138/api/auth/pair \
 ### Get character info
 
 ```bash
-curl http://localhost:2138/api/character \
+curl http://localhost:31337/api/character \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 ### Send a conversation message
 
 ```bash
-curl -X POST http://localhost:2138/api/conversations/YOUR_CONVERSATION_ID/messages \
+curl -X POST http://localhost:31337/api/conversations/YOUR_CONVERSATION_ID/messages \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"text": "Hello, what can you do?"}'
@@ -64,7 +64,7 @@ curl -X POST http://localhost:2138/api/conversations/YOUR_CONVERSATION_ID/messag
 ### Stream a conversation response
 
 ```bash
-curl -N -X POST http://localhost:2138/api/conversations/YOUR_CONVERSATION_ID/messages/stream \
+curl -N -X POST http://localhost:31337/api/conversations/YOUR_CONVERSATION_ID/messages/stream \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"text": "Tell me about yourself"}'
@@ -75,14 +75,14 @@ The response is a Server-Sent Events stream. Each event contains a `data` field 
 ### List conversations
 
 ```bash
-curl http://localhost:2138/api/conversations \
+curl http://localhost:31337/api/conversations \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 ### Upload a knowledge document
 
 ```bash
-curl -X POST http://localhost:2138/api/knowledge/documents \
+curl -X POST http://localhost:31337/api/knowledge/documents \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -94,21 +94,21 @@ curl -X POST http://localhost:2138/api/knowledge/documents \
 ### Search knowledge
 
 ```bash
-curl "http://localhost:2138/api/knowledge/search?q=what+is+milady&limit=5" \
+curl "http://localhost:31337/api/knowledge/search?q=what+is+milady&limit=5" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 ### List plugins
 
 ```bash
-curl http://localhost:2138/api/plugins \
+curl http://localhost:31337/api/plugins \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 ### Get autonomy state
 
 ```bash
-curl http://localhost:2138/api/agent/autonomy \
+curl http://localhost:31337/api/agent/autonomy \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -122,7 +122,7 @@ curl http://localhost:2138/api/agent/autonomy \
 ### Enable autonomy
 
 ```bash
-curl -X POST http://localhost:2138/api/agent/autonomy \
+curl -X POST http://localhost:31337/api/agent/autonomy \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"enabled": true}'
@@ -147,13 +147,26 @@ curl -X POST http://localhost:2138/api/agent/autonomy \
 | `GET` | `/api/health` | Structured subsystem health check (runtime, database, plugins, connectors, readiness) |
 | `GET` | `/api/runtime` | Get runtime details (loaded plugins, services, capabilities) |
 
+Example `GET /api/status` response:
+
+```json
+{
+  "name": "Milady",
+  "status": "running",
+  "model": "anthropic/claude-sonnet-4-6",
+  "uptime": 3600,
+  "autonomy": { "enabled": true },
+  "pendingRestart": false
+}
+```
+
 ---
 
 ## Agent Lifecycle
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `POST` | `/api/agent/start` | Start the agent and enable autonomy |
+| `POST` | `/api/agent/start` | Start the agent (starts paused; use `/api/agent/autonomy` to enable autonomy) |
 | `POST` | `/api/agent/stop` | Stop the agent and disable autonomy |
 | `POST` | `/api/agent/pause` | Pause the agent (keep uptime, disable autonomy) |
 | `POST` | `/api/agent/resume` | Resume a paused agent and re-enable autonomy |
@@ -372,6 +385,16 @@ The inbox aggregates messages from every connected platform (iMessage, Telegram,
 
 ---
 
+## Memory & Context
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/api/memory/remember` | Save a free-text note into the agent's persistent memory |
+| `GET` | `/api/memory/search` | Full-text keyword search over saved memory notes. Params: `q` (required), `limit` |
+| `GET` | `/api/context/quick` | Search memory and knowledge, then synthesize a concise answer. Params: `q` (required), `limit` |
+
+---
+
 ## Knowledge
 
 | Method | Path | Description |
@@ -380,6 +403,7 @@ The inbox aggregates messages from every connected platform (iMessage, Telegram,
 | `GET` | `/api/knowledge/documents` | List knowledge documents. Params: `limit`, `offset` |
 | `GET` | `/api/knowledge/documents/:id` | Get a specific document with content |
 | `POST` | `/api/knowledge/documents` | Upload a document (base64 content or text) |
+| `POST` | `/api/knowledge/documents/bulk` | Upload up to 100 documents in a single request |
 | `POST` | `/api/knowledge/documents/url` | Upload from URL (supports YouTube auto-transcription) |
 | `DELETE` | `/api/knowledge/documents/:id` | Delete a document and all its fragments |
 | `GET` | `/api/knowledge/search` | Semantic search. Params: `q` (required), `threshold`, `limit` |
@@ -585,9 +609,23 @@ Routes under `/api/cloud/v1/` are forwarded as `/api/v1/` on the cloud backend, 
 |--------|------|-------------|
 | `GET` | `/api/workbench/overview` | Get workbench overview (tasks, triggers, todos, life-ops, autonomy state) |
 | `GET` | `/api/workbench/tasks` | List workbench tasks |
-| `POST` | `/api/workbench/tasks` | Create or update a workbench task |
+| `POST` | `/api/workbench/tasks` | Create a new workbench task |
+| `GET` | `/api/workbench/tasks/:id` | Get a single workbench task by ID |
+| `PUT` | `/api/workbench/tasks/:id` | Update a workbench task |
+| `DELETE` | `/api/workbench/tasks/:id` | Delete a workbench task |
 | `GET` | `/api/workbench/todos` | List workbench todos |
 | `POST` | `/api/workbench/todos` | Create or update a workbench to-do item |
+
+---
+
+## Automations
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/automations` | Unified list of all automations (triggers + n8n workflows + workbench tasks) with summary counts |
+| `GET` | `/api/automations/nodes` | Node catalog — available trigger, action, context, integration, and agent nodes |
+| `GET` | `/api/n8n/workflows` | List n8n workflows |
+| `GET` | `/api/n8n/status` | Get n8n status (mode, health, platform) |
 
 ---
 
@@ -666,6 +704,13 @@ Routes under `/api/cloud/v1/` are forwarded as `/api/v1/` on the cloud backend, 
 | `POST` | `/api/wallet/generate` | Generate new wallet(s) for EVM, Solana, or both |
 | `POST` | `/api/wallet/export` | Export private keys (requires confirmation) |
 | `POST` | `/api/wallet/production-defaults` | Apply production-ready wallet trading defaults |
+
+### Wallet Cloud
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/api/wallet/primary` | Set the primary wallet source (local or cloud) for a chain. Gated by `ENABLE_CLOUD_WALLET` |
+| `POST` | `/api/wallet/refresh-cloud` | Re-query Eliza Cloud for the latest cloud wallet descriptors. Gated by `ENABLE_CLOUD_WALLET` |
 
 ### Wallet Trading
 

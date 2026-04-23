@@ -15,29 +15,29 @@ Milady 开箱即支持 **18 个推理后端**。提供商插件仍提供具体�
 下表是完整的受支持提供商插件列表，数据来源于 Milady 的提供商目录。
 
 <Note>
-标记为**内置**的提供商随每次 Milady 安装一同分发。其他提供商在首次需要时按需安装——无需手动安装插件。
+标记为**内置**（预装，即时加载）的提供商随每次 Milady 安装一同分发。其他提供商为**按需**（首次需要时自动安装）——无需手动安装插件。
 </Note>
 
-| 提供商 | 插件包 | 环境变量 | 内置 | 备注 |
+| 提供商 | 插件包 | 环境变量 | 安装方式 | 备注 |
 |--------|--------|----------|------|------|
-| [Anthropic](https://anthropic.com) | `@elizaos/plugin-anthropic` | `ANTHROPIC_API_KEY` 或 `CLAUDE_API_KEY` | 否 | **推荐。** Claude 模型（Opus、Sonnet、Haiku）。 |
-| [OpenAI](https://openai.com) | `@elizaos/plugin-openai` | `OPENAI_API_KEY` | 是 | GPT-4o、o1、o3、GPT-4.1。 |
-| [Google Gemini](https://ai.google.dev) | `@elizaos/plugin-google-genai` | `GOOGLE_API_KEY` 或 `GOOGLE_GENERATIVE_AI_API_KEY` | 否 | Gemini Pro、Flash、Ultra。 |
-| [Google Antigravity](https://cloud.google.com/vertex-ai) | `@elizaos/plugin-google-antigravity` | `GOOGLE_CLOUD_API_KEY` | 否 | Google Cloud / Vertex AI 模型。 |
-| [Vercel AI Gateway](https://sdk.vercel.ai) | `@elizaos/plugin-vercel-ai-gateway` | `AI_GATEWAY_API_KEY` 或 `AIGATEWAY_API_KEY` | 否 | 统一网关，接入多个提供商。 |
-| [OpenRouter](https://openrouter.ai) | `@elizaos/plugin-openrouter` | `OPENROUTER_API_KEY` | 是 | 一个 API 密钥访问 100+ 模型。 |
-| [Groq](https://groq.com) | `@elizaos/plugin-groq` | `GROQ_API_KEY` | 是 | 超快推理（LPU）。 |
-| [xAI](https://x.ai) | `@elizaos/plugin-xai` | `XAI_API_KEY` 或 `GROK_API_KEY` | 否 | Grok 模型。 |
-| [DeepSeek](https://deepseek.com) | `@elizaos/plugin-deepseek` | `DEEPSEEK_API_KEY` | 否 | 推理和代码模型。 |
-| [Ollama](https://ollama.ai) | `@elizaos/plugin-ollama` | `OLLAMA_BASE_URL` | 是 | **本地模型。** 无需 API 密钥。 |
-| [Qwen](https://qwen.ai) | `@elizaos/plugin-qwen` | — | 否 | 阿里巴巴的 Qwen 模型。通过插件配置项进行设置。 |
-| [MiniMax](https://minimaxi.com) | `@elizaos/plugin-minimax` | — | 否 | MiniMax 语言模型。通过插件配置项进行设置。 |
-| [Together AI](https://together.ai) | `@elizaos/plugin-together` | `TOGETHER_API_KEY` | 否 | 开源模型托管。 |
-| [Mistral](https://mistral.ai) | `@elizaos/plugin-mistral` | `MISTRAL_API_KEY` | 否 | Mistral 和 Mixtral 模型。 |
-| [Cohere](https://cohere.com) | `@elizaos/plugin-cohere` | `COHERE_API_KEY` | 否 | Command R+ 和嵌入模型。 |
-| [Perplexity](https://perplexity.ai) | `@elizaos/plugin-perplexity` | `PERPLEXITY_API_KEY` | 否 | 搜索增强生成。 |
-| [Zai](https://homunculuslabs.com) | `@homunculuslabs/plugin-zai` | `ZAI_API_KEY` | 否 | Homunculus Labs Zai 模型。 |
-| [Eliza Cloud](https://elizacloud.ai) | `@elizaos/plugin-elizacloud` | `ELIZAOS_CLOUD_API_KEY` | 是 | 云端管理的推理路由。可独立于 Milady 运行位置进行选择。 |
+| [Anthropic](https://anthropic.com) | `@elizaos/plugin-anthropic` | `ANTHROPIC_API_KEY` 或 `CLAUDE_API_KEY` | 按需 | **推荐。** Claude 模型（Opus、Sonnet、Haiku）。 |
+| [OpenAI](https://openai.com) | `@elizaos/plugin-openai` | `OPENAI_API_KEY` | 内置 | GPT-4o、o1、o3、GPT-4.1。 |
+| [Google Gemini](https://ai.google.dev) | `@elizaos/plugin-google-genai` | `GOOGLE_API_KEY` 或 `GOOGLE_GENERATIVE_AI_API_KEY` | 按需 | Gemini Pro、Flash、Ultra。 |
+| [Google Antigravity](https://cloud.google.com/vertex-ai) | `@elizaos/plugin-google-antigravity` | `GOOGLE_CLOUD_API_KEY` | 按需 | Google Cloud / Vertex AI 模型。 |
+| [Vercel AI Gateway](https://sdk.vercel.ai) | `@elizaos/plugin-vercel-ai-gateway` | `AI_GATEWAY_API_KEY` 或 `AIGATEWAY_API_KEY` | 按需 | 统一网关，接入多个提供商。 |
+| [OpenRouter](https://openrouter.ai) | `@elizaos/plugin-openrouter` | `OPENROUTER_API_KEY` | 内置 | 一个 API 密钥访问 100+ 模型。 |
+| [Groq](https://groq.com) | `@elizaos/plugin-groq` | `GROQ_API_KEY` | 内置 | 超快推理（LPU）。 |
+| [xAI](https://x.ai) | `@elizaos/plugin-xai` | `XAI_API_KEY` 或 `GROK_API_KEY` | 按需 | Grok 模型。 |
+| [DeepSeek](https://deepseek.com) | `@elizaos/plugin-deepseek` | `DEEPSEEK_API_KEY` | 按需 | 推理和代码模型。 |
+| [Ollama](https://ollama.com) | `@elizaos/plugin-ollama` | `OLLAMA_BASE_URL` | 内置 | **本地模型。** 无需 API 密钥。需要运行中的 [Ollama](https://ollama.com) 服务器。 |
+| [Qwen](https://qwen.ai) | `@elizaos/plugin-qwen` | — | 按需 | 阿里巴巴的 Qwen 模型。通过插件配置项进行设置。 |
+| [MiniMax](https://minimaxi.com) | `@elizaos/plugin-minimax` | — | 按需 | MiniMax 语言模型。通过插件配置项进行设置。 |
+| [Together AI](https://together.ai) | `@elizaos/plugin-together` | `TOGETHER_API_KEY` | 按需 | 开源模型托管。 |
+| [Mistral](https://mistral.ai) | `@elizaos/plugin-mistral` | `MISTRAL_API_KEY` | 按需 | Mistral 和 Mixtral 模型。 |
+| [Cohere](https://cohere.com) | `@elizaos/plugin-cohere` | `COHERE_API_KEY` | 按需 | Command R+ 和嵌入模型。 |
+| [Perplexity](https://perplexity.ai) | `@elizaos/plugin-perplexity` | `PERPLEXITY_API_KEY` | 按需 | 搜索增强生成。 |
+| [Zai](https://homunculuslabs.com) | `@homunculuslabs/plugin-zai` | `ZAI_API_KEY` | 按需 | Homunculus Labs Zai 模型。 |
+| [Eliza Cloud](https://elizacloud.ai) | `@elizaos/plugin-elizacloud` | `ELIZAOS_CLOUD_API_KEY` | 内置 | 云端管理的推理路由。可独立于 Milady 运行位置进行选择。 |
 
 ---
 
@@ -179,7 +179,7 @@ milady configure          # 显示提供商状态和环境变量指南（只读�
   agents: {
     defaults: {
       model: {
-        primary: "anthropic/claude-sonnet-4-20250514",
+        primary: "anthropic/claude-sonnet-4.6",
       },
     },
   },
@@ -205,7 +205,7 @@ Milady 支持有序的回退链。如果主模型失败（速率限制、服务�
   agents: {
     defaults: {
       model: {
-        primary: "anthropic/claude-sonnet-4-20250514",
+        primary: "anthropic/claude-sonnet-4.6",
         fallbacks: [
           "openai/gpt-4o",
           "groq/llama-3.3-70b-versatile",
@@ -251,8 +251,8 @@ OLLAMA_BASE_URL=http://127.0.0.1:11434
   agents: {
     defaults: {
       model: {
-        primary: "anthropic/claude-sonnet-4-20250514",
-        fallbacks: ["openrouter/anthropic/claude-sonnet-4-20250514"],
+        primary: "anthropic/claude-sonnet-4.6",
+        fallbacks: ["openrouter/anthropic/claude-sonnet-4.6"],
       },
       imageModel: {
         primary: "openai/gpt-4o",
@@ -277,7 +277,7 @@ Ollama 让您在本地运行模型，无需 API 密钥，完全保护隐私。�
 <Steps>
   <Step title="安装 Ollama">
     ```bash
-    curl -fsSL https://ollama.ai/install.sh | sh
+    curl -fsSL https://ollama.com/install.sh | sh
     ```
   </Step>
   <Step title="拉取模型">

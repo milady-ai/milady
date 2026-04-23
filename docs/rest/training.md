@@ -181,7 +181,7 @@ Start a new training job.
 |-----------|------|----------|-------------|
 | `datasetId` | string | No | Dataset ID to train on (uses latest if omitted) |
 | `maxTrajectories` | integer | No | Cap on trajectories to use |
-| `backend` | string | No | Training backend: `"mlx"`, `"cuda"`, or `"cpu"` |
+| `backend` | string | No | Training backend: `"native"` (default, prompt optimization via MIPRO/GEPA), `"mlx"`, `"cuda"`, or `"cpu"` |
 | `model` | string | No | Base model to fine-tune |
 | `iterations` | integer | No | Number of training iterations |
 | `batchSize` | integer | No | Batch size |

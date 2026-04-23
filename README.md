@@ -96,7 +96,7 @@ shasum -a 256 --check --ignore-missing SHA256SUMS.txt
 **Milady → Reset Milady…** (menu bar) confirms in the **native** dialog, then the **main process** calls **`POST /api/agent/reset`**, restarts the agent (embedded or external API), and tells the renderer to apply the **same local state wipe** as the end of Settings reset (onboarding, API client, cloud UI, conversations). **Why main does HTTP:** on macOS/WKWebView, the webview can fail to run **`fetch`** immediately after a native dialog, so a renderer-only reset looked stuck. **Why the renderer still runs teardown:** one implementation of “clear UI + `MiladyClient`” avoids duplicating logic in TypeScript main vs React.
 
 - **Docs:** [Desktop app](docs/apps/desktop.md) (native application menu section), [Main-process reset — WHYs](docs/apps/desktop-main-process-reset.md)
-- **Optional network / TTS:** with the agent orchestrator loaded, Edge TTS may call **Microsoft’s cloud** unless you set **`MILADY_DISABLE_EDGE_TTS=1`** — see [Environment variables](docs/cli/environment.md#runtime-behavior) and [TTS plugin](docs/plugin-registry/tts.md)
+- **Optional network / TTS:** with the agent orchestrator loaded, Edge TTS may call **Microsoft’s cloud** unless you set **`MILADY_DISABLE_EDGE_TTS=1`** — see [Environment variables](docs/cli/environment.mdx#runtime-behavior) and [TTS plugin](docs/plugin-registry/tts.md)
 
 ---
 
@@ -361,7 +361,7 @@ When running, milady shows a live terminal interface:
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
 │  Agent: mila                                                │
-│  Model: anthropic/claude-opus-4-5                           │
+│  Model: anthropic/claude-opus-4.7                           │
 │  Sessions: 2 active                                         │
 │                                                             │
 │  ┌─ Activity ──────────────────────────────────────────┐    │
@@ -454,7 +454,7 @@ Lives at `~/.milady/milady.json` (override with `MILADY_CONFIG_PATH` or `MILADY_
 {
   agent: {
     name: "mila",
-    model: "anthropic/claude-opus-4-5",
+    model: "anthropic/claude-opus-4.7",
   },
   env: {
     ANTHROPIC_API_KEY: "<ANTHROPIC_API_KEY>",
@@ -519,7 +519,7 @@ Edit `~/.milady/milady.json`:
 
 This routes through the OpenAI plugin instead of the broken Ollama plugin. Works with any Ollama model — just make sure `ollama serve` is running.
 
-> **OpenRouter (`@elizaos/plugin-openrouter`):** Milady pins the dependency to **`2.0.0-alpha.10`**. **Why:** npm **`2.0.0-alpha.12`** published **truncated** JavaScript bundles: the files export `openrouterPlugin` / default but never define them (the main plugin chunk is missing), so Bun fails when loading the plugin. A caret range would allow that broken version again. See [Plugin resolution — pinned OpenRouter](docs/plugin-resolution-and-node-path.md#pinned-elizaosplugin-openrouter) and [OpenRouter plugin doc](docs/plugin-registry/llm/openrouter.md#milady-pinned-version-and-upstream-bundle-bug).
+> **OpenRouter (`@elizaos/plugin-openrouter`):** Milady pins the dependency to **`2.0.0-alpha.13`**. **Why:** npm **`2.0.0-alpha.12`** published **truncated** JavaScript bundles: the files export `openrouterPlugin` / default but never define them (the main plugin chunk is missing), so Bun fails when loading the plugin. A caret range would allow that broken version again. See [Plugin resolution — pinned OpenRouter](docs/plugin-resolution-and-node-path.md#pinned-elizaosplugin-openrouter) and [OpenRouter plugin doc](docs/plugin-registry/llm/openrouter.md#milady-pinned-version-and-upstream-bundle-bug).
 
 **Recommended models for local use:**
 

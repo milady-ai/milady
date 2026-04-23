@@ -67,7 +67,7 @@ curl -X POST https://matrix.example.com/_matrix/client/v3/login \
 
 ## Auto-Enable
 
-The plugin auto-enables when `MATRIX_ACCESS_TOKEN` is set in the environment.
+The plugin auto-enables when the `connectors.matrix` block contains `token`, `botToken`, or `apiKey`. Environment variables alone do not trigger auto-enable. Set `"token": "syt_your_access_token"` in the connector config to trigger auto-enable, or add the plugin to `plugins.allow` explicitly.
 
 ## Related
 

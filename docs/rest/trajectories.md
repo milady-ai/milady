@@ -121,7 +121,7 @@ Get full trajectory details including all LLM calls and provider accesses.
       "id": "call-001",
       "trajectoryId": "550e8400-e29b-41d4-a716-446655440000",
       "stepId": "step-0",
-      "model": "claude-opus-4-5",
+      "model": "claude-opus-4-7",
       "systemPrompt": "You are Milady...",
       "userPrompt": "What should I post today?",
       "response": "Here are some ideas...",

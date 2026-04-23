@@ -33,6 +33,16 @@ These variables are read by the CLI wrapper (`run-node.mjs`) and the embedded ru
 
 Run `milady doctor` after changing ports or state paths to catch mismatches before you start the server.
 
+## Runtime behavior
+
+| Variable | Purpose |
+|----------|---------|
+| `MILADY_DISABLE_EDGE_TTS` / `ELIZA_DISABLE_EDGE_TTS` | Set to `1` to prevent auto-loading `@elizaos/plugin-edge-tts`. When the agent orchestrator is loaded, Milady adds Edge TTS by default so swarm/PTY paths have a TTS handler—this makes outbound calls to Microsoft's cloud. Disable if you want no network TTS. |
+| `MILADY_DISABLE_AUTO_BOOTSTRAP` | Set to `1` to skip the one-shot native optimization bootstrap at runtime boot. |
+| `EXECUTECODE_TIMEOUT_MS` | Default script timeout for the `EXECUTE_CODE` action, in ms. Default: `30000`. |
+| `EXECUTECODE_DISABLE` | Set to `true` or `1` to disable the `EXECUTE_CODE` action entirely. |
+| `ELIZA_DISABLE_TRAJECTORY_LOGGING` | Set to `1` to opt out of trajectory persistence. Also disabled when `NODE_ENV=test`. |
+
 ## Related
 
 - [Installation](/installation)

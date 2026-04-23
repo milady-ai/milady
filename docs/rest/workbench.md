@@ -12,7 +12,10 @@ The workbench API manages the agent's task board and todo list. Tasks represent 
 |--------|------|-------------|
 | GET | `/api/workbench/overview` | Unified dashboard overview |
 | GET | `/api/workbench/tasks` | List all tasks |
-| POST | `/api/workbench/tasks` | Create or update a workbench task |
+| POST | `/api/workbench/tasks` | Create a new workbench task |
+| GET | `/api/workbench/tasks/:id` | Get a single task by ID |
+| PUT | `/api/workbench/tasks/:id` | Update an existing task |
+| DELETE | `/api/workbench/tasks/:id` | Delete a task |
 | GET | `/api/workbench/todos` | List all todos |
 | POST | `/api/workbench/todos` | Create or update a workbench to-do item |
 

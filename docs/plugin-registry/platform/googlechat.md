@@ -81,12 +81,13 @@ milady plugins install googlechat
 
 ## Auto-Enable
 
-The plugin auto-enables when the `connectors.googlechat` block contains a `serviceAccountFile` or `serviceAccountJson`:
+The plugin auto-enables when the `connectors.googlechat` block contains `botToken`, `token`, or `apiKey`. Note that `serviceAccountFile` alone does not trigger auto-enable. Include `"apiKey": "placeholder"` to trigger auto-enable when using service account auth, or add the plugin to `plugins.allow` explicitly:
 
 ```json
 {
   "connectors": {
     "googlechat": {
+      "apiKey": "placeholder",
       "serviceAccountFile": "./service-account.json",
       "audienceType": "project-number",
       "audience": "123456789"

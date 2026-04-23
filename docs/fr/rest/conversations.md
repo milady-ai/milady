@@ -150,7 +150,7 @@ Envoie un message et obtient la réponse de l'agent de manière synchrone (sans 
 
 | Champ | Type | Requis | Description |
 |-------|------|--------|-------------|
-| `message` | string | Oui | Texte du message de l'utilisateur |
+| `text` | string | Oui | Texte du message de l'utilisateur |
 | `channelType` | string | Non | Remplacement du type de canal |
 | `images` | array | Non | Données d'images jointes |
 

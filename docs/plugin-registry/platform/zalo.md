@@ -29,9 +29,9 @@ milady plugins install zalo
   "connectors": {
     "zalo": {
       "accessToken": "YOUR_ACCESS_TOKEN",
+      "secretKey": "YOUR_SECRET_KEY",
       "refreshToken": "YOUR_REFRESH_TOKEN",
-      "appId": "YOUR_APP_ID",
-      "appSecret": "YOUR_APP_SECRET"
+      "appId": "YOUR_APP_ID"
     }
   }
 }
@@ -41,9 +41,9 @@ Or via environment variables:
 
 ```bash
 export ZALO_ACCESS_TOKEN=YOUR_ACCESS_TOKEN
+export ZALO_SECRET_KEY=YOUR_SECRET_KEY
 export ZALO_REFRESH_TOKEN=YOUR_REFRESH_TOKEN
 export ZALO_APP_ID=YOUR_APP_ID
-export ZALO_APP_SECRET=YOUR_APP_SECRET
 ```
 
 ## Configuration
@@ -51,18 +51,18 @@ export ZALO_APP_SECRET=YOUR_APP_SECRET
 | Field | Required | Description |
 |-------|----------|-------------|
 | `accessToken` | Yes | Zalo API access token |
-| `refreshToken` | Yes | Zalo API refresh token |
-| `appId` | Yes | Zalo application ID |
-| `appSecret` | Yes | Zalo application secret |
+| `secretKey` | Yes | Zalo application secret key |
+| `refreshToken` | No | Zalo API refresh token |
+| `appId` | No | Zalo application ID |
 | `enabled` | No | Set `false` to disable (default: `true`) |
 
 ## Environment Variables
 
 ```bash
 export ZALO_ACCESS_TOKEN=YOUR_ACCESS_TOKEN
+export ZALO_SECRET_KEY=YOUR_SECRET_KEY
 export ZALO_REFRESH_TOKEN=YOUR_REFRESH_TOKEN
 export ZALO_APP_ID=YOUR_APP_ID
-export ZALO_APP_SECRET=YOUR_APP_SECRET
 ```
 
 ## Related

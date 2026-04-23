@@ -21,7 +21,7 @@ const runtime = new AgentRuntime({
   }),
   settings: {
     VALIDATION_LEVEL: "fast",
-    MODEL_PROVIDER: "anthropic/claude-sonnet-4-5",
+    MODEL_PROVIDER: "anthropic/claude-sonnet-4.6",
     BUNDLED_SKILLS_DIRS: "/path/to/skills",
     WORKSPACE_SKILLS_DIR: "~/.milady/workspace/skills",
     SKILLS_ALLOWLIST: "skill-a,skill-b",
@@ -47,7 +47,7 @@ const runtime = new AgentRuntime({
 | Setting Key | Source | Description |
 |---|---|---|
 | `VALIDATION_LEVEL` | Hardcoded | Set to `"fast"` — controls elizaOS validation depth |
-| `MODEL_PROVIDER` | `agents.defaults.model.primary` | Primary model selection (e.g., `"anthropic/claude-sonnet-4-5"`) |
+| `MODEL_PROVIDER` | `agents.defaults.model.primary` | Primary model selection (e.g., `"anthropic/claude-sonnet-4.6"`) |
 | `BUNDLED_SKILLS_DIRS` | `@elizaos/skills` package | Absolute path to bundled skills directory |
 | `WORKSPACE_SKILLS_DIR` | workspace path + `/skills` | Per-agent skills override directory |
 | `EXTRA_SKILLS_DIRS` | `skills.load.extraDirs` | Additional skill directories from config |

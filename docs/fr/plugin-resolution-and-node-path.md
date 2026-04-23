@@ -96,7 +96,7 @@ Certains packages `@elizaos` (par ex. `@elizaos/plugin-sql`) publient un `packag
 ## Épinglé : `@elizaos/plugin-openrouter`
 </div>
 
-Ce repo résout actuellement **`@elizaos/plugin-openrouter`** via un lien workspace local (**`workspace:*`**) pendant le développement. La note importante sur l'artefact publié est inchangée : **`2.0.0-alpha.10`** est le dernier tarball npm connu comme fonctionnel, tandis que **`2.0.0-alpha.12`** a livré des entrypoints dist cassés.
+Ce repo résout actuellement **`@elizaos/plugin-openrouter`** via un lien workspace local (**`workspace:*`**) pendant le développement. Lorsque le checkout local n'est pas utilisé, le `package.json` racine épingle **`2.0.0-alpha.13`** (le tarball npm connu comme fonctionnel actuel). **`2.0.0-alpha.12`** a livré des entrypoints dist cassés et doit être évité.
 
 <div id="what-went-wrong-in-200-alpha12">
 ### Ce qui s'est mal passé dans `2.0.0-alpha.12`
@@ -106,14 +106,14 @@ Le tarball npm publié pour **`2.0.0-alpha.12`** contient des sorties JavaScript
 
 **Pourquoi Bun erreur :** Quand le runtime charge le plugin, Bun build/transpile ce fichier d'entrée et échoue avec des erreurs comme *`openrouterPlugin` is not declared in this file* — les symboles sont exportés mais jamais définis. Le build CommonJS (`dist/cjs/index.node.cjs`) est incomplet de la même manière (les getters d'export référencent un chunk `import_plugin` manquant).
 
-**Pourquoi nous ne patchons pas le dist en postinstall :** La release cassée manque le corps entier du plugin, pas un seul identifiant incorrect (contraste avec `@elizaos/plugin-pdf`, où un petit string replace corrige un mauvais alias d'export). Reconstruire le plugin depuis les sources dans Milady forkerait upstream et serait fragile. Quand vous n'utilisez pas le checkout workspace local, préférez l'artefact **`2.0.0-alpha.10`** connu comme fonctionnel.
+**Pourquoi nous ne patchons pas le dist en postinstall :** La release cassée manque le corps entier du plugin, pas un seul identifiant incorrect (contraste avec `@elizaos/plugin-pdf`, où un petit string replace corrige un mauvais alias d'export). Reconstruire le plugin depuis les sources dans Milady forkerait upstream et serait fragile. Quand vous n'utilisez pas le checkout workspace local, préférez l'artefact **`2.0.0-alpha.13`** connu comme fonctionnel.
 
 <div id="maintainer-notes">
 ### Notes pour les mainteneurs
 </div>
 
 - **Avant de mettre à jour** la dépendance OpenRouter, vérifiez le **tarball publié** sur npm : ouvrez `dist/node/index.node.js` et confirmez qu'il définit l'export default / `openrouterPlugin`, ou lancez `bun build node_modules/@elizaos/plugin-openrouter/dist/node/index.node.js --target=bun` après installation.
-- **Ne remplacez pas le lien workspace par une plage semver non bornée** tant qu'upstream n'a pas publié une version corrigée et que vous n'avez pas confirmé l'artefact. **Pourquoi :** `^2.0.0-alpha.10` permettait à Bun de résoudre **`alpha.12`**, ce qui cassait les installations qui mettaient à jour le lockfile.
+- **Ne remplacez pas le lien workspace par une plage semver non bornée** tant qu'upstream n'a pas publié une version corrigée et que vous n'avez pas confirmé l'artefact. **Pourquoi :** `^2.0.0-alpha.13` permettait à Bun de résoudre des versions défectueuses, ce qui cassait les installations qui mettaient à jour le lockfile.
 
 Le contexte utilisateur et la configuration pour OpenRouter lui-même vivent dans **[Plugin OpenRouter](plugin-registry/llm/openrouter.md)** (Mintlify : `/plugin-registry/llm/openrouter`).
 

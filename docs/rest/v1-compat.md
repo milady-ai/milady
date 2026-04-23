@@ -219,7 +219,7 @@ data: {"type":"message_stop"}
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="http://localhost:2138/v1",
+    base_url="http://localhost:31337/v1",
     api_key="your-milady-api-token"  # or "not-needed" if no token is set
 )
 
@@ -236,7 +236,7 @@ print(response.choices[0].message.content)
 import anthropic
 
 client = anthropic.Anthropic(
-    base_url="http://localhost:2138",
+    base_url="http://localhost:31337",
     api_key="your-milady-api-token"
 )
 
@@ -251,7 +251,7 @@ print(message.content[0].text)
 ### curl
 
 ```bash
-curl http://localhost:2138/v1/chat/completions \
+curl http://localhost:31337/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer your-milady-api-token" \
   -d '{

@@ -1,10 +1,10 @@
 ---
 title: "Anthropic 插件"
 sidebarTitle: "Anthropic"
-description: "Milady 的 Anthropic Claude 模型提供者 — Claude Opus 4.6、Sonnet 4.6、Haiku 4.5 以及扩展思维模型。"
+description: "Milady 的 Anthropic Claude 模型提供者 — Claude Opus 4.7、Sonnet 4.6、Haiku 4.5，以及自适应思维支持。"
 ---
 
-Anthropic 插件将 Milady 代理连接到 Anthropic 的 Claude API，提供对 Claude 4.6、4.5、4 和 3 模型系列的访问，包括 Opus、Sonnet 和 Haiku 变体。
+Anthropic 插件将 Milady 代理连接到 Anthropic 的 Claude API，并提供当前的 Claude Opus 4.7、Claude Sonnet 4.6 和 Claude Haiku 4.5 模型。
 
 **Package:** `@elizaos/plugin-anthropic`
 
@@ -56,7 +56,7 @@ export ANTHROPIC_API_KEY=sk-ant-...
     "profiles": {
       "default": {
         "provider": "anthropic",
-        "model": "claude-sonnet-4-20250514"
+        "model": "claude-sonnet-4-6"
       }
     }
   }
@@ -69,63 +69,11 @@ export ANTHROPIC_API_KEY=sk-ant-...
 
 </div>
 
-<div id="claude-4546-family">
-
-### Claude 4.5/4.6 系列
-
-</div>
-
 | 模型 | 上下文 | 最适合 |
 |------|--------|--------|
-| `claude-opus-4-6` | 200k | 最强大，复杂推理，可用 1M 上下文 |
-| `claude-sonnet-4-6` | 200k | 最新 Sonnet，性能与成本平衡 |
+| `claude-opus-4-7` | 200k | 最适合复杂推理和长流程代理的最强模型 |
+| `claude-sonnet-4-6` | 200k | 默认大模型，适合编码、分析和通用任务 |
 | `claude-haiku-4-5-20251001` | 200k | 快速、轻量任务 |
-
-<div id="claude-4-family">
-
-### Claude 4 系列
-
-</div>
-
-| 模型 | 上下文 | 最适合 |
-|------|--------|--------|
-| `claude-opus-4-20250514` | 200k | 复杂推理 |
-| `claude-sonnet-4-20250514` | 200k | 性能与成本平衡 |
-| `claude-sonnet-4.5` | 200k | 改进的编程能力 |
-| `claude-3-5-haiku-20241022` | 200k | 快速响应 |
-
-<div id="claude-37-family">
-
-### Claude 3.7 系列
-
-</div>
-
-| 模型 | 上下文 | 最适合 |
-|------|--------|--------|
-| `claude-3-7-sonnet-20250219` | 200k | 扩展思维、代理任务 |
-
-<div id="claude-35-family">
-
-### Claude 3.5 系列
-
-</div>
-
-| 模型 | 上下文 | 最适合 |
-|------|--------|--------|
-| `claude-3-5-sonnet-20241022` | 200k | 代码生成、分析 |
-| `claude-3-5-haiku-20241022` | 200k | 快速响应 |
-
-<div id="claude-3-family">
-
-### Claude 3 系列
-
-</div>
-
-| 模型 | 上下文 | 最适合 |
-|------|--------|--------|
-| `claude-3-opus-20240229` | 200k | 深度分析 |
-| `claude-3-sonnet-20240229` | 200k | 均衡 |
-| `claude-3-haiku-20240307` | 200k | 高性价比 |
 
 <div id="model-type-mapping">
 
@@ -135,10 +83,10 @@ export ANTHROPIC_API_KEY=sk-ant-...
 
 | elizaOS 模型类型 | Anthropic 模型 |
 |-----------------|---------------|
-| `TEXT_SMALL` | `claude-3-5-haiku-20241022` |
-| `TEXT_LARGE` | `claude-sonnet-4-20250514` |
-| `OBJECT_SMALL` | `claude-3-5-haiku-20241022` |
-| `OBJECT_LARGE` | `claude-sonnet-4-20250514` |
+| `TEXT_SMALL` | `claude-haiku-4-5-20251001` |
+| `TEXT_LARGE` | `claude-sonnet-4-6` |
+| `OBJECT_SMALL` | `claude-haiku-4-5-20251001` |
+| `OBJECT_LARGE` | `claude-sonnet-4-6` |
 
 <div id="features">
 
@@ -148,11 +96,11 @@ export ANTHROPIC_API_KEY=sk-ant-...
 
 - 流式响应
 - 工具使用（函数调用）
-- 视觉（所有模型支持图像输入）
-- 扩展思维（claude-3-7-sonnet、claude-opus-4-6）
+- 视觉输入（所有模型都支持图片输入）
+- `claude-sonnet-4-6` 和 `claude-opus-4-7` 支持自适应/扩展思维
 - 通过工具使用实现结构化 JSON 输出
-- 所有模型均支持 200k token 上下文窗口
-- 提示缓存，降低重复上下文的成本
+- 所有模型都支持 200k token 上下文窗口
+- 通过提示缓存降低重复上下文成本
 
 <div id="extended-thinking">
 
@@ -160,7 +108,7 @@ export ANTHROPIC_API_KEY=sk-ant-...
 
 </div>
 
-Claude 3.7 Sonnet 和 Claude Opus 4（`claude-opus-4-20250514`）支持扩展思维——一种模型在回答之前逐步推理的模式。这对于复杂推理、数学和多步骤规划特别有效。
+Claude Sonnet 4.6 和 Claude Opus 4.7 支持 Anthropic 的自适应/扩展思维模式，适合复杂推理和多步骤规划。
 
 ```typescript
 const response = await runtime.useModel("TEXT_LARGE", {
@@ -175,16 +123,16 @@ const response = await runtime.useModel("TEXT_LARGE", {
 
 </div>
 
-速率限制取决于您的 Anthropic 使用层级。请参阅 [docs.anthropic.com/en/api/rate-limits](https://docs.anthropic.com/en/api/rate-limits) 了解当前限制。
+速率限制取决于你的 Anthropic 使用层级。当前限制见 [docs.anthropic.com/en/api/rate-limits](https://docs.anthropic.com/en/api/rate-limits)。
 
-定价：[anthropic.com/pricing](https://www.anthropic.com/pricing)
+定价： [anthropic.com/pricing](https://www.anthropic.com/pricing)
 
 <div id="related">
 
-## 相关
+## 相关内容
 
 </div>
 
 - [OpenAI 插件](/zh/plugin-registry/llm/openai) — GPT-4o 和推理模型
-- [OpenRouter 插件](/zh/plugin-registry/llm/openrouter) — 在多个提供者之间路由，包括 Anthropic
+- [OpenRouter 插件](/zh/plugin-registry/llm/openrouter) — 包括 Anthropic 在内的多提供者路由
 - [模型提供者](/zh/runtime/models) — 比较所有提供者

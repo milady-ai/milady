@@ -29,7 +29,8 @@
       "!collision-report.json",
       "!scripts/type-audit-report.json",
       "!scripts/type-audit-report.md",
-      "!scripts/lib/elizaos-core-roles-shim.js"
+      "!scripts/lib/elizaos-core-roles-shim.js",
+      "!test/contracts/lib/openzeppelin-contracts/**"
     ]
   },
   "assist": {

@@ -140,34 +140,38 @@ export default scenario({
           return `expected seeded page mainText in result payload, got ${String(page.mainText ?? "")}`;
         }
         const links = Array.isArray(page.links) ? page.links : [];
-        if (!links.some((link) => {
-          if (!link || typeof link !== "object") {
-            return false;
-          }
-          const candidate = link as Record<string, unknown>;
-          return (
-            candidate.text === "Back to dashboard" &&
-            candidate.href ===
-              "https://speaker-portal.example.com/dashboard"
-          );
-        })) {
+        if (
+          !links.some((link) => {
+            if (!link || typeof link !== "object") {
+              return false;
+            }
+            const candidate = link as Record<string, unknown>;
+            return (
+              candidate.text === "Back to dashboard" &&
+              candidate.href === "https://speaker-portal.example.com/dashboard"
+            );
+          })
+        ) {
           return "expected seeded page links in result payload";
         }
         const forms = Array.isArray(page.forms) ? page.forms : [];
-        if (!forms.some((form) => {
-          if (!form || typeof form !== "object") {
-            return false;
-          }
-          const candidate = form as Record<string, unknown>;
-          const fields = Array.isArray(candidate.fields)
-            ? candidate.fields
-            : [];
-          return (
-            candidate.action === "https://speaker-portal.example.com/submissions" &&
-            fields.includes("deckUrl") &&
-            fields.includes("speakerName")
-          );
-        })) {
+        if (
+          !forms.some((form) => {
+            if (!form || typeof form !== "object") {
+              return false;
+            }
+            const candidate = form as Record<string, unknown>;
+            const fields = Array.isArray(candidate.fields)
+              ? candidate.fields
+              : [];
+            return (
+              candidate.action ===
+                "https://speaker-portal.example.com/submissions" &&
+              fields.includes("deckUrl") &&
+              fields.includes("speakerName")
+            );
+          })
+        ) {
           return "expected seeded page forms in result payload";
         }
         return undefined;

@@ -11,7 +11,7 @@
  * *.spec.ts            — Playwright specs (run by playwright configs)
  *
  * Test locations: src/, __tests__/, test/ — all are auto-discovered.
- * Subsystems with their own runners: eliza/cloud, eliza/steward-fi,
+ * Subsystems with their own runners: eliza/cloud,
  * eliza/packages/examples, eliza/packages/templates, eliza/packages/benchmarks.
  */
 import fs from "node:fs";
@@ -215,6 +215,18 @@ export default defineConfig({
         replacement: appCoreModuleFallbackPath,
       },
       {
+        find: "@elizaos/capacitor-llama",
+        replacement: path.join(
+          repoRoot,
+          "eliza",
+          "packages",
+          "native-plugins",
+          "llama",
+          "src",
+          "index.ts",
+        ),
+      },
+      {
         // Transitively imported via app-lifeops; resolve to source so subpath imports work.
         find: "@elizaos/plugin-telegram/account-auth-service",
         replacement: path.join(
@@ -336,6 +348,7 @@ export default defineConfig({
       "eliza/packages/app-core/platforms/electrobun/src/native/steward.test.ts",
       "eliza/packages/app-core/platforms/electrobun/src/application-menu.test.ts",
       "eliza/packages/app-core/scripts/**/*.test.ts",
+      "eliza/packages/native-plugins/llama/src/**/*.test.ts",
       "eliza/packages/shared/src/**/*.test.ts",
       "eliza/packages/app-core/src/**/*.test.tsx",
       "eliza/packages/agent/src/runtime/roles/test/**/*.test.ts",
@@ -358,6 +371,7 @@ export default defineConfig({
     exclude: [
       "dist/**",
       "**/node_modules/**",
+      ".claude/**",
       // --- live/real/integration/e2e tests have their own configs ---
       "**/*-live.test.{ts,tsx}",
       "**/*.live.test.{ts,tsx}",
@@ -375,7 +389,6 @@ export default defineConfig({
       "eliza/apps/*/src/services/**/*.test.{ts,tsx}",
       // --- subsystems with their own test runners ---
       "eliza/cloud/**",
-      "eliza/steward-fi/**",
       // --- wired via turbo, not root vitest ---
       "eliza/packages/examples/**",
       "eliza/packages/templates/**",

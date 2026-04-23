@@ -195,9 +195,19 @@ jobs:
         if: runner.os == 'Linux'
         shell: bash
         run: |
-          APT_ARGS=(-o Acquire::ForceIPv4=true -o Acquire::Retries=5 -o Acquire::http::Timeout=30)
-          sudo apt-get "${APT_ARGS[@]}" update
-          sudo apt-get "${APT_ARGS[@]}" install -y libwebkit2gtk-4.1-0 libayatana-appindicator3-1 xvfb
+          APT_ARGS=(-o Acquire::ForceIPv4=true -o Acquire::Retries=5 -o Acquire::http::Timeout=30 -o DPkg::Lock::Timeout=120)
+          for attempt in 1 2 3; do
+            if sudo env DEBIAN_FRONTEND=noninteractive timeout 5m apt-get "${APT_ARGS[@]}" update && \
+               sudo env DEBIAN_FRONTEND=noninteractive timeout 12m apt-get "${APT_ARGS[@]}" install -y --no-install-recommends \
+                 libwebkit2gtk-4.1-0 libayatana-appindicator3-1 xvfb; then
+              exit 0
+            fi
+            if [ "$attempt" -eq 3 ]; then
+              echo "Linux desktop dependency install failed after ${attempt} attempts"
+              exit 1
+            fi
+            sleep $((attempt * 10))
+          done
 
       - name: Cache Bun install
         uses: actions/cache@v4
@@ -230,9 +240,8 @@ jobs:
         if: runner.os == 'Linux'
         shell: bash
         run: |
-          # test:selfcontrol:e2e includes selfcontrol-desktop.live.e2e.test.ts,
-          # which boots the Electrobun desktop shell. Keep a virtual display on
-          # Linux even though the test assertions themselves are HTTP-driven.
+          # The blocking cross-platform lane covers the Vite-backed dev stack.
+          # Electrobun desktop startup has a dedicated smoke lane below.
           xvfb-run -a bun run test:selfcontrol:e2e
 
       - name: Run website blocker E2E suites
@@ -306,16 +315,18 @@ jobs:
         env:
           SKIP_AVATAR_CLONE: "1"
           MILADY_NO_VISION_DEPS: "1"
-        run: bun install --no-frozen-lockfile
+        run: bun install --cwd eliza --no-frozen-lockfile --ignore-scripts
 
       - name: Build @elizaos/core dist (required by dev-stack imports)
         shell: bash
         run: |
           # Run bun's own postinstall (skipped by --ignore-scripts) so its
           # runtime-embedded build plugins can execute.
-          if [ -d node_modules/bun ] && [ -f node_modules/bun/install.js ]; then
-            (cd node_modules/bun && node install.js) || true
-          fi
+          for bun_package_dir in node_modules/bun eliza/node_modules/bun; do
+            if [ -f "${bun_package_dir}/install.js" ]; then
+              (cd "${bun_package_dir}" && node install.js)
+            fi
+          done
           if [ -d eliza/packages/schemas ] && [ -f eliza/packages/schemas/buf.gen.yaml ] && [ ! -d eliza/packages/typescript/src/types/generated ]; then
             cd eliza/packages/schemas
             bunx @bufbuild/buf@1.67.0 generate
@@ -323,6 +334,9 @@ jobs:
           fi
           cd eliza/packages/typescript
           bun run build:node
+
+      - name: Link restored eliza workspaces into root node_modules
+        run: node scripts/link-local-eliza-workspace.mjs
 
       - name: Run website blocker startup smokes
         run: bun run test:selfcontrol:startup
@@ -370,16 +384,18 @@ jobs:
         env:
           SKIP_AVATAR_CLONE: "1"
           MILADY_NO_VISION_DEPS: "1"
-        run: bun install --no-frozen-lockfile
+        run: bun install --cwd eliza --no-frozen-lockfile --ignore-scripts
 
       - name: Build @elizaos/core dist (required by dev-stack imports)
         shell: bash
         run: |
           # Run bun's own postinstall (skipped by --ignore-scripts) so its
           # runtime-embedded build plugins can execute.
-          if [ -d node_modules/bun ] && [ -f node_modules/bun/install.js ]; then
-            (cd node_modules/bun && node install.js) || true
-          fi
+          for bun_package_dir in node_modules/bun eliza/node_modules/bun; do
+            if [ -f "${bun_package_dir}/install.js" ]; then
+              (cd "${bun_package_dir}" && node install.js)
+            fi
+          done
           if [ -d eliza/packages/schemas ] && [ -f eliza/packages/schemas/buf.gen.yaml ] && [ ! -d eliza/packages/typescript/src/types/generated ]; then
             cd eliza/packages/schemas
             bunx @bufbuild/buf@1.67.0 generate
@@ -387,6 +403,9 @@ jobs:
           fi
           cd eliza/packages/typescript
           bun run build:node
+
+      - name: Link restored eliza workspaces into root node_modules
+        run: node scripts/link-local-eliza-workspace.mjs
 
       - name: Build
         run: bun run build
@@ -805,6 +824,11 @@ jobs:
         if: steps.provider-check.outputs.skip != 'true'
         shell: bash
         run: |
+          for bun_package_dir in node_modules/bun eliza/node_modules/bun; do
+            if [ -f "${bun_package_dir}/install.js" ]; then
+              (cd "${bun_package_dir}" && node install.js)
+            fi
+          done
           if [ -d eliza/packages/schemas ] && [ -f eliza/packages/schemas/buf.gen.yaml ] && [ ! -d eliza/packages/typescript/src/types/generated ]; then
             cd eliza/packages/schemas
             bunx @bufbuild/buf@1.67.0 generate
@@ -813,12 +837,26 @@ jobs:
           cd eliza/packages/typescript
           bun run build:node
 
+      - name: Link restored eliza workspaces into root node_modules
+        if: steps.provider-check.outputs.skip != 'true'
+        run: node scripts/link-local-eliza-workspace.mjs
+
       - name: Install Electrobun runtime dependencies
         if: steps.provider-check.outputs.skip != 'true'
         run: |
-          APT_ARGS=(-o Acquire::ForceIPv4=true -o Acquire::Retries=5 -o Acquire::http::Timeout=30)
-          sudo apt-get "${APT_ARGS[@]}" update
-          sudo apt-get "${APT_ARGS[@]}" install -y libwebkit2gtk-4.1-0 libayatana-appindicator3-1
+          APT_ARGS=(-o Acquire::ForceIPv4=true -o Acquire::Retries=5 -o Acquire::http::Timeout=30 -o DPkg::Lock::Timeout=120)
+          for attempt in 1 2 3; do
+            if sudo env DEBIAN_FRONTEND=noninteractive timeout 5m apt-get "${APT_ARGS[@]}" update && \
+               sudo env DEBIAN_FRONTEND=noninteractive timeout 12m apt-get "${APT_ARGS[@]}" install -y --no-install-recommends \
+                 libwebkit2gtk-4.1-0 libayatana-appindicator3-1; then
+              exit 0
+            fi
+            if [ "$attempt" -eq 3 ]; then
+              echo "Electrobun runtime dependency install failed after ${attempt} attempts"
+              exit 1
+            fi
+            sleep $((attempt * 10))
+          done
 
       - name: Install Playwright browser
         if: steps.provider-check.outputs.skip != 'true'

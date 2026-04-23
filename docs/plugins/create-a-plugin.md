@@ -391,16 +391,16 @@ interface PluginConfigUiHint {
 
 ## How Plugin Discovery Works
 
-When Milady starts, it discovers plugins from multiple sources in priority order:
+When Milady starts, it discovers plugins from multiple sources in this order:
 
 1. **Milady plugin** — Built-in workspace context and session management
 2. **Core plugins** — Always loaded (`@elizaos/plugin-sql`, `@elizaos/plugin-local-embedding`, etc.)
 3. **Connector plugins** — Auto-enabled when channel config exists (e.g., `telegram` config → `@elizaos/plugin-telegram`)
 4. **Provider plugins** — Auto-enabled when API key env var is set (e.g., `ANTHROPIC_API_KEY` → `@elizaos/plugin-anthropic`)
 5. **Feature plugins** — Enabled via feature flags in `milady.json` (e.g., `features.browser: true` → `@elizaos/plugin-browser`)
-6. **User-installed plugins** — Installed via `milady plugins install`
-7. **Custom plugins** — Dropped into `~/.milady/plugins/custom/`
-8. **Ejected plugins** — Git-cloned upstream plugins in `~/.milady/plugins/ejected/`
+6. **Ejected plugins** — Git-cloned upstream plugins in `~/.milady/plugins/ejected/` (take priority over npm versions)
+7. **User-installed plugins** — Installed via `milady plugins install`
+8. **Custom plugins** — Dropped into `~/.milady/plugins/custom/`
 
 ### Auto-Enable by Environment Variable
 
@@ -436,7 +436,9 @@ Override in `milady.json`:
 ```json
 {
   "plugins": {
-    "@elizaos/plugin-telegram": { "enabled": false }
+    "entries": {
+      "telegram": { "enabled": false }
+    }
   }
 }
 ```

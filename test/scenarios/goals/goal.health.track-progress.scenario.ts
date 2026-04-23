@@ -1,5 +1,5 @@
-import { scenario } from "@elizaos/scenario-schema";
 import type { IAgentRuntime } from "@elizaos/core";
+import { scenario } from "@elizaos/scenario-schema";
 import { LifeOpsRepository } from "../../../eliza/apps/app-lifeops/src/lifeops/repository.ts";
 import { LifeOpsService } from "../../../eliza/apps/app-lifeops/src/lifeops/service.ts";
 

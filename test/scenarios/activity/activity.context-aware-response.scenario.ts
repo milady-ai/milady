@@ -1,7 +1,5 @@
 import { scenario } from "@elizaos/scenario-schema";
-import {
-  setScreenContextSamplerForTesting,
-} from "../../../eliza/apps/app-lifeops/src/activity-profile/service.ts";
+import { setScreenContextSamplerForTesting } from "../../../eliza/apps/app-lifeops/src/activity-profile/service.ts";
 import {
   LifeOpsScreenContextSampler,
   type LifeOpsScreenContextSummary,

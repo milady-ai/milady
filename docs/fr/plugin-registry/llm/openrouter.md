@@ -14,12 +14,12 @@ Le plugin OpenRouter connecte les agents Milady à la passerelle d'inférence un
 
 </div>
 
-Dans le monorepo Milady, **`@elizaos/plugin-openrouter` est épinglé à `2.0.0-alpha.10`** (version exacte dans le `package.json` racine, reflétée dans `bun.lock`).
+Dans le monorepo Milady, **`@elizaos/plugin-openrouter` est épinglé à `2.0.0-alpha.13`** (version exacte dans le `package.json` racine, reflétée dans `bun.lock`).
 
 **Pourquoi épingler**
 
 - **`2.0.0-alpha.12` sur npm est une publication défectueuse :** les bundles ESM Node et navigateur sont **tronqués**. Ils ne contiennent que des helpers de configuration empaquetés ; l'**objet principal du plugin est absent**, mais le fichier **exporte** toujours `openrouterPlugin` et un alias par défaut. **Pourquoi l'exécution échoue :** Bun (et tout outillage strict) tente de charger ce fichier et échoue car ces liaisons ne sont **jamais déclarées** dans le module.
-- **Pourquoi pas `^2.0.0-alpha.10` :** Les plages semver peuvent flotter jusqu'à **`alpha.12`**, ce qui casse `bun install` / le rafraîchissement du lockfile pour tous ceux qui utilisent OpenRouter.
+- **Pourquoi pas `^2.0.0-alpha.13` :** Les plages semver peuvent flotter jusqu'à des versions défectueuses, ce qui casse `bun install` / le rafraîchissement du lockfile pour tous ceux qui utilisent OpenRouter.
 - **Pourquoi nous ne corrigeons pas cela dans `patch-deps.mjs` :** Contrairement à un *nom* d'export incorrect dans un fichier par ailleurs complet, ce tarball omet le **fragment d'implémentation entier**. Un remplacement de chaîne en postinstall ne peut pas inventer le plugin ; la correction sûre est d'**utiliser une version fonctionnelle**.
 
 **Quand retirer l'épinglage**
@@ -72,7 +72,7 @@ export OPENROUTER_API_KEY=sk-or-...
     "profiles": {
       "default": {
         "provider": "openrouter",
-        "model": "anthropic/claude-sonnet-4-5"
+        "model": "anthropic/claude-sonnet-4.6"
       }
     }
   }
@@ -108,9 +108,9 @@ OpenRouter fournit l'accès aux modèles de tous les principaux fournisseurs. Ut
 
 | ID du modèle | Description |
 |--------------|-------------|
-| `anthropic/claude-opus-4` | Claude le plus performant |
-| `anthropic/claude-sonnet-4-5` | Claude équilibré |
-| `anthropic/claude-haiku-4` | Claude le plus rapide |
+| `anthropic/claude-opus-4.7` | Claude le plus performant |
+| `anthropic/claude-sonnet-4.6` | Claude équilibré |
+| `anthropic/claude-haiku-4.5` | Claude le plus rapide |
 
 <div id="meta-via-openrouter">
 
@@ -144,8 +144,8 @@ Parcourez tous les modèles sur [openrouter.ai/models](https://openrouter.ai/mod
 
 | Type de modèle elizaOS | Modèle OpenRouter par défaut |
 |------------------------|----------------------------|
-| `TEXT_SMALL` | `anthropic/claude-haiku-4` |
-| `TEXT_LARGE` | `anthropic/claude-sonnet-4-5` |
+| `TEXT_SMALL` | `anthropic/claude-haiku-4.5` |
+| `TEXT_LARGE` | `anthropic/claude-sonnet-4.6` |
 
 <div id="features">
 
@@ -176,7 +176,7 @@ OpenRouter prend en charge les préférences de routage par coût, latence ou d�
     "profiles": {
       "default": {
         "provider": "openrouter",
-        "model": "anthropic/claude-sonnet-4-5",
+        "model": "anthropic/claude-sonnet-4.6",
         "providerPreferences": {
           "order": ["Anthropic", "AWS Bedrock"],
           "allowFallbacks": true

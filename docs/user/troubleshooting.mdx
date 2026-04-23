@@ -47,7 +47,7 @@ Test voice preview first.
 - if preview works but replies stay silent, fix the speech provider
 - if talk mode fails, check microphone permissions
 
-## Discord or Telegram does not reply
+## A connector does not reply
 
 ### Discord
 
@@ -61,10 +61,29 @@ Test voice preview first.
 - connector offline
 - privacy mode blocking group behavior
 
+### Slack
+
+- missing `appToken` for Socket Mode
+- wrong `signingSecret` for HTTP mode
+
+### WhatsApp
+
+- QR code not scanned or session expired
+- `authDir` not set or not writable
+
+### Signal
+
+- `signal-cli` not running or unreachable at `httpUrl`
+
+### General
+
+For any connector: check the token/credential, confirm the connector is enabled in config (`connectors.<name>.enabled` is not `false`), and check logs for startup errors.
+
 Guides:
 
 - [Connect Discord](/user/connect-discord)
 - [Connect Telegram](/user/connect-telegram)
+- [All connectors](/guides/connectors)
 
 ## Remote connection fails
 

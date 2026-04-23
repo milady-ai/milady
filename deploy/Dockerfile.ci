@@ -100,7 +100,7 @@ RUN find eliza \( -path '*/node_modules/@elizaos/core' -o -path '*/node_modules/
 
 # Patch noble packages for eliza runtime compatibility.
 # - @noble/ciphers and @noble/curves need extensionless subpath aliases.
-# - @noble/hashes@1.3.x has no ./legacy export, but crypto-compat.ts imports it for md5/sha1.
+# - @noble/hashes no longer needs a custom ./legacy shim, crypto-compat imports legacy.js directly.
 RUN node - <<'__NOBLE_PATCH__'
 const fs = require('fs');
 const path = require('path');
@@ -126,31 +126,9 @@ function patchExtensionlessExports(dir) {
   }
   return pkg;
 }
-function ensureHashesLegacyShim(dir) {
-  const pkgPath = path.join(dir, 'package.json');
-  if (!fs.existsSync(pkgPath)) return;
-  const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
-  pkg.exports ||= {};
-  if (pkg.exports['./legacy']) return;
-  const cjs = `'use strict';\nconst { createHash } = require('node:crypto');\nconst toBytes = (data) => {\n  if (data instanceof Uint8Array) return data;\n  if (typeof data === 'string') return Buffer.from(data, 'utf8');\n  if (ArrayBuffer.isView(data)) return Buffer.from(data.buffer, data.byteOffset, data.byteLength);\n  if (data instanceof ArrayBuffer) return Buffer.from(data);\n  return Buffer.from(data);\n};\nconst make = (algorithm) => (data) => new Uint8Array(createHash(algorithm).update(toBytes(data)).digest());\nexports.md5 = make('md5');\nexports.sha1 = make('sha1');\n`;
-  const esm = `import { createHash } from 'node:crypto';\nconst toBytes = (data) => {\n  if (data instanceof Uint8Array) return data;\n  if (typeof data === 'string') return Buffer.from(data, 'utf8');\n  if (ArrayBuffer.isView(data)) return Buffer.from(data.buffer, data.byteOffset, data.byteLength);\n  if (data instanceof ArrayBuffer) return Buffer.from(data);\n  return Buffer.from(data);\n};\nconst make = (algorithm) => (data) => new Uint8Array(createHash(algorithm).update(toBytes(data)).digest());\nexport const md5 = make('md5');\nexport const sha1 = make('sha1');\n`;
-  const dts = `export declare const md5: (data: Uint8Array | ArrayBuffer | ArrayBufferView | string) => Uint8Array;\nexport declare const sha1: (data: Uint8Array | ArrayBuffer | ArrayBufferView | string) => Uint8Array;\n`;
-  fs.writeFileSync(path.join(dir, 'legacy.js'), cjs);
-  fs.mkdirSync(path.join(dir, 'esm'), { recursive: true });
-  fs.writeFileSync(path.join(dir, 'esm', 'legacy.js'), esm);
-  fs.writeFileSync(path.join(dir, 'legacy.d.ts'), dts);
-  pkg.exports['./legacy'] = {
-    types: './legacy.d.ts',
-    import: './esm/legacy.js',
-    default: './legacy.js'
-  };
-  fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
-  console.log('[patch-deps] Patched @noble/hashes exports: added ./legacy shim.');
-}
 patchExtensionlessExports('node_modules/@noble/ciphers');
 patchExtensionlessExports('node_modules/@noble/curves');
 patchExtensionlessExports('node_modules/@noble/hashes');
-ensureHashesLegacyShim('node_modules/@noble/hashes');
 __NOBLE_PATCH__
 
 # Fix dist layout: package.json says dist/index.node.js but build creates dist/node/index.node.js
@@ -400,7 +378,7 @@ for (const name of apps) {
   fs.writeFileSync(dir + '/plugin.mjs', emptyPlugin);
   // app-steward has extra subpath imports from dist/api/server.js
   if (name === '@elizaos/app-steward') {
-    const routeStub = `export async function resolveWalletExportRejection() { return null; }\nexport default {};`;
+    const routeStub = `export async function resolveWalletExportRejection() { return null; }\nexport async function handleWalletCoreRoutes() { return false; }\nexport default {};`;
     const secStub = `export async function hydrateWalletKeysFromNodePlatformSecureStore() { return null; }\nexport async function deleteWalletSecretsFromOsStore() { return null; }\nexport default {};`;
     const txServiceStub = `export class TxService {}\nexport default {};`;
     fs.writeFileSync(dir + '/routes-stub.mjs', routeStub);
@@ -412,6 +390,7 @@ for (const name of apps) {
         './plugin': './plugin.mjs', '.': './plugin.mjs',
         './api/tx-service': './tx-service-stub.mjs',
         './routes/server-wallet-trade': './routes-stub.mjs',
+        './routes/wallet-core-routes': './routes-stub.mjs',
         './security/hydrate-wallet-keys-from-platform-store': './security-stub.mjs',
         './security/wallet-os-store-actions': './security-stub.mjs',
       }

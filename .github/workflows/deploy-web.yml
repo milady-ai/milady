@@ -79,7 +79,7 @@ jobs:
         run: node scripts/write-homepage-release-data.mjs
 
       - name: Build homepage
-        run: bun run build:web
+        run: cd apps/homepage && bunx vite build
 
       - name: Stage GitHub Pages files
         run: |

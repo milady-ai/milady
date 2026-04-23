@@ -37,9 +37,12 @@ export OPENAI_API_KEY=sk-...
 | Environment Variable | Required | Description |
 |---------------------|----------|-------------|
 | `OPENAI_API_KEY` | Yes | OpenAI API key from [platform.openai.com](https://platform.openai.com) |
-| `OPENAI_API_URL` | No | Custom base URL (for Azure OpenAI or compatible APIs) |
-| `OPENAI_ORG_ID` | No | Organization ID for usage tracking |
-| `OPENAI_PROJECT_ID` | No | Project ID for quota management |
+| `OPENAI_BASE_URL` | No | Custom base URL (for Azure OpenAI or compatible APIs) |
+| `OPENAI_SMALL_MODEL` | No | Override the small model identifier (default: `gpt-4o-mini`) |
+| `OPENAI_LARGE_MODEL` | No | Override the large model identifier (default: `gpt-4o`) |
+| `OPENAI_EMBEDDING_MODEL` | No | Override the embedding model (default: `text-embedding-3-small`) |
+| `OPENAI_TTS_MODEL` | No | Override the text-to-speech model |
+| `OPENAI_TTS_VOICE` | No | Voice profile for text-to-speech output |
 
 ### milady.json Example
 

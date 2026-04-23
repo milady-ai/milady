@@ -76,6 +76,7 @@ vendor/
 .local/
 .vscode/
 .claude/settings.local.json
+.claude/scheduled_tasks.lock
 .claude/skills/
 .git-workspace/
 IDENTITY.md
@@ -85,6 +86,8 @@ USER.md
 .eliza.broken.*/
 .milady-repo-setup.lock
 .milady/desktop-dev-console.log
+.milady/gmail-fixtures/
+test/mocks/fixtures/*.raw.json
 .turbo/
 skills/.cache/
 apps/app/electron/.eliza

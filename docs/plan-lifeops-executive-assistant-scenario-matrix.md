@@ -24,6 +24,10 @@ The transcript-derived executable suite now lives at:
 
 - `test/scenarios/executive-assistant/`
 
+The Gmail/inbox-zero review and expanded LLM scenario matrix lives at:
+
+- `docs/plans/2026-04-22-gmail-lifeops-integration-review.md`
+
 Current footprint:
 
 - 22 transcript-derived scenario files
@@ -52,16 +56,16 @@ The scenario plan should enforce the architecture, not just the behavior.
 The executive-assistant suite must prove:
 
 1. Semantic routing is LLM-extracted.
-Tests should not pass if a flow only works because of keyword matching, regex routing, sender-name overrides, or channel-name rules.
+   Tests should not pass if a flow only works because of keyword matching, regex routing, sender-name overrides, or channel-name rules.
 
 2. Action execution is typed.
-Each scenario should verify the selected domain action and its typed arguments, not just the final assistant prose.
+   Each scenario should verify the selected domain action and its typed arguments, not just the final assistant prose.
 
 3. Connector behavior is capability-driven.
-The same scenario intent should execute through different connectors without changing the semantic planner.
+   The same scenario intent should execute through different connectors without changing the semantic planner.
 
 4. Background work uses the same stack.
-Cron handlers, reminder ladders, and connector ingest paths must exercise the same extraction, planning, approval, and action pipeline as live chat turns.
+   Cron handlers, reminder ladders, and connector ingest paths must exercise the same extraction, planning, approval, and action pipeline as live chat turns.
 
 ## What Already Exists In The Repo
 

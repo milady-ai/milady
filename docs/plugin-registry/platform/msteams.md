@@ -84,7 +84,7 @@ export MSTEAMS_TENANT_ID=YOUR_TENANT_ID
 
 ## Auto-Enable
 
-The plugin auto-enables when the `connectors.msteams` block contains `appId`, `appPassword`, and `tenantId`.
+The plugin auto-enables when the `connectors.msteams` block contains `botToken`, `token`, or `apiKey`. Note that `appId` and `appPassword` alone do not trigger auto-enable -- set `botToken` to the app password to trigger auto-enable, or add the plugin to `plugins.allow` explicitly.
 
 ## Troubleshooting
 

@@ -72,7 +72,10 @@ export default scenario({
         }
 
         const blob = JSON.stringify(hit).toLowerCase();
-        if (!blob.includes("telegram") || (!blob.includes("chat") && !blob.includes("message"))) {
+        if (
+          !blob.includes("telegram") ||
+          (!blob.includes("chat") && !blob.includes("message"))
+        ) {
           return "expected Telegram chat metadata in the inbox action payload";
         }
         return undefined;

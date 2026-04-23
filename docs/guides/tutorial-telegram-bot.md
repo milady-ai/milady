@@ -200,9 +200,9 @@ milady
 
 ## Next Steps
 
-- **[Connectors Guide](../guides/connectors.md)** — Overview of all available connectors
-- **[Configuration Guide](../guides/config-templates.md)** — Advanced configuration options
-- **[Deployment Guide](../guides/deployment.md)** — Deploy your bot to production
+- **[Connectors Guide](/guides/connectors)** — Overview of all available connectors
+- **[Configuration Guide](/guides/config-templates)** — Advanced configuration options
+- **[Deployment Guide](/deployment)** — Deploy your bot to production
 
 ## Need Help?
 

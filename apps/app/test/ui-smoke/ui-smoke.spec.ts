@@ -24,7 +24,7 @@ test("chat, apps, and settings routes render through the real shell", async ({
   await expect(page).toHaveURL(/\/apps$/);
   await expect(page.getByTestId("apps-catalog-grid")).toBeVisible();
 
-  await page.getByTestId("header-nav-button-settings").click();
+  await page.getByTestId("header-settings-button").click();
   await expect(page).toHaveURL(/\/settings$/);
   await expect(page.getByTestId("settings-shell")).toBeVisible();
   await expect(page.locator("#capabilities")).toBeVisible();

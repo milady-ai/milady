@@ -77,9 +77,9 @@ Some `@elizaos` packages (e.g. `@elizaos/plugin-sql`) publish a `package.json` w
 ## Pinned: `@elizaos/plugin-openrouter`
 
 This repo currently resolves **`@elizaos/plugin-openrouter`** via a local
-workspace link (**`workspace:*`**) during development. The important published
-artifact note is unchanged: **`2.0.0-alpha.10`** is the last known-good npm
-tarball, while **`2.0.0-alpha.12`** shipped broken dist entrypoints.
+workspace link (**`workspace:*`**) during development. When not using the local
+checkout, the root `package.json` pins **`2.0.0-alpha.13`** (the current known-good
+npm tarball). **`2.0.0-alpha.12`** shipped broken dist entrypoints and must be avoided.
 
 ### What went wrong in `2.0.0-alpha.12`
 
@@ -92,7 +92,7 @@ entire plugin body, not a single wrong identifier (contrast
 `@elizaos/plugin-pdf`, where a small string replace fixes a bad export alias).
 Reconstructing the plugin from source inside Milady would fork upstream and be
 fragile. When you are not using the local workspace checkout, prefer the known
-good published **`2.0.0-alpha.10`** artifact.
+good published **`2.0.0-alpha.13`** artifact.
 
 ### Maintainer notes
 

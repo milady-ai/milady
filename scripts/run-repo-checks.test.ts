@@ -6,35 +6,34 @@ import {
   miladyElizaCrossLanguageChecks,
   miladyElizaTypecheckSteps,
   miladySidecarTypecheckSteps,
+  miladyTypecheckSteps,
   suites,
 } from "./run-repo-checks.mjs";
 
 describe("run-repo-checks", () => {
-  it("keeps blocking typecheck sweep limited to stable checks", () => {
-    expect(suites.typecheck).toEqual([
-      {
-        label: "Root workspace typecheck",
-        command: "bun",
-        args: ["run", "verify:typecheck:workspace"],
-      },
-    ]);
-
-    expect(suites.typecheck).not.toContainEqual({
+  it("runs default typecheck on every shipped TS surface (same as miladyTypecheckSteps)", () => {
+    expect(suites.typecheck).toEqual(miladyTypecheckSteps);
+    expect(suites.typecheck).toContainEqual({
+      label: "Root workspace typecheck",
+      command: "bun",
+      args: ["run", "verify:typecheck:workspace"],
+    });
+    expect(suites.typecheck).toContainEqual({
       label: "@elizaos/app-core typecheck",
       command: "bun",
       args: ["run", "--cwd", "eliza/packages/app-core", "typecheck"],
     });
-    expect(suites.typecheck).not.toContainEqual({
+    expect(suites.typecheck).toContainEqual({
       label: "@elizaos/ui typecheck",
       command: "bun",
       args: ["run", "--cwd", "eliza/packages/ui", "typecheck"],
     });
-    expect(suites.typecheck).not.toContainEqual({
+    expect(suites.typecheck).toContainEqual({
       label: "apps/app typecheck",
       command: "bun",
       args: ["run", "--cwd", "apps/app", "typecheck"],
     });
-    expect(suites.typecheck).not.toContainEqual({
+    expect(suites.typecheck).toContainEqual({
       label: "apps/homepage typecheck",
       command: "bun",
       args: ["run", "--cwd", "apps/homepage", "typecheck"],
@@ -65,6 +64,10 @@ describe("run-repo-checks", () => {
       command: "bun",
       args: ["run", "--cwd", "eliza/packages/ui", "typecheck"],
     });
+
+    expect(
+      suites["typecheck:extended"].slice(0, miladyTypecheckSteps.length),
+    ).toEqual(miladyTypecheckSteps);
   });
 
   it("drops the full eliza TypeScript lint step", () => {
@@ -123,11 +126,5 @@ describe("run-repo-checks", () => {
 
   it("skips unrelated sidecar workspace typechecks", () => {
     expect(miladySidecarTypecheckSteps).toEqual([]);
-    expect(
-      suites.lint.find((step) => step.label === "steward-fi lint"),
-    ).toBeUndefined();
-    expect(
-      suites.typecheck.find((step) => step.label === "steward-fi typecheck"),
-    ).toBeUndefined();
   });
 });

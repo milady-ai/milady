@@ -1,6 +1,5 @@
 import { scenario } from "@elizaos/scenario-schema";
 import {
-  expectScenarioToCallAction,
   expectTurnToCallAction,
   judgeRubric,
 } from "../_helpers/action-assertions.ts";
@@ -27,7 +26,7 @@ export default scenario({
     {
       type: "gmailInbox",
       account: "test-owner",
-      fixture: "high-priority-client.eml",
+      fixture: "sarah-product-brief.eml",
     },
   ],
   turns: [
@@ -41,7 +40,6 @@ export default scenario({
         description: "gmail high-priority triage",
         includesAny: ["triage", "priority", "respond", "urgent"],
       }),
-      responseIncludesAny: ["urgent", "high priority", "priority"],
       responseJudge: {
         minimumScore: 0.7,
         rubric:
@@ -51,22 +49,18 @@ export default scenario({
   ],
   finalChecks: [
     {
-      type: "selectedAction",
+      type: "gmailActionArguments",
       actionName: ["GMAIL_ACTION", "INBOX"],
+      subaction: "triage",
     },
     {
-      type: "selectedActionArguments",
-      actionName: ["GMAIL_ACTION", "INBOX"],
-      includesAny: ["triage", "priority", "respond", "urgent"],
+      type: "gmailMockRequest",
+      method: "GET",
+      path: "/gmail/v1/users/me/messages",
+      minCount: 1,
     },
     {
-      type: "custom",
-      name: "gmail-high-priority-triage-action-coverage",
-      predicate: expectScenarioToCallAction({
-        acceptedActions: ["GMAIL_ACTION", "INBOX"],
-        description: "gmail high-priority triage",
-        includesAny: ["triage", "priority", "respond", "urgent"],
-      }),
+      type: "gmailNoRealWrite",
     },
     judgeRubric({
       name: "gmail-high-priority-triage-rubric",

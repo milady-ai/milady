@@ -60,7 +60,7 @@ Under your app settings, enable the **Bot** capability and configure event subsc
 
 ## Auto-Enable
 
-The plugin auto-enables when both `FEISHU_APP_ID` and `FEISHU_APP_SECRET` are set.
+The plugin auto-enables when the `connectors.feishu` block contains `token`, `botToken`, or `apiKey`. Environment variables alone (`FEISHU_APP_ID` / `FEISHU_APP_SECRET`) do not trigger auto-enable. Set `"apiKey": "your_app_secret"` in the connector config to trigger auto-enable, or add the plugin to `plugins.allow` explicitly.
 
 ## Related
 

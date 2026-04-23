@@ -218,7 +218,7 @@ export function seedBrowserExtensionTelemetry(args: BrowserTelemetrySeed) {
       deviceId: args.deviceId,
       userAgent:
         args.userAgent ??
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X) LifeOpsBrowser/1.0",
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X) AgentBrowserBridge/1.0",
       extensionVersion: args.extensionVersion ?? "1.0.0",
       browserVendor: args.browserVendor ?? "chrome",
       registeredAt: now.toISOString(),
@@ -265,7 +265,7 @@ export function seedBrowserCurrentPageContext(args: BrowserPageContextSeed) {
         browser: args.browser,
         profileId: args.profileId,
         profileLabel: args.profileId,
-        label: `LifeOps Browser ${args.browser} ${args.profileId}`,
+        label: `Agent Browser Bridge ${args.browser} ${args.profileId}`,
         connectionState: "connected",
         permissions: {
           tabs: true,

@@ -65,75 +65,68 @@ You can also enable and configure autonomous mode programmatically using the Mil
 
 <CodeGroup>
 ```bash curl
-curl -X POST https://api.milady.ai/agents/autonomous-config \
-  -H "Authorization: Bearer YOUR_API_KEY" \
+# Enable autonomy
+curl -X POST http://localhost:2138/api/agent/autonomy \
+  -H "Content-Type: application/json" \
+  -d '{"enabled": true}'
+
+# Create a trigger for scheduled execution
+curl -X POST http://localhost:2138/api/triggers \
   -H "Content-Type: application/json" \
   -d '{
-    "agentId": "agent_xyz123",
-    "enabled": true,
+    "displayName": "Hourly Check",
+    "instructions": "Check system health and report anomalies",
     "triggerType": "interval",
-    "triggerConfig": {
-      "intervalSeconds": 3600,
-      "timezone": "UTC"
-    },
-    "safetyControls": {
-      "maxRunsPerDay": 24,
-      "maxConcurrentRuns": 1,
-      "timeoutSeconds": 300,
-      "resourceLimits": {
-        "maxMemoryMB": 512,
-        "maxCpuPercent": 50
-      }
-    },
-    "notificationChannels": ["email", "slack"]
+    "intervalMs": 3600000,
+    "wakeMode": "inject_now",
+    "enabled": true
   }'
 ```
 
 ```json JSON Response
 {
-  "success": true,
-  "configId": "config_abc789",
-  "agentId": "agent_xyz123",
-  "status": "active",
-  "nextExecutionTime": "2026-03-18T15:00:00Z",
-  "createdAt": "2026-03-18T14:23:45Z"
+  "trigger": {
+    "id": "uuid",
+    "taskId": "uuid",
+    "displayName": "Hourly Check",
+    "triggerType": "interval",
+    "intervalMs": 3600000,
+    "enabled": true,
+    "wakeMode": "inject_now",
+    "runCount": 0
+  }
 }
 ```
 </CodeGroup>
 
 <Warning>
-Always use environment variables or secure secret management for your API keys. Never hardcode credentials in your code or configuration files.
+Store sensitive configuration in `~/.milady/milady.json` or environment variables. Never hardcode credentials in your code.
 </Warning>
 
 ## Trigger Types
 
-Autonomous agents support three trigger types to fit different scheduling needs:
+Autonomous agents support three trigger types to fit different scheduling needs. See the [Triggers guide](/guides/triggers) for full details.
 
 ### Interval Triggers
 
-Execute the agent at fixed time intervals.
+Execute the agent at fixed time intervals. The `intervalMs` field specifies milliseconds between runs (minimum: 60,000 ms, maximum: 2,678,400,000 ms).
 
 <CodeGroup>
-```json5 Interval Configuration
+```json Run Every Hour
 {
-  triggerType: "interval",
-  triggerConfig: {
-    intervalSeconds: 3600,        // Run every hour
-    timezone: "UTC",
-    startTime: "2026-03-18T09:00:00Z",  // Optional: when to begin scheduling
-    randomizeDelay: true,         // Optional: add 0-5min random delay
-    randomizeDelaySeconds: 300    // Max jitter in seconds
-  }
+  "triggerType": "interval",
+  "intervalMs": 3600000,
+  "instructions": "Check system health and report anomalies",
+  "wakeMode": "inject_now"
 }
 ```
 
-```json5 Every 30 Minutes
+```json Run Every 30 Minutes
 {
-  triggerType: "interval",
-  triggerConfig: {
-    intervalSeconds: 1800,
-    timezone: "America/New_York"
-  }
+  "triggerType": "interval",
+  "intervalMs": 1800000,
+  "instructions": "Summarize the latest activity in all channels",
+  "wakeMode": "inject_now"
 }
 ```
 </CodeGroup>
@@ -144,37 +137,26 @@ Interval triggers are best for tasks that should run at regular, predictable int
 
 ### Cron Triggers
 
-Use cron expressions for more complex scheduling patterns.
+Use standard 5-field cron expressions for more complex scheduling patterns. An optional `timezone` field supports IANA timezone names.
 
 <CodeGroup>
-```json5 Cron Configuration
+```json Weekdays at 9 AM Pacific
 {
-  triggerType: "cron",
-  triggerConfig: {
-    cronExpression: "0 9 * * MON-FRI",  // 9 AM every weekday
-    timezone: "America/Los_Angeles",
-    description: "Daily business hours task"
-  }
+  "triggerType": "cron",
+  "cronExpression": "0 9 * * 1-5",
+  "timezone": "America/Los_Angeles",
+  "instructions": "Generate the daily business report",
+  "wakeMode": "inject_now"
 }
 ```
 
-```json5 Multiple Cron Examples
+```json Every 15 Minutes During Business Hours
 {
-  // Twice daily at 6 AM and 6 PM
-  cronExpression: "0 6,18 * * *",
-  timezone: "UTC"
-}
-
-{
-  // Every Monday at midnight
-  cronExpression: "0 0 * * 1",
-  timezone: "Europe/London"
-}
-
-{
-  // Every 15 minutes during business hours
-  cronExpression: "*/15 9-17 * * MON-FRI",
-  timezone: "America/Chicago"
+  "triggerType": "cron",
+  "cronExpression": "*/15 9-17 * * 1-5",
+  "timezone": "America/Chicago",
+  "instructions": "Check price feeds",
+  "wakeMode": "inject_now"
 }
 ```
 </CodeGroup>
@@ -185,34 +167,21 @@ Cron triggers respect timezone settings, so you can schedule tasks to run at spe
 
 ### Once Triggers
 
-Execute a single time at a specified timestamp.
+Execute a single time at a specified ISO 8601 timestamp. The task is automatically deleted after execution.
 
 <CodeGroup>
-```json5 One-Time Execution
+```json One-Time Execution
 {
-  triggerType: "once",
-  triggerConfig: {
-    executionTime: "2026-03-25T15:30:00Z",
-    timezone: "UTC",
-    description: "One-time maintenance task"
-  }
-}
-```
-
-```json5 Scheduled Batch Job
-{
-  triggerType: "once",
-  triggerConfig: {
-    executionTime: "2026-03-20T02:00:00Z",
-    timezone: "America/New_York",
-    description: "Nightly batch processing job"
-  }
+  "triggerType": "once",
+  "scheduledAtIso": "2026-03-25T15:30:00Z",
+  "instructions": "Send the quarterly report summary",
+  "wakeMode": "inject_now"
 }
 ```
 </CodeGroup>
 
 <Warning>
-Once triggers are one-time only. After execution, the agent will not run again unless reconfigured with a new trigger.
+Once triggers are one-time only. After execution, the trigger is automatically deleted. Create a new trigger for additional runs.
 </Warning>
 
 ## Safety Controls
@@ -242,32 +211,21 @@ Milady provides comprehensive safety controls to prevent runaway autonomous agen
 
 ### Max Runs Configuration
 
-<CodeGroup>
-```json5 Daily Limit
+You can limit how many times a trigger executes by setting `maxRuns` on each trigger. For example, to run a trigger at most 24 times:
+
+```json
 {
-  safetyControls: {
-    maxRunsPerDay: 24,           // Maximum 24 executions per day
-    maxConcurrentRuns: 1,        // Only 1 instance at a time
-    timeoutSeconds: 300,         // 5 minute execution limit
-    backoffMultiplier: 2.0,      // Exponential backoff on errors
-    maxBackoffSeconds: 3600      // Cap backoff at 1 hour
-  }
+  "triggerType": "interval",
+  "intervalMs": 3600000,
+  "instructions": "Check system status",
+  "maxRuns": 24,
+  "wakeMode": "inject_now"
 }
 ```
 
-```json5 Resource Limits
-{
-  safetyControls: {
-    resourceLimits: {
-      maxMemoryMB: 512,         // 512 MB memory cap
-      maxCpuPercent: 50,        // 50% CPU usage cap
-      maxNetworkMBps: 10,       // 10 MB/s network limit
-      diskUsageMB: 100          // Temporary disk usage
-    }
-  }
-}
-```
-</CodeGroup>
+The trigger system also enforces a per-creator limit on the total number of active triggers (default: 100, configurable via the `MILADY_TRIGGERS_MAX_ACTIVE` environment variable or runtime setting).
+
+The autonomous state provider caps event caching at 240 events per agent to bound memory usage.
 
 ## Monitoring via Autonomous Panel
 
@@ -318,22 +276,16 @@ You can disable autonomous mode at any time through the dashboard or API:
 
 <CodeGroup>
 ```bash curl
-curl -X POST https://api.milady.ai/agents/autonomous-config/disable \
-  -H "Authorization: Bearer YOUR_API_KEY" \
+curl -X POST http://localhost:2138/api/agent/autonomy \
   -H "Content-Type: application/json" \
-  -d '{
-    "agentId": "agent_xyz123",
-    "reason": "Maintenance window"
-  }'
+  -d '{"enabled": false}'
 ```
 
 ```json JSON Response
 {
-  "success": true,
-  "agentId": "agent_xyz123",
-  "autonomyStatus": "disabled",
-  "disabledAt": "2026-03-18T14:45:00Z",
-  "previousNextExecution": "2026-03-18T15:00:00Z"
+  "ok": true,
+  "autonomy": false,
+  "thinking": false
 }
 ```
 </CodeGroup>
@@ -386,5 +338,5 @@ Disabling autonomy will prevent any scheduled executions from running. The agent
 
 - Learn more about [configuring advanced autonomous mode options](/guides/autonomous-mode)
 - Explore [trigger type details and edge cases](/guides/triggers)
-- Set up [monitoring and alerting](/guides/monitoring) for your agents
-- Review [safety best practices](/guides/safety-controls) for production deployments
+- Review the [sandbox and security guide](/guides/sandbox) for production deployments
+- See the [coding swarms guide](/guides/coding-swarms) for multi-agent orchestration

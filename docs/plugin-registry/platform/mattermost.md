@@ -42,7 +42,7 @@ Or via environment variables:
 
 ```bash
 export MATTERMOST_BOT_TOKEN=YOUR_BOT_TOKEN
-export MATTERMOST_BASE_URL=https://chat.example.com
+export MATTERMOST_SERVER_URL=https://chat.example.com
 ```
 
 ## Configuration

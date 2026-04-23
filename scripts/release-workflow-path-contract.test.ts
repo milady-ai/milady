@@ -42,9 +42,11 @@ describe("release workflow path contract", () => {
       "Build web assets\n        run: |\n          bun install --ignore-scripts\n          bun run postinstall\n          bun run build",
     );
     expect(mobileBuildHelper).toContain(
-      'console.error("Usage: node scripts/run-mobile-build.mjs <android|ios>");',
+      "Usage: node scripts/run-mobile-build.mjs <android|android-system|ios|ios-overlay>",
     );
     expect(mobileBuildHelper).toContain('if (target === "android") {');
+    expect(mobileBuildHelper).toContain('target !== "android-system"');
+    expect(mobileBuildHelper).toContain("await buildAndroidSystem();");
     expect(mobileBuildHelper).toContain("await buildIos();");
   });
 

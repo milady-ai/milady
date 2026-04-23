@@ -25,8 +25,7 @@ export default scenario({
       kind: "message",
       name: "inbound-sms",
       room: "main",
-      text:
-        'Please route this incoming Twilio text to the right agent and reply naturally. Exact SMS: "I am running 20 minutes late, the freeway is backed up, I will update you when I am parked, and please start the meeting without me if I am not there by 9:15."',
+      text: 'Please route this incoming Twilio text to the right agent and reply naturally. Exact SMS: "I am running 20 minutes late, the freeway is backed up, I will update you when I am parked, and please start the meeting without me if I am not there by 9:15."',
       assertTurn: expectTurnToCallAction({
         acceptedActions: ["REPLY", "CROSS_CHANNEL_SEND", "OWNER_SEND_MESSAGE"],
         description: "twilio sms route-to-agent",

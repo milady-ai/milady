@@ -42,6 +42,10 @@ on:
         required: false
       MAS_INSTALLER_KEY_PASSWORD:
         required: false
+      APP_STORE_API_KEY_ID:
+        required: false
+      APP_STORE_API_ISSUER_ID:
+        required: false
   workflow_dispatch:
     inputs:
       platform:
@@ -177,16 +181,26 @@ jobs:
 
       - name: Validate iOS secrets
         run: |
+          # Secrets required for signing the IPA. Without these the build
+          # itself cannot produce a signed artifact.
           missing=()
           [[ -z "$MATCH_GIT_URL" ]] && missing+=("MATCH_GIT_URL")
           [[ -z "$MATCH_PASSWORD" ]] && missing+=("MATCH_PASSWORD")
           [[ -z "$MATCH_GIT_BASIC_AUTHORIZATION" ]] && missing+=("MATCH_GIT_BASIC_AUTHORIZATION")
           [[ -z "$ITC_TEAM_ID" ]] && missing+=("ITC_TEAM_ID")
-          [[ -z "$APP_STORE_APP_ID" ]] && missing+=("APP_STORE_APP_ID")
           if [[ ${#missing[@]} -gt 0 ]]; then
             echo "::error::Missing required iOS signing secrets: ${missing[*]}"
             echo "Configure these secrets in the repo settings to enable iOS App Store builds."
             exit 1
+          fi
+
+          # Upload-only secret. When missing we still produce and upload the
+          # IPA artifact, but the TestFlight delivery step becomes a no-op
+          # with a clear warning. Surfaced here so the log line stays
+          # prominent rather than hidden inside a Fastlane run.
+          if [[ -z "$APP_STORE_APP_ID" ]]; then
+            echo "::warning::APP_STORE_APP_ID is not set; TestFlight upload will be skipped."
+            echo "Set APP_STORE_APP_ID to your App Store Connect numeric app id to enable TestFlight delivery."
           fi
 
       - name: Prepare CocoaPods trunk repo
@@ -197,6 +211,11 @@ jobs:
       - name: Sync Capacitor iOS
         working-directory: apps/app
         run: bun run cap:sync:ios
+        env:
+          LANG: en_US.UTF-8
+
+      - name: Overlay iOS native files (Fastlane, AppDelegate, entitlements)
+        run: node eliza/packages/app-core/scripts/run-mobile-build.mjs ios-overlay
         env:
           LANG: en_US.UTF-8
 
@@ -219,9 +238,34 @@ jobs:
           bundler-cache: true
           working-directory: apps/app/ios
 
+      - name: Resolve app identifiers
+        working-directory: apps/app
+        run: |
+          # Read the runtime bundle id straight from pbxproj (the overlay step
+          # has already rewritten it to the Milady-specific id).
+          APP_ID=$(grep -m1 -E 'PRODUCT_BUNDLE_IDENTIFIER = [^.]+\.' ios/App/App.xcodeproj/project.pbxproj \
+            | grep -v WebsiteBlockerContentExtension \
+            | awk '{print $3}' | tr -d ';')
+          if [[ -z "$APP_ID" ]]; then
+            echo "::error::Could not resolve iOS bundle id from pbxproj"
+            exit 1
+          fi
+          APP_ID_EXTRA="${APP_ID}.WebsiteBlockerContentExtension"
+          echo "APP_IDENTIFIER=$APP_ID" >> "$GITHUB_ENV"
+          echo "APP_IDENTIFIER_EXTRA=$APP_ID_EXTRA" >> "$GITHUB_ENV"
+          echo "Resolved: APP_IDENTIFIER=$APP_ID, APP_IDENTIFIER_EXTRA=$APP_ID_EXTRA"
+
       - name: Build and upload
         working-directory: apps/app/ios
+        env:
+          APP_IDENTIFIER: ${{ env.APP_IDENTIFIER }}
+          APP_IDENTIFIER_EXTRA: ${{ env.APP_IDENTIFIER_EXTRA }}
         run: |
+          if [[ ! -f fastlane/Fastfile ]]; then
+            echo "::error::fastlane/Fastfile missing at apps/app/ios/. cap:sync:ios or run-mobile-build.mjs should have copied it."
+            ls -la fastlane/ || true
+            exit 1
+          fi
           TRACK="${{ inputs.track || 'testflight' }}"
           if [[ "$TRACK" == "app-store" ]]; then
             bundle exec fastlane release

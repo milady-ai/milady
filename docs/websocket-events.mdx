@@ -12,7 +12,7 @@ Milady uses WebSocket connections to deliver real-time updates from the agent ru
 
 <CodeGroup>
 ```text Default
-ws://localhost:2138/ws
+ws://localhost:31337/ws
 ```
 
 ```text Gateway
@@ -20,7 +20,7 @@ ws://localhost:18789/ws
 ```
 </CodeGroup>
 
-The WebSocket endpoint is available at `/ws` on the API server (port 2138) or through the Gateway (port 18789 by default).
+The WebSocket endpoint is available at `/ws` on the API server (port 31337 by default, configurable via `MILADY_API_PORT`) or through the Gateway (port 18789 by default).
 
 ### Authentication
 

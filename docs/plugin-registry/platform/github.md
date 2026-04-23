@@ -50,8 +50,9 @@ export GITHUB_REPO=YOUR_GITHUB_REPO
 | Field | Required | Description |
 |-------|----------|-------------|
 | `apiToken` | Yes | GitHub personal access token |
-| `owner` | Yes | GitHub repository owner (user or organization) |
-| `repo` | Yes | GitHub repository name |
+| `owner` | No | Default GitHub repository owner (username or organization) |
+| `repo` | No | Default GitHub repository name |
+| `branch` | No | Default branch name (defaults to `main`) |
 | `enabled` | No | Set `false` to disable (default: `true`) |
 
 ## Environment Variables

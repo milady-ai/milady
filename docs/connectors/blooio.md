@@ -55,10 +55,15 @@ No environment variable is required to trigger auto-enable — it is driven enti
 
 ## Environment Variables
 
-| Variable | Source | Description |
-|----------|--------|-------------|
-| `BLOOIO_API_KEY` | `apiKey` | Blooio service API key |
-| `BLOOIO_WEBHOOK_URL` | `webhookUrl` | URL for receiving inbound messages |
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `BLOOIO_API_KEY` | Yes | Blooio service API key |
+| `BLOOIO_WEBHOOK_URL` | No | URL for receiving inbound messages |
+| `BLOOIO_BASE_URL` | No | Base URL for API requests |
+| `BLOOIO_FROM_NUMBER` | No | Sender phone number |
+| `BLOOIO_WEBHOOK_PATH` | No | Webhook endpoint path |
+| `BLOOIO_WEBHOOK_PORT` | No | Webhook listener port |
+| `BLOOIO_WEBHOOK_SECRET` | No | Secret key for webhook/client verification |
 
 ## Setup Steps
 
@@ -76,6 +81,11 @@ All fields are defined under `connectors.blooio` in `milady.json`.
 |-------|------|---------|-------------|
 | `apiKey` | string | — | Blooio API key (required) |
 | `webhookUrl` | string | — | Webhook URL for receiving inbound messages |
+| `baseUrl` | string | — | Base URL for API requests |
+| `fromNumber` | string | — | Sender phone number |
+| `webhookPath` | string | — | Webhook endpoint path |
+| `webhookPort` | number | — | Webhook listener port |
+| `webhookSecret` | string | — | Secret key for webhook/client verification |
 | `enabled` | boolean | — | Explicitly enable/disable |
 
 ### Features

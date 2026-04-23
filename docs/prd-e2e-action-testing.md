@@ -524,7 +524,8 @@ const BENCHMARK_CASES: ActionBenchmarkCase[] = [
   {
     id: "todo-create",
     userMessage: "Add 'buy groceries' to my to-do list",
-    expectedAction: "CREATE_TODO",
+    expectedAction: "LIFE",
+    expectedParams: { subaction: "create" },
     tags: ["todos", "critical"],
   },
   // ... many more cases covering LifeOps features
@@ -543,13 +544,13 @@ For each major feature area from the recordings, add targeted action tests:
 
 | Feature Area | Actions to Test | Priority |
 |-------------|----------------|----------|
-| **To-Do Management** | CREATE_TODO, UPDATE_TODO, COMPLETE_TODO, LIST_TODOS | P0 |
-| **Reminders** | SET_REMINDER, LIST_REMINDERS, CLEAR_REMINDER | P0 |
+| **To-Do Management** | LIFE (`create`, `update`, `complete`, `list`) | P0 |
+| **Reminders** | LIFE (`create`, `list`, `complete`, `snooze`) | P0 |
 | **Personality** | MODIFY_CHARACTER, UPDATE_RESPONSE_STYLE | P0 (exists partially) |
 | **Contacts/Rolodex** | ADD_CONTACT, SEARCH_CONTACTS | P1 |
 | **Messaging** | SEND_MESSAGE, DRAFT_MESSAGE, TRIAGE_MESSAGES | P1 |
 | **Calendar** | SCHEDULE_MEETING, CHECK_CALENDAR, CANCEL_MEETING | P1 |
-| **LifeOps Routines** | SET_ROUTINE, CHECK_ROUTINE, MORNING_CHECKIN | P2 |
+| **LifeOps Routines** | LIFE, RUN_MORNING_CHECKIN, RUN_NIGHT_CHECKIN | P2 |
 | **Browser/Computer** | BROWSE_URL, COMPUTER_ACTION | P2 |
 | **Social Media** | SEARCH_X, SUMMARIZE_FEED, SEND_DM | P3 |
 

@@ -27,7 +27,7 @@ milady plugins install imessage
 {
   "connectors": {
     "imessage": {
-      "enabled": true,
+      "cliPath": "/usr/local/bin/imessage",
       "service": "auto",
       "dmPolicy": "pairing"
     }
@@ -39,13 +39,13 @@ milady plugins install imessage
 
 | Field | Required | Description |
 |-------|----------|-------------|
-| `service` | No | Service type: `imessage`, `sms`, or `auto` (default: `auto`) |
-| `cliPath` | No | Path to iMessage CLI tool |
-| `dbPath` | No | Path to iMessage database |
-| `remoteHost` | No | Remote host for SSH-based access |
-| `region` | No | Region configuration |
-| `includeAttachments` | No | Include attachments in messages (default: `true`) |
-| `dmPolicy` | No | DM handling policy |
+| `cliPath` | Yes | Path to the iMessage CLI tool executable (required to trigger auto-enable) |
+| `service` | No | Service type: `"imessage"`, `"sms"`, or `"auto"` |
+| `dbPath` | No | Path to iMessage database (default: `~/Library/Messages/chat.db`) |
+| `remoteHost` | No | Remote Mac hostname for SSH-based iMessage access |
+| `region` | No | Region configuration for phone number formatting |
+| `includeAttachments` | No | Include attachments in messages |
+| `dmPolicy` | No | DM access policy: `"pairing"`, `"allowlist"`, `"open"`, or `"disabled"` (default: `"pairing"`) |
 
 ## Features
 
@@ -58,13 +58,13 @@ milady plugins install imessage
 
 ## Auto-Enable
 
-The plugin auto-enables when the `connectors.imessage` block is present:
+The plugin auto-enables when the `connectors.imessage` block contains a `cliPath`:
 
 ```json
 {
   "connectors": {
     "imessage": {
-      "enabled": true
+      "cliPath": "/usr/local/bin/imessage"
     }
   }
 }

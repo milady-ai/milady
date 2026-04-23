@@ -6,6 +6,8 @@ description: "REST API endpoints for managing local skills, the skills catalog, 
 
 The skills API covers three areas: **local skills** (agent-specific TypeScript action files), the **skills catalog** (curated registry of community skills), and the **skills marketplace** (npm-based skill packages). Skills extend the agent with new actions, providers, or evaluators.
 
+When `MILADY_API_TOKEN` is set, include it as a `Bearer` token in the `Authorization` header.
+
 ## Endpoints
 
 ### Local Skills

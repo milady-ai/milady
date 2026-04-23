@@ -16,7 +16,7 @@ Milady uses the Discord plugin to interact with Discord servers. This guide assu
 
 Before starting, ensure you have:
 - A Discord account with a server where you have admin permissions
-- Milady installed on your system (see [Getting Started](/getting-started))
+- Milady installed on your system (see [Installation](/installation))
 - Node.js 22+ installed
 - A code editor for modifying configuration files
 
@@ -50,18 +50,16 @@ If your token is ever exposed, regenerate it immediately by clicking **Regenerat
 </Step>
 
 <Step title="Configure milady.json">
-1. Open your Milady installation directory and locate or create `milady.json` in the root folder
-2. Add the Discord plugin configuration:
+1. Open your Milady config file at `~/.milady/milady.json` (create it if it does not exist)
+2. Add the Discord connector configuration:
 
 ```json5
 {
   // ... existing config ...
-  "plugins": {
+  "connectors": {
     "discord": {
       "enabled": true,
-      "token": "YOUR_BOT_TOKEN_HERE",
-      "intents": ["GUILDS", "GUILD_MESSAGES", "DIRECT_MESSAGES", "MESSAGE_CONTENT"],
-      "prefix": "!"
+      "token": "YOUR_BOT_TOKEN_HERE"
     }
   }
 }
@@ -71,21 +69,21 @@ If your token is ever exposed, regenerate it immediately by clicking **Regenerat
 4. Save the file
 
 <Info>
-The `intents` field tells Discord which events your bot should receive. `MESSAGE_CONTENT` is required to read message text.
+The Discord connector auto-enables when a `token` is present in the connector config. The `MESSAGE_CONTENT` intent must also be enabled in the Discord Developer Portal for the bot to read message text.
 </Info>
 
 </Step>
 
-<Step title="Enable the Discord Plugin">
-1. Open your terminal and navigate to your Milady installation directory
-2. Run the following command to verify the plugin is recognized:
+<Step title="Verify the Discord Connector">
+1. Open your terminal
+2. Start Milady to verify the connector loads:
 
 ```bash
-bun run milady --plugins
+milady
 ```
 
-3. Confirm that `discord` appears in the list of available plugins
-4. Check `milady.json` to ensure `"enabled": true` is set for the Discord plugin
+3. Check the console output for a line confirming the Discord connector has loaded
+4. Verify `milady.json` has `"enabled": true` set for the Discord connector
 
 </Step>
 
@@ -114,13 +112,13 @@ For a production bot, you may want to add additional permissions like `Manage Me
 1. In your terminal, start Milady:
 
 ```bash
-bun run milady
+milady
 ```
 
-2. You should see output confirming the Discord plugin has connected
+2. You should see output confirming the Discord connector has connected
 3. In your Discord server, send a message to your bot:
-   - Direct message: `Hello bot`
-   - In a channel: `!hello bot` (using the prefix)
+   - Direct message the bot directly
+   - In a channel, @mention the bot
 
 4. Your bot should respond with an AI-generated message
 5. Test a few more interactions to confirm everything is working
@@ -133,8 +131,8 @@ bun run milady
 
 Before considering your setup complete:
 
-- [ ] Bot token is securely stored in `milady.json`
-- [ ] Discord plugin shows as `"enabled": true`
+- [ ] Bot token is securely stored in `~/.milady/milady.json`
+- [ ] Discord connector shows as `"enabled": true`
 - [ ] Bot appears online in your Discord server
 - [ ] Bot responds to direct messages
 - [ ] Bot responds to channel messages (if configured)
@@ -149,10 +147,10 @@ This usually means the Discord plugin didn't connect successfully.
 
 **Solutions:**
 1. Verify your bot token is correct and hasn't expired
-2. Check that `"enabled": true` is set in `milady.json`
-3. Ensure all required intents are included in the config
-4. Run `bun run milady` and look for error messages in the console
-5. Regenerate your bot token if it's been more than 30 days since creation
+2. Check that `"enabled": true` is set in `~/.milady/milady.json` under `connectors.discord`
+3. Ensure `MESSAGE_CONTENT` intent is enabled in the Discord Developer Portal
+4. Run `milady` and look for error messages in the console
+5. Regenerate your bot token if needed
 </Accordion>
 
 <Accordion title="Bot doesn't respond to messages">
@@ -161,9 +159,9 @@ If your bot is online but not responding:
 **Solutions:**
 1. Check that `MESSAGE_CONTENT` intent is enabled in both `milady.json` and the Discord Developer Portal
 2. Verify the bot has permission to see and send messages in the channel
-3. Check the Milady console for error messages (run with `bun run milady --verbose`)
-4. Ensure your Discord server is listed in your milady.json allowed servers (if applicable)
-5. Try restarting Milady with `Ctrl+C` followed by `bun run milady`
+3. Check the Milady console for error messages
+4. Ensure your Discord server is in the allowed guilds if `groupPolicy` is set to `"allowlist"`
+5. Try restarting Milady with `Ctrl+C` followed by `milady`
 </Accordion>
 
 <Accordion title="Permission denied errors">
@@ -192,8 +190,8 @@ Discord limits how many messages bots can send:
 If you've configured slash commands but they're not appearing:
 
 **Solutions:**
-1. Verify `"USE_SLASH_COMMANDS": true` is set in your plugin config
-2. Ensure the `use_slash_commands` permission is included in the OAuth2 URL
+1. Verify slash command permissions are granted in the OAuth2 URL
+2. Ensure the `Use Slash Commands` scope is included in the bot's permissions
 3. Restart Milady after enabling slash commands
 4. In Discord, type `/` in a message box and wait 1-2 seconds for commands to appear
 5. If still missing, re-invite the bot using your updated authorization URL
@@ -219,7 +217,7 @@ Visit the [Discord Developer Portal](https://discord.com/developers/applications
 See the [Configuration Guide](/configuration) for detailed options in `milady.json`.
 </Tab>
 <Tab title="elizaOS Documentation">
-Learn more about elizaOS at the [elizaOS GitHub](https://github.com/ai16z/eliza).
+Learn more about elizaOS at the [elizaOS GitHub](https://github.com/elizaOS/eliza).
 </Tab>
 </Tabs>
 
@@ -230,4 +228,4 @@ If you encounter issues:
 1. Check the troubleshooting section above
 2. Review Milady's console output for error messages
 3. Visit the [Milady Community Discord](https://discord.gg/milady)
-4. Open an issue on the [Milady GitHub repository](https://github.com/milady/milady)
+4. Open an issue on the [Milady GitHub repository](https://github.com/milady-ai/milady)

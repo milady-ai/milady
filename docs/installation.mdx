@@ -6,6 +6,14 @@ description: "Install Milady on desktop or from the CLI."
 
 Milady supports desktop installs and a CLI runtime. Both use the same local state directory.
 
+## Prerequisites
+
+| Requirement | Version | Check |
+|-------------|---------|-------|
+| Node.js | >= 22.12.0 | `node --version` |
+
+The CLI installer checks for Node.js >= 22.12.0 and offers to install it if missing. The desktop app bundles its own runtime — no prerequisites needed.
+
 ## Desktop app
 
 Download the latest stable release from [GitHub Releases](https://github.com/milady-ai/milady/releases/latest).
@@ -73,12 +81,23 @@ Milady stores data in:
 
 This directory holds config, conversations, uploaded knowledge, logs, and local assets.
 
+## Alternative CLI install methods
+
+| Method | Command |
+|--------|---------|
+| npm global | `npm install -g miladyai && milady setup` |
+| Homebrew (macOS / Linux) | `brew tap milady-ai/milady && brew install milady` |
+| Snap (Linux) | `sudo snap install milady` |
+| Flatpak (Linux) | `flatpak install flathub ai.milady.Milady` |
+
+See the [README](https://github.com/milady-ai/milady#alternative-install-paths) for the full list including APT repos and Homebrew cask.
+
 ## Before first launch
 
 Have one of these ready:
 
-- an API key from a supported provider
-- a local Ollama model
+- an API key from a supported provider (Anthropic, OpenAI, OpenRouter, Groq, etc.)
+- a local Ollama model running at `http://127.0.0.1:11434`
 - an Eliza Cloud account
 
 ## Next

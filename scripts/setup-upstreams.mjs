@@ -8,6 +8,7 @@ import {
   readFileSync,
   realpathSync,
   rmSync,
+  statSync,
   symlinkSync,
   writeFileSync,
 } from "node:fs";
@@ -71,6 +72,12 @@ const ELIZA_INSTALL_RETRY_DELAY_MS = 3_000;
 // the workspace:* specifier resolves to the stub instead of failing.
 const UNPUBLISHED_ELIZA_PLUGIN_CI_STUBS = [
   {
+    packageName: "@elizaos/plugin-app-control",
+    workspaceEntry: "plugins/plugin-app-control/typescript",
+    /** Relative from eliza/ to the CI stub directory. */
+    stubRelativePath: "../scripts/ci-stubs/elizaos-plugin-app-control",
+  },
+  {
     packageName: "@elizaos/plugin-wechat",
     workspaceEntry: "plugins/plugin-wechat",
     /** Relative from eliza/ to the CI stub directory. */
@@ -98,8 +105,84 @@ const OPTIONAL_ELIZA_PLUGIN_PACKAGES = [
 
 const PACKAGE_LINK_ROOTS = [
   ["node_modules"],
+  ["eliza", "node_modules"],
   ["apps", "app", "node_modules"],
   ["apps", "home", "node_modules"],
+];
+const ELIZA_AGENT_SKILLS_PLUGIN_BUILD = {
+  label: "@elizaos/plugin-agent-skills",
+  cwd: path.join("eliza", "plugins", "plugin-agent-skills", "typescript"),
+  manifest: path.join(
+    "eliza",
+    "plugins",
+    "plugin-agent-skills",
+    "typescript",
+    "package.json",
+  ),
+  artifact: path.join(
+    "eliza",
+    "plugins",
+    "plugin-agent-skills",
+    "typescript",
+    "dist",
+    "index.js",
+  ),
+  args: [
+    "build",
+    "./src/index.ts",
+    "--outdir",
+    "./dist",
+    "--target",
+    "node",
+    "--format",
+    "esm",
+    "--sourcemap=linked",
+    "--external",
+    "node:*",
+    "--external",
+    "@elizaos/core",
+    "--external",
+    "fflate",
+  ],
+};
+const ELIZA_TELEGRAM_PLUGIN_BUILD = {
+  label: "@elizaos/plugin-telegram",
+  cwd: path.join("eliza", "plugins", "plugin-telegram"),
+  manifest: path.join("eliza", "plugins", "plugin-telegram", "package.json"),
+  artifact: path.join(
+    "eliza",
+    "plugins",
+    "plugin-telegram",
+    "dist",
+    "account-auth-service.js",
+  ),
+  args: ["run", "build"],
+};
+const ELIZA_EDGE_TTS_PLUGIN_BUILD = {
+  label: "@elizaos/plugin-edge-tts",
+  cwd: path.join("eliza", "plugins", "plugin-edge-tts", "typescript"),
+  manifest: path.join(
+    "eliza",
+    "plugins",
+    "plugin-edge-tts",
+    "typescript",
+    "package.json",
+  ),
+  artifact: path.join(
+    "eliza",
+    "plugins",
+    "plugin-edge-tts",
+    "typescript",
+    "dist",
+    "node",
+    "index.node.js",
+  ),
+  args: ["run", "build"],
+};
+const ELIZA_REQUIRED_PLUGIN_BUILDS = [
+  ELIZA_AGENT_SKILLS_PLUGIN_BUILD,
+  ELIZA_TELEGRAM_PLUGIN_BUILD,
+  ELIZA_EDGE_TTS_PLUGIN_BUILD,
 ];
 const INBOX_REPLY_HINT_LEGACY =
   "Sent through the connected {{source}} account on this Mac.";
@@ -167,6 +250,34 @@ const PLUGIN_ANTHROPIC_CLAUDE_CLI_BUN_REPLACEMENTS = [
     `const proc = getBunRuntime().spawn(args, { stdout: "pipe", stderr: "pipe" });`,
   ],
 ];
+const TS_IGNORE_DEPRECATIONS_COMPAT_FILES = [
+  path.join("packages", "typescript", "tsconfig.json"),
+  path.join("packages", "typescript", "tsconfig.declarations.json"),
+  path.join("packages", "shared", "tsconfig.json"),
+  path.join("packages", "interop", "tsconfig.json"),
+];
+const TSUP_IGNORE_DEPRECATIONS_COMPAT_FILES = [
+  path.join("plugins", "plugin-calendly", "tsconfig.json"),
+  path.join("plugins", "plugin-github", "tsconfig.json"),
+  path.join("plugins", "plugin-shopify", "tsconfig.json"),
+];
+const LIFEOPS_SETTINGS_SECTION_RELATIVE_PATH = path.join(
+  "apps",
+  "app-lifeops",
+  "src",
+  "components",
+  "LifeOpsSettingsSection.tsx",
+);
+const LIFEOPS_LUCIDE_GITHUB_REPLACEMENTS = [
+  [
+    'import { Copy, ExternalLink, Github } from "lucide-react";',
+    'import { Copy, ExternalLink, GitBranch } from "lucide-react";',
+  ],
+  [
+    '<Github className="h-4 w-4 shrink-0" />',
+    '<GitBranch className="h-4 w-4 shrink-0" />',
+  ],
+];
 
 function toDisplayPath(targetPath) {
   return path.normalize(targetPath);
@@ -219,6 +330,52 @@ function writePackageJson(packagePath, raw, nextPackageJson) {
     packagePath,
     `${JSON.stringify(nextPackageJson, null, indent)}\n`,
   );
+}
+
+function parseFirstNumericVersionSegment(versionSpecifier) {
+  if (typeof versionSpecifier !== "string") {
+    return null;
+  }
+
+  const match = versionSpecifier.match(/(\d+)(?:\.\d+)?(?:\.\d+)?/);
+  if (!match) {
+    return null;
+  }
+
+  const major = Number.parseInt(match[1], 10);
+  return Number.isFinite(major) ? major : null;
+}
+
+export function resolveTypeScriptIgnoreDeprecationsTarget(
+  repoRoot = DEFAULT_REPO_ROOT,
+  { fallbackRoot } = {},
+) {
+  const candidateRoots = [repoRoot, fallbackRoot].filter(
+    (candidate) => typeof candidate === "string" && candidate.length > 0,
+  );
+
+  for (const candidateRoot of candidateRoots) {
+    const rootPackageJson = readPackageJson(candidateRoot);
+    const versionSpecifier =
+      rootPackageJson?.devDependencies?.typescript ??
+      rootPackageJson?.dependencies?.typescript;
+    const major = parseFirstNumericVersionSegment(versionSpecifier);
+    if (major !== null) {
+      return major >= 6 ? "6.0" : "5.0";
+    }
+  }
+
+  return "5.0";
+}
+
+function buildIgnoreDeprecationsCompatibilityReplacements(targetVersion) {
+  const alternateVersion = targetVersion === "6.0" ? "5.0" : "6.0";
+  return [
+    [
+      `"ignoreDeprecations": "${alternateVersion}"`,
+      `"ignoreDeprecations": "${targetVersion}"`,
+    ],
+  ];
 }
 
 export function applyMiladyCopyPatches(elizaRoot) {
@@ -322,12 +479,55 @@ export function applyPluginAnthropicCliUsagePatch(elizaRoot) {
   );
 }
 
+export function applyTypeScriptIgnoreDeprecationsCompatPatch(
+  elizaRoot,
+  { repoRoot = DEFAULT_REPO_ROOT } = {},
+) {
+  let patchedReplacements = 0;
+  const targetVersion = resolveTypeScriptIgnoreDeprecationsTarget(elizaRoot, {
+    fallbackRoot: repoRoot,
+  });
+  const tsConfigReplacements =
+    buildIgnoreDeprecationsCompatibilityReplacements(targetVersion);
+  for (const relativePath of TS_IGNORE_DEPRECATIONS_COMPAT_FILES) {
+    patchedReplacements += applyTextReplacements(
+      path.join(elizaRoot, relativePath),
+      tsConfigReplacements,
+      {
+        label: `TypeScript ignoreDeprecations compatibility patch (${relativePath})`,
+      },
+    );
+  }
+  for (const relativePath of TSUP_IGNORE_DEPRECATIONS_COMPAT_FILES) {
+    patchedReplacements += applyTextReplacements(
+      path.join(elizaRoot, relativePath),
+      buildIgnoreDeprecationsCompatibilityReplacements("5.0"),
+      {
+        label: `tsup ignoreDeprecations compatibility patch (${relativePath})`,
+      },
+    );
+  }
+  return patchedReplacements;
+}
+
+export function applyLifeOpsLucideCompatPatch(elizaRoot) {
+  return applyTextReplacements(
+    path.join(elizaRoot, LIFEOPS_SETTINGS_SECTION_RELATIVE_PATH),
+    LIFEOPS_LUCIDE_GITHUB_REPLACEMENTS,
+    { label: "LifeOps lucide-react icon compatibility patch" },
+  );
+}
+
 function uniqueLinks(links) {
   const deduped = new Map();
   for (const link of links) {
     deduped.set(link.linkPath, link);
   }
   return [...deduped.values()];
+}
+
+function uniquePaths(paths) {
+  return [...new Set(paths.map((targetPath) => path.resolve(targetPath)))];
 }
 
 function walkWorkspaceFiles(dirPath, visit) {
@@ -414,9 +614,23 @@ export function getTemporaryElizaWorkspaceEntries(
       },
     ).map(({ stubRelativePath }) => stubRelativePath);
 
+  const cloudBillingWorkspace = "cloud/packages/services/billing";
+  const cloudBillingPackageJson = path.join(
+    elizaRoot,
+    cloudBillingWorkspace,
+    "package.json",
+  );
+  const cloudBillingWorkspaceEntry =
+    pathExists(cloudBillingPackageJson) &&
+    !optionalPluginWorkspaceEntries.includes(cloudBillingWorkspace) &&
+    !unpublishedStubWorkspaceEntries.includes(cloudBillingWorkspace)
+      ? [cloudBillingWorkspace]
+      : [];
+
   return [
     ...optionalPluginWorkspaceEntries,
     ...unpublishedStubWorkspaceEntries,
+    ...cloudBillingWorkspaceEntry,
   ];
 }
 
@@ -707,7 +921,29 @@ export function hasInstalledElizaDependencies(
   );
 }
 
-function getPackageLinkEntries(repoRoot, packageName, targetPath) {
+function getPackageLinkRootPaths(
+  repoRoot,
+  { elizaRoot = getRepoElizaRoot(repoRoot) } = {},
+) {
+  const roots = PACKAGE_LINK_ROOTS.map((segments) =>
+    path.join(repoRoot, ...segments),
+  );
+  for (const packageDir of discoverElizaAppPackageDirs(elizaRoot)) {
+    const packageNodeModules = path.join(packageDir, "node_modules");
+    if (existsSync(packageNodeModules)) {
+      roots.push(packageNodeModules);
+    }
+  }
+
+  return uniquePaths(roots);
+}
+
+function getPackageLinkEntries(
+  repoRoot,
+  packageName,
+  targetPath,
+  linkRootPaths = getPackageLinkRootPaths(repoRoot),
+) {
   if (typeof packageName !== "string" || packageName.length === 0) {
     return [];
   }
@@ -723,15 +959,15 @@ function getPackageLinkEntries(repoRoot, packageName, targetPath) {
     return [];
   }
 
-  return PACKAGE_LINK_ROOTS.map((segments) => ({
-    linkPath: path.join(repoRoot, ...segments, ...packageSegments),
+  return linkRootPaths.map((rootPath) => ({
+    linkPath: path.join(rootPath, ...packageSegments),
     targetPath,
   }));
 }
 
-function discoverElizaPackageDirs(elizaRoot) {
+function discoverElizaPackageDirsForParents(elizaRoot, parentDirs) {
   const packageDirs = [];
-  for (const parentDir of ["packages", "plugins"]) {
+  for (const parentDir of parentDirs) {
     const searchRoot = path.join(elizaRoot, parentDir);
     if (!existsSync(searchRoot)) {
       continue;
@@ -750,13 +986,29 @@ function discoverElizaPackageDirs(elizaRoot) {
       }
       const packageDir = path.join(searchRoot, entry.name);
       const packageJson = readPackageJson(packageDir);
-      if (packageJson?.name?.startsWith("@elizaos/")) {
+      const packageName = packageJson?.name;
+      if (
+        packageName?.startsWith("@elizaos/") &&
+        !packageName.endsWith("-root")
+      ) {
         packageDirs.push(packageDir);
       }
     }
   }
 
   return packageDirs;
+}
+
+function discoverElizaAppPackageDirs(elizaRoot) {
+  return discoverElizaPackageDirsForParents(elizaRoot, ["apps"]);
+}
+
+function discoverElizaPackageDirs(elizaRoot) {
+  return discoverElizaPackageDirsForParents(elizaRoot, [
+    "apps",
+    "packages",
+    "plugins",
+  ]);
 }
 
 function discoverPluginPackageDirs(pluginsRoot) {
@@ -803,12 +1055,18 @@ function discoverPluginPackageDirs(pluginsRoot) {
 export function getElizaPackageLinks(
   repoRoot = DEFAULT_REPO_ROOT,
   elizaRoot = getRepoElizaRoot(repoRoot),
+  linkRootPaths = getPackageLinkRootPaths(repoRoot, { elizaRoot }),
 ) {
   const links = [];
   for (const packageDir of discoverElizaPackageDirs(elizaRoot)) {
     const packageJson = readPackageJson(packageDir);
     links.push(
-      ...getPackageLinkEntries(repoRoot, packageJson?.name, packageDir),
+      ...getPackageLinkEntries(
+        repoRoot,
+        packageJson?.name,
+        packageDir,
+        linkRootPaths,
+      ),
     );
   }
   return uniqueLinks(links);
@@ -817,12 +1075,18 @@ export function getElizaPackageLinks(
 export function getPluginPackageLinks(
   repoRoot = DEFAULT_REPO_ROOT,
   pluginsRoot = getRepoPluginsRoot(repoRoot),
+  linkRootPaths = getPackageLinkRootPaths(repoRoot, { pluginsRoot }),
 ) {
   const links = [];
   for (const packageDir of discoverPluginPackageDirs(pluginsRoot)) {
     const packageJson = readPackageJson(packageDir);
     links.push(
-      ...getPackageLinkEntries(repoRoot, packageJson?.name, packageDir),
+      ...getPackageLinkEntries(
+        repoRoot,
+        packageJson?.name,
+        packageDir,
+        linkRootPaths,
+      ),
     );
   }
   return uniqueLinks(links);
@@ -836,16 +1100,99 @@ export function getUpstreamPackageLinks(
   } = {},
 ) {
   const combinedByTarget = new Map();
+  const linkRootPaths = getPackageLinkRootPaths(repoRoot, {
+    elizaRoot,
+    pluginsRoot,
+  });
 
-  for (const link of getElizaPackageLinks(repoRoot, elizaRoot)) {
+  for (const link of getElizaPackageLinks(repoRoot, elizaRoot, linkRootPaths)) {
     combinedByTarget.set(link.linkPath, link);
   }
 
-  for (const link of getPluginPackageLinks(repoRoot, pluginsRoot)) {
+  for (const link of getPluginPackageLinks(
+    repoRoot,
+    pluginsRoot,
+    linkRootPaths,
+  )) {
     combinedByTarget.set(link.linkPath, link);
   }
 
   return [...combinedByTarget.values()];
+}
+
+function isBuildArtifactStale(
+  manifestPath,
+  artifactPath,
+  { pathExists = existsSync, stat = statSync } = {},
+) {
+  if (!pathExists(artifactPath)) {
+    return true;
+  }
+
+  try {
+    return stat(manifestPath).mtimeMs > stat(artifactPath).mtimeMs;
+  } catch {
+    return true;
+  }
+}
+
+async function ensureElizaPluginBuild(
+  buildConfig,
+  repoRoot = DEFAULT_REPO_ROOT,
+  {
+    pathExists = existsSync,
+    stat = statSync,
+    runCommandImpl = runCommand,
+    log = console.log,
+  } = {},
+) {
+  const manifestPath = path.join(repoRoot, buildConfig.manifest);
+  if (!pathExists(manifestPath)) {
+    return false;
+  }
+
+  const artifactPath = path.join(repoRoot, buildConfig.artifact);
+  const stale = isBuildArtifactStale(manifestPath, artifactPath, {
+    pathExists,
+    stat,
+  });
+  if (!stale) {
+    return false;
+  }
+
+  const reason = !pathExists(artifactPath)
+    ? `${buildConfig.artifact} is missing`
+    : `${buildConfig.artifact} is older than ${buildConfig.manifest}`;
+  log(`[setup-upstreams] Building ${buildConfig.label} because ${reason}`);
+  await runCommandImpl("bun", buildConfig.args, {
+    cwd: path.join(repoRoot, buildConfig.cwd),
+    label: `bun ${buildConfig.args.join(" ")} (${buildConfig.label})`,
+  });
+  return true;
+}
+
+export async function ensureElizaAgentSkillsPluginBuild(
+  repoRoot = DEFAULT_REPO_ROOT,
+  options = {},
+) {
+  return ensureElizaPluginBuild(
+    ELIZA_AGENT_SKILLS_PLUGIN_BUILD,
+    repoRoot,
+    options,
+  );
+}
+
+export async function ensureRequiredElizaPluginBuilds(
+  repoRoot = DEFAULT_REPO_ROOT,
+  options = {},
+) {
+  let builtAny = false;
+  for (const buildConfig of ELIZA_REQUIRED_PLUGIN_BUILDS) {
+    builtAny =
+      (await ensureElizaPluginBuild(buildConfig, repoRoot, options)) ||
+      builtAny;
+  }
+  return builtAny;
 }
 
 export function isPackageLinkCurrent(linkPath, targetPath) {
@@ -1549,6 +1896,8 @@ export async function setupUpstreams(repoRoot = DEFAULT_REPO_ROOT) {
           );
         }
         applyMiladyCopyPatches(elizaRoot);
+        applyTypeScriptIgnoreDeprecationsCompatPatch(elizaRoot);
+        applyLifeOpsLucideCompatPatch(elizaRoot);
       }
     }
     console.log(`[setup-upstreams] Skipping: ${skipReason}`);
@@ -1569,6 +1918,8 @@ export async function setupUpstreams(repoRoot = DEFAULT_REPO_ROOT) {
 
   const elizaRoot = await ensureRepoLocalEliza(repoRoot);
   applyMiladyCopyPatches(elizaRoot);
+  applyTypeScriptIgnoreDeprecationsCompatPatch(elizaRoot);
+  applyLifeOpsLucideCompatPatch(elizaRoot);
   await ensureElizaDependencies(elizaRoot);
   await ensureElizaBuildOutputs(elizaRoot);
 

@@ -10,9 +10,9 @@ The WhatsApp plugin connects Milady agents to WhatsApp using the Baileys WebSock
 
 ## Overview
 
-The WhatsApp plugin uses Baileys, an unofficial WhatsApp Web multi-device API client. It connects using the same protocol as WhatsApp Web, meaning no official WhatsApp Business API account is required.
+The WhatsApp plugin supports two authentication methods: **Baileys** (QR code scan, personal accounts) and **Cloud API** (WhatsApp Business API). Baileys uses an unofficial WhatsApp Web multi-device API client and connects using the same protocol as WhatsApp Web, meaning no official WhatsApp Business API account is required.
 
-**Important:** Using unofficial WhatsApp APIs may violate WhatsApp's Terms of Service. Use at your own risk and review WhatsApp's policies before deploying in production.
+**Important:** Using unofficial WhatsApp APIs (Baileys) may violate WhatsApp's Terms of Service. Use at your own risk and review WhatsApp's policies before deploying in production.
 
 ## Installation
 
@@ -50,19 +50,24 @@ The session is saved to `authDir` and persists across restarts.
 
 | Field | Required | Description |
 |-------|----------|-------------|
-| `authDir` | Yes | Directory path for auth state files |
+| `authDir` | Yes (Baileys) | Directory path for Baileys session files |
 | `enabled` | No | Set `false` to disable (default: `true`) |
-| `allowedJids` | No | Array of WhatsApp JIDs (phone numbers) to respond to |
-| `allowedGroups` | No | Array of group JIDs to participate in |
-| `ignoreOwnMessages` | No | Skip messages sent by the bot itself (default: `true`) |
+| `dmPolicy` | No | DM acceptance policy: `"pairing"` (default), `"allowlist"`, `"open"`, or `"disabled"` |
+| `allowFrom` | No | Allowlist of phone numbers (required when `dmPolicy` is `"open"`, must include `"*"`) |
+| `groupPolicy` | No | Group message policy: `"open"`, `"disabled"`, or `"allowlist"` (default: `"allowlist"`) |
+| `groupAllowFrom` | No | Allowlist of group JIDs |
+| `sendReadReceipts` | No | Send read receipts for incoming messages |
+| `selfChatMode` | No | Respond to your own messages (for testing) |
+| `debounceMs` | No | Delay in ms before responding, to allow message batching (default: `0`) |
 
 ```json
 {
   "connectors": {
     "whatsapp": {
       "authDir": "./whatsapp-auth",
-      "allowedJids": ["1234567890@s.whatsapp.net"],
-      "allowedGroups": ["1234567890-1234567890@g.us"]
+      "dmPolicy": "pairing",
+      "groupPolicy": "allowlist",
+      "groupAllowFrom": ["1234567890-1234567890@g.us"]
     }
   }
 }

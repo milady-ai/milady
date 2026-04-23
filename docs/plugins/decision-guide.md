@@ -72,7 +72,7 @@ import type { Provider } from '@elizaos/core';
 const timeProvider: Provider = {
   name: 'current-time',
   description: 'Provides current date and time',
-  position: 'BEFORE_ACTIONS',
+  position: -5, // Negative values run before core providers
   get: async (runtime, message) => ({
     text: `Current time: ${new Date().toISOString()}`,
   }),
@@ -156,12 +156,13 @@ const analyticsPlugin: Plugin = {
   name: 'analytics',
   events: {
     MESSAGE_RECEIVED: [
-      async (runtime, event) => {
+      async (payload) => {
+        const { runtime, message, source } = payload;
         // Log message analytics
       },
     ],
     ACTION_STARTED: [
-      async (runtime, event) => {
+      async (payload) => {
         // Track action usage
       },
     ],

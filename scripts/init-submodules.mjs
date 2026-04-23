@@ -14,37 +14,20 @@ const SUBMODULE_READINESS_MARKERS = {
   eliza: ["package.json", "packages/typescript/package.json"],
 };
 
-// plugin-openrouter contains Windows-incompatible PGlite fixture paths; skip
-// checkout until elizaos-plugins/plugin-openrouter#25 is merged.
-const SKIP_SUBMODULES = new Set(["eliza/plugins/plugin-openrouter"]);
-
 // Initialize nested eliza submodules in a second pass from inside eliza/ so
-// nested skip rules (for example plugin-openrouter on Windows) actually apply.
+// per-submodule state (gitlink vs regular files) is evaluated correctly.
 const NO_RECURSE_SUBMODULES = new Set(["eliza"]);
 
-const LEGACY_ROOT_SUBMODULE_PATHS = ["cloud", "steward-fi"];
+const LEGACY_ROOT_SUBMODULE_PATHS = ["cloud"];
 
 function getSubmoduleSkipReason(
   submodulePath,
   { skipLocal = skipLocalUpstreams } = {},
 ) {
-  if (SKIP_SUBMODULES.has(submodulePath)) {
-    return "it is in the explicit skip list";
-  }
   if (skipLocal && submodulePath === "eliza") {
     return "local upstreams are disabled";
   }
   return null;
-}
-
-function getNestedElizaSubmoduleSkipArgs() {
-  return [...SKIP_SUBMODULES]
-    .filter((submodulePath) => submodulePath.startsWith("eliza/"))
-    .map(
-      (submodulePath) =>
-        `-c submodule.${submodulePath.slice("eliza/".length)}.update=none`,
-    )
-    .join(" ");
 }
 
 export function shouldSkipSubmoduleInit(
@@ -215,12 +198,10 @@ export function runInitSubmodules({
     return { initialized: 0, alreadyInitialized: 0, failed: 0, submodules: [] };
   }
 
-  const hasLegacyRootCloudPaths = submodules.some(
-    (s) => s.path === "cloud" || s.path === "steward-fi",
-  );
+  const hasLegacyRootCloudPaths = submodules.some((s) => s.path === "cloud");
   if (hasLegacyRootCloudPaths) {
     log(
-      "[init-submodules] This .gitmodules still lists cloud/ or steward-fi/ at the repo root. Pull the latest branch where those repos are nested under eliza/, or edit .gitmodules to match.",
+      "[init-submodules] This .gitmodules still lists cloud/ at the repo root. Pull the latest branch where it is nested under eliza/, or edit .gitmodules to match.",
     );
   }
 
@@ -230,6 +211,26 @@ export function runInitSubmodules({
     logError,
     exists,
   });
+
+  // Re-align every submodule's .git/config remote URL with .gitmodules before
+  // doing anything else. Without this, flipping a submodule URL upstream (e.g.
+  // retargeting eliza between elizaOS/eliza and milady-ai/eliza) leaves the
+  // local .git/modules/<name>/config stuck on the old remote — so `git pull`
+  // later fails to fetch commits that only exist on the new remote. The
+  // per-submodule sync below only runs when `needsInit` is true, which misses
+  // the common case where the submodule is still checked out cleanly.
+  try {
+    exec("git submodule sync --recursive", {
+      cwd: rootDir,
+      stdio: "inherit",
+    });
+  } catch (err) {
+    logError(
+      `[init-submodules] git submodule sync --recursive failed: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+    );
+  }
 
   let initialized = 0;
   let alreadyInitialized = 0;
@@ -369,7 +370,7 @@ export function runInitSubmodules({
   ) {
     const elizaRoot = resolve(rootDir, "eliza");
     log(
-      "[init-submodules] Ensuring nested checkouts under eliza/ (cloud, steward-fi, plugins, …)…",
+      "[init-submodules] Ensuring nested checkouts under eliza/ (cloud, plugins, …)…",
     );
     try {
       // Sync nested config first so git does not keep stale URLs from older
@@ -402,9 +403,6 @@ export function runInitSubmodules({
             cwd: elizaRoot,
           })
         ) {
-          log(
-            `[init-submodules] Skipping nested ${nestedSubmodule.name} (${rootRelativePath}) because eliza tracks that path as regular files, not a gitlink`,
-          );
           continue;
         }
 
@@ -427,10 +425,9 @@ export function runInitSubmodules({
           continue;
         }
 
-        const nestedSkipArgs = getNestedElizaSubmoduleSkipArgs();
         try {
           exec(
-            `git ${nestedSkipArgs} submodule update --init --recursive -- "${nestedSubmodule.path}"`.trim(),
+            `git submodule update --init --recursive -- "${nestedSubmodule.path}"`,
             {
               cwd: elizaRoot,
               stdio: "inherit",

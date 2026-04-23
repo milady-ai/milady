@@ -55,10 +55,16 @@ export default scenario({
             method?: string;
           };
         };
-        if (typeof data.travelOriginAddress !== "string" || data.travelOriginAddress.trim().length === 0) {
+        if (
+          typeof data.travelOriginAddress !== "string" ||
+          data.travelOriginAddress.trim().length === 0
+        ) {
           return "expected travelOriginAddress in calendar create result payload";
         }
-        if (typeof data.location !== "string" || data.location.trim().length === 0) {
+        if (
+          typeof data.location !== "string" ||
+          data.location.trim().length === 0
+        ) {
           return "expected created calendar event location in result payload";
         }
         if (data.travelDestinationAddress !== data.location) {

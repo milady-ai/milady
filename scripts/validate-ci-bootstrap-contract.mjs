@@ -237,7 +237,6 @@ function assertCiPreReviewBootstrap(workflowText, targetFailures) {
     "- name: Install submodule verification dependencies",
     "bun install --cwd eliza --no-frozen-lockfile --ignore-scripts",
     "bun install --cwd eliza/cloud --no-frozen-lockfile --ignore-scripts",
-    "bun install --cwd eliza/steward-fi --no-frozen-lockfile --ignore-scripts",
     "- name: Ensure biome uses correct architecture",
     `ln -s "\${{ github.workspace }}/node_modules/@biomejs" eliza/node_modules/@biomejs`,
     "- name: Run local pre-review gate",

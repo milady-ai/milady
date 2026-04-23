@@ -21,6 +21,26 @@ export const miladyElizaTypecheckSteps = [
   },
 ];
 
+/** Steps that run `tsc --noEmit` for every Milady-shipped TS surface (apps + core packages + root scripts config). */
+export const miladyTypecheckSteps = [
+  {
+    label: "Root workspace typecheck",
+    command: "bun",
+    args: ["run", "verify:typecheck:workspace"],
+  },
+  {
+    label: "apps/app typecheck",
+    command: "bun",
+    args: ["run", "--cwd", "apps/app", "typecheck"],
+  },
+  {
+    label: "apps/homepage typecheck",
+    command: "bun",
+    args: ["run", "--cwd", "apps/homepage", "typecheck"],
+  },
+  ...miladyElizaTypecheckSteps,
+];
+
 // The repo-local eliza checkout includes a much larger upstream Rust/Python
 // surface than Milady actually ships against. Running the root language-wide
 // turbo sweeps in this repo fans out into dozens of unrelated plugin packages
@@ -55,30 +75,9 @@ export const suites = {
     },
     ...miladyElizaCrossLanguageChecks,
   ],
-  typecheck: [
-    {
-      label: "Root workspace typecheck",
-      command: "bun",
-      args: ["run", "verify:typecheck:workspace"],
-    },
-  ],
+  typecheck: [...miladyTypecheckSteps],
   "typecheck:extended": [
-    {
-      label: "Root workspace typecheck",
-      command: "bun",
-      args: ["run", "verify:typecheck:workspace"],
-    },
-    {
-      label: "apps/app typecheck",
-      command: "bun",
-      args: ["run", "--cwd", "apps/app", "typecheck"],
-    },
-    {
-      label: "apps/homepage typecheck",
-      command: "bun",
-      args: ["run", "--cwd", "apps/homepage", "typecheck"],
-    },
-    ...miladyElizaTypecheckSteps,
+    ...miladyTypecheckSteps,
     ...miladyCloudTypecheckSteps,
     ...miladySidecarTypecheckSteps,
     ...miladyElizaCrossLanguageChecks,

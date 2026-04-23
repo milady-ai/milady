@@ -17,7 +17,7 @@ Each trajectory entry captures:
 | Field | Description |
 |-------|-------------|
 | **Timestamp** | When the LLM call was made |
-| **Model** | Which model was used (e.g., GPT-4o, Claude 3.5 Sonnet) |
+| **Model** | Which model was used (e.g., GPT-4o, Claude Sonnet 4.6) |
 | **Prompt** | The full prompt sent to the model, including system message and conversation history |
 | **Response** | The model's complete response |
 | **Token usage** | Input tokens, output tokens, and total |
