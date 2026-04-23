@@ -449,6 +449,43 @@ jobs:
             echo "@xyflow/react already present in app-core/node_modules"
           fi
 
+      # ── 7d. Ensure cron-parser + luxon are resolvable from inside app-core
+      - name: Inject cron-parser into eliza/packages/app-core/node_modules
+        run: |
+          # Heartbeats UI imports cron-parser from app-core source, and cron-parser
+          # in turn depends on luxon at runtime.
+          mkdir -p eliza/packages/app-core/node_modules
+          if [ ! -d "eliza/packages/app-core/node_modules/cron-parser" ]; then
+            echo "Fetching cron-parser tarball..."
+            CRON_URL=$(npm view cron-parser dist.tarball 2>/dev/null)
+            if [ -n "$CRON_URL" ]; then
+              mkdir -p /tmp/cron_extract
+              rm -rf /tmp/cron_extract/package
+              curl -sL "$CRON_URL" | tar xz -C /tmp/cron_extract
+              mv /tmp/cron_extract/package eliza/packages/app-core/node_modules/cron-parser
+              echo "+ cron-parser $(cat eliza/packages/app-core/node_modules/cron-parser/package.json | node -e 'process.stdin.resume();let d="";process.stdin.on("data",c=>d+=c);process.stdin.on("end",()=>console.log(JSON.parse(d).version))')"
+            else
+              echo "WARN: could not resolve cron-parser tarball URL"
+            fi
+          else
+            echo "cron-parser already present in app-core/node_modules"
+          fi
+          if [ ! -d "eliza/packages/app-core/node_modules/luxon" ]; then
+            echo "Fetching luxon tarball..."
+            LUXON_URL=$(npm view luxon dist.tarball 2>/dev/null)
+            if [ -n "$LUXON_URL" ]; then
+              mkdir -p /tmp/luxon_extract
+              rm -rf /tmp/luxon_extract/package
+              curl -sL "$LUXON_URL" | tar xz -C /tmp/luxon_extract
+              mv /tmp/luxon_extract/package eliza/packages/app-core/node_modules/luxon
+              echo "+ luxon $(cat eliza/packages/app-core/node_modules/luxon/package.json | node -e 'process.stdin.resume();let d="";process.stdin.on("data",c=>d+=c);process.stdin.on("end",()=>console.log(JSON.parse(d).version))')"
+            else
+              echo "WARN: could not resolve luxon tarball URL"
+            fi
+          else
+            echo "luxon already present in app-core/node_modules"
+          fi
+
       # ── 8. Build UI (vite) ──────────────────────────────────────────────────
       - name: Build UI (vite)
         run: |
