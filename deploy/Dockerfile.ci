@@ -517,6 +517,13 @@ export default { TelegramAccountAuthSession, loadTelegramAccountSessionString, d
   // The compiled agent dist imports from '../../../../plugins/plugin-telegram/src/account-auth-service.js'
   // (note .js extension, not .ts) so we also need a .js copy at the same path.
   fs.writeFileSync('eliza/plugins/plugin-telegram/src/account-auth-service.js', telegramAccountAuthStub);
+  // tsx's loader treats .ts files as CommonJS by default unless a package.json with
+  // "type":"module" exists in a parent directory. Without this, named exports get
+  // collapsed into a single 'default' export and runtime imports fail with
+  // "does not provide an export named 'TelegramAccountAuthSession'".
+  fs.writeFileSync('eliza/plugins/plugin-telegram/package.json', JSON.stringify({
+    name: '@elizaos/plugin-telegram-workspace-stub', version: '0.0.0', type: 'module', private: true
+  }));
   fs.writeFileSync(tgDir + '/package.json', JSON.stringify({
     name: '@elizaos/plugin-telegram', version: '0.0.0-cloud-stub', type: 'module',
     exports: {
