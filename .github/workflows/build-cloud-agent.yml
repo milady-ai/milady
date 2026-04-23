@@ -416,6 +416,7 @@ jobs:
             TAILWIND_URL=$(npm view tailwindcss dist.tarball 2>/dev/null)
             if [ -n "$TAILWIND_URL" ]; then
               mkdir -p /tmp/tw_extract
+              rm -rf /tmp/tw_extract/package
               curl -sL "$TAILWIND_URL" | tar xz -C /tmp/tw_extract
               mv /tmp/tw_extract/package eliza/packages/app-core/node_modules/tailwindcss
               echo "+ tailwindcss $(cat eliza/packages/app-core/node_modules/tailwindcss/package.json | node -e 'process.stdin.resume();let d="";process.stdin.on("data",c=>d+=c);process.stdin.on("end",()=>console.log(JSON.parse(d).version))')"
@@ -424,6 +425,28 @@ jobs:
             fi
           else
             echo "tailwindcss already present in app-core/node_modules"
+          fi
+
+      # ── 7c. Ensure @xyflow/react is resolvable from inside the eliza submodule
+      - name: Inject @xyflow/react into eliza/packages/app-core/node_modules
+        run: |
+          # Vite resolves package CSS imports from the importing file path inside
+          # the eliza submodule (eliza/packages/app-core/src/styles/styles.css).
+          mkdir -p eliza/packages/app-core/node_modules/@xyflow
+          if [ ! -d "eliza/packages/app-core/node_modules/@xyflow/react" ]; then
+            echo "Fetching @xyflow/react tarball..."
+            XYF_URL=$(npm view @xyflow/react dist.tarball 2>/dev/null)
+            if [ -n "$XYF_URL" ]; then
+              mkdir -p /tmp/xyf_extract
+              rm -rf /tmp/xyf_extract/package
+              curl -sL "$XYF_URL" | tar xz -C /tmp/xyf_extract
+              mv /tmp/xyf_extract/package eliza/packages/app-core/node_modules/@xyflow/react
+              echo "+ @xyflow/react $(cat eliza/packages/app-core/node_modules/@xyflow/react/package.json | node -e 'process.stdin.resume();let d="";process.stdin.on("data",c=>d+=c);process.stdin.on("end",()=>console.log(JSON.parse(d).version))')"
+            else
+              echo "WARN: could not resolve @xyflow/react tarball URL"
+            fi
+          else
+            echo "@xyflow/react already present in app-core/node_modules"
           fi
 
       # ── 8. Build UI (vite) ──────────────────────────────────────────────────
