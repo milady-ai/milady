@@ -348,6 +348,8 @@ __STUBS__
 # prevent the import from throwing.
 RUN node - <<'__APP_STUBS__'
 const fs = require('fs');
+fs.mkdirSync('node_modules', { recursive: true });
+fs.mkdirSync('node_modules/@elizaos', { recursive: true });
 const emptyPlugin = `export const vincentPlugin = { name: 'vincent-stub', routes: [] };
 export const shopifyPlugin = { name: 'shopify-stub', routes: [] };
 export const stewardPlugin = { name: 'steward-stub', routes: [] };
