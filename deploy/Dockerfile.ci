@@ -348,8 +348,8 @@ __STUBS__
 # prevent the import from throwing.
 RUN node - <<'__APP_STUBS__'
 const fs = require('fs');
-fs.mkdirSync('node_modules', { recursive: true });
-fs.mkdirSync('node_modules/@elizaos', { recursive: true });
+const { execFileSync } = require('child_process');
+execFileSync('mkdir', ['-p', 'node_modules', 'node_modules/@elizaos']);
 const emptyPlugin = `export const vincentPlugin = { name: 'vincent-stub', routes: [] };
 export const shopifyPlugin = { name: 'shopify-stub', routes: [] };
 export const stewardPlugin = { name: 'steward-stub', routes: [] };
@@ -376,7 +376,7 @@ const apps = [
 for (const name of apps) {
   const dir = 'node_modules/' + name;
   if (fs.existsSync(dir + '/package.json')) { console.log('present: ' + name); continue; }
-  fs.mkdirSync(dir, { recursive: true });
+  execFileSync('mkdir', ['-p', dir]);
   fs.writeFileSync(dir + '/plugin.mjs', emptyPlugin);
   // app-steward has extra subpath imports from dist/api/server.js
   if (name === '@elizaos/app-steward') {
