@@ -477,8 +477,10 @@ if (ensureStubDir(trDir) !== 'present') {
   fs.mkdirSync(trDir + '/routes', { recursive: true });
   const trainingStub = `export function handleTrainingRoutes() { return null; }\nexport default {};`;
   const trajectoryStub = `export function handleTrajectoryRoute() { return null; }\nexport default {};`;
+  const servicesStub = `export function clearBackendCache() {}\nexport async function detectAvailableBackends() { return []; }\nexport default {};`;
   fs.writeFileSync(trDir + '/routes/training.mjs', trainingStub);
   fs.writeFileSync(trDir + '/routes/trajectory.mjs', trajectoryStub);
+  fs.writeFileSync(trDir + '/services.mjs', servicesStub);
   fs.writeFileSync(trDir + '/index.mjs', 'export default {};');
   fs.writeFileSync(trDir + '/package.json', JSON.stringify({
     name: '@elizaos/app-training', version: '0.0.0-cloud-stub', type: 'module',
@@ -486,6 +488,7 @@ if (ensureStubDir(trDir) !== 'present') {
       '.': './index.mjs',
       './routes/training': './routes/training.mjs',
       './routes/trajectory': './routes/trajectory.mjs',
+      './services': './services.mjs',
     }
   }));
   console.log('stubbed: @elizaos/app-training');
