@@ -378,7 +378,7 @@ export default { routes: [] };
 const knowledgeRoutes = `export async function handleKnowledgeRoutes() { return false; }
 export default { handleKnowledgeRoutes };
 `;
-const knowledgeServiceLoader = `export function getKnowledgeService() { return null; }
+const knowledgeServiceLoader = `export async function getKnowledgeService() { return { service: null, reason: 'stub_not_registered' }; }
 export function getKnowledgeTimeoutMs() { return 30000; }
 export default { getKnowledgeService, getKnowledgeTimeoutMs };
 `;
