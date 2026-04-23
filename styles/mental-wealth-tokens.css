@@ -1,0 +1,331 @@
+/*
+ * Mental Wealth Academy design tokens.
+ * Source: Mental-Wealth-Academy/platform styles/design-tokens.ts and
+ * styles/globals.css. These variables map the platform token names onto the
+ * app-core theme contract consumed by Milady surfaces.
+ */
+
+:root,
+[data-theme="dark"],
+.dark {
+  --mwa-color-primary: #6b80ff;
+  --mwa-color-primary-hover: #8494ff;
+  --mwa-color-primary-muted: rgba(107, 128, 255, 0.5);
+  --mwa-color-primary-light: #adb7ff;
+  --mwa-color-primary-dark: #324be4;
+  --mwa-color-primary-rgb: 107, 128, 255;
+
+  --mwa-color-secondary: #7b84c4;
+  --mwa-color-secondary-hover: #959de0;
+  --mwa-color-secondary-muted: rgba(123, 132, 196, 0.5);
+  --mwa-color-secondary-light: #adb7ff;
+  --mwa-color-secondary-dark: #3c4686;
+
+  --mwa-color-background: #0d0e16;
+  --mwa-color-background-elevated: #14151e;
+  --mwa-color-background-hover: #1e1f28;
+  --mwa-color-card: rgba(22, 23, 31, 0.95);
+  --mwa-color-surface: #1e1f28;
+
+  --mwa-color-text: rgba(227, 225, 238, 0.95);
+  --mwa-color-text-strong: #ffffff;
+  --mwa-color-text-muted: rgba(227, 225, 238, 0.65);
+  --mwa-color-text-faint: rgba(227, 225, 238, 0.45);
+
+  --mwa-color-border: rgba(255, 255, 255, 0.08);
+  --mwa-color-border-subtle: rgba(255, 255, 255, 0.06);
+  --mwa-color-border-strong: rgba(173, 183, 255, 0.28);
+
+  --mwa-color-success: #7b84c4;
+  --mwa-color-success-muted: rgba(123, 132, 196, 0.2);
+  --mwa-color-warning: #f59e0b;
+  --mwa-color-warning-muted: rgba(245, 158, 11, 0.2);
+  --mwa-color-error: #ffb4ab;
+  --mwa-color-error-muted: rgba(255, 180, 171, 0.16);
+  --mwa-color-info: #6b80ff;
+  --mwa-color-info-muted: rgba(107, 128, 255, 0.2);
+
+  --mwa-color-mental-health: #9724a6;
+  --mwa-color-productivity: #6b80ff;
+  --mwa-color-wealth: #7b84c4;
+
+  --mwa-gradient-futuristic-floss: linear-gradient(to bottom, #0d0e16, #14151e);
+  --mwa-gradient-primary: linear-gradient(135deg, #6b80ff 0%, #adb7ff 100%);
+  --mwa-gradient-secondary: linear-gradient(135deg, #7b84c4 0%, #adb7ff 100%);
+
+  --mwa-font-primary: var(--font-poppins), "Poppins", sans-serif;
+  --mwa-font-secondary: var(--font-space-grotesk), "Space Grotesk", sans-serif;
+  --mwa-font-mono: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
+
+  --mwa-font-weight-light: 300;
+  --mwa-font-weight-regular: 400;
+  --mwa-font-weight-medium: 500;
+  --mwa-font-weight-semibold: 600;
+  --mwa-font-weight-bold: 700;
+
+  --mwa-font-size-xs: 0.618rem;
+  --mwa-font-size-sm: 0.75rem;
+  --mwa-font-size-base: 0.875rem;
+  --mwa-font-size-md: 1rem;
+  --mwa-font-size-lg: 1.125rem;
+  --mwa-font-size-xl: 1.618rem;
+  --mwa-font-size-2xl: 2.618rem;
+  --mwa-font-size-3xl: 4.236rem;
+  --mwa-font-size-4xl: 6.854rem;
+  --mwa-font-size-5xl: 11.09rem;
+
+  --mwa-line-height-tight: 1.2;
+  --mwa-line-height-snug: 1.4;
+  --mwa-line-height-normal: 1.5;
+  --mwa-line-height-relaxed: 1.6;
+
+  --mwa-letter-spacing-tight: -0.02em;
+  --mwa-letter-spacing-normal: 0em;
+  --mwa-letter-spacing-wide: 0.025em;
+  --mwa-letter-spacing-wider: 0.05em;
+  --mwa-letter-spacing-widest: 0.1em;
+
+  --mwa-space-0: 0;
+  --mwa-space-3xs: 0.375rem;
+  --mwa-space-2xs: 0.5rem;
+  --mwa-space-xs: 0.625rem;
+  --mwa-space-sm: 1rem;
+  --mwa-space-md: 1.625rem;
+  --mwa-space-lg: 2.625rem;
+  --mwa-space-xl: 4.25rem;
+  --mwa-space-2xl: 6.875rem;
+
+  --mwa-radius-sm: 0.25rem;
+  --mwa-radius-md: 0.5rem;
+  --mwa-radius-lg: 0.75rem;
+  --mwa-radius-xl: 1.25rem;
+  --mwa-radius-2xl: 2rem;
+  --mwa-radius-3xl: 3.25rem;
+  --mwa-radius-full: 9999px;
+
+  --mwa-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --mwa-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.35);
+  --mwa-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --mwa-shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.5);
+  --mwa-shadow-primary: 0 4px 12px rgba(107, 128, 255, 0.2);
+  --mwa-shadow-secondary: 0 4px 12px rgba(123, 132, 196, 0.2);
+
+  --mwa-duration-instant: 50ms;
+  --mwa-duration-fast: 200ms;
+  --mwa-duration-normal: 300ms;
+  --mwa-duration-slow: 500ms;
+
+  --mwa-ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --mwa-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --mwa-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --mwa-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --mwa-ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --mwa-ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  --color-background: var(--mwa-color-background);
+  --color-primary: var(--mwa-color-primary);
+  --color-primary-hover: var(--mwa-color-primary-hover);
+  --color-primary-muted: var(--mwa-color-primary-muted);
+  --color-primary-light: var(--mwa-color-primary-light);
+  --color-secondary: var(--mwa-color-secondary);
+  --color-secondary-hover: var(--mwa-color-secondary-hover);
+  --color-secondary-muted: var(--mwa-color-secondary-muted);
+  --color-text-dark: var(--mwa-color-text-strong);
+  --color-text-light: var(--mwa-color-text-strong);
+  --color-text-muted: var(--mwa-color-text-muted);
+  --color-mental-health: var(--mwa-color-mental-health);
+  --color-productivity: var(--mwa-color-productivity);
+  --color-wealth: var(--mwa-color-wealth);
+
+  --gradient-futuristic-floss: var(--mwa-gradient-futuristic-floss);
+  --gradient-primary: var(--mwa-gradient-primary);
+  --gradient-secondary: var(--mwa-gradient-secondary);
+
+  --font-primary: var(--mwa-font-primary);
+  --font-secondary: var(--mwa-font-secondary);
+  --font-button: var(--mwa-font-mono);
+  --font-sans: var(--mwa-font-primary);
+  --font-display: var(--mwa-font-secondary);
+  --font-mono: var(--mwa-font-mono);
+  --font-body: var(--mwa-font-primary);
+  --font-chat: var(--mwa-font-primary);
+  --mono: var(--mwa-font-mono);
+
+  --font-weight-light: var(--mwa-font-weight-light);
+  --font-weight-regular: var(--mwa-font-weight-regular);
+  --font-weight-medium: var(--mwa-font-weight-medium);
+  --font-weight-semibold: var(--mwa-font-weight-semibold);
+  --font-weight-bold: var(--mwa-font-weight-bold);
+
+  --bg: var(--mwa-color-background);
+  --bg-accent: var(--mwa-color-background-elevated);
+  --bg-elevated: var(--mwa-color-background-elevated);
+  --bg-hover: var(--mwa-color-background-hover);
+  --bg-muted: var(--mwa-color-background-elevated);
+  --card: var(--mwa-color-card);
+  --card-foreground: var(--mwa-color-text);
+  --surface: var(--mwa-color-surface);
+
+  --text: var(--mwa-color-text);
+  --text-strong: var(--mwa-color-text-strong);
+  --chat-text: var(--mwa-color-text);
+  --txt: var(--mwa-color-text);
+  --muted: var(--mwa-color-text-muted);
+  --muted-strong: var(--mwa-color-text-faint);
+
+  --border: var(--mwa-color-border);
+  --border-subtle: var(--mwa-color-border-subtle);
+  --border-strong: var(--mwa-color-border-strong);
+  --border-hover: var(--mwa-color-primary);
+  --input: var(--mwa-color-border-subtle);
+  --ring: var(--mwa-color-primary-light);
+
+  --accent: var(--mwa-color-primary);
+  --accent-rgb: var(--mwa-color-primary-rgb);
+  --accent-hover: var(--mwa-color-primary-hover);
+  --accent-muted: var(--mwa-color-primary-muted);
+  --accent-subtle: var(--mwa-color-info-muted);
+  --accent-foreground: #ffffff;
+  --primary: var(--mwa-color-primary);
+  --primary-foreground: #ffffff;
+
+  --ok: var(--mwa-color-success);
+  --ok-muted: var(--mwa-color-secondary-muted);
+  --ok-subtle: var(--mwa-color-success-muted);
+  --destructive: var(--mwa-color-error);
+  --destructive-foreground: #12131b;
+  --destructive-subtle: var(--mwa-color-error-muted);
+  --warn: var(--mwa-color-warning);
+  --warn-muted: rgba(245, 158, 11, 0.7);
+  --warn-subtle: var(--mwa-color-warning-muted);
+  --danger: var(--mwa-color-error);
+  --info: var(--mwa-color-info);
+
+  --status-success: var(--ok);
+  --status-success-bg: var(--ok-subtle);
+  --status-danger: var(--danger);
+  --status-danger-bg: var(--destructive-subtle);
+  --status-warning: var(--warn);
+  --status-warning-bg: var(--warn-subtle);
+  --status-info: var(--info);
+  --status-info-bg: var(--mwa-color-info-muted);
+
+  --focus: rgba(var(--accent-rgb), 0.18);
+  --focus-ring: 0 0 0 2px rgba(var(--accent-rgb), 0.44);
+  --scrollbar-track: transparent;
+  --scrollbar-thumb-start: rgba(var(--accent-rgb), 0.42);
+  --scrollbar-thumb-mid: rgba(var(--accent-rgb), 0.58);
+  --scrollbar-thumb-end: rgba(123, 132, 196, 0.66);
+  --scrollbar-thumb-hover-start: rgba(var(--accent-rgb), 0.56);
+  --scrollbar-thumb-hover-mid: rgba(var(--accent-rgb), 0.7);
+  --scrollbar-thumb-hover-end: rgba(123, 132, 196, 0.78);
+  --scrollbar-thumb-edge: rgba(var(--accent-rgb), 0.12);
+
+  --header-bar-bg: var(--mwa-color-background);
+  --header-bar-fg: var(--mwa-color-text-strong);
+  --section-bar-bg: var(--mwa-color-background-elevated);
+  --section-bar-fg: var(--mwa-color-text-strong);
+  --link-color: var(--mwa-color-primary-light);
+  --link-hover-color: var(--mwa-color-primary-hover);
+
+  --shadow-xs: var(--mwa-shadow-sm);
+  --shadow-sm: var(--mwa-shadow-sm);
+  --shadow-md: var(--mwa-shadow-md);
+  --shadow-lg: var(--mwa-shadow-lg);
+  --shadow-xl: var(--mwa-shadow-xl);
+  --shadow-2xl: var(--mwa-shadow-xl);
+  --radius-sm: var(--mwa-radius-sm);
+  --radius-md: var(--mwa-radius-md);
+  --radius-lg: var(--mwa-radius-lg);
+  --radius-xl: var(--mwa-radius-xl);
+  --radius-2xl: var(--mwa-radius-2xl);
+  --radius-3xl: var(--mwa-radius-3xl);
+  --radius-full: var(--mwa-radius-full);
+  --radius: var(--mwa-radius-md);
+  --duration-normal: var(--mwa-duration-normal);
+
+  --brand-gradient-primary: var(--mwa-gradient-primary);
+  --brand-glow: 0 0 48px rgba(var(--accent-rgb), 0.22);
+  --brand-glow-soft: 0 0 32px rgba(var(--accent-rgb), 0.14);
+
+  --onboarding-card-border-strong: rgba(var(--accent-rgb), 0.32);
+  --onboarding-recommended-bg: rgba(var(--accent-rgb), 0.16);
+  --onboarding-recommended-bg-hover: rgba(var(--accent-rgb), 0.22);
+  --onboarding-recommended-border: rgba(var(--accent-rgb), 0.28);
+  --onboarding-recommended-border-strong: rgba(var(--accent-rgb), 0.44);
+  --onboarding-accent-bg: rgba(var(--accent-rgb), 0.18);
+  --onboarding-accent-bg-hover: rgba(var(--accent-rgb), 0.24);
+  --onboarding-accent-border: rgba(var(--accent-rgb), 0.3);
+  --onboarding-accent-border-hover: rgba(var(--accent-rgb), 0.46);
+  --onboarding-accent-foreground: rgba(255, 255, 255, 0.98);
+  --onboarding-link: var(--mwa-color-primary-light);
+  --onboarding-ripple: rgba(var(--accent-rgb), 0.12);
+  --onboarding-secondary-hover-bg: rgba(var(--accent-rgb), 0.08);
+  --onboarding-secondary-pressed-bg: rgba(var(--accent-rgb), 0.14);
+  --onboarding-secondary-focus-ring: rgba(var(--accent-rgb), 0.42);
+  --onboarding-field-focus-border: rgba(var(--accent-rgb), 0.46);
+  --onboarding-field-focus-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.14);
+
+  color-scheme: dark;
+}
+
+[data-theme="light"],
+.light {
+  --mwa-color-primary: #5168ff;
+  --mwa-color-primary-hover: #324be4;
+  --mwa-color-primary-muted: rgba(81, 104, 255, 0.6);
+  --mwa-color-primary-light: #7586ff;
+  --mwa-color-primary-dark: #324be4;
+  --mwa-color-primary-rgb: 81, 104, 255;
+
+  --mwa-color-secondary: #50599b;
+  --mwa-color-secondary-hover: #3c4686;
+  --mwa-color-secondary-muted: rgba(80, 89, 155, 0.6);
+  --mwa-color-secondary-light: #adb7ff;
+  --mwa-color-secondary-dark: #3c4686;
+
+  --mwa-color-background: #fbf8ff;
+  --mwa-color-background-elevated: #ffffff;
+  --mwa-color-background-hover: #f4f5fe;
+  --mwa-color-card: rgba(255, 255, 255, 0.95);
+  --mwa-color-surface: #ffffff;
+
+  --mwa-color-text: #1a1b24;
+  --mwa-color-text-strong: #1a1b24;
+  --mwa-color-text-muted: rgba(26, 27, 36, 0.7);
+  --mwa-color-text-faint: rgba(26, 27, 36, 0.3);
+
+  --mwa-color-border: rgba(0, 0, 0, 0.08);
+  --mwa-color-border-subtle: rgba(0, 0, 0, 0.05);
+  --mwa-color-border-strong: rgba(81, 104, 255, 0.24);
+
+  --mwa-color-success: #50599b;
+  --mwa-color-success-muted: rgba(80, 89, 155, 0.2);
+  --mwa-color-error: #ba1a1a;
+  --mwa-color-error-muted: rgba(186, 26, 26, 0.2);
+  --mwa-color-info: #5168ff;
+  --mwa-color-info-muted: rgba(81, 104, 255, 0.2);
+
+  --mwa-color-productivity: #5168ff;
+  --mwa-color-wealth: #50599b;
+
+  --mwa-gradient-futuristic-floss: linear-gradient(to bottom, #fbf8ff, #e1e1f4);
+  --mwa-gradient-primary: linear-gradient(135deg, #5168ff 0%, #7586ff 100%);
+  --mwa-gradient-secondary: linear-gradient(135deg, #50599b 0%, #adb7ff 100%);
+
+  --mwa-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --mwa-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+  --mwa-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --mwa-shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.15);
+  --mwa-shadow-primary: 0 4px 12px rgba(81, 104, 255, 0.3);
+  --mwa-shadow-secondary: 0 4px 12px rgba(80, 89, 155, 0.3);
+
+  --accent-foreground: #ffffff;
+  --primary-foreground: #ffffff;
+  --destructive-foreground: #ffffff;
+  --scrollbar-track: #f4f5fe;
+  --header-bar-bg: var(--mwa-color-card);
+  --section-bar-bg: var(--mwa-color-background-hover);
+
+  color-scheme: light;
+}

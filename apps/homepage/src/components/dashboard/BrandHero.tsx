@@ -29,7 +29,7 @@ export function BrandHero({
         className="pointer-events-none absolute -right-20 -top-24 h-[320px] w-[320px] opacity-[0.16] blur-3xl sm:-right-32 sm:-top-28 sm:h-[420px] sm:w-[420px] sm:opacity-[0.18] md:-right-40 md:h-[520px] md:w-[520px] md:opacity-[0.22]"
         style={{
           background:
-            "radial-gradient(circle at center, rgba(240,185,11,0.12) 0%, transparent 72%)",
+            "radial-gradient(circle at center, rgba(var(--accent-rgb), 0.12) 0%, transparent 72%)",
         }}
       />
 
@@ -44,8 +44,8 @@ export function BrandHero({
               type="button"
               onClick={onOpenLocal}
               aria-label="Open local Milady runtime"
-              className="group inline-flex min-h-[44px] items-center gap-2 rounded-md px-4 py-2.5 text-[13px] font-semibold text-black shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_10px_24px_-10px_rgba(240,185,11,0.55)] transition duration-200 active:translate-y-0 active:scale-[0.98] sm:px-5 sm:py-3 [@media(hover:hover)]:hover:-translate-y-0.5"
-              style={{ background: "var(--gold-gradient-primary)" }}
+              className="group inline-flex min-h-[44px] items-center gap-2 rounded-md px-4 py-2.5 text-[13px] font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_10px_24px_-10px_rgba(var(--accent-rgb),0.55)] transition duration-200 active:translate-y-0 active:scale-[0.98] sm:px-5 sm:py-3 [@media(hover:hover)]:hover:-translate-y-0.5"
+              style={{ background: "var(--brand-gradient-primary)" }}
             >
               <span>{primaryLabel}</span>
               <span

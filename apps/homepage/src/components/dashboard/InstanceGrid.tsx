@@ -258,7 +258,7 @@ function EmptyState({
           onClick={state.cta.onClick}
           className={`shrink-0 rounded-md px-4 py-2 text-[12px] font-medium transition duration-200 active:scale-[0.98] ${
             state.cta.primary
-              ? "bg-brand text-black shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_6px_16px_-8px_rgba(240,185,11,0.4)] hover:-translate-y-0.5 hover:bg-[var(--color-gold-300)]"
+              ? "bg-brand text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_6px_16px_-8px_rgba(var(--accent-rgb),0.4)] hover:-translate-y-0.5 hover:bg-[var(--color-primary-light)]"
               : "border border-border text-white/85 hover:-translate-y-0.5 hover:border-white/25 hover:text-white"
           }`}
         >

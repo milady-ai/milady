@@ -1,10 +1,9 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=JetBrains+Mono:wght@400;500;600&display=swap");
+@import "../../../styles/mental-wealth-fonts.css";
 @import "tailwindcss";
 @import "@elizaos/app-core/styles/base.css";
+@import "../../../styles/mental-wealth-tokens.css";
 
-/* @tailwindcss/typography — provides prose utilities for long-form MDX content
-   under /docs. Consumer docs use `prose prose-invert` with DM Sans body + JetBrains
-   Mono code. */
+/* @tailwindcss/typography provides prose utilities for long-form MDX docs. */
 @plugin "@tailwindcss/typography";
 
 /* Scan @elizaos/app-core source so Tailwind generates CSS for all UI package classes
@@ -16,16 +15,17 @@
 @source "./src/components/docs/**/*.{ts,tsx}";
 
 @theme inline {
-  /* Fonts — homepage uses DM Sans (branded); app uses system stack */
-  --font-sans: "DM Sans", "Helvetica Neue", Arial, sans-serif;
-  --font-mono: "JetBrains Mono", "Cascadia Code", "Courier New", monospace;
-  --font-display: "DM Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-sans: var(--font-primary);
+  --font-mono: var(--font-button);
+  --font-display: var(--font-secondary);
 
-  --color-gold-300: #f7cf4a;
-  --color-gold-500: #f0b90b;
-  --color-gold-600: #d8a000;
-  --color-gold-700: #b07c00;
-  --color-gold-900: #6b4b00;
+  --color-academy-primary: var(--color-primary);
+  --color-academy-primary-hover: var(--color-primary-hover);
+  --color-academy-primary-light: var(--color-primary-light);
+  --color-academy-secondary: var(--color-secondary);
+  --color-academy-mental-health: var(--color-mental-health);
+  --color-academy-productivity: var(--color-productivity);
+  --color-academy-wealth: var(--color-wealth);
 
   /* Map to shared tokens */
   --color-dark: var(--bg);
@@ -50,17 +50,6 @@
   --color-status-paused: var(--warn);
   --color-status-stopped: var(--danger);
   --color-status-provisioning: var(--warn);
-}
-
-:root {
-  --gold-gradient-primary: linear-gradient(
-    135deg,
-    #f0b90b 0%,
-    #f7cf4a 55%,
-    #ffd966 100%
-  );
-  --gold-glow: 0 0 48px rgba(240, 185, 11, 0.22);
-  --gold-glow-soft: 0 0 32px rgba(240, 185, 11, 0.14);
 }
 
 html {
@@ -222,7 +211,7 @@ body {
     90deg,
     rgba(255, 255, 255, 0.04) 0%,
     rgba(255, 255, 255, 0.1) 40%,
-    rgba(240, 185, 11, 0.06) 50%,
+    rgba(var(--accent-rgb), 0.06) 50%,
     rgba(255, 255, 255, 0.1) 60%,
     rgba(255, 255, 255, 0.04) 100%
   );
@@ -519,9 +508,7 @@ body {
 }
 
 /* ── Docs Prose (MDX long-form content) ─────────────────────────────── */
-/* Overrides @tailwindcss/typography defaults to match the Milady brand:
-   DM Sans for body, JetBrains Mono for code, brand color for links, and
-   the dark aesthetic already established across the homepage. */
+/* Overrides @tailwindcss/typography defaults to match the active brand tokens. */
 
 .docs-prose {
   font-family: var(--font-sans);

@@ -1,6 +1,8 @@
 import { ErrorBoundary } from "@elizaos/app-core";
+import "../../../styles/mental-wealth-fonts.css";
 import "@elizaos/app-core/styles/styles.css";
 import "@elizaos/app-core/styles/brand-gold.css";
+import "../../../styles/mental-wealth-tokens.css";
 import "@elizaos/app-core/platform/native-plugin-entrypoints";
 
 import { App as CapacitorApp } from "@capacitor/app";

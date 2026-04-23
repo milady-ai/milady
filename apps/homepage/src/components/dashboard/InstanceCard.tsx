@@ -61,7 +61,7 @@ const OPEN_DISABLED_COPY: Partial<
  * Runtime card — typography + data, no image.
  *
  * Action model (post-H7):
- *   Primary:   "open"  — gold, opens web UI (every source)
+ *   Primary:   "open"  — brand-filled, opens web UI (every source)
  *   Secondary: copy    — icon button, copies URL   (every source)
  *   Menu ⋯:    destructive only, per-source:
  *                cloud  → "delete agent"      (two-step inline confirm)
@@ -170,7 +170,7 @@ export function InstanceCard({
   };
 
   return (
-    <article className="group relative flex flex-col gap-4 rounded-lg border border-border bg-[#0b0b10] p-4 transition hover:border-brand/35 hover:shadow-[0_0_0_1px_rgba(240,185,11,0.08),0_12px_30px_-18px_rgba(240,185,11,0.18)] sm:p-5 [@media(hover:hover)]:hover:-translate-y-0.5">
+    <article className="group relative flex flex-col gap-4 rounded-lg border border-border bg-dark-secondary p-4 transition hover:border-brand/35 hover:shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.08),0_12px_30px_-18px_rgba(var(--accent-rgb),0.18)] sm:p-5 [@media(hover:hover)]:hover:-translate-y-0.5">
       {/* Row 1 — inline meta strip */}
       <header className="flex items-center justify-between gap-3">
         <StatusDot status={agent.status} />

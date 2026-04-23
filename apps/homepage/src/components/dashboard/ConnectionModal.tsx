@@ -135,11 +135,11 @@ export function ConnectionModal({ onSubmit, onClose }: ConnectionModalProps) {
             <button
               type="submit"
               disabled={connectDisabled}
-              className="rounded-md px-5 py-2.5 text-[12px] font-semibold text-black shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_8px_20px_-10px_rgba(240,185,11,0.45)] transition duration-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] disabled:translate-y-0 disabled:shadow-none disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand/60"
+              className="rounded-md px-5 py-2.5 text-[12px] font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_8px_20px_-10px_rgba(var(--accent-rgb),0.45)] transition duration-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] disabled:translate-y-0 disabled:shadow-none disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand/60"
               style={{
                 background: connectDisabled
                   ? "var(--accent-muted)"
-                  : "var(--gold-gradient-primary)",
+                  : "var(--brand-gradient-primary)",
               }}
             >
               attach

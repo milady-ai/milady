@@ -233,7 +233,7 @@ function OpenLocalRow({
       <span className="flex items-center gap-2">
         <span
           aria-hidden="true"
-          className="h-1.5 w-1.5 rounded-full bg-brand shadow-[0_0_6px_rgba(240,185,11,0.4)]"
+          className="h-1.5 w-1.5 rounded-full bg-brand shadow-[0_0_6px_rgba(var(--accent-rgb),0.4)]"
         />
         <span>open local</span>
       </span>
