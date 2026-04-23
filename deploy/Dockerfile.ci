@@ -514,6 +514,9 @@ export default { TelegramAccountAuthSession, loadTelegramAccountSessionString, d
   fs.writeFileSync(tgDir + '/account-auth-service.mjs', telegramAccountAuthStub);
   fs.mkdirSync('eliza/plugins/plugin-telegram/src', { recursive: true });
   fs.writeFileSync('eliza/plugins/plugin-telegram/src/account-auth-service.ts', telegramAccountAuthStub);
+  // The compiled agent dist imports from '../../../../plugins/plugin-telegram/src/account-auth-service.js'
+  // (note .js extension, not .ts) so we also need a .js copy at the same path.
+  fs.writeFileSync('eliza/plugins/plugin-telegram/src/account-auth-service.js', telegramAccountAuthStub);
   fs.writeFileSync(tgDir + '/package.json', JSON.stringify({
     name: '@elizaos/plugin-telegram', version: '0.0.0-cloud-stub', type: 'module',
     exports: {
