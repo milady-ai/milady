@@ -98,9 +98,9 @@ RUN find eliza \( -path '*/node_modules/@elizaos/core' -o -path '*/node_modules/
 # tsconfig paths that point here (e.g. @elizaos/core/utils/context-catalog). Removing it
 # breaks agent startup even though the compiled dist is also present.
 
-# Patch @noble/ciphers: add extensionless export aliases (./aes, ./chacha, etc.)
-# crypto-compat.ts imports '@noble/ciphers/aes' but the package only exports './aes.js'.
-# Same pattern as the @noble/hashes patch in patch-deps.mjs.
+# Patch noble packages for eliza runtime compatibility.
+# - @noble/ciphers and @noble/curves need extensionless subpath aliases.
+# - @noble/hashes@1.3.x has no ./legacy export, but crypto-compat.ts imports it for md5/sha1.
 RUN node - <<'__NOBLE_PATCH__'
 const fs = require('fs');
 const path = require('path');
@@ -108,7 +108,7 @@ function patchExtensionlessExports(dir) {
   const pkgPath = path.join(dir, 'package.json');
   if (!fs.existsSync(pkgPath)) return;
   const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
-  if (!pkg.exports) return;
+  if (!pkg.exports) return pkg;
   let changed = false;
   const entries = Object.entries(pkg.exports);
   for (const [key, val] of entries) {
@@ -124,10 +124,33 @@ function patchExtensionlessExports(dir) {
     fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
     console.log('[patch-deps] Patched ' + pkg.name + ' exports: added extensionless aliases.');
   }
+  return pkg;
+}
+function ensureHashesLegacyShim(dir) {
+  const pkgPath = path.join(dir, 'package.json');
+  if (!fs.existsSync(pkgPath)) return;
+  const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+  pkg.exports ||= {};
+  if (pkg.exports['./legacy']) return;
+  const cjs = `'use strict';\nconst { createHash } = require('node:crypto');\nconst toBytes = (data) => {\n  if (data instanceof Uint8Array) return data;\n  if (typeof data === 'string') return Buffer.from(data, 'utf8');\n  if (ArrayBuffer.isView(data)) return Buffer.from(data.buffer, data.byteOffset, data.byteLength);\n  if (data instanceof ArrayBuffer) return Buffer.from(data);\n  return Buffer.from(data);\n};\nconst make = (algorithm) => (data) => new Uint8Array(createHash(algorithm).update(toBytes(data)).digest());\nexports.md5 = make('md5');\nexports.sha1 = make('sha1');\n`;
+  const esm = `import { createHash } from 'node:crypto';\nconst toBytes = (data) => {\n  if (data instanceof Uint8Array) return data;\n  if (typeof data === 'string') return Buffer.from(data, 'utf8');\n  if (ArrayBuffer.isView(data)) return Buffer.from(data.buffer, data.byteOffset, data.byteLength);\n  if (data instanceof ArrayBuffer) return Buffer.from(data);\n  return Buffer.from(data);\n};\nconst make = (algorithm) => (data) => new Uint8Array(createHash(algorithm).update(toBytes(data)).digest());\nexport const md5 = make('md5');\nexport const sha1 = make('sha1');\n`;
+  const dts = `export declare const md5: (data: Uint8Array | ArrayBuffer | ArrayBufferView | string) => Uint8Array;\nexport declare const sha1: (data: Uint8Array | ArrayBuffer | ArrayBufferView | string) => Uint8Array;\n`;
+  fs.writeFileSync(path.join(dir, 'legacy.js'), cjs);
+  fs.mkdirSync(path.join(dir, 'esm'), { recursive: true });
+  fs.writeFileSync(path.join(dir, 'esm', 'legacy.js'), esm);
+  fs.writeFileSync(path.join(dir, 'legacy.d.ts'), dts);
+  pkg.exports['./legacy'] = {
+    types: './legacy.d.ts',
+    import: './esm/legacy.js',
+    default: './legacy.js'
+  };
+  fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
+  console.log('[patch-deps] Patched @noble/hashes exports: added ./legacy shim.');
 }
 patchExtensionlessExports('node_modules/@noble/ciphers');
 patchExtensionlessExports('node_modules/@noble/curves');
 patchExtensionlessExports('node_modules/@noble/hashes');
+ensureHashesLegacyShim('node_modules/@noble/hashes');
 __NOBLE_PATCH__
 
 # Fix dist layout: package.json says dist/index.node.js but build creates dist/node/index.node.js
