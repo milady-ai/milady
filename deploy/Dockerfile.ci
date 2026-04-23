@@ -616,6 +616,11 @@ ${extraCjs}`;
         import: './index.mjs',
         require: './index.cjs',
         default: './index.mjs'
+      },
+      './plugin': {
+        import: './index.mjs',
+        require: './index.cjs',
+        default: './index.mjs'
       }
     }
   }));
