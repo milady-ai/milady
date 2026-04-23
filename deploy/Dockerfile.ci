@@ -127,6 +127,7 @@ function patchExtensionlessExports(dir) {
 }
 patchExtensionlessExports('node_modules/@noble/ciphers');
 patchExtensionlessExports('node_modules/@noble/curves');
+patchExtensionlessExports('node_modules/@noble/hashes');
 __NOBLE_PATCH__
 
 # Fix dist layout: package.json says dist/index.node.js but build creates dist/node/index.node.js
