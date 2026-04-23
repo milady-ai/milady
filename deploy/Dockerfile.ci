@@ -350,6 +350,22 @@ RUN node - <<'__APP_STUBS__'
 const fs = require('fs');
 const { execFileSync } = require('child_process');
 execFileSync('mkdir', ['-p', 'node_modules', 'node_modules/@elizaos']);
+function ensureStubDir(dir) {
+  try {
+    const st = fs.lstatSync(dir);
+    if (st.isSymbolicLink() || !st.isDirectory()) {
+      fs.rmSync(dir, { force: true, recursive: true });
+    } else if (fs.existsSync(dir + '/package.json')) {
+      return 'present';
+    }
+  } catch (err) {
+    // doesn't exist yet
+  }
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+  return 'stub';
+}
 const emptyPlugin = `export const vincentPlugin = { name: 'vincent-stub', routes: [] };
 export const shopifyPlugin = { name: 'shopify-stub', routes: [] };
 export const stewardPlugin = { name: 'steward-stub', routes: [] };
@@ -375,9 +391,9 @@ const apps = [
 ];
 for (const name of apps) {
   const dir = 'node_modules/' + name;
-  if (fs.existsSync(dir + '/package.json')) { console.log('present: ' + name); continue; }
-  if (!fs.existsSync(dir)) {
-    execFileSync('mkdir', ['-p', dir]);
+  if (ensureStubDir(dir) === 'present') {
+    console.log('present: ' + name);
+    continue;
   }
   fs.writeFileSync(dir + '/plugin.mjs', emptyPlugin);
   // app-steward has extra subpath imports from dist/api/server.js
@@ -409,8 +425,7 @@ for (const name of apps) {
 }
 // app-knowledge with subpath exports
 const knDir = 'node_modules/@elizaos/app-knowledge';
-if (!fs.existsSync(knDir + '/package.json')) {
-  fs.mkdirSync(knDir, { recursive: true });
+if (ensureStubDir(knDir) !== 'present') {
   fs.writeFileSync(knDir + '/routes.mjs', knowledgeRoutes);
   fs.writeFileSync(knDir + '/service-loader.mjs', knowledgeServiceLoader);
   fs.writeFileSync(knDir + '/index.mjs', 'export * from "./routes.mjs"; export * from "./service-loader.mjs";');
@@ -426,7 +441,7 @@ if (!fs.existsSync(knDir + '/package.json')) {
 }
 // app-task-coordinator: 9 subpaths imported across agent/src/api/*
 const tcDir = 'node_modules/@elizaos/app-task-coordinator';
-if (!fs.existsSync(tcDir + '/package.json')) {
+if (ensureStubDir(tcDir) !== 'present') {
   fs.mkdirSync(tcDir + '/api', { recursive: true });
   fs.mkdirSync(tcDir + '/evals', { recursive: true });
   const noopStub = `export default {};`;
@@ -458,7 +473,7 @@ if (!fs.existsSync(tcDir + '/package.json')) {
 }
 // app-training: imported by agent/src/api/server.ts for training/trajectory routes
 const trDir = 'node_modules/@elizaos/app-training';
-if (!fs.existsSync(trDir + '/package.json')) {
+if (ensureStubDir(trDir) !== 'present') {
   fs.mkdirSync(trDir + '/routes', { recursive: true });
   const trainingStub = `export function handleTrainingRoutes() { return null; }\nexport default {};`;
   const trajectoryStub = `export function handleTrajectoryRoute() { return null; }\nexport default {};`;
@@ -477,8 +492,7 @@ if (!fs.existsSync(trDir + '/package.json')) {
 }
 // plugin-telegram: LifeOps imports its account auth helpers even on cloud Linux.
 const tgDir = 'node_modules/@elizaos/plugin-telegram';
-if (!fs.existsSync(tgDir + '/package.json')) {
-  fs.mkdirSync(tgDir, { recursive: true });
+if (ensureStubDir(tgDir) !== 'present') {
   fs.writeFileSync(tgDir + '/index.mjs', 'export default { name: "telegram-stub", routes: [] };');
   fs.writeFileSync(tgDir + '/account-auth-service.mjs', `
 export const defaultTelegramAccountDeviceModel = 'Milady Cloud';
@@ -510,6 +524,22 @@ __APP_STUBS__
 # tarballs have incomplete dist/ output, so provide a dual ESM/CJS no-op module.
 RUN node - <<'__PLUGIN_STUBS__'
 const fs = require('fs');
+function ensureStubDir(dir) {
+  try {
+    const st = fs.lstatSync(dir);
+    if (st.isSymbolicLink() || !st.isDirectory()) {
+      fs.rmSync(dir, { force: true, recursive: true });
+    } else if (fs.existsSync(dir + '/package.json')) {
+      return 'present';
+    }
+  } catch (err) {
+    // doesn't exist yet
+  }
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+  return 'stub';
+}
 const plugins = [
   {
     name: '@elizaos/plugin-cron',
@@ -550,13 +580,12 @@ module.exports.getRegisteredCommands = function getRegisteredCommands() { return
 ];
 for (const { name, exportName, extraEsm = '', extraCjs = '' } of plugins) {
   const dir = 'node_modules/' + name;
-  if (fs.existsSync(dir + '/package.json')) {
+  if (ensureStubDir(dir) === 'present') {
     console.log('present: ' + name);
     continue;
   }
   const scope = name.startsWith('@') ? name.split('/')[0] : null;
   if (scope) fs.mkdirSync('node_modules/' + scope, { recursive: true });
-  fs.mkdirSync(dir, { recursive: true });
   const shortName = name.split('/').pop().replace(/^plugin-/, '');
   const stubName = shortName + '-stub';
   const esm = `const stub = { name: '${stubName}', description: '${stubName} cloud fallback', routes: [], actions: [], providers: [], evaluators: [], services: [] };
