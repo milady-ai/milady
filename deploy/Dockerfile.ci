@@ -376,7 +376,9 @@ const apps = [
 for (const name of apps) {
   const dir = 'node_modules/' + name;
   if (fs.existsSync(dir + '/package.json')) { console.log('present: ' + name); continue; }
-  execFileSync('mkdir', ['-p', dir]);
+  if (!fs.existsSync(dir)) {
+    execFileSync('mkdir', ['-p', dir]);
+  }
   fs.writeFileSync(dir + '/plugin.mjs', emptyPlugin);
   // app-steward has extra subpath imports from dist/api/server.js
   if (name === '@elizaos/app-steward') {
