@@ -577,6 +577,12 @@ module.exports.initForRuntime = function initForRuntime() {};
 module.exports.getRegisteredCommands = function getRegisteredCommands() { return Array.from(commandStore.values()); };
 `,
   },
+  {
+    name: '@elizaos/plugin-browser-bridge',
+    exportName: 'browserBridgePlugin',
+    extraEsm: `export const pluginBrowserBridge = browserBridgePlugin;\nexport const plugin = browserBridgePlugin;\n`,
+    extraCjs: `module.exports.pluginBrowserBridge = module.exports.browserBridgePlugin;\nmodule.exports.plugin = module.exports.browserBridgePlugin;\n`,
+  },
 ];
 for (const { name, exportName, extraEsm = '', extraCjs = '' } of plugins) {
   const dir = 'node_modules/' + name;
