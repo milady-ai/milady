@@ -91,6 +91,7 @@ vi.mock("@miladyai/ui", () => ({
     React.createElement("div", props, props.children as React.ReactNode),
   SidebarScrollRegion: (props: Record<string, unknown>) =>
     React.createElement("div", props, props.children as React.ReactNode),
+  Z_TOOLTIP: 300,
   SidebarFilterBar: ({
     selectValue,
     selectOptions,
@@ -188,6 +189,8 @@ vi.mock("@miladyai/ui", () => ({
       { type: "button", ...props },
       props.children as React.ReactNode,
     ),
+  Badge: (props: Record<string, unknown>) =>
+    React.createElement("span", props, props.children as React.ReactNode),
   Dialog: (props: Record<string, unknown>) =>
     React.createElement("div", props, props.children as React.ReactNode),
   DialogContent: (props: Record<string, unknown>) =>
@@ -195,6 +198,8 @@ vi.mock("@miladyai/ui", () => ({
   DialogHeader: (props: Record<string, unknown>) =>
     React.createElement("div", props, props.children as React.ReactNode),
   DialogTitle: (props: Record<string, unknown>) =>
+    React.createElement("div", props, props.children as React.ReactNode),
+  PromptDialog: (props: Record<string, unknown>) =>
     React.createElement("div", props, props.children as React.ReactNode),
   Spinner: () => React.createElement("span", { "aria-label": "loading" }),
   ConfirmDialog: (props: Record<string, unknown>) =>
@@ -228,13 +233,8 @@ vi.mock("../inventory/BscTradePanel", () => ({
     React.createElement("div", { "data-testid": "trade-panel" }),
 }));
 
-vi.mock("../inventory/NftGrid", () => ({
-  NftGrid: () => React.createElement("div", { "data-testid": "nft-grid" }),
-}));
-
-vi.mock("../inventory/TokensTable", () => ({
-  TokensTable: () =>
-    React.createElement("div", { "data-testid": "tokens-table" }),
+vi.mock("../pages/ChatView", () => ({
+  ChatView: () => React.createElement("div", { "data-testid": "chat-view" }),
 }));
 
 vi.mock("../inventory/useInventoryData", () => ({
@@ -433,72 +433,7 @@ describe("InventoryView wallet settings", () => {
     expect(loadNfts).toHaveBeenCalledTimes(1);
   });
 
-  it("renders the token sort control and dispatches inventorySort updates", async () => {
-    const ctx = createContext();
-    mockUseApp.mockImplementation(() => ctx);
-
-    let tree: TestRenderer.ReactTestRenderer | undefined;
-    await act(async () => {
-      tree = TestRenderer.create(<InventoryView />);
-    });
-
-    const sidebarSortBlock = tree?.root.find(
-      (node) => node.props["data-testid"] === "wallet-sidebar-sort-block",
-    );
-    expect(sidebarSortBlock).toBeTruthy();
-
-    const sortSelect = sidebarSortBlock?.find(
-      (node) =>
-        node.type === "mock-select" && node.props.value === ctx.inventorySort,
-    );
-    expect(sortSelect).toBeTruthy();
-
-    // No overview card, funding route pill, or summary sort pill
-    expect(
-      tree?.root.findAll(
-        (node) => node.props["data-testid"] === "wallet-overview-card",
-      ),
-    ).toHaveLength(0);
-    expect(
-      tree?.root.findAll(
-        (node) => node.props["data-testid"] === "wallet-funding-route-pill",
-      ),
-    ).toHaveLength(0);
-    expect(
-      tree?.root.findAll(
-        (node) => node.props["data-testid"] === "wallet-summary-sort-pill",
-      ),
-    ).toHaveLength(0);
-
-    await act(async () => {
-      sortSelect?.props.onChange({ target: { value: "chain" } });
-    });
-
-    expect(ctx.setState).toHaveBeenCalledWith("inventorySort", "chain");
-    expect(ctx.setState).toHaveBeenCalledWith("inventorySortDirection", "asc");
-  });
-
-  it("renders the shared sort control in NFT view", async () => {
-    const ctx = createContext({ inventoryView: "nfts" });
-    mockUseApp.mockImplementation(() => ctx);
-
-    let tree: TestRenderer.ReactTestRenderer | undefined;
-    await act(async () => {
-      tree = TestRenderer.create(<InventoryView />);
-    });
-
-    const sidebarSortBlock = tree?.root.find(
-      (node) => node.props["data-testid"] === "wallet-sidebar-sort-block",
-    );
-    expect(sidebarSortBlock).toBeTruthy();
-
-    const sortSelect = sidebarSortBlock?.find(
-      (node) => node.type === "mock-select" && node.props.value === "symbol",
-    );
-    expect(sortSelect).toBeTruthy();
-  });
-
-  it("keeps the simplified wallet shell and interactive chain icon grid", async () => {
+  it("keeps the simplified wallet shell and renders a token watchlist in the sidebar", async () => {
     const ctx = createContext();
     mockUseApp.mockImplementation(() => ctx);
 
@@ -516,26 +451,158 @@ describe("InventoryView wallet settings", () => {
     expect(
       tree?.root.findAll((node) => node.children.includes("WALLET")),
     ).toHaveLength(0);
+    expect(
+      tree?.root.findAll(
+        (node) => node.props["data-testid"] === "wallet-sidebar-sort-block",
+      ),
+    ).toHaveLength(0);
+    expect(
+      tree?.root.findAll(
+        (node) => node.props["data-testid"] === "wallet-header-tab-nfts",
+      ),
+    ).toHaveLength(0);
+    expect(
+      tree?.root.findAll((node) => node.props["data-testid"] === "chat-view"),
+    ).toHaveLength(1);
+    expect(
+      tree?.root.find(
+        (node) => node.props["data-testid"] === "wallet-sidebar-token-list",
+      ),
+    ).toBeTruthy();
+    expect(
+      tree?.root.find(
+        (node) => node.props["data-testid"] === "wallet-sidebar-tabs",
+      ),
+    ).toBeTruthy();
+    expect(
+      tree?.root.find(
+        (node) =>
+          node.props["data-testid"] === "wallet-sidebar-tab-tokens" &&
+          node.props["aria-pressed"] === true,
+      ),
+    ).toBeTruthy();
+    expect(
+      tree?.root.find(
+        (node) => node.props["data-testid"] === "wallet-sidebar-tab-defi",
+      ),
+    ).toBeTruthy();
+    expect(
+      tree?.root.find(
+        (node) => node.props["data-testid"] === "wallet-sidebar-tab-nfts",
+      ),
+    ).toBeTruthy();
+    expect(
+      tree?.root.find(
+        (node) => node.props["data-testid"] === "wallet-sidebar-tab-activity",
+      ),
+    ).toBeTruthy();
+    expect(
+      tree?.root.find(
+        (node) => node.props["data-testid"] === "wallet-sidebar-controls",
+      ),
+    ).toBeTruthy();
+    expect(
+      tree?.root.find(
+        (node) =>
+          node.props["data-testid"] === "wallet-sidebar-network-filter" &&
+          node.props["aria-label"] === "All popular networks",
+      ),
+    ).toBeTruthy();
+    expect(
+      tree?.root.find(
+        (node) => node.props["data-testid"] === "wallet-sidebar-filter-button",
+      ),
+    ).toBeTruthy();
+    expect(
+      tree?.root.find(
+        (node) => node.props["data-testid"] === "wallet-sidebar-more-button",
+      ),
+    ).toBeTruthy();
+    expect(
+      tree?.root.find(
+        (node) => node.props["data-testid"] === "wallet-sidebar-token-usdc",
+      ),
+    ).toBeTruthy();
+    expect(
+      tree?.root.find(
+        (node) => node.props["data-testid"] === "wallet-sidebar-token-rin",
+      ),
+    ).toBeTruthy();
+    expect(
+      tree?.root.find(
+        (node) => node.props["data-testid"] === "wallet-sidebar-token-eth",
+      ),
+    ).toBeTruthy();
+  });
 
-    const baseButton = tree?.root.find(
-      (node) =>
-        node.type === "button" &&
-        typeof node.props["aria-label"] === "string" &&
-        node.props["aria-label"].startsWith("Base"),
-    );
-    expect(baseButton).toBeTruthy();
+  it("renders the wallet account header and footer actions", async () => {
+    const ctx = createContext();
+    mockUseApp.mockImplementation(() => ctx);
 
+    let tree: TestRenderer.ReactTestRenderer | undefined;
     await act(async () => {
-      baseButton?.props.onClick();
+      tree = TestRenderer.create(<InventoryView />);
     });
 
-    expect(ctx.setState).toHaveBeenCalledWith("inventoryChainFilters", {
-      ethereum: true,
-      base: false,
-      bsc: true,
-      avax: true,
-      solana: true,
+    expect(
+      tree?.root.find(
+        (node) => node.props["data-testid"] === "wallet-rpc-popup",
+      ),
+    ).toBeTruthy();
+    expect(
+      tree?.root.find(
+        (node) => node.props["data-testid"] === "wallet-header-copy-address",
+      ),
+    ).toBeTruthy();
+    expect(
+      tree?.root.find(
+        (node) => node.props["data-testid"] === "wallet-rpc-logo-stack",
+      ),
+    ).toBeTruthy();
+    expect(
+      tree?.root.find(
+        (node) => node.props["data-testid"] === "wallet-policies-popup",
+      ),
+    ).toBeTruthy();
+    expect(
+      tree?.root.findAll(
+        (node) => node.props["data-testid"] === "wallet-header-settings",
+      ),
+    ).toHaveLength(0);
+    expect(
+      tree?.root.findAll(
+        (node) => node.props["data-testid"] === "wallet-header-policies",
+      ),
+    ).toHaveLength(0);
+    expect(
+      tree?.root.findAll(
+        (node) => node.props["data-testid"] === "wallet-header-refresh",
+      ),
+    ).toHaveLength(0);
+
+    expect(
+      tree?.root.findAll(
+        (node) => node.props["data-testid"] === "wallet-header-tab-nfts",
+      ),
+    ).toHaveLength(0);
+  });
+
+  it("raises the wallet dialogs above the chat layer", async () => {
+    const ctx = createContext();
+    mockUseApp.mockImplementation(() => ctx);
+
+    let tree: TestRenderer.ReactTestRenderer | undefined;
+    await act(async () => {
+      tree = TestRenderer.create(<InventoryView />);
     });
+
+    const elevatedNodes =
+      tree?.root.findAll(
+        (node) =>
+          typeof node.props?.className === "string" &&
+          node.props.className.includes("z-[300]"),
+      ) ?? [];
+    expect(elevatedNodes.length).toBeGreaterThanOrEqual(2);
   });
 
   it("does not render an overview card for focused wallets", async () => {

@@ -21,6 +21,7 @@ import {
   SidebarHeader,
   SidebarPanel,
   SidebarScrollRegion,
+  Z_TOOLTIP,
 } from "@miladyai/ui";
 import {
   AlertTriangle,
@@ -46,6 +47,7 @@ import {
 } from "../inventory";
 import { TradePanel } from "../inventory/BscTradePanel";
 import { ChainIcon } from "../inventory/ChainIcon";
+import { WalletStatusRail } from "../inventory/WalletStatusRail";
 import {
   CHAIN_CONFIGS,
   type ChainKey,
@@ -1151,9 +1153,12 @@ export function InventoryView() {
           ) : null}
         </div>
 
-        <div className="mt-4 flex flex-1 min-h-0 flex-col">
-          <div className="flex flex-1 min-h-[600px] flex-col">
-            <ChatView />
+        <div className="mt-4 flex min-h-0 flex-1 flex-col">
+          <div className="flex h-full min-h-0 flex-1 flex-col gap-4 lg:flex-row lg:items-stretch">
+            <div className="flex h-full min-w-0 flex-1 flex-col">
+              <ChatView />
+            </div>
+            <WalletStatusRail className="w-full lg:w-[22rem] lg:shrink-0" />
           </div>
         </div>
       </PageLayout>
@@ -1175,7 +1180,9 @@ export function InventoryView() {
 
       {/* ── Wallet & RPC popup ── */}
       <Dialog open={walletRpcOpen} onOpenChange={setWalletRpcOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent
+          className={`z-[${Z_TOOLTIP}] max-w-2xl max-h-[80vh] overflow-y-auto`}
+        >
           <DialogHeader>
             <DialogTitle>
               {stewardConnected
@@ -1203,7 +1210,9 @@ export function InventoryView() {
 
       {/* ── Wallet Policies popup ── */}
       <Dialog open={walletPoliciesOpen} onOpenChange={setWalletPoliciesOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent
+          className={`z-[${Z_TOOLTIP}] max-w-2xl max-h-[80vh] overflow-y-auto`}
+        >
           <DialogHeader>
             <DialogTitle>
               {t("settings.sections.walletpolicies.label", {
