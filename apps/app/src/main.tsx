@@ -39,7 +39,6 @@ import {
   applyForceFreshOnboardingReset,
   applyLaunchConnection,
   applyLaunchConnectionFromUrl,
-  dispatchQueuedLifeOpsGithubCallbackFromUrl,
   installDesktopPermissionsClientPatch,
   installForceFreshOnboardingClientPatch,
   installLocalProviderCloudPreferencePatch,
@@ -422,11 +421,9 @@ function handleDeepLink(url: string): void {
       break;
     case "lifeops":
       window.location.hash = "#lifeops";
-      dispatchQueuedLifeOpsGithubCallbackFromUrl(url);
       break;
     case "settings":
       window.location.hash = "#settings";
-      dispatchQueuedLifeOpsGithubCallbackFromUrl(url);
       break;
     case "connect": {
       const gatewayUrl = parsed.searchParams.get("url");
