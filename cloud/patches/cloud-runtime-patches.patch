@@ -7,9 +7,9 @@ index 04aadf9f7c..058b27302e 100644
   */
  import { cbc, gcm } from "@noble/ciphers/aes.js";
 -import { md5, sha1 } from "@noble/hashes/legacy";
-+// @ts-expect-error noble hash subpath typings are inconsistent across published versions.
++// @ts-ignore noble hash subpath typings are inconsistent across published versions.
 +import { md5, sha1 } from "@noble/hashes/legacy.js";
-+// @ts-expect-error noble hash subpath typings are inconsistent across published versions.
++// @ts-ignore noble hash subpath typings are inconsistent across published versions.
  import { ripemd160 } from "@noble/hashes/ripemd160";
  import { sha224, sha256, sha384, sha512 } from "@noble/hashes/sha2";
  import * as BufferUtils from "./buffer";
