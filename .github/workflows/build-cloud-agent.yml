@@ -126,6 +126,12 @@ jobs:
           ls eliza/plugins/plugin-sql/typescript/dist/node/index.node.js && echo "plugin-sql dist OK" || echo "WARN: plugin-sql dist missing"
           ls eliza/plugins/plugin-elizacloud/typescript/dist/cjs/index.node.cjs && echo "plugin-elizacloud dist OK" || echo "WARN: plugin-elizacloud dist missing"
           ls eliza/plugins/plugin-imessage/typescript/src/index.ts && echo "plugin-imessage src OK" || echo "WARN: plugin-imessage src missing"
+          # Compiled agent/dist imports from plugin-imessage/typescript/src/index.js (note .js).
+          # The submodule only ships .ts, so copy the .ts content to .js for the runtime loader.
+          if [ -f eliza/plugins/plugin-imessage/typescript/src/index.ts ]; then
+            cp eliza/plugins/plugin-imessage/typescript/src/index.ts eliza/plugins/plugin-imessage/typescript/src/index.js
+            echo "plugin-imessage .js copy OK"
+          fi
           # Init other submodules (skip local upstreams to avoid nested plugin submodules)
           MILADY_SKIP_LOCAL_UPSTREAMS=1 node scripts/init-submodules.mjs || echo "Some submodules failed, continuing"
           # Disable workspace entries for missing plugin submodules
