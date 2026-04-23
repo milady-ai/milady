@@ -95,9 +95,10 @@ jobs:
           # Init eliza submodule first (needed for workspace resolution)
           # Full clone (not shallow) because eliza commit may not be in shallow history
           git submodule update --init eliza || echo "eliza submodule init failed, continuing"
-          # plugin-sql is a nested submodule inside eliza. We vendor its built dist/
-          # into the image to avoid the broken npm alpha package in cloud CI.
+          # plugin-sql and plugin-elizacloud are nested submodules inside eliza.
+          # We vendor their built dist/ into the image to avoid broken/missing npm installs in cloud CI.
           git -C eliza submodule update --init plugins/plugin-sql || echo "plugin-sql submodule init failed, continuing"
+          git -C eliza submodule update --init plugins/plugin-elizacloud || echo "plugin-elizacloud submodule init failed, continuing"
           # Apply cloud runtime patches to eliza submodule
           if [ -f cloud/patches/cloud-runtime-patches.patch ]; then
             echo "Applying cloud runtime patches to eliza submodule..."
@@ -116,6 +117,7 @@ jobs:
           fi
           ls eliza/package.json && echo "eliza submodule OK" || echo "WARN: eliza submodule missing"
           ls eliza/plugins/plugin-sql/typescript/dist/node/index.node.js && echo "plugin-sql dist OK" || echo "WARN: plugin-sql dist missing"
+          ls eliza/plugins/plugin-elizacloud/typescript/dist/cjs/index.node.cjs && echo "plugin-elizacloud dist OK" || echo "WARN: plugin-elizacloud dist missing"
           # Init other submodules (skip local upstreams to avoid nested plugin submodules)
           MILADY_SKIP_LOCAL_UPSTREAMS=1 node scripts/init-submodules.mjs || echo "Some submodules failed, continuing"
           # Disable workspace entries for missing plugin submodules
@@ -248,11 +250,19 @@ jobs:
           MILADY_NO_VISION_DEPS: "1"
           MILADY_SKIP_LOCAL_UPSTREAMS: "1"
 
-      - name: Build vendored plugin-sql
+      - name: Build vendored plugins
         run: |
-          cd eliza/plugins/plugin-sql/typescript
-          bun run build
-          ls dist/node/index.node.js && echo "plugin-sql build OK"
+          (
+            cd eliza/plugins/plugin-sql/typescript
+            bun run build
+            ls dist/node/index.node.js && echo "plugin-sql build OK"
+          ) || echo "plugin-sql build failed, continuing"
+          (
+            cd eliza/plugins/plugin-elizacloud/typescript
+            bun install --no-save
+            bun run build
+            ls dist/cjs/index.node.cjs && echo "plugin-elizacloud build OK"
+          ) || echo "plugin-elizacloud build failed, continuing"
 
       # ── 5. Build Capacitor plugins ──────────────────────────────────────────
       - name: Build Capacitor plugins

@@ -48,6 +48,12 @@ RUN set -x; \
     cp eliza/plugins/plugin-sql/typescript/package.json node_modules/@elizaos/plugin-sql/; \
     cp -a eliza/plugins/plugin-sql/typescript/dist node_modules/@elizaos/plugin-sql/dist 2>/dev/null || true; \
     ls node_modules/@elizaos/plugin-sql/dist/node/index.node.js 2>/dev/null && echo "@elizaos/plugin-sql dist OK" || echo "WARN: plugin-sql dist missing"; \
+    # @elizaos/plugin-elizacloud: vendor submodule (not installed from npm due to overrides).
+    rm -rf node_modules/@elizaos/plugin-elizacloud; \
+    mkdir -p node_modules/@elizaos/plugin-elizacloud; \
+    cp eliza/plugins/plugin-elizacloud/typescript/package.json node_modules/@elizaos/plugin-elizacloud/; \
+    cp -a eliza/plugins/plugin-elizacloud/typescript/dist node_modules/@elizaos/plugin-elizacloud/dist 2>/dev/null || true; \
+    ls node_modules/@elizaos/plugin-elizacloud/dist/cjs/index.node.cjs 2>/dev/null && echo "@elizaos/plugin-elizacloud dist OK" || echo "WARN: plugin-elizacloud dist missing"; \
     # @elizaos/shared: DON'T replace — the npm version or resolved workspace symlink works.
     # Workspace package.json exports point to ./src/*.ts (tsx handles this).
     # Replacing with dist-only breaks resolution since exports don't match dist layout.
@@ -81,7 +87,7 @@ RUN for app_dir in eliza/apps/app-coding eliza/apps/app-shopify; do \
 # bun creates workspace symlinks like eliza/apps/app-lifeops/node_modules/@elizaos/core
 # and @elizaos/plugin-sql that resolve correctly in CI but point nowhere in Docker.
 # Removing them forces Node's module resolution to walk up to root node_modules.
-RUN find eliza \( -path '*/node_modules/@elizaos/core' -o -path '*/node_modules/@elizaos/plugin-sql' \) -not -path '*/node_modules/.bun/*' \
+RUN find eliza \( -path '*/node_modules/@elizaos/core' -o -path '*/node_modules/@elizaos/plugin-sql' -o -path '*/node_modules/@elizaos/plugin-elizacloud' \) -not -path '*/node_modules/.bun/*' \
     | while read p; do rm -rf "$p" && echo "Removed nested: $p"; done; true
 
 # ===== End symlink replacement =====
