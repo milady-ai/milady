@@ -496,8 +496,7 @@ if (ensureStubDir(trDir) !== 'present') {
 // plugin-telegram: LifeOps imports its account auth helpers even on cloud Linux.
 const tgDir = 'node_modules/@elizaos/plugin-telegram';
 if (ensureStubDir(tgDir) !== 'present') {
-  fs.writeFileSync(tgDir + '/index.mjs', 'export default { name: "telegram-stub", routes: [] };');
-  fs.writeFileSync(tgDir + '/account-auth-service.mjs', `
+  const telegramAccountAuthStub = `
 export const defaultTelegramAccountDeviceModel = 'Milady Cloud';
 export const defaultTelegramAccountSystemVersion = 'Linux';
 export function loadTelegramAccountSessionString() { return ''; }
@@ -510,7 +509,11 @@ export class TelegramAccountAuthSession {
   async cancel() { return undefined; }
 }
 export default { TelegramAccountAuthSession, loadTelegramAccountSessionString, defaultTelegramAccountDeviceModel, defaultTelegramAccountSystemVersion };
-`);
+`;
+  fs.writeFileSync(tgDir + '/index.mjs', 'export default { name: "telegram-stub", routes: [] };');
+  fs.writeFileSync(tgDir + '/account-auth-service.mjs', telegramAccountAuthStub);
+  fs.mkdirSync('eliza/plugins/plugin-telegram/src', { recursive: true });
+  fs.writeFileSync('eliza/plugins/plugin-telegram/src/account-auth-service.ts', telegramAccountAuthStub);
   fs.writeFileSync(tgDir + '/package.json', JSON.stringify({
     name: '@elizaos/plugin-telegram', version: '0.0.0-cloud-stub', type: 'module',
     exports: {
