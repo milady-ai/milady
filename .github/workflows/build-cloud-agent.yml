@@ -105,6 +105,7 @@ jobs:
           # We vendor their built dist/ into the image to avoid broken/missing npm installs in cloud CI.
           git -C eliza submodule update --init plugins/plugin-sql || echo "plugin-sql submodule init failed, continuing"
           git -C eliza submodule update --init plugins/plugin-elizacloud || echo "plugin-elizacloud submodule init failed, continuing"
+          git -C eliza submodule update --init plugins/plugin-imessage || echo "plugin-imessage submodule init failed, continuing"
           # Apply cloud runtime patches to eliza submodule
           if [ -f cloud/patches/cloud-runtime-patches.patch ]; then
             echo "Applying cloud runtime patches to eliza submodule..."
@@ -124,6 +125,7 @@ jobs:
           ls eliza/package.json && echo "eliza submodule OK" || echo "WARN: eliza submodule missing"
           ls eliza/plugins/plugin-sql/typescript/dist/node/index.node.js && echo "plugin-sql dist OK" || echo "WARN: plugin-sql dist missing"
           ls eliza/plugins/plugin-elizacloud/typescript/dist/cjs/index.node.cjs && echo "plugin-elizacloud dist OK" || echo "WARN: plugin-elizacloud dist missing"
+          ls eliza/plugins/plugin-imessage/typescript/src/index.ts && echo "plugin-imessage src OK" || echo "WARN: plugin-imessage src missing"
           # Init other submodules (skip local upstreams to avoid nested plugin submodules)
           MILADY_SKIP_LOCAL_UPSTREAMS=1 node scripts/init-submodules.mjs || echo "Some submodules failed, continuing"
           # Disable workspace entries for missing plugin submodules
