@@ -68,6 +68,7 @@ jobs:
           ref: ${{ env.SOURCE_REF }}
           fetch-depth: 0
           submodules: false
+          token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
 
       # ── 2. Set up Node + Bun ────────────────────────────────────────────────
       - name: Setup Node.js 22
@@ -91,7 +92,12 @@ jobs:
 
       # ── 3.5. Init submodules + patch workspace for CI ──────────────
       - name: Init submodules
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
         run: |
+          if [ -n "$GH_TOKEN" ]; then
+            git config --global url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf "https://github.com/"
+          fi
           # Init eliza submodule first (needed for workspace resolution)
           # Full clone (not shallow) because eliza commit may not be in shallow history
           git submodule update --init eliza || echo "eliza submodule init failed, continuing"
