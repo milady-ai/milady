@@ -70,3 +70,59 @@ index 04aadf9f7c..f1767e918c 100644
  };
  
  const AES_BLOCK_SIZE = 16;
+--- a/packages/agent/src/api/chat-routes.ts	2026-04-23 12:18:37.019060844 +0000
++++ b/packages/agent/src/api/chat-routes.ts	2026-04-23 12:18:58.133559447 +0000
+@@ -1897,12 +1897,13 @@
+         sendChunk({}, "stop");
+         writeSseData(res, "[DONE]");
+       } catch (err) {
++        console.error("[CHAT_DIAG] /v1/chat/completions stream catch:", err instanceof Error ? err.stack : err);
+         if (!aborted) {
+           writeSseData(
+             res,
+             JSON.stringify({
+               error: {
+-                message: getErrorMessage(err),
++                message: `${getErrorMessage(err)} | DIAG: ${err instanceof Error && err.stack ? err.stack.replace(/\n/g, " <<NL>> ") : "no-stack"}`,
+                 type: "server_error",
+               },
+             }),
+@@ -1984,9 +1985,10 @@
+         ],
+       });
+     } catch (err) {
++      console.error("[CHAT_DIAG] /v1/chat/completions non-stream catch:", err instanceof Error ? err.stack : err);
+       json(
+         res,
+-        { error: { message: getErrorMessage(err), type: "server_error" } },
++        { error: { message: `${getErrorMessage(err)} | DIAG: ${err instanceof Error && err.stack ? err.stack.replace(/\n/g, " <<NL>> ") : "no-stack"}`, type: "server_error" } },
+         500,
+       );
+     }
+@@ -2173,12 +2175,13 @@
+         );
+         writeSseJson(res, { type: "message_stop" }, "message_stop");
+       } catch (err) {
++        console.error("[CHAT_DIAG] /v1/messages stream catch:", err instanceof Error ? err.stack : err);
+         if (!aborted) {
+           writeSseJson(
+             res,
+             {
+               type: "error",
+-              error: { type: "server_error", message: getErrorMessage(err) },
++              error: { type: "server_error", message: `${getErrorMessage(err)} | DIAG: ${err instanceof Error && err.stack ? err.stack.replace(/\n/g, " <<NL>> ") : "no-stack"}` },
+             },
+             "error",
+           );
+@@ -2255,9 +2258,10 @@
+         usage: { input_tokens: 0, output_tokens: 0 },
+       });
+     } catch (err) {
++      console.error("[CHAT_DIAG] /v1/messages non-stream catch:", err instanceof Error ? err.stack : err);
+       json(
+         res,
+-        { error: { type: "server_error", message: getErrorMessage(err) } },
++        { error: { type: "server_error", message: `${getErrorMessage(err)} | DIAG: ${err instanceof Error && err.stack ? err.stack.replace(/\n/g, " <<NL>> ") : "no-stack"}` } },
+         500,
+       );
+     }
