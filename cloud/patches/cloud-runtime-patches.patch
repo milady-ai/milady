@@ -1,5 +1,31 @@
+diff --git a/apps/app-lifeops/src/lifeops/schedule-sync-contracts.ts b/apps/app-lifeops/src/lifeops/schedule-sync-contracts.ts
+index b2787b374d..a063636e27 100644
+--- a/apps/app-lifeops/src/lifeops/schedule-sync-contracts.ts
++++ b/apps/app-lifeops/src/lifeops/schedule-sync-contracts.ts
+@@ -35,6 +35,21 @@ export const LIFEOPS_SCHEDULE_STATE_SCOPES = ["local", "cloud"] as const;
+ export type LifeOpsScheduleStateScope =
+   (typeof LIFEOPS_SCHEDULE_STATE_SCOPES)[number];
+ 
++// Cloud-compat shim: service-mixin-reminders imports LIFEOPS_SCHEDULE_OBSERVATION_STATES
++// which was renamed/removed on some branches. Re-export the circadian states array under
++// the legacy name so cloud builds don't break with missing-export errors at boot.
++export const LIFEOPS_SCHEDULE_OBSERVATION_STATES = [
++  "awake",
++  "winding_down",
++  "sleeping",
++  "waking",
++  "napping",
++  "unclear",
++] as const;
++
++export type LifeOpsScheduleObservationState =
++  (typeof LIFEOPS_SCHEDULE_OBSERVATION_STATES)[number];
++
+ export interface LifeOpsScheduleObservationSnapshot {
+   effectiveDayKey: string;
+   localDate: string;
 diff --git a/packages/typescript/src/utils/crypto-compat.ts b/packages/typescript/src/utils/crypto-compat.ts
-index 04aadf9f7c..058b27302e 100644
+index 04aadf9f7c..f1767e918c 100644
 --- a/packages/typescript/src/utils/crypto-compat.ts
 +++ b/packages/typescript/src/utils/crypto-compat.ts
 @@ -17,23 +17,32 @@
