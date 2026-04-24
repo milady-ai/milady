@@ -318,19 +318,16 @@ Les plugins ne partagent pas directement d'état mutable — ils communiquent vi
 
 </div>
 
-Lorsqu'un package de plugin est importé dynamiquement, le runtime vérifie l'export du plugin dans cet ordre :
+Lorsqu'un package de plugin est importé dynamiquement, `findRuntimePluginExport()` localise l'export Plugin en utilisant cet ordre de priorité :
 
-1. `module.default`
-2. `module.plugin`
-3. Toute clé dont la valeur correspond à la structure de l'interface Plugin
+1. `module.default` — export par défaut d'un module ES
+2. `module.plugin` — export nommé `plugin`
+3. `module` lui-même — pattern par défaut CJS
+4. Exports nommés se terminant par `Plugin` ou commençant par `plugin`
+5. Autres exports nommés correspondant à la structure de l'interface Plugin
+6. Exports minimaux `{ name, description }` pour les clés nommées correspondant à `plugin`
 
-```typescript
-interface PluginModuleShape {
-  default?: Plugin;
-  plugin?: Plugin;
-  [key: string]: Plugin | undefined;
-}
-```
+Un export de module est accepté comme Plugin lorsqu'il possède à la fois les champs `name` et `description`, ainsi qu'au moins un des champs `services`, `providers`, `actions`, `routes`, `events` (en tant que tableaux), ou `init` (en tant que fonction).
 
 <div id="related">
 
