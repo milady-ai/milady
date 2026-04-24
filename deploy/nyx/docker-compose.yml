@@ -7,6 +7,13 @@ services:
     restart: unless-stopped
     env_file:
       - /etc/nyx/nyx.env
+    environment:
+      # Primary inference path: Eliza Cloud. Keep the secret
+      # ELIZAOS_CLOUD_API_KEY in /etc/nyx/nyx.env only.
+      ELIZAOS_CLOUD_BASE_URL: https://www.elizacloud.ai/api/v1
+      ELIZAOS_CLOUD_ENABLED: "true"
+      ELIZA_CLOUD_PROVISIONED: "1"
+      MILADY_CLOUD_PROVISIONED: "1"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
