@@ -78,6 +78,7 @@ export const LOCAL_ONLY_WORKSPACE_PATHS = [
   "eliza/plugins/plugin-discord/typescript",
   "eliza/plugins/plugin-openai/typescript",
   "eliza/plugins/plugin-evm/typescript",
+  "eliza/plugins/plugin-pdf/typescript",
   "eliza/plugins/plugin-telegram",
 ];
 export const NESTED_INSTALLABLE_PACKAGE_GLOBS = [

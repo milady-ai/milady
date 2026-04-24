@@ -111,6 +111,7 @@ jobs:
             plugins/plugin-discord \
             plugins/plugin-openai \
             plugins/plugin-evm \
+            plugins/plugin-pdf \
             plugins/plugin-telegram \
             plugins/plugin-sql \
             plugins/plugin-elizacloud

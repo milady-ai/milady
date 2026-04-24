@@ -75,6 +75,12 @@ RUN set -x; \
     mkdir -p node_modules/@elizaos; \
     cp -a eliza/plugins/plugin-evm/rust node_modules/@elizaos/rust 2>/dev/null || true; \
     ls node_modules/@elizaos/plugin-evm/dist/index.js 2>/dev/null && echo "@elizaos/plugin-evm dist OK" || echo "WARN: plugin-evm dist missing"; \
+    # @elizaos/plugin-pdf: statically imported by eliza runtime, so it must exist even if not config-selected.
+    rm -rf node_modules/@elizaos/plugin-pdf; \
+    mkdir -p node_modules/@elizaos/plugin-pdf; \
+    cp eliza/plugins/plugin-pdf/typescript/package.json node_modules/@elizaos/plugin-pdf/; \
+    cp -a eliza/plugins/plugin-pdf/typescript/dist node_modules/@elizaos/plugin-pdf/dist 2>/dev/null || true; \
+    ls node_modules/@elizaos/plugin-pdf/dist/node/index.node.js 2>/dev/null && echo "@elizaos/plugin-pdf dist OK" || echo "WARN: plugin-pdf dist missing"; \
     # @elizaos/plugin-telegram: vendor plugin package, while later stubs keep cloud-only account-auth helpers safe.
     rm -rf node_modules/@elizaos/plugin-telegram; \
     mkdir -p node_modules/@elizaos/plugin-telegram; \
@@ -114,7 +120,7 @@ RUN for app_dir in eliza/apps/app-coding eliza/apps/app-shopify; do \
 # bun creates workspace symlinks like eliza/apps/app-lifeops/node_modules/@elizaos/core
 # and @elizaos/plugin-sql that resolve correctly in CI but point nowhere in Docker.
 # Removing them forces Node's module resolution to walk up to root node_modules.
-RUN find eliza \( -path '*/node_modules/@elizaos/core' -o -path '*/node_modules/@elizaos/plugin-sql' -o -path '*/node_modules/@elizaos/plugin-elizacloud' -o -path '*/node_modules/@elizaos/plugin-discord' -o -path '*/node_modules/@elizaos/plugin-openai' -o -path '*/node_modules/@elizaos/plugin-evm' -o -path '*/node_modules/@elizaos/plugin-telegram' \) -not -path '*/node_modules/.bun/*' \
+RUN find eliza \( -path '*/node_modules/@elizaos/core' -o -path '*/node_modules/@elizaos/plugin-sql' -o -path '*/node_modules/@elizaos/plugin-elizacloud' -o -path '*/node_modules/@elizaos/plugin-discord' -o -path '*/node_modules/@elizaos/plugin-openai' -o -path '*/node_modules/@elizaos/plugin-evm' -o -path '*/node_modules/@elizaos/plugin-pdf' -o -path '*/node_modules/@elizaos/plugin-telegram' \) -not -path '*/node_modules/.bun/*' \
     | while read p; do rm -rf "$p" && echo "Removed nested: $p"; done; true
 
 # ===== End symlink replacement =====
