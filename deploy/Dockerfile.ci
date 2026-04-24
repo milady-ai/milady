@@ -217,10 +217,28 @@ function isAccessible(p) { return fs.existsSync(p); }
 // symlinkExists: uses lstatSync, returns true even for broken symlinks
 function symlinkExists(p) { try { fs.lstatSync(p); return true; } catch(e) { return false; } }
 // ensureDst: removes broken symlinks so cp -r can proceed cleanly
-function ensureDst(dst) {
+function ensureDst(dst, packageName) {
+  const forceBunLink = new Set([
+    '@discordjs/builders',
+    'discord-api-types',
+    '@mysten/sui',
+    '@noble/hashes',
+  ]);
+  if (forceBunLink.has(packageName)) {
+    execSync('rm -rf "' + dst + '"');
+    return true;
+  }
   if (isAccessible(dst)) return false; // real dir/file exists, skip
   if (symlinkExists(dst)) fs.unlinkSync(dst); // delete broken symlink
-  return true; // proceed with copy
+  return true; // proceed with link
+}
+function linkDir(src, dst) {
+  fs.mkdirSync(path.dirname(dst), {recursive:true});
+  const rel = path.relative(path.dirname(dst), src);
+  try { fs.symlinkSync(rel, dst, 'dir'); }
+  catch (e) {
+    execSync('cp -a "' + src + '" "' + dst + '"');
+  }
 }
 
 // --- Phase 1: Hoist .bun/ -> node_modules/ ---
@@ -243,8 +261,9 @@ if (fs.existsSync(bunDir)) {
           const src = path.join(scopeDir, sub);
           const dst = path.join('node_modules', pkg, sub);
           try {
-            if (ensureDst(dst) && fs.statSync(src).isDirectory()) {
-              execSync('cp -r "' + src + '" "' + dst + '"');
+            const packageName = pkg + '/' + sub;
+            if (ensureDst(dst, packageName) && fs.statSync(src).isDirectory()) {
+              linkDir(src, dst);
               hoisted++;
             }
           } catch(e) { /* skip broken .bun entries */ }
@@ -253,8 +272,8 @@ if (fs.existsSync(bunDir)) {
         const src = path.join(nmPath, pkg);
         const dst = path.join('node_modules', pkg);
         try {
-          if (ensureDst(dst) && fs.statSync(src).isDirectory()) {
-            execSync('cp -r "' + src + '" "' + dst + '"');
+          if (ensureDst(dst, pkg) && fs.statSync(src).isDirectory()) {
+            linkDir(src, dst);
             hoisted++;
           }
         } catch(e) { /* skip */ }

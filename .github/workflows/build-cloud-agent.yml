@@ -277,6 +277,27 @@ jobs:
             const fs = require("fs");
             const path = require("path");
             const { execSync } = require("child_process");
+            function bunStoreCandidate(dep) {
+              const bunDir = path.join("node_modules", ".bun");
+              if (!fs.existsSync(bunDir)) return null;
+              const encoded = dep.startsWith("@") ? dep.replace("/", "+") : dep;
+              const entries = fs.readdirSync(bunDir).filter((entry) => entry.startsWith(encoded + "@"));
+              entries.sort().reverse();
+              for (const entry of entries) {
+                const candidate = path.join(bunDir, entry, "node_modules", dep);
+                if (fs.existsSync(path.join(candidate, "package.json"))) return candidate;
+              }
+              return null;
+            }
+            function linkFromBunStore(dep, target) {
+              const candidate = bunStoreCandidate(dep);
+              if (!candidate) return false;
+              fs.rmSync(target, { recursive: true, force: true });
+              fs.mkdirSync(path.dirname(target), { recursive: true });
+              fs.symlinkSync(path.relative(path.dirname(target), candidate), target, "dir");
+              console.log(`  + ${dep} (linked from ${candidate})`);
+              return true;
+            }
             const pkgPaths = [
               "eliza/packages/typescript/package.json",
               "eliza/packages/agent/package.json",
@@ -299,6 +320,7 @@ jobs:
                 fs.mkdirSync(dir, {recursive: true});
                 execSync(`curl -sL "${url}" | tar xz -C "${dir}"`, {stdio: "inherit"});
                 const target = path.join("node_modules", dep);
+                if (linkFromBunStore(dep, target)) continue;
                 fs.mkdirSync(path.dirname(target), {recursive: true});
                 fs.renameSync(path.join(dir, "package"), target);
                 console.log(`  + ${dep}`);
