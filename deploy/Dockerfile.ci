@@ -81,6 +81,13 @@ RUN set -x; \
     cp eliza/plugins/plugin-pdf/typescript/package.json node_modules/@elizaos/plugin-pdf/; \
     cp -a eliza/plugins/plugin-pdf/typescript/dist node_modules/@elizaos/plugin-pdf/dist 2>/dev/null || true; \
     ls node_modules/@elizaos/plugin-pdf/dist/node/index.node.js 2>/dev/null && echo "@elizaos/plugin-pdf dist OK" || echo "WARN: plugin-pdf dist missing"; \
+    # @elizaos/plugin-agent-orchestrator: enables SWARM_COORDINATOR / coding-agent coordinator services.
+    rm -rf node_modules/@elizaos/plugin-agent-orchestrator; \
+    mkdir -p node_modules/@elizaos/plugin-agent-orchestrator; \
+    cp eliza/plugins/plugin-agent-orchestrator/package.json node_modules/@elizaos/plugin-agent-orchestrator/; \
+    cp -a eliza/plugins/plugin-agent-orchestrator/dist node_modules/@elizaos/plugin-agent-orchestrator/dist 2>/dev/null || true; \
+    cp -a eliza/plugins/plugin-agent-orchestrator/scripts node_modules/@elizaos/plugin-agent-orchestrator/scripts 2>/dev/null || true; \
+    ls node_modules/@elizaos/plugin-agent-orchestrator/dist/index.js 2>/dev/null && echo "@elizaos/plugin-agent-orchestrator dist OK" || echo "WARN: plugin-agent-orchestrator dist missing"; \
     # @elizaos/plugin-telegram: vendor plugin package, while later stubs keep cloud-only account-auth helpers safe.
     rm -rf node_modules/@elizaos/plugin-telegram; \
     mkdir -p node_modules/@elizaos/plugin-telegram; \
@@ -120,7 +127,7 @@ RUN for app_dir in eliza/apps/app-coding eliza/apps/app-shopify; do \
 # bun creates workspace symlinks like eliza/apps/app-lifeops/node_modules/@elizaos/core
 # and @elizaos/plugin-sql that resolve correctly in CI but point nowhere in Docker.
 # Removing them forces Node's module resolution to walk up to root node_modules.
-RUN find eliza \( -path '*/node_modules/@elizaos/core' -o -path '*/node_modules/@elizaos/plugin-sql' -o -path '*/node_modules/@elizaos/plugin-elizacloud' -o -path '*/node_modules/@elizaos/plugin-discord' -o -path '*/node_modules/@elizaos/plugin-openai' -o -path '*/node_modules/@elizaos/plugin-evm' -o -path '*/node_modules/@elizaos/plugin-pdf' -o -path '*/node_modules/@elizaos/plugin-telegram' \) -not -path '*/node_modules/.bun/*' \
+RUN find eliza \( -path '*/node_modules/@elizaos/core' -o -path '*/node_modules/@elizaos/plugin-sql' -o -path '*/node_modules/@elizaos/plugin-elizacloud' -o -path '*/node_modules/@elizaos/plugin-discord' -o -path '*/node_modules/@elizaos/plugin-openai' -o -path '*/node_modules/@elizaos/plugin-evm' -o -path '*/node_modules/@elizaos/plugin-pdf' -o -path '*/node_modules/@elizaos/plugin-agent-orchestrator' -o -path '*/node_modules/@elizaos/plugin-telegram' \) -not -path '*/node_modules/.bun/*' \
     | while read p; do rm -rf "$p" && echo "Removed nested: $p"; done; true
 
 # ===== End symlink replacement =====
@@ -725,14 +732,6 @@ if (fs.existsSync(bunDir)) {
   }
 }
 __AISDK_FIX__
-
-# Remove unbuilt orchestrator (desktop-only, crashes tsx if dist/ missing)
-RUN rm -rf \
-  node_modules/@elizaos/plugin-agent-orchestrator \
-  node_modules/.bun/@elizaos+plugin-agent-orchestrator@* \
-  eliza/packages/agent/node_modules/@elizaos/plugin-agent-orchestrator \
-  plugins/plugin-agent-orchestrator \
-  2>/dev/null || true
 
 # Safe pruning only (GPU binaries + obvious dead weight)
 RUN rm -rf \

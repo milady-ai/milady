@@ -112,6 +112,7 @@ jobs:
             plugins/plugin-openai \
             plugins/plugin-evm \
             plugins/plugin-pdf \
+            plugins/plugin-agent-orchestrator \
             plugins/plugin-telegram \
             plugins/plugin-sql \
             plugins/plugin-elizacloud

@@ -109,6 +109,7 @@ jobs:
           git -C eliza submodule update --init plugins/plugin-openai || echo "plugin-openai submodule init failed, continuing"
           git -C eliza submodule update --init plugins/plugin-evm || echo "plugin-evm submodule init failed, continuing"
           git -C eliza submodule update --init plugins/plugin-pdf || echo "plugin-pdf submodule init failed, continuing"
+          git -C eliza submodule update --init plugins/plugin-agent-orchestrator || echo "plugin-agent-orchestrator submodule init failed, continuing"
           git -C eliza submodule update --init plugins/plugin-telegram || echo "plugin-telegram submodule init failed, continuing"
           git -C eliza submodule update --init plugins/plugin-imessage || echo "plugin-imessage submodule init failed, continuing"
           # Apply cloud runtime patches to eliza submodule. Use a subshell so a
@@ -139,6 +140,7 @@ jobs:
           ls eliza/plugins/plugin-openai/typescript/dist/node/index.node.js && echo "plugin-openai dist OK" || echo "WARN: plugin-openai dist missing"
           ls eliza/plugins/plugin-evm/typescript/dist/index.js && echo "plugin-evm dist OK" || echo "WARN: plugin-evm dist missing"
           ls eliza/plugins/plugin-pdf/typescript/dist/node/index.node.js && echo "plugin-pdf dist OK" || echo "WARN: plugin-pdf dist missing"
+          ls eliza/plugins/plugin-agent-orchestrator/dist/index.js && echo "plugin-agent-orchestrator dist OK" || echo "WARN: plugin-agent-orchestrator dist missing"
           ls eliza/plugins/plugin-telegram/dist/index.js && echo "plugin-telegram dist OK" || echo "WARN: plugin-telegram dist missing"
           ls eliza/plugins/plugin-imessage/typescript/src/index.ts && echo "plugin-imessage src OK" || echo "WARN: plugin-imessage src missing"
           # Compiled agent/dist imports from plugin-imessage/typescript/src/index.js (note .js).
@@ -368,6 +370,11 @@ jobs:
             bun run build
             ls dist/node/index.node.js && echo "plugin-pdf build OK"
           ) || echo "plugin-pdf build failed, continuing"
+          (
+            cd eliza/plugins/plugin-agent-orchestrator
+            bun run build
+            ls dist/index.js && echo "plugin-agent-orchestrator build OK"
+          ) || echo "plugin-agent-orchestrator build failed, continuing"
           (
             cd eliza/plugins/plugin-telegram
             bun run build
