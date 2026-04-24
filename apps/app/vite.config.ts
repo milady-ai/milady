@@ -518,10 +518,12 @@ const WORKSPACE_CHUNK_GROUPS = [
     name: "workspace-ui",
     markers: ["/eliza/packages/ui/"],
   },
-  {
-    name: "workspace-typescript",
-    markers: ["/eliza/packages/typescript/"],
-  },
+  // NOTE: `workspace-typescript` (eliza/packages/typescript) is intentionally
+  // NOT split into its own chunk. Splitting it produced a TDZ error
+  // ("Cannot access 'Oi' before initialization") in clipboardService's
+  // default-config top-level const, which blanked the whole renderer. Same
+  // class of bug as the `vendor-three` comment above. Keep it inlined until
+  // the upstream circular import is resolved.
 ] as const;
 
 function resolveManualChunk(id: string): string | undefined {
