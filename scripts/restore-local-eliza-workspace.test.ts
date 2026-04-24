@@ -52,6 +52,7 @@ describe("restore-local-eliza-workspace", () => {
     const disabledDir = path.join(repoRoot, ".eliza.ci-disabled");
 
     fs.mkdirSync(path.join(disabledDir, "packages"), { recursive: true });
+    fs.mkdirSync(path.join(repoRoot, "apps", "app"), { recursive: true });
     fs.mkdirSync(
       path.join(repoRoot, "scripts", "ci-stubs", "elizaos-plugin-app-control"),
       { recursive: true },
@@ -59,6 +60,10 @@ describe("restore-local-eliza-workspace", () => {
     fs.writeFileSync(
       path.join(disabledDir, "package.json"),
       JSON.stringify({ name: "eliza" }, null, 2),
+    );
+    fs.writeFileSync(
+      path.join(repoRoot, "apps", "app", "package.json"),
+      JSON.stringify({ name: "milady-app" }, null, 2),
     );
     fs.writeFileSync(
       path.join(
@@ -82,6 +87,20 @@ describe("restore-local-eliza-workspace", () => {
     expect(restoredPackageJson.overrides).toEqual({
       "@elizaos/plugin-app-control":
         "file:../scripts/ci-stubs/elizaos-plugin-app-control",
+    });
+
+    const restoredAppPackageJson = JSON.parse(
+      fs.readFileSync(
+        path.join(repoRoot, "apps", "app", "package.json"),
+        "utf8",
+      ),
+    ) as {
+      overrides?: Record<string, string>;
+    };
+
+    expect(restoredAppPackageJson.overrides).toEqual({
+      "@elizaos/plugin-app-control":
+        "file:../../scripts/ci-stubs/elizaos-plugin-app-control",
     });
   });
 

@@ -1,7 +1,7 @@
 ---
 title: "Inbox API"
 sidebarTitle: "Inbox"
-description: "REST API endpoints for the unified cross-channel inbox — aggregated messages, chat threads, and source discovery."
+description: "REST API endpoints for the cross-channel inbox — aggregated messages, chat threads, and source discovery."
 ---
 
 The inbox API provides a read-only, time-ordered view of messages from every connector channel the agent participates in — iMessage, Telegram, Discord, WhatsApp, WeChat, Slack, Signal, and SMS — merged into a single feed. Dashboard web-chat messages are excluded since they are already accessible via the [conversations API](/rest/conversations).
@@ -18,7 +18,7 @@ The inbox API provides a read-only, time-ordered view of messages from every con
 
 ### GET /api/inbox/messages
 
-List the most recent messages across all connector channels in a unified, time-ordered feed (newest first).
+List the most recent messages across all connector channels in a time-ordered feed (newest first).
 
 **Query parameters**
 
@@ -67,7 +67,7 @@ For Discord messages, `from`, `fromUserName`, and `avatarUrl` are enriched from 
 
 ### GET /api/inbox/chats
 
-List connector chat threads — one row per external chat room. Used by the sidebar to display a unified chat list alongside dashboard conversations.
+List connector chat threads — one row per external chat room. Used by the sidebar to display a chat list alongside dashboard conversations.
 
 **Query parameters**
 

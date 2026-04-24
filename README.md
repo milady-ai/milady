@@ -166,7 +166,33 @@ npm install -g miladyai
 milady setup
 ```
 
+### Building from source (developers)
 
+Milady vendors [elizaOS](https://github.com/elizaOS/eliza) as a **git submodule** (with **nested** plugin submodules). Bun resolves root `workspace:*` dependencies **before** lifecycle scripts such as `preinstall`, so on a **fresh clone** a plain `bun install` can fail until those checkouts exist.
+
+**First install after cloning:**
+
+```bash
+git clone https://github.com/milady-ai/milady.git
+cd milady
+
+./install                 # Unix / macOS — chmod +x install if needed
+# install.cmd on Windows
+
+# Both wrappers init the git submodules first, then run `bun install`.
+# This is required on a fresh clone: Bun resolves workspace globs
+# (eliza/packages/*, eliza/plugins/*) before running the preinstall
+# hook, so without submodules on disk the initial `bun install` fails.
+# Once the submodules exist, plain `bun install` is enough for updates.
+```
+
+**Move eliza and all nested submodules to the latest remote branches** (see `eliza/.gitmodules` for each `branch =`):
+
+```bash
+bun run workspace:bump-eliza-submodules
+```
+
+Then, if `git status` inside `eliza/` shows updated submodule paths, commit there first, then `git add eliza` at the Milady root. Details: [CONTRIBUTING.md](CONTRIBUTING.md#local-clone-and-eliza-submodule-maintenance).
 
 ### Homebrew (macOS / Linux)
 

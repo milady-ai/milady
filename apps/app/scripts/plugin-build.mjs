@@ -13,6 +13,9 @@ import {
 const scriptFile = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(scriptFile);
 const _appDir = path.resolve(__dirname, "..");
+const verbosePluginBuild =
+  process.env.MILADY_VERBOSE_PLUGIN_BUILD === "1" ||
+  process.env.ELIZA_VERBOSE_PLUGIN_BUILD === "1";
 
 // Only these values in a plugin's `platforms` array are treated as build-host
 // gates. Anything else (e.g. "node", "browser") is a runtime hint and does
@@ -85,6 +88,12 @@ function run(command, args, cwd) {
   });
 }
 
+function logVerbose(message) {
+  if (verbosePluginBuild) {
+    console.log(message);
+  }
+}
+
 async function main() {
   const pluginsDir = NATIVE_PLUGINS_ROOT;
   const pluginNames = CAPACITOR_PLUGIN_NAMES;
@@ -105,7 +114,7 @@ async function main() {
       return true;
     }
     const platforms = pkg?.milady?.platforms ?? pkg?.elizaos?.platforms;
-    console.log(
+    logVerbose(
       `[plugin:${name}] skipping — declares platforms=${JSON.stringify(
         platforms,
       )}, host is ${process.platform}`,
@@ -115,9 +124,9 @@ async function main() {
 
   await Promise.all(
     buildablePluginNames.map(async (name) => {
-      console.log(`[plugin:${name}] building...`);
+      logVerbose(`[plugin:${name}] building...`);
       await run("bun", ["run", "build"], path.join(pluginsDir, name));
-      console.log(`[plugin:${name}] done`);
+      logVerbose(`[plugin:${name}] done`);
     }),
   );
 }

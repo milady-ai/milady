@@ -7,6 +7,7 @@ import {
   collectWorkspaceProtocolDependencyNames,
   disableLocalElizaWorkspace,
   ELIZA_RUNTIME_CI_OVERRIDE_SPECIFIERS,
+  LLAMA_CPP_CAPACITOR_PATCH_PATH,
   PINNED_VERSION_SOURCE_OVERRIDE,
   PINNED_VERSION_SOURCE_TEMPLATE,
   PINNED_VERSION_SOURCE_WORKSPACE,
@@ -197,6 +198,51 @@ describe("disable-local-eliza-workspace", () => {
       "@elizaos/plugin-agent-orchestrator": "0.6.2-alpha.0",
       "@elizaos/skills": "2.0.0-alpha.163",
     });
+  });
+
+  it("repairs known malformed eliza patch files before install", () => {
+    const repoRoot = makeTempDir();
+    writeJson(path.join(repoRoot, "package.json"), {
+      name: "milady-test",
+      workspaces: ["eliza/packages/*"],
+      overrides: {
+        "@elizaos/core": "2.0.0-alpha.163",
+      },
+    });
+    writeJson(
+      path.join(repoRoot, "eliza", "packages", "typescript", "package.json"),
+      {
+        name: "@elizaos/typescript",
+        version: "2.0.0-alpha.163",
+      },
+    );
+    const patchPath = path.join(repoRoot, LLAMA_CPP_CAPACITOR_PATCH_PATH);
+    fs.mkdirSync(path.dirname(patchPath), { recursive: true });
+    fs.writeFileSync(
+      patchPath,
+      [
+        "diff --git a/android/build.gradle b/android/build.gradle",
+        "@@ -18,7 +18,7 @@ apply plugin: 'com.android.library'",
+        " ",
+        " android {",
+        '-    namespace "ai.annadata.plugin.capacitor"',
+        '+    namespace = "ai.annadata.plugin.capacitor"',
+        "     compileSdk project.hasProperty('compileSdkVersion') ? rootProject.ext.compileSdkVersion : 35",
+        "     defaultConfig {",
+        "         minSdkVersion project.hasProperty('minSdkVersion') ? rootProject.ext.minSdkVersion : 23",
+        "",
+      ].join("\n"),
+    );
+
+    disableLocalElizaWorkspace(repoRoot, {
+      log: () => {},
+      warn: () => {},
+      errorLog: () => {},
+    });
+
+    expect(fs.readFileSync(patchPath, "utf8")).toContain(
+      "@@ -18,6 +18,6 @@ apply plugin: 'com.android.library'",
+    );
   });
 
   it("rewrites nested installable package manifests under app-core platforms", () => {

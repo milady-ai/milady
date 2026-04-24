@@ -54,6 +54,33 @@ RUN set -x; \
     cp eliza/plugins/plugin-elizacloud/typescript/package.json node_modules/@elizaos/plugin-elizacloud/; \
     cp -a eliza/plugins/plugin-elizacloud/typescript/dist node_modules/@elizaos/plugin-elizacloud/dist 2>/dev/null || true; \
     ls node_modules/@elizaos/plugin-elizacloud/dist/cjs/index.node.cjs 2>/dev/null && echo "@elizaos/plugin-elizacloud dist OK" || echo "WARN: plugin-elizacloud dist missing"; \
+    # @elizaos/plugin-discord: vendor companion connector plugin stripped by published-only CI.
+    rm -rf node_modules/@elizaos/plugin-discord; \
+    mkdir -p node_modules/@elizaos/plugin-discord; \
+    cp eliza/plugins/plugin-discord/typescript/package.json node_modules/@elizaos/plugin-discord/; \
+    cp -a eliza/plugins/plugin-discord/typescript/dist node_modules/@elizaos/plugin-discord/dist 2>/dev/null || true; \
+    ls node_modules/@elizaos/plugin-discord/dist/index.js 2>/dev/null && echo "@elizaos/plugin-discord dist OK" || echo "WARN: plugin-discord dist missing"; \
+    # @elizaos/plugin-openai: vendor companion model provider plugin stripped by published-only CI.
+    rm -rf node_modules/@elizaos/plugin-openai; \
+    mkdir -p node_modules/@elizaos/plugin-openai; \
+    cp eliza/plugins/plugin-openai/typescript/package.json node_modules/@elizaos/plugin-openai/; \
+    cp -a eliza/plugins/plugin-openai/typescript/dist node_modules/@elizaos/plugin-openai/dist 2>/dev/null || true; \
+    cp -a eliza/plugins/plugin-openai/typescript/rust node_modules/@elizaos/plugin-openai/rust 2>/dev/null || true; \
+    ls node_modules/@elizaos/plugin-openai/dist/node/index.node.js 2>/dev/null && echo "@elizaos/plugin-openai dist OK" || echo "WARN: plugin-openai dist missing"; \
+    # @elizaos/plugin-evm: vendor companion wallet plugin stripped by published-only CI.
+    rm -rf node_modules/@elizaos/plugin-evm; \
+    mkdir -p node_modules/@elizaos/plugin-evm; \
+    cp eliza/plugins/plugin-evm/typescript/package.json node_modules/@elizaos/plugin-evm/; \
+    cp -a eliza/plugins/plugin-evm/typescript/dist node_modules/@elizaos/plugin-evm/dist 2>/dev/null || true; \
+    mkdir -p node_modules/@elizaos; \
+    cp -a eliza/plugins/plugin-evm/rust node_modules/@elizaos/rust 2>/dev/null || true; \
+    ls node_modules/@elizaos/plugin-evm/dist/index.js 2>/dev/null && echo "@elizaos/plugin-evm dist OK" || echo "WARN: plugin-evm dist missing"; \
+    # @elizaos/plugin-telegram: vendor plugin package, while later stubs keep cloud-only account-auth helpers safe.
+    rm -rf node_modules/@elizaos/plugin-telegram; \
+    mkdir -p node_modules/@elizaos/plugin-telegram; \
+    cp eliza/plugins/plugin-telegram/package.json node_modules/@elizaos/plugin-telegram/; \
+    cp -a eliza/plugins/plugin-telegram/dist node_modules/@elizaos/plugin-telegram/dist 2>/dev/null || true; \
+    ls node_modules/@elizaos/plugin-telegram/dist/index.js 2>/dev/null && echo "@elizaos/plugin-telegram dist OK" || echo "WARN: plugin-telegram dist missing"; \
     # @elizaos/shared: DON'T replace — the npm version or resolved workspace symlink works.
     # Workspace package.json exports point to ./src/*.ts (tsx handles this).
     # Replacing with dist-only breaks resolution since exports don't match dist layout.
@@ -87,7 +114,7 @@ RUN for app_dir in eliza/apps/app-coding eliza/apps/app-shopify; do \
 # bun creates workspace symlinks like eliza/apps/app-lifeops/node_modules/@elizaos/core
 # and @elizaos/plugin-sql that resolve correctly in CI but point nowhere in Docker.
 # Removing them forces Node's module resolution to walk up to root node_modules.
-RUN find eliza \( -path '*/node_modules/@elizaos/core' -o -path '*/node_modules/@elizaos/plugin-sql' -o -path '*/node_modules/@elizaos/plugin-elizacloud' \) -not -path '*/node_modules/.bun/*' \
+RUN find eliza \( -path '*/node_modules/@elizaos/core' -o -path '*/node_modules/@elizaos/plugin-sql' -o -path '*/node_modules/@elizaos/plugin-elizacloud' -o -path '*/node_modules/@elizaos/plugin-discord' -o -path '*/node_modules/@elizaos/plugin-openai' -o -path '*/node_modules/@elizaos/plugin-evm' -o -path '*/node_modules/@elizaos/plugin-telegram' \) -not -path '*/node_modules/.bun/*' \
     | while read p; do rm -rf "$p" && echo "Removed nested: $p"; done; true
 
 # ===== End symlink replacement =====
@@ -494,9 +521,10 @@ if (ensureStubDir(trDir) !== 'present') {
   console.log('stubbed: @elizaos/app-training');
 }
 // plugin-telegram: LifeOps imports its account auth helpers even on cloud Linux.
+// Keep those helpers as no-op cloud-safe files even when the real Telegram
+// package has been vendored above.
 const tgDir = 'node_modules/@elizaos/plugin-telegram';
-if (ensureStubDir(tgDir) !== 'present') {
-  const telegramAccountAuthStub = `
+const telegramAccountAuthStub = `
 export const defaultTelegramAccountDeviceModel = 'Milady Cloud';
 export const defaultTelegramAccountSystemVersion = 'Linux';
 export function loadTelegramAccountSessionString() { return ''; }
@@ -510,20 +538,9 @@ export class TelegramAccountAuthSession {
 }
 export default { TelegramAccountAuthSession, loadTelegramAccountSessionString, defaultTelegramAccountDeviceModel, defaultTelegramAccountSystemVersion };
 `;
+const telegramPackageState = ensureStubDir(tgDir);
+if (telegramPackageState !== 'present') {
   fs.writeFileSync(tgDir + '/index.mjs', 'export default { name: "telegram-stub", routes: [] };');
-  fs.writeFileSync(tgDir + '/account-auth-service.mjs', telegramAccountAuthStub);
-  fs.mkdirSync('eliza/plugins/plugin-telegram/src', { recursive: true });
-  fs.writeFileSync('eliza/plugins/plugin-telegram/src/account-auth-service.ts', telegramAccountAuthStub);
-  // The compiled agent dist imports from '../../../../plugins/plugin-telegram/src/account-auth-service.js'
-  // (note .js extension, not .ts) so we also need a .js copy at the same path.
-  fs.writeFileSync('eliza/plugins/plugin-telegram/src/account-auth-service.js', telegramAccountAuthStub);
-  // tsx's loader treats .ts files as CommonJS by default unless a package.json with
-  // "type":"module" exists in a parent directory. Without this, named exports get
-  // collapsed into a single 'default' export and runtime imports fail with
-  // "does not provide an export named 'TelegramAccountAuthSession'".
-  fs.writeFileSync('eliza/plugins/plugin-telegram/package.json', JSON.stringify({
-    name: '@elizaos/plugin-telegram-workspace-stub', version: '0.0.0', type: 'module', private: true
-  }));
   fs.writeFileSync(tgDir + '/package.json', JSON.stringify({
     name: '@elizaos/plugin-telegram', version: '0.0.0-cloud-stub', type: 'module',
     exports: {
@@ -532,6 +549,22 @@ export default { TelegramAccountAuthSession, loadTelegramAccountSessionString, d
     }
   }));
   console.log('stubbed: @elizaos/plugin-telegram');
+} else {
+  console.log('kept vendored: @elizaos/plugin-telegram');
+}
+fs.writeFileSync(tgDir + '/account-auth-service.mjs', telegramAccountAuthStub);
+fs.mkdirSync('eliza/plugins/plugin-telegram/src', { recursive: true });
+fs.writeFileSync('eliza/plugins/plugin-telegram/src/account-auth-service.ts', telegramAccountAuthStub);
+// The compiled agent dist imports from '../../../../plugins/plugin-telegram/src/account-auth-service.js'
+// (note .js extension, not .ts) so we also need a .js copy at the same path.
+fs.writeFileSync('eliza/plugins/plugin-telegram/src/account-auth-service.js', telegramAccountAuthStub);
+// tsx's loader treats .ts files as CommonJS by default unless a package.json with
+// "type":"module" exists in a parent directory. Preserve real package metadata
+// when vendored; otherwise add a tiny workspace package marker for the stub.
+if (!fs.existsSync('eliza/plugins/plugin-telegram/package.json')) {
+  fs.writeFileSync('eliza/plugins/plugin-telegram/package.json', JSON.stringify({
+    name: '@elizaos/plugin-telegram-workspace-stub', version: '0.0.0', type: 'module', private: true
+  }));
 }
 __APP_STUBS__
 

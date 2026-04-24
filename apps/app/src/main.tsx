@@ -1,13 +1,11 @@
 import { ErrorBoundary } from "@elizaos/app-core";
 import "@elizaos/app-core/styles/styles.css";
 import "@elizaos/app-core/styles/brand-gold.css";
-import "@elizaos/app-core/platform/native-plugin-entrypoints";
 
 import { App as CapacitorApp } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";
 import { Keyboard } from "@capacitor/keyboard";
 import { Preferences } from "@capacitor/preferences";
-import { App } from "@elizaos/app-core";
 import { client } from "@elizaos/app-core";
 import {
   initializeCapacitorBridge,
@@ -15,7 +13,6 @@ import {
   initializeStorageBridge,
   isElectrobunRuntime,
 } from "@elizaos/app-core";
-import { CharacterEditor } from "@elizaos/app-core";
 import type { BrandingConfig } from "@elizaos/app-core";
 import {
   type AppBootConfig,
@@ -59,8 +56,11 @@ import { AppProvider } from "@elizaos/app-core";
 import { applyUiTheme, loadUiTheme } from "@elizaos/app-core";
 import { Agent } from "@elizaos/capacitor-agent";
 import { Desktop } from "@elizaos/capacitor-desktop";
-import type { DeviceBridgeClient } from "@elizaos/capacitor-llama";
-import { StrictMode } from "react";
+import {
+  startDeviceBridgeClient,
+  type DeviceBridgeClient,
+} from "@elizaos/capacitor-llama";
+import { lazy, StrictMode, Suspense, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import { CompanionShell } from "@elizaos/app-companion/ui";
 import {
@@ -85,6 +85,7 @@ import "@elizaos/app-scape/ui";
 import "@elizaos/app-hyperscape/ui";
 import "@elizaos/app-2004scape/ui";
 import "@elizaos/app-defense-of-the-agents/ui";
+import "@clawville/app-clawville/ui";
 import {
   AppBlockerSettingsCard,
   LifeOpsBrowserSetupPanel,
@@ -116,11 +117,34 @@ import {
 } from "./app-config";
 import { APP_ENV_ALIASES, APP_ENV_PREFIX } from "./brand-env";
 import { APP_CHARACTER_CATALOG } from "./character-catalog";
+import { App } from "../../../eliza/packages/app-core/src/App";
 import {
   apiBaseToDeviceBridgeUrl,
   type IosRuntimeConfig,
   resolveIosRuntimeConfig,
 } from "./ios-runtime";
+
+type CharacterEditorProps = {
+  sceneOverlay?: boolean;
+  inModal?: boolean;
+  onHeaderActionsChange?: (actions: ReactNode | null) => void;
+};
+
+const LazyCharacterEditor = lazy(() =>
+  import("@elizaos/app-core/components/character/CharacterEditor").then(
+    (module) => ({
+      default: module.CharacterEditor,
+    }),
+  ),
+);
+
+function CharacterEditor(props: CharacterEditorProps) {
+  return (
+    <Suspense fallback={null}>
+      <LazyCharacterEditor {...props} />
+    </Suspense>
+  );
+}
 
 declare global {
   interface Window {
@@ -319,6 +343,7 @@ async function initializePlatform(): Promise<void> {
   initializeCapacitorBridge();
 
   if (isIOS || isAndroid) {
+    await import("@elizaos/app-core/platform/native-plugin-entrypoints");
     await initializeKeyboard();
     initializeAppLifecycle();
     initializeMobileRuntimeModeListener();
@@ -720,10 +745,7 @@ async function initializeMobileDeviceBridge(): Promise<void> {
   if (!agentUrl) return;
 
   try {
-    const [{ startDeviceBridgeClient }, deviceId] = await Promise.all([
-      import("@elizaos/capacitor-llama"),
-      getOrCreateDeviceBridgeId(),
-    ]);
+    const deviceId = await getOrCreateDeviceBridgeId();
     mobileDeviceBridgeClient = startDeviceBridgeClient({
       agentUrl,
       ...(runtimeConfig.deviceBridgeToken

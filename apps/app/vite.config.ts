@@ -4,7 +4,13 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react-swc";
-import { defineConfig, type Plugin, transformWithEsbuild } from "vite";
+import {
+  type Alias,
+  createLogger,
+  defineConfig,
+  type Plugin,
+  transformWithEsbuild,
+} from "vite";
 import { resolveAppBranding } from "../../eliza/packages/app-core/src/config/app-config.ts";
 // Keep workspace-relative TS imports in this config so Vite transpiles them
 // while bundling the config instead of asking Node to load package-exported
@@ -55,6 +61,34 @@ function tryResolve(id: string): string | undefined {
 const capacitorKeyboardEntry = tryResolve("@capacitor/keyboard");
 const capacitorPreferencesEntry = tryResolve("@capacitor/preferences");
 const capacitorAppEntry = tryResolve("@capacitor/app");
+
+function isExpectedWsProxySocketError(
+  message: unknown,
+  error: unknown,
+): boolean {
+  const text = typeof message === "string" ? message : String(message ?? "");
+  if (!text.includes("ws proxy socket error")) {
+    return false;
+  }
+
+  const errorLike =
+    error && typeof error === "object"
+      ? (error as { code?: unknown; message?: unknown })
+      : null;
+  return (
+    errorLike?.code === "ECONNRESET" ||
+    String(errorLike?.message ?? "").includes("read ECONNRESET")
+  );
+}
+
+const viteLogger = createLogger();
+const viteLoggerError = viteLogger.error;
+viteLogger.error = (message, options) => {
+  if (isExpectedWsProxySocketError(message, options?.error)) {
+    return;
+  }
+  viteLoggerError(message, options);
+};
 
 function ensureTrailingSlash(value: string): string {
   return value.endsWith("/") ? value : `${value}/`;
@@ -428,9 +462,67 @@ const enableAppSourceMaps = process.env[BRANDED_ENV.appSourcemap] === "1";
 /** Set by eliza/packages/app-core/scripts/dev-platform.mjs for `vite build --watch` (Electrobun desktop). */
 const desktopFastDist = process.env[BRANDED_ENV.desktopFastDist] === "1";
 
-function pathIncludesAny(id: string, markers: string[]): boolean {
+function pathIncludesAny(id: string, markers: ReadonlyArray<string>): boolean {
   return markers.some((marker) => id.includes(marker));
 }
+
+const NODE_MODULE_CHUNK_GROUPS = [
+  {
+    name: "vendor-langchain",
+    markers: ["/@langchain/", "/langsmith/"],
+  },
+  {
+    name: "vendor-zod",
+    markers: ["/zod/"],
+  },
+  {
+    name: "vendor-utils",
+    markers: ["/dingbat-to-unicode/"],
+  },
+] as const;
+
+const WORKSPACE_CHUNK_GROUPS = [
+  {
+    name: "workspace-app-core",
+    markers: [
+      "/eliza/packages/app-core/",
+      "/eliza/apps/app-companion/",
+      "/eliza/apps/app-steward/",
+      "/eliza/apps/app-task-coordinator/",
+      "/eliza/apps/app-vincent/",
+    ],
+  },
+  {
+    name: "app-training",
+    markers: ["/eliza/apps/app-training/"],
+  },
+  {
+    name: "app-shopify",
+    markers: ["/eliza/apps/app-shopify/"],
+  },
+  {
+    name: "app-games",
+    markers: [
+      "/eliza/apps/app-babylon/",
+      "/eliza/apps/app-scape/",
+      "/eliza/apps/app-hyperscape/",
+      "/eliza/apps/app-2004scape/",
+      "/eliza/apps/app-defense-of-the-agents/",
+    ],
+  },
+  {
+    name: "app-lifeops",
+    markers: ["/eliza/apps/app-lifeops/"],
+  },
+  {
+    name: "workspace-ui",
+    markers: ["/eliza/packages/ui/"],
+  },
+  {
+    name: "workspace-typescript",
+    markers: ["/eliza/packages/typescript/"],
+  },
+] as const;
 
 function resolveManualChunk(id: string): string | undefined {
   const normalizedId = id.split(path.sep).join("/");
@@ -456,6 +548,18 @@ function resolveManualChunk(id: string): string | undefined {
     // init ordering bugs with WebGPU/TSL enums (see fix/three-chunk-tdz).
     if (normalizedId.includes("/three/")) {
       return "vendor-three";
+    }
+
+    for (const group of NODE_MODULE_CHUNK_GROUPS) {
+      if (pathIncludesAny(normalizedId, group.markers)) {
+        return group.name;
+      }
+    }
+  }
+
+  for (const group of WORKSPACE_CHUNK_GROUPS) {
+    if (pathIncludesAny(normalizedId, group.markers)) {
+      return group.name;
     }
   }
 
@@ -1237,6 +1341,7 @@ function workspaceJsxInJsPlugin(): Plugin {
 
 export default defineConfig({
   root: here,
+  customLogger: viteLogger,
   base: "./",
   // Keep pre-bundle cache under the app dir (not node_modules/.vite) so Bun
   // installs don't fight Vite, and `bun run clean` / docs can target one path.
@@ -1396,7 +1501,7 @@ export default defineConfig({
       // Dynamic aliases for all eliza/apps/* packages
       ...(() => {
         const appsDir = path.resolve(miladyRoot, "eliza/apps");
-        const aliases = [];
+        const aliases: Alias[] = [];
         for (const entry of fs.readdirSync(appsDir, { withFileTypes: true })) {
           if (!entry.isDirectory()) continue;
           const pkgPath = path.join(appsDir, entry.name, "package.json");
@@ -1434,7 +1539,7 @@ export default defineConfig({
         );
         const sharedPkgDir = path.dirname(sharedPkgPath);
         const sharedPkg = JSON.parse(fs.readFileSync(sharedPkgPath, "utf8"));
-        const aliases = [];
+        const aliases: Alias[] = [];
         for (const [key, value] of Object.entries(sharedPkg.exports || {})) {
           if (typeof value === "string") {
             const aliasKey =
@@ -1465,7 +1570,7 @@ export default defineConfig({
         );
         const appCorePkg = JSON.parse(fs.readFileSync(appCorePkgPath, "utf8"));
 
-        const generatedAliases = [];
+        const generatedAliases: Alias[] = [];
 
         for (const [key, value] of Object.entries(appCorePkg.exports || {})) {
           if (typeof value === "string") {
@@ -1658,9 +1763,9 @@ export default defineConfig({
     emptyOutDir: !desktopFastDist,
     sourcemap: desktopFastDist ? false : enableAppSourceMaps,
     target: "es2022",
-    // The desktop/web shell intentionally ships a large eagerly-loaded main
-    // chunk; warn only when it grows beyond the current known baseline.
-    chunkSizeWarningLimit: 3800,
+    // Keep warnings tight enough to catch regressions while allowing the
+    // current largest workspace chunks to build without noise.
+    chunkSizeWarningLimit: 3500,
     minify: desktopFastDist ? false : undefined,
     cssMinify: desktopFastDist ? false : undefined,
     reportCompressedSize: !desktopFastDist,

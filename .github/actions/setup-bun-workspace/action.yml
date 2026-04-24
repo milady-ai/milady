@@ -119,6 +119,15 @@ runs:
       env:
         MILADY_SKIP_LOCAL_UPSTREAMS: "1"
 
+    - name: Repair known eliza patch files
+      shell: bash
+      run: |
+        node --input-type=module <<'NODE'
+        import { repairKnownElizaPatchFiles } from "./scripts/disable-local-eliza-workspace.mjs";
+
+        repairKnownElizaPatchFiles();
+        NODE
+
     - name: Install dependencies
       shell: bash
       run: ${{ inputs.install-command }}
@@ -126,7 +135,7 @@ runs:
         npm_config_python: ${{ env.pythonLocation }}/bin/python3
 
     - name: Install published-workspace fallback dependencies
-      if: ${{ inputs.disable-local-eliza-workspace == 'true' }}
+      if: ${{ inputs.disable-local-eliza-workspace == 'true' || inputs.run-postinstall == 'true' }}
       shell: bash
       run: bash scripts/install-published-workspace-fallback-deps.sh
 

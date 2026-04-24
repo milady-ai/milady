@@ -215,7 +215,20 @@ jobs:
           if-no-files-found: error
 
       - name: Align version with release tag
-        run: node eliza/packages/app-core/scripts/align-electrobun-version.mjs
+        run: |
+          node eliza/packages/app-core/scripts/align-electrobun-version.mjs
+          node <<'NODE'
+          const fs = require("node:fs");
+          const version = process.env.RELEASE_VERSION;
+          const packagePath = "eliza/packages/app-core/platforms/electrobun/package.json";
+          const configPath = "eliza/packages/app-core/platforms/electrobun/electrobun.config.ts";
+          const pkg = JSON.parse(fs.readFileSync(packagePath, "utf8"));
+          pkg.version = version;
+          fs.writeFileSync(packagePath, JSON.stringify(pkg, null, 2) + "\n");
+          let config = fs.readFileSync(configPath, "utf8");
+          config = config.replace(/version:\s*"[^"]+"/, `version: "${version}"`);
+          fs.writeFileSync(configPath, config);
+          NODE
         env:
           RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
 
@@ -456,6 +469,33 @@ jobs:
       - name: Run repository postinstall patches
         run: bun run postinstall
 
+      - name: Patch desktop build workspace install reuse
+        run: |
+          node <<'NODE'
+          const fs = require("node:fs");
+          const script = "eliza/packages/app-core/scripts/desktop-build.mjs";
+          let source = fs.readFileSync(script, "utf8");
+          const replacements = [
+            {
+              pattern: /  runBun\(\["install", "--ignore-scripts"\], \{\r?\n    cwd: APP_DIR,\r?\n    label: "Ensuring app workspace dependencies are installed",\r?\n  \}\);\r?\n\r?\n/,
+              replacement:
+                '  console.log("[desktop-build] Reusing release-installed app workspace dependencies");\n',
+            },
+            {
+              pattern: /  runBun\(\["install", "--ignore-scripts"\], \{\r?\n    cwd: ELECTROBUN_DIR,\r?\n    label: "Ensuring Electrobun workspace dependencies are installed",\r?\n  \}\);\r?\n\r?\n/,
+              replacement:
+                '  console.log("[desktop-build] Reusing release-installed Electrobun workspace dependencies");\n',
+            },
+          ];
+          for (const { pattern, replacement } of replacements) {
+            if (!pattern.test(source)) {
+              throw new Error("Could not find desktop workspace install hooks");
+            }
+            source = source.replace(pattern, replacement);
+          }
+          fs.writeFileSync(script, source);
+          NODE
+
       - name: Cache Whisper models and binaries
         if: matrix.platform.os == 'macos' || matrix.platform.os == 'linux'
         uses: actions/cache@v4
@@ -481,14 +521,49 @@ jobs:
           cp .artifacts/whisper-model/ggml-base.en.bin "$HOME/.cache/milady/whisper/ggml-base.en.bin"
 
       - name: Align version with release tag
-        run: node eliza/packages/app-core/scripts/align-electrobun-version.mjs
+        run: |
+          node eliza/packages/app-core/scripts/align-electrobun-version.mjs
+          node <<'NODE'
+          const fs = require("node:fs");
+          const version = process.env.RELEASE_VERSION;
+          const packagePath = "eliza/packages/app-core/platforms/electrobun/package.json";
+          const configPath = "eliza/packages/app-core/platforms/electrobun/electrobun.config.ts";
+          const pkg = JSON.parse(fs.readFileSync(packagePath, "utf8"));
+          pkg.version = version;
+          fs.writeFileSync(packagePath, JSON.stringify(pkg, null, 2) + "\n");
+          let config = fs.readFileSync(configPath, "utf8");
+          config = config.replace(/version:\s*"[^"]+"/, `version: "${version}"`);
+          fs.writeFileSync(configPath, config);
+          NODE
         env:
           RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
+
+      - name: Generate protobuf types
+        run: |
+          node eliza/packages/shared/scripts/generate-keywords.mjs --target ts
+          if [ -d eliza/packages/schemas ] && [ -f eliza/packages/schemas/buf.gen.yaml ]; then
+            pushd eliza/packages/schemas
+            for attempt in 1 2 3; do
+              node node_modules/@bufbuild/buf/install.js 2>/dev/null || true
+              if bunx @bufbuild/buf@1.67.0 generate; then
+                break
+              fi
+              if [ "$attempt" -eq 3 ]; then
+                echo "buf generate failed after ${attempt} attempts" >&2
+                exit 1
+              fi
+              echo "buf generate failed on attempt ${attempt}; retrying in 15 seconds" >&2
+              sleep 15
+            done
+            popd
+          fi
+          test -f eliza/packages/typescript/src/types/generated/eliza/v1/agent_pb.ts
+          test -f eliza/packages/typescript/src/types/generated/eliza/v1/components_pb.ts
 
       - name: Stage desktop bundle inputs
         run: |
           if [ "${{ matrix.platform.os }}" = "macos" ] && [ "${{ matrix.platform.artifact-name }}" = "macos-x64" ]; then
-            MILADY_DESKTOP_COMMAND_PREFIX="arch -x86_64" node eliza/packages/app-core/scripts/desktop-build.mjs stage --variant=base --build-whisper
+            ELIZA_DESKTOP_COMMAND_PREFIX="arch -x86_64" node eliza/packages/app-core/scripts/desktop-build.mjs stage --variant=base --build-whisper
           else
             node eliza/packages/app-core/scripts/desktop-build.mjs stage --variant=base --build-whisper
           fi
@@ -631,11 +706,53 @@ jobs:
 
       - name: Build Electrobun app
         run: |
+          set +e
           if [ "${{ matrix.platform.os }}" = "macos" ] && [ "${{ matrix.platform.artifact-name }}" = "macos-x64" ]; then
-            MILADY_DESKTOP_COMMAND_PREFIX="arch -x86_64" node eliza/packages/app-core/scripts/desktop-build.mjs package --env=${{ needs.prepare.outputs.env }}
+            ELIZA_DESKTOP_COMMAND_PREFIX="arch -x86_64" node eliza/packages/app-core/scripts/desktop-build.mjs package --env=${{ needs.prepare.outputs.env }}
           else
             node eliza/packages/app-core/scripts/desktop-build.mjs package --env=${{ needs.prepare.outputs.env }}
           fi
+          status=$?
+          set -e
+          if [ "$status" -eq 0 ]; then
+            exit 0
+          fi
+
+          if [ "${{ inputs.draft }}" != "true" ] || [ "${{ inputs.publish_release }}" = "true" ]; then
+            exit "$status"
+          fi
+
+          artifact_root="apps/app/electrobun/artifacts"
+          build_root=""
+          build_dir=""
+          for candidate_root in \
+            "eliza/packages/app-core/platforms/electrobun/build" \
+            "apps/app/electrobun/build"; do
+            candidate_dir="$(find "$candidate_root" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort | tail -1 || true)"
+            if [ -n "$candidate_dir" ]; then
+              build_root="$candidate_root"
+              build_dir="$candidate_dir"
+              break
+            fi
+          done
+          if [ -z "$build_dir" ]; then
+            echo "::error::Electrobun packaging failed and no built app tree exists"
+            exit "$status"
+          fi
+
+          mkdir -p "$artifact_root"
+          case "${{ matrix.platform.os }}" in
+            linux)
+              tar --zstd -cf "$artifact_root/elizaOS-${{ needs.prepare.outputs.env }}-${{ matrix.platform.artifact-name }}.tar.zst" -C "$build_root" "$(basename "$build_dir")"
+              ;;
+            macos)
+              tar -czf "$artifact_root/elizaOS-${{ needs.prepare.outputs.env }}-${{ matrix.platform.artifact-name }}.tar.gz" -C "$build_root" "$(basename "$build_dir")"
+              ;;
+            windows)
+              powershell -NoProfile -Command "Compress-Archive -Path '$build_dir' -DestinationPath '$artifact_root/elizaOS-${{ needs.prepare.outputs.env }}-${{ matrix.platform.artifact-name }}.exe.zip' -Force"
+              ;;
+          esac
+          echo "::warning::Electrobun package command exited with $status; uploaded draft-validation fallback archive from $build_dir"
         env:
           # Electrobun reads these env vars directly. The workflow derives the
           # signing identity from CSC_LINK/CSC_KEY_PASSWORD during keychain setup
@@ -654,7 +771,34 @@ jobs:
           # by the upload step below. Env is encoded in the platform prefix
           # (canary-macos-arm64-update.json etc.), so the baseUrl has no env
           # subdir. Enables Electrobun's release.generatePatch flow.
-          ELIZA_RELEASE_URL: https://releases.milady.ai/
+          ELIZA_RELEASE_URL: ${{ (github.event_name != 'workflow_call' || inputs.publish_release) && !inputs.draft && 'https://releases.milady.ai/' || '' }}
+
+      - name: Dump Electrobun build diagnostics
+        if: failure()
+        run: |
+          for root in \
+            "eliza/packages/app-core/platforms/electrobun" \
+            "apps/app/electrobun"; do
+            echo "=== ${root}/build ==="
+            find -L "$root/build" -maxdepth 6 -type f -print 2>/dev/null | sort | head -300 || true
+            echo "=== ${root}/artifacts ==="
+            find -L "$root/artifacts" -maxdepth 6 -type f -print 2>/dev/null | sort | head -300 || true
+            echo "=== ${root} wrapper diagnostics ==="
+            find -L "$root/build" -name wrapper-diagnostics.json -print -exec sed -n '1,220p' {} \; 2>/dev/null || true
+          done
+
+      - name: Upload Electrobun build diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: electrobun-${{ matrix.platform.artifact-name }}-build-diagnostics
+          path: |
+            eliza/packages/app-core/platforms/electrobun/build/**
+            eliza/packages/app-core/platforms/electrobun/artifacts/**
+            apps/app/electrobun/build/**
+            apps/app/electrobun/artifacts/**
+          if-no-files-found: warn
+          retention-days: 14
 
       # Inject version.json into the packaged Resources directory.
       # The bun entry getVersionInfo() reads ../Resources/version.json and
@@ -1217,7 +1361,9 @@ jobs:
             foreach ($log in $logFiles) {
               $relative = $log.FullName.Substring($appDataRoot.Length).TrimStart('\','/')
               $safeName = $relative -replace '[\\/:]', '_'
-              Copy-Item $log.FullName -Destination (Join-Path $diagnosticsDir $safeName) -Force
+              $dest = Join-Path $diagnosticsDir $safeName
+              New-Item -ItemType Directory -Force -Path (Split-Path -Parent $dest) | Out-Null
+              Copy-Item $log.FullName -Destination $dest -Force -ErrorAction SilentlyContinue
               Write-Host "--- $($log.FullName) ---"
               Get-Content $log.FullName -Tail 400 -ErrorAction SilentlyContinue | ForEach-Object { Write-Host $_ }
               Write-Host "--- end $($log.FullName) ---"
@@ -1235,7 +1381,9 @@ jobs:
             foreach ($log in $localLogFiles) {
               $relative = $log.FullName.Substring($localAppDataRoot.Length).TrimStart('\','/')
               $safeName = "local_" + ($relative -replace '[\\/:]', '_')
-              Copy-Item $log.FullName -Destination (Join-Path $diagnosticsDir $safeName) -Force
+              $dest = Join-Path $diagnosticsDir $safeName
+              New-Item -ItemType Directory -Force -Path (Split-Path -Parent $dest) | Out-Null
+              Copy-Item $log.FullName -Destination $dest -Force -ErrorAction SilentlyContinue
               Write-Host "--- $($log.FullName) ---"
               Get-Content $log.FullName -Tail 400 -ErrorAction SilentlyContinue | ForEach-Object { Write-Host $_ }
               Write-Host "--- end $($log.FullName) ---"
@@ -1248,7 +1396,8 @@ jobs:
             if ($traceFiles) {
               foreach ($f in $traceFiles) {
                 $dest = Join-Path $diagnosticsDir $f.Name
-                Copy-Item $f.FullName -Destination $dest -Force
+                New-Item -ItemType Directory -Force -Path (Split-Path -Parent $dest) | Out-Null
+                Copy-Item $f.FullName -Destination $dest -Force -ErrorAction SilentlyContinue
                 Write-Host "--- startup-trace: $($f.Name) ---"
                 Get-Content $f.FullName -Tail 400 | ForEach-Object { Write-Host $_ }
                 Write-Host "--- end $($f.Name) ---"
@@ -1262,7 +1411,8 @@ jobs:
               Get-ChildItem -Path $root -Recurse -File -Filter "startup-session.json" -ErrorAction SilentlyContinue |
                 ForEach-Object {
                   $dest = Join-Path $diagnosticsDir ("startup-session-" + ($_.FullName -replace '[\\:]', '_') + ".json")
-                  Copy-Item $_.FullName -Destination $dest -Force
+                  New-Item -ItemType Directory -Force -Path (Split-Path -Parent $dest) | Out-Null
+                  Copy-Item $_.FullName -Destination $dest -Force -ErrorAction SilentlyContinue
                   Write-Host "--- $($_.FullName) ---"
                   Get-Content $_.FullName | ForEach-Object { Write-Host $_ }
                   Write-Host "--- end ---"

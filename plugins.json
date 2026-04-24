@@ -1803,10 +1803,8 @@
     },
     {
       "id": "experience",
-      "dirName": "plugin-experience",
       "name": "Experience",
-      "npmName": "@elizaos/plugin-experience",
-      "description": "Experience learning plugin for ElizaOS - records and recalls transferable agent learnings",
+      "description": "Built-in advanced capability for recording and recalling transferable agent learnings, surfaced in the Character Experience workspace alongside trajectory inspection tooling.",
       "tags": [
         "experience",
         "learning",
@@ -2946,7 +2944,7 @@
       "dirName": "plugin-lp-manager",
       "name": "Lp Manager",
       "npmName": "@elizaos/plugin-lp-manager",
-      "description": "A unified plugin for managing liquidity positions on Solana DEXs (Raydium, Orca, Meteora) and EVM DEXs (Uniswap, PancakeSwap, Aerodrome).",
+      "description": "A plugin for managing liquidity positions on Solana DEXs (Raydium, Orca, Meteora) and EVM DEXs (Uniswap, PancakeSwap, Aerodrome).",
       "tags": [
         "lp-manager",
         "lp",

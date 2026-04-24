@@ -168,7 +168,7 @@ shasum -a 256 --check --ignore-missing SHA256SUMS.txt
     bun install
     ```
 
-    `postinstall` 脚本会自动初始化 git 子模块、确保 skills 目录存在、链接浏览器服务器并修补依赖项。
+    `preinstall` 钩子会先初始化 git 子模块；随后的 `postinstall` 会确保 skills 目录存在、链接浏览器服务器并修补依赖项。
   </Step>
   <Step title="构建所有内容">
     ```bash

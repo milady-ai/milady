@@ -1,4 +1,5 @@
 node_modules
+.eliza-repo-setup.lock
 **/node_modules/
 .env
 .env.worktree
@@ -71,6 +72,10 @@ eliza/packages/app-core/src/ui/e2e/visual-regression.spec.ts-snapshots/
 
 # Vendored repos (clone separately if needed)
 vendor/
+# MiladyOS AOSP product layer (tracked); exception to `vendor/` above.
+!os/android/vendor/
+# Built elsewhere — run `bun run build:android:system` before sync/validate.
+os/android/vendor/milady/apps/Milady/Milady.apk
 
 # Local untracked files
 .local/
@@ -262,3 +267,4 @@ scripts/codex-sniff.ts
 .tmp-live/
 signal-auth/
 test-results/
+artifacts/

@@ -1,0 +1,15 @@
+// Privileged system import of the Milady APK (built by `bun run build:android:system`).
+android_app_import {
+    name: "Milady",
+    apk: "Milady.apk",
+    certificate: "platform",
+    privileged: true,
+    overrides: [
+        "Launcher3",
+        "Launcher3QuickStep",
+        "Dialer",
+        "Messaging",
+        "Contacts",
+        "Trebuchet",
+    ],
+}

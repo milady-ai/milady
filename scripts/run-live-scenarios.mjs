@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
- * Milady-side wrapper around the unified `@elizaos/scenario-runner` CLI.
+ * Milady-side wrapper around the `/scenario-runner` CLI.
  *
  * Responsibilities:
  *   1. Ensure SKIP_REASON gating: when scenarios are filtered/skipped via
  *      SCENARIO_SKIP, an explicit SKIP_REASON env var must be set or this
  *      wrapper exits non-zero.
- *   2. Forward to the unified scenario CLI at
+ *   2. Forward to the scenario CLI at
  *      `eliza/packages/scenario-runner/src/cli.ts`.
  *   3. Fail loudly if the CLI reports failure.
  *

@@ -168,7 +168,7 @@ Pour les contributeurs ou toute personne souhaitant la dernière version de dév
     bun install
     ```
 
-    Le script `postinstall` initialise automatiquement les sous-modules git, s'assure que le répertoire des compétences existe, lie le serveur de navigateur et corrige les dépendances.
+    Le hook `preinstall` initialise les sous-modules git en premier ; le `postinstall` qui suit s'assure que le répertoire des compétences existe, lie le serveur de navigateur et corrige les dépendances.
   </Step>
   <Step title="Tout compiler">
     ```bash

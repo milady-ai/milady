@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Role defaults (see packages/modules/Permission PermissionController roles.xml). -->
+    <string name="config_defaultDialer" translatable="false">com.miladyai.milady</string>
+    <string name="config_defaultSms" translatable="false">com.miladyai.milady</string>
+    <string name="config_defaultAssistant" translatable="false">com.miladyai.milady</string>
+</resources>

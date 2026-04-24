@@ -168,7 +168,7 @@ Para colaboradores o cualquier persona que desee la última versión de desarrol
     bun install
     ```
 
-    El script `postinstall` inicializa automáticamente los submódulos de git, asegura que el directorio de habilidades exista, vincula el servidor del navegador y aplica parches a las dependencias.
+    El hook `preinstall` inicializa primero los submódulos de git; el `postinstall` posterior asegura que el directorio de habilidades exista, vincula el servidor del navegador y aplica parches a las dependencias.
   </Step>
   <Step title="Compilar todo">
     ```bash

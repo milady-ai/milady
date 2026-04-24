@@ -153,7 +153,7 @@
         "followup.track-overdue",
         "followup.daily-digest"
       ],
-      "integrations": ["followup-tracker", "unified-inbox"],
+      "integrations": ["followup-tracker", "inbox"],
       "providers": ["internal"],
       "actions": [
         "FOLLOWUP_CREATE_RULE",
@@ -180,7 +180,7 @@
         "2026-01-12T12:14:53.303-07:00"
       ],
       "existingScenarioRefs": [
-        "cross-platform.unified-inbox",
+        "cross-platform.inbox",
         "cross-platform.triage-priority-ranking",
         "followup.daily-digest"
       ],
@@ -241,7 +241,7 @@
         "cross-platform.triage-priority-ranking",
         "gmail.triage.high-priority-client"
       ],
-      "integrations": ["unified-inbox", "contacts", "draft-store"],
+      "integrations": ["inbox", "contacts", "draft-store"],
       "providers": ["internal", "Gmail API", "connector bridges"],
       "actions": ["INBOX_TRIAGE_PRIORITY", "FOLLOWUP_GENERATE_DIGEST"],
       "backgroundJobs": ["daily brief builder"],

@@ -44,11 +44,11 @@ This guide is for **people building Milady from source** — editors, agents, an
 
 | Script / npm command | Role |
 |----------------------|------|
-| `workspace:deps:sync` (`fix-workspace-deps.mjs`) | Normalize workspace dependency edges to a consistent shape after upstream or local changes. |
+| `workspace:deps:sync` (`fix-workspace-deps.mjs`) | Rewrite in-repo dependency specifiers to `workspace:*` across every workspace `package.json`. **Writes to disk** — only use when you want to commit the specifier change. Prefer `workspace:prepare` for day-to-day install. |
 | `workspace:deps:check` / `--check` | Verify without writing — CI or pre-commit. |
-| `workspace:deps:restore` | Restore `workspace:*` references where appropriate. |
+| `workspace:deps:restore` | `fix-workspace-deps.mjs --restore` — read each workspace `package.json` from a git ref (default `HEAD`) and restore any `workspace:*` specifier back to its original version string. Counterpart to `workspace:deps:sync`. |
 | `workspace:replace-versions` / `workspace:restore-refs` | Targeted version-string operations aligned with eliza upstream tooling patterns. |
-| `workspace:prepare` | Sequenced prepare step for fresh checkouts or after branch switches. |
+| `workspace:prepare` | **Preferred:** submodule init + snapshot current `package.json` files + rewrite to `workspace:*` + `bun install` + restore from snapshot. After this runs, the on-disk `package.json` files are byte-identical to before, but `bun install` saw `workspace:*` during resolution. Use `--leave-on-disk` for the legacy behaviour where `workspace:*` persists. |
 
 **Discovery:** `scripts/lib/workspace-discovery.mjs` centralizes how we find workspace roots and plugin packages so scripts do not duplicate fragile path logic.
 

@@ -326,10 +326,10 @@ async function caseWorkbenchTaskLifecycle(): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// Case 5: Unified automations list shape
+// Case 5: Automations list shape
 // ---------------------------------------------------------------------------
 
-async function caseAutomationsUnifiedList(): Promise<void> {
+async function caseAutomationsList(): Promise<void> {
   const res = await apiFetch("/api/automations");
   assert(res.status === 200, `GET /api/automations ${res.status}`);
   const body = await readJson<AutomationListResponse>(res);
@@ -453,8 +453,8 @@ async function main(): Promise<void> {
   console.log("\nCase 4: Workbench task lifecycle");
   await runCase("workbench task lifecycle", caseWorkbenchTaskLifecycle);
 
-  console.log("\nCase 5: Unified automations list shape");
-  await runCase("automations unified list", caseAutomationsUnifiedList);
+  console.log("\nCase 5: Automations list shape");
+  await runCase("automations list", caseAutomationsList);
 
   console.log("\nCase 6: Node catalog shape");
   await runCase("node catalog", caseNodeCatalog);

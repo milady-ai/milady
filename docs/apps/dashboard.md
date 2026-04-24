@@ -81,12 +81,13 @@ The default landing tab — a full messaging interface with voice chat, 3D avata
 
 ### Character
 
-Configure your agent's identity and personality. The view is organized into four sections:
+Configure your agent through the Character hub. The view is organized into five sections:
 
-1. **Identity & Personality** -- agent name, avatar selection, bio, adjectives, topics, and system prompt.
-2. **Style** -- three-column style rule textareas for controlling how the agent communicates.
-3. **Examples** -- collapsible chat examples and post examples to guide the agent's behavior.
-4. **Voice** -- voice provider selection (ElevenLabs) and preview, with model configuration.
+1. **Overview** -- a high-level snapshot of the agent's current identity and character state.
+2. **Personality** -- editable persona fields such as name, bio, system prompt, style, topics, adjectives, examples, and voice-shaping copy.
+3. **Knowledge** -- uploaded documents and supporting reference material used for retrieval.
+4. **Experience** -- surfaced learnings and experience signals gathered by the runtime.
+5. **Relationships** -- people and relationship context associated with the agent.
 
 Changes are saved via a save bar at the bottom of the view.
 

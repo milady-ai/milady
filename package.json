@@ -1,7 +1,7 @@
 {
   "name": "miladyai",
   "version": "2.0.0-alpha.116",
-  "description": "Cute agents for the acceleration",
+  "description": "Cute agents for the acceleration. Fresh clone: run ./install (Unix / macOS) or install.cmd (Windows). Plain bun install works for updates.",
   "homepage": "https://github.com/milady-ai/milady",
   "author": {
     "name": "Milady AI",
@@ -17,8 +17,13 @@
     "milady.mjs",
     "apps/app/dist",
     "eliza/packages/app-core/scripts",
+    "install",
+    "install.cmd",
     "scripts/init-submodules.mjs",
-    "scripts/setup-upstreams.mjs"
+    "scripts/milady-postinstall-repo-setup.mjs",
+    "scripts/run-init-then-bun-install.mjs",
+    "scripts/setup-upstreams.mjs",
+    "scripts/update-eliza-submodule-pointers-to-remote.mjs"
   ],
   "bundleDependencies": [
     "@elizaos/core",
@@ -27,7 +32,7 @@
   "workspaces": [
     "apps/*",
     "eliza/packages/native-plugins/*",
-    "eliza/packages/app-core/platforms/electrobun",
+    "eliza/packages/app-core/platforms/*",
     "eliza/apps/*",
     "eliza/cloud/packages/services/*",
     "eliza/plugins/*",
@@ -135,13 +140,15 @@
     "train": "bun eliza/apps/app-training/src/cli/train.ts",
     "action:trajectories-to-dataset": "node scripts/benchmark-to-training-dataset.mjs",
     "action:optimize-planner": "node scripts/optimize-action-planner.mjs",
-    "postinstall": "node eliza/packages/app-core/scripts/run-repo-setup.mjs",
+    "preinstall": "node scripts/init-submodules.mjs",
+    "postinstall": "node scripts/milady-postinstall-repo-setup.mjs",
     "setup:sync": "node eliza/packages/app-core/scripts/run-repo-setup.mjs",
     "pre-review:local": "bun eliza/packages/app-core/scripts/pre-review-local.mjs",
     "prepack": "node eliza/packages/app-core/scripts/rt.mjs run build",
     "publish:plugins:next": "cd eliza/plugins && bun run publish:next",
     "release:check": "bun eliza/packages/app-core/scripts/run-node-tsx.mjs eliza/packages/app-core/scripts/release-check.ts",
     "setup:upstreams": "node scripts/setup-upstreams.mjs",
+    "workspace:bump-eliza-submodules": "node scripts/update-eliza-submodule-pointers-to-remote.mjs",
     "desktop:stack-status": "node eliza/packages/app-core/scripts/desktop-stack-status.mjs",
     "smoke:api-status": "node eliza/packages/app-core/scripts/smoke-api-status.mjs",
     "smoke:api-status:prod": "node eliza/packages/app-core/scripts/smoke-api-status.mjs https://milady.ai https://app.milady.ai",
@@ -225,6 +232,7 @@
     "test:selfcontrol:mobile:android": "node eliza/packages/app-core/scripts/run-mobile-build.mjs android",
     "test:selfcontrol:mobile:ios": "node eliza/packages/app-core/scripts/run-mobile-build.mjs ios",
     "test:live:cloud": "node eliza/packages/app-core/scripts/run-with-env.mjs MILADY_LIVE_TEST=1 -- bunx vitest run --config test/vitest/live-e2e.config.ts eliza/packages/app-core/test/live-agent/cloud-providers.live.e2e.test.ts",
+    "test:live:experience": "node eliza/packages/app-core/scripts/run-with-env.mjs MILADY_LIVE_TEST=1 ELIZA_LIVE_TEST=1 -- bunx vitest run --config test/vitest/live-e2e.config.ts eliza/packages/app-core/test/live-agent/experience-capture.real.e2e.test.ts",
     "test:live:evm:rpc": "node eliza/packages/app-core/scripts/run-with-env.mjs MILADY_LIVE_TEST=1 ELIZA_LIVE_TEST=1 MILADY_LIVE_EVM_RPC_TEST=1 -- bunx vitest run --config test/vitest/real.config.ts eliza/plugins/plugin-evm/typescript/__tests__/integration/rpc-providers.live.test.ts",
     "test:live:onboarding": "node eliza/packages/app-core/scripts/run-with-env.mjs MILADY_LIVE_TEST=1 ELIZA_LIVE_TEST=1 MILADY_LIVE_BROWSER_SUITE=1 -- bunx vitest run --config test/vitest/live-e2e.config.ts eliza/packages/app-core/test/app/onboarding-companion.live.e2e.test.ts",
     "test:live:memory-relationships": "node eliza/packages/app-core/scripts/run-with-env.mjs MILADY_LIVE_TEST=1 ELIZA_LIVE_TEST=1 MILADY_LIVE_BROWSER_SUITE=1 -- bunx vitest run --config test/vitest/live-e2e.config.ts eliza/packages/app-core/test/app/memory-relationships.real.e2e.test.ts",
@@ -339,7 +347,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.7",
-    "@capacitor/core": "8.0.2",
+    "@capacitor/core": "8.3.1",
     "@testing-library/react": "^16.3.2",
     "@types/bun": "^1.3.10",
     "@types/cross-spawn": "^6.0.6",
@@ -359,18 +367,19 @@
     "tsdown": "^0.20.3",
     "tsup": "^8.3.5",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.0",
     "vite": "^7.1.12",
     "vitest": "^4.1.0"
   },
   "overrides": {
-    "@capacitor/android": "8.0.2",
+    "@capacitor/android": "8.3.1",
     "@capacitor/app": "8.1.0",
-    "@capacitor/core": "8.0.2",
-    "@capacitor/haptics": "8.0.0",
-    "@capacitor/ios": "8.0.2",
-    "@capacitor/keyboard": "8.0.0",
+    "@capacitor/core": "8.3.1",
+    "@capacitor/haptics": "8.0.2",
+    "@capacitor/ios": "8.3.1",
+    "@capacitor/keyboard": "8.0.3",
     "@capacitor/preferences": "8.0.1",
+    "@capacitor/push-notifications": "8.0.3",
     "@capacitor/status-bar": "8.0.2",
     "@elizaos/plugin-elizacloud": "workspace:*",
     "@elizaos/plugin-anthropic": "workspace:*",
@@ -400,9 +409,10 @@
   "patchedDependencies": {
     "@noble/curves@2.0.1": "eliza/packages/app-core/patches/@noble%2Fcurves@2.0.1.patch",
     "proper-lockfile@4.1.2": "eliza/packages/app-core/patches/proper-lockfile@4.1.2.patch",
-    "@pixiv/three-vrm@3.5.1": "eliza/packages/app-core/patches/@pixiv%2Fthree-vrm@3.5.1.patch",
+    "@pixiv/three-vrm@3.5.2": "eliza/packages/app-core/patches/@pixiv%2Fthree-vrm@3.5.2.patch",
     "electrobun@1.16.0": "eliza/packages/app-core/patches/electrobun@1.16.0.patch",
     "pty-manager@1.11.0": "eliza/packages/app-core/patches/pty-manager@1.11.0.patch",
-    "coding-agent-adapters@0.16.3": "eliza/packages/app-core/patches/coding-agent-adapters@0.16.3.patch"
+    "coding-agent-adapters@0.16.3": "eliza/packages/app-core/patches/coding-agent-adapters@0.16.3.patch",
+    "llama-cpp-capacitor@0.1.5": "eliza/packages/app-core/patches/llama-cpp-capacitor@0.1.5.patch"
   }
 }

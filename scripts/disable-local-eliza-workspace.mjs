@@ -47,6 +47,10 @@ import { execSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  asElizaOverridesSpecifiers,
+  asRootOverridesSpecifiers,
+} from "./lib/ci-stubs.mjs";
 
 export const ELIZA_WORKSPACE_GLOB = "eliza/packages/*";
 export const PLUGIN_ROOT_WORKSPACE_GLOB = "eliza/plugins/*";
@@ -67,27 +71,37 @@ export const LOCAL_ONLY_ELIZA_PACKAGE_PATHS = {
 export const LOCAL_ONLY_WORKSPACE_PATHS = [
   "eliza/packages/shared",
   `eliza/${LOCAL_ONLY_ELIZA_PACKAGE_PATHS["@elizaos/plugin-browser-bridge"]}`,
+  // Cloud/staging must ship the same companion runtime plugins as develop.
+  // These plugin workspaces are vendored into the Docker image rather than
+  // resolved from npm, so keep exact workspace entries alive after the broad
+  // eliza/plugins/* globs are stripped for published-only CI.
+  "eliza/plugins/plugin-discord/typescript",
+  "eliza/plugins/plugin-openai/typescript",
+  "eliza/plugins/plugin-evm/typescript",
+  "eliza/plugins/plugin-telegram",
 ];
 export const NESTED_INSTALLABLE_PACKAGE_GLOBS = [
   // These package.json files are installed directly by CI/build scripts even
   // though they do not participate in the root workspace graph.
   "eliza/packages/app-core/platforms/*",
 ];
+// The @elizaos/plugin-app-control and @elizaos/plugin-wechat entries below
+// are derived from the single source of truth at scripts/lib/ci-stubs.mjs.
+// Other entries (@elizaos/shared, @elizaos/plugin-browser-bridge, @elizaos/ui)
+// are NOT stubs — they point to the real packages inside eliza/ and exist
+// here because those packages are not always npm-published. They stay
+// inline for now.
 export const CI_OVERRIDE_SPECIFIERS = {
   "@elizaos/shared": "file:./eliza/packages/shared",
-  "@elizaos/plugin-app-control":
-    "file:./scripts/ci-stubs/elizaos-plugin-app-control",
   "@elizaos/plugin-browser-bridge":
     "file:./eliza/packages/plugin-browser-bridge",
-  "@elizaos/plugin-wechat": "file:./scripts/ci-stubs/elizaos-plugin-wechat",
   "@elizaos/ui": "file:./eliza/packages/ui",
+  ...asRootOverridesSpecifiers(),
 };
 export const ELIZA_RUNTIME_CI_OVERRIDE_SPECIFIERS = {
-  "@elizaos/plugin-app-control":
-    "file:../scripts/ci-stubs/elizaos-plugin-app-control",
   "@elizaos/plugin-browser-bridge": "file:./packages/plugin-browser-bridge",
-  "@elizaos/plugin-wechat": "file:../scripts/ci-stubs/elizaos-plugin-wechat",
   "@elizaos/ui": "file:./packages/ui",
+  ...asElizaOverridesSpecifiers(),
 };
 export const DEPENDENCY_FIELDS = [
   "dependencies",
@@ -99,6 +113,13 @@ export const CI_LOCKFILES = ["bun.lock", "bun.lockb"];
 export const PINNED_VERSION_SOURCE_OVERRIDE = "override";
 export const PINNED_VERSION_SOURCE_TEMPLATE = "template";
 export const PINNED_VERSION_SOURCE_WORKSPACE = "workspace";
+export const LLAMA_CPP_CAPACITOR_PATCH_PATH = path.join(
+  "eliza",
+  "packages",
+  "app-core",
+  "patches",
+  "llama-cpp-capacitor@0.1.5.patch",
+);
 
 const ELIZAOS_CORE_NAME = "@elizaos/core";
 const SCRIPT_PATH = fileURLToPath(import.meta.url);
@@ -833,6 +854,31 @@ export function applyCiOnlyOverrides(
   });
 }
 
+export function repairKnownElizaPatchFiles(
+  repoRoot = DEFAULT_REPO_ROOT,
+  { log = console.log } = {},
+) {
+  const patchPath = path.join(repoRoot, LLAMA_CPP_CAPACITOR_PATCH_PATH);
+  if (!fs.existsSync(patchPath)) {
+    return false;
+  }
+
+  const source = fs.readFileSync(patchPath, "utf8");
+  const repaired = source.replace(
+    "@@ -18,7 +18,7 @@ apply plugin: 'com.android.library'",
+    "@@ -18,6 +18,6 @@ apply plugin: 'com.android.library'",
+  );
+  if (repaired === source) {
+    return false;
+  }
+
+  fs.writeFileSync(patchPath, repaired);
+  log(
+    `[disable-local-eliza-workspace] Repaired malformed patch hunk in ${LLAMA_CPP_CAPACITOR_PATCH_PATH}`,
+  );
+  return true;
+}
+
 export function disableLocalElizaWorkspace(
   repoRoot = DEFAULT_REPO_ROOT,
   { log = console.log, warn = console.warn, errorLog = console.error } = {},
@@ -873,6 +919,8 @@ export function disableLocalElizaWorkspace(
       );
     }
   }
+
+  repairKnownElizaPatchFiles(repoRoot, { log });
 
   const localOnlyPackagePaths = resolveLocalOnlyWorkspacePackagePaths(repoRoot);
   const localOnlyPackages = new Set(localOnlyPackagePaths.keys());

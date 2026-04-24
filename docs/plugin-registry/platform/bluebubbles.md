@@ -33,10 +33,6 @@ Install [BlueBubbles](https://bluebubbles.app) on a Mac with Messages signed in.
 }
 ```
 
-## Auto-Enable
-
-The plugin auto-enables when `password` or `serverUrl` is present in the connector config.
-
 ## Configuration
 
 | Variable | Required | Description |

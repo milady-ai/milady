@@ -11,7 +11,12 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "types": ["vite/client", "bun-types"],
+    "types": [
+      "vite/client",
+      "bun-types",
+      "vitest/globals",
+      "@testing-library/jest-dom"
+    ],
     "typeRoots": [
       "./node_modules/@types",
       "../../node_modules/@types",
@@ -63,7 +68,8 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "ignoreDeprecations": "6.0"
   },
   "include": [
     "src/**/*.ts",

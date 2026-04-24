@@ -3,6 +3,7 @@
 import { spawn, spawnSync } from "node:child_process";
 import {
   existsSync,
+  lstatSync,
   mkdirSync,
   readdirSync,
   readFileSync,
@@ -10,10 +11,12 @@ import {
   rmSync,
   statSync,
   symlinkSync,
+  unlinkSync,
   writeFileSync,
 } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { asSetupUpstreamsCiStubs } from "./lib/ci-stubs.mjs";
 import { readPackageJson } from "./lib/read-package-json.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -34,7 +37,8 @@ export const ELIZA_REQUIRED_FILES = ["package.json"];
 export const ELIZA_BUILD_STEPS = [
   {
     // Fresh CI checkouts do not track generated protobuf types for @elizaos/core.
-    // Build the package once so src/types/generated exists before root typecheck/tests.
+    // Also rebuild core declarations on every setup run so nested plugin builds
+    // never typecheck against stale dist/ output after the submodule changes.
     check: path.join(
       "packages",
       "typescript",
@@ -48,6 +52,7 @@ export const ELIZA_BUILD_STEPS = [
     cwd: path.join("packages", "typescript"),
     args: ["run", "build"],
     label: "@elizaos/core",
+    alwaysRun: true,
   },
   {
     check: path.join("packages", "prompts", "dist", "typescript", "index.ts"),
@@ -70,20 +75,8 @@ const ELIZA_INSTALL_RETRY_DELAY_MS = 3_000;
 // provided by a CI stub in the root repo rather than published on npm. Before
 // `bun install --cwd eliza`, we inject an override into eliza/package.json so
 // the workspace:* specifier resolves to the stub instead of failing.
-const UNPUBLISHED_ELIZA_PLUGIN_CI_STUBS = [
-  {
-    packageName: "@elizaos/plugin-app-control",
-    workspaceEntry: "plugins/plugin-app-control/typescript",
-    /** Relative from eliza/ to the CI stub directory. */
-    stubRelativePath: "../scripts/ci-stubs/elizaos-plugin-app-control",
-  },
-  {
-    packageName: "@elizaos/plugin-wechat",
-    workspaceEntry: "plugins/plugin-wechat",
-    /** Relative from eliza/ to the CI stub directory. */
-    stubRelativePath: "../scripts/ci-stubs/elizaos-plugin-wechat",
-  },
-];
+// Registry is centralized in scripts/lib/ci-stubs.mjs.
+const UNPUBLISHED_ELIZA_PLUGIN_CI_STUBS = asSetupUpstreamsCiStubs();
 
 const OPTIONAL_ELIZA_PLUGIN_PACKAGES = [
   {
@@ -101,6 +94,10 @@ const OPTIONAL_ELIZA_PLUGIN_PACKAGES = [
     workspaceEntry: "plugins/plugin-local-ai/typescript",
     packageName: "@elizaos/plugin-local-ai",
   },
+];
+const CONDITIONAL_ELIZA_WORKSPACE_ENTRIES = [
+  ...OPTIONAL_ELIZA_PLUGIN_PACKAGES.map(({ workspaceEntry }) => workspaceEntry),
+  "cloud/packages/services/billing",
 ];
 
 const PACKAGE_LINK_ROOTS = [
@@ -256,10 +253,19 @@ const TS_IGNORE_DEPRECATIONS_COMPAT_FILES = [
   path.join("packages", "shared", "tsconfig.json"),
   path.join("packages", "interop", "tsconfig.json"),
 ];
-const TSUP_IGNORE_DEPRECATIONS_COMPAT_FILES = [
+const PLUGIN_TS_IGNORE_DEPRECATIONS_COMPAT_FILES = [
+  path.join("plugins", "plugin-agent-skills", "typescript", "tsconfig.json"),
   path.join("plugins", "plugin-calendly", "tsconfig.json"),
   path.join("plugins", "plugin-github", "tsconfig.json"),
+  path.join("plugins", "plugin-local-ai", "typescript", "tsconfig.json"),
   path.join("plugins", "plugin-shopify", "tsconfig.json"),
+  path.join("plugins", "plugin-wechat", "tsconfig.json"),
+];
+const PLUGIN_TS_IGNORE_DEPRECATIONS_INSERT_FILES = [
+  path.join("plugins", "plugin-agent-skills", "typescript", "tsconfig.json"),
+  path.join("plugins", "plugin-signal", "typescript", "tsconfig.json"),
+  path.join("plugins", "plugin-telegram", "tsconfig.json"),
+  path.join("plugins", "plugin-telegram", "tsconfig.build.json"),
 ];
 const LIFEOPS_SETTINGS_SECTION_RELATIVE_PATH = path.join(
   "apps",
@@ -353,19 +359,25 @@ export function resolveTypeScriptIgnoreDeprecationsTarget(
   const candidateRoots = [repoRoot, fallbackRoot].filter(
     (candidate) => typeof candidate === "string" && candidate.length > 0,
   );
+  const versionSpecifiers = [];
 
   for (const candidateRoot of candidateRoots) {
     const rootPackageJson = readPackageJson(candidateRoot);
-    const versionSpecifier =
-      rootPackageJson?.devDependencies?.typescript ??
-      rootPackageJson?.dependencies?.typescript;
-    const major = parseFirstNumericVersionSegment(versionSpecifier);
-    if (major !== null) {
-      return major >= 6 ? "6.0" : "5.0";
-    }
+    versionSpecifiers.push(
+      rootPackageJson?.devDependencies?.typescript,
+      rootPackageJson?.dependencies?.typescript,
+    );
   }
 
-  return "5.0";
+  const major = versionSpecifiers.reduce((highest, versionSpecifier) => {
+    const parsed = parseFirstNumericVersionSegment(versionSpecifier);
+    if (parsed === null) {
+      return highest;
+    }
+    return highest === null ? parsed : Math.max(highest, parsed);
+  }, null);
+
+  return major !== null && major >= 6 ? "6.0" : "5.0";
 }
 
 function buildIgnoreDeprecationsCompatibilityReplacements(targetVersion) {
@@ -456,6 +468,33 @@ function applyTextReplacements(filePath, replacements, { label }) {
   return patchedReplacements;
 }
 
+function applyCompilerOption(filePath, option, value, { label }) {
+  if (!existsSync(filePath)) {
+    return 0;
+  }
+
+  try {
+    const raw = readFileSync(filePath, "utf8");
+    const config = JSON.parse(raw);
+    const current = config.compilerOptions?.[option];
+    if (current === value) {
+      return 0;
+    }
+    config.compilerOptions = {
+      ...(config.compilerOptions ?? {}),
+      [option]: value,
+    };
+    writeFileSync(filePath, `${JSON.stringify(config, null, 2)}\n`);
+    console.log(`[setup-upstreams] Applied ${label}`);
+    return 1;
+  } catch (error) {
+    console.warn(
+      `[setup-upstreams] WARNING: ${label} failed: ${error instanceof Error ? error.message : String(error)}`,
+    );
+    return 0;
+  }
+}
+
 export function applyPluginAnthropicBunRuntimePatch(elizaRoot) {
   let patchedReplacements = 0;
   patchedReplacements += applyTextReplacements(
@@ -498,12 +537,22 @@ export function applyTypeScriptIgnoreDeprecationsCompatPatch(
       },
     );
   }
-  for (const relativePath of TSUP_IGNORE_DEPRECATIONS_COMPAT_FILES) {
+  for (const relativePath of PLUGIN_TS_IGNORE_DEPRECATIONS_COMPAT_FILES) {
     patchedReplacements += applyTextReplacements(
       path.join(elizaRoot, relativePath),
-      buildIgnoreDeprecationsCompatibilityReplacements("5.0"),
+      tsConfigReplacements,
       {
-        label: `tsup ignoreDeprecations compatibility patch (${relativePath})`,
+        label: `plugin ignoreDeprecations compatibility patch (${relativePath})`,
+      },
+    );
+  }
+  for (const relativePath of PLUGIN_TS_IGNORE_DEPRECATIONS_INSERT_FILES) {
+    patchedReplacements += applyCompilerOption(
+      path.join(elizaRoot, relativePath),
+      "ignoreDeprecations",
+      targetVersion,
+      {
+        label: `plugin ignoreDeprecations compatibility patch (${relativePath})`,
       },
     );
   }
@@ -634,6 +683,61 @@ export function getTemporaryElizaWorkspaceEntries(
   ];
 }
 
+export function getMissingConditionalElizaWorkspaceEntries(
+  elizaRoot,
+  workspaces,
+  { pathExists = existsSync } = {},
+) {
+  if (!Array.isArray(workspaces)) {
+    return [];
+  }
+
+  return CONDITIONAL_ELIZA_WORKSPACE_ENTRIES.filter((workspaceEntry) => {
+    if (!workspaces.includes(workspaceEntry)) {
+      return false;
+    }
+
+    return !pathExists(path.join(elizaRoot, workspaceEntry, "package.json"));
+  });
+}
+
+export function stripMissingConditionalElizaWorkspaces(
+  elizaRoot,
+  { pathExists = existsSync } = {},
+) {
+  const packageJsonPath = path.join(elizaRoot, "package.json");
+  if (!pathExists(packageJsonPath)) {
+    return [];
+  }
+
+  const raw = readFileSync(packageJsonPath, "utf8");
+  let pkg;
+  try {
+    pkg = JSON.parse(raw);
+  } catch {
+    return [];
+  }
+
+  if (!Array.isArray(pkg.workspaces)) {
+    return [];
+  }
+
+  const missingWorkspaceEntries = getMissingConditionalElizaWorkspaceEntries(
+    elizaRoot,
+    pkg.workspaces,
+    { pathExists },
+  );
+  if (missingWorkspaceEntries.length === 0) {
+    return [];
+  }
+
+  pkg.workspaces = pkg.workspaces.filter(
+    (workspaceEntry) => !missingWorkspaceEntries.includes(workspaceEntry),
+  );
+  writePackageJson(packageJsonPath, raw, pkg);
+  return missingWorkspaceEntries;
+}
+
 async function withTemporaryOptionalElizaPluginWorkspaces(elizaRoot, callback) {
   const packageJsonPath = path.join(elizaRoot, "package.json");
   const raw = readFileSync(packageJsonPath, "utf8");
@@ -651,19 +755,36 @@ async function withTemporaryOptionalElizaPluginWorkspaces(elizaRoot, callback) {
     return callback();
   }
 
-  const missingWorkspaceEntries = getTemporaryElizaWorkspaceEntries(
+  const additionalWorkspaceEntries = getTemporaryElizaWorkspaceEntries(
     elizaRoot,
   ).filter((workspaceEntry) => !pkg.workspaces.includes(workspaceEntry));
+  const removedWorkspaceEntries = getMissingConditionalElizaWorkspaceEntries(
+    elizaRoot,
+    pkg.workspaces,
+  );
 
-  if (missingWorkspaceEntries.length === 0) {
+  if (
+    additionalWorkspaceEntries.length === 0 &&
+    removedWorkspaceEntries.length === 0
+  ) {
     return callback();
   }
 
-  pkg.workspaces = [...pkg.workspaces, ...missingWorkspaceEntries];
-  writePackageJson(packageJsonPath, raw, pkg);
-  console.log(
-    `[setup-upstreams] Temporarily enabling eliza workspace entries (${missingWorkspaceEntries.join(", ")})`,
+  pkg.workspaces = pkg.workspaces.filter(
+    (workspaceEntry) => !removedWorkspaceEntries.includes(workspaceEntry),
   );
+  pkg.workspaces = [...pkg.workspaces, ...additionalWorkspaceEntries];
+  writePackageJson(packageJsonPath, raw, pkg);
+  if (additionalWorkspaceEntries.length > 0) {
+    console.log(
+      `[setup-upstreams] Temporarily enabling eliza workspace entries (${additionalWorkspaceEntries.join(", ")})`,
+    );
+  }
+  if (removedWorkspaceEntries.length > 0) {
+    console.log(
+      `[setup-upstreams] Temporarily disabling missing eliza workspace entries (${removedWorkspaceEntries.join(", ")})`,
+    );
+  }
 
   try {
     return await callback();
@@ -1212,10 +1333,17 @@ function createLink(linkPath, targetPath, kind = "dir") {
     return false;
   }
 
-  rmSync(linkPath, {
-    force: true,
-    recursive: true,
-  });
+  try {
+    const existingLinkStats = lstatSync(linkPath);
+    if (existingLinkStats.isSymbolicLink()) {
+      unlinkSync(linkPath);
+    } else {
+      rmSync(linkPath, {
+        force: true,
+        recursive: existingLinkStats.isDirectory(),
+      });
+    }
+  } catch {}
 
   mkdirSync(path.dirname(linkPath), { recursive: true });
 
@@ -1571,6 +1699,55 @@ async function ensureRepoLocalEliza(repoRoot) {
   return elizaRoot;
 }
 
+export function ensureElizaTypescriptDependencyLinks(
+  elizaRoot,
+  {
+    repoRoot = path.dirname(elizaRoot),
+    // Do not link @noble/hashes by default: the Milady root often resolves v1
+    // (ethers/viem), while @elizaos/core requires v2 entrypoints (sha2.js, legacy.js).
+    dependencies = [],
+  } = {},
+) {
+  const packageDir = path.join(elizaRoot, "packages", "typescript");
+  let linkedDependencies = 0;
+
+  for (const dependency of dependencies) {
+    const target = findInstalledPackageDir(
+      repoRoot,
+      dependency,
+      undefined,
+      null,
+      {
+        searchRoots: [repoRoot, elizaRoot],
+      },
+    );
+    if (!target) {
+      continue;
+    }
+
+    const linkPath = path.join(
+      packageDir,
+      "node_modules",
+      ...dependency.split("/"),
+    );
+    if (createPackageLink(linkPath, target)) {
+      linkedDependencies += 1;
+    }
+  }
+
+  if (linkedDependencies > 0) {
+    console.log(
+      "[setup-upstreams] Linked " +
+        linkedDependencies +
+        " @elizaos/core build " +
+        (linkedDependencies === 1 ? "dependency" : "dependencies") +
+        " into eliza/packages/typescript",
+    );
+  }
+
+  return linkedDependencies;
+}
+
 async function ensureElizaDependencies(elizaRoot) {
   if (hasInstalledElizaDependencies(elizaRoot)) {
     await bootstrapBundledBunInstall(elizaRoot);
@@ -1610,6 +1787,7 @@ async function ensureElizaDependencies(elizaRoot) {
     await runElizaInstallWithRetry(elizaRoot);
     await bootstrapBundledBunInstall(elizaRoot);
   });
+  ensureElizaTypescriptDependencyLinks(elizaRoot);
 }
 
 export function getElizaInstallArgs(env = process.env) {
@@ -1703,7 +1881,14 @@ export async function bootstrapBundledBunInstall(
   return true;
 }
 
-async function ensureElizaGeneratedKeywordData(elizaRoot) {
+async function ensureElizaGeneratedKeywordData(
+  elizaRoot,
+  {
+    pathExists = existsSync,
+    runCommandImpl = runCommand,
+    log = console.log,
+  } = {},
+) {
   const generatedKeywordDataPath = path.join(
     elizaRoot,
     "packages",
@@ -1714,12 +1899,12 @@ async function ensureElizaGeneratedKeywordData(elizaRoot) {
     "validation-keyword-data.ts",
   );
 
-  if (existsSync(generatedKeywordDataPath)) {
+  if (pathExists(generatedKeywordDataPath)) {
     return;
   }
 
-  console.log("[setup-upstreams] Generating eliza i18n keyword data");
-  await runCommand(
+  log("[setup-upstreams] Generating eliza i18n keyword data");
+  await runCommandImpl(
     "node",
     ["packages/shared/scripts/generate-keywords.mjs", "--target", "ts"],
     {
@@ -1729,16 +1914,27 @@ async function ensureElizaGeneratedKeywordData(elizaRoot) {
   );
 }
 
-async function ensureElizaBuildOutputs(elizaRoot) {
-  await ensureElizaGeneratedKeywordData(elizaRoot);
+export async function ensureElizaBuildOutputs(
+  elizaRoot,
+  {
+    pathExists = existsSync,
+    runCommandImpl = runCommand,
+    log = console.log,
+  } = {},
+) {
+  await ensureElizaGeneratedKeywordData(elizaRoot, {
+    pathExists,
+    runCommandImpl,
+    log,
+  });
 
   for (const step of ELIZA_BUILD_STEPS) {
-    if (existsSync(path.join(elizaRoot, step.check))) {
+    if (!step.alwaysRun && pathExists(path.join(elizaRoot, step.check))) {
       continue;
     }
 
-    console.log(`[setup-upstreams] Building ${step.label}`);
-    await runCommand("bun", step.args, {
+    log(`[setup-upstreams] Building ${step.label}`);
+    await runCommandImpl("bun", step.args, {
       cwd: path.join(elizaRoot, step.cwd),
       label: `bun ${step.args.join(" ")} (${step.label})`,
     });
@@ -1746,14 +1942,14 @@ async function ensureElizaBuildOutputs(elizaRoot) {
 }
 
 /**
- * Ensure plugin-anthropic's tsconfig.build.json explicitly loads @types/bun.
+ * Ensure plugin-anthropic's tsconfig.build.json explicitly loads Bun types.
  *
  * When tsc runs `bun run build` for plugin-anthropic on fresh CI checkouts,
  * it reports TS2868 "Cannot find name 'Bun'" on init.ts / utils/claude-cli.ts
  * because the build config extends tsconfig.json but does not carry the
  * `compilerOptions.types` array forward deterministically. We force the
  * setting in-place so every CI/dev checkout sees a build config that
- * resolves @types/bun without relying on extends inheritance.
+ * resolves Bun globals without relying on extends inheritance.
  *
  * Idempotent: only writes when the desired types list is not already present.
  */
@@ -1793,13 +1989,13 @@ export function ensurePluginAnthropicBunTypes(
     ? compilerOptions.types
     : null;
 
-  if (existingTypes?.includes("bun")) {
+  if (existingTypes?.includes("bun-types")) {
     return false;
   }
 
   const nextTypes = existingTypes ? [...existingTypes] : ["node"];
-  if (!nextTypes.includes("bun")) {
-    nextTypes.push("bun");
+  if (!nextTypes.includes("bun-types")) {
+    nextTypes.push("bun-types");
   }
 
   const nextCompilerOptions = {
@@ -1817,7 +2013,7 @@ export function ensurePluginAnthropicBunTypes(
     `${JSON.stringify(nextParsed, null, indent)}\n`,
   );
   console.log(
-    `[setup-upstreams] Patched ${toDisplayPath(buildConfigPath)} to load @types/bun`,
+    `[setup-upstreams] Patched ${toDisplayPath(buildConfigPath)} to load Bun types`,
   );
   return true;
 }
@@ -1871,12 +2067,19 @@ export async function setupUpstreams(repoRoot = DEFAULT_REPO_ROOT) {
   if (skipReason) {
     if (skipReason.endsWith("=1")) {
       ensurePublishedElizaPackageLinks(repoRoot);
-      // Strip missing optional plugin workspace entries from eliza/package.json
-      // so that any subsequent `bun install --cwd eliza` doesn't fail on
-      // workspace paths that don't exist when plugin submodules are absent.
+      // Strip missing conditional workspace entries from eliza/package.json so
+      // that any subsequent `bun install --cwd eliza` doesn't fail on nested
+      // paths that are intentionally absent in this checkout.
       // Guard: eliza/ may have been renamed by disable-local-eliza-workspace.mjs.
       const elizaRoot = getRepoElizaRoot(repoRoot);
       if (existsSync(path.join(elizaRoot, "package.json"))) {
+        const strippedWorkspaces =
+          stripMissingConditionalElizaWorkspaces(elizaRoot);
+        if (strippedWorkspaces.length > 0) {
+          console.log(
+            `[setup-upstreams] Stripped missing conditional eliza workspace entries (${strippedWorkspaces.join(", ")})`,
+          );
+        }
         const missingPlugins = getMissingOptionalElizaPlugins(elizaRoot);
         if (missingPlugins.length > 0) {
           const patched = applyOptionalElizaPluginFallback(

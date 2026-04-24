@@ -36,6 +36,20 @@ Use Milady. Talk to it. Push its limits. Request changes *through the app itself
 
 If you're an agent or operating on behalf of an agent: welcome. Open your PR and the review pipeline will handle it.
 
+## Local clone and eliza submodule maintenance
+
+Milady vendors [eliza](https://github.com/elizaOS/eliza) as a git submodule with nested plugin submodules. Bun resolves `workspace:*` **before** `preinstall`, so use **`./install`** (Unix / macOS) or **`install.cmd`** (Windows) on a fresh clone. Plain `bun install` works for updates once the submodules are on disk.
+
+To **fast-forward `eliza` to `submodule.eliza.branch` (from Milady’s `.gitmodules`, usually `develop`)** and set **every nested submodule** to the tip of its configured remote branch (`eliza/.gitmodules`):
+
+```bash
+bun run workspace:bump-eliza-submodules
+```
+
+Only refresh nested repos, not `eliza` itself: `bun run workspace:bump-eliza-submodules -- --skip-eliza-pull`.
+
+If you keep the new SHAs: **commit inside `eliza/`** (`git add -u`, commit), then **`git add eliza`** and commit at the Milady root.
+
 ## What Gets Accepted
 
 ### Always Welcome

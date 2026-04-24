@@ -3,6 +3,42 @@ title: Changelog
 description: What's new in Milady — features, improvements, and fixes.
 ---
 
+<Update label="2026-04-24" description="Week of April 24; MiladyOS Android, fine-tuning app, streamlined onboarding, wallet dashboard polish" tags={["Feature", "Update", "Fix"]}>
+
+## MiladyOS Android
+
+Milady now ships as a full Android system image. MiladyOS bakes the agent directly into an AOSP build so your agent runs as a privileged system app on supported devices, with the permissions it needs for messaging, calendar, and background operation pre-granted. A validated boot path and cuttlefish emulator target are available for testing, and the system-level integration lays the groundwork for a first-class Milady phone experience.
+
+## Fine-tuning app
+
+A new **Fine-tuning** tile is available in the [apps view](/dashboard/apps). Use it to run and review fine-tuning jobs against your agent alongside the existing training tools, without leaving the dashboard.
+
+## Streamlined onboarding with RuntimeGate
+
+The legacy three-step onboarding wizard and its connection subflow have been replaced with **RuntimeGate** — a minimal pre-chat gate that gets you to your agent faster. If your backend is already configured, you land directly in chat. Cloud OAuth redirects also now carry the correct `redirect_uri`, so cloud sign-in from the desktop app completes reliably on the first try.
+
+## Wallet dashboard polish
+
+The [wallet](/guides/wallet) dashboard has been refreshed with a cleaner rail header, updated chain badges, live prediction data, and a tighter overall layout. Balance lookups on Eliza Cloud now detect the correct EVM RPC endpoint automatically, so cloud wallets resolve balances without manual RPC configuration.
+
+## Updates
+
+- **Land on chat after setup** — After completing onboarding, the app now lands directly on the chat view instead of an intermediate screen, so you can start talking to your agent immediately.
+- **Compact page chat** — The page-scoped chat input and sidebar have been tightened up for a more compact, consistent layout across dashboard pages.
+- **Refreshed app hero artwork** — Hero images for the Database Viewer, LifeOps, Log Viewer, Memory Viewer, Plugin Viewer, Relationship Viewer, Runtime Debugger, Skills Viewer, and Trajectory Viewer have been updated with higher-resolution artwork.
+- **Mobile shell layout** — The mobile shell layout has been refined for better density on phone-sized viewports.
+- **iMessage startup logging** — The [iMessage connector](/connectors/imessage) now emits clearer startup logs and recovers more reliably when the Messages database is temporarily unavailable.
+- **Faster fresh-clone setup** — A new `./install` / `install.cmd` entry point replaces the previous `bootstrap` alias, giving you a single reliable way to set up the repo after a fresh clone. See [CONTRIBUTING](/guides/contributing) for details.
+
+## Bug fixes
+
+- Fixed web and Android builds emitting spurious warnings during production bundling
+- Fixed Vite bundle chunking and submodule build configuration causing intermittent build failures
+- Fixed the cloud OAuth flow occasionally failing due to an incorrect `redirect_uri` when signing in from the desktop app
+- Fixed the BlueBubbles connector documentation incorrectly claiming auto-enable behavior — the [BlueBubbles connector](/connectors/bluebubbles) must be explicitly enabled in your configuration
+
+</Update>
+
 <Update label="2026-04-23" description="Week of April 23; dual-wallet and cloud wallet provisioning, Agent Browser Bridge, automation drafts, cloud agent provisioning UX, BlueBubbles connector" tags={["Feature", "Update", "Fix"]}>
 
 ## Dual-wallet with cloud wallet provisioning

@@ -6,6 +6,18 @@ description: "Schema, field reference, and examples for the elizaOS Character ob
 
 The Character object is the primary definition of an agent's identity. Milady builds a Character at startup from `milady.json` using `buildCharacterFromConfig()`, then passes it to `AgentRuntime`. All personality fields are sourced from `config.agents.list[0]` (set during onboarding or edited directly).
 
+## Character Hub Surfaces
+
+In the dashboard, character work is grouped into five hub sections:
+
+1. **Overview** -- the top-level summary of the agent's current character state.
+2. **Personality** -- the editable Character fields documented below, including identity, prompt, style, topics, adjectives, and examples.
+3. **Knowledge** -- uploaded documents and retrieval material associated with the agent.
+4. **Experience** -- surfaced runtime learnings and experience signals that inform future behavior.
+5. **Relationships** -- relationship and contact context associated with the agent.
+
+Only the **Personality** section maps directly to the core `Character` schema. **Knowledge**, **Experience**, and **Relationships** surface adjacent runtime data in the same hub so you can review the full agent profile in one place.
+
 ## Field Reference
 
 | Field | Type | Required | Description |

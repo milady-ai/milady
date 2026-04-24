@@ -37,7 +37,7 @@ export const CORE_PLUGINS: readonly string[] = [
 ];
 ```
 
-> **Note:** `@elizaos/plugin-secrets-manager`, `relationships`, `@elizaos/plugin-trust`, `@elizaos/plugin-personality`, and `@elizaos/plugin-experience` are statically imported for fast resolution but commented out of the core list. They may be re-enabled in a future release. Milady does not ship `@elizaos/plugin-todo`; todo functionality is handled by the workbench API and LifeOps-related runtime tasks.
+> **Note:** `@elizaos/plugin-secrets-manager`, `relationships`, `@elizaos/plugin-trust`, and `@elizaos/plugin-personality` are statically imported for fast resolution but commented out of the core list. Experience now ships as a built-in advanced capability instead of a standalone plugin. Milady does not ship `@elizaos/plugin-todo`; todo functionality is handled by the workbench API and LifeOps-related runtime tasks.
 
 ### Optional Core Plugins
 
@@ -214,7 +214,7 @@ const FEATURE_PLUGINS = {
   webhooks:             "@elizaos/plugin-webhooks",
   gmailWatch:           "@elizaos/plugin-gmail-watch",
   personality:          "@elizaos/plugin-personality",
-  experience:           "@elizaos/plugin-experience",
+  experience:           "(built-in advanced capability)",
   form:                 "@elizaos/plugin-form",
   x402:                 "@elizaos/plugin-x402",
   fal:                  "@elizaos/plugin-fal",
@@ -274,19 +274,16 @@ Plugins do not share mutable state directly — they communicate through the run
 
 ## Module Shape
 
-When a plugin package is dynamically imported, the runtime checks for a plugin export in this order:
+When a plugin package is dynamically imported, `findRuntimePluginExport()` locates the Plugin export using this priority order:
 
-1. `module.default`
-2. `module.plugin`
-3. Any key whose value matches the Plugin interface shape
+1. `module.default` — ES module default export
+2. `module.plugin` — named `plugin` export
+3. `module` itself — CJS default pattern
+4. Named exports ending in `Plugin` or starting with `plugin`
+5. Other named exports matching the Plugin interface shape
+6. Minimal `{ name, description }` exports for named keys matching `plugin`
 
-```typescript
-interface PluginModuleShape {
-  default?: Plugin;
-  plugin?: Plugin;
-  [key: string]: Plugin | undefined;
-}
-```
+A module export is accepted as a Plugin when it has both `name` and `description` fields plus at least one of `services`, `providers`, `actions`, `routes`, `events` (as arrays), or `init` (as a function).
 
 ## Related
 
