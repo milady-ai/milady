@@ -1,0 +1,50 @@
+name: nyx
+
+services:
+  nyx:
+    image: ghcr.io/milady-ai/agent@sha256:0973bfc5d4083c1881251e7c2731433b7dc8e697e7089ba220e470098079f26f
+    container_name: nyx
+    restart: unless-stopped
+    env_file:
+      - /etc/nyx/nyx.env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      milady-isolated:
+        ipv4_address: 172.18.0.5
+    expose:
+      - "2138"
+    volumes:
+      - type: bind
+        source: /tmp/nyx-config/milady.json
+        target: /root/.milady/milady.json
+        read_only: false
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          sh -lc 'port="$${PORT:-$${APP_PORT:-$${ELIZA_PORT:-2138}}}";
+          code="$$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:$${port}/api/health")" &&
+          [ "$$code" = "200" -o "$$code" = "401" ]'
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
+    mem_limit: 10g
+    cpus: "6.0"
+    pids_limit: 2048
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  milady-isolated:
+    external: true
