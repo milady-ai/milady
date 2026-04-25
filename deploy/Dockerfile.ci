@@ -456,10 +456,18 @@ for (const name of apps) {
   }
   fs.writeFileSync(dir + '/plugin.mjs', emptyPlugin);
   // app-steward has extra subpath imports from dist/api/server.js
-  if (name === '@elizaos/app-steward') {
+  if (name === '@elizaos/app-elizamaker') {
+    fs.writeFileSync(dir + '/plugin.mjs', `export class DropService {}
+export function handleDropRoutes() { return false; }
+export default {};`);
+    fs.writeFileSync(dir + '/package.json', JSON.stringify({
+      name, version: '0.0.0-cloud-stub', type: 'module',
+      exports: { './plugin': './plugin.mjs', '.': './plugin.mjs' }
+    }));
+  } else if (name === '@elizaos/app-steward') {
     const routeStub = `export async function resolveWalletExportRejection() { return null; }\nexport async function handleWalletCoreRoutes() { return false; }\nexport default {};`;
     const secStub = `export async function hydrateWalletKeysFromNodePlatformSecureStore() { return null; }\nexport async function deleteWalletSecretsFromOsStore() { return null; }\nexport default {};`;
-    const txServiceStub = `export class TxService {}\nexport default {};`;
+    const txServiceStub = `export class TxService {}\nexport function normalizeJsonRpcUrl(rpcUrl) { return String(rpcUrl || ''); }\nexport async function probeJsonRpcEndpoint() { return { ok: false, error: 'stubbed' }; }\nexport default {};`;
     fs.writeFileSync(dir + '/routes-stub.mjs', routeStub);
     fs.writeFileSync(dir + '/security-stub.mjs', secStub);
     fs.writeFileSync(dir + '/tx-service-stub.mjs', txServiceStub);
@@ -585,6 +593,15 @@ if (telegramPackageState !== 'present') {
   console.log('kept vendored: @elizaos/plugin-telegram');
 }
 fs.writeFileSync(tgDir + '/account-auth-service.mjs', telegramAccountAuthStub);
+try {
+  const pkgPath = tgDir + '/package.json';
+  const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+  pkg.exports ||= {};
+  pkg.exports['./account-auth-service'] = './account-auth-service.mjs';
+  fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
+} catch (err) {
+  console.log('WARN: failed to patch @elizaos/plugin-telegram account-auth-service export:', err?.message || err);
+}
 fs.mkdirSync('eliza/plugins/plugin-telegram/src', { recursive: true });
 fs.writeFileSync('eliza/plugins/plugin-telegram/src/account-auth-service.ts', telegramAccountAuthStub);
 // The compiled agent dist imports from '../../../../plugins/plugin-telegram/src/account-auth-service.js'
@@ -663,9 +680,16 @@ module.exports.getRegisteredCommands = function getRegisteredCommands() { return
     exportName: 'browserBridgePlugin',
     extraEsm: `export const pluginBrowserBridge = browserBridgePlugin;\nexport const plugin = browserBridgePlugin;\n`,
     extraCjs: `module.exports.pluginBrowserBridge = module.exports.browserBridgePlugin;\nmodule.exports.plugin = module.exports.browserBridgePlugin;\n`,
+    extraFiles: {
+      'contracts.mjs': `export const BROWSER_BRIDGE_KINDS = ['chrome', 'safari'];\nexport const BROWSER_BRIDGE_ACTION_KINDS = ['open_url', 'search', 'summarize', 'extract', 'close_tab'];\nexport const BROWSER_BRIDGE_TRACKING_MODES = ['off', 'active_tab', 'all_tabs'];\nexport const BROWSER_BRIDGE_SITE_ACCESS_MODES = ['allow_all', 'deny_all', 'allowlist'];\nexport const BROWSER_BRIDGE_COMPANION_CONNECTION_STATES = ['disconnected', 'connecting', 'connected', 'error'];\nexport const BROWSER_BRIDGE_PACKAGE_PATH_TARGETS = ['chrome', 'safari'];\n`,
+      'service.mjs': `export const BROWSER_BRIDGE_ROUTE_SERVICE_TYPE = 'lifeops_browser_plugin';\nexport class BrowserBridgeRouteService {}\nexport default {};\n`,
+      'schema.mjs': `export const browserBridgeSchema = {};\nexport default browserBridgeSchema;\n`,
+      'packaging.mjs': `export function getBrowserBridgeCompanionPackageStatus() { return { available: false, chrome: null, safari: null }; }\nexport default { getBrowserBridgeCompanionPackageStatus };\n`,
+      'routes.mjs': `export function handleBrowserBridgeRoutes() { return false; }\nexport default {};\n`,
+    },
   },
 ];
-for (const { name, exportName, extraEsm = '', extraCjs = '' } of plugins) {
+for (const { name, exportName, extraEsm = '', extraCjs = '', extraFiles = {} } of plugins) {
   const dir = 'node_modules/' + name;
   if (ensureStubDir(dir) === 'present') {
     console.log('present: ' + name);
@@ -686,24 +710,34 @@ module.exports.${exportName} = stub;
 ${extraCjs}`;
   fs.writeFileSync(dir + '/index.mjs', esm);
   fs.writeFileSync(dir + '/index.cjs', cjs);
+  const exportsMap = {
+    '.': {
+      import: './index.mjs',
+      require: './index.cjs',
+      default: './index.mjs'
+    },
+    './plugin': {
+      import: './index.mjs',
+      require: './index.cjs',
+      default: './index.mjs'
+    }
+  };
+  for (const [fileName, code] of Object.entries(extraFiles)) {
+    fs.writeFileSync(dir + '/' + fileName, code);
+    const subpath = './' + fileName.replace(/\.mjs$/, '');
+    exportsMap[subpath] = {
+      import: './' + fileName,
+      require: './' + fileName,
+      default: './' + fileName
+    };
+  }
   fs.writeFileSync(dir + '/package.json', JSON.stringify({
     name,
     version: '0.0.0-cloud-stub',
     type: 'module',
     main: './index.cjs',
     module: './index.mjs',
-    exports: {
-      '.': {
-        import: './index.mjs',
-        require: './index.cjs',
-        default: './index.mjs'
-      },
-      './plugin': {
-        import: './index.mjs',
-        require: './index.cjs',
-        default: './index.mjs'
-      }
-    }
+    exports: exportsMap
   }));
   console.log('stubbed: ' + name);
 }
