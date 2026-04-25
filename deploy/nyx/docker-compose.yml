@@ -2,7 +2,7 @@ name: nyx
 
 services:
   nyx:
-    image: ghcr.io/milady-ai/agent@sha256:0973bfc5d4083c1881251e7c2731433b7dc8e697e7089ba220e470098079f26f
+    image: ghcr.io/milady-ai/agent@sha256:9db7e2d2af7c9cba19f2510dbf4367a0eafb6e090664c52314ce2f5f5e0ae28d
     container_name: nyx
     restart: unless-stopped
     env_file:
