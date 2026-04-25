@@ -3,6 +3,62 @@ title: Journal des modifications
 description: Nouveautés de Milady — fonctionnalités, améliorations et correctifs.
 ---
 
+<Update label="2026-04-23" description="Semaine du 23 avril ; portefeuille dual et provisionnement de portefeuille cloud, Agent Browser Bridge, brouillons d'automatisation, UX de provisionnement d'agents cloud, connecteur BlueBubbles" tags={["Feature", "Update", "Fix"]}>
+
+<div id="dual-wallet-with-cloud-wallet-provisioning">
+## Portefeuille dual avec provisionnement de portefeuille cloud
+</div>
+
+Votre agent prend désormais en charge une architecture de portefeuille dual dans laquelle les [portefeuilles locaux et cloud](/fr/rest/wallet) coexistent, avec une source principale par chaîne. Lorsque vous vous connectez à [Eliza Cloud](/fr/guides/cloud) avec la fonctionnalité de portefeuille cloud activée, les portefeuilles EVM et Solana sont importés depuis le cloud et définis comme principaux automatiquement — sans configuration manuelle. Vous pouvez changer la source principale à tout moment, et les descripteurs de portefeuille cloud peuvent être réinterrogés à la demande. Si le provisionnement échoue lors de la connexion, l'authentification réussit tout de même et vous pouvez réessayer le provisionnement du portefeuille plus tard.
+
+<div id="agent-browser-bridge">
+## Agent Browser Bridge
+</div>
+
+L'extension LifeOps Browser a été renommée et relocalisée en tant qu'**Agent Browser Bridge** — une extension de navigateur autonome (Chrome et Safari) qui permet à votre agent d'observer et d'agir au sein de vos sessions de navigateur. Le bridge s'exécute comme sa propre application avec un panneau de configuration dédié, des artefacts d'installateur rafraîchis et un nouvel onglet d'accueil dans la vue de l'espace de travail du navigateur. Les flux de travail LifeOps Browser existants continuent de fonctionner avec le nouveau bridge.
+
+<div id="automation-drafts">
+## Brouillons d'automatisation
+</div>
+
+La vue des [automatisations](/fr/guides/cloud) prend désormais en charge la rédaction de flux de travail avant de les activer. Un nouveau volet de brouillons vous permet de composer un flux de travail limité à une salle spécifique, de normaliser son titre et de gérer avec élégance les erreurs d'envoi si le brouillon ne peut pas être livré. Les brouillons restent en dehors de votre liste d'automatisations actives jusqu'à ce que vous soyez prêt à les expédier.
+
+<div id="cloud-agent-provisioning-ux">
+## UX de provisionnement d'agents cloud
+</div>
+
+Le [tableau de bord](/fr/guides/cloud) cloud gère désormais clairement les cartes de runtime non en cours d'exécution. Le bouton principal **Ouvrir** est désactivé et étiqueté avec l'état actuel de l'agent ("démarrage…", "arrêté", "en pause", "inaccessible") pendant que la carte interroge pour la disponibilité, avec un point d'état pulsé pendant le provisionnement et une info-bulle expliquant le temps de démarrage attendu. Le bouton repasse automatiquement à l'état solide **Ouvrir** dès que la sonde de santé renvoie en cours d'exécution. La suppression des agents cloud et le provisionnement en ligne depuis le tableau de bord ont également été restaurés.
+
+<div id="bluebubbles-connector">
+## Connecteur BlueBubbles
+</div>
+
+Un nouveau [connecteur BlueBubbles](/fr/connectors/bluebubbles) permet à votre agent de se connecter à iMessage via un serveur [BlueBubbles](https://bluebubbles.app) auto-hébergé via HTTP. Contrairement au connecteur iMessage natif — qui lit directement la base de données Messages locale — BlueBubbles peut être atteint depuis n'importe quelle machine sur le même réseau, ce qui en fait un bon choix lorsque votre agent ne s'exécute pas sur le Mac qui contient la base de données Messages.
+
+<div id="updates">
+## Mises à jour
+</div>
+
+- **Finition du chat et des pages** — Le contexte de chat avec portée de page, l'en-tête du widget de chat, le titre du chat et la barre latérale du chat ont tous été affinés pour des mises en page plus propres et un contexte plus fiable lors du changement entre les pages.
+- **Modernisation de la barre latérale et de la vue des apps** — Les contrôles de la barre latérale du tableau de bord, le catalogue de la [vue des apps](/fr/dashboard/apps) et la barre latérale des apps ont été nettoyés avec des contrôles repliés et une densité plus serrée. L'éditeur de personnages, la mise en page des [personnages](/fr/agents/character-interface), le panneau des personnages et la barre latérale des personnages ont également été polis pour une expérience de navigation plus cohérente.
+- **Nettoyage de la barre latérale des connecteurs** — La barre latérale de configuration des connecteurs a été nettoyée et polie, avec des bascules plus claires et des interrupteurs de connecteurs pour activer/désactiver les plateformes individuelles.
+- **Téléchargements de connaissances embarqués** — Le système de [connaissances](/fr/guides/knowledge) prend désormais en charge les téléchargements embarqués directement depuis l'éditeur de personnages, afin que vous puissiez joindre du matériel de référence tout en configurant la personnalité de votre agent.
+- **Facturation et statut X (Twitter)** — La facturation du connecteur X est désormais présentée aux côtés des autres utilisations cloud, et les rapports de statut ont été renforcés avec une nouvelle couverture de tests.
+- **Correctif de migration cloud** — Un problème de migration affectant les agents déployés en cloud a été résolu afin que les mises à niveau s'appliquent proprement au premier démarrage.
+- **Modes d'onboarding de runtime iOS** — L'application iOS prend désormais en charge des modes de build de runtime et d'onboarding distincts, offrant aux utilisateurs mobiles une expérience de première exécution plus fluide.
+- **Nettoyage d'accessibilité** — Les micro-étiquettes du tableau de bord, le chrome de page et les affordances de statut ont été nettoyés pour une meilleure parité d'accessibilité.
+
+<div id="bug-fixes">
+## Corrections de bugs
+</div>
+
+- Correction du sidecar n8n qui ne se rétablissait pas proprement dans certaines configurations — le sidecar démarre désormais et bascule de manière fiable
+- Correction des liens profonds d'automatisation qui ne défilaient pas jusqu'à la bonne section lorsqu'ils étaient ouverts depuis la barre latérale — les ancres de hachage se résolvent désormais correctement
+- Correction du tableau de bord cloud qui permettait aux utilisateurs de cliquer sur le bouton Ouvrir sur des cartes de runtime non en cours d'exécution, ce qui menait à des pages mortes
+- Correction des onglets de l'espace de travail du navigateur qui ne se réinitialisaient pas entre les sessions dans Agent Browser Bridge
+
+</Update>
+
 <Update label="2026-04-20" description="Semaine du 20 avril ; routage d'actions plus intelligent, précision de la messagerie multi-canal, améliorations de l'optimiseur d'entraînement" tags={["Update", "Fix"]}>
 
 <div id="smarter-action-routing">
