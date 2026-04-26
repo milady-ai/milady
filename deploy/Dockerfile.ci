@@ -110,6 +110,11 @@ RUN set -x; \
     cp eliza/packages/shared/package.json node_modules/@elizaos/shared/; \
     cp -a eliza/packages/shared/src node_modules/@elizaos/shared/src 2>/dev/null || true; \
     ls node_modules/@elizaos/shared/src/type-guards.ts 2>/dev/null && echo "@elizaos/shared src OK" || echo "WARN: shared src missing"; \
+    rm -rf node_modules/@elizaos/ui; \
+    mkdir -p node_modules/@elizaos/ui; \
+    cp eliza/packages/ui/package.json node_modules/@elizaos/ui/; \
+    cp -a eliza/packages/ui/src node_modules/@elizaos/ui/src 2>/dev/null || true; \
+    ls node_modules/@elizaos/ui/src/index.ts 2>/dev/null && echo "@elizaos/ui src OK" || echo "WARN: ui src missing"; \
     # @elizaos/app-training and sibling runtime apps: copy real package contents
     # instead of falling through to the cloud route stubs below. The develop-side
     # agent now statically imports root named exports such as loadTrainingConfig,
@@ -297,7 +302,7 @@ RUN for app_dir in eliza/apps/app-coding eliza/apps/app-shopify; do \
 # bun creates workspace symlinks like eliza/apps/app-lifeops/node_modules/@elizaos/core
 # and @elizaos/plugin-sql that resolve correctly in CI but point nowhere in Docker.
 # Removing them forces Node's module resolution to walk up to root node_modules.
-RUN find eliza \( -path '*/node_modules/@elizaos/core' -o -path '*/node_modules/@elizaos/shared' -o -path '*/node_modules/@elizaos/app-training' -o -path '*/node_modules/@elizaos/app-steward' -o -path '*/node_modules/@elizaos/app-task-coordinator' -o -path '*/node_modules/@elizaos/app-vincent' -o -path '*/node_modules/@elizaos/app-companion' -o -path '*/node_modules/@elizaos/app-lifeops' -o -path '*/node_modules/@elizaos/plugin-sql' -o -path '*/node_modules/@elizaos/plugin-elizacloud' -o -path '*/node_modules/@elizaos/plugin-discord' -o -path '*/node_modules/@elizaos/plugin-openai' -o -path '*/node_modules/@elizaos/plugin-evm' -o -path '*/node_modules/@elizaos/plugin-pdf' -o -path '*/node_modules/@elizaos/plugin-agent-orchestrator' -o -path '*/node_modules/@elizaos/plugin-telegram' \) -not -path '*/node_modules/.bun/*' \
+RUN find eliza \( -path '*/node_modules/@elizaos/core' -o -path '*/node_modules/@elizaos/shared' -o -path '*/node_modules/@elizaos/ui' -o -path '*/node_modules/@elizaos/app-training' -o -path '*/node_modules/@elizaos/app-steward' -o -path '*/node_modules/@elizaos/app-task-coordinator' -o -path '*/node_modules/@elizaos/app-vincent' -o -path '*/node_modules/@elizaos/app-companion' -o -path '*/node_modules/@elizaos/app-lifeops' -o -path '*/node_modules/@elizaos/plugin-sql' -o -path '*/node_modules/@elizaos/plugin-elizacloud' -o -path '*/node_modules/@elizaos/plugin-discord' -o -path '*/node_modules/@elizaos/plugin-openai' -o -path '*/node_modules/@elizaos/plugin-evm' -o -path '*/node_modules/@elizaos/plugin-pdf' -o -path '*/node_modules/@elizaos/plugin-agent-orchestrator' -o -path '*/node_modules/@elizaos/plugin-telegram' \) -not -path '*/node_modules/.bun/*' \
     | while read p; do rm -rf "$p" && echo "Removed nested: $p"; done; true
 
 # ===== End symlink replacement =====
@@ -353,7 +358,7 @@ RUN CORE_DIR="node_modules/@elizaos/core"; \
 
 # Hoist missing deps from workspace packages to top-level node_modules
 # tsx resolves raw .ts source which imports packages not hoisted by bun
-RUN for pkg_dir in eliza/packages/typescript eliza/packages/shared eliza/packages/agent eliza/apps/app-training eliza/apps/app-steward eliza/apps/app-task-coordinator eliza/apps/app-vincent eliza/apps/app-companion eliza/apps/app-lifeops; do \
+RUN for pkg_dir in eliza/packages/typescript eliza/packages/shared eliza/packages/ui eliza/packages/agent eliza/apps/app-training eliza/apps/app-steward eliza/apps/app-task-coordinator eliza/apps/app-vincent eliza/apps/app-companion eliza/apps/app-lifeops; do \
       if [ -d "$pkg_dir/node_modules" ]; then \
         for dep in $(ls "$pkg_dir/node_modules/" 2>/dev/null | grep -v '^\.'); do \
           if [ ! -e "node_modules/$dep" ] && [ -d "$pkg_dir/node_modules/$dep" ]; then \
