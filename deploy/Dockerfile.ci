@@ -226,6 +226,11 @@ export { vincentPlugin } from './src/plugin.ts';
 export * from './src/routes.ts';
 export { VINCENT_APP_NAME, vincentApp } from './src/vincent-app.ts';
 `);
+patchRoot('@elizaos/app-companion', `
+export * from './src/emotes/index.ts';
+export { emoteAction } from './src/actions/emote.ts';
+export { appCompanionPlugin, default } from './src/plugin.ts';
+`);
 __APP_ROOT_PATCH__
 
 # Link any remaining missing workspace app packages to node_modules
