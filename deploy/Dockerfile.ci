@@ -193,8 +193,8 @@ export * from './src/security/agent-vault-id.ts';
 export * from './src/security/platform-secure-store.ts';
 export * from './src/security/platform-secure-store-node.ts';
 export * from './src/components/inventory/constants.ts';
-export * from './src/utils/env.ts';
-export * from './src/utils/format.ts';
+export * from './src/utils/index.ts';
+export * from '@elizaos/ui';
 export const client = new Proxy({}, {
   get(_target, prop) {
     if (prop === 'then') return undefined;
@@ -203,6 +203,11 @@ export const client = new Proxy({}, {
     };
   },
 });
+export function useApp() { return {}; }
+export function usePtySessions() { return {}; }
+export function useRenderGuard() { return { shouldRender: true }; }
+export function registerOverlayApp() {}
+export function resolveAppAssetUrl(value) { return value; }
 export function mirrorCompatHeaders(req) {
   const aliases = [
     ['x-elizaos-token', 'x-eliza-token'],
