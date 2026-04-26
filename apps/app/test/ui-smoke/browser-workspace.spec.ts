@@ -63,13 +63,19 @@ test("browser workspace can create live tabs and switch selection", async ({
     name: "New tab",
   });
   await expect(newTabButton).toBeVisible({ timeout: 120_000 });
-  await expect(tabsSidebar.getByText("User Tabs")).toBeVisible({
+  await expect(
+    tabsSidebar.getByTestId("browser-tab-section-toggle-user"),
+  ).toBeVisible({
     timeout: 120_000,
   });
-  await expect(tabsSidebar.getByText("Agent Tabs")).toBeVisible({
+  await expect(
+    tabsSidebar.getByTestId("browser-tab-section-toggle-agent"),
+  ).toBeVisible({
     timeout: 120_000,
   });
-  await expect(tabsSidebar.getByText("App Tabs")).toBeVisible({
+  await expect(
+    tabsSidebar.getByTestId("browser-tab-section-toggle-app"),
+  ).toBeVisible({
     timeout: 120_000,
   });
   const addressInput = browserWorkspaceView.locator("input").first();

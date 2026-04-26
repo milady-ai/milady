@@ -1,26 +1,29 @@
----
-title: Twitch Connector
-sidebarTitle: Twitch
-description: Connect your agent to Twitch for live chat and channel interactions using the @elizaos/plugin-twitch package.
----
+# Twitch Connector
 
-Connect your agent to Twitch for live chat monitoring, channel events, and audience interactions.
+Connect your agent to Twitch for live chat monitoring, channel events, and audience interactions using the `@elizaos/plugin-twitch` package.
 
-## Overview
+## Prerequisites
 
-The Twitch connector is an external elizaOS plugin that bridges your agent to Twitch. It handles chat messaging, whispers, and channel event handling. It is auto-enabled when an access token, client ID, or `enabled: true` is configured.
+- A Twitch application registered at the [Twitch Developer Console](https://dev.twitch.tv/console/apps)
+- A Client ID and OAuth access token with chat scopes
 
-## Package Info
+## Configuration
 
-| Field | Value |
-|-------|-------|
-| Package | `@elizaos/plugin-twitch` |
-| Config key | `connectors.twitch` |
-| Auto-enable trigger | `accessToken`, `clientId`, or `enabled: true` in connector config |
+| Name | Required | Description |
+|------|----------|-------------|
+| `TWITCH_ACCESS_TOKEN` | Yes | Twitch OAuth access token with chat scopes |
+| `TWITCH_CLIENT_ID` | No | Twitch application Client ID |
+| `TWITCH_CLIENT_SECRET` | No | Twitch client secret |
+| `TWITCH_REFRESH_TOKEN` | No | Refresh token for automatic token renewal |
+| `TWITCH_USERNAME` | No | Twitch username for the bot |
+| `TWITCH_CHANNEL` | No | Primary channel name to join |
+| `TWITCH_CHANNELS` | No | Comma-separated list of additional channel names to join |
+| `TWITCH_ALLOWED_ROLES` | No | Comma-separated list of allowed roles |
+| `TWITCH_REQUIRE_MENTION` | No | Only respond when mentioned |
 
-## Minimal Configuration
+The connector auto-enables when `accessToken`, `clientId`, or `enabled: true` is set in the connector config.
 
-In `~/.milady/milady.json`:
+Configure in `~/.milady/milady.json`:
 
 ```json
 {
@@ -33,9 +36,7 @@ In `~/.milady/milady.json`:
 }
 ```
 
-## Disabling
-
-To explicitly disable the connector even when credentials are present:
+To disable:
 
 ```json
 {
@@ -49,18 +50,25 @@ To explicitly disable the connector even when credentials are present:
 }
 ```
 
-## Auto-Enable Mechanism
+## Setup
 
-The `plugin-auto-enable.ts` module checks `connectors.twitch` in your config. If any of the fields `accessToken` or `clientId` is truthy, or `enabled` is explicitly `true` (and `enabled` is not explicitly `false`), the runtime automatically loads `@elizaos/plugin-twitch`.
+The `plugin-auto-enable.ts` module checks `connectors.twitch` in your config. The connector auto-enables when `accessToken` or `clientId` is truthy, or when `enabled` is explicitly `true`. Setting `enabled: false` disables auto-enable regardless of other fields.
 
 No environment variable is required to trigger auto-enable — it is driven entirely by the connector config object.
 
 ## Environment Variables
 
-| Variable | Description |
-|----------|-------------|
-| `TWITCH_ACCESS_TOKEN` | Twitch OAuth access token with chat scopes |
-| `TWITCH_CLIENT_ID` | Twitch application Client ID |
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `TWITCH_ACCESS_TOKEN` | Yes | Twitch OAuth access token with chat scopes |
+| `TWITCH_CLIENT_ID` | No | Twitch application Client ID |
+| `TWITCH_CLIENT_SECRET` | No | Twitch client secret |
+| `TWITCH_REFRESH_TOKEN` | No | Refresh token for automatic token renewal |
+| `TWITCH_USERNAME` | No | Twitch username for the bot |
+| `TWITCH_CHANNEL` | No | Primary channel name to join |
+| `TWITCH_CHANNELS` | No | Comma-separated list of additional channels to join |
+| `TWITCH_ALLOWED_ROLES` | No | Comma-separated list of roles allowed to interact |
+| `TWITCH_REQUIRE_MENTION` | No | Only respond when @mentioned |
 
 ## Setup Steps
 
@@ -93,12 +101,12 @@ All fields are defined under `connectors.twitch` in `milady.json`.
 - Live chat monitoring and response
 - Channel event handling
 - Audience interaction management
-
-### Streaming
-
-A separate streaming plugin (`@elizaos/plugin-twitch-streaming`) is available for live stream management. It is configured under the `streaming.twitch` config key rather than `connectors.twitch`. See the streaming documentation for details.
+- Multi-channel support
+- Role-based access filtering
+- Mention-based response filtering
 
 ## Related
 
+- [Twitch plugin reference](/plugin-registry/platform/twitch)
 - [Connectors overview](/guides/connectors)
 - [Configuration reference](/configuration)

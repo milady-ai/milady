@@ -15,23 +15,36 @@ The Solana plugin provides the agent with a Solana keypair wallet and a set of o
 ## Installation
 
 ```bash
-milady plugins install solana
+milady plugins install @elizaos/plugin-solana
 ```
+
+## Auto-Enable
+
+The plugin auto-enables when `HELIUS_API_KEY` is set (this is the `envKey` in `plugins.json`).
 
 ## Configuration
 
 | Environment Variable | Required | Description |
 |---------------------|----------|-------------|
-| `SOLANA_PRIVATE_KEY` | Yes | Base58-encoded private key for the agent's wallet (alias: `WALLET_PRIVATE_KEY`) |
+| `SOLANA_PRIVATE_KEY` | No | Base58-encoded private key for the agent's wallet |
+| `WALLET_PRIVATE_KEY` | No | Alias for `SOLANA_PRIVATE_KEY` |
+| `SOL_ADDRESS` | Yes | Solana wallet address |
+| `SOLANA_PUBLIC_KEY` | No | Solana public key |
+| `WALLET_PUBLIC_KEY` | No | Alias for public key |
 | `SOLANA_RPC_URL` | No | RPC endpoint (default: `https://api.mainnet-beta.solana.com`) |
-| `HELIUS_API_KEY` | No | Helius API key for enhanced RPC and webhooks (also the primary auto-enable trigger) |
-| `BIRDEYE_API_KEY` | No | Birdeye API key for token price and market data |
+| `HELIUS_API_KEY` | Yes | Helius API key for enhanced RPC and webhooks (also the primary auto-enable trigger) |
+| `BIRDEYE_API_KEY` | Yes | Birdeye API key for token price and market data |
+| `SLIPPAGE` | Yes | Default slippage tolerance for swaps |
+| `WALLET_SECRET_SALT` | No | Salt for wallet key derivation |
+| `WALLET_SECRET_KEY` | No | Secret key for wallet derivation |
 
 ```json
 {
   "settings": {
     "secrets": {
-      "SOLANA_PRIVATE_KEY": "your-base58-private-key"
+      "SOLANA_PRIVATE_KEY": "your-base58-private-key",
+      "HELIUS_API_KEY": "your-helius-key",
+      "BIRDEYE_API_KEY": "your-birdeye-key"
     }
   }
 }

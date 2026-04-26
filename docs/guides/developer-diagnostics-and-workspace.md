@@ -14,7 +14,7 @@ This guide is for **people building Milady from source** — editors, agents, an
 
 **Scope:** This is **diagnostics**, not hiding failures. Serious resolution errors still surface normally.
 
-**Related code:** `packages/agent/src/runtime/plugin-collector.ts`, `packages/agent/src/runtime/plugin-resolver.ts`. See also [Plugin resolution and NODE_PATH](../plugin-resolution-and-node-path.md#optional-plugins-why-was-this-package-in-the-load-set).
+**Related code:** `eliza/packages/agent/src/runtime/plugin-collector.ts`, `eliza/packages/agent/src/runtime/plugin-resolver.ts`. See also [Plugin resolution and NODE_PATH](../plugin-resolution-and-node-path.md#optional-plugins-why-was-this-package-in-the-load-set).
 
 ## Browser / stagehand server path
 
@@ -24,7 +24,7 @@ This guide is for **people building Milady from source** — editors, agents, an
 
 **Operational note:** If you do not use browser automation, absence of stagehand is **expected**; messages are intentionally concise at debug level so daily dev is not spammed.
 
-**Related:** `scripts/link-browser-server.mjs`, `packages/agent/src/runtime/eliza.ts` (`ensureBrowserServerLink`, `findPluginBrowserStagehandDir`).
+**Related:** `scripts/link-browser-server.mjs`, `eliza/packages/agent/src/runtime/eliza.ts` (`ensureBrowserServerLink`, `findPluginBrowserStagehandDir`).
 
 ## Life-ops schema migrations (PGlite)
 
@@ -34,7 +34,7 @@ This guide is for **people building Milady from source** — editors, agents, an
 
 **Indexes vs `ALTER TABLE`:** Indexes on `life_task_definitions` and related tables reference **ownership columns** (`domain`, `subject_type`, …). **Why indexes run after ALTERs:** legacy databases created before those columns existed would fail `CREATE INDEX` if indexes ran in the same batch as initial `CREATE TABLE` without the columns present. Core index statements are applied **after** ownership `ALTER TABLE` / backfill steps.
 
-**Tests:** `packages/agent/test/lifeops-pglite-schema.test.ts` covers legacy upgrade paths.
+**Tests:** `eliza/packages/agent/test/lifeops-pglite-schema.test.ts` covers legacy upgrade paths.
 
 ## Workspace dependency scripts
 
@@ -58,7 +58,7 @@ This guide is for **people building Milady from source** — editors, agents, an
 
 **Why this is not “product UI”:** Output is **stdout for local development only** — same category as port tables and log prefixes. **Goal:** faster human/agent scanning of **effective env** (ports, feature flags, sources) when four processes start. It does not change dashboard, chat, or companion rendering.
 
-**Where:** `packages/shared` (table + color + figlet helpers), `scripts/dev-platform.mjs`, `apps/app/vite.config.ts`, `packages/app-core/src/runtime/dev-server.ts`, Electrobun banner helper under `apps/app/electrobun/src/`.
+**Where:** `eliza/packages/shared` (table + color + figlet helpers), `eliza/packages/app-core/scripts/dev-platform.mjs`, `apps/app/vite.config.ts`, `eliza/packages/app-core/src/runtime/dev-server.ts`, Electrobun banner helper under `apps/app/electrobun/src/`.
 
 **Related doc:** [Desktop local development](../apps/desktop-local-development.md#startup-tables-and-terminal-banners).
 

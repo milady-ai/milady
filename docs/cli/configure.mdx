@@ -1,21 +1,38 @@
 ---
 title: "milady configure"
-description: "Interactive configuration for Milady after initial setup."
+description: "Print configuration guidance and common environment variables."
 ---
 
 # `milady configure`
 
-Opens prompts or flows to adjust settings stored in the Milady config file (under your state directory).
+Prints a summary of how to read and edit configuration, along with common environment variable names for model providers. This is a non-interactive help command -- it does not modify any files.
 
-## Examples
+## Output
 
-```bash
-milady configure
+The command displays:
+
+- How to read config values with `milady config get <key>`.
+- The config file path (`~/.eliza/eliza.json` by default).
+- Common environment variables: `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `AI_GATEWAY_API_KEY`, `GOOGLE_API_KEY`.
+
+## What it shows
+
+- Which model providers are detected and their status
+- Common environment variables and where to set them
+- Current config file path and state directory
+- Suggested next steps based on your configuration
+
+This command does not accept flags. For reading and writing config values, use [`milady config`](/cli/config). For interactive key setup, use [`milady setup`](/cli/setup).
+
+## Output
+
 ```
-
-Run `milady configure --help` for scope and mode flags.
+Set values with:
+  milady config get <key>     Read a config value
+  Edit ~/.milady/milady.json directly for full control.
 
 ## Related
 
 - [Configuration](/configuration)
-- [Config schema](/config-schema)
+- [`milady config`](/cli/config) -- read or display config values
+- [`milady setup`](/cli/setup) -- interactive first-time setup

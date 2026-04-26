@@ -4,7 +4,7 @@ sidebarTitle: "Agentes"
 description: "Endpoints de la API REST para el ciclo de vida del agente, administración y transferencia (exportar/importar)."
 ---
 
-Todos los endpoints de agentes requieren que el runtime del agente esté inicializado. El servidor de la API se ejecuta en el puerto **2138** por defecto y todas las rutas tienen el prefijo `/api/`. Cuando `MILADY_API_TOKEN` está configurado, inclúyelo como un token `Bearer` en el encabezado `Authorization`.
+Todos los endpoints de agentes requieren que el runtime del agente esté inicializado. El servidor de la API se ejecuta en el puerto **31337** por defecto y todas las rutas tienen el prefijo `/api/`. Cuando `MILADY_API_TOKEN` está configurado, inclúyelo como un token `Bearer` en el encabezado `Authorization`.
 
 <div id="endpoints">
 

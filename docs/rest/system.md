@@ -37,6 +37,7 @@ Returns the agent's current state, name, model, uptime, cloud connection status,
   "state": "running",
   "agentName": "Milady",
   "model": "@elizaos/plugin-anthropic",
+  "startedAt": 1718000000000,
   "uptime": 3600000,
   "startup": {
     "phase": "ready",
@@ -44,7 +45,9 @@ Returns the agent's current state, name, model, uptime, cloud connection status,
   },
   "cloud": {
     "connectionStatus": "disconnected",
-    "activeAgentId": null
+    "activeAgentId": null,
+    "cloudProvisioned": false,
+    "hasApiKey": false
   },
   "pendingRestart": false,
   "pendingRestartReasons": []
@@ -56,6 +59,7 @@ Returns the agent's current state, name, model, uptime, cloud connection status,
 | `state` | string | `not_started`, `starting`, `running`, `paused`, `stopped`, `restarting`, or `error` |
 | `agentName` | string | Current agent display name |
 | `model` | string\|undefined | Active model/plugin identifier |
+| `startedAt` | number\|undefined | Unix timestamp (ms) when the agent started |
 | `uptime` | number\|undefined | Milliseconds since the agent started |
 | `startup` | object | Startup diagnostics with `phase`, `attempt`, and optional error fields |
 | `pendingRestart` | boolean | Whether configuration changes require a restart |
@@ -115,10 +119,10 @@ Deep runtime introspection endpoint for advanced debugging. Returns detailed inf
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `depth` | number | 3 | Max object nesting depth |
-| `maxArrayLength` | number | 20 | Max array elements to include |
-| `maxObjectEntries` | number | 50 | Max object entries to include |
-| `maxStringLength` | number | 500 | Max string truncation length |
+| `depth` | number | 10 | Max object nesting depth (capped at 24) |
+| `maxArrayLength` | number | 1000 | Max array elements to include |
+| `maxObjectEntries` | number | 1000 | Max object entries to include |
+| `maxStringLength` | number | 8000 | Max string truncation length |
 
 **Response**
 
@@ -205,23 +209,15 @@ available independently.
 
 ### POST /api/restart
 
-Restart the server process. Sets the agent state to `restarting`, broadcasts a status update, responds immediately, and exits after a 1-second delay.
+Restart the server process. Sets the agent state to `restarting`, broadcasts a status update, and responds immediately. The process exits after a short delay.
 
 **Response**
 
 ```json
 {
-  "ok": true,
-  "message": "Restarting...",
-  "restarting": true
+  "ok": true
 }
 ```
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `ok` | boolean | Always `true` |
-| `message` | string | Human-readable status message |
-| `restarting` | boolean | Confirms the server is entering a restart cycle |
 
 ---
 
@@ -354,9 +350,9 @@ Execute a shell command on the server and stream output via WebSocket. Responds 
 |-------|------|----------|-------------|
 | `command` | string | Yes | Shell command to execute |
 | `clientId` | string | Conditional | WebSocket client ID to receive output. Required if not provided via header. |
-| `terminalToken` | string | Conditional | Required when `MILADY_TERMINAL_RUN_TOKEN` is configured |
+| `terminalToken` | string | Conditional | Required when `ELIZA_TERMINAL_RUN_TOKEN` is configured |
 
-The `clientId` can alternatively be sent via the `X-Milady-Client-Id` header.
+The `clientId` can alternatively be sent via the `X-Eliza-Client-Id` header.
 
 **Constraints**
 
@@ -383,7 +379,7 @@ Output is streamed via WebSocket:
 
 | Status | Condition |
 |--------|-----------|
-| 400 | Missing client ID (provide `clientId` in body or `X-Milady-Client-Id` header) |
+| 400 | Missing client ID (provide `clientId` in body or `X-Eliza-Client-Id` header) |
 | 400 | Missing or empty command |
 | 403 | Shell access is disabled |
 | 403 | Terminal authorization required (invalid `terminalToken`) |

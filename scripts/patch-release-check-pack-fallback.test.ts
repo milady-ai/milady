@@ -26,8 +26,8 @@ const upstreamRunPackDryBlock = `function runPackDry(): PackResult[] {
 
       // Last-resort fallback if sanitizing didn't resolve the
       // EOVERRIDE (e.g. npm found a different override conflict).
-      // \`bun pm pack --dry-run\` trips over the Bun 1.3.11 lockfile
-      // parser bug (Duplicate package path at bun.lock:2034:5) under
+      // \`bun pm pack --dry-run\` can trip over Bun lockfile parser drift
+      // (Duplicate package path at bun.lock:2034:5) under
       // SKIP_LOCAL_UPSTREAMS, so we try it last and tolerate the
       // parser failure by treating it as a soft-skip — the
       // snapshot's file/dependency assertions still run against the
@@ -47,7 +47,7 @@ const upstreamRunPackDryBlock = `function runPackDry(): PackResult[] {
           bunOutput.includes("InvalidPackageKey")
         ) {
           console.warn(
-            "release-check: bun pm pack --dry-run failed with a known Bun 1.3.11 lockfile parser error; returning empty file list (CI contract suite will still validate workflow snippets).",
+            "release-check: bun pm pack --dry-run failed with a known Bun lockfile parser error; returning empty file list (CI contract suite will still validate workflow snippets).",
           );
           return [{ files: [] }];
         }
@@ -72,6 +72,30 @@ const upstreamLifeOpsWorkflowSnippetBlock = `const requiredWorkflowSnippets = [
   "name: Attach LifeOps Browser assets to GitHub release",
   "pattern: lifeops-browser-*",
 ];`;
+const upstreamReleaseWorkflowDriftBlock = `const requiredWorkflowSnippets = [
+  'BUN_VERSION: "1.3.11"',
+  "name: Build patched Electrobun CLI for Windows",
+  'node eliza/packages/app-core/scripts/build-patched-electrobun-cli.mjs "$' +
+    '{{ steps.resolve-electrobun.outputs.package-dir }}"',
+  "ELIZAOS_CLOUD_API_KEY: $" + "{{ secrets.ELIZAOS_CLOUD_API_KEY }}",
+  "name: Run cloud live regression suite",
+  "run: bun run test:live:cloud",
+];
+const _requiredPatchedElectrobunCliSnippets = [
+  "--target=bun-windows-x64-baseline",
+];
+const requiredElectrobunPrWorkflowSnippets = [
+  'BUN_VERSION: "1.3.11"',
+];
+function assertMacArtifactStagerLooksCorrect() {
+  const requiredSnippets = [
+    'find -L "$ARTIFACTS_DIR" -maxdepth 1 -type f -name "*-macos-*.app.tar.zst"',
+  ];
+}`;
+const matrixArtifactNameSnippet =
+  '"$' + "{{ matrix.platform.artifact-name }}" + '"';
+const buildTargetBunTargetSnippet =
+  "--target=" + "$" + "{buildTarget.bunTarget}";
 
 describe("patch-release-check-pack-fallback", () => {
   it("patches the upstream release-check pack fallback and hotspot blocks", () => {
@@ -113,6 +137,36 @@ describe("patch-release-check-pack-fallback", () => {
     );
     expect(patched).toContain("pattern: browser-bridge-*");
     expect(patched).not.toContain("lifeops-browser-*");
+  });
+
+  it("rewrites stale release workflow contract snippets to current CI wiring", () => {
+    const patched = applyReleaseCheckPackFallback(
+      `before\n${upstreamReleaseWorkflowDriftBlock}\nafter\n`,
+    );
+
+    expect(patched).toContain('BUN_VERSION: "1.3.13"');
+    expect(patched).toContain("name: Build patched Electrobun CLI");
+    expect(patched).toContain(matrixArtifactNameSnippet);
+    expect(patched).toContain("function resolveBuildTarget(value) {");
+    expect(patched).toContain(buildTargetBunTargetSnippet);
+    expect(patched).toContain(
+      "secrets.ELIZAOS_CLOUD_API_KEY != '' && secrets.ELIZAOS_CLOUD_API_KEY || secrets.ELIZACLOUD_API_KEY",
+    );
+    expect(patched).toContain("name: Run optional cloud live regression suite");
+    expect(patched).toContain(
+      'if bun run test:live:cloud 2>&1 | tee \\"$log_file\\"; then',
+    );
+    expect(patched).toContain(
+      'for tarball_pattern in "*-macos-*.app.tar.zst" "*-macos-*.app.tar.gz" "*-macos-*.tar.gz"; do',
+    );
+    expect(patched).toContain('tar -xzf "$TARBALL_PATH" -C "$EXTRACT_DIR"');
+    expect(patched).not.toContain('BUN_VERSION: "1.3.11"');
+    expect(patched).not.toContain(
+      "name: Build patched Electrobun CLI for Windows",
+    );
+    expect(patched).not.toContain("name: Run cloud live regression suite");
+    expect(patched).not.toContain("run: bun run test:live:cloud");
+    expect(patched).not.toContain("--target=bun-windows-x64-baseline");
   });
 
   it("patches hotspot blocks that drifted from the original upstream shape", () => {

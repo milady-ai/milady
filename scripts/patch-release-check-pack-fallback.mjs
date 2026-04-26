@@ -60,8 +60,8 @@ const oldRunPackDryBlock = `function runPackDry(): PackResult[] {
 
       // Last-resort fallback if sanitizing didn't resolve the
       // EOVERRIDE (e.g. npm found a different override conflict).
-      // \`bun pm pack --dry-run\` trips over the Bun 1.3.11 lockfile
-      // parser bug (Duplicate package path at bun.lock:2034:5) under
+      // \`bun pm pack --dry-run\` can trip over Bun lockfile parser drift
+      // (Duplicate package path at bun.lock:2034:5) under
       // SKIP_LOCAL_UPSTREAMS, so we try it last and tolerate the
       // parser failure by treating it as a soft-skip — the
       // snapshot's file/dependency assertions still run against the
@@ -81,7 +81,7 @@ const oldRunPackDryBlock = `function runPackDry(): PackResult[] {
           bunOutput.includes("InvalidPackageKey")
         ) {
           console.warn(
-            "release-check: bun pm pack --dry-run failed with a known Bun 1.3.11 lockfile parser error; returning empty file list (CI contract suite will still validate workflow snippets).",
+            "release-check: bun pm pack --dry-run failed with a known Bun lockfile parser error; returning empty file list (CI contract suite will still validate workflow snippets).",
           );
           return [{ files: [] }];
         }
@@ -108,7 +108,7 @@ const patchedRunPackDryBlock = `function runBunPackDry(): PackResult[] {
       bunOutput.includes("InvalidPackageKey")
     ) {
       console.warn(
-        "release-check: bun pm pack --dry-run failed with a known Bun 1.3.11 lockfile parser error; returning empty file list (CI contract suite will still validate workflow snippets).",
+        "release-check: bun pm pack --dry-run failed with a known Bun lockfile parser error; returning empty file list (CI contract suite will still validate workflow snippets).",
       );
       return [{ files: [] }];
     }
@@ -148,6 +148,7 @@ const canonicalLocalPackHotspotPaths = [
   "apps/app/dist/animations",
 ];
 const workflowSnippetCompatReplacements = [
+  ['BUN_VERSION: "1.3.11"', 'BUN_VERSION: "1.3.13"'],
   [
     "name: Build LifeOps Browser companions",
     "name: Build Agent Browser Bridge companions",
@@ -174,6 +175,18 @@ const workflowSnippetCompatReplacements = [
     "name: Attach Agent Browser Bridge assets to GitHub release",
   ],
   ["pattern: lifeops-browser-*", "pattern: browser-bridge-*"],
+  [
+    "name: Build patched Electrobun CLI for Windows",
+    "name: Build patched Electrobun CLI",
+  ],
+  [
+    "name: Run cloud live regression suite",
+    "name: Run optional cloud live regression suite",
+  ],
+  [
+    "run: bun run test:live:cloud",
+    'if bun run test:live:cloud 2>&1 | tee \\"$log_file\\"; then',
+  ],
 ];
 
 function getLocalPackHotspotPathsBlock(source) {
@@ -224,6 +237,79 @@ function hasRequiredLocalPackHotspots(source) {
   return entries.includes("dist") && entries.includes("apps/app/dist");
 }
 
+function patchCloudSecretSnippet(source) {
+  return source.replace(
+    /"ELIZAOS_CLOUD_API_KEY: \$" \+\s*"{{ secrets\.ELIZAOS_CLOUD_API_KEY }}"/g,
+    `"ELIZAOS_CLOUD_API_KEY: $" +
+    "{{ secrets.ELIZAOS_CLOUD_API_KEY != '' && secrets.ELIZAOS_CLOUD_API_KEY || secrets.ELIZACLOUD_API_KEY }}"`,
+  );
+}
+
+const buildTargetBunTargetSnippet =
+  "--target=" + "$" + "{buildTarget.bunTarget}";
+const matrixArtifactNameSnippet =
+  '"$' + "{{ matrix.platform.artifact-name }}" + '"';
+const matrixArtifactNameSourceLine = `  '${matrixArtifactNameSnippet}',`;
+const electrobunPackageDirSourceLine =
+  "    '{{ steps.resolve-electrobun.outputs.package-dir }}\"',";
+
+function patchPatchedElectrobunCliSnippets(source) {
+  if (
+    source.includes('"function resolveBuildTarget(value) {"') ||
+    !source.includes('"--target=bun-windows-x64-baseline"')
+  ) {
+    return source;
+  }
+
+  return source.replace(
+    '  "--target=bun-windows-x64-baseline",',
+    [
+      '  "function resolveBuildTarget(value) {",',
+      `  "${buildTargetBunTargetSnippet}",`,
+      '  "[electrobun-build] Bun entry:",',
+      '  "targetPaths.BUN_BINARY",',
+      '  "Bun CLI fallback succeeded",',
+    ].join("\n"),
+  );
+}
+
+function patchElectrobunPlatformArgumentSnippet(source) {
+  if (
+    source.includes(matrixArtifactNameSourceLine.trim()) ||
+    !source.includes(electrobunPackageDirSourceLine.trim())
+  ) {
+    return source;
+  }
+
+  return source.replace(
+    electrobunPackageDirSourceLine,
+    [electrobunPackageDirSourceLine, matrixArtifactNameSourceLine].join("\n"),
+  );
+}
+
+function patchMacArtifactStagerSnippet(source) {
+  if (
+    source.includes(
+      '\'for tarball_pattern in "*-macos-*.app.tar.zst" "*-macos-*.app.tar.gz" "*-macos-*.tar.gz"; do\'',
+    ) ||
+    !source.includes(
+      '\'find -L "$ARTIFACTS_DIR" -maxdepth 1 -type f -name "*-macos-*.app.tar.zst"\'',
+    )
+  ) {
+    return source;
+  }
+
+  return source.replace(
+    '    \'find -L "$ARTIFACTS_DIR" -maxdepth 1 -type f -name "*-macos-*.app.tar.zst"\',',
+    [
+      '    \'for tarball_pattern in "*-macos-*.app.tar.zst" "*-macos-*.app.tar.gz" "*-macos-*.tar.gz"; do\',',
+      '    \'tar --zstd -xf "$TARBALL_PATH" -C "$EXTRACT_DIR"\',',
+      '    \'tar -xzf "$TARBALL_PATH" -C "$EXTRACT_DIR"\',',
+      '    \'TARBALL_BASENAME="$(basename "$TARBALL_PATH")"\',',
+    ].join("\n"),
+  );
+}
+
 export function applyReleaseCheckPackFallback(source) {
   let patched = source;
 
@@ -242,10 +328,15 @@ export function applyReleaseCheckPackFallback(source) {
   }
 
   for (const [from, to] of workflowSnippetCompatReplacements) {
-    if (!patched.includes(to) && patched.includes(from)) {
+    if (patched.includes(from)) {
       patched = patched.replaceAll(from, to);
     }
   }
+
+  patched = patchCloudSecretSnippet(patched);
+  patched = patchPatchedElectrobunCliSnippets(patched);
+  patched = patchElectrobunPlatformArgumentSnippet(patched);
+  patched = patchMacArtifactStagerSnippet(patched);
 
   return patched;
 }

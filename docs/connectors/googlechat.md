@@ -1,26 +1,26 @@
----
-title: Google Chat Connector
-sidebarTitle: Google Chat
-description: Connect your agent to Google Chat using the @elizaos/plugin-google-chat package.
----
+# Google Chat Connector
 
-Connect your agent to Google Chat for DMs and space conversations.
+Connect your agent to Google Chat for DMs and space conversations using the `@elizaos/plugin-google-chat` package.
 
-## Overview
+## Prerequisites
 
-The Google Chat connector is an external elizaOS plugin that bridges your agent to Google Chat via a Google Cloud service account. It is auto-enabled by the runtime when a valid token or service account configuration is detected in your connector configuration.
+- A Google Cloud project with the Google Chat API enabled
+- A service account with Chat Bot permissions
 
-## Package Info
+## Configuration
 
 | Field | Value |
 |-------|-------|
 | Package | `@elizaos/plugin-google-chat` |
+| Registry ID | `google-chat` |
 | Config key | `connectors.googlechat` |
 | Auto-enable trigger | `botToken`, `token`, or `apiKey` is truthy in connector config |
 
-## Minimal Configuration
+The connector auto-enables when `botToken`, `token`, or `apiKey` is truthy in the connector config. The `serviceAccountFile`/`audience` fields alone do not trigger auto-enable -- you must include one of the trigger fields or add the plugin to `plugins.allow`.
 
-The connector auto-enables only when `botToken`, `token`, or `apiKey` is present. The `serviceAccountFile`/`audience` fields alone do NOT trigger auto-enable — you must also include one of the trigger fields or add the plugin to `plugins.allow`.
+Configure in `~/.milady/milady.json`:
+
+Google Chat authenticates via a service account JSON file, not an API key. The `apiKey` field below is only used to trigger auto-enable — it has no functional role in authentication.
 
 ```json
 {
@@ -54,28 +54,45 @@ If you don't want to set a trigger field, add the plugin explicitly:
 }
 ```
 
-## Disabling
-
-To explicitly disable the connector even when credentials are present:
+To disable:
 
 ```json
 {
   "connectors": {
     "googlechat": {
-      "serviceAccountFile": "./service-account.json",
-      "audienceType": "project-number",
-      "audience": "123456789",
       "enabled": false
     }
   }
 }
 ```
 
-## Auto-Enable Mechanism
+## Setup
 
-The `plugin-auto-enable.ts` module checks `connectors.googlechat` in your config. If any of the fields `botToken`, `token`, or `apiKey` is truthy (and `enabled` is not explicitly `false`), the runtime automatically loads `@elizaos/plugin-google-chat`.
+1. Create a Google Cloud project and enable the Google Chat API.
+2. Create a service account with the Chat Bot role.
+3. Download the service account key file or configure inline credentials.
+4. Configure the Chat app in the Google Cloud Console with an HTTP endpoint pointing to your Milady instance.
+5. Add the credentials and webhook path to your Milady config.
+6. Start your agent.
 
-No environment variable is required to trigger auto-enable — it is driven entirely by the connector config object.
+## Features
+
+## Environment Variables
+
+The following environment variables are supported by the plugin:
+
+| Variable | Description |
+|----------|-------------|
+| `GOOGLE_CHAT_SERVICE_ACCOUNT_FILE` | Path to service account JSON key file |
+| `GOOGLE_CHAT_SERVICE_ACCOUNT` | Inline service account JSON |
+| `GOOGLE_APPLICATION_CREDENTIALS` | Standard Google Cloud credentials path |
+| `GOOGLE_CHAT_AUDIENCE_TYPE` | Authentication audience type (`app-url` or `project-number`) |
+| `GOOGLE_CHAT_AUDIENCE` | App URL or project number |
+| `GOOGLE_CHAT_BOT_USER` | Bot user identifier |
+| `GOOGLE_CHAT_WEBHOOK_PATH` | Webhook endpoint path |
+| `GOOGLE_CHAT_SPACES` | Comma-separated list of spaces to join |
+| `GOOGLE_CHAT_ENABLED` | Set to `true` to enable |
+| `GOOGLE_CHAT_REQUIRE_MENTION` | Only respond when @mentioned |
 
 ## Full Configuration Reference
 
@@ -170,7 +187,6 @@ Account-level settings override the base connector settings. Use `defaultAccount
 
 ## Related
 
-- [Google Chat plugin reference](/plugin-registry/platform/googlechat)
-- [MS Teams connector reference](/connectors/msteams)
+- [MS Teams connector](/connectors/msteams)
 - [Connectors overview](/guides/connectors)
 - [Configuration reference](/configuration)

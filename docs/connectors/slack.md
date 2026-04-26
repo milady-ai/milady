@@ -1,24 +1,27 @@
----
-title: Slack Connector
-sidebarTitle: Slack
-description: Connect your agent to Slack workspaces using the @elizaos/plugin-slack package.
----
+# Slack Connector
 
-## Overview
+Connect your agent to Slack workspaces using the `@elizaos/plugin-slack` package.
 
-The Slack connector is an external elizaOS plugin that bridges your agent to Slack workspaces. It supports two transport modes (Socket Mode and HTTP webhooks), per-channel configuration, DM policies, slash commands, multi-account support, and fine-grained action permissions. The connector is auto-enabled by the runtime when a valid token is detected in your connector configuration.
+## Prerequisites
 
-## Package Info
+- A Slack app with a Bot Token (`xoxb-...`) and an App-Level Token (`xapp-...`) for Socket Mode
+- Alternatively, a Signing Secret for HTTP webhook mode
 
-| Field | Value |
-|-------|-------|
-| Package | `@elizaos/plugin-slack` |
-| Config key | `connectors.slack` |
-| Auto-enable trigger | `botToken`, `token`, or `apiKey` is truthy in connector config |
+## Configuration
 
-## Minimal Configuration
+| Name | Required | Description |
+|------|----------|-------------|
+| `SLACK_APP_TOKEN` | Yes | Slack App Token (`xapp-...`) for Socket Mode connections |
+| `SLACK_BOT_TOKEN` | Yes | Slack Bot Token (`xoxb-...`) for API authentication |
+| `SLACK_USER_TOKEN` | No | Optional User Token (`xoxp-...`) for enhanced permissions |
+| `SLACK_SIGNING_SECRET` | No | Slack Signing Secret for verifying HTTP webhook requests |
+| `SLACK_CHANNEL_IDS` | No | Comma-separated list of channel IDs to restrict the bot to |
+| `SLACK_SHOULD_IGNORE_BOT_MESSAGES` | No | If `true`, ignore messages from other bots |
+| `SLACK_SHOULD_RESPOND_ONLY_TO_MENTIONS` | No | If `true`, only respond when @mentioned |
 
-In `~/.milady/milady.json`:
+The connector auto-enables when `botToken`, `token`, or `apiKey` is truthy in the connector config and `enabled` is not explicitly `false`.
+
+Configure in `~/.milady/milady.json`:
 
 ```json
 {
@@ -31,11 +34,21 @@ In `~/.milady/milady.json`:
 }
 ```
 
-The default transport is **Socket Mode**, which requires both `botToken` and `appToken`. If you only provide `botToken`, auto-enable will trigger but Socket Mode will fail to connect. For HTTP mode, `appToken` is not needed — set `"mode": "http"` and provide a `signingSecret` instead.
+The default transport is **Socket Mode**, which requires both `botToken` and `appToken`. Providing only `botToken` is enough to trigger auto-enable, but Socket Mode will fail to connect without `appToken`. For HTTP webhook mode, `appToken` is not needed — set `"mode": "http"` and provide a `signingSecret` instead:
 
-## Disabling
+```json
+{
+  "connectors": {
+    "slack": {
+      "botToken": "xoxb-your-bot-token",
+      "signingSecret": "your-signing-secret",
+      "mode": "http"
+    }
+  }
+}
+```
 
-To explicitly disable the connector even when a token is present:
+To disable:
 
 ```json
 {
@@ -48,21 +61,29 @@ To explicitly disable the connector even when a token is present:
 }
 ```
 
-## Auto-Enable Mechanism
+## Setup
 
-The `plugin-auto-enable.ts` module checks `connectors.slack` in your config. If any of the fields `botToken`, `token`, or `apiKey` is truthy (and `enabled` is not explicitly `false`), the runtime automatically loads `@elizaos/plugin-slack`.
+1. Create a Slack app at [api.slack.com/apps](https://api.slack.com/apps).
+2. Enable **Socket Mode** and generate an **App-Level Token** (`xapp-...`).
+3. Under **OAuth & Permissions**, add the required bot scopes and install to your workspace to get a **Bot Token** (`xoxb-...`).
+4. Add both tokens to `connectors.slack` in your config.
+5. Start your agent -- the Slack connector will auto-enable.
 
-No environment variable is required to trigger auto-enable — it is driven entirely by the connector config object.
+## Features
 
 ## Environment Variables
 
 When the connector is loaded, the runtime pushes the following secrets from your config into `process.env` for the plugin to consume:
 
-| Variable | Source | Description |
-|----------|--------|-------------|
-| `SLACK_BOT_TOKEN` | `botToken` | Bot token (`xoxb-...`) |
-| `SLACK_APP_TOKEN` | `appToken` | App-level token (`xapp-...`) for Socket Mode |
-| `SLACK_USER_TOKEN` | `userToken` | User token (`xoxp-...`) for user-scoped actions |
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `SLACK_BOT_TOKEN` | Yes | Bot token (`xoxb-...`) |
+| `SLACK_APP_TOKEN` | Yes | App-level token (`xapp-...`) for Socket Mode |
+| `SLACK_USER_TOKEN` | No | User token (`xoxp-...`) for user-scoped actions |
+| `SLACK_SIGNING_SECRET` | No | Signing secret for HTTP mode request verification |
+| `SLACK_CHANNEL_IDS` | No | Comma-separated list of channel IDs to restrict the bot to |
+| `SLACK_SHOULD_IGNORE_BOT_MESSAGES` | No | Ignore messages from other bots |
+| `SLACK_SHOULD_RESPOND_ONLY_TO_MENTIONS` | No | Only respond when @mentioned |
 
 ## Transport Modes
 

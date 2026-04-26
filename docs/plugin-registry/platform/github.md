@@ -8,10 +8,12 @@ The GitHub plugin connects Milady agents to GitHub, enabling interactions with r
 
 **Package:** `@elizaos/plugin-github`
 
+> **Note:** GitHub is categorized as a **feature** plugin in the registry, not a connector. It provides repository management, issue tracking, and PR workflows.
+
 ## Installation
 
 ```bash
-milady plugins install github
+milady plugins install @elizaos/plugin-github
 ```
 
 ## Setup
@@ -53,15 +55,24 @@ export GITHUB_REPO=YOUR_GITHUB_REPO
 | `owner` | No | Default GitHub repository owner (username or organization) |
 | `repo` | No | Default GitHub repository name |
 | `branch` | No | Default branch name (defaults to `main`) |
+| `appId` | No | GitHub App ID for app-based authentication |
+| `appPrivateKey` | No | GitHub App private key for app-based authentication |
+| `installationId` | No | GitHub App installation ID |
+| `webhookSecret` | No | Secret for validating GitHub webhook payloads |
 | `enabled` | No | Set `false` to disable (default: `true`) |
 
 ## Environment Variables
 
-```bash
-export GITHUB_API_TOKEN=YOUR_API_TOKEN
-export GITHUB_OWNER=YOUR_GITHUB_OWNER
-export GITHUB_REPO=YOUR_GITHUB_REPO
-```
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `GITHUB_API_TOKEN` | Yes | GitHub personal access token (primary auto-enable trigger) |
+| `GITHUB_OWNER` | No | Default repository owner (username or organization) |
+| `GITHUB_REPO` | No | Default repository name |
+| `GITHUB_BRANCH` | No | Default branch name |
+| `GITHUB_APP_ID` | No | GitHub App ID (for GitHub App authentication) |
+| `GITHUB_APP_PRIVATE_KEY` | No | GitHub App private key |
+| `GITHUB_INSTALLATION_ID` | No | GitHub App installation ID |
+| `GITHUB_WEBHOOK_SECRET` | No | Secret for webhook signature verification |
 
 ## Related
 

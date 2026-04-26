@@ -26,7 +26,7 @@ The MCP marketplace is accessed through the REST API (there is no dedicated CLI 
 
 ```bash
 # Search for MCP servers
-curl "http://localhost:2138/api/mcp/marketplace/search?q=filesystem&limit=10" \
+curl "http://localhost:31337/api/mcp/marketplace/search?q=filesystem&limit=10" \
   -H "Authorization: Bearer your-token"
 ```
 
@@ -34,7 +34,7 @@ curl "http://localhost:2138/api/mcp/marketplace/search?q=filesystem&limit=10" \
 
 ```bash
 # Get full details for a specific server
-curl "http://localhost:2138/api/mcp/marketplace/server/filesystem" \
+curl "http://localhost:31337/api/mcp/marketplace/server/filesystem" \
   -H "Authorization: Bearer your-token"
 ```
 
@@ -44,7 +44,7 @@ Installation writes the server config into your `milady.json` under the `mcp.ser
 
 ```bash
 # Add a server to your config
-curl -X POST "http://localhost:2138/api/mcp/config/server" \
+curl -X POST "http://localhost:31337/api/mcp/config/server" \
   -H "Authorization: Bearer your-token" \
   -H "Content-Type: application/json" \
   -d '{
@@ -61,14 +61,14 @@ curl -X POST "http://localhost:2138/api/mcp/config/server" \
 
 ```bash
 # List all configured MCP servers (secrets redacted)
-curl "http://localhost:2138/api/mcp/config" \
+curl "http://localhost:31337/api/mcp/config" \
   -H "Authorization: Bearer your-token"
 ```
 
 ### Remove a Server
 
 ```bash
-curl -X DELETE "http://localhost:2138/api/mcp/config/server/filesystem" \
+curl -X DELETE "http://localhost:31337/api/mcp/config/server/filesystem" \
   -H "Authorization: Bearer your-token"
 ```
 
@@ -76,7 +76,7 @@ curl -X DELETE "http://localhost:2138/api/mcp/config/server/filesystem" \
 
 ```bash
 # See which MCP servers are currently connected
-curl "http://localhost:2138/api/mcp/status" \
+curl "http://localhost:31337/api/mcp/status" \
   -H "Authorization: Bearer your-token"
 ```
 

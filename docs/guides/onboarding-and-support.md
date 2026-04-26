@@ -10,12 +10,22 @@ Goal: a **working first configuration in minutes**, and a **clear template** whe
 
 ## 1. Install and launch
 
+**Fresh clone:**
+
+```bash
+./install        # Unix / macOS (initializes submodules + installs deps)
+# install.cmd    # Windows
+bun run dev      # API on :31337, UI on :2138 with hot reload
+```
+
+**Existing checkout (submodules already on disk):**
+
 ```bash
 bun install
 bun run dev
 ```
 
-Open the web or desktop UI and complete first-run onboarding. A slower cold start the first time is normal.
+Open the web UI at `http://localhost:2138` or the desktop app and complete first-run onboarding. A slower cold start the first time is normal.
 
 ## 2. First-run paths
 

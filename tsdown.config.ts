@@ -5,12 +5,15 @@ const env = {
 // Native .node packages must stay external; rolldown cannot bundle shared libraries.
 const nativeExternals = [
   "node-llama-cpp",
+  "@node-rs/argon2",
+  /^@node-rs\/argon2-/,
   "@reflink/reflink",
   "@reflink/reflink-darwin-arm64",
   "@reflink/reflink-darwin-x64",
   "@reflink/reflink-linux-arm64-gnu",
   "@reflink/reflink-linux-x64-gnu",
   "fsevents",
+  /^@node-rs\/argon2(?:-|$)/,
   // Keep React external for Node server builds; bundling it introduces incompatible wrappers.
   "react",
   "react-dom",

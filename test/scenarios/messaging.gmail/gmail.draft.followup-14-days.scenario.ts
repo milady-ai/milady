@@ -1,8 +1,5 @@
 import { scenario } from "@elizaos/scenario-schema";
-import {
-  expectTurnToCallAction,
-  judgeRubric,
-} from "../_helpers/action-assertions.ts";
+import { judgeRubric } from "../_helpers/action-assertions.ts";
 
 export default scenario({
   id: "gmail.draft.followup-14-days",
@@ -35,15 +32,21 @@ export default scenario({
       name: "find followups",
       room: "main",
       text: "Who haven't I followed up with?",
-      assertTurn: expectTurnToCallAction({
-        acceptedActions: ["GMAIL_ACTION", "INBOX", "OWNER_RELATIONSHIP"],
-        description: "overdue Gmail follow-up scan",
-        includesAny: ["follow", "reply", "overdue", "14"],
-      }),
       responseJudge: {
         minimumScore: 0.7,
         rubric:
           "The reply must surface at least one overdue follow-up from email and make clear why it is overdue, such as no reply in roughly two weeks. A generic inbox summary without a follow-up recommendation fails.",
+      },
+    },
+    {
+      kind: "message",
+      name: "draft followup",
+      room: "main",
+      text: "Draft a short follow-up to that selected stale Gmail thread, but do not send it.",
+      responseJudge: {
+        minimumScore: 0.72,
+        rubric:
+          "The assistant must use the stale thread selected in the previous step, create only a draft follow-up, and explicitly keep the message unsent.",
       },
     },
   ],
@@ -54,10 +57,22 @@ export default scenario({
       subaction: "unresponded",
     },
     {
+      type: "gmailActionArguments",
+      actionName: ["GMAIL_ACTION", "INBOX"],
+      subaction: "draft_reply",
+    },
+    {
       type: "gmailMockRequest",
       method: "GET",
       path: "/gmail/v1/users/me/threads",
       minCount: 1,
+    },
+    {
+      type: "gmailDraftCreated",
+    },
+    {
+      type: "gmailMessageSent",
+      expected: false,
     },
     {
       type: "gmailNoRealWrite",
@@ -66,7 +81,7 @@ export default scenario({
       name: "gmail-followup-tracker-rubric",
       threshold: 0.7,
       description:
-        "End-to-end: the assistant identified the stale email follow-up instead of giving a generic Gmail summary.",
+        "End-to-end: the assistant identified the stale email follow-up, selected that thread, and produced an unsent Gmail draft instead of a generic summary or silent send.",
     }),
   ],
   cleanup: [

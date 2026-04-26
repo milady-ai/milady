@@ -15,7 +15,7 @@ The Browser plugin uses a headless browser (via stagehand-server and Puppeteer/C
 ## Installation
 
 ```bash
-milady plugins install browser
+milady plugins install @elizaos/plugin-browser
 ```
 
 The plugin requires a running stagehand-server instance for browser automation.
@@ -40,14 +40,14 @@ export MILADY_FEATURE_BROWSER=true
 
 | Environment Variable | Required | Description |
 |---------------------|----------|-------------|
-| `OPENAI_API_KEY` | Yes* | Required for stagehand-server web extraction |
-| `ANTHROPIC_API_KEY` | No | Alternative LLM provider for stagehand |
+| `OPENAI_API_KEY` | No* | OpenAI API key for AI-powered browser interactions |
+| `ANTHROPIC_API_KEY` | No* | Anthropic API key for Claude-powered interactions |
 | `BROWSER_HEADLESS` | No | Run browser in headless mode (default: `true`) |
 | `BROWSERBASE_API_KEY` | No | API key for BrowserBase cloud browser service |
 | `BROWSERBASE_PROJECT_ID` | No | Project ID for BrowserBase |
-| `CAPSOLVER_API_KEY` | No | API key for CAPSolver CAPTCHA solving |
+| `CAPSOLVER_API_KEY` | No | API key for CAPSolver automated CAPTCHA solving |
 
-*An LLM API key is required for content extraction. `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` can be used.
+*At least one LLM API key (`OPENAI_API_KEY` or `ANTHROPIC_API_KEY`) is needed for content extraction.
 
 ```json
 {

@@ -107,6 +107,43 @@ jobs:
             core.setOutput('category', category);
             console.log(`Classified as: ${category} | files=${paths.length}`);
 
+  # ─────────────────────────────────────────────────────────────────────────────
+  # P0 auth gate — required check.
+  # Runs the bootstrap-token verifier, AuthStore, and the cloud-bootstrap
+  # exchange smoke (real pglite, real HTTP). Failing this means the audited
+  # bypass at `auth-pairing-compat-routes.ts:124,140` is back open or the
+  # bootstrap exchange contract is broken — block the PR.
+  # See `docs/security/remote-auth-hardening-plan.md` §12.
+  # ─────────────────────────────────────────────────────────────────────────────
+  test-auth:
+    name: Auth tests (P0 gate)
+    if: github.event_name == 'pull_request_target'
+    needs: classify
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    timeout-minutes: 20
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 1
+          submodules: false
+
+      - name: Setup workspace dependencies
+        uses: ./.github/actions/setup-bun-workspace
+        with:
+          install-command: bun install --ignore-scripts --no-frozen-lockfile
+          install-native-deps: "false"
+          run-postinstall: "true"
+          skip-avatar-clone: "true"
+          no-vision-deps: "true"
+          prepare-local-eliza-runtime: "true"
+
+      - name: Run auth test suite
+        run: bun run test:auth
+
   review-pr:
     if: github.event_name == 'pull_request_target'
     needs: classify

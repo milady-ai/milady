@@ -22,7 +22,7 @@ When a user sends a message, the runtime evaluates all registered actions. If th
 
 ## Built-in Actions Reference
 
-Milady registers the following built-in actions from `src/actions/` automatically at runtime.
+Milady registers the following built-in actions automatically at runtime. Action source lives in the elizaOS submodule under `eliza/packages/app-core/src/actions/`.
 
 ### Agent Lifecycle
 

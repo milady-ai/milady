@@ -11,7 +11,7 @@ The Discord plugin connects Milady agents to Discord as a bot, enabling message 
 ## Installation
 
 ```bash
-milady plugins install discord
+milady plugins install @elizaos/plugin-discord
 ```
 
 ## Setup
@@ -46,17 +46,19 @@ milady plugins install discord
 }
 ```
 
-Or via environment variable:
+Or via environment variables:
 
 ```bash
 export DISCORD_API_TOKEN=YOUR_BOT_TOKEN
 ```
 
+The runtime sets both `DISCORD_API_TOKEN` and `DISCORD_BOT_TOKEN` from the configured token, so either variable name works.
+
 ## Configuration
 
 | Field | Required | Description |
 |-------|----------|-------------|
-| `token` | Yes | Discord bot token |
+| `token` | Yes | Discord bot token (the Discord config schema uses strict validation — use `token`, not `botToken`) |
 | `enabled` | No | Set `false` to disable (default: `true`) |
 | `groupPolicy` | No | Group join policy: `"open"`, `"disabled"`, or `"allowlist"` (default: `"allowlist"`) |
 | `dm.policy` | No | DM access policy: `"pairing"`, `"allowlist"`, `"open"`, or `"disabled"` (default: `"pairing"`) |
@@ -66,13 +68,8 @@ export DISCORD_API_TOKEN=YOUR_BOT_TOKEN
   "connectors": {
     "discord": {
       "token": "YOUR_BOT_TOKEN",
-      "guilds": {
-        "SERVER_ID": {
-          "channels": {
-            "CHANNEL_ID": { "allow": true }
-          }
-        }
-      }
+      "allowedChannels": ["1234567890123456789"],
+      "prefix": "!"
     }
   }
 }
@@ -108,7 +105,7 @@ Response sent back to Discord channel/DM
 
 ## Auto-Enable
 
-The plugin auto-enables when the `connectors.discord` block contains a `token` (or `botToken` / `apiKey` as aliases):
+The plugin auto-enables when the `connectors.discord` block contains a `token` (or `botToken` / `apiKey` — these trigger auto-enable detection but `token` is the validated schema field):
 
 ```json
 {
@@ -122,14 +119,25 @@ The plugin auto-enables when the `connectors.discord` block contains a `token` (
 
 ## Environment Variables
 
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `DISCORD_API_TOKEN` | Yes | Discord bot token |
+| `DISCORD_APPLICATION_ID` | No | Discord application ID |
+| `CHANNEL_IDS` | No | Comma-separated list of channel IDs to monitor |
+| `DISCORD_LISTEN_CHANNEL_IDS` | No | Channel IDs to listen to (alternative to `CHANNEL_IDS`) |
+| `DISCORD_TEST_CHANNEL_ID` | No | Channel ID for test/dev messages |
+| `DISCORD_VOICE_CHANNEL_ID` | No | Voice channel ID for voice features |
+| `DISCORD_SHOULD_IGNORE_BOT_MESSAGES` | No | Ignore messages from other bots |
+| `DISCORD_SHOULD_IGNORE_DIRECT_MESSAGES` | No | Ignore direct messages |
+| `DISCORD_SHOULD_RESPOND_ONLY_TO_MENTIONS` | No | Only respond when @mentioned |
+
 The bot token can also be set via:
 
-```bash
-export DISCORD_API_TOKEN=YOUR_BOT_TOKEN
-```
+Both `DISCORD_API_TOKEN` and `DISCORD_BOT_TOKEN` environment variables are recognized (the runtime sets both for compatibility).
 
 ## Related
 
+- [Discord Connector Reference](/connectors/discord) — Full configuration reference (intents, PluralKit, streaming modes, per-guild tools, exec approvals)
 - [Telegram Plugin](/plugin-registry/platform/telegram) — Telegram bot integration
 - [Slack Plugin](/plugin-registry/platform/slack) — Slack workspace integration
 - [Connectors Guide](/guides/connectors) — General connector documentation

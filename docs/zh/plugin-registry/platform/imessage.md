@@ -13,7 +13,7 @@ iMessage 插件将 Milady 代理连接到 macOS 上的 iMessage，支持 iMessag
 </div>
 
 ```bash
-milady plugins install imessage
+milady plugins install @elizaos/plugin-imessage
 ```
 
 <div id="setup">

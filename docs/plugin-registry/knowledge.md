@@ -4,9 +4,13 @@ sidebarTitle: "Knowledge"
 description: "Native RAG system — document ingestion, embedding generation, similarity search, knowledge retrieval, and supported file formats."
 ---
 
+<Warning>
+Knowledge management is a built-in runtime capability, not a standalone plugin. No separate installation is needed — knowledge features are available by default.
+</Warning>
+
 The native knowledge feature provides a Retrieval-Augmented Generation (RAG) system for Milady agents. It enables agents to retrieve relevant information from a document corpus and inject it into the LLM context.
 
-**Runtime Feature:** `knowledge` (enabled by default)
+**Built-in runtime feature** — `knowledge` is part of the elizaOS core runtime and is enabled by default. It is not a standalone plugin in the plugin registry; it loads automatically as part of the core plugin set.
 
 ## Overview
 
@@ -41,7 +45,7 @@ Navigate to **Agent → Knowledge** and upload documents through the file picker
 ### Via the REST API
 
 ```bash
-curl -X POST http://localhost:3000/api/knowledge \
+curl -X POST http://localhost:31337/api/knowledge \
   -H "Authorization: Bearer $MILADY_API_KEY" \
   -F "file=@document.pdf" \
   -F "agentId=your-agent-id"

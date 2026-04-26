@@ -196,7 +196,16 @@ describe("disable-local-eliza-workspace", () => {
     expect(agentPackage.dependencies).toMatchObject({
       "@elizaos/core": "2.0.0-alpha.163",
       "@elizaos/plugin-agent-orchestrator": "0.6.2-alpha.0",
-      "@elizaos/skills": "2.0.0-alpha.163",
+      "@elizaos/skills": "workspace:*",
+    });
+
+    const rootPackage = JSON.parse(
+      fs.readFileSync(path.join(repoRoot, "package.json"), "utf8"),
+    );
+    expect(rootPackage.workspaces).toContain("eliza/packages/skills");
+    expect(rootPackage.overrides).toMatchObject({
+      "@elizaos/skills":
+        resolveCiOverrideSpecifiers(repoRoot)["@elizaos/skills"],
     });
   });
 
@@ -361,6 +370,8 @@ describe("disable-local-eliza-workspace", () => {
       fs.readFileSync(path.join(repoRoot, "package.json"), "utf8"),
     );
     expect(rootPackage.overrides).toMatchObject({
+      "@elizaos/app-core":
+        resolveCiOverrideSpecifiers(repoRoot)["@elizaos/app-core"],
       "@elizaos/ui": resolveCiOverrideSpecifiers(repoRoot)["@elizaos/ui"],
       "@elizaos/plugin-app-control":
         CI_OVERRIDE_SPECIFIERS["@elizaos/plugin-app-control"],
@@ -400,6 +411,8 @@ describe("disable-local-eliza-workspace", () => {
       fs.readFileSync(path.join(repoRoot, "package.json"), "utf8"),
     );
     expect(rootPackage.overrides).toMatchObject({
+      "@elizaos/app-core":
+        resolveCiOverrideSpecifiers(repoRoot)["@elizaos/app-core"],
       "@elizaos/ui": resolveCiOverrideSpecifiers(repoRoot)["@elizaos/ui"],
       "@elizaos/plugin-app-control":
         CI_OVERRIDE_SPECIFIERS["@elizaos/plugin-app-control"],
@@ -493,6 +506,79 @@ describe("disable-local-eliza-workspace", () => {
     expect(browserBridgePackage.dependencies).toMatchObject({
       "@elizaos/app-lifeops": "workspace:*",
       "@elizaos/core": "2.0.0-alpha.163",
+    });
+  });
+
+  it("keeps source-only runtime packages resolvable in published-only CI", () => {
+    const repoRoot = makeTempDir();
+    writeJson(path.join(repoRoot, "package.json"), {
+      name: "milady-test",
+      workspaces: [
+        "eliza/packages/*",
+        "eliza/plugins/*",
+        "eliza/plugins/plugin-*/typescript",
+      ],
+      dependencies: {
+        "@elizaos/core": "workspace:*",
+        "@elizaos/plugin-signal": "workspace:*",
+        "@elizaos/skills": "workspace:*",
+      },
+      overrides: {
+        "@elizaos/core": "2.0.0-alpha.163",
+      },
+    });
+    writeJson(
+      path.join(repoRoot, "eliza", "packages", "typescript", "package.json"),
+      {
+        name: "@elizaos/typescript",
+        version: "2.0.0-alpha.163",
+      },
+    );
+    writeJson(
+      path.join(repoRoot, "eliza", "packages", "skills", "package.json"),
+      {
+        name: "@elizaos/skills",
+        version: "2.0.0-alpha.163",
+      },
+    );
+    writeJson(
+      path.join(
+        repoRoot,
+        "eliza",
+        "plugins",
+        "plugin-signal",
+        "typescript",
+        "package.json",
+      ),
+      {
+        name: "@elizaos/plugin-signal",
+        version: "2.0.0-alpha.7",
+      },
+    );
+
+    disableLocalElizaWorkspace(repoRoot, {
+      log: () => {},
+      warn: () => {},
+      errorLog: () => {},
+    });
+
+    const rootPackage = JSON.parse(
+      fs.readFileSync(path.join(repoRoot, "package.json"), "utf8"),
+    );
+    expect(rootPackage.workspaces).toContain("eliza/packages/skills");
+    expect(rootPackage.workspaces).toContain(
+      "eliza/plugins/plugin-signal/typescript",
+    );
+    expect(rootPackage.dependencies).toMatchObject({
+      "@elizaos/core": "2.0.0-alpha.163",
+      "@elizaos/plugin-signal": "workspace:*",
+      "@elizaos/skills": "workspace:*",
+    });
+    expect(rootPackage.overrides).toMatchObject({
+      "@elizaos/plugin-signal":
+        resolveCiOverrideSpecifiers(repoRoot)["@elizaos/plugin-signal"],
+      "@elizaos/skills":
+        resolveCiOverrideSpecifiers(repoRoot)["@elizaos/skills"],
     });
   });
 

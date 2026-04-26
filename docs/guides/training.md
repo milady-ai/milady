@@ -17,6 +17,14 @@ Milady captures all LLM interactions as trajectories, which can be curated into 
 
 ---
 
+<Info>
+**API port note:** In development mode (`bun run dev`), the API runs on port **31337**. In production mode (`milady start`), the API runs on port **2138**. Curl examples below use `localhost:2138` (production). Adjust the port for dev mode.
+</Info>
+
+<Info>
+**Environment controls:** Set `ELIZA_DISABLE_TRAJECTORY_LOGGING=1` or `NODE_ENV=test` to disable trajectory persistence. Auto-training thresholds (default: 100 trajectories, 12h cooldown) can be configured via `/api/training/auto/config` or Settings → Auto-Training.
+</Info>
+
 ## Trajectory Collection
 
 Every LLM call made by the agent is automatically logged as part of a trajectory. The trajectory logger service (`trajectories`) records:
@@ -142,7 +150,48 @@ The `POST /api/training/datasets/build` endpoint creates a dataset from collecte
 
 ---
 
-## Fine-Tuning Workflow
+## Native Prompt Optimization (Default Backend)
+
+The default training backend is `native`, which runs prompt optimization techniques locally against collected trajectory data. Unlike fine-tuning (which modifies model weights), native optimization produces optimized prompt artifacts that improve the agent's behavior without requiring a new model.
+
+### How It Works
+
+The native backend dispatches per-task JSONL datasets through one of three optimizers:
+
+| Optimizer | Description |
+|-----------|-------------|
+| `instruction-search` | Searches for improved system instructions using trajectory examples |
+| `prompt-evolution` | Evolutionary prompt optimization (GEPA-style) |
+| `bootstrap-fewshot` | Selects high-quality few-shot examples from trajectories |
+
+Optimized prompts are written to `~/.milady/optimized-prompts/<task>/`. The `OptimizedPromptService` automatically loads these artifacts at boot, so improvements take effect on restart without manual configuration.
+
+### Auto-Training
+
+Milady can trigger native optimization automatically when enough trajectory data accumulates:
+
+- **Default threshold:** 100 trajectories per task
+- **Cooldown:** 12 hours between auto-training runs
+- **Configuration:** Adjust via `POST /api/training/auto/config` or Settings > Auto-Training in the dashboard
+
+Auto-training runs the native backend by default. It only fires when the trajectory count exceeds the threshold and no recent artifact exists for that task.
+
+To disable auto-training at startup, set `MILADY_DISABLE_AUTO_BOOTSTRAP=1`.
+
+### Running Native Optimization Manually
+
+```bash
+bun run train -- --backend native --optimizer instruction-search \
+  --dataset <path> --task <task>
+```
+
+### Privacy Filter
+
+All training pipelines (both auto-training and on-demand) run a mandatory privacy filter (`privacy-filter.ts`) before writing JSONL datasets. This strips personally identifiable information from trajectory data before it is used for optimization.
+
+---
+
+## Fine-Tuning Workflow (Model Weight Training)
 
 ### Starting a Training Job
 
@@ -164,7 +213,7 @@ The `POST /api/training/jobs` endpoint launches a fine-tuning job:
 |-----------|-------------|
 | `datasetId` | ID of a previously built dataset |
 | `maxTrajectories` | Cap on trajectories to use |
-| `backend` | Training backend: `mlx` (Apple Silicon), `cuda` (NVIDIA GPU), or `cpu` |
+| `backend` | Training backend: `native` (default — MIPRO/GEPA prompt optimization), `mlx` (Apple Silicon), `cuda` (NVIDIA GPU), or `cpu` |
 | `model` | Base model to fine-tune |
 | `iterations` | Number of training iterations |
 | `batchSize` | Training batch size |
@@ -252,6 +301,25 @@ The Trajectories view displays:
 
 ---
 
+## Native Optimization (Default Backend)
+
+The default training backend is `native`, which runs MIPRO / GEPA / bootstrap-fewshot optimization against collected trajectory data. Unlike the `mlx`/`cuda`/`cpu` backends that fine-tune model weights, native optimization produces optimized prompt artifacts stored under `~/.milady/optimized-prompts/<task>/`. The `OptimizedPromptService` loads these automatically at boot.
+
+### Auto-Training
+
+When enough trajectories accumulate, the runtime can trigger native optimization automatically:
+
+- **Threshold:** 100 trajectories per task (default)
+- **Cooldown:** 12 hours between auto-training runs
+- **Configuration:** `GET /api/training/auto/config` and `PUT /api/training/auto/config`, or Settings > Auto-Training in the dashboard
+- **Disable at boot:** set `MILADY_DISABLE_AUTO_BOOTSTRAP=1`
+
+### Privacy Filter
+
+All write paths that touch real user trajectories run through the privacy filter (`eliza/apps/app-training/src/core/privacy-filter.ts`) before any JSONL is written. This applies to both the nightly export cron and on-demand training.
+
+---
+
 ## API Endpoints
 
 ### Trajectory Endpoints
@@ -284,6 +352,56 @@ The Trajectories view displays:
 | `POST` | `/api/training/models/:id/activate` | Activate model for agent use |
 | `POST` | `/api/training/models/:id/benchmark` | Run benchmarks against a model |
 
+### Auto-Training
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/training/auto/config` | Get auto-training configuration |
+| `PUT` | `/api/training/auto/config` | Update auto-training configuration |
+
+---
+
+## Native Optimization (Default Backend)
+
+The default training backend is `native`. Native optimization uses techniques like MIPRO, GEPA, and bootstrap-fewshot to optimize prompts directly from trajectory data without fine-tuning a model. Outputs land as prompt artifacts under `~/.milady/optimized-prompts/<task>/`. The `OptimizedPromptService` auto-loads those artifacts at boot.
+
+To use native optimization:
+
+```bash
+curl -X POST http://localhost:31337/api/training/jobs \
+  -H "Authorization: Bearer your-token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "datasetId": "dataset-abc123",
+    "backend": "native"
+  }'
+```
+
+### Auto-Training Thresholds
+
+Auto-training triggers automatically when trajectory counters exceed configured thresholds. The defaults are:
+
+- **Threshold**: 100 trajectories accumulated per task
+- **Cooldown**: 12 hours between auto-training runs
+
+Configure these via the Settings dashboard (Auto-Training section) or the API:
+
+```bash
+curl -X PUT http://localhost:31337/api/training/auto/config \
+  -H "Authorization: Bearer your-token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "threshold": 100,
+    "cooldownHours": 12
+  }'
+```
+
+The auto-bootstrap runs at runtime boot when trajectory counters exceed the threshold and no artifact exists for the task. Disable it by setting `MILADY_DISABLE_AUTO_BOOTSTRAP=1`.
+
+### Privacy Filter
+
+A privacy filter (`eliza/apps/app-training/src/core/privacy-filter.ts`) is mandatory on every write path that touches real user trajectories. Both the nightly export cron and the on-demand training orchestrator run it before any JSONL is written, ensuring that sensitive user data is stripped from training datasets.
+
 ---
 
 ## End-to-End Tutorial
@@ -293,7 +411,7 @@ Walk through the complete training workflow using curl commands.
 ### Step 1: Check Training Status
 
 ```bash
-curl http://localhost:2138/api/training/status \
+curl http://localhost:31337/api/training/status \
   -H "Authorization: Bearer your-token"
 ```
 
@@ -311,7 +429,7 @@ Response:
 Trajectories are automatically collected as your agent processes messages. Each trajectory records LLM calls, provider accesses, and token usage.
 
 ```bash
-curl "http://localhost:2138/api/training/trajectories?limit=10&offset=0" \
+curl "http://localhost:31337/api/training/trajectories?limit=10&offset=0" \
   -H "Authorization: Bearer your-token"
 ```
 
@@ -320,7 +438,7 @@ curl "http://localhost:2138/api/training/trajectories?limit=10&offset=0" \
 Filter trajectories into a dataset suitable for fine-tuning:
 
 ```bash
-curl -X POST http://localhost:2138/api/training/datasets/build \
+curl -X POST http://localhost:31337/api/training/datasets/build \
   -H "Authorization: Bearer your-token" \
   -H "Content-Type: application/json" \
   -d '{
@@ -343,7 +461,7 @@ Response:
 ### Step 4: Start a Training Job
 
 ```bash
-curl -X POST http://localhost:2138/api/training/jobs \
+curl -X POST http://localhost:31337/api/training/jobs \
   -H "Authorization: Bearer your-token" \
   -H "Content-Type: application/json" \
   -d '{
@@ -356,12 +474,12 @@ curl -X POST http://localhost:2138/api/training/jobs \
   }'
 ```
 
-Supported backends: `mlx` (Apple Silicon), `cuda` (NVIDIA GPU), `cpu`.
+Supported backends: `native` (default, prompt optimization), `mlx` (Apple Silicon fine-tuning), `cuda` (NVIDIA GPU fine-tuning), `cpu` (CPU fine-tuning).
 
 ### Step 5: Monitor Progress
 
 ```bash
-curl http://localhost:2138/api/training/jobs/job-xyz789 \
+curl http://localhost:31337/api/training/jobs/job-xyz789 \
   -H "Authorization: Bearer your-token"
 ```
 
@@ -372,7 +490,7 @@ Job statuses: `pending` -> `running` -> `completed` (or `failed` / `cancelled`).
 After training completes, import the fine-tuned model into Ollama for local inference:
 
 ```bash
-curl -X POST http://localhost:2138/api/training/models/model-abc123/import-ollama \
+curl -X POST http://localhost:31337/api/training/models/model-abc123/import-ollama \
   -H "Authorization: Bearer your-token" \
   -H "Content-Type: application/json" \
   -d '{
@@ -389,7 +507,7 @@ The `ollamaUrl` must point to a local Ollama server (localhost, 127.0.0.1, or ::
 Switch your agent to use the fine-tuned model:
 
 ```bash
-curl -X POST http://localhost:2138/api/training/models/model-abc123/activate \
+curl -X POST http://localhost:31337/api/training/models/model-abc123/activate \
   -H "Authorization: Bearer your-token" \
   -H "Content-Type: application/json" \
   -d '{"providerModel": "ollama/my-fine-tuned-agent"}'

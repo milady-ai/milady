@@ -1,22 +1,28 @@
----
-title: WhatsApp Connector
-sidebarTitle: WhatsApp
-description: Connect your agent to WhatsApp using the @elizaos/plugin-whatsapp package.
----
+# WhatsApp Connector
 
-Connect your agent to WhatsApp for private chats and group conversations via personal or business accounts.
+Connect your agent to WhatsApp for private chats and group conversations via personal or business accounts using the `@elizaos/plugin-whatsapp` package.
 
-## Overview
+## Prerequisites
 
-The WhatsApp connector is an external elizaOS plugin that bridges your agent to WhatsApp. It supports two authentication methods: **Baileys** (QR code scan, personal accounts) and **Cloud API** (WhatsApp Business API). The connector is auto-enabled by the runtime when a valid auth configuration is detected.
+- For **Baileys** (personal): A phone with WhatsApp installed (for QR code scanning)
+- For **Cloud API** (business): A WhatsApp Business Account and access tokens from the Meta Developer Dashboard
 
-## Package Info
+## Configuration
 
-| Field | Value |
-|-------|-------|
-| Package | `@elizaos/plugin-whatsapp` |
-| Config key | `connectors.whatsapp` |
-| Auto-enable trigger | `authDir`, `authState`, `sessionPath`, or `accounts` with at least one account having `authDir` |
+| Name | Required | Description |
+|------|----------|-------------|
+| `WHATSAPP_AUTH_METHOD` | No | Authentication method: `cloudapi` or `baileys` |
+| `WHATSAPP_ACCESS_TOKEN` | No | WhatsApp Business API access token (required for `cloudapi` auth) |
+| `WHATSAPP_PHONE_NUMBER_ID` | No | Phone number ID from Meta Developer Dashboard (required for `cloudapi` auth) |
+| `WHATSAPP_AUTH_DIR` | No | Directory for Baileys session files (required for `baileys` auth) |
+| `WHATSAPP_PRINT_QR` | No | Print QR code in terminal when using Baileys auth |
+| `WHATSAPP_WEBHOOK_VERIFY_TOKEN` | No | Webhook verification token |
+| `WHATSAPP_BUSINESS_ACCOUNT_ID` | No | WhatsApp Business Account ID |
+| `WHATSAPP_API_VERSION` | No | API version string |
+| `WHATSAPP_DM_POLICY` | No | DM policy (e.g., `allow`, `deny`, `allowlist`) |
+| `WHATSAPP_GROUP_POLICY` | No | Group message policy |
+
+The connector auto-enables when `authDir`, `authState`, `sessionPath`, or `accounts` with at least one account having `authDir` is present, and `enabled` is not explicitly `false`.
 
 ## Minimal Configuration
 
@@ -64,16 +70,22 @@ To explicitly disable the connector even when auth config is present:
 }
 ```
 
-## Auto-Enable Mechanism
+## Setup
 
-The `plugin-auto-enable.ts` module checks `connectors.whatsapp` in your config. The plugin is loaded when any of the following is truthy (and `enabled` is not explicitly `false`):
+### Baileys (personal account)
 
-- `authDir` is set at the top level
-- `authState` is set at the top level
-- `sessionPath` is set at the top level
-- `accounts` contains at least one account with `authDir` set
+1. Set `authDir` in your connector config (e.g., `"./auth/whatsapp"`).
+2. Start Milady -- a QR code will be printed to the terminal.
+3. Scan the QR code with your phone (WhatsApp > Settings > Linked Devices > Link a Device).
+4. The session persists automatically across restarts.
 
-No environment variable is required to trigger auto-enable -- it is driven entirely by the connector config object.
+### Cloud API (business account)
+
+1. Set up a WhatsApp Business Account in the [Meta Developer Dashboard](https://developers.facebook.com/).
+2. Obtain an access token and phone number ID.
+3. Set `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, and `WHATSAPP_AUTH_METHOD=cloudapi`.
+4. Configure a webhook URL pointing to your Milady instance.
+5. Start your agent.
 
 ## Authentication Methods
 
@@ -91,22 +103,16 @@ The WhatsApp Business Cloud API is Meta's official API. Requires a WhatsApp Busi
 **Pros**: Official API, reliable uptime, webhook-based.
 **Cons**: Requires business account, per-message costs may apply, approval process.
 
-## Environment Variables
+## Features
 
-| Variable | Description |
-|----------|-------------|
-| `WHATSAPP_AUTH_METHOD` | Authentication method: `cloudapi` or `baileys` |
-| `WHATSAPP_ACCESS_TOKEN` | WhatsApp Business API access token (required for `cloudapi` auth) |
-| `WHATSAPP_PHONE_NUMBER_ID` | Phone number ID from Meta Developer Dashboard (required for `cloudapi` auth) |
-| `WHATSAPP_AUTH_DIR` | Directory for Baileys session files (required for `baileys` auth) |
-| `WHATSAPP_PRINT_QR` | Print QR code in terminal when using Baileys auth |
-| `WHATSAPP_WEBHOOK_VERIFY_TOKEN` | Webhook verification token |
-| `WHATSAPP_BUSINESS_ACCOUNT_ID` | WhatsApp Business Account ID |
-| `WHATSAPP_API_VERSION` | API version string |
-| `WHATSAPP_DM_POLICY` | DM policy (`allow`, `deny`, `allowlist`) |
-| `WHATSAPP_GROUP_POLICY` | Group message policy |
-
-These can also be placed in the `env` section of your config file. When using Baileys mode with the connector config, set `authDir` in the connector config instead of using the environment variable.
+- Private and group chat messaging
+- Two auth methods: Baileys (QR code, personal) and Cloud API (business)
+- Read receipts and acknowledgment reactions
+- DM and group access policies
+- Media attachments up to 50MB
+- Multi-account support
+- Self-chat mode for testing
+- Session persistence across restarts
 
 ## Full Configuration Reference
 

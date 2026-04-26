@@ -11,7 +11,7 @@ The Feishu plugin connects Milady agents to Feishu (known as Lark outside China)
 ## Installation
 
 ```bash
-milady plugins install feishu
+milady plugins install @elizaos/plugin-feishu
 ```
 
 ## Setup

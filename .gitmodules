@@ -1,4 +1,4 @@
 [submodule "eliza"]
 	path = eliza
-	url = https://github.com/elizaOS/eliza.git
+	url = https://github.com/0xSolace/eliza.git
 	branch = develop

@@ -72,7 +72,7 @@ import type { Provider } from '@elizaos/core';
 const timeProvider: Provider = {
   name: 'current-time',
   description: 'Provides current date and time',
-  position: -5, // Negative values run before core providers
+  position: -10,
   get: async (runtime, message) => ({
     text: `Current time: ${new Date().toISOString()}`,
   }),

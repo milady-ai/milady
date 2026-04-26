@@ -329,6 +329,47 @@ export default defineConfig({
         includeConfigAlias: true,
         includeMiladyAlias: true,
       }),
+      // P0 auth subsystem reads tables/types from plugin-sql; map subpaths to
+      // source so vitest's resolver doesn't fall through to the dist `main`.
+      // Subpaths first (Vite alias matching is order-sensitive).
+      {
+        find: "@elizaos/plugin-sql/schema",
+        replacement: path.join(
+          repoRoot,
+          "eliza",
+          "plugins",
+          "plugin-sql",
+          "typescript",
+          "schema",
+          "index.ts",
+        ),
+      },
+      {
+        find: "@elizaos/plugin-sql/types",
+        replacement: path.join(
+          repoRoot,
+          "eliza",
+          "plugins",
+          "plugin-sql",
+          "typescript",
+          "types.ts",
+        ),
+      },
+      // Bare-package alias to source so the runtime migrator sees the same
+      // `Plugin.schema` namespace the auth-store imports from. Without this
+      // the dist build would ship the pre-P0 schema and `auth_identities`
+      // would never be created at runtime in tests.
+      {
+        find: /^@elizaos\/plugin-sql$/,
+        replacement: path.join(
+          repoRoot,
+          "eliza",
+          "plugins",
+          "plugin-sql",
+          "typescript",
+          "index.ts",
+        ),
+      },
       ...getOptionalInstalledPackageAliases(repoRoot, [
         {
           find: "@elizaos/plugin-agent-orchestrator",

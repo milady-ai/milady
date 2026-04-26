@@ -15,7 +15,7 @@ Le plugin Nextcloud Talk connecte les agents Milady à Nextcloud Talk, permettan
 </div>
 
 ```bash
-milady plugins install nextcloud-talk
+milady plugins install @elizaos/plugin-nextcloud-talk
 ```
 
 <div id="setup">

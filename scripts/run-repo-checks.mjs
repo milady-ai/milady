@@ -73,6 +73,11 @@ export const suites = {
       command: "bun",
       args: ["run", "--cwd", "apps/homepage", "lint"],
     },
+    {
+      label: "i18n translation coverage",
+      command: "bun",
+      args: ["run", "verify:i18n"],
+    },
     ...miladyElizaCrossLanguageChecks,
   ],
   typecheck: [...miladyTypecheckSteps],

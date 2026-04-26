@@ -16,7 +16,7 @@ Esta guía es para **personas que compilan Milady desde el código fuente** — 
 
 **Alcance:** Esto son **diagnósticos**, no ocultar fallos. Los errores serios de resolución siguen apareciendo normalmente.
 
-**Código relacionado:** `packages/agent/src/runtime/plugin-collector.ts`, `packages/agent/src/runtime/plugin-resolver.ts`. Consulta también [Resolución de plugins y NODE_PATH](/es/plugin-resolution-and-node-path#optional-plugins-why-was-this-package-in-the-load-set).
+**Código relacionado:** `eliza/packages/agent/src/runtime/plugin-collector.ts`, `eliza/packages/agent/src/runtime/plugin-resolver.ts`. Consulta también [Resolución de plugins y NODE_PATH](/es/plugin-resolution-and-node-path#optional-plugins-why-was-this-package-in-the-load-set).
 
 <div id="browser--stagehand-server-path">
 ## Ruta del servidor browser / stagehand
@@ -28,7 +28,7 @@ Esta guía es para **personas que compilan Milady desde el código fuente** — 
 
 **Nota operativa:** Si no usas automatización de navegador, la ausencia de stagehand es **esperada**; los mensajes son intencionalmente concisos a nivel de depuración para no saturar el desarrollo diario.
 
-**Relacionado:** `scripts/link-browser-server.mjs`, `packages/agent/src/runtime/eliza.ts` (`ensureBrowserServerLink`, `findPluginBrowserStagehandDir`).
+**Relacionado:** `scripts/link-browser-server.mjs`, `eliza/packages/agent/src/runtime/eliza.ts` (`ensureBrowserServerLink`, `findPluginBrowserStagehandDir`).
 
 <div id="life-ops-schema-migrations-pglite">
 ## Migraciones de esquema life-ops (PGlite)

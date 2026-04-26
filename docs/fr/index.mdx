@@ -58,7 +58,7 @@ les conversations, les outils et l'état du runtime.
 ### Multi-modèle, multi-fournisseur
 </div>
 
-Connectez-vous à l'un des 18 fournisseurs d'IA pris en charge — ou fonctionnez entièrement hors ligne avec Ollama :
+Connectez-vous à l'un des 19 fournisseurs d'IA pris en charge — ou fonctionnez entièrement hors ligne avec Ollama :
 
 | Fournisseur | Ce que vous obtenez |
 |-------------|---------------------|
@@ -143,7 +143,7 @@ Milady est structuré comme un système en couches :
 ```
  Interfaces utilisateur (Bureau / Mobile / Web / CLI)
                           |
-                     Serveur API (HTTP + WebSocket sur :2138)
+                     Serveur API (HTTP + WebSocket sur :31337)
                           |
                     Gateway (:18789)
                           |
@@ -164,7 +164,7 @@ Milady est structuré comme un système en couches :
 - **Plugin Milady** — un plugin elizaOS de première partie qui fournit le contexte du workspace, les clés de session, les presets de personnalité, l'état autonome et l'intégration du portefeuille.
 - **Gateway** — un serveur multiplexé WebSocket + HTTP qui relie le runtime à tous les clients et connecteurs connectés.
 - **Système de plugins** — plugins elizaOS standard qui ajoutent des capacités (connaissances, navigateur, TTS, etc.).
-- **Couche de connecteurs** — adaptateurs spécifiques aux plateformes pour Telegram, Discord, Slack, WhatsApp, Signal, iMessage, Blooio, MS Teams, Google Chat, Twitter, Farcaster, Twitch, Mattermost, WeChat, Matrix, Feishu/Lark, Nostr, Lens et l'interface de chat web.
+- **Couche de connecteurs** — adaptateurs spécifiques aux plateformes pour Telegram, Discord, Slack, WhatsApp, Signal, iMessage, BlueBubbles, Blooio, MS Teams, Google Chat, Twitter, Farcaster, Twitch, Mattermost, WeChat, Matrix, Feishu/Lark, Nostr, Lens et l'interface de chat web.
 
 La configuration principale persistante du runtime se trouve dans `~/.milady/milady.json`.
 Le routage canonique du runtime est réparti entre `deploymentTarget`,

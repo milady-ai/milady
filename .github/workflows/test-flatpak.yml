@@ -29,33 +29,30 @@ jobs:
 
       - name: Validate AppStream metadata
         working-directory: eliza/packages/app-core/packaging/flatpak
-        run: |
-          appstream-util validate-relax ai.milady.Milady.metainfo.xml
+        run: appstream-util validate-relax ai.elizaos.App.metainfo.xml
 
       - name: Validate desktop entry
-        run: |
-          desktop-file-validate eliza/packages/app-core/packaging/flatpak/ai.milady.Milady.desktop
+        run: desktop-file-validate eliza/packages/app-core/packaging/flatpak/ai.elizaos.App.desktop
 
       - name: Build Flatpak
         working-directory: eliza/packages/app-core/packaging/flatpak
         run: |
-          flatpak-builder --repo=repo --force-clean build-dir ai.milady.Milady.yml
+          flatpak-builder --repo=repo --force-clean build-dir ai.elizaos.App.yml
 
       - name: Create bundle
         working-directory: eliza/packages/app-core/packaging/flatpak
-        run: |
-          flatpak build-bundle repo milady.flatpak ai.milady.Milady
+        run: flatpak build-bundle repo elizaos-app.flatpak ai.elizaos.App
 
       - name: Install and test
         working-directory: eliza/packages/app-core/packaging/flatpak
         run: |
-          flatpak --user install -y milady.flatpak
-          flatpak run ai.milady.Milady --version || echo "Version check completed"
-          flatpak run ai.milady.Milady --help || echo "Help check completed"
+          flatpak --user install -y elizaos-app.flatpak
+          flatpak run ai.elizaos.App --version || echo "Version check completed"
+          flatpak run ai.elizaos.App --help || echo "Help check completed"
 
       - name: Upload bundle artifact
         uses: actions/upload-artifact@v4
         with:
           name: flatpak-test-bundle
-          path: eliza/packages/app-core/packaging/flatpak/milady.flatpak
+          path: eliza/packages/app-core/packaging/flatpak/elizaos-app.flatpak
           retention-days: 7

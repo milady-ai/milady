@@ -79,7 +79,7 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: "1.3.10"
+          bun-version: "1.3.11"
 
       # ── 3. Cache bun store ──────────────────────────────────────────────────
       - name: Cache bun store
@@ -392,6 +392,7 @@ jobs:
         uses: bufbuild/buf-setup-action@v1
         with:
           version: "1.50.0"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build @elizaos/core
         run: |
@@ -579,8 +580,15 @@ jobs:
           echo '!eliza/apps/app-companion' >> .dockerignore
           echo '!eliza/apps/app-lifeops' >> .dockerignore
 
-      # ── 10. Set up Docker Buildx (Depot fallback while billing is sorted) ──
-      - name: Set up Docker Buildx
+      # ── 10. Set up builders ────────────────────────────────────────────────
+      # Prefer Depot when available, but always provision Buildx so the fallback
+      # path is ready if Depot is disabled or the Depot build step fails.
+      - name: Set up Depot CLI
+        if: vars.DEPOT_ENABLED != 'false'
+        uses: depot/setup-action@v1
+        continue-on-error: true
+
+      - name: Set up Docker Buildx fallback
         uses: docker/setup-buildx-action@v3
 
       # ── 11. Login to GHCR ──────────────────────────────────────────────────
@@ -595,6 +603,7 @@ jobs:
       # ── 12. Build and push via Depot (persistent layer cache + Depot infra) ──
       - name: Build and push Docker image with Depot
         id: depot-build
+        if: vars.DEPOT_ENABLED != 'false'
         continue-on-error: true
         uses: depot/build-push-action@v1
         with:
@@ -622,7 +631,7 @@ jobs:
           provenance: false
 
       - name: Build and push Docker image with Buildx fallback
-        if: steps.depot-build.outcome == 'failure'
+        if: vars.DEPOT_ENABLED == 'false' || steps.depot-build.outcome == 'failure'
         uses: docker/build-push-action@v6
         with:
           context: .

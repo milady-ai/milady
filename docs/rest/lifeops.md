@@ -26,6 +26,11 @@ LifeOps routes require an active agent runtime. If the runtime is unavailable, a
 | POST | `/api/lifeops/occurrences/:id/complete` | Mark an occurrence as completed |
 | POST | `/api/lifeops/occurrences/:id/skip` | Skip an occurrence |
 | POST | `/api/lifeops/occurrences/:id/snooze` | Snooze an occurrence |
+| POST | `/api/lifeops/reminders/process` | Advance the reminder engine (fire pending reminders) |
+| POST | `/api/lifeops/reminders/acknowledge` | Acknowledge a reminder |
+| GET | `/api/lifeops/reminders/inspection` | Inspect reminder state for an occurrence |
+| GET | `/api/lifeops/workflows` | List event-triggered workflows |
+| POST | `/api/lifeops/workflows` | Create an event-triggered workflow |
 
 ---
 
@@ -521,6 +526,93 @@ Time windows divide the day into named periods. The built-in window names are `m
   ]
 }
 ```
+
+## Reminders
+
+The reminder engine fires notifications for upcoming or overdue occurrences based on each definition's reminder plan.
+
+### POST /api/lifeops/reminders/process
+
+Advance the reminder engine — evaluates all active occurrences and fires any pending reminder steps. Typically called on a timer by the runtime.
+
+**Request body**
+
+```json
+{}
+```
+
+**Response**
+
+Returns the processed reminder results.
+
+---
+
+### POST /api/lifeops/reminders/acknowledge
+
+Acknowledge a fired reminder. Prevents re-delivery of the same reminder step.
+
+**Request body**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `reminderId` | string | Yes | The reminder instance ID |
+| `channel` | string | No | The channel on which the reminder was acknowledged |
+
+**Response**
+
+Returns the updated reminder state.
+
+---
+
+### GET /api/lifeops/reminders/inspection
+
+Inspect the current reminder ladder state for an occurrence. Useful for debugging reminder escalation.
+
+**Query parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `ownerType` | string | Yes | `occurrence` |
+| `ownerId` | string | Yes | The occurrence ID |
+
+**Response**
+
+Returns the reminder plan steps and their current states (pending, fired, acknowledged, skipped).
+
+---
+
+## Workflows
+
+Event-triggered workflows execute actions in response to external events (e.g., calendar events ending).
+
+### GET /api/lifeops/workflows
+
+List all event-triggered workflows for the current agent.
+
+**Response**
+
+Returns an array of workflow objects.
+
+---
+
+### POST /api/lifeops/workflows
+
+Create a new event-triggered workflow.
+
+**Request body**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `trigger` | object | Yes | Event trigger configuration (event type, filters) |
+| `actions` | array | Yes | Actions to execute when the trigger fires |
+| `title` | string | No | Display title |
+| `enabled` | boolean | No | Whether the workflow is active (default: `true`) |
+
+**Response** (201)
+
+Returns the created workflow object.
+
+---
 
 ## Common error codes
 

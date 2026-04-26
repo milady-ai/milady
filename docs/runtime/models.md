@@ -65,7 +65,7 @@ The primary model is stored in `agents.defaults.model.primary` as a `"provider/m
     "defaults": {
       "model": {
         "primary": "anthropic/claude-sonnet-4.6",
-        "fallbacks": ["openai/gpt-4o", "groq/llama-3-70b"]
+        "fallbacks": ["openai/gpt-5", "groq/llama-3-70b"]
       }
     }
   }
@@ -203,7 +203,7 @@ Each agent in `agents.list` can override the model:
         "id": "coder",
         "model": {
           "primary": "anthropic/claude-sonnet-4.6",
-          "fallbacks": ["openai/gpt-4o"]
+          "fallbacks": ["openai/gpt-5"]
         }
       }
     ]

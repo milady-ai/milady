@@ -35,7 +35,7 @@ Here's the honest accounting. "Leaves your machine" means "gets sent over the ne
 - If your provider is **local (Ollama)**: this stays on your machine. Nothing leaves.
 - If your provider is **cloud (OpenAI, Anthropic, OpenRouter, Eliza Cloud, etc.)**: the request goes to their servers. They see the full context of your conversation during inference. Most providers retain logs for some period — read their privacy policy.
 
-**What you can do about it:** use a local provider. Ollama + llama3.1 is a fully local setup where chat never leaves your machine. Tradeoff: slower and less capable than cloud models.
+**What you can do about it:** use a local provider. Ollama + llama3.3 is a fully local setup where chat never leaves your machine. Tradeoff: slower and less capable than cloud models.
 
 ### 2. Voice synthesis (TTS)
 
@@ -92,7 +92,7 @@ If you want to minimize what leaves your machine, here's the stack:
 
 | Slot | Choice |
 | --- | --- |
-| Chat provider | Ollama + a local model (llama3.1, qwen2.5, etc.) |
+| Chat provider | Ollama + a local model (llama3.3, gemma3:4b, etc.) |
 | TTS | Edge TTS (goes to MS servers but no auth / no account needed), or skip voice |
 | STT | Local Whisper (via Ollama or a Whisper plugin), or skip talk mode |
 | Embeddings | Ollama nomic-embed-text |

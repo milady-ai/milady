@@ -5,20 +5,41 @@ description: "Diagnose environment, ports, and common misconfigurations."
 
 # `milady doctor`
 
-Runs static checks: Node/Bun version, config presence, port availability, and other fast sanity tests.
+Runs health checks across four categories: System, Configuration, Storage, and Network. Reports pass/fail/warn status for each check with suggested fixes.
 
-For maintainers working from a source checkout, `doctor` also checks the repo-local vendored workspace under `./eliza` and reports whether `@elizaos/core` resolves to vendored source or a published install. The orchestrator runtime now ships through `@elizaos/core`, so there is no separate standalone orchestrator package to validate here.
+## Options
+
+| Flag | Description |
+|------|-------------|
+| `--no-ports` | Skip port availability checks |
+| `--fix` | Automatically fix issues where possible (runs `milady` sub-commands for auto-fixable checks) |
+| `--json` | Output results as JSON (CI-friendly). Exits with code 1 if any checks fail. |
 
 ## Examples
 
 ```bash
 milady doctor
-milady doctor --help
+milady doctor --fix
+milady doctor --json
+milady doctor --no-ports
 ```
 
-Use the output when filing issues or after moving state directories.
+From a source checkout:
+
+```bash
+bun run milady:doctor
+```
+
+## When to use it
+
+- After installing or updating Milady
+- After changing ports or state directory paths
+- After moving `~/.milady/` to a new location
+- When the agent fails to start or connectors do not load
+- When filing a bug report — include the doctor output
 
 ## Related
 
 - [Developer diagnostics and workspace](/guides/developer-diagnostics-and-workspace)
 - [Known failure modes](/stability/known-failure-modes)
+- [CLI environment variables](/cli/environment)

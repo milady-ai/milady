@@ -72,6 +72,7 @@ Get aggregate trajectory statistics.
 {
   "totalTrajectories": 142,
   "totalLlmCalls": 891,
+  "totalProviderAccesses": 320,
   "totalPromptTokens": 450000,
   "totalCompletionTokens": 128000,
   "averageDurationMs": 8500,
@@ -79,9 +80,9 @@ Get aggregate trajectory statistics.
     "chat": 98,
     "autonomy": 44
   },
-  "byStatus": {
-    "completed": 138,
-    "error": 4
+  "byModel": {
+    "claude-opus-4-7": 500,
+    "claude-sonnet-4-5": 391
   }
 }
 ```

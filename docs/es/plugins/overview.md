@@ -28,15 +28,15 @@ Un plugin es un módulo autónomo que registra uno o más de los siguientes:
 <CardGroup cols={2}>
 
 <Card title="Plugins principales" icon="cube" href="/es/plugin-registry/knowledge">
-  Plugins esenciales que se incluyen con cada instalación de Milady — knowledge, database, form, cron, shell, agent-skills, trajectory-logger y agent-orchestrator.
+  Plugins esenciales que se incluyen con cada instalación de Milady — knowledge, database, form, cron, shell, agent-skills, trajectories y agent-orchestrator.
 </Card>
 
 <Card title="Proveedores de modelos" icon="brain" href="/es/plugin-registry/llm/openai">
-  Integraciones de LLM para OpenAI, Anthropic, Google Gemini, Google Antigravity, Groq, Ollama, OpenRouter, DeepSeek, xAI, Mistral, Cohere, Together, Qwen, Minimax, Perplexity, Zai, Vercel AI Gateway y Eliza Cloud.
+  Integraciones de LLM disponibles en el registro: OpenAI, Anthropic, Google Gemini, Groq, Ollama, OpenRouter, xAI, Vercel AI Gateway y Eliza Cloud. Proveedores adicionales (DeepSeek, Mistral, Cohere, etc.) accesibles a través de OpenRouter.
 </Card>
 
 <Card title="Conectores de plataformas" icon="plug" href="/es/plugin-registry/platform/discord">
-  Puentes hacia más de 17 plataformas de mensajería mediante auto-habilitación (Discord, Telegram, Twitter, Slack, WhatsApp, Signal, iMessage, Blooio, MS Teams, Google Chat, Mattermost, Farcaster, Twitch, WeChat, Feishu, Matrix, Nostr). Conectores adicionales (Bluesky, Instagram, Lens, LINE, Zalo, Twilio, GitHub, Gmail Watch, Nextcloud Talk, Tlon) están disponibles en el registro de elizaOS.
+  28 conectores de plataformas. 18 se auto-habilitan mediante configuración (Discord, Telegram, Twitter, Slack, WhatsApp, Signal, iMessage, Blooio, MS Teams, Google Chat, Mattermost, Farcaster, Twitch, WeChat, Feishu, Matrix, Nostr, Lens). 10 más se pueden instalar desde el registro (BlueBubbles, Bluesky, Instagram, LINE, Zalo, Twilio, GitHub, Gmail Watch, Nextcloud Talk, Tlon).
 </Card>
 
 <Card title="DeFi y Blockchain" icon="wallet" href="/es/plugin-registry/defi/evm">
@@ -59,7 +59,7 @@ Los plugins se cargan durante la inicialización del runtime en este orden:
 
 1. **Plugin de Milady** — El plugin puente (`createMiladyPlugin()`) que proporciona contexto del workspace, claves de sesión, emotes, acciones personalizadas y acciones de ciclo de vida. Siempre es el primero en el array de plugins.
 2. **Plugins pre-registrados** — `@elizaos/plugin-sql` y `@elizaos/plugin-local-embedding` se pre-registran antes de `runtime.initialize()` para prevenir condiciones de carrera.
-3. **Plugins principales** — Siempre se cargan: `sql`, `local-embedding`, `form`, `knowledge`, `trajectory-logger`, `agent-orchestrator`, `cron`, `shell`, `agent-skills` (ver `packages/agent/src/runtime/core-plugins.ts`). Plugins adicionales como `pdf`, `cua`, `browser`, `computeruse`, `obsidian`, `code`, `repoprompt`, `claude-code-workbench`, `vision`, `cli`, `edge-tts`, `elevenlabs`, `discord`, `telegram` y `twitch` son opcionales y se cargan cuando sus feature flags o variables de entorno están configuradas.
+3. **Plugins principales** — Siempre se cargan: `sql`, `local-embedding`, `form`, `knowledge`, `trajectories`, `agent-orchestrator`, `cron`, `shell`, `agent-skills` (ver `packages/agent/src/runtime/core-plugins.ts`). Plugins adicionales como `pdf`, `cua`, `browser`, `computeruse`, `obsidian`, `code`, `repoprompt`, `claude-code-workbench`, `vision`, `cli`, `edge-tts`, `elevenlabs`, `discord`, `telegram` y `twitch` son opcionales y se cargan cuando sus feature flags o variables de entorno están configuradas.
 4. **Plugins auto-habilitados** — Los plugins de conectores, proveedores, características, streaming, suscripción, hooks (webhooks + Gmail Watch) y generación de medios se auto-habilitan según la configuración y variables de entorno (ver [Arquitectura](/es/plugins/architecture) para los mapas completos).
 5. **Plugins expulsados** — Sobrecargas locales descubiertas desde `~/.milady/plugins/ejected/`. Cuando existe una copia expulsada, tiene prioridad sobre la versión publicada en npm.
 6. **Plugins instalados por el usuario** — Registrados en `plugins.installs` en `milady.json`. Se recopilan antes de los plugins drop-in; cualquier nombre de plugin ya presente aquí tiene precedencia.
@@ -128,9 +128,22 @@ milady plugins list
 
 </div>
 
+Habilita o deshabilita un plugin configurando su flag `enabled` en `milady.json`:
+
+```json
+{
+  "plugins": {
+    "entries": {
+      "plugin-name": { "enabled": false }
+    }
+  }
+}
+```
+
+O edita el archivo de configuración directamente (`milady config path` muestra la ubicación del archivo):
+
 ```bash
-milady plugins enable plugin-name
-milady plugins disable plugin-name
+$EDITOR "$(milady config path)"
 ```
 
 <div id="eject-copy-to-local">
@@ -139,11 +152,13 @@ milady plugins disable plugin-name
 
 </div>
 
-```bash
-milady plugins eject plugin-name
+Expulsa un plugin a través del chat del agente para clonar su código fuente y editarlo localmente:
+
+```
+eject the telegram plugin so I can edit its source
 ```
 
-Consulta [Expulsar Plugin](/es/plugins/plugin-eject) para detalles sobre cómo personalizar plugins expulsados.
+Consulta [Expulsar Plugin](/es/plugins/plugin-eject) para el flujo completo de expulsar/sincronizar/reinyectar.
 
 <div id="related">
 

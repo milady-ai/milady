@@ -22,7 +22,7 @@ AgentRuntime
 └── Local            (来自 plugins/ 目录)
 ```
 
-确定哪些插件始终加载的权威来源位于 `packages/agent/src/runtime/core-plugins.ts`（由 `packages/app-core/src/runtime/core-plugins.ts` 重新导出）：
+确定哪些插件始终加载的权威来源位于 `eliza/packages/agent/src/runtime/core-plugins.ts`（在上游 elizaOS 子模块中，由 `eliza/packages/app-core/src/runtime/core-plugins.ts` 重新导出）：
 
 ```typescript
 export const CORE_PLUGINS: readonly string[] = [
@@ -49,7 +49,7 @@ export const CORE_PLUGINS: readonly string[] = [
 
 </div>
 
-另有一组可选核心插件可从管理面板启用。由于打包或规范约束，这些插件默认不加载。列表位于 `packages/agent/src/runtime/core-plugins.ts`：
+另有一组可选核心插件可从管理面板启用。由于打包或规范约束，这些插件默认不加载。列表位于 `eliza/packages/agent/src/runtime/core-plugins.ts`：
 
 ```typescript
 export const OPTIONAL_CORE_PLUGINS: readonly string[] = [
@@ -144,7 +144,7 @@ interface Plugin {
 
 </div>
 
-当检测到所需配置时，插件会自动启用。此逻辑位于 `packages/agent/src/config/plugin-auto-enable.ts`（由 `packages/app-core/src/config/plugin-auto-enable.ts` 扩展，用于 Milady 特有的连接器如微信），并在运行时初始化之前执行。
+当检测到所需配置时，插件会自动启用。此逻辑位于 `eliza/packages/agent/src/config/plugin-auto-enable.ts`（由 Milady 自身的 `plugin-auto-enable.ts` 扩展，用于微信等连接器），并在运行时初始化之前执行。
 
 <div id="trigger-sources">
 

@@ -22,7 +22,7 @@ Milady now has two layers before the first chat:
 
 2. **Onboarding wizard**
    Once a server target is selected, the app runs the four-step wizard defined in
-   [`packages/app-core/src/state/types.ts`](../../packages/app-core/src/state/types.ts):
+   [`eliza/packages/app-core/src/state/types.ts`](../../eliza/packages/app-core/src/state/types.ts):
    - `deployment`
    - `identity`
    - `providers`
@@ -83,11 +83,11 @@ Relevant files:
 
 | File | Role |
 |------|------|
-| [`packages/app-core/src/onboarding/server-target.ts`](../../packages/app-core/src/onboarding/server-target.ts) | Canonical mapping between onboarding server target and the temporary compatibility fields still used at the onboarding API boundary. |
-| [`packages/app-core/src/onboarding/types.ts`](../../packages/app-core/src/onboarding/types.ts) | Types for the nested connection flow snapshots, patches, screens, and events. |
-| [`packages/app-core/src/onboarding/connection-flow.ts`](../../packages/app-core/src/onboarding/connection-flow.ts) | Pure routing logic for the nested deployment/provider panels inside the providers step. No React, no API calls. |
-| [`packages/app-core/src/components/onboarding/ConnectionStep.tsx`](../../packages/app-core/src/components/onboarding/ConnectionStep.tsx) | React shell that renders the pure flow and performs effectful actions. |
-| [`packages/app-core/src/onboarding/tests/connection-flow.test.ts`](../../packages/app-core/src/onboarding/tests/connection-flow.test.ts) | Table-driven coverage for the nested deployment/provider decisions. |
+| [`eliza/packages/app-core/src/onboarding/server-target.ts`](../../eliza/packages/app-core/src/onboarding/server-target.ts) | Canonical mapping between onboarding server target and the temporary compatibility fields still used at the onboarding API boundary. |
+| [`eliza/packages/app-core/src/onboarding/types.ts`](../../eliza/packages/app-core/src/onboarding/types.ts) | Types for the nested connection flow snapshots, patches, screens, and events. |
+| [`eliza/packages/app-core/src/onboarding/connection-flow.ts`](../../eliza/packages/app-core/src/onboarding/connection-flow.ts) | Pure routing logic for the nested deployment/provider panels inside the providers step. No React, no API calls. |
+| [`eliza/packages/app-core/src/components/onboarding/ConnectionStep.tsx`](../../eliza/packages/app-core/src/components/onboarding/ConnectionStep.tsx) | React shell that renders the pure flow and performs effectful actions. |
+| [`eliza/packages/app-core/src/onboarding/tests/connection-flow.test.ts`](../../eliza/packages/app-core/src/onboarding/tests/connection-flow.test.ts) | Table-driven coverage for the nested deployment/provider decisions. |
 
 **Why this split still exists:** the providers step has richer nested UI than the outer wizard, and the pure module keeps that behavior deterministic and testable.
 
@@ -110,7 +110,7 @@ Those answers belong to the provider section of onboarding, where the app writes
 ## Back/next behavior
 
 The outer wizard navigation still comes from pure flow helpers in
-[`packages/app-core/src/onboarding/flow.ts`](../../packages/app-core/src/onboarding/flow.ts), while effectful transitions stay in AppContext and onboarding callbacks.
+[`eliza/packages/app-core/src/onboarding/flow.ts`](../../eliza/packages/app-core/src/onboarding/flow.ts), while effectful transitions stay in AppContext and onboarding callbacks.
 
 Use:
 

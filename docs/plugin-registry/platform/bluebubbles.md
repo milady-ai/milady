@@ -1,37 +1,20 @@
 ---
 title: "BlueBubbles Plugin"
 sidebarTitle: "BlueBubbles"
-description: "BlueBubbles connector for Milady — iMessage integration via a local BlueBubbles server."
+description: "BlueBubbles connector for sending and receiving iMessage through a local BlueBubbles server"
 ---
 
-The BlueBubbles plugin connects Milady agents to iMessage through a self-hosted [BlueBubbles](https://bluebubbles.app) server running on macOS.
+iMessage connector via a local BlueBubbles server.
 
 **Package:** `@elizaos/plugin-bluebubbles`
 
-## Installation
+## Auto-Enable
 
-```bash
-milady plugins install bluebubbles
-```
+This plugin auto-enables when both `serverUrl` and `password` are set in the connector config. No manual install is required.
 
-## Setup
+## Auto-Enable
 
-### 1. Install BlueBubbles Server
-
-Install [BlueBubbles](https://bluebubbles.app) on a Mac with Messages signed in. Start the server and note the URL and password from the BlueBubbles dashboard.
-
-### 2. Configure Milady
-
-```json
-{
-  "connectors": {
-    "bluebubbles": {
-      "serverUrl": "http://192.168.1.10:1234",
-      "password": "your-bluebubbles-password"
-    }
-  }
-}
-```
+This plugin auto-enables when the `BLUEBUBBLES_SERVER_URL` environment variable is set.
 
 ## Configuration
 
@@ -39,6 +22,13 @@ Install [BlueBubbles](https://bluebubbles.app) on a Mac with Messages signed in.
 |----------|----------|-------------|
 | `BLUEBUBBLES_SERVER_URL` | Yes | BlueBubbles server URL |
 | `BLUEBUBBLES_PASSWORD` | Yes | Server password |
+| `BLUEBUBBLES_ENABLED` | No | Enable or disable the connector |
+| `BLUEBUBBLES_DM_POLICY` | No | DM policy (e.g., allow, deny, allowlist) |
+| `BLUEBUBBLES_ALLOW_FROM` | No | Comma-separated allowed user list |
+| `BLUEBUBBLES_GROUP_POLICY` | No | Group message policy |
+| `BLUEBUBBLES_WEBHOOK_PATH` | No | Webhook endpoint path |
+| `BLUEBUBBLES_GROUP_ALLOW_FROM` | No | Comma-separated allowed group list |
+| `BLUEBUBBLES_SEND_READ_RECEIPTS` | No | Send read receipts for received messages |
 
 ## Features
 

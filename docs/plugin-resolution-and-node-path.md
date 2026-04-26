@@ -1,6 +1,14 @@
+---
+title: "Plugin Resolution and NODE_PATH"
+sidebarTitle: "Plugin Resolution"
+description: "Why dynamic plugin imports fail without NODE_PATH and how Milady fixes it across CLI, dev server, and Electrobun."
+---
+
 # Plugin resolution: why NODE_PATH is needed
 
 This doc explains **why** dynamic plugin imports fail without `NODE_PATH` and **how** we fix it across CLI, dev server, and Electrobun.
+
+> **Note:** The source files referenced in this document live in the elizaOS submodule (`eliza/`). Run `bun run setup:upstreams` to populate the submodule so you can inspect them locally. All paths like `src/runtime/eliza.ts` refer to `eliza/packages/app-core/src/runtime/eliza.ts` unless otherwise noted.
 
 ## The problem
 

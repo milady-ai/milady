@@ -1,20 +1,22 @@
 import { expect, test } from "@playwright/test";
-import { openAppPath, seedAppStorage } from "./helpers";
+import { openAppPath, openSettingsSection, seedAppStorage } from "./helpers";
 
 test("settings exposes computer use capability controls", async ({ page }) => {
   await seedAppStorage(page);
   await openAppPath(page, "/voice");
 
   await expect(page.getByTestId("settings-shell")).toBeVisible();
+  await openSettingsSection(page, /^Capabilities\b/);
+
+  await expect(page.locator("#capabilities")).toBeVisible();
   await expect(
     page.getByRole("switch", { name: "Enable Computer Use" }),
   ).toBeVisible();
 
   await page.getByRole("switch", { name: "Enable Computer Use" }).click();
 
-  await expect(page.getByText("Approval Mode")).toBeVisible();
   await expect(
-    page.getByRole("combobox").filter({ hasText: "Full Control" }),
+    page.getByText(/Computer Use requires Accessibility and Screen Recording/),
   ).toBeVisible();
   await expect(page.locator("#permissions")).toBeVisible();
   await expect(
@@ -22,7 +24,9 @@ test("settings exposes computer use capability controls", async ({ page }) => {
   ).toBeVisible();
 });
 
-test("onboarding exposes the computer use feature toggle", async ({ page }) => {
+test("onboarding starts with setup choices before capability settings", async ({
+  page,
+}) => {
   await seedAppStorage(page, {
     "eliza:onboarding-complete": "0",
     "elizaos:onboarding:force-fresh": "1",
@@ -32,15 +36,11 @@ test("onboarding exposes the computer use feature toggle", async ({ page }) => {
 
   await page.goto("/chat", { waitUntil: "domcontentloaded" });
 
-  const onboarding = page.getByTestId("onboarding-ui-overlay");
-  await expect(onboarding).toBeVisible();
   await expect(
-    onboarding.getByText("Computer Use", { exact: true }),
+    page.getByRole("heading", { name: "Choose your setup" }),
   ).toBeVisible();
+  await expect(page.getByRole("button", { name: /Eliza Cloud/ })).toBeVisible();
   await expect(
-    onboarding.getByText(/Accessibility and Screen Recording permissions\./),
-  ).toBeVisible();
-  await expect(
-    onboarding.getByRole("button", { name: "Continue without features" }),
+    page.getByRole("button", { name: /Remote agent/ }),
   ).toBeVisible();
 });

@@ -15,7 +15,7 @@ Le plugin Gmail Watch connecte les agents Milady à Gmail, permettant la surveil
 </div>
 
 ```bash
-milady plugins install gmail-watch
+milady plugins install @elizaos/plugin-gmail-watch
 ```
 
 <div id="setup">

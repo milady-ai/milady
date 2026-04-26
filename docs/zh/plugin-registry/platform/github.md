@@ -15,7 +15,7 @@ GitHub 插件将 Milady 代理连接到 GitHub，实现与仓库、issue、pull 
 </div>
 
 ```bash
-milady plugins install github
+milady plugins install @elizaos/plugin-github
 ```
 
 <div id="setup">

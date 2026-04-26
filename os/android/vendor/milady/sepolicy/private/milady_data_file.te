@@ -1,0 +1,7 @@
+# Type for the Milady scratch directory created in init.milady.rc.
+# Allows the system_app domain to read/write under /data/milady/.
+
+type milady_data_file, file_type, data_file_type, core_data_file_type;
+
+allow system_app milady_data_file:dir create_dir_perms;
+allow system_app milady_data_file:file create_file_perms;

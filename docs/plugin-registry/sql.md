@@ -4,23 +4,40 @@ sidebarTitle: "SQL"
 description: "Database layer — SQLite adapter, schema, migrations, query interface, and memory persistence."
 ---
 
+<Warning>
+SQL/database support is a built-in runtime capability, not a standalone installable plugin. The runtime handles database connections automatically.
+</Warning>
+
 The SQL plugin is the database layer for Milady agents. It provides persistent storage for conversation memory, entity data, knowledge embeddings, and agent state.
+
+> **Core plugin.** This is a foundational runtime plugin that is always loaded. It is not listed in the bundled `plugins.json` index because it is not user-installable — it ships as part of the elizaOS core.
 
 **Package:** `@elizaos/plugin-sql` (core plugin — always loaded)
 
 ## Overview
 
-The SQL plugin implements the `IDatabaseAdapter` interface from elizaOS core, backed by SQLite via Drizzle ORM. It is the first core plugin loaded because all other plugins depend on persistent storage.
+The SQL plugin implements the `IDatabaseAdapter` interface from elizaOS core. Milady defaults to **PGLite** (embedded PostgreSQL) for local state, with optional external PostgreSQL for production. It is the first core plugin loaded because all other plugins depend on persistent storage.
 
 ## Database Location
 
-The SQLite database file is stored at:
+The default PGLite database is stored at:
 
 ```
-~/.milady/agents/{agentId}/agent.db
+~/.milady/workspace/.eliza/.elizadb
 ```
 
-For multi-agent setups, each agent has its own isolated database.
+Override via config:
+
+```json5
+{
+  database: {
+    provider: "pglite",
+    pglite: {
+      dataDir: "~/.milady/workspace/.eliza/.elizadb",
+    },
+  },
+}
+```
 
 ## Schema
 
@@ -67,14 +84,17 @@ SQLite does not have a native vector extension, so similarity search is performe
 
 ## PostgreSQL Support
 
-For production deployments, the SQL plugin supports PostgreSQL via the `pg` driver:
+For production deployments, the SQL plugin supports external PostgreSQL:
 
-```json
+```json5
 {
-  "database": {
-    "type": "postgres",
-    "url": "postgresql://user:password@host:5432/milady"
-  }
+  database: {
+    provider: "postgres",
+    postgres: {
+      connectionString: "postgresql://user:password@host:5432/milady",
+      ssl: true,
+    },
+  },
 }
 ```
 
@@ -141,7 +161,7 @@ await runtime.setComponent(userId, "userPreferences", {
 | `database.type` | `sqlite` or `postgres` | `sqlite` |
 | `database.url` | PostgreSQL connection URL | — |
 | `database.path` | Custom SQLite file path | Auto-resolved |
-| `database.vectorDimensions` | Embedding vector size | `768` |
+| `database.vectorDimensions` | Embedding vector size | `384` (Milady caps `EMBEDDING_DIMENSION` to 384) |
 
 ## Related
 

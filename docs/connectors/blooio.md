@@ -1,26 +1,31 @@
----
-title: Blooio Connector
-sidebarTitle: Blooio
-description: Connect your agent to iMessage and SMS via the Blooio service using the @elizaos/plugin-blooio package.
----
+# Blooio Connector
 
-Connect your agent to iMessage and SMS messaging via the Blooio bridge service.
+Connect your agent to iMessage and SMS messaging via the Blooio bridge service using the `@elizaos/plugin-blooio` package.
+
+> **Note:** Blooio is registered as a **feature** plugin (not a connector) in the plugin registry. It behaves like a connector but is categorized under features in `plugins.json`.
 
 ## Overview
 
-The Blooio connector is an external elizaOS plugin that bridges your agent to iMessage and SMS through the Blooio service. It uses signed webhooks for inbound messages and an API for outbound messaging. It is auto-enabled by the runtime when a valid API key is detected in your connector configuration.
+- A Blooio account and API key from the Blooio platform
+
+<Note>
+In the bundled registry (`plugins.json`) this plugin is listed under the `feature` category rather than `connector`. It functions as a connector regardless of the registry classification.
+</Note>
 
 ## Package Info
 
-| Field | Value |
-|-------|-------|
-| Package | `@elizaos/plugin-blooio` |
-| Config key | `connectors.blooio` |
-| Auto-enable trigger | `apiKey` is truthy in connector config |
+| Name | Required | Description |
+|------|----------|-------------|
+| `BLOOIO_API_KEY` | Yes | Blooio service API key |
+| `BLOOIO_BASE_URL` | No | Base URL for API requests |
+| `BLOOIO_FROM_NUMBER` | No | Sender phone number |
+| `BLOOIO_WEBHOOK_URL` | No | Webhook callback URL for receiving inbound messages |
+| `BLOOIO_WEBHOOK_PATH` | No | Webhook endpoint path |
+| `BLOOIO_WEBHOOK_PORT` | No | Webhook listener port |
+| `BLOOIO_WEBHOOK_SECRET` | No | Secret key for webhook/client verification |
+| `BLOOIO_SIGNATURE_TOLERANCE_SEC` | No | Tolerance window in seconds for signature validation |
 
-## Minimal Configuration
-
-In `~/.milady/milady.json`:
+These can be set as environment variables or under the `connectors.blooio` config in `~/.milady/milady.json`:
 
 ```json
 {
@@ -32,9 +37,9 @@ In `~/.milady/milady.json`:
 }
 ```
 
-## Disabling
+The connector auto-enables when `apiKey` is truthy in the connector config and `enabled` is not explicitly `false`.
 
-To explicitly disable the connector even when an API key is present:
+To disable:
 
 ```json
 {
@@ -47,9 +52,11 @@ To explicitly disable the connector even when an API key is present:
 }
 ```
 
-## Auto-Enable Mechanism
+## Setup
 
-The `plugin-auto-enable.ts` module checks `connectors.blooio` in your config. If the `apiKey` field is truthy (and `enabled` is not explicitly `false`), the runtime automatically loads `@elizaos/plugin-blooio`.
+1. Obtain an API key from the Blooio platform.
+2. Add it to `connectors.blooio` in your config or set the `BLOOIO_API_KEY` environment variable.
+3. Start your agent -- the Blooio connector will auto-enable.
 
 No environment variable is required to trigger auto-enable — it is driven entirely by the connector config object.
 
@@ -60,10 +67,11 @@ No environment variable is required to trigger auto-enable — it is driven enti
 | `BLOOIO_API_KEY` | Yes | Blooio service API key |
 | `BLOOIO_WEBHOOK_URL` | No | URL for receiving inbound messages |
 | `BLOOIO_BASE_URL` | No | Base URL for API requests |
-| `BLOOIO_FROM_NUMBER` | No | Sender phone number |
+| `BLOOIO_PHONE_NUMBER` | No | Sender phone number (injected by the runtime from `fromNumber` config field) |
 | `BLOOIO_WEBHOOK_PATH` | No | Webhook endpoint path |
 | `BLOOIO_WEBHOOK_PORT` | No | Webhook listener port |
 | `BLOOIO_WEBHOOK_SECRET` | No | Secret key for webhook/client verification |
+| `BLOOIO_SIGNATURE_TOLERANCE_SEC` | No | Tolerance window in seconds for webhook signature verification |
 
 ## Setup Steps
 
@@ -96,5 +104,6 @@ All fields are defined under `connectors.blooio` in `milady.json`.
 
 ## Related
 
+- [Blooio plugin reference](/plugin-registry/platform/blooio)
 - [Connectors overview](/guides/connectors)
 - [Configuration reference](/configuration)

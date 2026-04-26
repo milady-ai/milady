@@ -46,26 +46,26 @@ Settings still uses **`handleReset`** in the renderer (confirm in webview + full
 | Menu template / action ids | `apps/app/electrobun/src/application-menu.ts` |
 | Native confirm + orchestration | `apps/app/electrobun/src/index.ts` (`resetMiladyFromApplicationMenu`) |
 | Testable fetch/restart/poll core | `apps/app/electrobun/src/menu-reset-from-main.ts` |
-| Tray subscription (legacy `menu-reset-milady` + applied) | `packages/app-core/src/shell/DesktopTrayRuntime.tsx` |
-| Renderer sync + lifecycle | `packages/app-core/src/state/handle-reset-applied-from-main.ts`, `complete-reset-local-state-after-wipe.ts` |
-| Parse `agentStatus` from push payload | `packages/app-core/src/state/parsers.ts` (`parseAgentStatusFromMainMenuResetPayload`) |
+| Tray subscription (legacy `menu-reset-milady` + applied) | `eliza/packages/app-core/src/shell/DesktopTrayRuntime.tsx` |
+| Renderer sync + lifecycle | `eliza/packages/app-core/src/state/handle-reset-applied-from-main.ts`, `complete-reset-local-state-after-wipe.ts` |
+| Parse `agentStatus` from push payload | `eliza/packages/app-core/src/state/parsers.ts` (`parseAgentStatusFromMainMenuResetPayload`) |
 
 ## Tests
 
 | Suite | File | What it proves |
 |-------|------|----------------|
 | Main reset core | `apps/app/electrobun/src/__tests__/menu-reset-from-main.test.ts` | Candidate ordering, skip non-ok HTTP, poll until running, embedded vs external branches, failed POST |
-| Renderer reset | `packages/app-core/src/state/reset-main-process.test.ts` | Order of local wipes, onboarding options failure path, lifecycle busy / begin-fail / success / throw + `finishLifecycleAction` |
-| Payload parse | `packages/app-core/src/state/parsers.test.ts` | Valid / invalid `agentStatus` on tray payload |
+| Renderer reset | `eliza/packages/app-core/src/state/reset-main-process.test.ts` | Order of local wipes, onboarding options failure path, lifecycle busy / begin-fail / success / throw + `finishLifecycleAction` |
+| Payload parse | `eliza/packages/app-core/src/state/parsers.test.ts` | Valid / invalid `agentStatus` on tray payload |
 
 **Why separate from kitchen-sink string checks:** `kitchen-sink` asserts wiring in `index.ts`; **behavior** lives in the extracted modules so CI fails when reset semantics regress without loading Electrobun.
 
 ## Related documentation
 
-- [Desktop app](./desktop.md) — native menu overview (table updated to match main-process reset).
-- [Environment variables](../cli/environment.md) — `MILADY_DISABLE_EDGE_TTS` and other runtime flags.
-- [TTS / Edge plugin](../plugin-registry/tts.md) — Microsoft Edge TTS cloud disclosure when orchestrator auto-loads Edge TTS.
-- [Contributing — Testing](../guides/contributing.md) — Vitest include globs for `packages/app-core`.
+- [Desktop app](/apps/desktop) — native menu overview (table updated to match main-process reset).
+- [Environment variables](/cli/environment) — `MILADY_DISABLE_EDGE_TTS` and other runtime flags.
+- [TTS / Edge plugin](/plugin-registry/tts) — Microsoft Edge TTS cloud disclosure when orchestrator auto-loads Edge TTS.
+- [Contributing — Testing](/guides/contributing) — Vitest include globs for `packages/app-core`.
 
 ## Tray RPC wait timeout
 

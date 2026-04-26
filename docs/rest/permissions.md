@@ -14,32 +14,51 @@ Get all system permission states.
 
 **Response**
 
+Returns a flat map of permission ID to permission state:
+
 ```json
 {
-  "permissions": {
-    "microphone": {
-      "id": "microphone",
-      "status": "granted",
-      "lastChecked": 1718000000000,
-      "canRequest": false
-    },
-    "camera": {
-      "id": "camera",
-      "status": "denied",
-      "lastChecked": 1718000000000,
-      "canRequest": true
-    }
+  "accessibility": {
+    "id": "accessibility",
+    "status": "granted",
+    "lastChecked": 1718000000000,
+    "canRequest": false
   },
-  "platform": "darwin",
-  "shellEnabled": true
+  "screen-recording": {
+    "id": "screen-recording",
+    "status": "granted",
+    "lastChecked": 1718000000000,
+    "canRequest": false
+  },
+  "microphone": {
+    "id": "microphone",
+    "status": "granted",
+    "lastChecked": 1718000000000,
+    "canRequest": false
+  },
+  "camera": {
+    "id": "camera",
+    "status": "denied",
+    "lastChecked": 1718000000000,
+    "canRequest": true
+  },
+  "shell": {
+    "id": "shell",
+    "status": "granted",
+    "lastChecked": 1718000000000,
+    "canRequest": false
+  }
 }
 ```
 
+Each value is a permission state object with the following fields:
+
 | Field | Type | Description |
 |-------|------|-------------|
-| `permissions` | object | Map of permission ID to permission state |
-| `platform` | string | Operating system platform (`darwin`, `win32`, `linux`) |
-| `shellEnabled` | boolean | Whether shell command execution is currently enabled |
+| `id` | string | Permission identifier |
+| `status` | string | `"granted"`, `"denied"`, `"not-determined"`, `"restricted"`, or `"not-applicable"` |
+| `lastChecked` | number | Unix ms timestamp of the last check |
+| `canRequest` | boolean | Whether the app can request this permission via system prompt |
 
 ---
 
@@ -79,17 +98,7 @@ Get the shell access toggle status.
 
 ```json
 {
-  "enabled": true,
-  "id": "shell",
-  "status": "granted",
-  "lastChecked": 1718000000000,
-  "canRequest": false,
-  "permission": {
-    "id": "shell",
-    "status": "granted",
-    "lastChecked": 1718000000000,
-    "canRequest": false
-  }
+  "enabled": true
 }
 ```
 
@@ -113,15 +122,14 @@ Toggle shell access on or off. When changed while the agent is running, schedule
 
 **Response**
 
+Returns the updated shell permission state:
+
 ```json
 {
-  "shellEnabled": false,
-  "permission": {
-    "id": "shell",
-    "status": "denied",
-    "lastChecked": 1718000000000,
-    "canRequest": false
-  }
+  "id": "shell",
+  "status": "denied",
+  "lastChecked": 1718000000000,
+  "canRequest": true
 }
 ```
 
@@ -167,12 +175,7 @@ Force refresh all permission states. In desktop deployments, this signals the re
 
 **Response**
 
-```json
-{
-  "message": "Permission refresh requested",
-  "action": "ipc:permissions:refresh"
-}
-```
+Returns the full permissions state map (same shape as `GET /api/permissions`).
 
 ---
 

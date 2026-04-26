@@ -1,19 +1,19 @@
 ---
 title: "Types"
 sidebarTitle: "Types"
-description: "Key TypeScript type definitions: MiladyConfig, AgentConfig, AgentRuntime interfaces, Character, Plugin, Provider, Hook, Trigger, and more."
+description: "Key TypeScript type definitions: ElizaConfig, AgentConfig, AgentRuntime interfaces, Character, Plugin, Provider, Hook, Trigger, and more."
 ---
 
-This page is a quick reference for the key TypeScript types used across the Milady codebase. Types from `@elizaos/core` are noted as such; types defined in `src/` are Milady-specific.
+This page is a quick reference for the key TypeScript types used across the Milady codebase. Types from `@elizaos/core` are noted as such; types defined in the `eliza/packages/` source tree are Milady-specific.
 
-## MiladyConfig
+## ElizaConfig
 
-The root configuration type for `milady.json`. All fields are optional.
+The root configuration type for the config file (defaults to `milady.json` in this product). All fields are optional.
 
 ```typescript
-// src/config/types.milady.ts
-export type MiladyConfig = {
-  meta?:         { lastTouchedVersion?: string; lastTouchedAt?: string };
+// eliza/packages/shared/src/config/types.eliza.ts
+export type ElizaConfig = {
+  meta?:         { onboardingComplete?: boolean; lastTouchedVersion?: string; lastTouchedAt?: string };
   auth?:         AuthConfig;
   env?:          {
     shellEnv?: { enabled?: boolean; timeoutMs?: number };
@@ -30,9 +30,15 @@ export type MiladyConfig = {
   browser?:      BrowserConfig;
   ui?:           {
     seamColor?: string;
-    theme?: "milady" | "qt314" | "web2000" | "programmer" | "haxor" | "psycho";
+    theme?: "eliza" | "qt314" | "web2000" | "programmer" | "haxor" | "psycho";
     assistant?: { name?: string; avatar?: string };
+    avatarIndex?: number;
+    language?: string;
+    presetId?: string;
+    ownerName?: string;
   };
+  knowledge?:    KnowledgeConfig;
+  roles?:        RolesConfig;
   skills?:       SkillsConfig;
   plugins?:      PluginsConfig;
   models?:       ModelsConfig;
@@ -72,7 +78,7 @@ export type MiladyConfig = {
 Per-agent configuration stored in `agents.list[]`:
 
 ```typescript
-// src/config/types.agents.ts
+// eliza/packages/shared/src/config/types.agents.ts
 export type AgentConfig = {
   id: string;
   default?: boolean;
@@ -191,14 +197,14 @@ interface Service {
 }
 ```
 
-## MiladyPluginConfig
+## ElizaPluginConfig
 
 ```typescript
-// src/runtime/milady-plugin.ts
-export type MiladyPluginConfig = {
+// eliza/packages/agent/src/runtime/eliza-plugin.ts
+export type ElizaPluginConfig = {
   workspaceDir?: string;
-  repoRoot?: string;
-  userTimezone?: string;
+  initMaxChars?: number;
+  sessionStorePath?: string;
   agentId?: string;
 };
 ```
@@ -206,7 +212,7 @@ export type MiladyPluginConfig = {
 ## HookEvent
 
 ```typescript
-// src/hooks/types.ts
+// eliza/packages/agent/src/hooks/types.ts
 export interface HookEvent {
   type: "command" | "session" | "agent" | "gateway";
   action: string;
@@ -222,11 +228,11 @@ export type HookHandler = (event: HookEvent) => Promise<void> | void;
 ## Hook
 
 ```typescript
-// src/hooks/types.ts
+// eliza/packages/agent/src/hooks/types.ts
 export interface Hook {
   name: string;
   description: string;
-  source: "milady-bundled" | "milady-managed" | "milady-workspace" | "milady-plugin";
+  source: "eliza-bundled" | "eliza-managed" | "eliza-workspace" | "eliza-plugin";
   pluginId?: string;
   filePath: string;
   baseDir: string;
@@ -237,7 +243,7 @@ export interface Hook {
 ## TriggerConfig
 
 ```typescript
-// src/triggers/types.ts
+// @elizaos/core (re-exported via eliza/packages/agent/src/triggers/types.ts)
 export interface TriggerConfig {
   version: 1;
   triggerId: UUID;
@@ -258,13 +264,16 @@ export interface TriggerConfig {
   lastRunAtIso?: string;
   lastStatus?: "success" | "error" | "skipped";
   lastError?: string;
+  kind?: "text" | "workflow";
+  workflowId?: string;
+  workflowName?: string;
 }
 ```
 
 ## PluginsConfig
 
 ```typescript
-// src/config/types.milady.ts
+// eliza/packages/shared/src/config/types.eliza.ts
 export type PluginsConfig = {
   enabled?: boolean;
   allow?: string[];
@@ -278,6 +287,8 @@ export type PluginsConfig = {
 export type PluginInstallRecord = {
   source: "npm" | "archive" | "path";
   spec?: string;
+  requestedVersion?: string;
+  releaseStream?: "latest" | "alpha";
   sourcePath?: string;
   installPath?: string;
   version?: string;
@@ -288,7 +299,7 @@ export type PluginInstallRecord = {
 ## DatabaseConfig
 
 ```typescript
-// src/config/types.milady.ts
+// eliza/packages/shared/src/config/types.eliza.ts
 export type DatabaseConfig = {
   provider?: "pglite" | "postgres";
   pglite?: { dataDir?: string };
@@ -307,7 +318,7 @@ export type DatabaseConfig = {
 ## EmbeddingConfig
 
 ```typescript
-// src/config/types.milady.ts
+// eliza/packages/shared/src/config/types.eliza.ts
 export type EmbeddingConfig = {
   model?: string;
   modelRepo?: string;
@@ -321,7 +332,7 @@ export type EmbeddingConfig = {
 ## HooksConfig
 
 ```typescript
-// src/config/types.hooks.ts
+// eliza/packages/shared/src/config/types.hooks.ts
 export type HooksConfig = {
   enabled?: boolean;
   path?: string;
@@ -338,7 +349,7 @@ export type HooksConfig = {
 ## HookMappingConfig
 
 ```typescript
-// src/config/types.hooks.ts
+// eliza/packages/shared/src/config/types.hooks.ts
 export type HookMappingConfig = {
   id?: string;
   match?: { path?: string; source?: string };
@@ -360,7 +371,7 @@ export type HookMappingConfig = {
 ## MemoryConfig
 
 ```typescript
-// src/config/types.milady.ts
+// eliza/packages/shared/src/config/types.eliza.ts
 export type MemoryConfig = {
   backend?: "builtin" | "qmd";
   citations?: "auto" | "on" | "off";
@@ -371,7 +382,7 @@ export type MemoryConfig = {
 ## StartElizaOptions
 
 ```typescript
-// src/runtime/eliza.ts
+// eliza/packages/agent/src/runtime/eliza.ts
 export interface StartElizaOptions {
   headless?: boolean;
   serverOnly?: boolean;
@@ -386,7 +397,7 @@ export interface BootElizaRuntimeOptions {
 ## ResolvedPlugin (Internal)
 
 ```typescript
-// src/runtime/eliza.ts (internal)
+// eliza/packages/agent/src/runtime/eliza.ts (internal)
 interface ResolvedPlugin {
   name: string;   // npm package name
   plugin: Plugin; // Plugin instance

@@ -176,10 +176,31 @@ const ELIZA_EDGE_TTS_PLUGIN_BUILD = {
   ),
   args: ["run", "build"],
 };
+const ELIZA_LOCAL_EMBEDDING_PLUGIN_BUILD = {
+  label: "@elizaos/plugin-local-embedding",
+  cwd: path.join("eliza", "plugins", "plugin-local-embedding", "typescript"),
+  manifest: path.join(
+    "eliza",
+    "plugins",
+    "plugin-local-embedding",
+    "typescript",
+    "package.json",
+  ),
+  artifact: path.join(
+    "eliza",
+    "plugins",
+    "plugin-local-embedding",
+    "typescript",
+    "dist",
+    "index.js",
+  ),
+  args: ["run", "build"],
+};
 const ELIZA_REQUIRED_PLUGIN_BUILDS = [
   ELIZA_AGENT_SKILLS_PLUGIN_BUILD,
   ELIZA_TELEGRAM_PLUGIN_BUILD,
   ELIZA_EDGE_TTS_PLUGIN_BUILD,
+  ELIZA_LOCAL_EMBEDDING_PLUGIN_BUILD,
 ];
 const INBOX_REPLY_HINT_LEGACY =
   "Sent through the connected {{source}} account on this Mac.";
@@ -1367,7 +1388,31 @@ export function createPackageLink(linkPath, targetPath) {
 }
 
 function createBinLink(linkPath, targetPath) {
-  return createLink(linkPath, targetPath, "file");
+  const linked = createLink(linkPath, targetPath, "file");
+
+  if (process.platform !== "win32") {
+    return linked;
+  }
+
+  const cmdPath = `${linkPath}.cmd`;
+  const cmdContents = `@ECHO off\r\nnode "${targetPath}" %*\r\n`;
+  let wroteCmdShim = false;
+  try {
+    const currentContents = existsSync(cmdPath)
+      ? readFileSync(cmdPath, "utf8")
+      : null;
+    if (currentContents !== cmdContents) {
+      mkdirSync(path.dirname(cmdPath), { recursive: true });
+      writeFileSync(cmdPath, cmdContents);
+      wroteCmdShim = true;
+    }
+  } catch {
+    mkdirSync(path.dirname(cmdPath), { recursive: true });
+    writeFileSync(cmdPath, cmdContents);
+    wroteCmdShim = true;
+  }
+
+  return linked || wroteCmdShim;
 }
 
 function getPackageBinEntries(packageJson) {
@@ -2018,11 +2063,51 @@ export function ensurePluginAnthropicBunTypes(
   return true;
 }
 
+export function patchPluginBuildTscBinPaths(
+  pluginsRoot,
+  { pathExists = existsSync } = {},
+) {
+  let patchedFiles = 0;
+  for (const packageDir of discoverPluginPackageDirs(pluginsRoot)) {
+    const buildScriptPath = path.join(packageDir, "build.ts");
+    if (!pathExists(buildScriptPath)) {
+      continue;
+    }
+
+    const original = readFileSync(buildScriptPath, "utf8");
+    const patched = original
+      .replaceAll(
+        'join(rootDir, "node_modules", ".bin", "tsc")',
+        'join(rootDir, "node_modules", ".bin", process.platform === "win32" ? "tsc.cmd" : "tsc")',
+      )
+      .replaceAll(
+        'join(ROOT, "node_modules", ".bin", "tsc")',
+        'join(ROOT, "node_modules", ".bin", process.platform === "win32" ? "tsc.cmd" : "tsc")',
+      );
+
+    if (patched === original) {
+      continue;
+    }
+
+    writeFileSync(buildScriptPath, patched);
+    patchedFiles += 1;
+  }
+
+  if (patchedFiles > 0) {
+    console.log(
+      `[setup-upstreams] Patched ${patchedFiles} plugin build script ${patchedFiles === 1 ? "tsc path" : "tsc paths"} for Windows bin shims`,
+    );
+  }
+
+  return patchedFiles;
+}
+
 export async function ensurePluginBuildOutputs(
   pluginsRoot,
   { pathExists = existsSync, runCommandImpl = runCommand } = {},
 ) {
   ensurePluginAnthropicBunTypes(pluginsRoot, { pathExists });
+  patchPluginBuildTscBinPaths(pluginsRoot, { pathExists });
   for (const packageDir of discoverPluginPackageDirs(pluginsRoot)) {
     const packageJson = readPackageJson(packageDir);
     if (!packageJson?.name?.startsWith("@elizaos/")) {

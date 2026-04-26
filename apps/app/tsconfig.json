@@ -37,12 +37,8 @@
       ],
       "@elizaos/app-companion": ["./eliza/apps/app-companion/src/index.ts"],
       "@elizaos/app-companion/*": ["./eliza/apps/app-companion/src/*"],
-      "@clawville/app-clawville": [
-        "./eliza/apps/app-clawville/src/index.ts"
-      ],
-      "@clawville/app-clawville/*": [
-        "./eliza/apps/app-clawville/src/*"
-      ],
+      "@clawville/app-clawville": ["./eliza/apps/app-clawville/src/index.ts"],
+      "@clawville/app-clawville/*": ["./eliza/apps/app-clawville/src/*"],
       "@elizaos/app-lifeops": ["./eliza/apps/app-lifeops/src/index.ts"],
       "@elizaos/app-lifeops/*": ["./eliza/apps/app-lifeops/src/*"],
       "@elizaos/app-shopify": ["./eliza/apps/app-shopify/src/index.ts"],

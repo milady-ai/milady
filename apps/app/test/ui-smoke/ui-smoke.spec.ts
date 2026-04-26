@@ -1,5 +1,10 @@
 import { expect, test } from "@playwright/test";
-import { assertReadyChecks, openAppPath, seedAppStorage } from "./helpers";
+import {
+  assertReadyChecks,
+  openAppPath,
+  openSettingsSection,
+  seedAppStorage,
+} from "./helpers";
 
 test.beforeEach(async ({ page }) => {
   await seedAppStorage(page);
@@ -27,6 +32,7 @@ test("chat, apps, and settings routes render through the real shell", async ({
   await page.getByTestId("header-settings-button").click();
   await expect(page).toHaveURL(/\/settings$/);
   await expect(page.getByTestId("settings-shell")).toBeVisible();
+  await openSettingsSection(page, /^Capabilities\b/);
   await expect(page.locator("#capabilities")).toBeVisible();
   await expect(
     page.locator("#capabilities").getByText("Capabilities", { exact: true }),
@@ -36,8 +42,8 @@ test("chat, apps, and settings routes render through the real shell", async ({
     page.locator("#permissions").getByText("Permissions", { exact: true }),
   ).toBeVisible();
   await expect(
-    page.locator("#capabilities").getByText("Enable Computer Use", {
-      exact: true,
-    }),
+    page
+      .locator("#capabilities")
+      .getByRole("switch", { name: "Enable Computer Use" }),
   ).toBeVisible();
 });

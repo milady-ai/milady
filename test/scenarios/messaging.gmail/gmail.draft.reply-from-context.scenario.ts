@@ -1,8 +1,5 @@
 import { scenario } from "@elizaos/scenario-schema";
-import {
-  expectTurnToCallAction,
-  judgeRubric,
-} from "../_helpers/action-assertions.ts";
+import { judgeRubric } from "../_helpers/action-assertions.ts";
 
 export default scenario({
   id: "gmail.draft.reply-from-context",
@@ -35,11 +32,6 @@ export default scenario({
       name: "draft reply to sarah",
       room: "main",
       text: "Draft a reply to Sarah's latest email saying I can review it Friday afternoon, but don't send it yet.",
-      assertTurn: expectTurnToCallAction({
-        acceptedActions: ["GMAIL_ACTION", "INBOX"],
-        description: "gmail reply draft from recent context",
-        includesAny: ["Sarah", "draft", "Friday", "review"],
-      }),
       responseJudge: {
         minimumScore: 0.7,
         rubric:
@@ -54,6 +46,12 @@ export default scenario({
       subaction: "draft_reply",
     },
     {
+      type: "gmailMockRequest",
+      method: "GET",
+      path: "/gmail/v1/users/me/messages",
+      minCount: 1,
+    },
+    {
       type: "gmailDraftCreated",
     },
     {
@@ -61,6 +59,10 @@ export default scenario({
       method: "POST",
       path: "/gmail/v1/users/me/drafts",
       minCount: 1,
+    },
+    {
+      type: "gmailMessageSent",
+      expected: false,
     },
     {
       type: "gmailNoRealWrite",

@@ -119,8 +119,8 @@ Analyze images to describe contents, identify objects, read text, or answer ques
 | Provider | Config Key | Default Model | API Endpoint |
 |----------|-----------|--------------|-------------|
 | Eliza Cloud | `cloud` (default) | Managed | `{cloudBaseUrl}/media/vision/analyze` |
-| OpenAI | `openai` | `gpt-4o` | `https://api.openai.com/v1/chat/completions` |
-| Google | `google` | `gemini-2.0-flash` | Google Generative Language API |
+| OpenAI | `openai` | `gpt-5` | `https://api.openai.com/v1/chat/completions` |
+| Google | `google` | `gemini-2.5-flash` | Google Generative Language API |
 | Anthropic | `anthropic` | `claude-sonnet-4-6` | `https://api.anthropic.com/v1/messages` |
 | xAI | `xai` | `grok-2-vision-1212` | `https://api.x.ai/v1/chat/completions` |
 | Ollama | `ollama` | `llava` | `http://localhost:11434/api/chat` |
@@ -214,7 +214,7 @@ Media providers are configured in the `media` section of `milady.json`. Each med
       "provider": "openai",
       "openai": {
         "apiKey": "your-openai-api-key",
-        "model": "gpt-4o"
+        "model": "gpt-5"
       }
     }
   }
@@ -329,7 +329,7 @@ FAL supports both image and video generation. The `model` field specifies which 
       "provider": "openai",
       "openai": {
         "apiKey": "your-openai-api-key",
-        "model": "gpt-4o",
+        "model": "gpt-5",
         "maxTokens": 1024
       }
     }
@@ -366,7 +366,7 @@ OpenAI supports image generation (DALL-E), video generation (Sora), and vision a
       "provider": "google",
       "google": {
         "apiKey": "your-google-api-key",
-        "model": "gemini-2.0-flash"
+        "model": "gemini-2.5-flash"
       }
     }
   }

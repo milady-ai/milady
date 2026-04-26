@@ -21,7 +21,7 @@ bun run miladyos:sync -- /path/to/aosp
 
 cd /path/to/aosp
 source build/envsetup.sh
-lunch milady_cf_x86_64_phone-userdebug
+lunch milady_cf_x86_64_phone-trunk_staging-userdebug
 m
 launch_cvd --daemon
 node /path/to/milady/scripts/miladyos/boot-validate.mjs
@@ -37,7 +37,7 @@ On a Linux x86_64 builder with KVM and an existing AOSP checkout, the hard-path 
 node scripts/miladyos/build-aosp.mjs --aosp-root /path/to/aosp --launch --boot-validate
 ```
 
-That command syncs `vendor/milady`, validates the product layer against the AOSP source, runs `lunch milady_cf_x86_64_phone-userdebug && m`, launches Cuttlefish, and then runs the boot validator.
+That command syncs `vendor/milady`, validates the product layer against the AOSP source, runs `lunch milady_cf_x86_64_phone-trunk_staging-userdebug && m`, launches Cuttlefish, and then runs the boot validator.
 
 Primary AOSP source points used for the role wiring:
 

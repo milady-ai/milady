@@ -5,7 +5,7 @@ inputs:
   bun-version:
     description: "Bun version to install"
     required: false
-    default: "1.3.11"
+    default: "1.3.13"
   python-version:
     description: "Python version for node-gyp fallbacks"
     required: false
@@ -109,6 +109,10 @@ runs:
         git submodule sync -- eliza
         git submodule update --init --depth=1 eliza
 
+    - name: Apply Milady eliza CI patches
+      shell: bash
+      run: node scripts/apply-eliza-ci-patches.mjs
+
     # IMPORTANT: This mode is for published-only CI jobs. Do not enable it for
     # jobs that execute repo-local paths under eliza/ after dependency setup.
     - name: Disable repo-local eliza workspace
@@ -118,6 +122,17 @@ runs:
       run: node scripts/disable-local-eliza-workspace.mjs
       env:
         MILADY_SKIP_LOCAL_UPSTREAMS: "1"
+
+    - name: Validate published-only install mode
+      if: ${{ inputs.disable-local-eliza-workspace == 'true' }}
+      shell: bash
+      env:
+        INSTALL_COMMAND: ${{ inputs.install-command }}
+      run: |
+        if [[ "$INSTALL_COMMAND" != *"--no-frozen-lockfile"* ]]; then
+          echo "::error::disable-local-eliza-workspace requires an install-command with --no-frozen-lockfile because the workspace rewrite regenerates bun.lock."
+          exit 1
+        fi
 
     - name: Repair known eliza patch files
       shell: bash
@@ -135,9 +150,14 @@ runs:
         npm_config_python: ${{ env.pythonLocation }}/bin/python3
 
     - name: Install published-workspace fallback dependencies
-      if: ${{ inputs.disable-local-eliza-workspace == 'true' || inputs.run-postinstall == 'true' }}
+      if: ${{ inputs.disable-local-eliza-workspace == 'true' }}
       shell: bash
       run: bash scripts/install-published-workspace-fallback-deps.sh
+
+    - name: Build local eliza CI override packages
+      if: ${{ inputs.disable-local-eliza-workspace == 'true' }}
+      shell: bash
+      run: node scripts/build-local-eliza-ci-overrides.mjs
 
     - name: Run repository postinstall patches
       if: ${{ inputs.run-postinstall == 'true' }}

@@ -5,6 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
+import { lintInitRc } from "./lint-init-rc.mjs";
 
 const PACKAGE_NAME = "com.miladyai.milady";
 const APP_NAME = "Milady";
@@ -240,43 +241,91 @@ export function validateProductLayer(vendorDir) {
     "device/google/cuttlefish/vsoc_x86_64_only/phone/aosp_cf.mk",
     "product",
   );
-  assertIncludes(product, "PRODUCT_PACKAGES +=", "product");
-  assertIncludes(product, "PRODUCT_PACKAGES -=", "product");
-  assertIncludes(product, "Milady", "product");
   assertIncludes(
     product,
+    "vendor/milady/milady_common.mk",
+    "product (must inherit milady_common.mk for shared OS-path invariants)",
+  );
+  assertIncludes(product, "MILADY_PRODUCT_TAG", "product");
+
+  const common = read(path.join(vendorDir, "milady_common.mk"));
+  assertIncludes(common, "PRODUCT_PACKAGES +=", "milady_common.mk");
+  assertIncludes(common, "PRODUCT_PACKAGES -=", "milady_common.mk");
+  assertIncludes(common, "Milady", "milady_common.mk");
+  assertIncludes(
+    common,
     "default-permissions-com.miladyai.milady.xml",
-    "product",
+    "milady_common.mk",
   );
   assertIncludes(
-    product,
+    common,
     "privapp-permissions-com.miladyai.milady.xml",
-    "product",
+    "milady_common.mk",
   );
-  assertIncludes(product, "vendor/milady/overlays/framework-res", "product");
-  if (product.includes("PermissionController")) {
+  assertIncludes(common, "vendor/milady/overlays/framework-res", "milady_common.mk");
+  // Ensure no first-boot UX leaks through.
+  for (const marker of ["Provision", "SetupWizard", "ManagedProvisioning"]) {
+    assertIncludes(common, marker, "milady_common.mk PRODUCT_PACKAGES -= strip list");
+  }
+  assertIncludes(common, "ro.setupwizard.mode=DISABLED", "milady_common.mk");
+  // Boot-time scaffolds.
+  assertIncludes(common, "init.milady.rc", "milady_common.mk PRODUCT_COPY_FILES");
+  assertIncludes(common, "BOARD_VENDOR_SEPOLICY_DIRS", "milady_common.mk");
+  assertIncludes(common, "vendor/milady/sepolicy", "milady_common.mk");
+  if (common.includes("PermissionController")) {
     fail(
-      "product still references a PermissionController overlay; role defaults live in framework-res strings.",
+      "milady_common.mk still references a PermissionController overlay; role defaults live in framework-res strings.",
     );
   }
+
+  // Per-Pixel templates exist and follow the same MILADY_PIXEL_CODENAME contract.
+  const pixelTemplate = read(
+    path.join(vendorDir, "products", "milady_pixel_phone.mk"),
+  );
+  assertIncludes(pixelTemplate, "MILADY_PIXEL_CODENAME", "milady_pixel_phone.mk");
+  assertIncludes(
+    pixelTemplate,
+    "vendor/milady/milady_common.mk",
+    "milady_pixel_phone.mk",
+  );
 
   const androidProducts = read(path.join(vendorDir, "AndroidProducts.mk"));
   assertMatches(
     androidProducts,
     new RegExp(
-      `PRODUCT_MAKEFILES\\s*:=\\s*\\\\?\\s*\\$\\(LOCAL_DIR\\)/products/${PRODUCT_NAME}\\.mk`,
+      `\\$\\(LOCAL_DIR\\)/products/${PRODUCT_NAME}\\.mk`,
     ),
     "AndroidProducts.mk",
     `PRODUCT_MAKEFILES entry for ${PRODUCT_NAME}`,
   );
   assertMatches(
     androidProducts,
-    new RegExp(
-      `COMMON_LUNCH_CHOICES\\s*:=\\s*\\\\?\\s*${PRODUCT_NAME}-userdebug`,
-    ),
+    new RegExp(`${PRODUCT_NAME}-trunk_staging-userdebug`),
     "AndroidProducts.mk",
-    `${PRODUCT_NAME}-userdebug lunch choice`,
+    `${PRODUCT_NAME}-trunk_staging-userdebug lunch choice`,
   );
+
+  // Init script + sepolicy scaffold present.
+  assertFile(
+    path.join(vendorDir, "init", "init.milady.rc"),
+    "vendor/milady init script",
+  );
+  assertFile(
+    path.join(vendorDir, "sepolicy", "file_contexts"),
+    "vendor/milady sepolicy file_contexts",
+  );
+
+  // Lint the init script syntactically — typos here only show up at
+  // boot otherwise.
+  const initIssues = lintInitRc(path.join(vendorDir, "init", "init.milady.rc"));
+  const initErrors = initIssues.filter((i) => !i.soft);
+  if (initErrors.length > 0) {
+    fail(
+      `init.milady.rc has lint errors:\n - ${initErrors
+        .map((i) => `line ${i.line}: ${i.message}`)
+        .join("\n - ")}`,
+    );
+  }
 
   const androidBp = read(path.join(vendorDir, "apps", "Milady", "Android.bp"));
   for (const marker of [
@@ -374,6 +423,31 @@ export function validateDefaultPermissions(vendorDir) {
       "privapp permissions",
     );
   }
+
+  // The product makefile lists these XMLs by module name in PRODUCT_PACKAGES.
+  // Soong needs prebuilt_etc{} declarations or `m` exits with "module not defined".
+  const permissionsBp = read(path.join(vendorDir, "permissions", "Android.bp"));
+  for (const moduleName of [
+    `default-permissions-${PACKAGE_NAME}.xml`,
+    `privapp-permissions-${PACKAGE_NAME}.xml`,
+  ]) {
+    assertIncludes(
+      permissionsBp,
+      `name: "${moduleName}"`,
+      "permissions/Android.bp",
+    );
+  }
+  assertIncludes(
+    permissionsBp,
+    'sub_dir: "default-permissions"',
+    "permissions/Android.bp",
+  );
+  assertIncludes(
+    permissionsBp,
+    'sub_dir: "permissions"',
+    "permissions/Android.bp",
+  );
+
   console.log("[miladyos:validate] Permission XML checks passed.");
 }
 
@@ -579,6 +653,77 @@ function validateApkManifest(manifest) {
     "android.intent.action.BOOT_COMPLETED",
     "MiladyBootReceiver",
   );
+
+  // Replacement activities for the role apps stripped from PRODUCT_PACKAGES.
+  // Without these, the system has no resolver for the corresponding intents
+  // and a stripped phone is a broken phone — http URLs can't open, alarms
+  // can't be set, etc.
+
+  // Replacement activities for stripped role apps (Browser2, Contacts,
+  // Camera2, DeskClock, Calendar). These soft-warn instead of failing
+  // because the activity Java sources land in the eliza submodule and a
+  // staged APK built before they were added is still a valid OS-path
+  // image — just one with intent-resolution gaps for the corresponding
+  // system intents.
+  const REPLACEMENT_ACTIVITIES = [
+    {
+      name: "MiladyBrowserActivity",
+      markers: [
+        "android.intent.action.VIEW",
+        "android.intent.category.BROWSABLE",
+        'android:scheme(0x01010027)="http"',
+        'android:scheme(0x01010027)="https"',
+      ],
+    },
+    {
+      name: "MiladyContactsActivity",
+      markers: ["android.intent.category.APP_CONTACTS"],
+    },
+    {
+      name: "MiladyCameraActivity",
+      markers: [
+        "android.media.action.STILL_IMAGE_CAMERA",
+        "android.media.action.IMAGE_CAPTURE",
+      ],
+    },
+    {
+      name: "MiladyClockActivity",
+      markers: [
+        "android.intent.action.SET_ALARM",
+        "android.intent.action.SHOW_ALARMS",
+      ],
+    },
+    {
+      name: "MiladyCalendarActivity",
+      markers: ["android.intent.category.APP_CALENDAR"],
+    },
+  ];
+
+  const replacementWarnings = [];
+  for (const { name, markers } of REPLACEMENT_ACTIVITIES) {
+    const blocks = manifestElementBlocks(manifest, "activity").filter((b) =>
+      b.includes(`"${PACKAGE_NAME}.${name}"`),
+    );
+    if (blocks.length === 0) {
+      replacementWarnings.push(
+        `[soft] APK manifest is missing activity ${PACKAGE_NAME}.${name} — system intent will have no resolver after stripping the corresponding AOSP app.`,
+      );
+      continue;
+    }
+    const block = blocks[0];
+    for (const marker of markers) {
+      if (!block.includes(marker)) {
+        replacementWarnings.push(
+          `[soft] APK manifest ${name} is missing ${marker}`,
+        );
+      }
+    }
+  }
+  if (replacementWarnings.length > 0) {
+    console.warn(
+      `[miladyos:validate] Soft warnings (rebuild APK to clear):\n - ${replacementWarnings.join("\n - ")}`,
+    );
+  }
 }
 
 export function validateApk(apkPath) {

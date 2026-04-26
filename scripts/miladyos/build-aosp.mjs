@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 import { main as syncToAospMain } from "./sync-to-aosp.mjs";
 import { main as validateMain } from "./validate.mjs";
 
-const PRODUCT_LUNCH = "milady_cf_x86_64_phone-userdebug";
+const PRODUCT_LUNCH = "milady_cf_x86_64_phone-trunk_staging-userdebug";
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "../..");
 
@@ -116,11 +116,15 @@ function runAospBuild(aospRoot, jobs) {
 }
 
 function launchCuttlefish(aospRoot) {
+  // Cuttlefish 1.x ships `cvd start`; 0.x exposed `launch_cvd`. Prefer the
+  // newer command and fall back so older host packages keep working.
+  // `cvd start` reads host artifacts from $ANDROID_HOST_OUT, which lunch
+  // populates from build/envsetup.sh.
   run(
     "bash",
     [
       "-lc",
-      `source build/envsetup.sh && lunch ${PRODUCT_LUNCH} && launch_cvd --daemon`,
+      `source build/envsetup.sh && lunch ${PRODUCT_LUNCH} && (cvd start --daemon 2>/dev/null || launch_cvd --daemon)`,
     ],
     { cwd: aospRoot },
   );

@@ -4,14 +4,20 @@ sidebarTitle: "DeepSeek"
 description: "DeepSeek model provider for Milady — DeepSeek-V3 and DeepSeek-R1 reasoning models."
 ---
 
+<Warning>
+This plugin is not yet available in the Milady plugin registry. To use DeepSeek models today, configure them through the [OpenRouter plugin](/plugin-registry/llm/openrouter) using the appropriate model ID.
+</Warning>
+
 The DeepSeek plugin connects Milady agents to DeepSeek's API, providing access to DeepSeek-V3 (general-purpose) and DeepSeek-R1 (reasoning-focused) models at competitive pricing.
+
+> **On-demand plugin.** This plugin is resolved from the remote elizaOS plugin registry and auto-installs when its API key is detected. It is not included in Milady's bundled `plugins.json` index.
 
 **Package:** `@elizaos/plugin-deepseek`
 
 ## Installation
 
 ```bash
-milady plugins install deepseek
+milady plugins install @elizaos/plugin-deepseek
 ```
 
 ## Auto-Enable

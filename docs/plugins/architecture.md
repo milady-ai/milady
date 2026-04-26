@@ -6,6 +6,8 @@ description: "Deep dive into Milady's plugin system — registration lifecycle, 
 
 The Milady plugin system is built on elizaOS core. Every capability beyond the base runtime — model providers, platform connectors, DeFi integrations, scheduling, and custom features — is delivered as a plugin.
 
+> **Path convention:** Paths like `packages/agent/` and `packages/app-core/` below refer to directories inside the `eliza/` git submodule.
+
 ## System Design
 
 Plugins are isolated modules that register capabilities with the `AgentRuntime`. The runtime orchestrates plugin loading, dependency resolution, initialization, and shutdown.
@@ -18,30 +20,28 @@ AgentRuntime
 └── Local            (from plugins/ directory)
 ```
 
-The source of truth for which plugins are always loaded lives in `packages/agent/src/runtime/core-plugins.ts` (re-exported by `packages/app-core/src/runtime/core-plugins.ts`):
+The source of truth for which plugins are always loaded lives in the elizaOS submodule at `eliza/packages/agent/src/runtime/core-plugins.ts` (re-exported by `eliza/packages/app-core/src/runtime/core-plugins.ts`). Initialize the submodule with `bun run setup:upstreams` to inspect these files locally.
 
 ```typescript
 export const CORE_PLUGINS: readonly string[] = [
   "@elizaos/plugin-sql",               // database adapter — required
   "@elizaos/plugin-local-embedding",   // local embeddings — required for memory
-  "@elizaos/plugin-form",              // form handling for guided user journeys
-  "knowledge",         // RAG knowledge management — required for knowledge tab
-  "trajectories", // trajectory logging for debugging and RL training
-  "@elizaos/plugin-agent-orchestrator",// multi-agent orchestration (PTY, SwarmCoordinator, workspace provisioning)
+  "@elizaos/app-companion",            // VRM companion emotes
   "@elizaos/plugin-cron",              // scheduled jobs and automation
+  "@elizaos/plugin-app-control",       // launch, close, list running Milady apps
   "@elizaos/plugin-shell",             // shell command execution
   "@elizaos/plugin-agent-skills",      // skill execution and marketplace runtime
-  "@elizaos/plugin-commands",          // slash command handling (skills auto-register as /commands)
-  "@elizaos/plugin-plugin-manager",    // dynamic plugin management for registry/plugin installs
-  "roles",                            // internal role-based access control (OWNER/ADMIN/NONE)
+  "@elizaos/plugin-commands",          // slash command handling
+  "@elizaos/app-lifeops",             // LifeOps: tasks, goals, calendar, inbox
+  "@elizaos/plugin-browser-bridge",    // Chrome/Safari companion pairing
 ];
 ```
 
-> **Note:** `@elizaos/plugin-secrets-manager`, `relationships`, `@elizaos/plugin-trust`, and `@elizaos/plugin-personality` are statically imported for fast resolution but commented out of the core list. Experience now ships as a built-in advanced capability instead of a standalone plugin. Milady does not ship `@elizaos/plugin-todo`; todo functionality is handled by the workbench API and LifeOps-related runtime tasks.
+> **Note:** Several capabilities that were previously standalone plugins are now built-in runtime features: experience, form, clipboard, personality (advanced capabilities via `advancedCapabilities: true`), trust (via `enableTrust: true`), secrets-manager (via `enableSecretsManager: true`), plugin-manager (via `enablePluginManager: true`), knowledge, relationships, and trajectories (native features). The agent-orchestrator is opt-in via `ELIZA_AGENT_ORCHESTRATOR` (Eliza app enables by default).
 
 ### Optional Core Plugins
 
-A separate list of optional core plugins can be enabled from the admin panel. These are not loaded by default due to packaging or specification constraints. The list lives in `packages/agent/src/runtime/core-plugins.ts`:
+A separate list of optional core plugins can be enabled from the admin panel. These are not loaded by default due to packaging or specification constraints. The list lives in `eliza/packages/agent/src/runtime/core-plugins.ts`:
 
 ```typescript
 export const OPTIONAL_CORE_PLUGINS: readonly string[] = [
@@ -49,17 +49,22 @@ export const OPTIONAL_CORE_PLUGINS: readonly string[] = [
   "@elizaos/plugin-cua",                   // CUA computer-use agent (cloud sandbox automation)
   "@elizaos/plugin-obsidian",              // Obsidian vault CLI integration
   "@elizaos/plugin-code",                  // code writing and file operations
-  "@elizaos/plugin-repoprompt",            // RepoPrompt CLI integration
-  "@elizaos/plugin-claude-code-workbench", // Claude Code companion workflows
-  "@elizaos/plugin-computeruse",           // computer use automation (platform-specific)
+  "@elizaos/plugin-repoprompt",            // RepoPrompt CLI integration and workflow orchestration
+  "@elizaos/plugin-claude-code-workbench", // Claude Code companion workflows for this monorepo
+  "@elizaos/plugin-computeruse",           // computer use automation (requires platform-specific binaries)
   "@elizaos/plugin-browser",              // browser automation (requires stagehand-server)
   "@elizaos/plugin-vision",               // vision/image understanding (feature-gated)
   "@elizaos/plugin-cli",                  // CLI interface
   "@elizaos/plugin-discord",              // Discord bot integration
+  "@elizaos/plugin-discord-local",        // Local Discord desktop integration for macOS
+  "@elizaos/plugin-bluebubbles",          // BlueBubbles-backed iMessage integration for macOS
   "@elizaos/plugin-telegram",             // Telegram bot integration
+  "@elizaos/plugin-signal",               // Signal user-account integration
   "@elizaos/plugin-twitch",               // Twitch integration
   "@elizaos/plugin-edge-tts",             // text-to-speech (Microsoft Edge TTS)
   "@elizaos/plugin-elevenlabs",           // ElevenLabs text-to-speech
+  "@elizaos/plugin-music-library",        // music metadata, library, playlists
+  "@elizaos/plugin-music-player",         // music playback engine + streaming routes
 ];
 ```
 
@@ -120,69 +125,71 @@ interface Plugin {
 
 ## Auto-Enable Mechanism
 
-Plugins are automatically enabled when their required configuration is detected. This logic lives in `packages/agent/src/config/plugin-auto-enable.ts` (extended by `packages/app-core/src/config/plugin-auto-enable.ts` for Eliza-specific connectors like WeChat) and runs before runtime initialization.
+Plugins are automatically enabled when their required configuration is detected. This logic lives in `packages/agent/src/config/plugin-auto-enable.ts` (extended by `packages/app-core/src/config/plugin-auto-enable.ts` for Milady-specific connectors like WeChat) and runs before runtime initialization.
 
 ### Trigger Sources
 
-**Environment variable API keys** — The `AUTH_PROVIDER_PLUGINS` map connects env vars to plugin package names:
+**Environment variable API keys** — The `AUTH_PROVIDER_PLUGINS` map connects env vars to plugin package names. Plugins marked with `// bundled` ship in `plugins.json`; others require the upstream elizaOS registry or explicit installation:
 
 ```typescript
 const AUTH_PROVIDER_PLUGINS = {
-  ANTHROPIC_API_KEY:              "@elizaos/plugin-anthropic",
-  CLAUDE_API_KEY:                 "@elizaos/plugin-anthropic",
-  OPENAI_API_KEY:                 "@elizaos/plugin-openai",
-  AI_GATEWAY_API_KEY:             "@elizaos/plugin-vercel-ai-gateway",
-  AIGATEWAY_API_KEY:              "@elizaos/plugin-vercel-ai-gateway",
-  GOOGLE_API_KEY:                 "@elizaos/plugin-google-genai",
-  GOOGLE_GENERATIVE_AI_API_KEY:   "@elizaos/plugin-google-genai",
-  GOOGLE_CLOUD_API_KEY:           "@elizaos/plugin-google-antigravity",
-  GROQ_API_KEY:                   "@elizaos/plugin-groq",
-  XAI_API_KEY:                    "@elizaos/plugin-xai",
-  GROK_API_KEY:                   "@elizaos/plugin-xai",
-  OPENROUTER_API_KEY:             "@elizaos/plugin-openrouter",
-  OLLAMA_BASE_URL:                "@elizaos/plugin-ollama",
-  ZAI_API_KEY:                    "@homunculuslabs/plugin-zai",
-  DEEPSEEK_API_KEY:               "@elizaos/plugin-deepseek",
-  TOGETHER_API_KEY:               "@elizaos/plugin-together",
-  MISTRAL_API_KEY:                "@elizaos/plugin-mistral",
-  COHERE_API_KEY:                 "@elizaos/plugin-cohere",
-  PERPLEXITY_API_KEY:             "@elizaos/plugin-perplexity",
-  ELIZAOS_CLOUD_API_KEY:          "@elizaos/plugin-elizacloud",
-  ELIZAOS_CLOUD_ENABLED:          "@elizaos/plugin-elizacloud",
-  CUA_API_KEY:                    "@elizaos/plugin-cua",
-  CUA_HOST:                       "@elizaos/plugin-cua",
-  OBSIDIAN_VAULT_PATH:            "@elizaos/plugin-obsidian",
-  REPOPROMPT_CLI_PATH:            "@elizaos/plugin-repoprompt",
-  CLAUDE_CODE_WORKBENCH_ENABLED:  "@elizaos/plugin-claude-code-workbench",
+  ANTHROPIC_API_KEY:              "@elizaos/plugin-anthropic",           // bundled
+  CLAUDE_API_KEY:                 "@elizaos/plugin-anthropic",           // bundled
+  OPENAI_API_KEY:                 "@elizaos/plugin-openai",              // bundled
+  AI_GATEWAY_API_KEY:             "@elizaos/plugin-vercel-ai-gateway",   // bundled
+  AIGATEWAY_API_KEY:              "@elizaos/plugin-vercel-ai-gateway",   // bundled
+  GOOGLE_API_KEY:                 "@elizaos/plugin-google-genai",        // bundled
+  GOOGLE_GENERATIVE_AI_API_KEY:   "@elizaos/plugin-google-genai",        // bundled
+  GOOGLE_CLOUD_API_KEY:           "@elizaos/plugin-google-antigravity",  // upstream
+  GROQ_API_KEY:                   "@elizaos/plugin-groq",                // bundled
+  XAI_API_KEY:                    "@elizaos/plugin-xai",                 // bundled
+  GROK_API_KEY:                   "@elizaos/plugin-xai",                 // bundled
+  OPENROUTER_API_KEY:             "@elizaos/plugin-openrouter",          // bundled
+  OLLAMA_BASE_URL:                "@elizaos/plugin-ollama",              // bundled
+  ZAI_API_KEY:                    "@homunculuslabs/plugin-zai",          // upstream
+  DEEPSEEK_API_KEY:               "@elizaos/plugin-deepseek",            // upstream
+  TOGETHER_API_KEY:               "@elizaos/plugin-together",            // upstream
+  MISTRAL_API_KEY:                "@elizaos/plugin-mistral",             // upstream
+  COHERE_API_KEY:                 "@elizaos/plugin-cohere",              // upstream
+  PERPLEXITY_API_KEY:             "@elizaos/plugin-perplexity",          // upstream
+  ELIZAOS_CLOUD_API_KEY:          "@elizaos/plugin-elizacloud",          // bundled
+  ELIZAOS_CLOUD_ENABLED:          "@elizaos/plugin-elizacloud",          // bundled
+  CUA_API_KEY:                    "@elizaos/plugin-cua",                 // bundled
+  CUA_HOST:                       "@elizaos/plugin-cua",                 // bundled
+  OBSIDIAN_VAULT_PATH:            "@elizaos/plugin-obsidian",            // bundled
+  REPOPROMPT_CLI_PATH:            "@elizaos/plugin-repoprompt",          // bundled
+  CLAUDE_CODE_WORKBENCH_ENABLED:  "@elizaos/plugin-claude-code-workbench", // bundled
 };
 ```
+
+> **Note:** Upstream plugins (DeepSeek, Together, Mistral, Cohere, Perplexity, Google Antigravity, Zai) are not included in the bundled `plugins.json`. Setting their env var will attempt to resolve them from the upstream elizaOS registry at runtime. Install them explicitly with `milady plugins install <package>` if auto-resolution fails.
 
 **Connector configuration** — Connector blocks with a `botToken`, `token`, or `apiKey` field auto-enable the corresponding connector plugin:
 
 ```typescript
 const CONNECTOR_PLUGINS = {
-  telegram:    "@elizaos/plugin-telegram",
-  discord:     "@elizaos/plugin-discord",
-  slack:       "@elizaos/plugin-slack",
-  twitter:     "@elizaos/plugin-twitter",
-  whatsapp:    "@elizaos/plugin-whatsapp",
-  signal:      "@elizaos/plugin-signal",
-  imessage:    "@elizaos/plugin-imessage",
-  farcaster:   "@elizaos/plugin-farcaster",
-  lens:        "@elizaos/plugin-lens",
-  msteams:     "@elizaos/plugin-msteams",
-  mattermost:  "@elizaos/plugin-mattermost",
-  googlechat:  "@elizaos/plugin-google-chat",
-  feishu:      "@elizaos/plugin-feishu",
-  matrix:      "@elizaos/plugin-matrix",
-  nostr:       "@elizaos/plugin-nostr",
-  blooio:      "@elizaos/plugin-blooio",
-  twitch:      "@elizaos/plugin-twitch",
-  wechat:      "@elizaos/plugin-wechat",  // Milady-specific (added in app-core)
+  telegram:    "@elizaos/plugin-telegram",      // bundled
+  discord:     "@elizaos/plugin-discord",        // bundled
+  slack:       "@elizaos/plugin-slack",           // bundled
+  twitter:     "@elizaos/plugin-twitter",         // upstream (not in plugins.json)
+  whatsapp:    "@elizaos/plugin-whatsapp",        // bundled
+  signal:      "@elizaos/plugin-signal",          // bundled
+  imessage:    "@elizaos/plugin-imessage",        // bundled
+  farcaster:   "@elizaos/plugin-farcaster",       // bundled
+  lens:        "@elizaos/plugin-lens",            // upstream (not in plugins.json)
+  msteams:     "@elizaos/plugin-msteams",         // bundled
+  mattermost:  "@elizaos/plugin-mattermost",      // bundled
+  googlechat:  "@elizaos/plugin-google-chat",     // bundled
+  feishu:      "@elizaos/plugin-feishu",          // bundled
+  matrix:      "@elizaos/plugin-matrix",          // bundled
+  nostr:       "@elizaos/plugin-nostr",           // bundled
+  blooio:      "@elizaos/plugin-blooio",          // bundled (feature category)
+  twitch:      "@elizaos/plugin-twitch",          // bundled
+  wechat:      "@elizaos/plugin-wechat",          // upstream (Milady-specific, not in plugins.json)
 };
 ```
 
-> **Note:** The upstream `packages/agent` defines all `@elizaos/*` connectors. Milady's `packages/app-core` extends this map with the `wechat` entry pointing to `@elizaos/plugin-wechat`.
+> **Note:** The upstream `packages/agent` defines all `@elizaos/*` connectors. Milady's `packages/app-core` extends this map with the `wechat` entry. Connectors marked "upstream" are not in the bundled `plugins.json` — they resolve from the upstream elizaOS registry at runtime. Install them explicitly if auto-resolution fails.
 
 **Feature flags** — The `features` section of `milady.json` auto-enables feature plugins. A feature can be enabled with `features.<name>: true` or `features.<name>.enabled: true`:
 
@@ -196,45 +203,47 @@ const CONNECTOR_PLUGINS = {
 }
 ```
 
-The complete `FEATURE_PLUGINS` map:
+The complete `FEATURE_PLUGINS` map. Plugins marked with `*` are upstream-only (not in the bundled `plugins.json`):
 
 ```typescript
 const FEATURE_PLUGINS = {
   browser:              "@elizaos/plugin-browser",
-  cua:                  "@elizaos/plugin-cua",
-  obsidian:             "@elizaos/plugin-obsidian",
+  cua:                  "@elizaos/plugin-cua",                   // * upstream-only
+  obsidian:             "@elizaos/plugin-obsidian",              // * upstream-only
   cron:                 "@elizaos/plugin-cron",
   shell:                "@elizaos/plugin-shell",
+  executeCode:          "@elizaos/plugin-executecode",
   imageGen:             "@elizaos/plugin-image-generation",
-  tts:                  "@elizaos/plugin-tts",
+  tts:                  "@elizaos/plugin-edge-tts",
   stt:                  "@elizaos/plugin-stt",
   agentSkills:          "@elizaos/plugin-agent-skills",
   commands:             "@elizaos/plugin-commands",
-  diagnosticsOtel:      "@elizaos/plugin-diagnostics-otel",
+  diagnosticsOtel:      "@elizaos/plugin-diagnostics-otel",      // * upstream-only
   webhooks:             "@elizaos/plugin-webhooks",
   gmailWatch:           "@elizaos/plugin-gmail-watch",
-  personality:          "@elizaos/plugin-personality",
-  experience:           "(built-in advanced capability)",
-  form:                 "@elizaos/plugin-form",
   x402:                 "@elizaos/plugin-x402",
   fal:                  "@elizaos/plugin-fal",
   suno:                 "@elizaos/plugin-suno",
+  musicLibrary:         "@elizaos/plugin-music-library",
+  musicPlayer:          "@elizaos/plugin-music-player",
   vision:               "@elizaos/plugin-vision",
   computeruse:          "@elizaos/plugin-computeruse",
-  repoprompt:           "@elizaos/plugin-repoprompt",
-  claudeCodeWorkbench:  "@elizaos/plugin-claude-code-workbench",
+  repoprompt:           "@elizaos/plugin-repoprompt",            // * upstream-only
+  claudeCodeWorkbench:  "@elizaos/plugin-claude-code-workbench", // * upstream-only
 };
 ```
+
+> **Note:** `personality`, `experience`, and `form` are no longer separate feature plugins -- they are now built-in advanced capabilities enabled via `advancedCapabilities: true` in the character settings.
 
 **Streaming destinations** — The `streaming` section of config auto-enables streaming plugins for live video platforms:
 
 ```typescript
 const STREAMING_PLUGINS = {
-  twitch:     "@elizaos/plugin-twitch-streaming",
-  youtube:    "@elizaos/plugin-youtube-streaming",
-  customRtmp: "@elizaos/plugin-custom-rtmp",
-  pumpfun:    "@elizaos/plugin-pumpfun-streaming",
-  x:          "@elizaos/plugin-x-streaming",
+  twitch:     "@elizaos/plugin-twitch-streaming",   // * upstream-only
+  youtube:    "@elizaos/plugin-youtube-streaming",   // * upstream-only
+  customRtmp: "@elizaos/plugin-custom-rtmp",         // * upstream-only
+  pumpfun:    "@elizaos/plugin-pumpfun-streaming",   // * upstream-only
+  x:          "@elizaos/plugin-x-streaming",         // * upstream-only
 };
 ```
 

@@ -1,0 +1,60 @@
+# Connect to Tlon (Urbit)
+
+Tlon is the primary interface for Urbit, a decentralized personal server network. Your Milady agent can participate in ship-to-ship messaging and group chats on the Urbit network.
+
+**What you'll learn:** get your Urbit ship credentials, point Milady at your ship, and confirm messaging works. About ten minutes.
+
+## What you need before you start
+
+- **An Urbit ship** — either a planet you own or a comet you've booted. The ship must be running and accessible over HTTP.
+- **Your ship's access code** — generated with `+code` in your ship's Dojo.
+- **Milady running** with a working provider.
+
+<Callout kind="warning" title="Your access code is sensitive">
+The ship access code grants full API access to your Urbit ship. Treat it like a password — don't share it or commit it to version control.
+</Callout>
+
+## Step 1 — Get your ship credentials
+
+<Steps>
+  <li>Boot your Urbit ship if it isn't already running.</li>
+  <li>Open the Dojo (command line) and type <code>+code</code> to get your access code.</li>
+  <li>Note your ship name (e.g., <code>~sampel-palnet</code>) and the URL where your ship is accessible (e.g., <code>http://localhost:8080</code>).</li>
+</Steps>
+
+## Step 2 — Hand the credentials to Milady
+
+<Steps>
+  <li>Open Milady. Go to <strong>Settings → Plugins → Tlon → Configure</strong>.</li>
+  <li>Enter your <strong>Ship name</strong> (e.g., <code>~sampel-palnet</code>).</li>
+  <li>Enter the <strong>Ship URL</strong> (e.g., <code>http://localhost:8080</code>).</li>
+  <li>Paste your <strong>Access code</strong> from Step 1.</li>
+  <li>Click <strong>Save</strong>.</li>
+</Steps>
+
+## Step 3 — Test it
+
+From another Urbit ship or the Landscape UI, send a DM to the ship Milady is connected to. Within a minute, the agent should reply.
+
+## Useful options
+
+| Option | What it does |
+| --- | --- |
+| **DM allowlist** | Restrict which ships can DM your agent. |
+| **Group channels** | Specify which group channels the agent should monitor and participate in. |
+| **Auto-discover channels** | Let the agent automatically discover and join channels. |
+
+## Troubleshooting
+
+**"Connection refused" when saving.**
+Make sure your Urbit ship is running and the URL is reachable. If your ship is on a remote machine, check firewall rules and port forwarding.
+
+**Agent doesn't respond to messages.**
+Confirm the access code is current — codes can change if you run `|rotate-code` on your ship. Re-enter it if needed.
+
+**Connector not loading.**
+This connector is in the plugin registry. Install it with `milady plugins install tlon`.
+
+## What's next
+
+[Running multiple connectors](/docs/advanced/multi-connector-setup) — Tlon pairs naturally with Nostr and Matrix for decentralized communication coverage.

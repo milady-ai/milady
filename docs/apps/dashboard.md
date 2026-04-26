@@ -145,16 +145,7 @@ Provider selection and model configuration via the `ProviderSwitcher` component.
 
 Embedded configuration view (`ConfigPageView` with `embedded` prop) for managing wallet addresses, RPC endpoint URLs, and secret values (API keys, tokens). This is the same configuration system available through the Config page, rendered inline within Settings.
 
-#### 4. Media Generation
-
-The `MediaSettingsSection` component provides provider selection for:
-
-- **Image generation** -- select and configure image generation providers.
-- **Video generation** -- select and configure video generation providers.
-- **Audio generation** -- select and configure audio generation providers.
-- **Vision** -- select and configure vision/image understanding providers.
-
-#### 5. Speech (TTS / STT)
+#### 4. Speech (TTS / STT)
 
 The `VoiceConfigView` component configures:
 
@@ -162,11 +153,11 @@ The `VoiceConfigView` component configures:
 - **Speech-to-Text** -- transcription provider configuration.
 - **Voice preview** -- test the selected voice configuration.
 
-#### 6. Permissions & Capabilities
+#### 5. Permissions & Capabilities
 
 The `PermissionsSection` component manages system permission grants for native platforms (Electrobun desktop app). Controls access to features like file system, microphone, camera, and notifications.
 
-#### 7. Software Updates
+#### 6. Software Updates
 
 - **Current version** display.
 - **Release channel** selection via radio buttons: Stable (recommended), Beta (preview), or Nightly (bleeding edge).
@@ -174,7 +165,7 @@ The `PermissionsSection` component manages system permission grants for native p
 - **Update available** banner showing current and latest version with instructions to run `milady update`.
 - **Last checked** timestamp.
 
-#### 8. Chrome Extension
+#### 7. Chrome Extension
 
 - **Relay server status** -- shows whether the WebSocket relay at `ws://127.0.0.1:{port}/extension` is reachable, with a green/red indicator.
 - **Check Connection** button to re-test relay status.

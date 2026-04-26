@@ -22,7 +22,7 @@ AgentRuntime
 └── Local            (desde el directorio plugins/)
 ```
 
-La fuente de verdad sobre qué plugins se cargan siempre se encuentra en `packages/agent/src/runtime/core-plugins.ts` (re-exportado por `packages/app-core/src/runtime/core-plugins.ts`):
+La fuente de verdad sobre qué plugins se cargan siempre se encuentra en `eliza/packages/agent/src/runtime/core-plugins.ts` (en el submódulo upstream de elizaOS, re-exportado por `eliza/packages/app-core/src/runtime/core-plugins.ts`):
 
 ```typescript
 export const CORE_PLUGINS: readonly string[] = [
@@ -49,7 +49,7 @@ export const CORE_PLUGINS: readonly string[] = [
 
 </div>
 
-Una lista separada de plugins principales opcionales puede habilitarse desde el panel de administración. No se cargan por defecto debido a restricciones de empaquetado o especificación. La lista se encuentra en `packages/agent/src/runtime/core-plugins.ts`:
+Una lista separada de plugins principales opcionales puede habilitarse desde el panel de administración. No se cargan por defecto debido a restricciones de empaquetado o especificación. La lista se encuentra en `eliza/packages/agent/src/runtime/core-plugins.ts`:
 
 ```typescript
 export const OPTIONAL_CORE_PLUGINS: readonly string[] = [
@@ -144,7 +144,7 @@ interface Plugin {
 
 </div>
 
-Los plugins se habilitan automáticamente cuando se detecta su configuración requerida. Esta lógica se encuentra en `packages/agent/src/config/plugin-auto-enable.ts` (extendida por `packages/app-core/src/config/plugin-auto-enable.ts` para conectores específicos de Milady como WeChat) y se ejecuta antes de la inicialización del runtime.
+Los plugins se habilitan automáticamente cuando se detecta su configuración requerida. Esta lógica se encuentra en `eliza/packages/agent/src/config/plugin-auto-enable.ts` (extendida por el `plugin-auto-enable.ts` de Milady para conectores como WeChat) y se ejecuta antes de la inicialización del runtime.
 
 <div id="trigger-sources">
 

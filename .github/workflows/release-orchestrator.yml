@@ -3,6 +3,42 @@ name: Release Orchestrator
 on:
   release:
     types: [published]
+  workflow_call:
+    inputs:
+      version:
+        description: "Version to distribute (e.g. 2.0.0-alpha.87)"
+        required: true
+        type: string
+      publish_npm:
+        description: "Publish npm package"
+        required: false
+        type: boolean
+        default: true
+      publish_packages:
+        description: "Publish PyPI / Snap / Debian / Flatpak"
+        required: false
+        type: boolean
+        default: true
+      publish_android:
+        description: "Publish Android build"
+        required: false
+        type: boolean
+        default: true
+      publish_apple:
+        description: "Publish Apple builds"
+        required: false
+        type: boolean
+        default: true
+      update_homebrew:
+        description: "Update Homebrew tap"
+        required: false
+        type: boolean
+        default: true
+      deploy_homepage:
+        description: "Deploy homepage"
+        required: false
+        type: boolean
+        default: true
   workflow_dispatch:
     inputs:
       version:
@@ -41,7 +77,10 @@ on:
         default: true
 
 permissions:
-  contents: read
+  contents: write
+  packages: write
+  id-token: write
+  pages: write
 
 jobs:
   prepare:
@@ -94,7 +133,7 @@ jobs:
             fi
           fi
 
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" || "${{ github.event_name }}" == "workflow_call" ]]; then
             PUBLISH_NPM="${{ inputs.publish_npm }}"
             PUBLISH_PACKAGES="${{ inputs.publish_packages }}"
             PUBLISH_ANDROID="${{ inputs.publish_android }}"
@@ -112,38 +151,41 @@ jobs:
 
           PUBLISH_FLATPAK="$PUBLISH_PACKAGES"
           if [[ "$IS_PRERELEASE" == "true" ]]; then
-            PUBLISH_FLATPAK="false"
             UPDATE_HOMEBREW="false"
           fi
 
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "is_prerelease=$IS_PRERELEASE" >> "$GITHUB_OUTPUT"
-          echo "npm_dist_tag=$NPM_DIST_TAG" >> "$GITHUB_OUTPUT"
-          echo "android_track=$ANDROID_TRACK" >> "$GITHUB_OUTPUT"
-          echo "apple_track=$APPLE_TRACK" >> "$GITHUB_OUTPUT"
-          echo "publish_npm=$PUBLISH_NPM" >> "$GITHUB_OUTPUT"
-          echo "publish_packages=$PUBLISH_PACKAGES" >> "$GITHUB_OUTPUT"
-          echo "publish_flatpak=$PUBLISH_FLATPAK" >> "$GITHUB_OUTPUT"
-          echo "publish_android=$PUBLISH_ANDROID" >> "$GITHUB_OUTPUT"
-          echo "publish_apple=$PUBLISH_APPLE" >> "$GITHUB_OUTPUT"
-          echo "update_homebrew=$UPDATE_HOMEBREW" >> "$GITHUB_OUTPUT"
-          echo "deploy_homepage=$DEPLOY_HOMEPAGE" >> "$GITHUB_OUTPUT"
+          {
+            echo "version=$VERSION"
+            echo "tag=$TAG"
+            echo "is_prerelease=$IS_PRERELEASE"
+            echo "npm_dist_tag=$NPM_DIST_TAG"
+            echo "android_track=$ANDROID_TRACK"
+            echo "apple_track=$APPLE_TRACK"
+            echo "publish_npm=$PUBLISH_NPM"
+            echo "publish_packages=$PUBLISH_PACKAGES"
+            echo "publish_flatpak=$PUBLISH_FLATPAK"
+            echo "publish_android=$PUBLISH_ANDROID"
+            echo "publish_apple=$PUBLISH_APPLE"
+            echo "update_homebrew=$UPDATE_HOMEBREW"
+            echo "deploy_homepage=$DEPLOY_HOMEPAGE"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Summary
         run: |
-          echo "## Release distribution plan" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Field | Value |" >> "$GITHUB_STEP_SUMMARY"
-          echo "|-------|-------|" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Version | \`${{ steps.meta.outputs.version }}\` |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Tag | \`${{ steps.meta.outputs.tag }}\` |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Pre-release | \`${{ steps.meta.outputs.is_prerelease }}\` |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| npm dist-tag | \`${{ steps.meta.outputs.npm_dist_tag }}\` |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Android track | \`${{ steps.meta.outputs.android_track }}\` |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Apple track | \`${{ steps.meta.outputs.apple_track }}\` |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Homebrew enabled | \`${{ steps.meta.outputs.update_homebrew }}\` |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Flatpak enabled | \`${{ steps.meta.outputs.publish_flatpak }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "## Release distribution plan"
+            echo ""
+            echo "| Field | Value |"
+            echo "|-------|-------|"
+            echo "| Version | \`${{ steps.meta.outputs.version }}\` |"
+            echo "| Tag | \`${{ steps.meta.outputs.tag }}\` |"
+            echo "| Pre-release | \`${{ steps.meta.outputs.is_prerelease }}\` |"
+            echo "| npm dist-tag | \`${{ steps.meta.outputs.npm_dist_tag }}\` |"
+            echo "| Android track | \`${{ steps.meta.outputs.android_track }}\` |"
+            echo "| Apple track | \`${{ steps.meta.outputs.apple_track }}\` |"
+            echo "| Homebrew enabled | \`${{ steps.meta.outputs.update_homebrew }}\` |"
+            echo "| Flatpak enabled | \`${{ steps.meta.outputs.publish_flatpak }}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
 
   publish-npm:
     name: npm
@@ -224,13 +266,37 @@ jobs:
     steps:
       - name: Summary
         run: |
-          echo "## Release Orchestrator" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Target | Result |" >> "$GITHUB_STEP_SUMMARY"
-          echo "|--------|--------|" >> "$GITHUB_STEP_SUMMARY"
-          echo "| npm | ${{ needs.publish-npm.result || 'skipped' }} |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Package registries | ${{ needs.publish-packages.result || 'skipped' }} |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Android | ${{ needs.publish-android.result || 'skipped' }} |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Apple Stores | ${{ needs.publish-apple.result || 'skipped' }} |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Homebrew | ${{ needs.update-homebrew.result || 'skipped' }} |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Homepage | ${{ needs.deploy-homepage.result || 'skipped' }} |" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "## Release Orchestrator"
+            echo ""
+            echo "| Target | Result |"
+            echo "|--------|--------|"
+            echo "| npm | ${{ needs.publish-npm.result || 'skipped' }} |"
+            echo "| Package registries | ${{ needs.publish-packages.result || 'skipped' }} |"
+            echo "| Android | ${{ needs.publish-android.result || 'skipped' }} |"
+            echo "| Apple Stores | ${{ needs.publish-apple.result || 'skipped' }} |"
+            echo "| Homebrew | ${{ needs.update-homebrew.result || 'skipped' }} |"
+            echo "| Homepage | ${{ needs.deploy-homepage.result || 'skipped' }} |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Require enabled distributions succeeded
+        run: |
+          failed=0
+          require_result() {
+            local label="$1"
+            local enabled="$2"
+            local result="$3"
+            if [[ "$enabled" == "true" && "$result" != "success" ]]; then
+              echo "::error::$label distribution result was '$result', expected success"
+              failed=1
+            fi
+          }
+
+          require_result "npm" "${{ needs.prepare.outputs.publish_npm }}" "${{ needs.publish-npm.result }}"
+          require_result "Package registries" "${{ needs.prepare.outputs.publish_packages }}" "${{ needs.publish-packages.result }}"
+          require_result "Android" "${{ needs.prepare.outputs.publish_android }}" "${{ needs.publish-android.result }}"
+          require_result "Apple Stores" "${{ needs.prepare.outputs.publish_apple }}" "${{ needs.publish-apple.result }}"
+          require_result "Homebrew" "${{ needs.prepare.outputs.update_homebrew }}" "${{ needs.update-homebrew.result }}"
+          require_result "Homepage" "${{ needs.prepare.outputs.deploy_homepage }}" "${{ needs.deploy-homepage.result }}"
+
+          exit "$failed"

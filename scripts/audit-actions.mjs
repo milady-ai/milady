@@ -80,10 +80,34 @@ function walk(dir) {
  */
 function extractActions(source, filePath) {
   const actions = [];
-  const nameRe = /name:\s*["']([A-Z][A-Z0-9_]+)["']/g;
-  for (const m of source.matchAll(nameRe)) {
-    const name = m[1];
-    const nameIdx = m.index ?? 0;
+  // Resolve `const ACTION_NAME = "X"` referenced by `name: ACTION_NAME`.
+  // Many files in this codebase use that constant pattern; without resolution
+  // the audit silently skips them.
+  const namedConstants = new Map();
+  const constRe =
+    /\bconst\s+([A-Z][A-Z0-9_]+)\s*=\s*["']([A-Z][A-Z0-9_]+)["']/g;
+  for (const m of source.matchAll(constRe)) {
+    namedConstants.set(m[1], m[2]);
+  }
+  const literalRe = /name:\s*["']([A-Z][A-Z0-9_]+)["']/g;
+  const constRefRe = /name:\s*([A-Z][A-Z0-9_]+)\s*[,}]/g;
+  const sites = [];
+  for (const m of source.matchAll(literalRe)) {
+    sites.push({ idx: m.index ?? 0, name: m[1] });
+  }
+  for (const m of source.matchAll(constRefRe)) {
+    const resolved = namedConstants.get(m[1]);
+    if (resolved) sites.push({ idx: m.index ?? 0, name: resolved });
+  }
+  // Sort by source position so each Action object is found at its earliest
+  // recognizable name reference (`name:` field).
+  sites.sort((a, b) => a.idx - b.idx);
+  const seenAtIdx = new Set();
+  for (const site of sites) {
+    const name = site.name;
+    const nameIdx = site.idx;
+    if (seenAtIdx.has(nameIdx)) continue;
+    seenAtIdx.add(nameIdx);
     // Find the enclosing { for this Action object
     let depth = 0;
     let blockStart = -1;
@@ -281,24 +305,60 @@ function findViolations(action, source) {
     seen.add(norm);
   }
 
-  // Heuristic intent inference — the "cheating" rules. We scan the FILE
-  // source, not just the action block, because the helper functions live at
-  // module scope. Only flag when the helper is actually invoked from the
-  // handler.
-  const fileHasInferFn =
-    /function\s+infer(Subaction|PasswordManager|Kind|Surface)\w*\s*\(/.test(
-      source,
-    );
-  const handlerReferencesText =
-    /\bmessageText\s*\(|\bmessage\.content\?\.text/.test(block);
-  const handlerCallsInfer =
-    /\binfer(Subaction|PasswordManager|Kind|Surface)\w*\s*\(/.test(block);
-  if (fileHasInferFn && handlerReferencesText && handlerCallsInfer) {
-    violations.push({
-      severity: "high",
-      rule: "regex-intent-inference",
-      detail: `Action ${name} handler calls a heuristic inferXFromText() helper — LLM should extract all params`,
-    });
+  // Heuristic intent inference & format-coercion — the "cheating" rules.
+  // Two tiers:
+  //   HIGH: real intent inference — `looksLike*`, `infer*FromText/Intent`,
+  //         `extract*FromText/Intent`, `resolve*Intent/Command`. These
+  //         classify the user's intent from message text instead of relying
+  //         on the LLM planner.
+  //   MEDIUM: parameter-format coercion — `parseLooseParameterString` and
+  //         siblings. These tolerate the planner emitting params as a
+  //         stringly-typed blob; not strictly intent inference, but still a
+  //         deviation from "trust planner-extracted structured params".
+  const inferHelperPattern =
+    /function\s+(infer\w*FromText|infer\w*FromIntent|inferSubaction|inferKind|inferSurface|inferPasswordManager|extract\w*FromText|extract\w*FromIntent|extractEventTypeUri|extractDateRange|extractPasswordSearchQuery|extractLifeTimeZone\w*|resolveSubscriptionIntent|resolveCryptoCommand|resolveAlarmDayOffset|looksLike\w+)\s*\(/;
+  const inferMatch = source.match(inferHelperPattern);
+  if (inferMatch) {
+    const fn = inferMatch[1];
+    const callCount = (source.match(new RegExp(`\\b${fn}\\s*\\(`, "g")) ?? [])
+      .length;
+    if (callCount > 1) {
+      // Allowlist: validate-time helpers that delegate to the shared i18n
+      // keyword loader (`getValidationKeywordTerms` + `findKeywordTermMatch`)
+      // are explicitly OK per project policy — string matching in validate()
+      // is permitted when fully internationalized + greedy.
+      const fnBodyMatch = source.match(
+        new RegExp(
+          `function\\s+${fn}\\s*\\([^)]*\\)\\s*[^{]*\\{([\\s\\S]{0,800}?)\\n\\}`,
+        ),
+      );
+      const fnBody = fnBodyMatch?.[1] ?? "";
+      const usesI18nLoader =
+        /\bgetValidationKeywordTerms\s*\(/.test(fnBody) ||
+        /\bfindKeywordTermMatch\s*\(/.test(fnBody);
+      if (!usesI18nLoader) {
+        violations.push({
+          severity: "high",
+          rule: "regex-intent-inference",
+          detail: `Action ${name} file defines and uses heuristic helper ${fn} — LLM should extract all params`,
+        });
+      }
+    }
+  }
+  const formatCoercionPattern =
+    /function\s+(parseLooseParameterString|parseFlatParams|parseInlineParams)\s*\(/;
+  const formatMatch = source.match(formatCoercionPattern);
+  if (formatMatch) {
+    const fn = formatMatch[1];
+    const callCount = (source.match(new RegExp(`\\b${fn}\\s*\\(`, "g")) ?? [])
+      .length;
+    if (callCount > 1) {
+      violations.push({
+        severity: "medium",
+        rule: "param-format-coercion",
+        detail: `Action ${name} file defines and uses ${fn} — accepts stringly-typed planner params; prefer enforcing structured JSON in the planner schema`,
+      });
+    }
   }
 
   // Hardcoded lookup tables for service / channel / alias resolution.

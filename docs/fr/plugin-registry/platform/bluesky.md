@@ -15,7 +15,7 @@ Le plugin Bluesky connecte les agents Milady au réseau social Bluesky via le Pr
 </div>
 
 ```bash
-milady plugins install bluesky
+milady plugins install @elizaos/plugin-bluesky
 ```
 
 <div id="setup">

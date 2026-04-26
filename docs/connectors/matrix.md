@@ -1,26 +1,26 @@
----
-title: Matrix Connector
-sidebarTitle: Matrix
-description: Connect your agent to Matrix rooms and spaces using the @elizaos/plugin-matrix package.
----
+# Matrix Connector
 
-Connect your agent to Matrix for federated chat across rooms and spaces.
+Connect your agent to Matrix for federated chat across rooms and spaces using the `@elizaos/plugin-matrix` package.
 
-## Overview
+## Prerequisites
 
-The Matrix connector is an external elizaOS plugin that bridges your agent to any Matrix homeserver. It supports rooms, direct messages, end-to-end encryption, and auto-join. It is auto-enabled by the runtime when a valid access token is detected.
+- A Matrix account for your bot on a homeserver (e.g., matrix.org)
+- An access token for the bot account
 
-## Package Info
+## Configuration
 
-| Field | Value |
-|-------|-------|
-| Package | `@elizaos/plugin-matrix` |
-| Config key | `connectors.matrix` |
-| Auto-enable trigger | `token`, `botToken`, or `apiKey` in the connector config |
+| Name | Required | Description |
+|------|----------|-------------|
+| `MATRIX_ACCESS_TOKEN` | Yes | Access token for authenticating with the homeserver |
+| `MATRIX_HOMESERVER` | No | Homeserver URL (e.g., `https://matrix.org`) |
+| `MATRIX_USER_ID` | No | Bot user identifier (e.g., `@bot:matrix.org`) |
+| `MATRIX_DEVICE_ID` | No | Device identifier for encryption sessions |
+| `MATRIX_ROOMS` | No | Comma-separated list of room IDs to join |
+| `MATRIX_AUTO_JOIN` | No | Automatically join rooms when invited |
+| `MATRIX_ENCRYPTION` | No | Enable end-to-end encryption |
+| `MATRIX_REQUIRE_MENTION` | No | Only respond when the bot is @mentioned |
 
-## Minimal Configuration
-
-The connector auto-enables when one of the generic trigger fields (`token`, `botToken`, or `apiKey`) is present in the connector config. Set the access token in both places:
+The connector auto-enables when `token`, `botToken`, or `apiKey` is truthy in the connector config. Set the access token in both places:
 
 ```json
 {
@@ -49,19 +49,6 @@ To explicitly disable the connector even when a token is present:
 }
 ```
 
-## Environment Variables
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `MATRIX_ACCESS_TOKEN` | Yes | Access token for authenticating with the homeserver |
-| `MATRIX_HOMESERVER` | No | Homeserver URL (e.g., `https://matrix.org`) |
-| `MATRIX_USER_ID` | No | Bot user identifier (e.g., `@bot:matrix.org`) |
-| `MATRIX_DEVICE_ID` | No | Device identifier for encryption sessions |
-| `MATRIX_ROOMS` | No | Comma-separated list of room IDs to join |
-| `MATRIX_AUTO_JOIN` | No | Automatically join rooms when invited (`true`/`false`) |
-| `MATRIX_ENCRYPTION` | No | Enable end-to-end encryption (`true`/`false`) |
-| `MATRIX_REQUIRE_MENTION` | No | Only respond when the bot is @mentioned (`true`/`false`) |
-
 ## Setup
 
 1. Create a Matrix account for your bot on your preferred homeserver.
@@ -81,5 +68,6 @@ To explicitly disable the connector even when a token is present:
 
 ## Related
 
+- [Matrix plugin reference](/plugin-registry/platform/matrix)
 - [Connectors overview](/guides/connectors)
 - [Configuration reference](/configuration)

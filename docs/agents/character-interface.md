@@ -54,7 +54,7 @@ The `style` object controls how the agent adapts its tone across different conte
 
 ## Source Mapping: Config to Character
 
-`buildCharacterFromConfig()` in `src/runtime/eliza.ts` performs the following mapping:
+`buildCharacterFromConfig()` in `eliza/packages/agent/src/runtime/eliza.ts` performs the following mapping:
 
 ```typescript
 // Name resolution
@@ -104,7 +104,7 @@ DISCORD_BOT_TOKEN             TELEGRAM_BOT_TOKEN
 SLACK_BOT_TOKEN               SLACK_APP_TOKEN
 SLACK_USER_TOKEN              SIGNAL_ACCOUNT
 MSTEAMS_APP_ID                MSTEAMS_APP_PASSWORD
-MATTERMOST_BOT_TOKEN          MATTERMOST_BASE_URL
+MATTERMOST_BOT_TOKEN          MATTERMOST_SERVER_URL
 
 # ElizaCloud
 ELIZAOS_CLOUD_API_KEY         ELIZAOS_CLOUD_BASE_URL

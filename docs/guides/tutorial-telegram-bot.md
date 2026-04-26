@@ -111,7 +111,19 @@ Click **Advanced** to expand additional settings:
 
 ## Configuration via milady.json
 
-You can also configure the Telegram connector directly in `~/.milady/milady.json`:
+You can also configure the Telegram connector directly in `~/.milady/milady.json`. The recommended approach uses the `connectors` config, which triggers auto-enable:
+
+```json
+{
+  "connectors": {
+    "telegram": {
+      "botToken": "123456789:ABCdefGHIjklmNOpqrsTUVwxyzABC-defGHI"
+    }
+  }
+}
+```
+
+Alternatively, set the token as an environment variable (via `env` in milady.json or a `.env` file). Note that environment variables alone do not trigger auto-enable — you would also need to add `@elizaos/plugin-telegram` to `plugins.allow`.
 
 ```json
 {
@@ -121,16 +133,10 @@ You can also configure the Telegram connector directly in `~/.milady/milady.json
 }
 ```
 
-Or use a `.env` file in your project root:
-
-```bash
-TELEGRAM_BOT_TOKEN=123456789:ABCdefGHIjklmNOpqrsTUVwxyzABC-defGHI
-```
-
 Then start Milady:
 
 ```bash
-milady
+milady start
 ```
 
 ## Configuration Parameters
@@ -201,7 +207,7 @@ milady
 ## Next Steps
 
 - **[Connectors Guide](/guides/connectors)** — Overview of all available connectors
-- **[Configuration Guide](/guides/config-templates)** — Advanced configuration options
+- **[Telegram Connector Reference](/connectors/telegram)** — Advanced Telegram configuration options
 - **[Deployment Guide](/deployment)** — Deploy your bot to production
 
 ## Need Help?

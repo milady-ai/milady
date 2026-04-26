@@ -15,7 +15,7 @@ Gmail Watch 插件将 Milady 代理连接到 Gmail，实现传入邮件监控和
 </div>
 
 ```bash
-milady plugins install gmail-watch
+milady plugins install @elizaos/plugin-gmail-watch
 ```
 
 <div id="setup">

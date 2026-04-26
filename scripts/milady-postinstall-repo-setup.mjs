@@ -22,4 +22,4 @@ const setupPath = path.join(
 const setupHref = pathToFileURL(setupPath).href;
 const { runRepoSetup } = await import(setupHref);
 
-await runRepoSetup();
+await runRepoSetup(repoRoot);

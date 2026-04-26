@@ -15,7 +15,7 @@ El plugin de Tlon conecta agentes de Milady a Tlon (Urbit), permitiendo el manej
 </div>
 
 ```bash
-milady plugins install tlon
+milady plugins install @elizaos/plugin-tlon
 ```
 
 <div id="setup">

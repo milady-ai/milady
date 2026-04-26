@@ -1,23 +1,24 @@
 ---
 title: "WhatsApp Plugin"
 sidebarTitle: "WhatsApp"
-description: "WhatsApp connector for Milady — personal and multi-account messaging via the Baileys WebSocket API."
+description: "WhatsApp connector for Milady — personal messaging via Baileys or official WhatsApp Business Cloud API."
 ---
 
-The WhatsApp plugin connects Milady agents to WhatsApp using the Baileys WebSocket library, enabling messaging from personal WhatsApp accounts without the official Business API.
+The WhatsApp plugin connects Milady agents to WhatsApp, supporting two authentication methods: **Baileys** (QR code scan, personal accounts) and **Cloud API** (WhatsApp Business API, official).
 
 **Package:** `@elizaos/plugin-whatsapp`
 
 ## Overview
 
-The WhatsApp plugin supports two authentication methods: **Baileys** (QR code scan, personal accounts) and **Cloud API** (WhatsApp Business API). Baileys uses an unofficial WhatsApp Web multi-device API client and connects using the same protocol as WhatsApp Web, meaning no official WhatsApp Business API account is required.
+Two paths are available:
 
-**Important:** Using unofficial WhatsApp APIs (Baileys) may violate WhatsApp's Terms of Service. Use at your own risk and review WhatsApp's policies before deploying in production.
+- **Baileys (Personal)** — Uses the WhatsApp Web multi-device protocol. No API keys or business accounts needed. Scan a QR code with your phone to authenticate. **Pros:** no cost, works with personal accounts. **Cons:** unofficial API (may violate WhatsApp ToS), session can expire if phone disconnects.
+- **Cloud API (Business)** — Uses Meta's official WhatsApp Business Cloud API. Requires a WhatsApp Business Account and access tokens from the Meta Developer Dashboard. **Pros:** official, reliable, webhook-based. **Cons:** requires business account, per-message costs may apply.
 
 ## Installation
 
 ```bash
-milady plugins install whatsapp
+milady plugins install @elizaos/plugin-whatsapp
 ```
 
 ## Setup
@@ -46,19 +47,31 @@ On first start, the plugin prints a QR code to the terminal. Scan it with WhatsA
 
 The session is saved to `authDir` and persists across restarts.
 
+### Cloud API Setup
+
+For the official WhatsApp Business API, set environment variables instead of (or in addition to) `authDir`:
+
+```bash
+WHATSAPP_ACCESS_TOKEN=your-access-token
+WHATSAPP_PHONE_NUMBER_ID=your-phone-number-id
+WHATSAPP_WEBHOOK_VERIFY_TOKEN=your-webhook-verify-token
+WHATSAPP_BUSINESS_ACCOUNT_ID=your-business-account-id
+```
+
+These can be placed in `~/.milady/.env` or the `env` section of your config file.
+
 ## Configuration
 
 | Field | Required | Description |
 |-------|----------|-------------|
-| `authDir` | Yes (Baileys) | Directory path for Baileys session files |
+| `authDir` | Baileys only | Directory path for Baileys session files |
 | `enabled` | No | Set `false` to disable (default: `true`) |
-| `dmPolicy` | No | DM acceptance policy: `"pairing"` (default), `"allowlist"`, `"open"`, or `"disabled"` |
-| `allowFrom` | No | Allowlist of phone numbers (required when `dmPolicy` is `"open"`, must include `"*"`) |
+| `allowedJids` | No | Array of WhatsApp JIDs (phone numbers) to respond to |
+| `allowedGroups` | No | Array of group JIDs to participate in |
+| `ignoreOwnMessages` | No | Skip messages sent by the bot itself (default: `true`) |
+| `dmPolicy` | No | DM acceptance policy: `"pairing"`, `"open"`, or `"closed"` (default: `"pairing"`) |
 | `groupPolicy` | No | Group message policy: `"open"`, `"disabled"`, or `"allowlist"` (default: `"allowlist"`) |
-| `groupAllowFrom` | No | Allowlist of group JIDs |
-| `sendReadReceipts` | No | Send read receipts for incoming messages |
-| `selfChatMode` | No | Respond to your own messages (for testing) |
-| `debounceMs` | No | Delay in ms before responding, to allow message batching (default: `0`) |
+| `selfChatMode` | No | Respond to your own messages for testing (default: `false`) |
 
 ```json
 {
@@ -119,6 +132,21 @@ AgentRuntime processes message
 Response sent via Baileys API
 ```
 
+## Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `WHATSAPP_ACCESS_TOKEN` | No | WhatsApp Cloud API access token |
+| `WHATSAPP_PHONE_NUMBER_ID` | No | WhatsApp Business phone number ID |
+| `WHATSAPP_AUTH_METHOD` | No | Authentication method: `baileys` or `cloud-api` |
+| `WHATSAPP_AUTH_DIR` | No | Directory for Baileys session files |
+| `WHATSAPP_PRINT_QR` | No | Print QR code in terminal for Baileys auth |
+| `WHATSAPP_WEBHOOK_VERIFY_TOKEN` | No | Webhook verification token for Cloud API |
+| `WHATSAPP_BUSINESS_ACCOUNT_ID` | No | WhatsApp Business account ID |
+| `WHATSAPP_API_VERSION` | No | Cloud API version |
+| `WHATSAPP_DM_POLICY` | No | DM acceptance policy |
+| `WHATSAPP_GROUP_POLICY` | No | Group message policy |
+
 ## Auto-Enable
 
 The plugin auto-enables when `connectors.whatsapp` contains an `authDir` or `accounts` configuration with at least one account that has `authDir` set.
@@ -129,6 +157,7 @@ Session credentials are stored in the `authDir` as multiple JSON files. Back up 
 
 ## Related
 
+- [WhatsApp Connector Reference](/connectors/whatsapp) — Full configuration reference (multi-account, acknowledgment reactions, per-group config, streaming)
 - [Telegram Plugin](/plugin-registry/platform/telegram) — Telegram bot integration (official API)
 - [Connectors Guide](/guides/whatsapp) — WhatsApp setup guide
 - [Connectors Overview](/guides/connectors) — All connector options

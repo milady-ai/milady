@@ -15,7 +15,7 @@ El plugin de LINE conecta agentes de Milady a LINE como un bot, permitiendo el m
 </div>
 
 ```bash
-milady plugins install line
+milady plugins install @elizaos/plugin-line
 ```
 
 <div id="setup">

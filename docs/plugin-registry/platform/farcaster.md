@@ -15,7 +15,7 @@ Farcaster is a sufficiently decentralized social protocol. Users own their accou
 ## Installation
 
 ```bash
-milady plugins install farcaster
+milady plugins install @elizaos/plugin-farcaster
 ```
 
 ## Setup
@@ -58,10 +58,10 @@ Your agent needs a Farcaster account (FID — Farcaster ID):
 | `signerUuid` | Yes | Neynar signer UUID for the agent account |
 | `fid` | Yes | Farcaster ID (FID) of the agent account |
 | `enabled` | No | Set `false` to disable (default: `true`) |
-| `pollInterval` | No | Seconds between mention checks (default: `60`) |
+| `pollInterval` | No | Seconds between mention checks (default: `120`) |
 | `channels` | No | Array of Farcaster channel names to monitor |
-| `castIntervalMin` | No | Min minutes between autonomous casts (default: `120`) |
-| `castIntervalMax` | No | Max minutes between autonomous casts (default: `240`) |
+| `castIntervalMin` | No | Min minutes between autonomous casts (default: `90`) |
+| `castIntervalMax` | No | Max minutes between autonomous casts (default: `180`) |
 
 ```json
 {
@@ -103,15 +103,33 @@ AgentRuntime processes with Farcaster context
 Response posted via Neynar API
 ```
 
+## Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `FARCASTER_NEYNAR_API_KEY` | Yes | API key for the Neynar Farcaster API |
+| `FARCASTER_SIGNER_UUID` | Yes | UUID of the Neynar signer for the agent account |
+| `FARCASTER_FID` | Yes | Farcaster ID (user identifier) for the agent |
+| `FARCASTER_HUB_URL` | No | Base URL for the Farcaster hub |
+| `FARCASTER_MODE` | No | Operation mode: `polling` or `webhook` |
+| `FARCASTER_DRY_RUN` | No | Enable dry run mode (no actual posts) |
+| `FARCASTER_POLL_INTERVAL` | No | Polling interval in seconds |
+
 ## Autonomous Casting
 
 When configured, the agent posts casts autonomously at random intervals. The LLM generates cast content based on the character's personality and current context.
 
 Casts are limited to 320 characters. Longer responses are split into cast threads.
 
+## Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `FARCASTER_NEYNAR_API_KEY` | Neynar API key. When set, the runtime maps this to the connector's `apiKey` field. |
+
 ## Auto-Enable
 
-The plugin auto-enables when `connectors.farcaster.apiKey` is set.
+The plugin auto-enables when `connectors.farcaster.apiKey` is set or the `FARCASTER_NEYNAR_API_KEY` environment variable is present.
 
 ## Related
 

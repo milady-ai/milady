@@ -15,7 +15,7 @@ Bluesky 插件通过 AT 协议将 Milady 代理连接到 Bluesky 社交网络，
 </div>
 
 ```bash
-milady plugins install bluesky
+milady plugins install @elizaos/plugin-bluesky
 ```
 
 <div id="setup">

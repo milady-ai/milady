@@ -1,3 +1,4 @@
+// @milady-live-audit allow-route-fixtures
 import { expect, type Page, test } from "@playwright/test";
 import {
   installDefaultAppRoutes,
@@ -41,7 +42,10 @@ type Workflow = {
   active: boolean;
   nodeCount?: number;
   nodes?: WorkflowNode[];
-  connections?: Record<string, { main?: Array<Array<{ node: string; type: "main"; index: number }>> }>;
+  connections?: Record<
+    string,
+    { main?: Array<Array<{ node: string; type: "main"; index: number }>> }
+  >;
 };
 
 type AutomationItem = {
@@ -90,11 +94,7 @@ type AutomationsMockApi = {
 const NOW_ISO = "2026-04-23T20:00:00.000Z";
 const HOUR_MS = 60 * 60 * 1000;
 
-function workflowFixture(
-  id: string,
-  name: string,
-  active = true,
-): Workflow {
+function workflowFixture(id: string, name: string, active = true): Workflow {
   return {
     id,
     name,
@@ -291,7 +291,13 @@ async function installAutomationsApi(
     }
   }
 
-  const fulfillJson = async (route: Parameters<Page["route"]>[1] extends (route: infer R) => unknown ? R : never, body: unknown, status = 200) => {
+  const fulfillJson = async (
+    route: Parameters<Page["route"]>[1] extends (route: infer R) => unknown
+      ? R
+      : never,
+    body: unknown,
+    status = 200,
+  ) => {
     await route.fulfill({
       status,
       contentType: "application/json",
@@ -372,7 +378,8 @@ async function installAutomationsApi(
         taskId: "task-created-event",
         displayName: String(createdTrigger.displayName ?? "Created task"),
         instructions: String(createdTrigger.instructions ?? ""),
-        triggerType: createdTrigger.triggerType as TriggerSummary["triggerType"],
+        triggerType:
+          createdTrigger.triggerType as TriggerSummary["triggerType"],
         eventKind:
           typeof createdTrigger.eventKind === "string"
             ? createdTrigger.eventKind
@@ -435,7 +442,10 @@ async function installAutomationsApi(
 
     if (request.method() === "POST" && path === "/api/n8n/workflows/generate") {
       generatedWorkflow = request.postDataJSON() as Record<string, unknown>;
-      const workflow = workflowFixture("workflow-generated", "Generated workflow");
+      const workflow = workflowFixture(
+        "workflow-generated",
+        "Generated workflow",
+      );
       workflows.set(workflow.id, workflow);
       automations = [
         ...automations.filter((item) => !item.isDraft),
@@ -551,14 +561,19 @@ test("automations overview empty state encourages creating tasks and workflows",
   ).toBeVisible();
   await expect(page.getByText("Task ideas")).toBeVisible();
   await expect(page.getByText("Workflow ideas")).toBeVisible();
-  await expect(page.getByText("NODE CATALOG")).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "Node Catalog" }),
+  ).toBeVisible();
   await expect(page.getByText("DRAFTS", { exact: true })).toHaveCount(0);
 });
 
 test("automations can create event tasks and inspect workflow data flow", async ({
   page,
 }) => {
-  const workflow = workflowFixture("workflow-message-pipeline", "Message pipeline");
+  const workflow = workflowFixture(
+    "workflow-message-pipeline",
+    "Message pipeline",
+  );
   const api = await installAutomationsApi(page, [
     eventTaskItem(),
     draftWorkflowItem(),
@@ -581,9 +596,11 @@ test("automations can create event tasks and inspect workflow data flow", async 
   await expect(page.getByText("Output")).toBeVisible();
 
   await page.getByLabel("Duplicate workflow").click();
-  await expect.poll(() => api.getCreatedWorkflow()).toMatchObject({
-    name: "Message pipeline Copy",
-  });
+  await expect
+    .poll(() => api.getCreatedWorkflow())
+    .toMatchObject({
+      name: "Message pipeline Copy",
+    });
   await expect(
     page.getByRole("heading", { name: "Message pipeline Copy" }),
   ).toBeVisible();
@@ -593,17 +610,24 @@ test("automations can create event tasks and inspect workflow data flow", async 
   await editor.locator("input").first().fill("Escalate inbound messages");
   await editor
     .locator("textarea")
-    .fill("When a normalized message arrives, summarize it and flag urgent ones.");
+    .fill(
+      "When a normalized message arrives, summarize it and flag urgent ones.",
+    );
   await editor.getByRole("combobox").first().click();
   await page.getByRole("option", { name: "Event" }).click();
   await expect(editor.getByText("Waiting for Message Received.")).toBeVisible();
-  await editor.getByRole("button", { name: "Create task" }).click();
-  await expect.poll(() => api.getCreatedTrigger()).toMatchObject({
-    displayName: "Escalate inbound messages",
-    triggerType: "event",
-    eventKind: "message.received",
-    kind: "text",
-  });
+  await page
+    .locator("main")
+    .getByRole("button", { name: "Create task" })
+    .click();
+  await expect
+    .poll(() => api.getCreatedTrigger())
+    .toMatchObject({
+      displayName: "Escalate inbound messages",
+      triggerType: "event",
+      eventKind: "message.received",
+      kind: "text",
+    });
 });
 
 test("workflow drafts generate from a prompt and drafts can be deleted", async ({
@@ -617,9 +641,9 @@ test("workflow drafts generate from a prompt and drafts can be deleted", async (
   await page.getByRole("button", { name: "Draft" }).first().click();
   await expect(page.getByText("Create workflow")).toBeVisible();
   await page.getByLabel("Delete draft").click();
-  await expect.poll(() => api.getDeletedConversationIds()).toContain(
-    "conversation-draft-existing",
-  );
+  await expect
+    .poll(() => api.getDeletedConversationIds())
+    .toContain("conversation-draft-existing");
 
   await page.getByRole("button", { name: "New workflow" }).first().click();
   const workflowPrompt = page.locator("[data-workflow-prompt-input='true']");
@@ -629,10 +653,12 @@ test("workflow drafts generate from a prompt and drafts can be deleted", async (
   );
   await page.getByRole("button", { name: "Generate" }).click();
 
-  await expect.poll(() => api.getGeneratedWorkflow()).toMatchObject({
-    prompt:
-      "When a generic message event arrives, summarize it and send a digest.",
-  });
+  await expect
+    .poll(() => api.getGeneratedWorkflow())
+    .toMatchObject({
+      prompt:
+        "When a generic message event arrives, summarize it and send a digest.",
+    });
   await expect(
     page.getByRole("heading", { name: "Generated workflow" }),
   ).toBeVisible();

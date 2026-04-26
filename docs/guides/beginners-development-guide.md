@@ -53,6 +53,12 @@ Install dependencies:
 bun install
 ```
 
+Initialize the elizaOS submodule and link local packages (required for reading/editing runtime source):
+
+```bash
+bun run setup:upstreams
+```
+
 Recommended quick sanity checks:
 
 ```bash
@@ -65,6 +71,12 @@ bun run milady --version
 
 ## 4) Repo map (mental model)
 
+The runtime source lives in the `eliza/` git submodule. Initialize it first:
+
+```bash
+bun run setup:upstreams
+```
+
 Core areas (all under `eliza/packages/app-core/`):
 
 - `eliza/packages/app-core/src/runtime/` — runtime startup, plugin orchestration, lifecycle
@@ -73,16 +85,18 @@ Core areas (all under `eliza/packages/app-core/`):
 - `eliza/packages/app-core/src/api/` — dashboard API server and routes
 - `eliza/packages/app-core/src/services/` — business logic (plugin installer, updater, etc.)
 - `eliza/packages/app-core/src/connectors/` — connector integration code
-- `eliza/packages/agent/` — upstream elizaOS agent (core plugins, auto-enable maps)
+- `eliza/packages/agent/` — upstream elizaOS agent submodule (core plugins, auto-enable maps)
 - `apps/app/` — desktop/mobile UI app
 - `scripts/` — build/dev/release tooling
 - `test/` + colocated tests — verification
+
+> **Note:** The `eliza/` directory is a git submodule — these paths will not exist until you run `bun run setup:upstreams` or `git submodule update --init --recursive`. See [CONTRIBUTING.md](https://github.com/milady-ai/milady/blob/main/CONTRIBUTING.md) for submodule maintenance details.
 
 ---
 
 ## 5) Entry points and startup path
 
-Important files to understand first:
+Important files to understand first (all inside the `eliza/` submodule):
 
 1. `eliza/packages/app-core/src/entry.ts` (CLI process bootstrap)
 2. `eliza/packages/app-core/src/cli/run-main.ts` (dotenv + Commander + error handling)
@@ -102,12 +116,15 @@ Important files to understand first:
 ## 6) Daily commands for development
 
 ```bash
+bun run dev           # API on :31337, UI on :2138 (dev mode splits them)
 bun run build
 bun run check
 bun run test
 bun run test:e2e
 bun run test:coverage
 ```
+
+In dev mode, the API runs on port 31337 and the dashboard UI on port 2138. In production, both share port 2138. The dev orchestrator auto-shifts to the next free port if defaults are busy and syncs the env vars (`MILADY_API_PORT`, `MILADY_PORT`).
 
 CLI iteration examples:
 

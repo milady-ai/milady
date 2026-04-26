@@ -27,7 +27,7 @@ Skills can include:
 | Complexity | Low -- documentation-focused | High -- full programmatic control |
 | Runtime | Injected into agent prompts | Runs as executable code |
 | Use case | Task instructions, workflows | Actions, services, API integrations |
-| Installation | Drop a folder or install from marketplace | `milady plugin install` |
+| Installation | Drop a folder or install from marketplace | `milady plugins install` |
 
 Use skills when you want to teach the agent a procedure. Use plugins when you need executable logic, background services, or API routes.
 
@@ -97,7 +97,7 @@ Shipped with the `@elizaos/plugin-agent-skills` package. These are automatically
 
 ### 2. Extra Directories
 
-Additional directories configured in `~/.milady/config.json`:
+Additional directories configured in `~/.milady/milady.json`:
 
 ```json
 {
@@ -126,7 +126,7 @@ Global user-level skills stored at:
 
 The catalog file is also stored here at `~/.milady/skills/catalog.json`.
 
-### 4. Workspace Skills (highest precedence)
+### 4. Workspace Skills
 
 Project-local skills in the agent's workspace directory:
 
@@ -138,7 +138,7 @@ Project-local skills in the agent's workspace directory:
     └── SKILL.md
 ```
 
-### 5. Marketplace Skills
+### 5. Marketplace Skills (highest precedence)
 
 Skills installed from the marketplace are placed under:
 
@@ -176,7 +176,7 @@ Whether a skill is active is determined by this cascade (highest priority first)
 4. **`skills.allowBundled`** -- config allow list (whitelist mode: only listed skills load)
 5. **Default** -- enabled
 
-Configuration example in `~/.milady/config.json`:
+Configuration example in `~/.milady/milady.json`:
 
 ```json
 {

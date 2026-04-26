@@ -1,7 +1,7 @@
 import type {
   BrowserBridgeAction,
   BrowserBridgeSettings,
-} from "@elizaos/plugin-browser-bridge/contracts";
+} from "@elizaos/plugin-browser-bridge";
 import type { LifeOpsBrowserSession } from "@elizaos/shared/contracts/lifeops";
 import { BrowserBridgeRelayClient, RelayApiError } from "../src/api-client";
 import type {

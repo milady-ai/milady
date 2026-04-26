@@ -6,7 +6,7 @@ description: "Cross-platform design for wallet and agent secrets: macOS Keychain
 
 This document defines how Milady should store **high-value secrets** (especially **chain private keys**) using each OS’s native secret store, while staying compatible with **multi-agent** workflows (per-agent state, coding swarms / PTY workers).
 
-**Status:** architecture — implementation is phased; today wallet keys may still live in config `env` (see [Wallet & Crypto](./wallet.md)).
+**Status:** architecture — implementation is phased; today wallet keys may still live in config `env` (see [Wallet & Crypto](/guides/wallet)).
 
 ## Goals
 
@@ -34,7 +34,7 @@ A single capability surface (implemented per OS):
 
 **Returns** must distinguish: `not_found`, `denied` (user cancelled / ACL), `unavailable` (no daemon), `error` (transient).
 
-TypeScript contract: `packages/app-core/src/security/platform-secure-store.ts`.
+TypeScript contract: `eliza/packages/app-core/src/security/platform-secure-store.ts`.
 
 ## Vault ID (`vaultId`) — multi-profile and multi-agent
 
@@ -81,7 +81,7 @@ When the native store is **unavailable** (headless server, no Secret Service, us
 1. **Degrade explicitly:** report `unavailable` to the wallet UI / logs; do not silently fall back to plaintext without user consent.
 2. **Optional consenting fallback:** encrypted-at-rest file under the **state dir** with a key derived from **machine + user** (DPAPI on Windows; similar pattern only where well-supported), **or** require user to keep keys in `env` (current behavior).
 
-Document the chosen fallback in release notes and [Wallet](./wallet.md).
+Document the chosen fallback in release notes and [Wallet](/guides/wallet).
 
 ## Where code runs: desktop vs CLI vs workers
 
@@ -126,6 +126,6 @@ When loading wallet keys into the signing layer:
 
 ## Related
 
-- [Wallet & Crypto — Security model](./wallet.md#security-model)
-- [Coding swarms](./coding-swarms.md) — subprocess boundaries
-- [Secrets Manager plugin](../plugin-registry/secrets-manager.md) — per-agent DB secrets (complementary)
+- [Wallet & Crypto — Security model](/guides/wallet#security-model)
+- [Coding swarms](/guides/coding-swarms) — subprocess boundaries
+- [Secrets Manager plugin](/plugin-registry/secrets-manager) — per-agent DB secrets (complementary)

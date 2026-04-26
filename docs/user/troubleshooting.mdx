@@ -34,10 +34,11 @@ chmod +x Milady.AppImage
 
 Check:
 
-- the API key
-- whether Ollama is running
-- whether the selected model exists
-- whether a remote backend owns provider routing
+- the API key is valid and has remaining credits
+- whether Ollama is running (if using local models): `curl http://127.0.0.1:11434/api/tags`
+- whether the selected model exists on the provider
+- whether a remote backend owns provider routing (`deploymentTarget` in config)
+- logs for specific errors: check `~/.milady/logs/` or run `milady doctor`
 
 ## Voice is silent
 
@@ -95,10 +96,22 @@ Check:
 - whether the backend listens outside localhost
 - whether the current device can reach that network
 
+## Useful chat commands
+
+These commands work in the chat input and can help diagnose issues:
+
+- `/model` — check or switch the active model
+- `/clear` — clear the chat and start fresh
+- `/help` — list available commands
+
+See [Chat Commands](/chat-commands) for the full reference.
+
 ## Milady is slow
 
-- slow before the first token: choose a faster model or provider
-- slow throughout: check network limits or local model size
+- slow before the first token: choose a faster model or provider (Groq and Anthropic Haiku are fast options)
+- slow throughout: check network limits or local model size (smaller Ollama models like `llama3.2:3b` are faster)
+- check if fallback models are being used (slower providers may be engaged if the primary is rate-limited)
+- for local models, ensure you have enough RAM for the model size
 
 ## Start over
 

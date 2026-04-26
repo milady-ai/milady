@@ -516,12 +516,12 @@ Milady activa automáticamente los plugins según su configuración. En la mayor
 | Conector | Plugin | Activador de activación automática |
 |----------|--------|------------------------------------|
 | `telegram` | `@elizaos/plugin-telegram` | `connectors.telegram.botToken` |
-| `discord` | `@elizaos/plugin-discord` | `connectors.discord.botToken` |
+| `discord` | `@elizaos/plugin-discord` | `connectors.discord.token` (o `botToken`, `apiKey`) |
 | `slack` | `@elizaos/plugin-slack` | `connectors.slack.botToken` |
 | `twitter` | `@elizaos/plugin-twitter` | `connectors.twitter.apiKey` |
 | `whatsapp` | `@elizaos/plugin-whatsapp` | `connectors.whatsapp.authDir` (o `authState`, `sessionPath`, o `accounts` con `authDir`) |
 | `signal` | `@elizaos/plugin-signal` | `connectors.signal.account` (o `httpUrl`, `httpHost`, `httpPort`, `cliPath`, o `accounts` con entradas habilitadas) |
-| `farcaster` | `@elizaos/plugin-farcaster` | `connectors.farcaster.token` |
+| `farcaster` | `@elizaos/plugin-farcaster` | `connectors.farcaster.apiKey` |
 | `matrix` | `@elizaos/plugin-matrix` | `connectors.matrix.token` |
 | `nostr` | `@elizaos/plugin-nostr` | `connectors.nostr.token` |
 | `msteams` | `@elizaos/plugin-msteams` | `connectors.msteams.token` |
@@ -530,8 +530,10 @@ Milady activa automáticamente los plugins según su configuración. En la mayor
 | `lens` | `@elizaos/plugin-lens` | `connectors.lens.token` |
 | `mattermost` | `@elizaos/plugin-mattermost` | `connectors.mattermost.token` |
 | `feishu` | `@elizaos/plugin-feishu` | `connectors.feishu.token` |
-| `blooio` | `@elizaos/plugin-blooio` | `connectors.blooio.token` |
+| `blooio` | `@elizaos/plugin-blooio` | `connectors.blooio.apiKey` |
+| `wechat` | `@elizaos/plugin-wechat` | `connectors.wechat.apiKey` (o `accounts` con `apiKey`) |
 | `twitch` | `@elizaos/plugin-twitch` | `connectors.twitch.accessToken` o `clientId` o `enabled: true` |
+| `wechat` | `@elizaos/plugin-wechat` | `connectors.wechat.apiKey` (nivel superior o en entrada de `accounts`) |
 
 **Los plugins de proveedores** se activan automáticamente cuando la variable de entorno de la clave API correspondiente está definida:
 
@@ -626,12 +628,12 @@ Los conectores integran Milady con plataformas de mensajería. Configúrelos baj
     },
     discord: {
       enabled: true,
-      botToken: "<DISCORD_BOT_TOKEN>",
+      token: "<DISCORD_BOT_TOKEN>",
     },
     slack: {
       enabled: true,
       botToken: "<SLACK_BOT_TOKEN>",
-      apiKey: "<SLACK_APP_TOKEN>",
+      appToken: "<SLACK_APP_TOKEN>",
     },
     whatsapp: {
       enabled: true,

@@ -27,14 +27,14 @@ Before cutting a release you need:
 
 ## Version Bumping
 
-The root `package.json` holds the canonical version (currently uses semver with pre-release identifiers like `2.0.0-alpha.92`).
+The root `package.json` holds the canonical version (currently uses semver with pre-release identifiers like `2.0.0-alpha.116`).
 
 **Scripts:**
 
 | Script | What it does |
 |--------|-------------|
-| `scripts/set-package-version.mjs` | Sets version in root `package.json`. Reads `RELEASE_VERSION` env var. |
-| `scripts/align-electrobun-version.mjs` | Syncs version across `package.json`, `apps/app/package.json`, `apps/app/electrobun/package.json`, and `electrobun.config.ts`. Also reads `RELEASE_VERSION` env var. |
+| `eliza/packages/app-core/scripts/set-package-version.mjs` | Sets version in root `package.json`. Reads `RELEASE_VERSION` env var. |
+| `eliza/packages/app-core/scripts/align-electrobun-version.mjs` | Syncs version across `package.json`, `apps/app/package.json`, `apps/app/electrobun/package.json`, and `electrobun.config.ts`. Also reads `RELEASE_VERSION` env var. |
 
 Both scripts are called automatically by CI during the release workflow. You don't need to run them manually unless doing a local dry-run.
 
@@ -60,8 +60,8 @@ bun run release:check    # validates dist contents, forbidden paths, package int
 ### Step 2: Tag and push
 
 ```bash
-git tag v2.0.0-alpha.93
-git push origin v2.0.0-alpha.93
+git tag v2.0.0-alpha.117
+git push origin v2.0.0-alpha.117
 ```
 
 That's it. Pushing a `v*` tag triggers the entire release pipeline.
@@ -231,11 +231,11 @@ Example: 2.1.3 → 2010300
 ```bash
 # iOS (requires macOS + Xcode)
 bun run dev:ios          # Build + open in Xcode
-node scripts/run-mobile-build.mjs ios   # CI-style simulator build
+bun run build:ios        # CI-style simulator build
 
 # Android (requires Android SDK + JDK 21)
 bun run dev:android      # Build + open in Android Studio
-node scripts/run-mobile-build.mjs android   # CI-style debug build
+bun run build:android    # CI-style debug build
 ```
 
 ### Certificate Renewal
@@ -251,7 +251,7 @@ node scripts/run-mobile-build.mjs android   # CI-style debug build
 
 ### `release:check` fails
 
-The script (`scripts/release-check.ts`) validates that required files exist in `dist/` and forbidden paths (like `dist/Milady.app/`) are absent. Fix whatever it complains about and re-tag.
+The script (`eliza/packages/app-core/scripts/release-check.ts`) validates that required files exist in `dist/` and forbidden paths (like `dist/Milady.app/`) are absent. Fix whatever it complains about and re-tag.
 
 ### npm publish fails
 

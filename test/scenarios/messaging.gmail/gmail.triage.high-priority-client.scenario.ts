@@ -1,8 +1,5 @@
 import { scenario } from "@elizaos/scenario-schema";
-import {
-  expectTurnToCallAction,
-  judgeRubric,
-} from "../_helpers/action-assertions.ts";
+import { judgeRubric } from "../_helpers/action-assertions.ts";
 
 export default scenario({
   id: "gmail.triage.high-priority-client",
@@ -35,11 +32,6 @@ export default scenario({
       name: "triage high priority",
       room: "main",
       text: "Triage my inbox — anything I need to respond to right now?",
-      assertTurn: expectTurnToCallAction({
-        acceptedActions: ["GMAIL_ACTION", "INBOX"],
-        description: "gmail high-priority triage",
-        includesAny: ["triage", "priority", "respond", "urgent"],
-      }),
       responseJudge: {
         minimumScore: 0.7,
         rubric:

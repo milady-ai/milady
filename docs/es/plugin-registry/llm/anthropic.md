@@ -15,7 +15,7 @@ El plugin de Anthropic conecta los agentes de Milady con la API de Claude de Ant
 </div>
 
 ```bash
-milady plugins install anthropic
+milady plugins install @elizaos/plugin-anthropic
 ```
 
 <div id="auto-enable">

@@ -14,12 +14,14 @@ import {
   ensureElizaBuildOutputs,
   ensureElizaTypescriptDependencyLinks,
   ensurePluginAnthropicBunTypes,
+  ensurePublishedElizaPackageLinks,
   ensureRequiredElizaPluginBuilds,
   findInstalledPackageDir,
   getElizaInstallArgs,
   getMissingConditionalElizaWorkspaceEntries,
   getTemporaryElizaWorkspaceEntries,
   getUpstreamPackageLinks,
+  patchPluginBuildTscBinPaths,
   resolveTypeScriptIgnoreDeprecationsTarget,
   runElizaInstallWithRetry,
   stripMissingConditionalElizaWorkspaces,
@@ -376,6 +378,79 @@ describe("findInstalledPackageDir", () => {
   });
 });
 
+describe("ensurePublishedElizaPackageLinks", () => {
+  it("links published skip-mode packages from Bun's store into root and eliza node_modules", () => {
+    const repoRoot = makeTempDir();
+    const packageName = "@elizaos/plugin-local-embedding";
+    const version = "2.0.0-alpha.12";
+    const installedPackage = path.join(
+      repoRoot,
+      "node_modules",
+      ".bun",
+      "@elizaos+plugin-local-embedding@2.0.0-alpha.12",
+      "node_modules",
+      "@elizaos",
+      "plugin-local-embedding",
+    );
+
+    writeFile(
+      path.join(repoRoot, "package.json"),
+      JSON.stringify({ dependencies: { [packageName]: version } }, null, 2),
+    );
+    writeFile(
+      path.join(installedPackage, "package.json"),
+      JSON.stringify({ name: packageName, version }, null, 2),
+    );
+
+    expect(ensurePublishedElizaPackageLinks(repoRoot)).toBe(4);
+    expect(
+      fs.realpathSync(
+        path.join(
+          repoRoot,
+          "node_modules",
+          "@elizaos",
+          "plugin-local-embedding",
+        ),
+      ),
+    ).toBe(fs.realpathSync(installedPackage));
+    expect(
+      fs.realpathSync(
+        path.join(
+          repoRoot,
+          "eliza",
+          "node_modules",
+          "@elizaos",
+          "plugin-local-embedding",
+        ),
+      ),
+    ).toBe(fs.realpathSync(installedPackage));
+    expect(
+      fs.realpathSync(
+        path.join(
+          repoRoot,
+          "apps",
+          "app",
+          "node_modules",
+          "@elizaos",
+          "plugin-local-embedding",
+        ),
+      ),
+    ).toBe(fs.realpathSync(installedPackage));
+    expect(
+      fs.realpathSync(
+        path.join(
+          repoRoot,
+          "apps",
+          "home",
+          "node_modules",
+          "@elizaos",
+          "plugin-local-embedding",
+        ),
+      ),
+    ).toBe(fs.realpathSync(installedPackage));
+  });
+});
+
 describe("getUpstreamPackageLinks", () => {
   it("links nested eliza plugin workspaces into eliza node_modules", () => {
     const repoRoot = makeTempDir();
@@ -579,6 +654,13 @@ describe("ensureRequiredElizaPluginBuilds", () => {
       "plugin-edge-tts",
       "typescript",
     );
+    const localEmbeddingPackage = path.join(
+      repoRoot,
+      "eliza",
+      "plugins",
+      "plugin-local-embedding",
+      "typescript",
+    );
     writeFile(path.join(agentSkillsPackage, "package.json"), "{}\n");
     writeFile(
       path.join(agentSkillsPackage, "dist", "index.js"),
@@ -588,6 +670,11 @@ describe("ensureRequiredElizaPluginBuilds", () => {
     writeFile(path.join(edgeTtsPackage, "package.json"), "{}\n");
     writeFile(
       path.join(edgeTtsPackage, "dist", "node", "index.node.js"),
+      "export {};\n",
+    );
+    writeFile(path.join(localEmbeddingPackage, "package.json"), "{}\n");
+    writeFile(
+      path.join(localEmbeddingPackage, "dist", "index.js"),
       "export {};\n",
     );
 
@@ -608,6 +695,14 @@ describe("ensureRequiredElizaPluginBuilds", () => {
               "dist",
               "node",
               "index.node.js",
+            ),
+          ) ||
+          targetPath.endsWith(
+            path.join(
+              "plugin-local-embedding",
+              "typescript",
+              "dist",
+              "index.js",
             ),
           ),
         stat: () => ({ mtimeMs: 1 }) as fs.Stats,
@@ -648,6 +743,13 @@ describe("ensureRequiredElizaPluginBuilds", () => {
       "plugins",
       "plugin-telegram",
     );
+    const localEmbeddingPackage = path.join(
+      repoRoot,
+      "eliza",
+      "plugins",
+      "plugin-local-embedding",
+      "typescript",
+    );
     writeFile(path.join(agentSkillsPackage, "package.json"), "{}\n");
     writeFile(
       path.join(agentSkillsPackage, "dist", "index.js"),
@@ -657,6 +759,11 @@ describe("ensureRequiredElizaPluginBuilds", () => {
     writeFile(path.join(telegramPackage, "package.json"), "{}\n");
     writeFile(
       path.join(telegramPackage, "dist", "account-auth-service.js"),
+      "export {};\n",
+    );
+    writeFile(path.join(localEmbeddingPackage, "package.json"), "{}\n");
+    writeFile(
+      path.join(localEmbeddingPackage, "dist", "index.js"),
       "export {};\n",
     );
 
@@ -672,6 +779,14 @@ describe("ensureRequiredElizaPluginBuilds", () => {
           ) ||
           targetPath.endsWith(
             path.join("plugin-telegram", "dist", "account-auth-service.js"),
+          ) ||
+          targetPath.endsWith(
+            path.join(
+              "plugin-local-embedding",
+              "typescript",
+              "dist",
+              "index.js",
+            ),
           ),
         stat: () => ({ mtimeMs: 1 }) as fs.Stats,
         runCommandImpl,
@@ -686,6 +801,90 @@ describe("ensureRequiredElizaPluginBuilds", () => {
     });
     expect(log).toHaveBeenCalledWith(
       expect.stringContaining("@elizaos/plugin-edge-tts"),
+    );
+  });
+
+  it("builds plugin-local-embedding when the runtime import artifact is missing", async () => {
+    const repoRoot = makeTempDir();
+    const agentSkillsPackage = path.join(
+      repoRoot,
+      "eliza",
+      "plugins",
+      "plugin-agent-skills",
+      "typescript",
+    );
+    const telegramPackage = path.join(
+      repoRoot,
+      "eliza",
+      "plugins",
+      "plugin-telegram",
+    );
+    const edgeTtsPackage = path.join(
+      repoRoot,
+      "eliza",
+      "plugins",
+      "plugin-edge-tts",
+      "typescript",
+    );
+    const localEmbeddingPackage = path.join(
+      repoRoot,
+      "eliza",
+      "plugins",
+      "plugin-local-embedding",
+      "typescript",
+    );
+    writeFile(path.join(agentSkillsPackage, "package.json"), "{}\n");
+    writeFile(
+      path.join(agentSkillsPackage, "dist", "index.js"),
+      "export {};\n",
+    );
+    writeFile(path.join(telegramPackage, "package.json"), "{}\n");
+    writeFile(
+      path.join(telegramPackage, "dist", "account-auth-service.js"),
+      "export {};\n",
+    );
+    writeFile(path.join(edgeTtsPackage, "package.json"), "{}\n");
+    writeFile(
+      path.join(edgeTtsPackage, "dist", "node", "index.node.js"),
+      "export {};\n",
+    );
+    writeFile(path.join(localEmbeddingPackage, "package.json"), "{}\n");
+
+    const runCommandImpl = vi.fn().mockResolvedValue(undefined);
+    const log = vi.fn();
+
+    await expect(
+      ensureRequiredElizaPluginBuilds(repoRoot, {
+        pathExists: (targetPath) =>
+          targetPath.endsWith(path.join("package.json")) ||
+          targetPath.endsWith(
+            path.join("plugin-agent-skills", "typescript", "dist", "index.js"),
+          ) ||
+          targetPath.endsWith(
+            path.join("plugin-telegram", "dist", "account-auth-service.js"),
+          ) ||
+          targetPath.endsWith(
+            path.join(
+              "plugin-edge-tts",
+              "typescript",
+              "dist",
+              "node",
+              "index.node.js",
+            ),
+          ),
+        stat: () => ({ mtimeMs: 1 }) as fs.Stats,
+        runCommandImpl,
+        log,
+      }),
+    ).resolves.toBe(true);
+
+    expect(runCommandImpl).toHaveBeenCalledTimes(1);
+    expect(runCommandImpl).toHaveBeenCalledWith("bun", ["run", "build"], {
+      cwd: localEmbeddingPackage,
+      label: "bun run build (@elizaos/plugin-local-embedding)",
+    });
+    expect(log).toHaveBeenCalledWith(
+      expect.stringContaining("@elizaos/plugin-local-embedding"),
     );
   });
 });
@@ -1065,7 +1264,7 @@ describe("applyTypeScriptIgnoreDeprecationsCompatPatch", () => {
     );
 
     writeFile(
-      path.join(repoRoot, "eliza", "package.json"),
+      path.join(elizaRoot, "package.json"),
       JSON.stringify({ devDependencies: { typescript: "^6.0.0" } }, null, 2),
     );
     writeFile(
@@ -1104,7 +1303,7 @@ describe("applyTypeScriptIgnoreDeprecationsCompatPatch", () => {
     ];
 
     writeFile(
-      path.join(repoRoot, "eliza", "package.json"),
+      path.join(elizaRoot, "package.json"),
       JSON.stringify({ devDependencies: { typescript: "^6.0.0" } }, null, 2),
     );
     for (const configPath of configPaths) {
@@ -1126,6 +1325,7 @@ describe("applyTypeScriptIgnoreDeprecationsCompatPatch", () => {
 
   it("downgrades tsup plugin configs to TypeScript 5-compatible deprecation silencing", () => {
     const elizaRoot = makeTempDir();
+    const repoRoot = makeTempDir();
     const calendlyPath = path.join(
       elizaRoot,
       "plugins",
@@ -1134,11 +1334,17 @@ describe("applyTypeScriptIgnoreDeprecationsCompatPatch", () => {
     );
 
     writeFile(
+      path.join(repoRoot, "package.json"),
+      JSON.stringify({ devDependencies: { typescript: "^5.9.3" } }, null, 2),
+    );
+    writeFile(
       calendlyPath,
       '{\n  "compilerOptions": {\n    "ignoreDeprecations": "6.0",\n    "baseUrl": "./src"\n  }\n}\n',
     );
 
-    expect(applyTypeScriptIgnoreDeprecationsCompatPatch(elizaRoot)).toBe(1);
+    expect(
+      applyTypeScriptIgnoreDeprecationsCompatPatch(elizaRoot, { repoRoot }),
+    ).toBe(1);
     expect(fs.readFileSync(calendlyPath, "utf8")).toContain(
       '"ignoreDeprecations": "5.0"',
     );
@@ -1363,7 +1569,7 @@ describe("ensurePluginAnthropicBunTypes", () => {
     return buildConfigPath;
   }
 
-  it("adds 'bun' to compilerOptions.types when missing", () => {
+  it("adds 'bun-types' to compilerOptions.types when missing", () => {
     const pluginsRoot = makeTempDir();
     const buildConfigPath = writeBuildConfig(pluginsRoot, {
       extends: "./tsconfig.json",
@@ -1379,18 +1585,18 @@ describe("ensurePluginAnthropicBunTypes", () => {
     const parsed = JSON.parse(fs.readFileSync(buildConfigPath, "utf8")) as {
       compilerOptions: { types?: string[] };
     };
-    expect(parsed.compilerOptions.types).toContain("bun");
+    expect(parsed.compilerOptions.types).toContain("bun-types");
     expect(parsed.compilerOptions.types).toContain("node");
   });
 
-  it("is a no-op when 'bun' is already present", () => {
+  it("is a no-op when 'bun-types' is already present", () => {
     const pluginsRoot = makeTempDir();
     const initialConfig = {
       extends: "./tsconfig.json",
       compilerOptions: {
         rootDir: ".",
         outDir: "../dist",
-        types: ["node", "bun"],
+        types: ["node", "bun-types"],
       },
       include: ["**/*.ts"],
     };
@@ -1401,7 +1607,7 @@ describe("ensurePluginAnthropicBunTypes", () => {
     expect(fs.readFileSync(buildConfigPath, "utf8")).toBe(originalContents);
   });
 
-  it("extends an existing types array without duplicating 'bun'", () => {
+  it("extends an existing types array without duplicating 'bun-types'", () => {
     const pluginsRoot = makeTempDir();
     const buildConfigPath = writeBuildConfig(pluginsRoot, {
       extends: "./tsconfig.json",
@@ -1418,11 +1624,55 @@ describe("ensurePluginAnthropicBunTypes", () => {
     const parsed = JSON.parse(fs.readFileSync(buildConfigPath, "utf8")) as {
       compilerOptions: { types?: string[] };
     };
-    expect(parsed.compilerOptions.types).toEqual(["node", "bun"]);
+    expect(parsed.compilerOptions.types).toEqual(["node", "bun-types"]);
   });
 
   it("is a no-op when plugin-anthropic is not present", () => {
     const pluginsRoot = makeTempDir();
     expect(ensurePluginAnthropicBunTypes(pluginsRoot)).toBe(false);
+  });
+});
+
+describe("patchPluginBuildTscBinPaths", () => {
+  it("patches hardcoded plugin tsc paths to use the Windows cmd shim", () => {
+    const pluginsRoot = makeTempDir();
+    const pdfBuildScript = path.join(
+      pluginsRoot,
+      "plugin-pdf",
+      "typescript",
+      "build.ts",
+    );
+    const ollamaBuildScript = path.join(
+      pluginsRoot,
+      "plugin-ollama",
+      "typescript",
+      "build.ts",
+    );
+
+    writeFile(
+      path.join(pluginsRoot, "plugin-pdf", "typescript", "package.json"),
+      JSON.stringify({ name: "@elizaos/plugin-pdf" }),
+    );
+    writeFile(
+      path.join(pluginsRoot, "plugin-ollama", "typescript", "package.json"),
+      JSON.stringify({ name: "@elizaos/plugin-ollama" }),
+    );
+    writeFile(
+      pdfBuildScript,
+      'const tscPath = join(rootDir, "node_modules", ".bin", "tsc");\n',
+    );
+    writeFile(
+      ollamaBuildScript,
+      'const tscPath = join(ROOT, "node_modules", ".bin", "tsc");\n',
+    );
+
+    expect(patchPluginBuildTscBinPaths(pluginsRoot)).toBe(2);
+    expect(fs.readFileSync(pdfBuildScript, "utf8")).toContain(
+      'process.platform === "win32" ? "tsc.cmd" : "tsc"',
+    );
+    expect(fs.readFileSync(ollamaBuildScript, "utf8")).toContain(
+      'process.platform === "win32" ? "tsc.cmd" : "tsc"',
+    );
+    expect(patchPluginBuildTscBinPaths(pluginsRoot)).toBe(0);
   });
 });

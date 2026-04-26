@@ -67,10 +67,14 @@ export const LOCAL_ONLY_WORKSPACE_GLOBS = [
 ];
 export const LOCAL_ONLY_ELIZA_PACKAGE_PATHS = {
   "@elizaos/plugin-browser-bridge": "packages/plugin-browser-bridge",
+  "@elizaos/plugin-signal": "plugins/plugin-signal/typescript",
+  "@elizaos/skills": "packages/skills",
 };
 export const LOCAL_ONLY_WORKSPACE_PATHS = [
   "eliza/packages/shared",
-  `eliza/${LOCAL_ONLY_ELIZA_PACKAGE_PATHS["@elizaos/plugin-browser-bridge"]}`,
+  ...Object.values(LOCAL_ONLY_ELIZA_PACKAGE_PATHS).map(
+    (packagePath) => `eliza/${packagePath}`,
+  ),
   // Cloud/staging must ship the same companion runtime plugins as develop.
   // These plugin workspaces are vendored into the Docker image rather than
   // resolved from npm, so keep exact workspace entries alive after the broad
@@ -88,20 +92,18 @@ export const NESTED_INSTALLABLE_PACKAGE_GLOBS = [
 ];
 // The @elizaos/plugin-app-control and @elizaos/plugin-wechat entries below
 // are derived from the single source of truth at scripts/lib/ci-stubs.mjs.
-// Other entries (@elizaos/shared, @elizaos/plugin-browser-bridge, @elizaos/ui)
-// are NOT stubs — they point to the real packages inside eliza/ and exist
-// here because those packages are not always npm-published. They stay
-// inline for now.
+// Other entries point to real packages inside eliza/ and exist here because
+// published-only CI still runs source paths that import their local builds.
 export const CI_OVERRIDE_SPECIFIERS = {
   "@elizaos/shared": "file:./eliza/packages/shared",
-  "@elizaos/plugin-browser-bridge":
-    "file:./eliza/packages/plugin-browser-bridge",
   "@elizaos/ui": "file:./eliza/packages/ui",
   ...asRootOverridesSpecifiers(),
 };
 export const ELIZA_RUNTIME_CI_OVERRIDE_SPECIFIERS = {
-  "@elizaos/plugin-browser-bridge": "file:./packages/plugin-browser-bridge",
   "@elizaos/ui": "file:./packages/ui",
+  "@elizaos/plugin-browser-bridge": "file:./packages/plugin-browser-bridge",
+  "@elizaos/plugin-signal": "file:./plugins/plugin-signal/typescript",
+  "@elizaos/skills": "file:./packages/skills",
   ...asElizaOverridesSpecifiers(),
 };
 export const DEPENDENCY_FIELDS = [
@@ -161,12 +163,22 @@ export function resolveRootElizaPackageOverrideSpecifier(
 }
 
 export function resolveCiOverrideSpecifiers(repoRoot = DEFAULT_REPO_ROOT) {
+  const localOnlyOverrides = Object.fromEntries(
+    Object.entries(LOCAL_ONLY_ELIZA_PACKAGE_PATHS).map(
+      ([packageName, packagePath]) => [
+        packageName,
+        resolveRootElizaPackageOverrideSpecifier(packagePath, repoRoot),
+      ],
+    ),
+  );
+
   return {
     ...CI_OVERRIDE_SPECIFIERS,
-    "@elizaos/plugin-browser-bridge": resolveRootElizaPackageOverrideSpecifier(
-      LOCAL_ONLY_ELIZA_PACKAGE_PATHS["@elizaos/plugin-browser-bridge"],
+    "@elizaos/app-core": resolveRootElizaPackageOverrideSpecifier(
+      "packages/app-core",
       repoRoot,
     ),
+    ...localOnlyOverrides,
     "@elizaos/ui": resolveRootUiOverrideSpecifier(repoRoot),
   };
 }

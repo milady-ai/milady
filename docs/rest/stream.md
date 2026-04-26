@@ -4,6 +4,31 @@ sidebarTitle: Stream
 description: REST API endpoints for controlling live streaming, overlays, voice TTS, and stream settings.
 ---
 
+## Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/stream/live` | Start streaming (destination-managed) |
+| POST | `/api/stream/offline` | Stop the active stream |
+| GET | `/api/stream/status` | Current stream health and configuration |
+| POST | `/api/stream/start` | Start streaming (direct RTMP) |
+| POST | `/api/stream/stop` | Stop FFmpeg process |
+| POST | `/api/stream/frame` | Pipe a raw image frame to FFmpeg |
+| POST | `/api/stream/volume` | Set audio volume |
+| POST | `/api/stream/mute` | Mute audio |
+| POST | `/api/stream/unmute` | Unmute audio |
+| GET | `/api/streaming/destinations` | List configured streaming destinations |
+| POST | `/api/streaming/destination` | Set active streaming destination |
+| GET | `/api/stream/overlay-layout` | Get overlay layout |
+| POST | `/api/stream/overlay-layout` | Save overlay layout |
+| GET | `/api/stream/voice` | Get voice (TTS) configuration |
+| POST | `/api/stream/voice` | Save voice settings |
+| POST | `/api/stream/voice/speak` | Manually trigger TTS on live stream |
+| GET | `/api/stream/settings` | Get visual stream settings |
+| POST | `/api/stream/settings` | Save visual stream settings |
+
+---
+
 ## Stream Control
 
 ### Start Stream (Destination-Managed)
@@ -125,6 +150,62 @@ Pipes a raw JPEG/image frame buffer to FFmpeg. Used in `pipe` capture mode (desk
 **Response:** `200` with empty body.
 
 **Errors:** `400` empty body; `503` stream not running.
+
+## Stream Source
+
+### Get Stream Source
+
+```
+GET /api/stream/source
+```
+
+Returns the current stream capture source configuration.
+
+**Response:**
+```json
+{
+  "source": {
+    "type": "stream-tab",
+    "url": "https://example.com"
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `source.type` | string | Source type: `"stream-tab"`, `"screen"`, `"custom"`, etc. |
+| `source.url` | string\|undefined | Custom URL when applicable |
+
+### Set Stream Source
+
+```
+POST /api/stream/source
+```
+
+Switch the stream capture source.
+
+**Request body:**
+```json
+{
+  "sourceType": "stream-tab",
+  "customUrl": "https://example.com"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `sourceType` | string | no | Source type (default: `"stream-tab"`) |
+| `customUrl` | string | no | Custom URL for the source |
+
+**Response:**
+```json
+{
+  "ok": true,
+  "source": {
+    "type": "stream-tab"
+  }
+}
+```
 
 ## Audio
 
@@ -291,12 +372,14 @@ Returns voice configuration and current speaking status.
 **Response:**
 ```json
 {
+  "ok": true,
   "enabled": true,
   "autoSpeak": true,
   "provider": "elevenlabs",
-  "speaking": false,
-  "bridgeAttached": true,
-  "apiKeyConfigured": true
+  "configuredProvider": "elevenlabs",
+  "hasApiKey": true,
+  "isSpeaking": false,
+  "isAttached": true
 }
 ```
 
@@ -345,6 +428,58 @@ Manually trigger TTS on the live stream.
 ```
 
 **Errors:** `400` text missing/too long; `429` already speaking; `503` bridge not attached.
+
+## Stream Source
+
+### Get Stream Source
+
+```
+GET /api/stream/source
+```
+
+Returns the current stream input source configuration.
+
+**Response:**
+```json
+{
+  "source": {
+    "type": "stream-tab",
+    "url": null
+  }
+}
+```
+
+### Set Stream Source
+
+```
+POST /api/stream/source
+```
+
+Switch the stream input source.
+
+**Request body:**
+```json
+{
+  "sourceType": "custom-url",
+  "customUrl": "https://example.com/stream"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `sourceType` | string | no | Source type (default: `"stream-tab"`) |
+| `customUrl` | string | no | Custom URL for the source (only used with custom-url type) |
+
+**Response:**
+```json
+{
+  "ok": true,
+  "source": {
+    "type": "custom-url",
+    "url": "https://example.com/stream"
+  }
+}
+```
 
 ## Visual Settings
 

@@ -518,10 +518,12 @@ const WORKSPACE_CHUNK_GROUPS = [
     name: "workspace-ui",
     markers: ["/eliza/packages/ui/"],
   },
-  {
-    name: "workspace-typescript",
-    markers: ["/eliza/packages/typescript/"],
-  },
+  // NOTE: `workspace-typescript` (eliza/packages/typescript) is intentionally
+  // NOT split into its own chunk. Splitting it produced a TDZ error
+  // ("Cannot access 'Oi' before initialization") in clipboardService's
+  // default-config top-level const, which blanked the whole renderer. Same
+  // class of bug as the `vendor-three` comment above. Keep it inlined until
+  // the upstream circular import is resolved.
 ] as const;
 
 function resolveManualChunk(id: string): string | undefined {
@@ -1112,6 +1114,50 @@ function nativeModuleStubPlugin(): Plugin {
         ].join("\n");
       }
 
+      if (strippedId === "@elizaos/plugin-sql/schema") {
+        return [
+          "const handler = { get: () => table, apply: () => table };",
+          "const table = new Proxy(function table() {}, handler);",
+          ...[
+            "agentTable",
+            "approvalRequestTable",
+            "authAuditEventTable",
+            "authBootstrapJtiSeenTable",
+            "authIdentityCreatedAtDefault",
+            "authIdentityTable",
+            "authOwnerBindingTable",
+            "authOwnerLoginTokenTable",
+            "authSessionTable",
+            "cacheTable",
+            "channelTable",
+            "channelParticipantsTable",
+            "componentTable",
+            "embeddingTable",
+            "entityTable",
+            "entityIdentityTable",
+            "entityMergeCandidateTable",
+            "factCandidateTable",
+            "logTable",
+            "longTermMemories",
+            "memoryTable",
+            "memoryAccessLogs",
+            "messageTable",
+            "messageServerTable",
+            "messageServerAgentsTable",
+            "pairingAllowlistTable",
+            "pairingRequestTable",
+            "participantTable",
+            "relationshipTable",
+            "roomTable",
+            "serverTable",
+            "sessionSummaries",
+            "taskTable",
+            "worldTable",
+          ].map((name) => `export const ${name} = table;`),
+          "export default table;",
+        ].join("\n");
+      }
+
       // Capacitor native plugins — mobile-only, cloud builds stub them.
       // Must export the exact named identifiers used in app-core sources.
       if (capacitorNativeScopeRe.test(strippedId)) {
@@ -1447,6 +1493,10 @@ export default defineConfig({
           ),
         },
       ]),
+      {
+        find: /^telegram(\/.*)?$/,
+        replacement: path.join(appCoreSrcRoot, "platform/empty-node-module.ts"),
+      },
       // Capacitor plugins — resolve to local plugin sources
       ...NATIVE_PLUGIN_ALIAS_ENTRIES,
       // Force local @elizaos/ui source paths when the app bundles linked

@@ -12,7 +12,7 @@ The Milady desktop app wraps the companion UI in a native Electrobun shell, addi
 
 Download the `.dmg` file from the [GitHub releases page](https://github.com/milady-ai/milady/releases). Open the DMG and drag Milady to your Applications folder.
 
-- **Which file:** On Apple Silicon (M1/M2/M3/M4 and later), use **Milady-arm64.dmg**. On Intel Macs, use **Milady-x64.dmg**. If you pick the wrong architecture, the app may not run correctly; see [Build & release — why two DMGs](../build-and-release.md#macos-why-two-dmgs-arm64-and-x64).
+- **Which file:** On Apple Silicon (M1/M2/M3/M4 and later), use **Milady-arm64.dmg**. On Intel Macs, use **Milady-x64.dmg**. If you pick the wrong architecture, the app may not run correctly; see [Build & release — why two DMGs](/build-and-release#macos-why-two-dmgs-arm64-and-x64).
 - **Build targets:** DMG and ZIP.
 - **Category:** Productivity (`public.app-category.productivity`).
 - **Code signed and notarized** -- hardened runtime with Apple notarization enabled.
@@ -52,11 +52,11 @@ Strip **thickness** can track the current **`NSScreen`** when the host passes `h
 
 ### WebGPU log line vs macOS version (Tahoe+)
 
-Electrobun may log **`[WebGPU Browser] macOS …`** using **`os.release()`** (Darwin). **Why document:** on **macOS 26**, Darwin is still **25.x**; a naive `Darwin − 9` mapping shows **16** and mis-gates WKWebView WebGPU. Milady maps Darwin to the **marketing** major in code; rationale and table: [Darwin vs macOS version (Electrobun WebGPU)](./electrobun-darwin-macos-webgpu-version.md).
+Electrobun may log **`[WebGPU Browser] macOS …`** using **`os.release()`** (Darwin). **Why document:** on **macOS 26**, Darwin is still **25.x**; a naive `Darwin − 9` mapping shows **16** and mis-gates WKWebView WebGPU. Milady maps Darwin to the **marketing** major in code; rationale and table: [Darwin vs macOS version (Electrobun WebGPU)](/apps/electrobun-darwin-macos-webgpu-version).
 
 ### Battery and energy use (macOS)
 
-**Product framing:** Milady targets **strong visuals when you are engaged** and **quiet hardware when you are not**—especially on battery—without pretending every workload beats a full IDE shell. See [Roadmap — Principles: energy and experience (desktop)](../roadmap.md#principles-energy-and-experience-desktop).
+**Product framing:** Milady targets **strong visuals when you are engaged** and **quiet hardware when you are not**—especially on battery—without pretending every workload beats a full IDE shell. See [Roadmap — Principles: energy and experience (desktop)](/roadmap#principles-energy-and-experience-desktop).
 
 **What drives usage**
 
@@ -84,7 +84,7 @@ Electrobun may log **`[WebGPU Browser] macOS …`** using **`os.release()`** (Da
 - If WebGPU is hotter on your Mac than WebGL for this workload, set the renderer override in **localStorage** key **`eliza.avatarRenderer`** to **`webgl`** (or **`webgpu`** to experiment the other way). **Why:** path differs by machine and OS version; the desktop webview defaults WebGPU in the Electrobun runtime — sometimes the fallback is kinder to thermals.
 - In dev, disable the **screenshot** and **aggregated console** hooks if you do not use them (`MILADY_DESKTOP_SCREENSHOT_SERVER`, `MILADY_DESKTOP_DEV_LOG`).
 
-**Code:** `packages/app-core/src/hooks/useDocumentVisibility.ts`, `VectorBrowserView.tsx` (3D graph), `ElizaCloudDashboard.tsx`, `StreamView.tsx`, `stream/StreamVoiceConfig.tsx`, `GameView.tsx`, `ChatView.tsx` (game-modal carryover timer), `FineTuningView.tsx`, `state/AppContext.tsx` (cloud credits interval), `VrmViewer.tsx`, `VrmEngine.ts`, `vrm-desktop-energy.ts`.
+**Code:** `eliza/packages/app-core/src/hooks/useDocumentVisibility.ts`, `VectorBrowserView.tsx` (3D graph), `ElizaCloudDashboard.tsx`, `StreamView.tsx`, `stream/StreamVoiceConfig.tsx`, `GameView.tsx`, `ChatView.tsx` (game-modal carryover timer), `FineTuningView.tsx`, `state/AppContext.tsx` (cloud credits interval), `VrmViewer.tsx`, `VrmEngine.ts`, `vrm-desktop-energy.ts`.
 
 ## Desktop Runtime Modes
 
@@ -111,7 +111,7 @@ On startup, the Electrobun shell and `AgentManager` coordinate these steps:
 
 **Embedded `local` mode (packaged or dev without external API):** the Electrobun main process chooses a **listen port** for the child **`milady start`** process as follows:
 
-1. **Preferred port** — `MILADY_PORT` (default **2138**). The shell probes **127.0.0.1** and, if that port is busy, uses the **next free** port (same idea as `dev-platform`, implemented in `loopback-port.ts`). **Why:** two Milady instances or another service may legitimately hold **2138**; we should not SIGKILL unrelated processes by default (see **`MILADY_AGENT_RECLAIM_STALE_PORT`** in [Desktop local development](./desktop-local-development.md#when-default-ports-are-busy) to opt back into reclaim).
+1. **Preferred port** — `MILADY_PORT` (default **2138**). The shell probes **127.0.0.1** and, if that port is busy, uses the **next free** port (same idea as `dev-platform`, implemented in `loopback-port.ts`). **Why:** two Milady instances or another service may legitimately hold **2138**; we should not SIGKILL unrelated processes by default (see **`MILADY_AGENT_RECLAIM_STALE_PORT`** in [Desktop local development](/apps/desktop-local-development#when-default-ports-are-busy) to opt back into reclaim).
 2. **Child env** — the spawned process receives the chosen port via **`MILADY_PORT`** so `entry.js start` binds there when possible.
 3. **Stdout + health** — if the runtime still reports a different bind (legacy / upstream behavior), stdout parsing and **`waitForHealthy`** follow the **actual** port before marking the agent running.
 4. **Renderer + surfaces** — `pushApiBaseToRenderer` / `injectApiBase` use **`AgentManager`’s resolved port**; status listeners refresh **main and detached** windows. **Why:** the dashboard must not keep using a stale loopback URL after a dynamic bind.
@@ -130,7 +130,7 @@ The OS menu bar template is built in **`apps/app/electrobun/src/application-menu
 |----------------|-----------|----------|
 | **Reset Milady…** | `reset-milady` | **Main process:** shows the window, native confirm, then **`POST /api/agent/reset`**, embedded restart or **`POST /api/agent/restart`**, poll **`/api/status`**, and pushes **`desktopTrayMenuClick`** with **`itemId: "menu-reset-milady-applied"`** + **`agentStatus`**. **Renderer:** **`handleResetAppliedFromMain`** runs the same **local UI wipe** as the end of Settings **`handleReset`** (`completeResetLocalStateAfterServerWipe`). **Why main owns HTTP:** after native dialogs, WKWebView can defer renderer **`fetch`/bridge** work, so reset looked hung; **why renderer still wipes UI:** one place for onboarding, `MiladyClient` base URL, cloud flags, and conversation lists so the menu cannot drift from Settings. |
 
-**Settings** still uses **`handleReset`** (webview confirm + full flow). **Legacy:** tray may still emit **`menu-reset-milady`** for older paths; see [Desktop main-process reset](./desktop-main-process-reset.md) for sequence, probes, and tests.
+**Settings** still uses **`handleReset`** (webview confirm + full flow). **Legacy:** tray may still emit **`menu-reset-milady`** for older paths; see [Desktop main-process reset](/apps/desktop-main-process-reset) for sequence, probes, and tests.
 
 ### Agent Status States
 

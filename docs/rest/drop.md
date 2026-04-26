@@ -27,15 +27,27 @@ Returns the current state of the NFT drop — whether it is active, supply remai
 
 ```json
 {
-  "active": true,
-  "totalSupply": 1000,
-  "minted": 342,
-  "remaining": 658,
-  "price": "0.05",
-  "currency": "ETH",
-  "contractAddress": "0x1234...abcd"
+  "dropEnabled": false,
+  "publicMintOpen": false,
+  "whitelistMintOpen": false,
+  "mintedOut": false,
+  "currentSupply": 0,
+  "maxSupply": 2138,
+  "shinyPrice": "0.1",
+  "userHasMinted": false
 }
 ```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `dropEnabled` | boolean | Whether the drop feature is active |
+| `publicMintOpen` | boolean | Whether public minting is currently open |
+| `whitelistMintOpen` | boolean | Whether whitelist minting is currently open |
+| `mintedOut` | boolean | Whether all tokens have been minted |
+| `currentSupply` | number | Number of tokens minted so far |
+| `maxSupply` | number | Maximum token supply |
+| `shinyPrice` | string | Mint price as a decimal string |
+| `userHasMinted` | boolean | Whether the connected user has already minted |
 
 ---
 
@@ -87,23 +99,25 @@ Mint an NFT using a whitelist allocation. The address must have been previously 
 
 ### GET /api/whitelist/status
 
-Check whether a wallet address has been verified for the whitelist.
-
-**Query Parameters**
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `address` | string | Wallet address to check |
+Check whitelist eligibility for the connected wallet address.
 
 **Response**
 
 ```json
 {
-  "address": "0x1234...abcd",
-  "whitelisted": true,
-  "verifiedAt": "2025-06-01T12:00:00.000Z"
+  "eligible": false,
+  "twitterVerified": false,
+  "ogCode": null,
+  "walletAddress": "0x1234567890abcdef1234567890abcdef12345678"
 }
 ```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `eligible` | boolean | Whether the wallet is eligible for whitelist minting |
+| `twitterVerified` | boolean | Whether the wallet has been verified via Twitter |
+| `ogCode` | string\|null | OG verification code, if applicable |
+| `walletAddress` | string | The wallet address being checked |
 
 ---
 

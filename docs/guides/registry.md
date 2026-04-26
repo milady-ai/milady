@@ -399,7 +399,7 @@ If you're maintaining a fork or custom registry:
 
 ```bash
 # Generate plugins.json from installed plugins
-pnpm generate:plugins
+bun run generate:plugins
 ```
 
 This scans `node_modules/@elizaos/plugin-*` and generates an updated index.
@@ -418,7 +418,7 @@ milady plugins list --category model
 milady plugins info openai
 
 # Install and configure
-pnpm add @elizaos/plugin-openai
+bun add @elizaos/plugin-openai
 echo "OPENAI_API_KEY=sk-..." >> .env
 ```
 
@@ -446,7 +446,7 @@ SLACK_BOT_TOKEN=...
 
 ```bash
 # Install community plugin
-pnpm add elizaos-plugin-custom-feature
+bun add elizaos-plugin-custom-feature
 
 # Add to config
 # milady.json
@@ -464,7 +464,7 @@ pnpm add elizaos-plugin-custom-feature
 
 - [Plugin Development Guide](/plugins/development) — Create your own plugins
 - [Local Plugin Development](/plugins/local-plugins) — Develop without publishing
-- [Contributing Guide](./contributing.md) — Submit plugins upstream
+- [Contributing Guide](/guides/contributing) — Submit plugins upstream
 
 ---
 

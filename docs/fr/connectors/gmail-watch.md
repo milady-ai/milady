@@ -24,7 +24,7 @@ Le connecteur Gmail Watch est un plugin elizaOS qui surveille les boîtes de ré
 |-------|--------|
 | Package | `@elizaos/plugin-gmail-watch` |
 | Feature flag | `features.gmailWatch` |
-| Installation | `milady plugins install gmail-watch` |
+| Installation | `milady plugins install @elizaos/plugin-gmail-watch` |
 
 <div id="setup-requirements">
 
@@ -41,7 +41,9 @@ Le connecteur Gmail Watch est un plugin elizaOS qui surveille les boîtes de ré
 
 </div>
 
-Gmail Watch est activé via la section `features` :
+Gmail Watch se configure à deux endroits dans `milady.json` :
+
+### 1. Activer via le feature flag
 
 ```json
 {
@@ -50,6 +52,46 @@ Gmail Watch est activé via la section `features` :
   }
 }
 ```
+
+### 2. Configurer le compte Gmail dans hooks
+
+```json
+{
+  "hooks": {
+    "gmail": {
+      "account": "user@gmail.com",
+      "label": "INBOX",
+      "includeBody": true
+    }
+  }
+}
+```
+
+### Exemple complet
+
+```json
+{
+  "features": {
+    "gmailWatch": true
+  },
+  "hooks": {
+    "enabled": true,
+    "gmail": {
+      "account": "user@gmail.com",
+      "label": "INBOX",
+      "includeBody": true
+    }
+  }
+}
+```
+
+### Champs de configuration Gmail
+
+| Champ | Type | Par défaut | Description |
+|-------|------|------------|-------------|
+| `account` | string | — | Adresse Gmail à surveiller (requis) |
+| `label` | string | `"INBOX"` | Libellé Gmail à surveiller |
+| `includeBody` | boolean | `false` | Inclure le corps de l'email dans les événements de l'agent |
 
 <div id="features">
 
@@ -60,6 +102,7 @@ Gmail Watch est activé via la section `features` :
 - Surveillance des messages Gmail via Pub/Sub
 - Renouvellement automatique des abonnements de surveillance
 - Gestion des événements d'emails entrants
+- Filtrage par libellé pour la surveillance ciblée de la boîte de réception
 
 <div id="related">
 

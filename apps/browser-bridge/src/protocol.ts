@@ -5,7 +5,7 @@ import type {
   CreateBrowserBridgeCompanionAutoPairRequest,
   SyncBrowserBridgeStateRequest,
   UpdateBrowserBridgeSessionProgressRequest,
-} from "@elizaos/plugin-browser-bridge/contracts";
+} from "@elizaos/plugin-browser-bridge";
 import type {
   CompleteLifeOpsBrowserSessionRequest,
   LifeOpsBrowserSession,

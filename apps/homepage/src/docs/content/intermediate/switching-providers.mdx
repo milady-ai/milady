@@ -18,7 +18,7 @@ Milady separates providers by **what they power**. There are four slots:
 You can fill each slot independently. Common patterns:
 
 - **Chat**: Anthropic Claude (smart). **Voice**: ElevenLabs (best sound). **Embeddings**: OpenAI (cheap and fast).
-- **Chat**: Ollama llama3.1 (local, free). **Voice**: Edge TTS (free). **Embeddings**: Ollama nomic-embed-text (local, free). **→ Fully local stack.**
+- **Chat**: Ollama llama3.3 (local, free). **Voice**: Edge TTS (free). **Embeddings**: Ollama nomic-embed-text (local, free). **→ Fully local stack.**
 - **Chat**: Eliza Cloud. **Voice**: Eliza Cloud. **Embeddings**: Eliza Cloud. **→ One account, zero config.**
 
 ## Switching the chat provider
@@ -64,7 +64,7 @@ Example chain for chat:
 
 1. **Primary**: Anthropic Claude Sonnet
 2. **Fallback 1**: OpenAI GPT-4
-3. **Fallback 2**: Ollama llama3.1 (local, always works offline)
+3. **Fallback 2**: Ollama llama3.3 (local, always works offline)
 
 If Anthropic is down or rate-limited, Milady automatically retries on OpenAI. If both cloud providers fail, it falls back to the local Ollama model. You never see an error unless all three fail.
 

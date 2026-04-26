@@ -25,12 +25,12 @@ The registry has two layers:
 
 ### Bundled Registry (`plugins.json`)
 
-A local JSON file shipped with Milady containing metadata for ~98 plugins from the elizaOS ecosystem. Each entry includes the plugin's id, npm package name, category, environment variables, version, dependencies, and detailed parameter definitions. This file follows the `plugin-index-v1` schema.
+A local JSON file shipped with Milady containing metadata for 98 plugins from the elizaOS ecosystem. Each entry includes the plugin's id, npm package name, category, environment variables, version, dependencies, and detailed parameter definitions. This file follows the `plugin-index-v1` schema.
 
 ```json
 {
   "$schema": "plugin-index-v1",
-  "generatedAt": "2026-04-11T01:55:50.795Z",
+  "generatedAt": "2026-02-09T20:23:38.561Z",
   "count": 98,
   "plugins": [
     {
@@ -75,7 +75,7 @@ If the primary endpoint fails, the client falls back to `index.json`, which is a
 
 ## 3-Tier Caching
 
-The registry client (`src/services/registry-client.ts`) uses a 3-tier resolution strategy to minimize network requests and support offline operation:
+The registry client (`eliza/packages/agent/src/services/registry-client.ts`) uses a 3-tier resolution strategy to minimize network requests and support offline operation:
 
 ```
 Memory Cache  -->  File Cache  -->  Network Fetch
@@ -290,7 +290,7 @@ Each entry in the bundled `plugins.json` uses this schema:
 | `name` | `string` | Human-readable display name |
 | `npmName` | `string` | Full npm package name (e.g., `@elizaos/plugin-telegram`) |
 | `description` | `string` | What the plugin does |
-| `category` | `string` | Plugin category: `ai-provider`, `connector`, `database`, `feature`, `app` |
+| `category` | `string` | Plugin category: `connector`, `ai-provider`, `feature`, `database`, `app` |
 | `envKey` | `string` | Primary environment variable that activates this plugin |
 | `configKeys` | `string[]` | All environment variables this plugin reads |
 | `version` | `string` | Current published version |
@@ -380,7 +380,7 @@ Local app metadata is merged with remote registry data, with local values taking
 
 ### Core Functions
 
-The registry client exports these functions from `src/services/registry-client.ts`:
+The registry client exports these functions from `eliza/packages/agent/src/services/registry-client.ts`:
 
 ```typescript
 import {
@@ -502,4 +502,4 @@ The registry has a browsable web interface hosted from `registry/site/`. Users c
 - [Plugin Development Guide](./development) -- Create your own plugins
 - [Local Plugin Development](./local-plugins) -- Develop without publishing
 - [Publishing Guide](./publish) -- Publish to npm and the registry
-- [Contributing Guide](/guides/contribution-guide) -- Submit plugins upstream
+- [Contributing Guide](/guides/contributing) -- Submit plugins upstream

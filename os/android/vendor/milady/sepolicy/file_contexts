@@ -1,0 +1,8 @@
+# MiladyOS file_contexts.
+#
+# Each line: <regex> <selinux_context>. Matched against absolute paths
+# during fs label assignment. AOSP applies the broader system_file label
+# to /system/priv-app/Milady/ by default — extend here if Milady ever
+# ships data files outside the APK that need their own type.
+
+/data/milady(/.*)?            u:object_r:milady_data_file:s0

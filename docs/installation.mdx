@@ -10,9 +10,9 @@ Milady supports desktop installs and a CLI runtime. Both use the same local stat
 
 | Requirement | Version | Check |
 |-------------|---------|-------|
-| Node.js | >= 22.12.0 | `node --version` |
+| Node.js | >= 22 | `node --version` |
 
-The CLI installer checks for Node.js >= 22.12.0 and offers to install it if missing. The desktop app bundles its own runtime — no prerequisites needed.
+The CLI installer checks for Node.js >= 22 and offers to install it if missing. The desktop app bundles its own runtime — no prerequisites needed.
 
 ## Desktop app
 
@@ -54,23 +54,24 @@ Use the official release page. If the app looks unsigned or unfamiliar, delete i
 ### macOS / Linux
 
 ```bash
-curl -fsSL https://milady-ai.github.io/milady/install.sh | bash
+curl -fsSL https://get.milady.ai | bash
 milady setup
 ```
 
 ### Windows PowerShell
 
 ```powershell
-irm https://milady-ai.github.io/milady/install.ps1 | iex
+irm https://get.milady.ai/install.ps1 | iex
 milady setup
 ```
 
-### Start or stop the runtime
+### Start the runtime
 
 ```bash
 milady start
-milady stop
 ```
+
+To stop the runtime, press `Ctrl+C` in the terminal or close the desktop app.
 
 ## Local state
 

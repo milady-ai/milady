@@ -22,7 +22,7 @@ on:
       ANDROID_KEY_PASSWORD:
         required: true
       PLAY_STORE_SERVICE_ACCOUNT_JSON:
-        required: true
+        required: false
   workflow_dispatch:
     inputs:
       track:
@@ -56,6 +56,7 @@ jobs:
     outputs:
       version_name: ${{ steps.version.outputs.name }}
       version_code: ${{ steps.version.outputs.code }}
+      play_store_ready: ${{ steps.play_store_credentials.outputs.ready }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -74,7 +75,7 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: "1.3.10"
+          bun-version: "1.3.13"
 
       - name: Determine version
         id: version
@@ -97,6 +98,18 @@ jobs:
           echo "name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
           echo "code=$VERSION_CODE" >> "$GITHUB_OUTPUT"
           echo "Version: $VERSION_NAME (code: $VERSION_CODE)"
+
+      - name: Check Play Store credentials
+        id: play_store_credentials
+        env:
+          PLAY_STORE_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_STORE_SERVICE_ACCOUNT_JSON }}
+        run: |
+          if [[ -n "$PLAY_STORE_SERVICE_ACCOUNT_JSON" ]]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error::PLAY_STORE_SERVICE_ACCOUNT_JSON is required for Android release publishing."
+            exit 1
+          fi
 
       - name: Install dependencies
         run: bun install
@@ -153,8 +166,8 @@ jobs:
           VERSION="${{ steps.version.outputs.name }}"
           TAG="v${VERSION}"
           if ! gh release view "$TAG" >/dev/null 2>&1; then
-            echo "No GitHub release found for $TAG; skipping AAB attachment."
-            exit 0
+            echo "::error::No GitHub release found for $TAG; cannot attach AAB."
+            exit 1
           fi
           cp apps/app/android/app/build/outputs/bundle/release/app-release.aab \
              "Milady-${VERSION}.aab"
@@ -167,6 +180,7 @@ jobs:
   publish-play-store:
     name: Publish to Play Store
     needs: build-aab
+    if: needs.build-aab.outputs.play_store_ready == 'true'
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
@@ -223,11 +237,26 @@ jobs:
     steps:
       - name: Summary
         run: |
-          echo "## Android Release Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Version:** ${{ needs.build-aab.outputs.version_name }} (code: ${{ needs.build-aab.outputs.version_code }})" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Step | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Build AAB | ${{ needs.build-aab.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Publish to Play Store | ${{ needs.publish-play-store.result }} |" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## Android Release Summary"
+            echo ""
+            echo "**Version:** ${{ needs.build-aab.outputs.version_name }} (code: ${{ needs.build-aab.outputs.version_code }})"
+            echo ""
+            echo "| Step | Status |"
+            echo "|------|--------|"
+            echo "| Build AAB | ${{ needs.build-aab.result }} |"
+            echo "| Publish to Play Store | ${{ needs.publish-play-store.result }} |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Require Android release succeeded
+        run: |
+          failed=0
+          if [[ "${{ needs.build-aab.result }}" != "success" ]]; then
+            echo "::error::Signed AAB build result was '${{ needs.build-aab.result }}', expected success"
+            failed=1
+          fi
+          if [[ "${{ needs.publish-play-store.result }}" != "success" ]]; then
+            echo "::error::Play Store publish result was '${{ needs.publish-play-store.result }}', expected success"
+            failed=1
+          fi
+          exit "$failed"

@@ -1,10 +1,10 @@
 ---
 title: Desktop local development
 sidebarTitle: Local development
-description: Why and how the Milady desktop dev orchestrator (scripts/dev-platform.mjs) runs Vite, the API, and Electrobun together — environment variables, signals, and shutdown behavior.
+description: Why and how the Milady desktop dev orchestrator (eliza/packages/app-core/scripts/dev-platform.mjs) runs Vite, the API, and Electrobun together — environment variables, signals, and shutdown behavior.
 ---
 
-The **desktop dev stack** is not a single binary. `bun run dev:desktop` and `bun run dev:desktop:watch` run `scripts/dev-platform.mjs`, which **orchestrates** separate processes: optional one-off `vite build`, optional repo-root `tsdown`, then long-lived **Vite** (when `MILADY_DESKTOP_VITE_WATCH=1`), **`bun --watch` API**, and **Electrobun**.
+The **desktop dev stack** is not a single binary. `bun run dev:desktop` and `bun run dev:desktop:watch` run `eliza/packages/app-core/scripts/dev-platform.mjs`, which **orchestrates** separate processes: optional one-off `vite build`, optional repo-root `tsdown`, then long-lived **Vite** (when `MILADY_DESKTOP_VITE_WATCH=1`), **`bun --watch` API**, and **Electrobun**.
 
 **Why orchestrate?** Electrobun needs (a) a renderer URL, (b) often a running dashboard API, and (c) in dev, a root `dist/` bundle for the embedded Milady runtime. Doing that manually is error-prone; one script keeps ports, env vars, and shutdown consistent.
 
@@ -35,9 +35,9 @@ On a **TTY**, tables may use a **Unicode box frame** and a large **figlet-style*
 If you explicitly need file output on every save (e.g. debugging Rollup behavior):
 
 ```bash
-MILADY_DESKTOP_VITE_WATCH=1 bun scripts/dev-platform.mjs -- --rollup-watch
+MILADY_DESKTOP_VITE_WATCH=1 bun eliza/packages/app-core/scripts/dev-platform.mjs -- --rollup-watch
 # or env-only:
-MILADY_DESKTOP_VITE_WATCH=1 MILADY_DESKTOP_VITE_BUILD_WATCH=1 bun scripts/dev-platform.mjs
+MILADY_DESKTOP_VITE_WATCH=1 MILADY_DESKTOP_VITE_BUILD_WATCH=1 bun eliza/packages/app-core/scripts/dev-platform.mjs
 ```
 
 **Why this is opt-in:** `vite build --watch` still runs Rollup production emits; “3 modules transformed” can still mean **seconds** rewriting multi‑MB chunks. The default watch path uses the **Vite dev server** instead.
@@ -61,7 +61,7 @@ MILADY_DESKTOP_VITE_WATCH=1 MILADY_DESKTOP_VITE_BUILD_WATCH=1 bun scripts/dev-pl
 
 ### When default ports are busy
 
-`scripts/dev-platform.mjs` runs **`dev:desktop`** and **`bun run dev`**. Before starting long-lived children it **probes loopback TCP** starting at:
+The dev-platform orchestrator runs **`dev:desktop`** and **`bun run dev`**. Before starting long-lived children it **probes loopback TCP** starting at:
 
 | Env | Role | Default |
 |-----|------|--------|
@@ -98,7 +98,7 @@ Milady’s pinned **Electrobun** config types (as of the version in this repo) d
 
 ## Why `vite build` is sometimes skipped
 
-Before starting services, the script checks `viteRendererBuildNeeded()` (`scripts/lib/vite-renderer-dist-stale.mjs`): compare `apps/app/dist/index.html` mtime against `apps/app/src`, `vite.config.ts`, shared packages (`packages/ui`, `packages/app-core`), etc.
+Before starting services, the script checks `viteRendererBuildNeeded()` (`scripts/lib/vite-renderer-dist-stale.mjs`): compare `apps/app/dist/index.html` mtime against `apps/app/src`, `vite.config.ts`, shared packages (`eliza/packages/ui`, `eliza/packages/app-core`), etc.
 
 **Why mtime, not a full dependency graph?** It is a **cheap, local-first** heuristic so restarts do not pay 10–30s for a redundant production build when sources did not change. Override when you need a clean bundle.
 
@@ -169,7 +169,7 @@ Prefixed **vite / api / electrobun** lines are mirrored to **`.milady/desktop-de
 
 ## UI E2E (Playwright)
 
-Browser smoke tests target the **same renderer URL** Electrobun loads in watch mode (`http://localhost:<MILADY_PORT>`, default **2138**). They do **not** drive the native Electrobun webview; tray, native menus, and packaged-only behaviors stay covered by **`bun run test:desktop:packaged`** (where applicable) and the [release regression checklist](./release-regression-checklist.md).
+Browser smoke tests target the **same renderer URL** Electrobun loads in watch mode (`http://localhost:<MILADY_PORT>`, default **2138**). They do **not** drive the native Electrobun webview; tray, native menus, and packaged-only behaviors stay covered by **`bun run test:desktop:packaged`** (where applicable) and the [release regression checklist](/apps/release-regression-checklist).
 
 **Why Playwright:** the app already ships Playwright for renderer and packaged checks, so the browser smoke flows now use the same supported stack instead of a separate TestCafe toolchain. This removes the vulnerable `replicator` dependency entirely and keeps the UI E2E surface on one runner.
 
@@ -185,7 +185,7 @@ Browser smoke tests target the **same renderer URL** Electrobun loads in watch m
 
 **Full test matrix:** `bun run test` does **not** run Playwright UI smoke by default. Set **`MILADY_TEST_UI_PLAYWRIGHT=1`** to append the UI suite to `test/scripts/test-parallel.mjs` (serial, after Vitest e2e). `MILADY_TEST_UI_TESTCAFE=1` is still accepted as a legacy alias.
 
-**Path A vs native webview (Phase B):** These specs still target the renderer URL, not the embedded Electrobun webview. Packaged/native behaviors remain covered by **`bun run test:desktop:packaged`**, **`bun run test:desktop:playwright`**, and the [release regression checklist](./release-regression-checklist.md).
+**Path A vs native webview (Phase B):** These specs still target the renderer URL, not the embedded Electrobun webview. Packaged/native behaviors remain covered by **`bun run test:desktop:packaged`**, **`bun run test:desktop:playwright`**, and the [release regression checklist](/apps/release-regression-checklist).
 
 ## Related source
 
@@ -198,8 +198,8 @@ Browser smoke tests target the **same renderer URL** Electrobun loads in watch m
 | `scripts/lib/kill-process-tree.mjs` | Scoped tree kill |
 | `scripts/lib/desktop-stack-status.mjs` | Port + HTTP probes for `desktop:stack-status` |
 | `scripts/desktop-stack-status.mjs` | CLI entry for agents (`--json`) |
-| `packages/app-core/src/api/dev-stack.ts` | Payload for `GET /api/dev/stack` |
-| `packages/app-core/src/api/dev-console-log.ts` | Safe tail read for `GET /api/dev/console-log` |
+| `eliza/packages/app-core/src/api/dev-stack.ts` | Payload for `GET /api/dev/stack` |
+| `eliza/packages/app-core/src/api/dev-console-log.ts` | Safe tail read for `GET /api/dev/console-log` |
 | `apps/app/electrobun/src/index.ts` | `resolveRendererUrl()`; starts screenshot dev server when enabled |
 | `apps/app/electrobun/src/screenshot-dev-server.ts` | Loopback PNG server (proxied as `/api/dev/cursor-screenshot`) |
 | `apps/app/playwright.ui-smoke.config.ts` | Playwright config for renderer smoke specs |
@@ -211,4 +211,4 @@ Browser smoke tests target the **same renderer URL** Electrobun loads in watch m
 ## See also
 
 - [Desktop app (Electrobun)](/apps/desktop) — runtime modes, IPC, downloads
-- [Electrobun startup and exception handling](../electrobun-startup.md) — why main-process try/catch stays
+- [Electrobun startup and exception handling](/electrobun-startup) — why main-process try/catch stays

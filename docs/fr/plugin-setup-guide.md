@@ -699,9 +699,9 @@ où obtenir les identifiants, les champs minimum requis et des conseils pour les
 </div>
 
 **Obtenir les identifiants :** Votre instance Mattermost → System Console → Integrations → Bot Accounts
-**Minimum requis :** `MATTERMOST_BASE_URL` + `MATTERMOST_BOT_TOKEN`
+**Minimum requis :** `MATTERMOST_SERVER_URL` + `MATTERMOST_BOT_TOKEN`
 **Variables :**
-- `MATTERMOST_BASE_URL` — ex. `https://mattermost.yourcompany.com`
+- `MATTERMOST_SERVER_URL` — ex. `https://mattermost.yourcompany.com`
 - `MATTERMOST_BOT_TOKEN` — Depuis System Console → Bot Accounts → Add Bot Account
 - `MATTERMOST_TEAM_ID` — Votre identifiant d'équipe (depuis l'URL de l'équipe ou l'API)
 - `MATTERMOST_DM_POLICY` / `MATTERMOST_GROUP_POLICY` — `allow-all` ou `allow-from`

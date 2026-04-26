@@ -1,5 +1,10 @@
 import { expect, test } from "@playwright/test";
-import { openAppPath, readLocalStorage, seedAppStorage } from "./helpers";
+import {
+  openAppPath,
+  openSettingsSection,
+  readLocalStorage,
+  seedAppStorage,
+} from "./helpers";
 
 const VRM_POWER_KEY = "eliza:companion-vrm-power";
 const HALF_FRAMERATE_KEY = "eliza:companion-half-framerate";
@@ -12,6 +17,7 @@ test.beforeEach(async ({ page }) => {
 test("companion media settings persist across reloads", async ({ page }) => {
   await openAppPath(page, "/voice");
   await expect(page.getByTestId("settings-shell")).toBeVisible();
+  await openSettingsSection(page, /^Appearance\b/);
 
   await page
     .getByTestId("settings-companion-vrm-power")

@@ -334,6 +334,7 @@ export default defineConfig({
       "eliza/apps/*/test/**/*.test.tsx",
       "eliza/packages/app-core/test/live-agent/**/*.test.ts",
       "eliza/packages/app-core/test/live-agent/**/*.test.tsx",
+      "eliza/packages/app-core/test/helpers/**/*.test.ts",
       // app-core src-colocated tests run here; test/ harness suites run in
       // the app-unit config (apps/app/vitest.config.ts) which provides the
       // correct @elizaos/app-core alias resolution. Running both in parallel
@@ -350,6 +351,7 @@ export default defineConfig({
       "eliza/packages/app-core/scripts/**/*.test.ts",
       "eliza/packages/native-plugins/llama/src/**/*.test.ts",
       "eliza/packages/shared/src/**/*.test.ts",
+      "eliza/packages/plugin-browser-bridge/src/**/*.test.ts",
       "eliza/packages/app-core/src/**/*.test.tsx",
       "eliza/packages/agent/src/runtime/roles/test/**/*.test.ts",
       "eliza/apps/app-lifeops/src/selfcontrol/**/*.test.ts",

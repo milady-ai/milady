@@ -30,13 +30,13 @@ A personal AI assistant you run on your own devices, built on [elizaOS](https://
 macOS / Linux / WSL:
 
 ```bash
-curl -fsSL https://milady-ai.github.io/milady/install.sh | bash
+curl -fsSL https://get.milady.ai | bash
 ```
 
 Windows (PowerShell):
 
 ```powershell
-irm https://milady-ai.github.io/milady/install.ps1 | iex
+irm https://get.milady.ai/install.ps1 | iex
 ```
 
 ### npm global

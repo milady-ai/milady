@@ -1,10 +1,17 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 import {
   installCloudWalletImportApiOverrides,
   installDefaultAppRoutes,
   openAppPath,
   seedAppStorage,
 } from "./helpers";
+
+async function openWalletRpcSettings(page: Page) {
+  await page.getByRole("button", { name: "Open RPC settings" }).click();
+  await expect(
+    page.getByRole("button", { name: /Eliza Cloud/ }).first(),
+  ).toBeVisible({ timeout: 15_000 });
+}
 
 test.beforeEach(async ({ page }) => {
   await seedAppStorage(page);
@@ -67,11 +74,7 @@ test("inventory cloud import uses the live wallet API", async ({ page }) => {
     "Wallet import CTA is hidden once the live stack already has a wallet connected.",
   );
 
-  const importBtn = page.getByRole("button", {
-    name: "Import from Eliza Cloud",
-  });
-  await expect(importBtn).toBeVisible({ timeout: 15_000 });
-  await importBtn.click();
+  await openWalletRpcSettings(page);
 
   const saveBtn = page.getByRole("button", { name: /^Save$/ }).last();
   await expect(saveBtn).toBeVisible({ timeout: 15_000 });
@@ -135,7 +138,7 @@ test("inventory cloud import uses the live wallet API", async ({ page }) => {
   });
 });
 
-test("inventory cloud import refreshes steward status after save", async ({
+test("inventory cloud import refreshes cloud wallets after save", async ({
   page,
 }) => {
   await installDefaultAppRoutes(page);
@@ -143,11 +146,7 @@ test("inventory cloud import refreshes steward status after save", async ({
 
   await openAppPath(page, "/inventory");
 
-  const importBtn = page.getByRole("button", {
-    name: "Import from Eliza Cloud",
-  });
-  await expect(importBtn).toBeVisible({ timeout: 15_000 });
-  await importBtn.click();
+  await openWalletRpcSettings(page);
 
   const saveBtn = page.getByRole("button", { name: /^Save$/ }).last();
   await expect(saveBtn).toBeVisible({ timeout: 15_000 });
@@ -168,13 +167,10 @@ test("inventory cloud import refreshes steward status after save", async ({
   });
   expect(put.walletNetwork).toBe("mainnet");
 
-  // steward-status is fetched at least twice:
-  //   1. On mount — WalletView polls /api/wallet/steward-status to show connection state.
-  //   2. After "Import from Eliza Cloud" save — the wallet-config PUT triggers a
-  //      re-fetch so the UI reflects the newly-provisioned Steward bridge.
-  // ≥2 (not exactly 2) because React strict-mode double-mounts in dev add an
-  // extra call, and future UI additions may add more legitimate fetches.
   await expect
-    .poll(() => api.stewardStatusRequestCount(), { timeout: 15_000 })
+    .poll(() => api.refreshCloudRequestCount(), { timeout: 15_000 })
+    .toBeGreaterThanOrEqual(1);
+  await expect
+    .poll(() => api.walletConfigGetCount(), { timeout: 15_000 })
     .toBeGreaterThanOrEqual(2);
 });

@@ -43,7 +43,14 @@ const SCENARIO_CLI = path.join(
   "src",
   "cli.ts",
 );
-const SCENARIO_ROOT = path.join(REPO_ROOT, "test", "scenarios");
+const LIFEOPS_SCENARIO_ROOT = path.join(
+  REPO_ROOT,
+  "eliza",
+  "apps",
+  "app-lifeops",
+  "test",
+  "scenarios",
+);
 
 if (!existsSync(SCENARIO_CLI)) {
   console.error(
@@ -88,7 +95,7 @@ const args = [
   "tsx",
   SCENARIO_CLI,
   "run",
-  SCENARIO_ROOT,
+  LIFEOPS_SCENARIO_ROOT,
   "--report",
   reportPath,
   ...process.argv.slice(2),

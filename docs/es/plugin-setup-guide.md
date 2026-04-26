@@ -699,9 +699,9 @@ dónde obtener las credenciales, los campos mínimos requeridos y consejos para 
 </div>
 
 **Obtener credenciales:** Tu instancia de Mattermost → System Console → Integrations → Bot Accounts
-**Mínimo requerido:** `MATTERMOST_BASE_URL` + `MATTERMOST_BOT_TOKEN`
+**Mínimo requerido:** `MATTERMOST_SERVER_URL` + `MATTERMOST_BOT_TOKEN`
 **Variables:**
-- `MATTERMOST_BASE_URL` — p. ej. `https://mattermost.yourcompany.com`
+- `MATTERMOST_SERVER_URL` — p. ej. `https://mattermost.yourcompany.com`
 - `MATTERMOST_BOT_TOKEN` — De System Console → Bot Accounts → Add Bot Account
 - `MATTERMOST_TEAM_ID` — Tu ID de equipo (de la URL del equipo o la API)
 - `MATTERMOST_DM_POLICY` / `MATTERMOST_GROUP_POLICY` — `allow-all` o `allow-from`

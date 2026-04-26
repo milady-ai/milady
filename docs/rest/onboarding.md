@@ -60,44 +60,52 @@ selections, and inventory/RPC provider options.
   "names": ["Aurora", "Luna", "Nyx", "Selene", "Nova"],
   "styles": [
     {
-      "id": "milady",
-      "label": "Milady",
-      "description": "Classic milady persona"
+      "catchphrase": "chaotic",
+      "hint": "chaotic good",
+      "bio": ["Chaotic and curious AI companion."],
+      "system": "You are {{name}}.",
+      "style": { "all": ["be concise"], "chat": ["friendly"], "post": ["playful"] },
+      "adjectives": ["curious", "playful"],
+      "postExamples": ["hello world"],
+      "messageExamples": [[{ "user": "User", "content": { "text": "hello" } }]]
     }
   ],
   "providers": [
     {
       "id": "openai",
-      "label": "OpenAI",
-      "envKey": "OPENAI_API_KEY"
+      "name": "OpenAI",
+      "envKey": "OPENAI_API_KEY",
+      "pluginName": "@elizaos/plugin-openai",
+      "keyPrefix": "sk-",
+      "description": "OpenAI API"
     }
   ],
   "cloudProviders": [
     {
       "id": "elizacloud",
-      "label": "elizaOS Cloud"
+      "name": "Eliza Cloud",
+      "description": "Managed cloud runtime"
     }
   ],
-  "models": [
-    {
-      "id": "openai/gpt-5-mini",
-      "label": "GPT-5 Mini"
-    }
-  ],
-  "inventoryProviders": [
-    {
-      "id": "evm",
-      "label": "EVM",
-      "rpcProviders": [
-        {
-          "id": "alchemy",
-          "label": "Alchemy",
-          "envKey": "ALCHEMY_API_KEY"
-        }
-      ]
-    }
-  ],
-  "sharedStyleRules": "Keep responses brief. Be helpful and concise."
+  "models": {
+    "small": [
+      {
+        "id": "small-model",
+        "name": "Small Model",
+        "provider": "elizacloud",
+        "description": "Fast"
+      }
+    ],
+    "large": [
+      {
+        "id": "large-model",
+        "name": "Large Model",
+        "provider": "elizacloud",
+        "description": "High quality"
+      }
+    ]
+  },
+  "sharedStyleRules": ""
 }
 ```
 

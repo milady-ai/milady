@@ -77,7 +77,7 @@ Grab from **[Releases](https://github.com/milady-ai/milady/releases/latest)**:
 | macOS (Apple Silicon) | [`Milady-arm64.dmg`](https://github.com/milady-ai/milady/releases/latest) | for your overpriced rectangle |
 | macOS (Intel) | [`Milady-x64.dmg`](https://github.com/milady-ai/milady/releases/latest) | boomer mac (why separate arm64/x64: [Build & release](docs/build-and-release.md#macos-why-two-dmgs-arm64-and-x64)) |
 | Windows | [`Milady-Setup.exe`](https://github.com/milady-ai/milady/releases/latest) | for the gamer anons |
-| iOS | [App Store](https://apps.apple.com/app/milady-private-ai-assistant/id0000000000) | for the privacy-pilled |
+| iOS | App Store (coming soon) | for the privacy-pilled |
 | Android | [Google Play](https://play.google.com/store/apps/details?id=ai.milady.app) / [APK](https://github.com/milady-ai/milady/releases/latest) | for the degen on the go |
 | Linux | [`.AppImage`](https://github.com/milady-ai/milady/releases/latest) / [`.deb`](https://github.com/milady-ai/milady/releases/latest) / [Snap](#snap) / [Flatpak](#flatpak) / [APT repo](#debian--ubuntu-apt) | I use arch btw |
 
@@ -105,7 +105,7 @@ shasum -a 256 --check --ignore-missing SHA256SUMS.txt
 ### New Environment Setup (recommended)
 
 ```bash
-curl -fsSL https://milady-ai.github.io/milady/install.sh | bash
+curl -fsSL https://get.milady.ai | bash
 milady setup
 ```
 
@@ -157,7 +157,7 @@ First run walks you through onboarding:
 
 Windows:
 ```powershell
-irm https://milady-ai.github.io/milady/install.ps1 | iex
+irm https://get.milady.ai/install.ps1 | iex
 ```
 
 NPM global:
@@ -501,7 +501,7 @@ Or use `~/.milady/.env` for secrets.
 | [OpenRouter](https://openrouter.ai) | `OPENROUTER_API_KEY` | 100+ models one API |
 | [Google Gemini](https://ai.google.dev) | `GOOGLE_API_KEY` | gemini pro, flash, ultra |
 | [Google Antigravity](https://cloud.google.com/vertex-ai) | `GOOGLE_CLOUD_API_KEY` | vertex AI / cloud models |
-| [Ollama](https://ollama.ai) | — | local, free, no API key, full privacy |
+| [Ollama](https://ollama.com) | — | local, free, no API key, full privacy |
 | [Groq](https://groq.com) | `GROQ_API_KEY` | fast af |
 | [xAI](https://x.ai) | `XAI_API_KEY` | grok, based |
 | [DeepSeek](https://deepseek.com) | `DEEPSEEK_API_KEY` | reasoning arc |
@@ -518,11 +518,11 @@ See [Model Providers](docs/model-providers.mdx) for the full provider reference 
 
 ### Using Ollama (local models)
 
-[Ollama](https://ollama.ai) lets you run models locally with zero API keys. Install it, pull a model, and configure Milady:
+[Ollama](https://ollama.com) lets you run models locally with zero API keys. Install it, pull a model, and configure Milady:
 
 ```bash
 # install ollama
-curl -fsSL https://ollama.ai/install.sh | sh
+curl -fsSL https://ollama.com/install.sh | sh
 
 # pull a model
 ollama pull gemma3:4b
@@ -580,7 +580,7 @@ bun run build
 bun run milady start
 ```
 
-> `eliza/packages/app-core/scripts/rt.sh` prefers bun but falls back to npm automatically. `bun run build` runs the production build via Node (`scripts/run-production-build.mjs`).
+> `bun run build` runs the production build via Node (`eliza/packages/app-core/scripts/run-production-build.mjs`).
 
 ### Dev mode (recommended for development)
 
@@ -607,7 +607,7 @@ bun run dev:desktop:watch  # + Vite dev server and MILADY_RENDERER_URL (HMR for 
 **IDE / agent hooks** — Editors and agents do not see the native window or auto-discover localhost. **Why we added hooks:** with desktop dev running, the API exposes **`GET /api/dev/stack`** (JSON: ports, renderer URL, which features are on). **`bun run desktop:stack-status -- --json`** probes ports and merges stack + health + status. By default, **`.milady/desktop-dev-console.log`** mirrors prefixed child logs and **`GET /api/dev/cursor-screenshot`** (loopback) returns a full-screen PNG via OS capture — both are opt-out via env (see doc). Cursor uses **`.cursor/rules/milady-desktop-dev-observability.mdc`** plus that guide.
 
 ```bash
-bun run verify       # typecheck + lint (run before committing; `check` aliases this)
+bun run verify       # typecheck + lint + test (run before committing; `check` aliases this)
 bun run test         # parallel test suite
 bun run milady:doctor # diagnose environment issues (`doctor` aliases this)
 bun run setup:sync   # re-run postinstall hooks (`repair` aliases this)

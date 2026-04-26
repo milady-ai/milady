@@ -17,13 +17,30 @@ List all available and installed apps from the registry.
 ```json
 [
   {
-    "name": "@elizaos/app-browser",
-    "displayName": "Browser",
-    "description": "Web browsing capability",
-    "version": "1.0.0",
-    "installed": true,
-    "running": false,
-    "iconUrl": "https://..."
+    "name": "@hyperscape/plugin-hyperscape",
+    "displayName": "Hyperscape",
+    "description": "Virtual world environment",
+    "category": "game",
+    "launchType": "viewer",
+    "launchUrl": null,
+    "icon": null,
+    "heroImage": null,
+    "capabilities": [],
+    "stars": 100,
+    "repository": "https://github.com/HyperscapeAI/hyperscape",
+    "latestVersion": "1.0.0",
+    "supports": { "v0": false, "v1": false, "v2": true },
+    "npm": {
+      "package": "@hyperscape/plugin-hyperscape",
+      "v0Version": null,
+      "v1Version": null,
+      "v2Version": "1.0.0"
+    },
+    "viewer": {
+      "url": "https://example.com/app",
+      "sandbox": "allow-scripts allow-same-origin",
+      "postMessageAuth": false
+    }
   }
 ]
 ```
@@ -79,7 +96,7 @@ Launch an app. If the app's plugin is not installed, it is installed first. Retu
 {
   "name": "@elizaos/app-browser",
   "displayName": "Browser",
-  "viewerUrl": "http://localhost:3000/apps/browser",
+  "viewerUrl": "http://localhost:2138/apps/browser",
   "running": true
 }
 ```
@@ -209,9 +226,9 @@ Proxied response from the Hyperscape API.
 
 ---
 
-### POST /api/apps/hyperscape/embedded-agents/:id/(start|stop|pause|resume|command)
+### POST /api/apps/hyperscape/embedded-agents/:id/:action
 
-Control an embedded agent. The action segment must be one of: `start`, `stop`, `pause`, `resume`, or `command`.
+Control an embedded agent. `:action` must be one of `start`, `stop`, `pause`, `resume`, or `command`.
 
 **Path Parameters**
 

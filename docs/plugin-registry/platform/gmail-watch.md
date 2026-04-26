@@ -8,10 +8,12 @@ The Gmail Watch plugin connects Milady agents to Gmail, enabling monitoring of i
 
 **Package:** `@elizaos/plugin-gmail-watch`
 
+> **Note:** Gmail Watch is categorized as a **feature** plugin in the registry, not a connector. It provides Gmail Pub/Sub message watching and auto-renewal.
+
 ## Installation
 
 ```bash
-milady plugins install gmail-watch
+milady plugins install @elizaos/plugin-gmail-watch
 ```
 
 ## Setup
@@ -34,18 +36,32 @@ Follow the Google Cloud Console setup to enable the Gmail API and obtain OAuth c
 
 ## Configuration
 
+Gmail Watch is configured via both a feature flag and the `hooks.gmail` section:
+
 | Field | Required | Description |
 |-------|----------|-------------|
 | `features.gmailWatch` | Yes | Set `true` to enable the Gmail Watch plugin |
+| `hooks.gmail.account` | Yes | Gmail address to monitor |
+| `hooks.gmail.label` | No | Gmail label to watch (default: `"INBOX"`) |
+| `hooks.gmail.includeBody` | No | Include email body content in agent events |
 
 ```json
 {
   "features": {
     "gmailWatch": true
+  },
+  "hooks": {
+    "enabled": true,
+    "gmail": {
+      "account": "user@gmail.com",
+      "label": "INBOX",
+      "includeBody": true
+    }
   }
 }
 ```
 
 ## Related
 
+- [Gmail Watch Connector](/connectors/gmail-watch) — Full connector documentation
 - [Connectors Guide](/guides/connectors) — General connector documentation

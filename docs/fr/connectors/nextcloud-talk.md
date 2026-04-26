@@ -24,7 +24,7 @@ Le connecteur Nextcloud Talk est un plugin elizaOS qui relie votre agent aux sal
 |-------|--------|
 | Package | `@elizaos/plugin-nextcloud-talk` |
 | Clé de configuration | `connectors.nextcloud-talk` |
-| Installation | `milady plugins install nextcloud-talk` |
+| Installation | `milady plugins install @elizaos/plugin-nextcloud-talk` |
 
 <div id="setup-requirements">
 
@@ -32,7 +32,9 @@ Le connecteur Nextcloud Talk est un plugin elizaOS qui relie votre agent aux sal
 
 </div>
 
-- URL du serveur Nextcloud et identifiants
+- Une instance Nextcloud avec l'application Talk activée
+- Un secret de bot pour l'authentification des webhooks (configuré dans les paramètres d'administration de Nextcloud Talk)
+- Une URL publiquement accessible pour le point de terminaison du webhook
 
 <div id="configuration">
 
@@ -50,15 +52,50 @@ Le connecteur Nextcloud Talk est un plugin elizaOS qui relie votre agent aux sal
 }
 ```
 
+<div id="environment-variables">
+
+## Variables d'environnement
+
+</div>
+
+| Variable | Requise | Description |
+|----------|---------|-------------|
+| `NEXTCLOUD_URL` | Oui | URL de base de votre instance Nextcloud (ex. `https://cloud.example.com`) |
+| `NEXTCLOUD_BOT_SECRET` | Oui | Secret du bot pour la vérification de signature du webhook |
+| `NEXTCLOUD_WEBHOOK_HOST` | Non | Adresse hôte pour le listener du webhook |
+| `NEXTCLOUD_WEBHOOK_PORT` | Non | Port pour le listener du webhook |
+| `NEXTCLOUD_WEBHOOK_PATH` | Non | Chemin pour le point de terminaison du webhook |
+| `NEXTCLOUD_WEBHOOK_PUBLIC_URL` | Non | URL publique complète du webhook (remplace host/port/path) |
+| `NEXTCLOUD_ALLOWED_ROOMS` | Non | Liste de IDs de salons/canaux séparés par des virgules |
+| `NEXTCLOUD_ENABLED` | Non | Définir à `true` pour activer (alternative à la config) |
+
+```json
+{
+  "connectors": {
+    "nextcloud-talk": {
+      "enabled": true
+    }
+  },
+  "env": {
+    "NEXTCLOUD_URL": "https://cloud.example.com",
+    "NEXTCLOUD_BOT_SECRET": "YOUR_BOT_SECRET",
+    "NEXTCLOUD_WEBHOOK_PUBLIC_URL": "https://your-agent.example.com/hooks/nextcloud",
+    "NEXTCLOUD_ALLOWED_ROOMS": "general,support"
+  }
+}
+```
+
 <div id="features">
 
 ## Fonctionnalités
 
 </div>
 
-- Messagerie par salons
+- Messagerie par salons Talk
 - Support des conversations directes et de groupe
-- Intégration avec la plateforme de collaboration auto-hébergée
+- Livraison de messages basée sur les webhooks avec vérification de signature
+- Liste d'autorisation par salon pour contrôler les conversations auxquelles l'agent participe
+- Auto-hébergé — toutes les données restent sur votre instance Nextcloud
 
 <div id="related">
 

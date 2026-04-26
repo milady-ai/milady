@@ -11,7 +11,7 @@ Renderer code talks to the host through `window.__MILADY_ELECTROBUN_RPC__`:
 - `request.<method>(params)` for request/response calls into Bun
 - `onMessage(name, listener)` / `offMessage(name, listener)` for Bun push events
 
-There are **10 native modules** with **118+ request aliases and push messages** in total, covering agent lifecycle, desktop integration, network discovery, voice I/O, wake-word detection, screen capture, camera, canvas windows, geolocation, and system permissions.
+There are **10 native modules** with **140+ request aliases and push messages** in total, covering agent lifecycle, desktop integration, network discovery, voice I/O, wake-word detection, screen capture, camera, canvas windows, geolocation, and system permissions.
 
 ## RPC Alias Conventions
 
@@ -432,7 +432,7 @@ if (cameraPermission.status !== "granted") {
 }
 ```
 
-The renderer usually should not call this global directly. Prefer the shared app helpers in `packages/app-core/src/bridge/electrobun-rpc.ts`, which wrap the same preload bridge behind request/message helpers used by the app and plugins.
+The renderer usually should not call this global directly. Prefer the shared app helpers in `eliza/packages/app-core/src/bridge/electrobun-rpc.ts`, which wrap the same preload bridge behind request/message helpers used by the app and plugins.
 
 ---
 

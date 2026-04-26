@@ -11,17 +11,17 @@ The Google Gemini plugin connects Milady agents to Google's Gemini API, providin
 ## Installation
 
 ```bash
-milady plugins install google-genai
+milady plugins install @elizaos/plugin-google-genai
 ```
 
 ## Auto-Enable
 
-The plugin auto-enables when either env var is present:
+The plugin auto-enables when `GOOGLE_GENERATIVE_AI_API_KEY` or `GOOGLE_API_KEY` is present:
 
 ```bash
-export GOOGLE_API_KEY=AIza...
-# or
 export GOOGLE_GENERATIVE_AI_API_KEY=AIza...
+# or
+export GOOGLE_API_KEY=AIza...
 ```
 
 ## Configuration
@@ -32,8 +32,11 @@ export GOOGLE_GENERATIVE_AI_API_KEY=AIza...
 | `GOOGLE_API_KEY` | Yes* | Alias (also triggers auto-enable) |
 | `GOOGLE_SMALL_MODEL` | No | Override the small model identifier |
 | `GOOGLE_LARGE_MODEL` | No | Override the large model identifier |
+| `SMALL_MODEL` | No | Global alias to override the small model |
+| `LARGE_MODEL` | No | Global alias to override the large model |
 | `GOOGLE_EMBEDDING_MODEL` | No | Override the embedding model identifier |
 | `GOOGLE_IMAGE_MODEL` | No | Override the image generation model |
+| `IMAGE_MODEL` | No | Global alias for the image model |
 
 *Either `GOOGLE_GENERATIVE_AI_API_KEY` or `GOOGLE_API_KEY` is accepted.
 
@@ -82,10 +85,10 @@ Get your API key from [aistudio.google.com](https://aistudio.google.com).
 
 | elizaOS Model Type | Gemini Model |
 |-------------------|-------------|
-| `TEXT_SMALL` | `gemini-2.5-flash` |
-| `TEXT_LARGE` | `gemini-2.5-pro` |
+| `TEXT_SMALL` | `gemini-2.0-flash-001` |
+| `TEXT_LARGE` | `gemini-2.0-flash-001` |
 | `TEXT_EMBEDDING` | `text-embedding-004` |
-| `IMAGE_DESCRIPTION` | `gemini-2.5-flash` (vision) |
+| `IMAGE_DESCRIPTION` | `gemini-2.0-flash-001` (vision) |
 
 ## Features
 

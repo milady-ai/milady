@@ -1,4 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Default runtime-permission grants for com.miladyai.milady.
+
+  PermissionController reads this on first boot to pre-grant the listed
+  dangerous permissions, so Milady can answer calls / receive SMS / etc.
+  without showing the runtime prompt the moment the user opens the app.
+
+  fixed="true"
+    Permission cannot be revoked by the user from Settings. Use for
+    permissions that are load-bearing for the SMS/Dialer roles —
+    revoking them would leave Milady installed-but-broken.
+
+  fixed="false"
+    Permission is granted on first boot but the user can revoke it from
+    Settings → Apps → Milady → Permissions. Use for permissions the
+    user might reasonably want to disable case by case (mic, camera,
+    location).
+
+  Read by PermissionController from /system/etc/default-permissions/.
+  Soong module: see ../permissions/Android.bp (`prebuilt_etc`,
+    sub_dir: "default-permissions").
+-->
 <exceptions>
     <exception package="com.miladyai.milady">
         <permission name="android.permission.READ_CALL_LOG" fixed="true" />

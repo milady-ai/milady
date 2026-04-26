@@ -35,7 +35,7 @@ Après qu'upstream publie une version corrigée, vérifiez que `dist/node/index.
 </div>
 
 ```bash
-milady plugins install openrouter
+milady plugins install @elizaos/plugin-openrouter
 ```
 
 <div id="auto-enable">

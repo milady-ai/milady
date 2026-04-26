@@ -42,13 +42,21 @@ const FORBIDDEN_STOCK_PACKAGES = [
   "com.android.email",
   "com.android.gallery3d",
   "com.android.launcher3",
+  "com.android.managedprovisioning",
   "com.android.messaging",
   "com.android.music",
+  "com.android.provision",
   "com.google.android.apps.messaging",
   "com.google.android.apps.nexuslauncher",
   "com.google.android.dialer",
+  "com.google.android.setupwizard",
   "org.lineageos.trebuchet",
 ];
+
+const REQUIRED_BOOT_PROPERTIES = {
+  "ro.setupwizard.mode": "DISABLED",
+  "ro.miladyos.boot_phase": "completed",
+};
 
 const LOGCAT_FAILURE_PATTERNS = [
   /FATAL EXCEPTION/i,
@@ -212,6 +220,20 @@ function validateProductProperty(adb, serial) {
   return product;
 }
 
+function validateBootProperties(adb, serial) {
+  const properties = {};
+  for (const [name, expected] of Object.entries(REQUIRED_BOOT_PROPERTIES)) {
+    const actual = shell(adb, serial, `getprop ${name}`).trim();
+    if (actual !== expected) {
+      throw new Error(
+        `${name} must be ${expected}; found ${actual || "<empty>"}`,
+      );
+    }
+    properties[name] = actual;
+  }
+  return properties;
+}
+
 function validatePackagePath(adb, serial) {
   const pmPath = shell(adb, serial, `pm path ${PACKAGE_NAME}`);
   assertIncludes(pmPath, "/system/priv-app/Milady/", "Milady package path");
@@ -226,6 +248,66 @@ function validateHomeResolution(adb, serial) {
   );
   assertIncludes(resolved, PACKAGE_NAME, "HOME activity resolution");
   return resolved;
+}
+
+/**
+ * For every system intent whose default app we stripped from
+ * PRODUCT_PACKAGES, prove a Milady activity is the resolver. Without
+ * these assertions a stripped phone could pass HOME/Dialer/SMS role
+ * validation while silently failing to open URLs / set alarms / take
+ * photos — exactly the regression class this list catches.
+ */
+const REPLACEMENT_INTENT_RESOLUTIONS = [
+  {
+    label: "VIEW http",
+    args: '-a android.intent.action.VIEW -c android.intent.category.BROWSABLE -d "http://example.com"',
+  },
+  {
+    label: "VIEW https",
+    args: '-a android.intent.action.VIEW -c android.intent.category.BROWSABLE -d "https://example.com"',
+  },
+  {
+    label: "STILL_IMAGE_CAMERA",
+    args: "-a android.media.action.STILL_IMAGE_CAMERA",
+  },
+  {
+    label: "IMAGE_CAPTURE",
+    args: "-a android.media.action.IMAGE_CAPTURE",
+  },
+  {
+    label: "SET_ALARM",
+    args: "-a android.intent.action.SET_ALARM",
+  },
+  {
+    label: "SHOW_ALARMS",
+    args: "-a android.intent.action.SHOW_ALARMS",
+  },
+  {
+    label: "APP_CONTACTS launcher",
+    args: "-a android.intent.action.MAIN -c android.intent.category.APP_CONTACTS",
+  },
+  {
+    label: "APP_CALENDAR launcher",
+    args: "-a android.intent.action.MAIN -c android.intent.category.APP_CALENDAR",
+  },
+];
+
+function validateReplacementIntents(adb, serial) {
+  const resolutions = {};
+  for (const { label, args } of REPLACEMENT_INTENT_RESOLUTIONS) {
+    const resolved = shell(
+      adb,
+      serial,
+      `cmd package resolve-activity --brief ${args}`,
+    );
+    if (!resolved.includes(PACKAGE_NAME)) {
+      throw new Error(
+        `Intent "${label}" did not resolve to ${PACKAGE_NAME}; got:\n${resolved}`,
+      );
+    }
+    resolutions[label] = resolved;
+  }
+  return resolutions;
 }
 
 function validateRoles(adb, serial) {
@@ -308,8 +390,10 @@ export async function validateBootedDevice(options) {
     adb,
     serial,
     product: validateProductProperty(adb, serial),
+    bootProperties: validateBootProperties(adb, serial),
     packagePath: validatePackagePath(adb, serial),
     homeResolution: validateHomeResolution(adb, serial),
+    replacementIntents: validateReplacementIntents(adb, serial),
     roles: validateRoles(adb, serial),
     appOps: validateAppOps(adb, serial),
     forbiddenPackages: validateForbiddenPackages(adb, serial),

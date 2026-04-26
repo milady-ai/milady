@@ -90,10 +90,18 @@ bun run dev
 
 ## Monorepo Structure
 
-Milady is a monorepo managed with Bun workspaces.
+Milady is a monorepo managed with Bun workspaces. The core elizaOS runtime lives in the `eliza/` git submodule.
 
 ```
 milady/
+├── eliza/                       # elizaOS submodule (core runtime)
+│   ├── packages/
+│   │   ├── app-core/            # Main application package (CLI, API, runtime, config)
+│   │   ├── agent/               # Upstream elizaOS agent (core plugins, auto-enable maps)
+│   │   └── ...                  # Other @elizaos/* packages
+│   └── plugins/                 # Official plugins (submodule checkouts)
+│       ├── plugin-agent-orchestrator/
+│       └── ...
 ├── apps/
 │   ├── app/                 # Desktop/mobile app (Capacitor + React)
 │   │   ├── electrobun/      # Electrobun desktop wrapper
@@ -119,10 +127,10 @@ Builds are run via Bun scripts defined in the root `package.json`:
 # Full build (TypeScript + UI)
 bun run build
 
-# Typecheck + lint
+# Typecheck + lint + tests (the main verification suite)
 bun run verify
 
-# Run tests
+# Run tests only
 bun run test
 ```
 
@@ -130,9 +138,12 @@ bun run test
 
 | File | Purpose |
 |------|---------|
-| `milady.mjs` | npm bin entry (CLI bootstrap) |
-| `eliza/packages/app-core/src/entry.ts` | CLI entry point |
-| `eliza/packages/app-core/src/runtime/eliza.ts` | elizaOS runtime initialization |
+| `milady.mjs` | npm bin entry |
+| `eliza/packages/app-core/src/entry.ts` | CLI process bootstrap |
+| `eliza/packages/app-core/src/cli/` | Commander CLI (milady command) |
+| `eliza/packages/app-core/src/runtime/eliza.ts` | Agent loader and runtime boot |
+| `eliza/packages/app-core/src/api/` | Dashboard API |
+| `eliza/packages/app-core/src/config/` | Plugin auto-enable, config schemas |
 
 ---
 
@@ -169,13 +180,13 @@ bun run dev:desktop:watch
 
 ### Testing
 
-Coverage thresholds are enforced from `scripts/coverage-policy.mjs`: 25% lines/functions/statements, 15% branches. CI fails when coverage falls below these floors.
+Coverage thresholds are enforced from `eliza/packages/app-core/scripts/coverage-policy.mjs`: 25% lines/functions/statements, 15% branches. CI fails when coverage falls below these floors.
 
 ```bash
 # Run all tests (parallel)
 bun run test
 
-# Run with coverage (enforces thresholds)
+# Run with coverage
 bun run test:coverage
 
 # Watch mode
@@ -187,8 +198,8 @@ bun run test:e2e
 # Live tests (requires API keys)
 MILADY_LIVE_TEST=1 bun run test:live
 
-# Docker-based tests
-bun run test:docker:all
+# Docker-based runtime review
+bun run test:docker:review
 ```
 
 ### Runtime fallback for Bun crashes
@@ -208,14 +219,14 @@ MILADY_RUNTIME=node bun run milady start
 | `*.live.test.ts` | Live API tests |
 | `test/**/*.test.ts` | Integration tests |
 
-### `packages/app-core` in the root Vitest config
+### `eliza/packages/app-core` in the root Vitest config
 
-The repo root **`vitest.config.ts`** (used by **`bun run test`** → unit shard) includes:
+The repo root **`vitest.config.ts`** (used by **`bun run test`** via the unit shard) includes:
 
-- **`packages/app-core/src/**/*.test.ts`** and **`packages/app-core/src/**/*.test.tsx`** — colocated tests, including TSX, without listing each file.
-- **`packages/app-core/test/**/*.test.ts`** and **`.../test/**/*.test.tsx`** — shared harness tests (e.g. `test/state`, `test/runtime`).
+- **`eliza/packages/app-core/src/**/*.test.ts`** and **`eliza/packages/app-core/src/**/*.test.tsx`** — colocated tests, including TSX, without listing each file.
+- **`eliza/packages/app-core/test/live-agent/**/*.test.ts`** — live-agent harness tests.
 
-**Why:** those directories were previously omitted, so new suites never ran in CI. **`packages/app-core/test/**/*.e2e.test.ts(x)`** is excluded from this job so e2e stays on **`test/vitest/e2e.config.ts`**. **`test/vitest/unit.config.ts`** still omits **`packages/app-core/test/app/**`** (heavy renderer harness) from the coverage-focused unit pass—**why:** those are run in targeted app workspaces or separate jobs.
+**Why:** those directories were previously omitted, so new suites never ran in CI. **`*.e2e.test.ts(x)`** is excluded from this job so e2e stays on **`test/vitest/e2e.config.ts`**. **`test/vitest/unit.config.ts`** still omits **`eliza/packages/app-core/test/app/**`** (heavy renderer harness) from the coverage-focused unit pass—**why:** those are run in targeted app workspaces or separate jobs.
 
 ---
 
@@ -249,7 +260,7 @@ The repo root **`vitest.config.ts`** (used by **`bun run test`** → unit shard)
 The project uses **Biome** for formatting and linting:
 
 ```bash
-# Check formatting and lint
+# Typecheck + lint + tests (alias for `bun run verify`)
 bun run check
 
 # Fix formatting issues
@@ -405,6 +416,10 @@ Claude Code Review is enabled for automated initial feedback.
 Join the community Discord for help, discussions, and announcements:
 
 **[discord.gg/milady](https://discord.gg/milady)**
+
+Channels:
+- `#dev` — Development help
+- `#showcase` — Share what you've built
 
 ### GitHub
 

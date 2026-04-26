@@ -76,7 +76,6 @@ Get cloud connection status, authentication state, and billing URL.
 {
   "connected": true,
   "enabled": true,
-  "cloudVoiceProxyAvailable": true,
   "hasApiKey": true,
   "userId": "user-123",
   "organizationId": "org-456",
@@ -89,10 +88,11 @@ Get cloud connection status, authentication state, and billing URL.
 ```json
 {
   "connected": false,
-  "enabled": false,
-  "cloudVoiceProxyAvailable": false,
+  "enabled": true,
   "hasApiKey": false,
-  "reason": "not_authenticated"
+  "userId": null,
+  "organizationId": null,
+  "topUpUrl": "https://elizacloud.ai"
 }
 ```
 
@@ -100,12 +100,11 @@ Get cloud connection status, authentication state, and billing URL.
 |-------|------|-------------|
 | `connected` | boolean | Whether the cloud auth service is authenticated |
 | `enabled` | boolean | Whether cloud mode is enabled in config |
-| `cloudVoiceProxyAvailable` | boolean | Whether cloud voice proxy is available for the current session |
+| `cloudVoiceProxyAvailable` | boolean | Whether cloud voice proxy is available for the current session (may be omitted) |
 | `hasApiKey` | boolean | Whether an API key is present in config |
-| `userId` | string | Authenticated user ID (when connected) |
-| `organizationId` | string | Authenticated organization ID (when connected) |
+| `userId` | string\|null | Authenticated user ID, or `null` when not connected |
+| `organizationId` | string\|null | Authenticated organization ID, or `null` when not connected |
 | `topUpUrl` | string | URL to the cloud billing page |
-| `reason` | string | Reason for disconnected state |
 
 ---
 
@@ -121,17 +120,18 @@ Get the cloud credit balance. Returns `null` balance when not connected.
   "balance": 15.50,
   "low": false,
   "critical": false,
-  "authRejected": false,
   "topUpUrl": "https://elizacloud.ai/dashboard/settings?tab=billing"
 }
 ```
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `balance` | number \| null | Credit balance in dollars |
+| `connected` | boolean | Whether the cloud auth service is authenticated |
+| `balance` | number \| null | Credit balance in dollars, or `null` when not connected |
 | `low` | boolean | `true` when balance is below $2.00 |
 | `critical` | boolean | `true` when balance is below $0.50 |
 | `authRejected` | boolean | `true` when the cloud API key was rejected during the credit check |
+| `topUpUrl` | string | URL to the cloud billing page |
 
 ---
 

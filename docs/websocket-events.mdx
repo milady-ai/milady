@@ -20,7 +20,7 @@ ws://localhost:18789/ws
 ```
 </CodeGroup>
 
-The WebSocket endpoint is available at `/ws` on the API server (port 31337 by default, configurable via `MILADY_API_PORT`) or through the Gateway (port 18789 by default).
+The WebSocket endpoint is available at `/ws` on the API server. In development, this is port 31337 (`MILADY_API_PORT`); in production, the API shares port 2138 (`MILADY_PORT`) with the dashboard. The Gateway (port 18789 by default) also proxies WebSocket connections.
 
 ### Authentication
 
@@ -63,7 +63,8 @@ When a WebSocket client connects and is authenticated (either via a handshake he
   "state": "running",
   "agentName": "Milady",
   "model": "@elizaos/plugin-anthropic",
-  "startedAt": 1708000000000
+  "startedAt": 1708000000000,
+  "uptime": 60000
 }
 ```
 

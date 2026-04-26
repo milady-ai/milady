@@ -11,7 +11,7 @@ The Tlon plugin connects Milady agents to Tlon (Urbit), enabling message handlin
 ## Installation
 
 ```bash
-milady plugins install tlon
+milady plugins install @elizaos/plugin-tlon
 ```
 
 ## Setup
@@ -53,14 +53,21 @@ export TLON_URL=YOUR_URL
 | `code` | Yes | Urbit ship access code |
 | `url` | Yes | Urbit ship URL |
 | `enabled` | No | Set `false` to disable (default: `true`) |
+| `dmAllowlist` | No | Comma-separated allowed user list for DMs |
+| `groupChannels` | No | Comma-separated list of group channel identifiers |
+| `autoDiscoverChannels` | No | Comma-separated list of channels to auto-discover |
 
 ## Environment Variables
 
-```bash
-export TLON_SHIP=YOUR_SHIP
-export TLON_CODE=YOUR_CODE
-export TLON_URL=YOUR_URL
-```
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `TLON_SHIP` | No | Urbit ship name (e.g., `~zod`) |
+| `TLON_CODE` | No | Urbit ship access code |
+| `TLON_URL` | No | Urbit ship URL |
+| `TLON_ENABLED` | No | Enable or disable the connector |
+| `TLON_DM_ALLOWLIST` | No | Comma-separated allowed ship names for DMs |
+| `TLON_GROUP_CHANNELS` | No | Comma-separated group channel paths |
+| `TLON_AUTO_DISCOVER_CHANNELS` | No | Auto-discover channels from groups |
 
 ## Related
 

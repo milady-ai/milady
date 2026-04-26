@@ -3,6 +3,62 @@ title: Registro de cambios
 description: Novedades en Milady — funcionalidades, mejoras y correcciones.
 ---
 
+<Update label="2026-04-23" description="Semana del 23 de abril; billetera dual y aprovisionamiento de billetera en la nube, Agent Browser Bridge, borradores de automatización, UX de aprovisionamiento de agentes en la nube, conector BlueBubbles" tags={["Feature", "Update", "Fix"]}>
+
+<div id="dual-wallet-with-cloud-wallet-provisioning">
+## Billetera dual con aprovisionamiento de billetera en la nube
+</div>
+
+Tu agente ahora admite una arquitectura de billetera dual donde las [billeteras locales y en la nube](/es/rest/wallet) coexisten, con una fuente principal por cadena. Cuando inicias sesión en [Eliza Cloud](/es/guides/cloud) con la función de billetera en la nube habilitada, las billeteras EVM y Solana se importan desde la nube y se establecen como principales automáticamente — sin configuración manual. Puedes cambiar la fuente principal en cualquier momento, y los descriptores de billetera en la nube se pueden volver a consultar bajo demanda. Si el aprovisionamiento falla durante el inicio de sesión, la autenticación aún se realiza correctamente y puedes reintentar el aprovisionamiento de la billetera más tarde.
+
+<div id="agent-browser-bridge">
+## Agent Browser Bridge
+</div>
+
+La extensión LifeOps Browser ha sido renombrada y reubicada como **Agent Browser Bridge** — una extensión de navegador independiente (Chrome y Safari) que permite a tu agente observar y actuar dentro de tus sesiones de navegador. El bridge se ejecuta como su propia aplicación con un panel de configuración dedicado, artefactos de instalador actualizados y una nueva pestaña de inicio en la vista del espacio de trabajo del navegador. Los flujos de trabajo existentes de LifeOps Browser continúan funcionando con el nuevo bridge.
+
+<div id="automation-drafts">
+## Borradores de automatización
+</div>
+
+La vista de [automatizaciones](/es/guides/cloud) ahora admite la redacción de flujos de trabajo antes de activarlos. Un nuevo panel de borradores te permite componer un flujo de trabajo con ámbito a una sala específica, normalizar su título y manejar con elegancia los errores de envío si el borrador no se puede entregar. Los borradores se mantienen fuera de tu lista de automatizaciones activas hasta que estés listo para enviarlos.
+
+<div id="cloud-agent-provisioning-ux">
+## UX de aprovisionamiento de agentes en la nube
+</div>
+
+El [panel de control](/es/guides/cloud) en la nube ahora maneja claramente las tarjetas de runtime que no están en ejecución. El botón principal **Abrir** está deshabilitado y etiquetado con el estado actual del agente ("iniciando…", "detenido", "pausado", "inalcanzable") mientras la tarjeta consulta por su disponibilidad, con un punto de estado pulsante durante el aprovisionamiento y un tooltip que explica el tiempo de arranque esperado. El botón vuelve al estado sólido **Abrir** automáticamente tan pronto como la sonda de salud devuelve en ejecución. La eliminación de agentes en la nube y el aprovisionamiento en línea desde el panel de control también se han restaurado.
+
+<div id="bluebubbles-connector">
+## Conector BlueBubbles
+</div>
+
+Un nuevo [conector BlueBubbles](/es/connectors/bluebubbles) permite a tu agente conectarse a iMessage a través de un servidor [BlueBubbles](https://bluebubbles.app) autoalojado sobre HTTP. A diferencia del conector nativo de iMessage — que lee directamente la base de datos local de Messages — BlueBubbles se puede alcanzar desde cualquier máquina en la misma red, lo que lo convierte en una buena opción cuando tu agente no se ejecuta en el Mac que contiene la base de datos de Messages.
+
+<div id="updates">
+## Actualizaciones
+</div>
+
+- **Pulido de chat y páginas** — El contexto de chat con ámbito de página, el encabezado del widget de chat, el título del chat y la barra lateral del chat se han refinado para diseños más limpios y un contexto más confiable al cambiar entre páginas.
+- **Modernización de la barra lateral y la vista de apps** — Los controles de la barra lateral del panel de control, el catálogo de [vista de apps](/es/dashboard/apps) y la barra lateral de apps se han limpiado con controles colapsados y mayor densidad. El editor de personajes, el diseño de [personaje](/es/agents/character-interface), el panel de personajes y la barra lateral de personajes también se han pulido para una experiencia de navegación más consistente.
+- **Limpieza de la barra lateral de conectores** — La barra lateral de configuración de conectores se ha limpiado y pulido, con conmutadores más claros e interruptores de conectores para habilitar/deshabilitar plataformas individuales.
+- **Cargas de conocimiento embebidas** — El sistema de [conocimiento](/es/guides/knowledge) ahora admite cargas embebidas directamente desde el editor de personajes, para que puedas adjuntar material de referencia mientras configuras la personalidad de tu agente.
+- **Facturación y estado de X (Twitter)** — La facturación del conector X ahora se muestra junto con otros usos en la nube, y los informes de estado se han reforzado con nueva cobertura de pruebas.
+- **Corrección de migración en la nube** — Se ha resuelto un problema de migración que afectaba a los agentes desplegados en la nube para que las actualizaciones se apliquen limpiamente en el primer arranque.
+- **Modos de onboarding de runtime en iOS** — La aplicación de iOS ahora admite modos distintos de compilación de runtime y onboarding, brindando a los usuarios móviles una experiencia de primera ejecución más fluida.
+- **Limpieza de accesibilidad** — Las micro-etiquetas del panel de control, el chrome de página y las affordances de estado se han limpiado para una mejor paridad de accesibilidad.
+
+<div id="bug-fixes">
+## Correcciones de errores
+</div>
+
+- Se corrigió que el sidecar de n8n no se recuperara limpiamente en algunas configuraciones — el sidecar ahora inicia y realiza conmutación por error de manera confiable
+- Se corrigió que los enlaces profundos de automatización no se desplazaran a la sección correcta cuando se abrían desde la barra lateral — los anclajes hash ahora se resuelven correctamente
+- Se corrigió que el panel de control en la nube permitiera a los usuarios hacer clic en el botón Abrir en tarjetas de runtime que no están en ejecución, lo que llevaba a páginas muertas
+- Se corrigió que las pestañas del espacio de trabajo del navegador no se restablecieran entre sesiones en Agent Browser Bridge
+
+</Update>
+
 <Update label="2026-04-20" description="Semana del 20 de abril; enrutamiento de acciones más inteligente, precisión en mensajería multicanal, mejoras en el optimizador de entrenamiento" tags={["Update", "Fix"]}>
 
 <div id="smarter-action-routing">

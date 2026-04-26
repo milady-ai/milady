@@ -5,6 +5,7 @@ const NAV_TIMEOUT_MS = 12_000;
 // Ready checks only confirm route-level render markers after navigation.
 // Full bootstrap waits use the surrounding test timeout and Playwright defaults.
 const READY_CHECK_TIMEOUT_MS = 15_000;
+const SMOKE_GENERATED_AT = "2026-01-01T00:00:00.000Z";
 
 type ReadyCheck =
   | { selector: string; text?: never }
@@ -60,6 +61,14 @@ export async function readLocalStorage(
   key: string,
 ): Promise<string | null> {
   return page.evaluate((storageKey) => localStorage.getItem(storageKey), key);
+}
+
+export async function openSettingsSection(
+  page: Page,
+  sectionName: string | RegExp,
+): Promise<void> {
+  const settingsNav = page.getByRole("navigation", { name: "Settings" });
+  await settingsNav.getByRole("button", { name: sectionName }).click();
 }
 
 async function locatorVisible(
@@ -143,6 +152,61 @@ export async function assertReadyChecks(
   ).toBe(true);
 }
 
+function emptyWalletMarketSource(providerId: "coingecko" | "polymarket") {
+  return {
+    providerId,
+    providerName: providerId === "coingecko" ? "CoinGecko" : "Polymarket",
+    providerUrl:
+      providerId === "coingecko"
+        ? "https://www.coingecko.com"
+        : "https://polymarket.com",
+    available: false,
+    stale: false,
+    error: null,
+  };
+}
+
+function emptyWalletMarketOverview() {
+  return {
+    generatedAt: SMOKE_GENERATED_AT,
+    cacheTtlSeconds: 60,
+    stale: false,
+    sources: {
+      prices: emptyWalletMarketSource("coingecko"),
+      movers: emptyWalletMarketSource("coingecko"),
+      predictions: emptyWalletMarketSource("polymarket"),
+    },
+    prices: [],
+    movers: [],
+    predictions: [],
+  };
+}
+
+function emptyWalletTradingProfile(url: URL) {
+  return {
+    window: url.searchParams.get("window") ?? "30d",
+    source: url.searchParams.get("source") ?? "all",
+    generatedAt: SMOKE_GENERATED_AT,
+    summary: {
+      totalSwaps: 0,
+      buyCount: 0,
+      sellCount: 0,
+      settledCount: 0,
+      successCount: 0,
+      revertedCount: 0,
+      tradeWinRate: null,
+      txSuccessRate: null,
+      winningTrades: 0,
+      evaluatedTrades: 0,
+      realizedPnlBnb: "0",
+      volumeBnb: "0",
+    },
+    pnlSeries: [],
+    tokenBreakdown: [],
+    recentSwaps: [],
+  };
+}
+
 /** Installs baseline API routes for smoke tests before flow-specific overrides. */
 export async function installDefaultAppRoutes(page: Page): Promise<void> {
   await page.route("**/api/health", async (route) => {
@@ -181,11 +245,37 @@ export async function installDefaultAppRoutes(page: Page): Promise<void> {
       }),
     });
   });
+
+  await page.route("**/api/wallet/market-overview", async (route) => {
+    if (route.request().method() !== "GET") {
+      await route.fallback();
+      return;
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(emptyWalletMarketOverview()),
+    });
+  });
+
+  await page.route("**/api/wallet/trading/profile**", async (route) => {
+    const request = route.request();
+    if (request.method() !== "GET") {
+      await route.fallback();
+      return;
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(emptyWalletTradingProfile(new URL(request.url()))),
+    });
+  });
 }
 
 type CloudWalletImportMockApi = {
   lastWalletConfigPut: () => Record<string, unknown> | null;
-  stewardStatusRequestCount: () => number;
+  refreshCloudRequestCount: () => number;
+  walletConfigGetCount: () => number;
 };
 
 /** Overrides the default smoke routes for the cloud wallet import flow. */
@@ -193,13 +283,14 @@ export async function installCloudWalletImportApiOverrides(
   page: Page,
 ): Promise<CloudWalletImportMockApi> {
   let lastWalletPut: Record<string, unknown> | null = null;
-  let stewardStatusHits = 0;
+  let refreshCloudHits = 0;
+  let walletConfigGetHits = 0;
 
   const initialWalletConfig = {
     selectedRpcProviders: {
-      evm: "alchemy",
-      bsc: "alchemy",
-      solana: "helius-birdeye",
+      evm: "eliza-cloud",
+      bsc: "eliza-cloud",
+      solana: "eliza-cloud",
     },
     walletNetwork: "mainnet",
     legacyCustomChains: [],
@@ -209,7 +300,7 @@ export async function installCloudWalletImportApiOverrides(
     nodeRealBscRpcSet: false,
     quickNodeBscRpcSet: false,
     managedBscRpcReady: false,
-    cloudManagedAccess: false,
+    cloudManagedAccess: true,
     heliusKeySet: true,
     birdeyeKeySet: false,
     evmChains: ["ethereum", "base"],
@@ -261,6 +352,7 @@ export async function installCloudWalletImportApiOverrides(
   await page.route("**/api/wallet/config", async (route) => {
     const req = route.request();
     if (req.method() === "GET") {
+      walletConfigGetHits += 1;
       await route.fulfill({
         status: 200,
         contentType: "application/json",
@@ -291,19 +383,18 @@ export async function installCloudWalletImportApiOverrides(
     await route.fallback();
   });
 
-  await page.route("**/api/wallet/steward-status", async (route) => {
-    if (route.request().method() !== "GET") {
+  await page.route("**/api/wallet/refresh-cloud", async (route) => {
+    if (route.request().method() !== "POST") {
       await route.fallback();
       return;
     }
-    stewardStatusHits += 1;
+    refreshCloudHits += 1;
     await route.fulfill({
       status: 200,
       contentType: "application/json",
       body: JSON.stringify({
-        configured: false,
-        available: false,
-        connected: false,
+        ok: true,
+        warnings: [],
       }),
     });
   });
@@ -349,6 +440,7 @@ export async function installCloudWalletImportApiOverrides(
 
   return {
     lastWalletConfigPut: () => lastWalletPut,
-    stewardStatusRequestCount: () => stewardStatusHits,
+    refreshCloudRequestCount: () => refreshCloudHits,
+    walletConfigGetCount: () => walletConfigGetHits,
   };
 }

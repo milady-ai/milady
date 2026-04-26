@@ -4,38 +4,65 @@ sidebarTitle: "Agents"
 description: "REST API endpoints for agent lifecycle, administration, and transfer (export/import)."
 ---
 
-All agent endpoints require the agent runtime to be initialized. The API server runs on port **31337** by default (`MILADY_API_PORT`). All paths are prefixed with `/api/`. When `MILADY_API_TOKEN` is set, include it as a `Bearer` token in the `Authorization` header.
+All agent endpoints require the agent runtime to be initialized. The API server runs on port **2138** by default when started with `milady start`. In dev mode (`bun run dev`), the API splits to port **31337** while the UI stays on **2138**. Override with `MILADY_API_PORT` (dev API) or `MILADY_PORT` (server-only / UI). All paths are prefixed with `/api/`. When `MILADY_API_TOKEN` is set, include it as a `Bearer` token in the `Authorization` header.
 
 ## Endpoints
 
 | Method | Path | Description |
 |--------|------|-------------|
+| GET | `/api/agents` | List running agent(s) |
 | POST | `/api/agent/start` | Start the agent |
 | POST | `/api/agent/stop` | Stop the agent and disable autonomy |
 | POST | `/api/agent/pause` | Pause the agent (keep uptime, disable autonomy) |
 | POST | `/api/agent/resume` | Resume a paused agent and re-enable autonomy |
-| POST | `/api/agent/restart` | Restart the agent runtime |
+| POST | `/api/agent/restart` | Restart the agent runtime (also available as `POST /api/restart`) |
 | POST | `/api/agent/reset` | Wipe config, workspace, memory and return to onboarding |
 | POST | `/api/agent/export` | Export agent as a password-encrypted `.eliza-agent` binary file |
 | GET | `/api/agent/export/estimate` | Estimate export file size before downloading |
 | POST | `/api/agent/import` | Import agent from a password-encrypted `.eliza-agent` file |
 | GET | `/api/agent/autonomy` | Check whether autonomy is enabled |
 | POST | `/api/agent/autonomy` | Enable or disable autonomy |
+| GET | `/api/agent/events` | Get buffered agent events (actions, thoughts, status changes) |
 | GET | `/api/agent/self-status` | Structured self-status summary with capabilities, wallet, plugins, and awareness |
 
 ---
 
-### POST /api/agent/start
+### GET /api/agents
 
-Start the agent. Sets the agent state to `paused`, records the start timestamp, and detects the active model provider. Use `POST /api/agent/autonomy` to enable autonomous operation separately.
+List the running agent(s). The app runs a single agent; the response wraps it in an `agents` array for compatibility with multi-agent callers and health probes.
 
 **Response**
 
 ```json
 {
-  "ok": true,
+  "agents": [
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "name": "Milady",
+      "status": "running"
+    }
+  ]
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `agents[].id` | string | Agent UUID (falls back to a nil UUID if the runtime is not started) |
+| `agents[].name` | string | Agent display name from the character config |
+| `agents[].status` | string | Current agent state (`not_started`, `starting`, `running`, `paused`, `stopped`, `restarting`, `error`) |
+
+---
+
+### POST /api/agent/start
+
+Start the agent. Sets the agent state to `running`, records the start timestamp, and detects the active model provider.
+
+**Response**
+
+```json
+{
   "status": {
-    "state": "paused",
+    "state": "running",
     "agentName": "Milady",
     "model": "@elizaos/plugin-anthropic",
     "uptime": 0,
@@ -54,10 +81,12 @@ Stop the agent and disable autonomy. Sets the agent state to `stopped` and clear
 
 ```json
 {
-  "ok": true,
   "status": {
     "state": "stopped",
-    "agentName": "Milady"
+    "agentName": "Milady",
+    "model": "@elizaos/plugin-anthropic",
+    "startedAt": 1718000000000,
+    "uptime": 34200000
   }
 }
 ```
@@ -72,7 +101,6 @@ Pause the agent while keeping uptime intact. Disables autonomy but preserves the
 
 ```json
 {
-  "ok": true,
   "status": {
     "state": "paused",
     "agentName": "Milady",
@@ -93,7 +121,6 @@ Resume a paused agent and re-enable autonomy. The first tick fires immediately.
 
 ```json
 {
-  "ok": true,
   "status": {
     "state": "running",
     "agentName": "Milady",
@@ -134,7 +161,6 @@ Enable or disable autonomous operation.
 
 ```json
 {
-  "ok": true,
   "enabled": true
 }
 ```
@@ -149,11 +175,10 @@ Restart the agent runtime. Returns `409` if a restart is already in progress and
 
 ```json
 {
-  "ok": true,
-  "pendingRestart": false,
   "status": {
     "state": "running",
     "agentName": "Milady",
+    "model": "@elizaos/plugin-anthropic",
     "startedAt": 1718000000000
   }
 }
@@ -163,11 +188,11 @@ Restart the agent runtime. Returns `409` if a restart is already in progress and
 
 ### POST /api/agent/reset
 
-Wipe config, workspace (memory), oauth tokens, and return to onboarding state. Stops the runtime, deletes the `~/.milady/` state directory (with safety checks to prevent deletion of system paths), and resets all server state.
+Wipe memory, onboarding config, cloud secrets, and return to onboarding state. Stops the runtime, deletes the PGlite database directory (with safety checks), clears persisted onboarding and cloud credentials, and resets server state. GGUF models and the state directory itself are preserved.
 
 This is a sensitive endpoint with stricter authorization:
-- In `development` or `dev` environments (`NODE_ENV`), no token is required.
-- In all other environments, a valid `MILADY_API_TOKEN` must be configured and included in the request. Returns `403` if no token is configured.
+- If `MILADY_API_TOKEN` is configured, the request must include it as a Bearer token.
+- If no token is configured, the request is only allowed from loopback addresses (localhost). Non-loopback requests without a token return `403`.
 
 **Response**
 
@@ -226,6 +251,29 @@ Raw binary body — not JSON. The first 4 bytes encode the password length as a 
   "ok": true
 }
 ```
+
+### GET /api/agent/events
+
+Get buffered agent events including actions, thoughts, and status changes. Supports long-polling via the `since` parameter to receive only new events.
+
+**Query Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `since` | string | No | Event ID to start from (returns only events after this ID) |
+
+**Response**
+
+```json
+{
+  "events": [],
+  "latestEventId": null,
+  "totalBuffered": 0,
+  "replayed": true
+}
+```
+
+---
 
 ### GET /api/agent/self-status
 

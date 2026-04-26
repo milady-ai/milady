@@ -40,7 +40,7 @@ Téléchargez depuis **[GitHub Releases](https://github.com/milady-ai/milady/rel
 | macOS (Intel) | [`Milady-x64.dmg`](https://github.com/milady-ai/milady/releases/latest) | Macs d'avant 2020 |
 | Windows | [`Milady-Setup.exe`](https://github.com/milady-ai/milady/releases/latest) | Windows 10+ |
 | Linux | [`Milady.AppImage`](https://github.com/milady-ai/milady/releases/latest) / [`.deb`](https://github.com/milady-ai/milady/releases/latest) | AppImage ou paquet Debian |
-| iOS | [App Store](https://apps.apple.com/app/milady-private-ai-assistant/id0000000000) | iPhone et iPad |
+| iOS | App Store (bientôt) | iPhone et iPad |
 | Android | [Google Play](https://play.google.com/store/apps/details?id=ai.milady.app) / [APK](https://github.com/milady-ai/milady/releases/latest) | Android 10+ |
 
 Toutes les versions sont signées et notariées. Aucun avertissement Gatekeeper sur macOS.
@@ -64,7 +64,7 @@ shasum -a 256 --check --ignore-missing SHA256SUMS.txt
     Le script d'installation télécharge la dernière version, place le binaire dans votre PATH et lance la configuration initiale :
 
     ```bash
-    curl -fsSL https://milady-ai.github.io/milady/install.sh | bash
+    curl -fsSL https://get.milady.ai | bash
     milady setup
     ```
 
@@ -76,7 +76,7 @@ shasum -a 256 --check --ignore-missing SHA256SUMS.txt
   </Tab>
   <Tab title="Windows (PowerShell)">
     ```powershell
-    irm https://milady-ai.github.io/milady/install.ps1 | iex
+    irm https://get.milady.ai/install.ps1 | iex
     ```
 
     Après l'installation, ouvrez une nouvelle fenêtre de terminal et exécutez :

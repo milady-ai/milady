@@ -1,32 +1,28 @@
----
-title: iMessage Connector
-sidebarTitle: iMessage
-description: Connect your agent to iMessage using the @elizaos/plugin-imessage package.
----
+# iMessage Connector
 
-Connect your agent to iMessage for private chats and group conversations on macOS.
-
-## Overview
-
-The iMessage connector is an external elizaOS plugin that bridges your agent to iMessage and SMS on macOS. It accesses the native iMessage database directly and supports remote host connectivity via SSH. It is auto-enabled by the runtime when a CLI path is detected in your connector configuration.
-
-## Package Info
-
-| Field | Value |
-|-------|-------|
-| Package | `@elizaos/plugin-imessage` |
-| Config key | `connectors.imessage` |
-| Auto-enable trigger | `cliPath` is truthy in connector config |
+Connect your agent to iMessage for private chats and group conversations on macOS using the `@elizaos/plugin-imessage` package.
 
 ## Prerequisites
 
 - macOS with iMessage configured and signed in
 - Full Disk Access granted to the terminal or application running Milady (for chat database access at `~/Library/Messages/chat.db`)
-- A CLI tool for iMessage access (e.g., `imessage-exporter`)
+- A CLI tool for iMessage access — set the `cliPath` config field to the absolute path of the binary
 
-## Minimal Configuration
+## Configuration
 
-In `~/.milady/milady.json`:
+| Name | Required | Description |
+|------|----------|-------------|
+| `IMESSAGE_ENABLED` | No | Enable or disable the connector |
+| `IMESSAGE_CLI_PATH` | No | Path to the iMessage CLI tool executable |
+| `IMESSAGE_DB_PATH` | No | Path to the iMessage database (default: `~/Library/Messages/chat.db`) |
+| `IMESSAGE_DM_POLICY` | No | DM policy (e.g., `allow`, `deny`, `allowlist`) |
+| `IMESSAGE_ALLOW_FROM` | No | Comma-separated allowed sender list |
+| `IMESSAGE_GROUP_POLICY` | No | Group message policy |
+| `IMESSAGE_POLL_INTERVAL_MS` | No | Polling interval in milliseconds |
+
+The connector auto-enables when `cliPath` is truthy in the connector config and `enabled` is not explicitly `false`.
+
+Configure in `~/.milady/milady.json`:
 
 ```json
 {
@@ -40,9 +36,7 @@ In `~/.milady/milady.json`:
 }
 ```
 
-## Disabling
-
-To explicitly disable the connector even when a CLI path is present:
+To disable:
 
 ```json
 {
@@ -55,11 +49,39 @@ To explicitly disable the connector even when a CLI path is present:
 }
 ```
 
-## Auto-Enable Mechanism
+## Setup
 
-The `plugin-auto-enable.ts` module checks `connectors.imessage` in your config. If the `cliPath` field is truthy (and `enabled` is not explicitly `false`), the runtime automatically loads `@elizaos/plugin-imessage`.
+1. Ensure macOS has iMessage configured and signed in.
+2. Grant Full Disk Access to the terminal or Milady process (System Settings > Privacy & Security > Full Disk Access).
+3. Install an iMessage CLI tool and note its path.
+4. Add the CLI path to `connectors.imessage.cliPath` in your config.
+5. Start your agent -- the iMessage connector will auto-enable.
 
-No environment variable is required to trigger auto-enable — it is driven entirely by the connector config object.
+## Features
+
+## Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `IMESSAGE_CLI_PATH` | Path to the iMessage CLI tool executable |
+| `IMESSAGE_DB_PATH` | Path to the iMessage database |
+| `IMESSAGE_ENABLED` | Set to `true` to enable |
+| `IMESSAGE_DM_POLICY` | DM access policy |
+| `IMESSAGE_ALLOW_FROM` | Comma-separated list of allowed user IDs |
+| `IMESSAGE_GROUP_POLICY` | Group join policy |
+| `IMESSAGE_POLL_INTERVAL_MS` | Polling interval in milliseconds |
+
+## Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `IMESSAGE_CLI_PATH` | No | Path to the iMessage CLI tool executable |
+| `IMESSAGE_DB_PATH` | No | Path to the iMessage database |
+| `IMESSAGE_ENABLED` | No | Enable or disable the connector |
+| `IMESSAGE_DM_POLICY` | No | DM policy (e.g., `allow`, `deny`, `allowlist`) |
+| `IMESSAGE_ALLOW_FROM` | No | Comma-separated allowed sender list |
+| `IMESSAGE_GROUP_POLICY` | No | Group message policy |
+| `IMESSAGE_POLL_INTERVAL_MS` | No | Polling interval in milliseconds |
 
 ## Full Configuration Reference
 
@@ -188,6 +210,7 @@ The iMessage connector requires macOS. It will not function on Linux or Windows.
 
 ## Related
 
-- [iMessage plugin reference](/plugin-registry/platform/imessage)
+- [BlueBubbles Connector](/connectors/bluebubbles) -- iMessage via BlueBubbles HTTP API (works from any machine)
+- [Blooio Connector](/connectors/blooio) -- iMessage/SMS via Blooio cloud service
 - [Connectors overview](/guides/connectors)
 - [Configuration reference](/configuration)
