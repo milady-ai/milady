@@ -579,6 +579,10 @@ jobs:
           # Whitelist runtime-required app packages (agent imports these at boot)
           echo '!eliza/apps/app-companion' >> .dockerignore
           echo '!eliza/apps/app-lifeops' >> .dockerignore
+          echo '!eliza/apps/app-steward' >> .dockerignore
+          echo '!eliza/apps/app-task-coordinator' >> .dockerignore
+          echo '!eliza/apps/app-training' >> .dockerignore
+          echo '!eliza/apps/app-vincent' >> .dockerignore
 
       # ── 10. Set up builders ────────────────────────────────────────────────
       # Prefer Depot when available, but always provision Buildx so the fallback
