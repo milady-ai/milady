@@ -32,14 +32,19 @@ RUN set -x; \
     # NOTE: Do NOT copy src/ - tsx will prefer raw .ts over compiled dist/
     # cp -a eliza/packages/typescript/src node_modules/@elizaos/core/src 2>/dev/null || true; \
     ls node_modules/@elizaos/core/dist/node/index.node.js 2>/dev/null && echo "@elizaos/core dist OK" || echo "WARN: core dist/node missing"; \
-    # @elizaos/agent: delete symlink, copy package + compiled dist
+    # @elizaos/agent: delete symlink, copy compiled package root from dist.
+    # The source package.json exports ./src/*.ts, but we intentionally do not
+    # ship src/ here; use dist/package.json so imports from vendored apps resolve
+    # to the compiled packages/agent/src/*.js files inside the dist bundle.
     rm -rf node_modules/@elizaos/agent; \
     mkdir -p node_modules/@elizaos/agent; \
-    cp eliza/packages/agent/package.json node_modules/@elizaos/agent/; \
-    cp -a eliza/packages/agent/dist node_modules/@elizaos/agent/dist 2>/dev/null || true; \
-    # NOTE: Do NOT copy src/ - tsx will prefer raw .ts over compiled dist/
-    # cp -a eliza/packages/agent/src node_modules/@elizaos/agent/src 2>/dev/null || true; \
-    ls node_modules/@elizaos/agent/dist/ 2>/dev/null | head -3 && echo "@elizaos/agent dist OK" || echo "WARN: agent dist missing"; \
+    if [ -f eliza/packages/agent/dist/package.json ]; then \
+      cp -a eliza/packages/agent/dist/. node_modules/@elizaos/agent/; \
+    else \
+      cp eliza/packages/agent/package.json node_modules/@elizaos/agent/; \
+      cp -a eliza/packages/agent/dist node_modules/@elizaos/agent/dist 2>/dev/null || true; \
+    fi; \
+    ls node_modules/@elizaos/agent/packages/agent/src/index.js 2>/dev/null && echo "@elizaos/agent compiled package OK" || echo "WARN: agent compiled package missing"; \
     # @elizaos/plugin-sql: replace broken npm alpha with vendored submodule build.
     # The published alpha lacks object-form countMemories() support and does not
     # register the memoryStorage service, which breaks cloud chat.
