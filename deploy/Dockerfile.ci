@@ -194,6 +194,7 @@ export * from './src/security/platform-secure-store.ts';
 export * from './src/security/platform-secure-store-node.ts';
 export * from './src/components/inventory/constants.ts';
 export * from './src/utils/env.ts';
+export * from './src/utils/format.ts';
 export function mirrorCompatHeaders(req) {
   const aliases = [
     ['x-elizaos-token', 'x-eliza-token'],
@@ -278,6 +279,7 @@ export * from './src/website-blocker/public.ts';
 export { handleCloudFeaturesRoute } from './src/routes/cloud-features-routes.ts';
 export { handleTravelProviderRelayRoute } from './src/routes/travel-provider-relay-routes.ts';
 export * from './src/plugin.ts';
+export * from './src/lifeops/service.ts';
 export { lifeopsPlugin } from './src/routes/plugin.ts';
 `);
 patchRoot('@elizaos/app-companion', `
