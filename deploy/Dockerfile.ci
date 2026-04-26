@@ -766,7 +766,14 @@ try {
   const pkgPath = tgDir + '/package.json';
   const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
   pkg.exports ||= {};
+  const rootExport = pkg.exports['.'];
+  const rootTarget = typeof rootExport === 'string'
+    ? rootExport
+    : (rootExport && typeof rootExport === 'object' && (rootExport.import || rootExport.default))
+      || pkg.module || pkg.main || './index.mjs';
   pkg.exports['./account-auth-service'] = './account-auth-service.mjs';
+  fs.writeFileSync(tgDir + '/cloud-root.mjs', `export * from ${JSON.stringify(rootTarget)};\nexport * from './account-auth-service.mjs';\nimport pluginDefault from ${JSON.stringify(rootTarget)};\nexport default pluginDefault;\n`);
+  pkg.exports['.'] = './cloud-root.mjs';
   fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
 } catch (err) {
   console.log('WARN: failed to patch @elizaos/plugin-telegram account-auth-service export:', err?.message || err);
