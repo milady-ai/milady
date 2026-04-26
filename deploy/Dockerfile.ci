@@ -188,7 +188,7 @@ export * from './src/api/auth.ts';
 export * from './src/api/compat-route-shared.ts';
 export * from './src/api/response.ts';
 export * from './src/events/index.ts';
-export * from './src/bridge/native-plugins.ts';
+export * from './src/bridge/index.ts';
 export * from './src/security/agent-vault-id.ts';
 export * from './src/security/platform-secure-store.ts';
 export * from './src/security/platform-secure-store-node.ts';
