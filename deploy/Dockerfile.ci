@@ -767,10 +767,17 @@ try {
   const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
   pkg.exports ||= {};
   const rootExport = pkg.exports['.'];
-  const rootTarget = typeof rootExport === 'string'
-    ? rootExport
-    : (rootExport && typeof rootExport === 'object' && (rootExport.import || rootExport.default))
-      || pkg.module || pkg.main || './index.mjs';
+  function resolveExportTarget(value) {
+    if (typeof value === 'string') return value;
+    if (!value || typeof value !== 'object') return null;
+    return resolveExportTarget(value.import)
+      || resolveExportTarget(value.default)
+      || resolveExportTarget(value.node)
+      || resolveExportTarget(value.require)
+      || resolveExportTarget(value.types)
+      || null;
+  }
+  const rootTarget = resolveExportTarget(rootExport) || pkg.module || pkg.main || './index.mjs';
   pkg.exports['./account-auth-service'] = './account-auth-service.mjs';
   fs.writeFileSync(tgDir + '/cloud-root.mjs', `export * from ${JSON.stringify(rootTarget)};\nexport * from './account-auth-service.mjs';\nimport pluginDefault from ${JSON.stringify(rootTarget)};\nexport default pluginDefault;\n`);
   pkg.exports['.'] = './cloud-root.mjs';
