@@ -173,6 +173,27 @@ function patchRoot(name, code) {
   fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
   console.log(`[app-root-patch] ${name} root -> cloud-runtime-index.mjs`);
 }
+patchRoot('@elizaos/app-core', `
+export {
+  DEFAULT_MAX_BODY_BYTES,
+  readRequestBody,
+  readRequestBodyBuffer,
+} from '@elizaos/agent';
+export {
+  RESTART_EXIT_CODE,
+  requestRestart,
+  setRestartHandler,
+} from '@elizaos/shared';
+export * from './src/api/auth.ts';
+export * from './src/api/compat-route-shared.ts';
+export * from './src/api/response.ts';
+export * from './src/api/server-cloud-tts.ts';
+export * from './src/events/index.ts';
+export * from './src/security/agent-vault-id.ts';
+export * from './src/security/platform-secure-store.ts';
+export * from './src/security/platform-secure-store-node.ts';
+export * from './src/components/inventory/constants.ts';
+`);
 patchRoot('@elizaos/app-training', `
 export * from './src/routes/index.ts';
 export * from './src/services/index.ts';
