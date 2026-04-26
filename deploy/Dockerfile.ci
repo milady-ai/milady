@@ -576,9 +576,19 @@ for (const name of apps) {
     fs.writeFileSync(dir + '/plugin.mjs', `export class DropService {}
 export function handleDropRoutes() { return false; }
 export default {};`);
+    fs.writeFileSync(dir + '/drop-service.mjs', `export class DropService {}
+export default DropService;`);
+    fs.writeFileSync(dir + '/drop-service-registry.mjs', `let service = null;
+export function setElizaMakerDropService(next) { service = next ?? null; }
+export function getElizaMakerDropService() { return service; }
+export default { setElizaMakerDropService, getElizaMakerDropService };`);
     fs.writeFileSync(dir + '/package.json', JSON.stringify({
       name, version: '0.0.0-cloud-stub', type: 'module',
-      exports: { './plugin': './plugin.mjs', '.': './plugin.mjs' }
+      exports: {
+        './plugin': './plugin.mjs', '.': './plugin.mjs',
+        './drop-service': './drop-service.mjs',
+        './drop-service-registry': './drop-service-registry.mjs'
+      }
     }));
   } else if (name === '@elizaos/app-steward') {
     const routeStub = `export async function resolveWalletExportRejection() { return null; }\nexport async function handleWalletCoreRoutes() { return false; }\nexport default {};`;
