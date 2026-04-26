@@ -142,6 +142,92 @@ RUN set -x; \
     cp eliza/apps/app-lifeops/package.json node_modules/@elizaos/app-lifeops/; \
     cp -a eliza/apps/app-lifeops/src node_modules/@elizaos/app-lifeops/src 2>/dev/null || true; \
     ls node_modules/@elizaos/app-lifeops/src/plugin.ts 2>/dev/null && echo "@elizaos/app-lifeops src OK" || echo "WARN: app-lifeops src missing"
+# Patch vendored app package roots for the Node runtime. The real workspace
+# source packages deliberately include UI exports from their root index for the
+# browser build, but cloud startup imports server symbols from those roots. If
+# Node evaluates UI exports here it pulls @elizaos/ui/React-only modules that are
+# not part of the backend runtime image. Keep the real src + subpath exports,
+# but point the package root at a server-safe cloud index.
+RUN node - <<'__APP_ROOT_PATCH__'
+const fs = require('fs');
+function patchRoot(name, code) {
+  const dir = `node_modules/${name}`;
+  const pkgPath = `${dir}/package.json`;
+  if (!fs.existsSync(pkgPath)) {
+    console.log(`[app-root-patch] skip missing ${name}`);
+    return;
+  }
+  fs.writeFileSync(`${dir}/cloud-runtime-index.mjs`, code.trimStart());
+  const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+  pkg.type = 'module';
+  if (!pkg.exports || typeof pkg.exports !== 'object') pkg.exports = {};
+  pkg.exports['.'] = './cloud-runtime-index.mjs';
+  fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
+  console.log(`[app-root-patch] ${name} root -> cloud-runtime-index.mjs`);
+}
+patchRoot('@elizaos/app-training', `
+export * from './src/routes/index.ts';
+export * from './src/services/index.ts';
+export * from './src/core/index.ts';
+`);
+patchRoot('@elizaos/app-steward', `
+export * from './src/api/tx-service.ts';
+export * from './src/api/wallet-dex-prices.ts';
+export * from './src/browser-workspace-wallet.ts';
+export * from './src/chain-utils.ts';
+export { stewardPlugin } from './src/plugin.ts';
+export * from './src/routes/server-wallet-trade.ts';
+export {
+  approveStewardTransaction,
+  buildStewardHeaders,
+  createStewardClient,
+  denyStewardTransaction,
+  ensureStewardAgent,
+  __resetStewardAgentEnsured,
+  formatStewardError,
+  getRecentWebhookEvents,
+  getStewardBalance,
+  getStewardBridgeStatus,
+  getStewardHistory,
+  getStewardPendingApprovals as getStewardBridgePendingApprovals,
+  getStewardTokenBalances,
+  getStewardWalletAddresses,
+  isStewardConfigured,
+  provisionStewardWallet,
+  pushWebhookEvent,
+  registerStewardWebhook,
+  resolveStewardAgentId,
+  signTransactionWithOptionalSteward,
+  signViaSteward,
+  tryRegisterStewardWebhook,
+} from './src/routes/steward-bridge.ts';
+export * from './src/security/hydrate-wallet-keys-from-platform-store.ts';
+export * from './src/security/wallet-os-store-actions.ts';
+export * from './src/services/privy-wallets.ts';
+export { loadStewardCredentials, saveStewardCredentials } from './src/services/steward-credentials.ts';
+export * from './src/services/steward-evm-bridge.ts';
+export * from './src/services/steward-sidecar.ts';
+export * from './src/services/steward-wallet.ts';
+export * from './src/types/index.ts';
+`);
+patchRoot('@elizaos/app-task-coordinator', `
+export * from './src/api/coordinator-types.ts';
+export * from './src/api/coordinator-wiring.ts';
+export * from './src/api/task-agent-message-routing.ts';
+export * from './src/api/coding-agents-auth-sanitize.ts';
+export * from './src/api/coding-agents-preflight-normalize.ts';
+export * from './src/evals/coordinator-eval-client.ts';
+export * from './src/evals/coordinator-live-runner.ts';
+export * from './src/evals/coordinator-preflight.ts';
+export * from './src/evals/coordinator-scenarios.ts';
+`);
+patchRoot('@elizaos/app-vincent', `
+export { vincentPlugin } from './src/plugin.ts';
+export * from './src/routes.ts';
+export { VINCENT_APP_NAME, vincentApp } from './src/vincent-app.ts';
+`);
+__APP_ROOT_PATCH__
+
 # Link any remaining missing workspace app packages to node_modules
 RUN for app_dir in eliza/apps/app-coding eliza/apps/app-shopify; do \
       if [ -d "$app_dir" ]; then \
