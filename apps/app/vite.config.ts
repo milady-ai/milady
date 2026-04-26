@@ -1114,7 +1114,10 @@ function nativeModuleStubPlugin(): Plugin {
         ].join("\n");
       }
 
-      if (strippedId === "@elizaos/plugin-sql/schema") {
+      if (
+        strippedId === "@elizaos/plugin-sql/schema" ||
+        strippedId === "@elizaos/plugin-sql"
+      ) {
         return [
           "const handler = { get: () => table, apply: () => table };",
           "const table = new Proxy(function table() {}, handler);",
