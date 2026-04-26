@@ -99,9 +99,14 @@ RUN set -x; \
     cp eliza/plugins/plugin-telegram/package.json node_modules/@elizaos/plugin-telegram/; \
     cp -a eliza/plugins/plugin-telegram/dist node_modules/@elizaos/plugin-telegram/dist 2>/dev/null || true; \
     ls node_modules/@elizaos/plugin-telegram/dist/index.js 2>/dev/null && echo "@elizaos/plugin-telegram dist OK" || echo "WARN: plugin-telegram dist missing"; \
-    # @elizaos/shared: DON'T replace — the npm version or resolved workspace symlink works.
-    # Workspace package.json exports point to ./src/*.ts (tsx handles this).
-    # Replacing with dist-only breaks resolution since exports don't match dist layout.
+    # @elizaos/shared: vendor source package. The npm alpha can lag source exports
+    # (for example ./type-guards), while the workspace package exports ./src/*.ts
+    # and tsx handles those at runtime.
+    rm -rf node_modules/@elizaos/shared; \
+    mkdir -p node_modules/@elizaos/shared; \
+    cp eliza/packages/shared/package.json node_modules/@elizaos/shared/; \
+    cp -a eliza/packages/shared/src node_modules/@elizaos/shared/src 2>/dev/null || true; \
+    ls node_modules/@elizaos/shared/src/type-guards.ts 2>/dev/null && echo "@elizaos/shared src OK" || echo "WARN: shared src missing"; \
     # @elizaos/app-training and sibling runtime apps: copy real package contents
     # instead of falling through to the cloud route stubs below. The develop-side
     # agent now statically imports root named exports such as loadTrainingConfig,
@@ -278,7 +283,7 @@ RUN for app_dir in eliza/apps/app-coding eliza/apps/app-shopify; do \
 # bun creates workspace symlinks like eliza/apps/app-lifeops/node_modules/@elizaos/core
 # and @elizaos/plugin-sql that resolve correctly in CI but point nowhere in Docker.
 # Removing them forces Node's module resolution to walk up to root node_modules.
-RUN find eliza \( -path '*/node_modules/@elizaos/core' -o -path '*/node_modules/@elizaos/plugin-sql' -o -path '*/node_modules/@elizaos/plugin-elizacloud' -o -path '*/node_modules/@elizaos/plugin-discord' -o -path '*/node_modules/@elizaos/plugin-openai' -o -path '*/node_modules/@elizaos/plugin-evm' -o -path '*/node_modules/@elizaos/plugin-pdf' -o -path '*/node_modules/@elizaos/plugin-agent-orchestrator' -o -path '*/node_modules/@elizaos/plugin-telegram' \) -not -path '*/node_modules/.bun/*' \
+RUN find eliza \( -path '*/node_modules/@elizaos/core' -o -path '*/node_modules/@elizaos/shared' -o -path '*/node_modules/@elizaos/plugin-sql' -o -path '*/node_modules/@elizaos/plugin-elizacloud' -o -path '*/node_modules/@elizaos/plugin-discord' -o -path '*/node_modules/@elizaos/plugin-openai' -o -path '*/node_modules/@elizaos/plugin-evm' -o -path '*/node_modules/@elizaos/plugin-pdf' -o -path '*/node_modules/@elizaos/plugin-agent-orchestrator' -o -path '*/node_modules/@elizaos/plugin-telegram' \) -not -path '*/node_modules/.bun/*' \
     | while read p; do rm -rf "$p" && echo "Removed nested: $p"; done; true
 
 # ===== End symlink replacement =====
