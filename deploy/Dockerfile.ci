@@ -844,7 +844,7 @@ module.exports.getRegisteredCommands = function getRegisteredCommands() { return
   {
     name: '@elizaos/plugin-browser-bridge',
     exportName: 'browserBridgePlugin',
-    extraEsm: `export const pluginBrowserBridge = browserBridgePlugin;\nexport const plugin = browserBridgePlugin;\n`,
+    extraEsm: `export const pluginBrowserBridge = browserBridgePlugin;\nexport const plugin = browserBridgePlugin;\nexport * from './contracts.mjs';\nexport * from './service.mjs';\nexport * from './schema.mjs';\nexport * from './packaging.mjs';\nexport * from './routes.mjs';\n`,
     extraCjs: `module.exports.pluginBrowserBridge = module.exports.browserBridgePlugin;\nmodule.exports.plugin = module.exports.browserBridgePlugin;\n`,
     extraFiles: {
       'contracts.mjs': `export const BROWSER_BRIDGE_KINDS = ['chrome', 'safari'];\nexport const BROWSER_BRIDGE_ACTION_KINDS = ['open_url', 'search', 'summarize', 'extract', 'close_tab'];\nexport const BROWSER_BRIDGE_TRACKING_MODES = ['off', 'active_tab', 'all_tabs'];\nexport const BROWSER_BRIDGE_SITE_ACCESS_MODES = ['allow_all', 'deny_all', 'allowlist'];\nexport const BROWSER_BRIDGE_COMPANION_CONNECTION_STATES = ['disconnected', 'connecting', 'connected', 'error'];\nexport const BROWSER_BRIDGE_PACKAGE_PATH_TARGETS = ['chrome', 'safari'];\n`,
