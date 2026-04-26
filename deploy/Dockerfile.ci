@@ -97,6 +97,31 @@ RUN set -x; \
     # @elizaos/shared: DON'T replace — the npm version or resolved workspace symlink works.
     # Workspace package.json exports point to ./src/*.ts (tsx handles this).
     # Replacing with dist-only breaks resolution since exports don't match dist layout.
+    # @elizaos/app-training and sibling runtime apps: copy real package contents
+    # instead of falling through to the cloud route stubs below. The develop-side
+    # agent now statically imports root named exports such as loadTrainingConfig,
+    # TxService, and wireCoordinatorBridgesWhenReady; the old 0.0.0-cloud-stub
+    # packages only covered optional route/plugin registration subpaths.
+    rm -rf node_modules/@elizaos/app-training; \
+    mkdir -p node_modules/@elizaos/app-training; \
+    cp eliza/apps/app-training/package.json node_modules/@elizaos/app-training/; \
+    cp -a eliza/apps/app-training/src node_modules/@elizaos/app-training/src 2>/dev/null || true; \
+    ls node_modules/@elizaos/app-training/src/core/index.ts 2>/dev/null && echo "@elizaos/app-training src OK" || echo "WARN: app-training src missing"; \
+    rm -rf node_modules/@elizaos/app-steward; \
+    mkdir -p node_modules/@elizaos/app-steward; \
+    cp eliza/apps/app-steward/package.json node_modules/@elizaos/app-steward/; \
+    cp -a eliza/apps/app-steward/src node_modules/@elizaos/app-steward/src 2>/dev/null || true; \
+    ls node_modules/@elizaos/app-steward/src/index.ts 2>/dev/null && echo "@elizaos/app-steward src OK" || echo "WARN: app-steward src missing"; \
+    rm -rf node_modules/@elizaos/app-task-coordinator; \
+    mkdir -p node_modules/@elizaos/app-task-coordinator; \
+    cp eliza/apps/app-task-coordinator/package.json node_modules/@elizaos/app-task-coordinator/; \
+    cp -a eliza/apps/app-task-coordinator/src node_modules/@elizaos/app-task-coordinator/src 2>/dev/null || true; \
+    ls node_modules/@elizaos/app-task-coordinator/src/index.ts 2>/dev/null && echo "@elizaos/app-task-coordinator src OK" || echo "WARN: app-task-coordinator src missing"; \
+    rm -rf node_modules/@elizaos/app-vincent; \
+    mkdir -p node_modules/@elizaos/app-vincent; \
+    cp eliza/apps/app-vincent/package.json node_modules/@elizaos/app-vincent/; \
+    cp -a eliza/apps/app-vincent/src node_modules/@elizaos/app-vincent/src 2>/dev/null || true; \
+    ls node_modules/@elizaos/app-vincent/src/plugin.ts 2>/dev/null && echo "@elizaos/app-vincent src OK" || echo "WARN: app-vincent src missing"; \
     # @elizaos/app-companion: copy real package contents instead of relying on a workspace symlink
     # The runtime executes agent/src under tsx, and static imports like
     # @elizaos/app-companion/plugin must resolve through node_modules at runtime.
@@ -183,7 +208,7 @@ RUN CORE_DIR="node_modules/@elizaos/core"; \
 
 # Hoist missing deps from workspace packages to top-level node_modules
 # tsx resolves raw .ts source which imports packages not hoisted by bun
-RUN for pkg_dir in eliza/packages/typescript eliza/packages/shared eliza/packages/agent eliza/apps/app-companion eliza/apps/app-lifeops; do \
+RUN for pkg_dir in eliza/packages/typescript eliza/packages/shared eliza/packages/agent eliza/apps/app-training eliza/apps/app-steward eliza/apps/app-task-coordinator eliza/apps/app-vincent eliza/apps/app-companion eliza/apps/app-lifeops; do \
       if [ -d "$pkg_dir/node_modules" ]; then \
         for dep in $(ls "$pkg_dir/node_modules/" 2>/dev/null | grep -v '^\.'); do \
           if [ ! -e "node_modules/$dep" ] && [ -d "$pkg_dir/node_modules/$dep" ]; then \
