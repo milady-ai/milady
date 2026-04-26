@@ -175,11 +175,6 @@ function patchRoot(name, code) {
 }
 patchRoot('@elizaos/app-core', `
 export {
-  DEFAULT_MAX_BODY_BYTES,
-  readRequestBody,
-  readRequestBodyBuffer,
-} from '@elizaos/agent';
-export {
   RESTART_EXIT_CODE,
   requestRestart,
   setRestartHandler,
@@ -187,7 +182,6 @@ export {
 export * from './src/api/auth.ts';
 export * from './src/api/compat-route-shared.ts';
 export * from './src/api/response.ts';
-export * from './src/api/server-cloud-tts.ts';
 export * from './src/events/index.ts';
 export * from './src/bridge/native-plugins.ts';
 export * from './src/security/agent-vault-id.ts';
@@ -195,6 +189,22 @@ export * from './src/security/platform-secure-store.ts';
 export * from './src/security/platform-secure-store-node.ts';
 export * from './src/components/inventory/constants.ts';
 export * from './src/utils/env.ts';
+export function mirrorCompatHeaders(req) {
+  const aliases = [
+    ['x-elizaos-token', 'x-eliza-token'],
+    ['x-elizaos-export-token', 'x-eliza-export-token'],
+    ['x-elizaos-client-id', 'x-eliza-client-id'],
+    ['x-elizaos-terminal-token', 'x-eliza-terminal-token'],
+    ['x-elizaos-ui-language', 'x-eliza-ui-language'],
+    ['x-elizaos-agent-action', 'x-eliza-agent-action'],
+  ];
+  for (const [appHeader, elizaHeader] of aliases) {
+    const appValue = req?.headers?.[appHeader];
+    const elizaValue = req?.headers?.[elizaHeader];
+    if (appValue != null && elizaValue == null) req.headers[elizaHeader] = appValue;
+    if (elizaValue != null && appValue == null) req.headers[appHeader] = elizaValue;
+  }
+}
 `);
 patchRoot('@elizaos/app-training', `
 export * from './src/routes/index.ts';
