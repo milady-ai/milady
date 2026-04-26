@@ -994,6 +994,37 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 WORKDIR /app
 COPY --from=pruner /app /app
 
+# Runtime must resolve @elizaos/* through node_modules/package exports, not
+# repo-local tsconfig path aliases. The aliases are useful for Vite/typecheck,
+# but in the cloud image they bypass the vendored server-safe package roots and
+# can make Node evaluate browser UI barrels from eliza/apps/* during startup.
+RUN node - <<'__RUNTIME_TSCONFIG_PATCH__'
+const fs = require('fs');
+const cp = require('child_process');
+const files = cp.execSync("find /app -name tsconfig.json -not -path '*/node_modules/.bun/*'", { encoding: 'utf8' })
+  .trim()
+  .split(/\n+/)
+  .filter(Boolean);
+for (const file of files) {
+  let json;
+  try { json = JSON.parse(fs.readFileSync(file, 'utf8')); } catch { continue; }
+  const paths = json.compilerOptions && json.compilerOptions.paths;
+  if (!paths || typeof paths !== 'object') continue;
+  let changed = false;
+  for (const key of Object.keys(paths)) {
+    if (key === '@elizaos' || key.startsWith('@elizaos/')) {
+      delete paths[key];
+      changed = true;
+    }
+  }
+  if (changed) {
+    if (Object.keys(paths).length === 0) delete json.compilerOptions.paths;
+    fs.writeFileSync(file, JSON.stringify(json, null, 2));
+    console.log('[runtime-tsconfig] removed @elizaos paths from ' + file);
+  }
+}
+__RUNTIME_TSCONFIG_PATCH__
+
 # NOTE: Do NOT install esbuild globally. tsx bundles its own esbuild.
 # A global esbuild binary causes a recursive fork bomb (8000+ processes)
 # when tsx's loader spawns esbuild service processes.
