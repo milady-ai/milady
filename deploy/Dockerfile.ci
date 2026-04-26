@@ -44,6 +44,9 @@ RUN set -x; \
       cp eliza/packages/agent/package.json node_modules/@elizaos/agent/; \
       cp -a eliza/packages/agent/dist node_modules/@elizaos/agent/dist 2>/dev/null || true; \
     fi; \
+    if [ -f node_modules/@elizaos/agent/packages/agent/src/index.js ] && ! grep -q 'cloud root export conflict patches' node_modules/@elizaos/agent/packages/agent/src/index.js; then \
+      printf '\n// cloud root export conflict patches\nexport { resolveCloudApiBaseUrl } from "./cloud/base-url.js";\n' >> node_modules/@elizaos/agent/packages/agent/src/index.js; \
+    fi; \
     ls node_modules/@elizaos/agent/packages/agent/src/index.js 2>/dev/null && echo "@elizaos/agent compiled package OK" || echo "WARN: agent compiled package missing"; \
     # @elizaos/plugin-sql: replace broken npm alpha with vendored submodule build.
     # The published alpha lacks object-form countMemories() support and does not
