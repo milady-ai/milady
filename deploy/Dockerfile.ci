@@ -194,6 +194,7 @@ export * from './src/security/agent-vault-id.ts';
 export * from './src/security/platform-secure-store.ts';
 export * from './src/security/platform-secure-store-node.ts';
 export * from './src/components/inventory/constants.ts';
+export * from './src/utils/env.ts';
 `);
 patchRoot('@elizaos/app-training', `
 export * from './src/routes/index.ts';
