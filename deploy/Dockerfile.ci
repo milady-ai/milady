@@ -195,6 +195,14 @@ export * from './src/security/platform-secure-store-node.ts';
 export * from './src/components/inventory/constants.ts';
 export * from './src/utils/env.ts';
 export * from './src/utils/format.ts';
+export const client = new Proxy({}, {
+  get(_target, prop) {
+    if (prop === 'then') return undefined;
+    return async () => {
+      throw new Error('app-core client is not available in the cloud Node runtime');
+    };
+  },
+});
 export function mirrorCompatHeaders(req) {
   const aliases = [
     ['x-elizaos-token', 'x-eliza-token'],
