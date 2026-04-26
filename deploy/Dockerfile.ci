@@ -189,6 +189,7 @@ export * from './src/api/compat-route-shared.ts';
 export * from './src/api/response.ts';
 export * from './src/api/server-cloud-tts.ts';
 export * from './src/events/index.ts';
+export * from './src/bridge/native-plugins.ts';
 export * from './src/security/agent-vault-id.ts';
 export * from './src/security/platform-secure-store.ts';
 export * from './src/security/platform-secure-store-node.ts';
@@ -260,29 +261,7 @@ export * from './src/contracts/index.ts';
 export * from './src/website-blocker/public.ts';
 export { handleCloudFeaturesRoute } from './src/routes/cloud-features-routes.ts';
 export { handleTravelProviderRelayRoute } from './src/routes/travel-provider-relay-routes.ts';
-export {
-  appLifeOpsPlugin,
-  calendarAction,
-  ensureLifeOpsSchedulerTask,
-  executeLifeOpsSchedulerTask,
-  gmailAction,
-  handleLifeOpsRoutes,
-  handleWebsiteBlockerRoutes,
-  inboxAction,
-  inboxTriageProvider,
-  LIFEOPS_TASK_INTERVAL_MS,
-  LIFEOPS_TASK_JITTER_MS,
-  LIFEOPS_TASK_NAME,
-  LIFEOPS_TASK_TAGS,
-  BrowserBridgePluginService,
-  lifeAction,
-  browserBridgeProvider,
-  lifeOpsProvider,
-  manageBrowserBridgeAction,
-  registerLifeOpsTaskWorker,
-  resolveLifeOpsTaskIntervalMs,
-  updateOwnerProfileAction,
-} from './src/plugin.ts';
+export * from './src/plugin.ts';
 export { lifeopsPlugin } from './src/routes/plugin.ts';
 `);
 patchRoot('@elizaos/app-companion', `
