@@ -530,6 +530,44 @@ const phase2 = [
 (function next(i) { if (i >= phase2.length) return; installTarball(phase2[i], () => next(i+1)); })(0);
 __HOIST__
 
+# Patch @elizaos/plugin-n8n-workflow's published ESM output. The package ships
+# extensionless relative imports (for example './services/index'), which Node's
+# ESM resolver rejects when the plugin is loaded from node_modules in the cloud
+# image. Add .js only when the referenced file exists.
+RUN node - <<'__PATCH_N8N_ESM__'
+const fs = require('fs');
+const path = require('path');
+const root = 'node_modules/@elizaos/plugin-n8n-workflow/dist';
+if (fs.existsSync(root)) {
+  const visit = (dir) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        visit(full);
+        continue;
+      }
+      if (!entry.isFile() || !entry.name.endsWith('.js')) continue;
+      let source = fs.readFileSync(full, 'utf8');
+      const patched = source.replace(
+        /(from\s+['"])(\.{1,2}\/[^'"]+?)(['"])/g,
+        (match, prefix, spec, suffix) => {
+          if (spec.endsWith('.js') || spec.endsWith('.json')) return match;
+          const target = path.resolve(path.dirname(full), spec);
+          if (fs.existsSync(`${target}.js`)) return `${prefix}${spec}.js${suffix}`;
+          if (fs.existsSync(path.join(target, 'index.js'))) return `${prefix}${spec}/index.js${suffix}`;
+          return match;
+        },
+      );
+      if (patched !== source) {
+        fs.writeFileSync(full, patched);
+        console.log(`Patched n8n ESM imports in ${full}`);
+      }
+    }
+  };
+  visit(root);
+}
+__PATCH_N8N_ESM__
+
 # Patch plugin-agent-skills getCatalogStats crash (alpha.11 vs alpha.66 interface mismatch)
 RUN sed -i 's/const stats = service.getCatalogStats();/const stats = typeof service.getCatalogStats === "function" ? service.getCatalogStats() : { loaded: 0, total: 0, storageType: "unknown" };/g' node_modules/@elizaos/plugin-agent-skills/dist/index.js 2>/dev/null || true
 ARG VERSION_CLEAN
