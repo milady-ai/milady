@@ -288,8 +288,8 @@ export { appCompanionPlugin, default } from './src/plugin.ts';
   const sqlNodeEntry = 'node_modules/@elizaos/plugin-sql/dist/node/index.node.js';
   if (fs.existsSync(sqlNodeEntry)) {
     const src = fs.readFileSync(sqlNodeEntry, 'utf8');
-    if (!src.includes('authAuditEventTable = schema.authAuditEventTable')) {
-      fs.writeFileSync(sqlNodeEntry, `${src}\n\nexport const authAuditEventTable = schema.authAuditEventTable;\nexport const authBootstrapJtiSeenTable = schema.authBootstrapJtiSeenTable;\nexport const authIdentityTable = schema.authIdentityTable;\nexport const authOwnerBindingTable = schema.authOwnerBindingTable;\nexport const authOwnerLoginTokenTable = schema.authOwnerLoginTokenTable;\nexport const authSessionTable = schema.authSessionTable;\n`);
+    if (!src.includes('authAuditEventTable as authAuditEventTable')) {
+      fs.writeFileSync(sqlNodeEntry, `${src}\n\nexport {\n  authAuditEventTable as authAuditEventTable,\n  authBootstrapJtiSeenTable as authBootstrapJtiSeenTable,\n  authIdentityTable as authIdentityTable,\n  authOwnerBindingTable as authOwnerBindingTable,\n  authOwnerLoginTokenTable as authOwnerLoginTokenTable,\n  authSessionTable as authSessionTable,\n};\n`);
       console.log('[patch-deps] Patched @elizaos/plugin-sql node root: exported auth schema tables.');
     }
   }
