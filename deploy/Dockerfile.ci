@@ -194,20 +194,6 @@ export * from './src/security/platform-secure-store.ts';
 export * from './src/security/platform-secure-store-node.ts';
 export * from './src/components/inventory/constants.ts';
 export * from './src/utils/index.ts';
-export * from '@elizaos/ui';
-export const client = new Proxy({}, {
-  get(_target, prop) {
-    if (prop === 'then') return undefined;
-    return async () => {
-      throw new Error('app-core client is not available in the cloud Node runtime');
-    };
-  },
-});
-export function useApp() { return {}; }
-export function usePtySessions() { return {}; }
-export function useRenderGuard() { return { shouldRender: true }; }
-export function registerOverlayApp() {}
-export function resolveAppAssetUrl(value) { return value; }
 export function mirrorCompatHeaders(req) {
   const aliases = [
     ['x-elizaos-token', 'x-eliza-token'],
@@ -284,16 +270,9 @@ export * from './src/evals/coordinator-scenarios.ts';
 patchRoot('@elizaos/app-vincent', `
 export { vincentPlugin } from './src/plugin.ts';
 export * from './src/routes.ts';
-export { VINCENT_APP_NAME, vincentApp } from './src/vincent-app.ts';
 `);
 patchRoot('@elizaos/app-lifeops', `
-export * from './src/contracts/index.ts';
-export * from './src/website-blocker/public.ts';
-export { handleCloudFeaturesRoute } from './src/routes/cloud-features-routes.ts';
-export { handleTravelProviderRelayRoute } from './src/routes/travel-provider-relay-routes.ts';
-export * from './src/plugin.ts';
-export * from './src/lifeops/service.ts';
-export { lifeopsPlugin } from './src/routes/plugin.ts';
+export * from './src/index.ts';
 `);
 patchRoot('@elizaos/app-companion', `
 export * from './src/emotes/index.ts';
