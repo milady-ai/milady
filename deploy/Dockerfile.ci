@@ -285,7 +285,7 @@ export { appCompanionPlugin, default } from './src/plugin.ts';
 // exports for Vite/native-stub compatibility. Bridge that package-version gap
 // in the cloud Node runtime without pulling plugin-sql browser/native stubs.
 {
-  const sqlNodeEntry = path.join(root, 'node_modules/@elizaos/plugin-sql/dist/node/index.node.js');
+  const sqlNodeEntry = 'node_modules/@elizaos/plugin-sql/dist/node/index.node.js';
   if (fs.existsSync(sqlNodeEntry)) {
     const src = fs.readFileSync(sqlNodeEntry, 'utf8');
     if (!src.includes('authAuditEventTable = schema.authAuditEventTable')) {
