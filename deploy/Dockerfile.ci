@@ -548,7 +548,7 @@ if (fs.existsSync(root)) {
       }
       if (!entry.isFile() || !entry.name.endsWith('.js')) continue;
       let source = fs.readFileSync(full, 'utf8');
-      const patched = source.replace(
+      let patched = source.replace(
         /(from\s+['"])(\.{1,2}\/[^'"]+?)(['"])/g,
         (match, prefix, spec, suffix) => {
           if (spec.endsWith('.js') || spec.endsWith('.json')) return match;
@@ -557,6 +557,12 @@ if (fs.existsSync(root)) {
           if (fs.existsSync(path.join(target, 'index.js'))) return `${prefix}${spec}/index.js${suffix}`;
           return match;
         },
+      );
+      // Node 22 removed the old JSON import assertion syntax; import
+      // attributes are the supported form.
+      patched = patched.replace(
+        /\sassert\s*\{\s*type:\s*(['"])json\1\s*\}/g,
+        " with { type: 'json' }",
       );
       if (patched !== source) {
         fs.writeFileSync(full, patched);
