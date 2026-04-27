@@ -14,6 +14,7 @@ import {
   ensureElizaBuildOutputs,
   ensureElizaTypescriptDependencyLinks,
   ensurePluginAnthropicBunTypes,
+  ensurePluginTelegramNodeTypes,
   ensurePublishedElizaPackageLinks,
   ensureRequiredElizaPluginBuilds,
   findInstalledPackageDir,
@@ -22,6 +23,7 @@ import {
   getTemporaryElizaWorkspaceEntries,
   getUpstreamPackageLinks,
   patchPluginBuildTscBinPaths,
+  patchPluginManagerWindowsDtsBuild,
   resolveTypeScriptIgnoreDeprecationsTarget,
   runElizaInstallWithRetry,
   stripMissingConditionalElizaWorkspaces,
@@ -55,6 +57,45 @@ describe("ensureElizaTypescriptDependencyLinks", () => {
     const repoRoot = makeTempDir();
     const elizaRoot = path.join(repoRoot, "eliza");
     expect(ensureElizaTypescriptDependencyLinks(elizaRoot)).toBe(0);
+  });
+
+  it("links core ambient type dependencies by default when available", () => {
+    const repoRoot = makeTempDir();
+    const elizaRoot = path.join(repoRoot, "eliza");
+    const nodeTypesPkg = path.join(repoRoot, "node_modules", "@types", "node");
+    const bunTypesPkg = path.join(repoRoot, "node_modules", "@types", "bun");
+    const bunTypesAmbientPkg = path.join(repoRoot, "node_modules", "bun-types");
+    writeFile(
+      path.join(nodeTypesPkg, "package.json"),
+      '{"name":"@types/node"}',
+    );
+    writeFile(path.join(bunTypesPkg, "package.json"), '{"name":"@types/bun"}');
+    writeFile(
+      path.join(bunTypesAmbientPkg, "package.json"),
+      '{"name":"bun-types"}',
+    );
+
+    expect(ensureElizaTypescriptDependencyLinks(elizaRoot)).toBe(6);
+    for (const [dependency, targetPkg] of [
+      ["@types/node", nodeTypesPkg],
+      ["@types/bun", bunTypesPkg],
+      ["bun-types", bunTypesAmbientPkg],
+    ] as const) {
+      expect(
+        fs.realpathSync(
+          path.join(
+            elizaRoot,
+            "packages",
+            "typescript",
+            "node_modules",
+            dependency,
+          ),
+        ),
+      ).toBe(fs.realpathSync(targetPkg));
+      expect(
+        fs.realpathSync(path.join(elizaRoot, "node_modules", dependency)),
+      ).toBe(fs.realpathSync(targetPkg));
+    }
   });
 
   it("links an explicitly listed package from the repo root into core", () => {
@@ -667,6 +708,19 @@ describe("ensureRequiredElizaPluginBuilds", () => {
       "export {};\n",
     );
     writeFile(path.join(telegramPackage, "package.json"), "{}\n");
+    const telegramTsconfigPath = path.join(telegramPackage, "tsconfig.json");
+    const telegramBuildTsconfigPath = path.join(
+      telegramPackage,
+      "tsconfig.build.json",
+    );
+    writeFile(
+      telegramTsconfigPath,
+      '{\n  "compilerOptions": {\n    "target": "ESNext"\n  }\n}\n',
+    );
+    writeFile(
+      telegramBuildTsconfigPath,
+      '{\n  "extends": "./tsconfig.json",\n  "compilerOptions": {\n    "declaration": true\n  }\n}\n',
+    );
     writeFile(path.join(edgeTtsPackage, "package.json"), "{}\n");
     writeFile(
       path.join(edgeTtsPackage, "dist", "node", "index.node.js"),
@@ -678,13 +732,26 @@ describe("ensureRequiredElizaPluginBuilds", () => {
       "export {};\n",
     );
 
-    const runCommandImpl = vi.fn().mockResolvedValue(undefined);
+    const runCommandImpl = vi.fn().mockImplementation(async () => {
+      expect(
+        JSON.parse(fs.readFileSync(telegramTsconfigPath, "utf8"))
+          .compilerOptions.types,
+      ).toEqual(["node"]);
+      expect(
+        JSON.parse(fs.readFileSync(telegramBuildTsconfigPath, "utf8"))
+          .compilerOptions.types,
+      ).toEqual(["node"]);
+    });
     const log = vi.fn();
 
     await expect(
       ensureRequiredElizaPluginBuilds(repoRoot, {
         pathExists: (targetPath) =>
           targetPath.endsWith(path.join("package.json")) ||
+          targetPath.endsWith(path.join("plugin-telegram", "tsconfig.json")) ||
+          targetPath.endsWith(
+            path.join("plugin-telegram", "tsconfig.build.json"),
+          ) ||
           targetPath.endsWith(
             path.join("plugin-agent-skills", "typescript", "dist", "index.js"),
           ) ||
@@ -1633,6 +1700,64 @@ describe("ensurePluginAnthropicBunTypes", () => {
   });
 });
 
+describe("ensurePluginTelegramNodeTypes", () => {
+  function writeTelegramConfig(
+    pluginsRoot: string,
+    fileName: string,
+    config: Record<string, unknown>,
+  ) {
+    const configPath = path.join(pluginsRoot, "plugin-telegram", fileName);
+    writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`);
+    return configPath;
+  }
+
+  it("adds 'node' to both plugin-telegram TypeScript configs", () => {
+    const pluginsRoot = makeTempDir();
+    const baseConfigPath = writeTelegramConfig(pluginsRoot, "tsconfig.json", {
+      compilerOptions: { target: "ESNext" },
+    });
+    const buildConfigPath = writeTelegramConfig(
+      pluginsRoot,
+      "tsconfig.build.json",
+      {
+        extends: "./tsconfig.json",
+        compilerOptions: { declaration: true },
+      },
+    );
+
+    expect(ensurePluginTelegramNodeTypes(pluginsRoot)).toBe(2);
+
+    expect(
+      JSON.parse(fs.readFileSync(baseConfigPath, "utf8")).compilerOptions.types,
+    ).toEqual(["node"]);
+    expect(
+      JSON.parse(fs.readFileSync(buildConfigPath, "utf8")).compilerOptions
+        .types,
+    ).toEqual(["node"]);
+  });
+
+  it("preserves existing type packages and does not duplicate 'node'", () => {
+    const pluginsRoot = makeTempDir();
+    const configPath = writeTelegramConfig(pluginsRoot, "tsconfig.json", {
+      compilerOptions: { types: ["vitest/globals"] },
+    });
+    writeTelegramConfig(pluginsRoot, "tsconfig.build.json", {
+      compilerOptions: { types: ["node"] },
+    });
+
+    expect(ensurePluginTelegramNodeTypes(pluginsRoot)).toBe(1);
+
+    expect(
+      JSON.parse(fs.readFileSync(configPath, "utf8")).compilerOptions.types,
+    ).toEqual(["vitest/globals", "node"]);
+  });
+
+  it("is a no-op when plugin-telegram is not present", () => {
+    const pluginsRoot = makeTempDir();
+    expect(ensurePluginTelegramNodeTypes(pluginsRoot)).toBe(0);
+  });
+});
+
 describe("patchPluginBuildTscBinPaths", () => {
   it("patches hardcoded plugin tsc paths to use the Windows cmd shim", () => {
     const pluginsRoot = makeTempDir();
@@ -1674,5 +1799,54 @@ describe("patchPluginBuildTscBinPaths", () => {
       'process.platform === "win32" ? "tsc.cmd" : "tsc"',
     );
     expect(patchPluginBuildTscBinPaths(pluginsRoot)).toBe(0);
+  });
+});
+
+describe("patchPluginManagerWindowsDtsBuild", () => {
+  it("uses tsc declaration emit when tsup DTS is disabled on Windows", () => {
+    const pluginsRoot = makeTempDir();
+    const packageDir = path.join(
+      pluginsRoot,
+      "plugin-plugin-manager",
+      "typescript",
+    );
+    const packageJsonPath = path.join(packageDir, "package.json");
+    const tsupConfigPath = path.join(packageDir, "tsup.config.ts");
+
+    writeFile(
+      packageJsonPath,
+      JSON.stringify(
+        {
+          name: "@elizaos/plugin-plugin-manager",
+          scripts: { build: "tsup && tsc --noEmit" },
+        },
+        null,
+        2,
+      ),
+    );
+    writeFile(
+      tsupConfigPath,
+      [
+        'import { defineConfig } from "tsup";',
+        "export default defineConfig({",
+        "  dts: true, // require DTS so we get d.ts in the dist folder on npm",
+        "});",
+      ].join("\n"),
+    );
+
+    expect(patchPluginManagerWindowsDtsBuild(pluginsRoot)).toBe(2);
+
+    const packageJson = JSON.parse(
+      fs.readFileSync(packageJsonPath, "utf8"),
+    ) as {
+      scripts: { build: string };
+    };
+    expect(packageJson.scripts.build).toBe(
+      "tsup && tsc --emitDeclarationOnly -p tsconfig.build.json && tsc --noEmit",
+    );
+    expect(fs.readFileSync(tsupConfigPath, "utf8")).toContain(
+      'dts: process.platform === "win32" ? false : true',
+    );
+    expect(patchPluginManagerWindowsDtsBuild(pluginsRoot)).toBe(0);
   });
 });

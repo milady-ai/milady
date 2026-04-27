@@ -41,6 +41,7 @@ PRODUCT_PACKAGES -= \
     Launcher3QuickStep \
     ManagedProvisioning \
     Messaging \
+    messaging \
     Music \
     Provision \
     QuickSearchBox \

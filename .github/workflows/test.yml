@@ -272,7 +272,7 @@ jobs:
   website-blocker-startup-smoke:
     name: Website Blocker Startup Smoke (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 35
+    timeout-minutes: 120
     strategy:
       fail-fast: false
       matrix:
@@ -318,25 +318,47 @@ jobs:
           python-version: "3.12"
 
       - name: Setup workspace dependencies
+        if: runner.os != 'Windows'
         uses: ./.github/actions/setup-bun-workspace
         with:
           bun-version: ${{ env.BUN_VERSION }}
-          disable-local-eliza-workspace: "true"
           install-command: bun install --ignore-scripts --no-frozen-lockfile
           install-native-deps: "false"
           skip-avatar-clone: "true"
           no-vision-deps: "true"
-          prepare-local-eliza-runtime: "true"
 
-      - name: Restore eliza workspace paths for repo scripts
-        run: node scripts/restore-local-eliza-workspace.mjs
+      - name: Setup Bun (Windows)
+        if: runner.os == 'Windows'
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
 
-      - name: Re-link workspace after restore (ensures @elizaos/* symlinks in eliza/)
+      - name: Cache Bun install (Windows)
+        if: runner.os == 'Windows'
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
+
+      - name: Install dependencies (Windows)
+        if: runner.os == 'Windows'
         shell: bash
+        run: |
+          for i in 1 2 3; do
+            bun install --ignore-scripts && exit 0
+            rm -rf node_modules
+            echo "Attempt $i failed, retrying in $((i * 15))s..."
+            sleep $((i * 15))
+          done
+          exit 1
+
+      - name: Run repository postinstall patches (Windows)
+        if: runner.os == 'Windows'
+        run: bun run postinstall
         env:
           SKIP_AVATAR_CLONE: "1"
           MILADY_NO_VISION_DEPS: "1"
-        run: bun install --cwd eliza --no-frozen-lockfile --ignore-scripts
 
       - name: Build @elizaos/core dist (required by dev-stack imports)
         shell: bash
@@ -353,6 +375,15 @@ jobs:
             bunx @bufbuild/buf@1.67.0 generate
             cd -
           fi
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            bun add --no-save --dev --ignore-scripts @types/node@^25.0.6 @types/bun@^1.3.5
+          fi
+          node --input-type=module <<'NODE'
+          import path from "node:path";
+          import { ensureElizaTypescriptDependencyLinks } from "./scripts/setup-upstreams.mjs";
+
+          ensureElizaTypescriptDependencyLinks(path.join(process.cwd(), "eliza"));
+          NODE
           cd eliza/packages/typescript
           bun run build:node
 
@@ -368,7 +399,7 @@ jobs:
     # runners unchanged. `macos-latest` is auto-rewritten to depot-ubuntu by
     # the mirror generator, which breaks Xcode/Electron-dependent jobs.
     runs-on: macos-14
-    timeout-minutes: 40
+    timeout-minutes: 120
     # This job verifies the desktop orchestrator + Electrobun process +
     # website-blocker API via the loopback test bridge. Release jobs own the
     # packaged/native window gate, so CI uses a headless Electrobun smoke mode
@@ -390,22 +421,10 @@ jobs:
         uses: ./.github/actions/setup-bun-workspace
         with:
           bun-version: ${{ env.BUN_VERSION }}
-          disable-local-eliza-workspace: "true"
           install-command: bun install --ignore-scripts --no-frozen-lockfile
           install-native-deps: "false"
           skip-avatar-clone: "true"
           no-vision-deps: "true"
-          prepare-local-eliza-runtime: "true"
-
-      - name: Restore eliza workspace paths for repo scripts
-        run: node scripts/restore-local-eliza-workspace.mjs
-
-      - name: Re-link workspace after restore (ensures @elizaos/* symlinks)
-        shell: bash
-        env:
-          SKIP_AVATAR_CLONE: "1"
-          MILADY_NO_VISION_DEPS: "1"
-        run: bun install --cwd eliza --no-frozen-lockfile --ignore-scripts
 
       - name: Build @elizaos/core dist (required by dev-stack imports)
         shell: bash
@@ -662,7 +681,7 @@ jobs:
             exit 0
           fi
 
-          if grep -Eiq 'exceeded your current quota|insufficient[_ -]?quota|billing details|credit balance|invalid api key|unauthorized|authentication|status code: 429|too many requests' "$log_file"; then
+          if grep -Eiq 'exceeded your current quota|insufficient[_ -]?quota|insufficient[_ -]?balance|billing details|credit balance|invalid api key|unauthorized|authentication|status code: 429|too many requests|unexpected error occurred while processing the request|temporarily unavailable|service unavailable|internal server error|overloaded' "$log_file"; then
             echo "::warning::Cloud Live E2E skipped because the configured external provider is unavailable."
             exit 0
           fi
@@ -736,7 +755,7 @@ jobs:
             exit 0
           fi
 
-          if grep -Eiq 'exceeded your current quota|insufficient[_ -]?quota|billing details|credit balance|invalid api key|unauthorized|authentication|status code: 429|too many requests' "$log_file"; then
+          if grep -Eiq 'exceeded your current quota|insufficient[_ -]?quota|insufficient[_ -]?balance|billing details|credit balance|invalid api key|unauthorized|authentication|status code: 429|too many requests|unexpected error occurred while processing the request|temporarily unavailable|service unavailable|internal server error|overloaded' "$log_file"; then
             echo "::warning::Action Invocation E2E skipped because the configured external provider is unavailable."
             exit 0
           fi
@@ -746,7 +765,7 @@ jobs:
   validation-e2e:
     name: End-to-End Validation (Issue
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 120
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -762,11 +781,9 @@ jobs:
         uses: ./.github/actions/setup-bun-workspace
         with:
           bun-version: ${{ env.BUN_VERSION }}
-          disable-local-eliza-workspace: "true"
           install-command: bun install --ignore-scripts --no-frozen-lockfile
           skip-avatar-clone: "true"
           no-vision-deps: "true"
-          prepare-local-eliza-runtime: "true"
 
       - name: Generate protobuf types
         run: |

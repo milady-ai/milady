@@ -217,6 +217,46 @@ export async function installDefaultAppRoutes(page: Page): Promise<void> {
     });
   });
 
+  await page.route("**/api/auth/me", async (route) => {
+    if (route.request().method() !== "GET") {
+      await route.fallback();
+      return;
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        identity: {
+          id: "playwright-smoke-owner",
+          displayName: "Playwright Smoke",
+          kind: "owner",
+        },
+        session: {
+          id: "playwright-smoke-session",
+          kind: "local",
+          expiresAt: null,
+        },
+        access: {
+          mode: "local",
+          passwordConfigured: false,
+          ownerConfigured: true,
+        },
+      }),
+    });
+  });
+
+  await page.route("**/api/auth/sessions", async (route) => {
+    if (route.request().method() !== "GET") {
+      await route.fallback();
+      return;
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ sessions: [] }),
+    });
+  });
+
   await page.route("**/api/agents", async (route) => {
     if (route.request().method() !== "GET") {
       await route.fallback();

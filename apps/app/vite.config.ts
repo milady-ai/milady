@@ -848,6 +848,10 @@ function nativeModuleStubPlugin(): Plugin {
     // prebundle proxy-agent and other Node-only HTTP deps for the browser.
     "puppeteer-core",
     "@puppeteer/browsers",
+    // GramJS / SOCKS networking is Node-only. If Telegram account auth leaks
+    // into the renderer graph, stub it before socksclient extends node:net.
+    "telegram",
+    "socks",
     // Server-only plugins statically imported from the @elizaos/agent runtime.
     // Their exports maps nest browser/node conditional exports that Vite 6's
     // commonjs--resolver cannot walk. Stubbing returns an empty Proxy virtual
@@ -994,6 +998,27 @@ function nativeModuleStubPlugin(): Plugin {
             "emptyDir",
             "emptyDirSync",
           ].map((n) => `export const ${n} = noop;`),
+        ].join("\n");
+      }
+
+      // Telegram's MTProto client is server-only. If it reaches this virtual
+      // native stub path, preserve the static exports used by account auth.
+      if (modName === "telegram") {
+        if (strippedId.startsWith("telegram/sessions")) {
+          return [
+            "export class StringSession { constructor(value = '') { this.value = value; } }",
+            "export default { StringSession };",
+          ].join("\n");
+        }
+
+        return [
+          "const noop = () => {};",
+          "class SignIn { constructor(input = {}) { Object.assign(this, input); } }",
+          "class Authorization { constructor(input = {}) { Object.assign(this, input); } }",
+          "const Api = Object.freeze({ auth: Object.freeze({ SignIn, Authorization }) });",
+          "class TelegramClient {}",
+          "export { Api, TelegramClient };",
+          "export default { Api, TelegramClient, noop };",
         ].join("\n");
       }
 
@@ -1823,6 +1848,9 @@ export default defineConfig({
       // Browser automation is server-only and pulls in proxy-agent/httpUtil.
       "puppeteer-core",
       "@puppeteer/browsers",
+      // Telegram account auth is server-only and pulls in GramJS + socks.
+      "telegram",
+      "socks",
       // Native LLM embedding — uses node-llama-cpp, never runs in browser
       "@elizaos/plugin-local-embedding",
     ],

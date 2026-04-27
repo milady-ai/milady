@@ -139,6 +139,20 @@ jobs:
       - name: Install published-workspace fallback dependencies
         run: bash scripts/install-published-workspace-fallback-deps.sh
 
+      - name: Build local plugin-telegram and overlay node_modules
+        run: |
+          git submodule update --init --depth=1 eliza/plugins/plugin-telegram
+          test -f eliza/plugins/plugin-telegram/package.json
+          (cd eliza/plugins/plugin-telegram && bun "$GITHUB_WORKSPACE/node_modules/tsup/dist/cli-default.js" src/index.ts src/account-auth-service.ts --format esm --out-dir dist --tsconfig tsconfig.build.json --sourcemap --clean --no-config)
+
+          installed_dir="node_modules/@elizaos/plugin-telegram"
+          test -d "$installed_dir"
+          test -d eliza/plugins/plugin-telegram/dist
+          rm -rf "$installed_dir/dist"
+          cp -r eliza/plugins/plugin-telegram/dist "$installed_dir/dist"
+          cp eliza/plugins/plugin-telegram/package.json "$installed_dir/package.json"
+          test -f "$installed_dir/dist/account-auth-service.js"
+
       - name: Restore eliza workspace paths for repo-local tests
         run: node scripts/restore-local-eliza-workspace.mjs
 

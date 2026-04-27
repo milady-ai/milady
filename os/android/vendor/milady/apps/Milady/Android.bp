@@ -1,9 +1,24 @@
 // Privileged system import of the Milady APK (built by `bun run build:android:system`).
+//
+// dex_preopt is disabled because:
+//   1. The APK is mostly a Capacitor WebView shell — dexpreopt buys
+//      basically nothing for its small Java surface.
+//   2. The Capacitor manifest declares optional uses-libraries
+//      (androidx.camera.extensions.impl, androidx.window.extensions,
+//      androidx.window.sidecar) that AOSP's manifest_check requires
+//      the build system to also declare. Disabling dexpreopt skips
+//      that check.
+//
+// Update validate.mjs's APK marker list together with any change to
+// the optional_uses_libs / dex_preopt fields here.
 android_app_import {
     name: "Milady",
     apk: "Milady.apk",
     certificate: "platform",
     privileged: true,
+    dex_preopt: {
+        enabled: false,
+    },
     overrides: [
         "Launcher3",
         "Launcher3QuickStep",

@@ -68,18 +68,27 @@ export default scenario({
       name: "telegram-local-reply-two-step-gate",
       predicate: async (ctx) => {
         const firstBlob = JSON.stringify(ctx.turns?.[0]?.actionsCalled ?? []);
-        const secondBlob = JSON.stringify(ctx.turns?.[1]?.actionsCalled ?? []);
+        const secondActions = ctx.turns?.[1]?.actionsCalled ?? [];
+        const secondBlob = JSON.stringify(secondActions);
         if (
           /send|"confirmed":true/i.test(firstBlob) &&
           !/draft/i.test(firstBlob)
         ) {
           return "first turn appears to have sent the Telegram reply instead of drafting it";
         }
-        if (!/send|"confirmed":true/i.test(secondBlob)) {
-          const responseText = String(ctx.turns?.[1]?.responseText ?? "");
-          if (!/\bsent\b|\bsending\b/i.test(responseText)) {
-            return "second turn did not clearly send the Telegram reply after confirmation";
-          }
+        const sendAction = secondActions.find((entry) =>
+          ["CROSS_CHANNEL_SEND", "OWNER_SEND_MESSAGE"].includes(
+            entry.actionName,
+          ),
+        );
+        if (!sendAction) {
+          return "second turn did not call the Telegram send action after confirmation";
+        }
+        if (!/"confirmed":true|send/i.test(secondBlob)) {
+          return "second turn did not carry a confirmed Telegram send payload";
+        }
+        if (!/telegram/i.test(secondBlob)) {
+          return "second turn send payload did not identify Telegram as the channel";
         }
       },
     },

@@ -610,6 +610,7 @@ export function resolvePublishSafePinnedVersions(
   {
     dependencyNames = undefined,
     versionSources = new Map(),
+    fileOverrideNames = undefined,
     readRegistryInfo = readRegistryPackageInfo,
     log = console.log,
     warn = console.warn,
@@ -619,8 +620,20 @@ export function resolvePublishSafePinnedVersions(
   const registryInfoCache = new Map();
   const relevantNames =
     dependencyNames instanceof Set ? dependencyNames : undefined;
+  const overriddenNames =
+    fileOverrideNames instanceof Set ? fileOverrideNames : undefined;
 
   for (const [dependencyName, preferredVersion] of pinnedVersions) {
+    // Packages with a file:./... override resolve from the local path, never
+    // from the registry. Skipping the npm view here avoids 404 noise for
+    // unpublished CI stubs (e.g. @elizaos/plugin-app-control,
+    // @elizaos/plugin-wechat) and unpublished plugin packages mirrored as
+    // workspace overrides (e.g. @elizaos/plugin-music-library).
+    if (overriddenNames?.has(dependencyName)) {
+      resolvedVersions.set(dependencyName, preferredVersion);
+      continue;
+    }
+
     const versionSource = versionSources.get(dependencyName);
     const shouldResolveFromRegistry =
       (versionSource === PINNED_VERSION_SOURCE_WORKSPACE ||
@@ -638,9 +651,23 @@ export function resolvePublishSafePinnedVersions(
       try {
         registryInfo = readRegistryInfo(dependencyName);
       } catch (error) {
-        warn(
-          `[disable-local-eliza-workspace] Could not read registry metadata for ${dependencyName}: ${error instanceof Error ? error.message : String(error)}`,
-        );
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        // npm view emits E404 when the package isn't published. That's an
+        // expected miss for unpublished workspace packages — log a single
+        // tidy line instead of dumping the multi-line npm stderr blob.
+        if (
+          /\bE404\b/.test(errorMessage) ||
+          /404 Not Found/.test(errorMessage)
+        ) {
+          log(
+            `[disable-local-eliza-workspace] ${dependencyName} is not published to npm; keeping workspace-pinned version`,
+          );
+        } else {
+          warn(
+            `[disable-local-eliza-workspace] Could not read registry metadata for ${dependencyName}: ${errorMessage}`,
+          );
+        }
         registryInfo = null;
       }
       registryInfoCache.set(dependencyName, registryInfo);
@@ -1224,11 +1251,15 @@ export function disableLocalElizaWorkspace(
     }
   }
 
+  const ciOverrideNames = new Set(
+    Object.keys(resolveCiOverrideSpecifiers(repoRoot)),
+  );
   const publishSafePinnedWorkspaceVersions = resolvePublishSafePinnedVersions(
     pinnedWorkspaceVersions,
     {
       dependencyNames: workspaceProtocolDependencyNames,
       versionSources: pinnedVersionSources,
+      fileOverrideNames: ciOverrideNames,
       log,
       warn,
     },

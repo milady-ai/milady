@@ -366,6 +366,28 @@ cd ~/milady
 node scripts/miladyos/build-aosp.mjs --aosp-root ~/aosp
 ```
 
+### One-shot Cuttlefish runner
+
+Once `m` finishes (or while it's still running, with `--wait-for-build`):
+
+```bash
+# Wait for system.img, start cvd, validate, capture screenshots — one command
+bun run miladyos:sim -- --wait-for-build --out reports/aosp-sim
+
+# Already booted manually? Skip the launch step
+bun run miladyos:sim -- --no-launch --out reports/aosp-sim
+
+# Tear down cvd cleanly when done
+bun run miladyos:sim -- --stop-after
+```
+
+The runner:
+1. Waits for `out/target/product/<device>/system.img` to appear (`--wait-for-build` polls).
+2. Stops any running cvd instance for a clean boot.
+3. `lunch milady_cf_x86_64_phone-trunk_staging-userdebug && cvd start --daemon` (falls back to `launch_cvd --daemon` on Cuttlefish 0.x).
+4. Spawns `miladyos:e2e` which boot-validates and captures HOME / Dialer / SMS / Assist / launcher screenshots.
+5. Optionally tears down cvd at the end (`--stop-after`).
+
 ### Visual / e2e validation (Cuttlefish or AVD)
 
 After Cuttlefish boots (or against a stock AVD), capture role-ownership proof and a PNG gallery of the Milady surfaces:

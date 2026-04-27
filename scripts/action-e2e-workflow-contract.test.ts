@@ -77,7 +77,7 @@ describe("action e2e workflow contract", () => {
       "Action Invocation E2E skipped because the configured external provider is unavailable.",
     );
     expect(actionE2EBlock).toContain(
-      "grep -Eiq 'exceeded your current quota|insufficient[_ -]?quota|billing details|credit balance|invalid api key|unauthorized|authentication|status code: 429|too many requests' \"$log_file\"",
+      "grep -Eiq 'exceeded your current quota|insufficient[_ -]?quota|insufficient[_ -]?balance|billing details|credit balance|invalid api key|unauthorized|authentication|status code: 429|too many requests|unexpected error occurred while processing the request|temporarily unavailable|service unavailable|internal server error|overloaded' \"$log_file\"",
     );
   });
 });

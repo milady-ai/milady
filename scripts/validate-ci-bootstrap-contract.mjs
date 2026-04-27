@@ -44,7 +44,6 @@ const requiredWorkflowSnippets = [
   "name: Regression Matrix Contract",
   "run: node scripts/validate-ci-bootstrap-contract.mjs",
   "uses: ./.github/actions/setup-bun-workspace",
-  'disable-local-eliza-workspace: "true"',
   "install-command: bun install --ignore-scripts --no-frozen-lockfile",
   "run: node scripts/restore-local-eliza-workspace.mjs",
   "run: bun run test:regression-matrix:pr",

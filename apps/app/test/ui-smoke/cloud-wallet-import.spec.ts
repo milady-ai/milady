@@ -8,9 +8,9 @@ import {
 
 async function openWalletRpcSettings(page: Page) {
   await page.getByRole("button", { name: "Open RPC settings" }).click();
-  await expect(
-    page.getByRole("button", { name: /Eliza Cloud/ }).first(),
-  ).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByTestId("wallet-rpc-mode-cloud")).toBeVisible({
+    timeout: 15_000,
+  });
 }
 
 test.beforeEach(async ({ page }) => {
@@ -76,7 +76,7 @@ test("inventory cloud import uses the live wallet API", async ({ page }) => {
 
   await openWalletRpcSettings(page);
 
-  const saveBtn = page.getByRole("button", { name: /^Save$/ }).last();
+  const saveBtn = page.getByTestId("wallet-rpc-save");
   await expect(saveBtn).toBeVisible({ timeout: 15_000 });
 
   const walletConfigPutRequestPromise = page.waitForRequest(
@@ -148,7 +148,7 @@ test("inventory cloud import refreshes cloud wallets after save", async ({
 
   await openWalletRpcSettings(page);
 
-  const saveBtn = page.getByRole("button", { name: /^Save$/ }).last();
+  const saveBtn = page.getByTestId("wallet-rpc-save");
   await expect(saveBtn).toBeVisible({ timeout: 15_000 });
   await saveBtn.click();
 

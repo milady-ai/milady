@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import {
+  installDefaultAppRoutes,
   openAppPath,
   openSettingsSection,
   readLocalStorage,
@@ -12,6 +13,7 @@ const ANIMATE_WHEN_HIDDEN_KEY = "eliza:companion-animate-when-hidden";
 
 test.beforeEach(async ({ page }) => {
   await seedAppStorage(page);
+  await installDefaultAppRoutes(page);
 });
 
 test("companion media settings persist across reloads", async ({ page }) => {

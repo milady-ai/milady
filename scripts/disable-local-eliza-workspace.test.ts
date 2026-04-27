@@ -102,6 +102,115 @@ describe("disable-local-eliza-workspace", () => {
     expect(readRegistryInfo).toHaveBeenCalledTimes(2);
   });
 
+  it("skips registry resolution for packages with file: overrides", () => {
+    const pinnedVersions = new Map([
+      ["@elizaos/core", "2.0.0-alpha.153"],
+      ["@elizaos/plugin-app-control", "2.0.0-alpha.99"],
+      ["@elizaos/plugin-wechat", "2.0.0-alpha.99"],
+    ]);
+    const versionSources = new Map([
+      ["@elizaos/core", PINNED_VERSION_SOURCE_WORKSPACE],
+      ["@elizaos/plugin-app-control", PINNED_VERSION_SOURCE_WORKSPACE],
+      ["@elizaos/plugin-wechat", PINNED_VERSION_SOURCE_WORKSPACE],
+    ]);
+    const dependencyNames = new Set([
+      "@elizaos/core",
+      "@elizaos/plugin-app-control",
+      "@elizaos/plugin-wechat",
+    ]);
+    const fileOverrideNames = new Set([
+      "@elizaos/plugin-app-control",
+      "@elizaos/plugin-wechat",
+    ]);
+    const readRegistryInfo = vi.fn((packageName: string) => {
+      if (packageName === "@elizaos/core") {
+        return {
+          versions: ["2.0.0-alpha.152"],
+          "dist-tags": { alpha: "2.0.0-alpha.152", latest: "0.25.9" },
+          version: "0.25.9",
+        };
+      }
+      throw new Error(
+        `registry should not be queried for overridden ${packageName}`,
+      );
+    });
+
+    const resolved = resolvePublishSafePinnedVersions(pinnedVersions, {
+      dependencyNames,
+      versionSources,
+      fileOverrideNames,
+      readRegistryInfo,
+      log: () => {},
+      warn: () => {},
+    });
+
+    expect(resolved.get("@elizaos/plugin-app-control")).toBe("2.0.0-alpha.99");
+    expect(resolved.get("@elizaos/plugin-wechat")).toBe("2.0.0-alpha.99");
+    expect(readRegistryInfo).toHaveBeenCalledTimes(1);
+    expect(readRegistryInfo).toHaveBeenCalledWith("@elizaos/core");
+  });
+
+  it("downgrades unpublished-package npm 404s to a tidy log line", () => {
+    const pinnedVersions = new Map([
+      ["@elizaos/plugin-music-library", "2.0.0-alpha.10"],
+    ]);
+    const versionSources = new Map([
+      ["@elizaos/plugin-music-library", PINNED_VERSION_SOURCE_WORKSPACE],
+    ]);
+    const dependencyNames = new Set(["@elizaos/plugin-music-library"]);
+    const readRegistryInfo = vi.fn(() => {
+      throw new Error(
+        "Command failed: npm view ...\nnpm error code E404\nnpm error 404 Not Found",
+      );
+    });
+    const logged: string[] = [];
+    const warned: string[] = [];
+
+    const resolved = resolvePublishSafePinnedVersions(pinnedVersions, {
+      dependencyNames,
+      versionSources,
+      readRegistryInfo,
+      log: (message: string) => {
+        logged.push(message);
+      },
+      warn: (message: string) => {
+        warned.push(message);
+      },
+    });
+
+    expect(resolved.get("@elizaos/plugin-music-library")).toBe(
+      "2.0.0-alpha.10",
+    );
+    expect(warned).toEqual([]);
+    expect(logged.some((entry) => entry.includes("not published to npm"))).toBe(
+      true,
+    );
+  });
+
+  it("still warns when registry resolution fails for a non-404 reason", () => {
+    const pinnedVersions = new Map([["@elizaos/core", "2.0.0-alpha.10"]]);
+    const versionSources = new Map([
+      ["@elizaos/core", PINNED_VERSION_SOURCE_WORKSPACE],
+    ]);
+    const dependencyNames = new Set(["@elizaos/core"]);
+    const readRegistryInfo = vi.fn(() => {
+      throw new Error("ETIMEDOUT");
+    });
+    const warned: string[] = [];
+
+    resolvePublishSafePinnedVersions(pinnedVersions, {
+      dependencyNames,
+      versionSources,
+      readRegistryInfo,
+      log: () => {},
+      warn: (message: string) => {
+        warned.push(message);
+      },
+    });
+
+    expect(warned.some((entry) => entry.includes("ETIMEDOUT"))).toBe(true);
+  });
+
   it("collects workspace protocol dependencies and excludes local-only packages", () => {
     const dependencyNames = collectWorkspaceProtocolDependencyNames(
       {

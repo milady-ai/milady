@@ -1,8 +1,13 @@
 # MiladyOS file_contexts.
 #
-# Each line: <regex> <selinux_context>. Matched against absolute paths
-# during fs label assignment. AOSP applies the broader system_file label
-# to /system/priv-app/Milady/ by default — extend here if Milady ever
-# ships data files outside the APK that need their own type.
-
-/data/milady(/.*)?            u:object_r:milady_data_file:s0
+# Empty for now. /data/milady (created by init.milady.rc) gets the
+# default `system_data_file` label, which the system_app domain can
+# read/write — sufficient for the Milady process's scratch directory.
+#
+# Adding a custom type here also requires:
+#   1. A .te declaration under sepolicy/public/ (private types aren't
+#      visible to vendor file_contexts).
+#   2. The type to inherit `data_file_type` AND `core_data_file_type`
+#      attributes (sepolicy_test enforces this for /data/* paths).
+# Until we have a concrete need for narrower labelling, the default is
+# the right answer.

@@ -3,6 +3,38 @@ title: Changelog
 description: What's new in Milady — features, improvements, and fixes.
 ---
 
+<Update label="2026-04-26" description="Week of April 26; native app windows, screenshare app, plugin role gating, lifeops polish, n8n empty-state translations" tags={["Feature", "Update", "Fix"]}>
+
+## Apps open in dedicated native windows
+
+On the desktop app, [dashboard apps](/dashboard/apps) now launch in their own native windows instead of taking over the main shell. Open a game, the wallet, life-ops, or any other app and it lives in its own resizable window so you can run multiple agent surfaces side by side. A new **App Details** page accompanies apps that need configuration before launch, walking you through any required setup before the app opens.
+
+## Screenshare app
+
+A new screenshare app is wired into the [apps view](/dashboard/apps), letting your agent observe a remote screen alongside its other workspace surfaces. Use it when you want your agent to follow along with what you're doing on another device or session without switching tools.
+
+## Plugin role gating with boot auto-enable
+
+The runtime now respects per-plugin role declarations on startup. Plugins that declare a required role — for example, owner-only or admin-only capabilities — only auto-enable when the active user matches, so the action surface stays focused on what's relevant to you. Boot-time auto-enable runs through the same gate, eliminating cases where role-restricted plugins loaded for the wrong user.
+
+## Updates
+
+- **Direct life-ops launch** — Opening [life-ops](/rest/lifeops) from the dashboard now goes straight to the section you tapped instead of routing through an intermediate landing screen.
+- **n8n empty-state translations** — The [automations](/guides/cloud) empty state for n8n workflows is now fully localized (Spanish, French, and Chinese) so first-time setup reads cleanly in every supported language.
+- **Eliza Cloud TTS polish** — Cloud-hosted text-to-speech has been refreshed for cleaner audio output and more reliable streaming when your agent speaks back through Discord or the desktop voice surface.
+- **Default assistant name sync** — The assistant name shown across the desktop app, chat, and connector greetings now stays in sync with your agent configuration on first run, so renaming your agent applies everywhere immediately.
+- **Inbox routing reliability** — Inbox route handling has been hardened with deeper test coverage, so cross-channel messages land in the [unified inbox](/rest/inbox) consistently across Gmail, Discord, Telegram, Signal, and iMessage.
+- **Cloud app surface stability** — Cloud-deployed agents now ship with the full apps catalog — wallet, life-ops, companion, browser bridge, and screenshare — running reliably in cloud containers without the runtime import gaps that previously forced fallbacks.
+
+## Bug fixes
+
+- Fixed a desktop blank-screen regression caused by a workspace bundling order issue — the desktop app now boots cleanly on first launch
+- Fixed a malformed Anthropic Haiku model ID in the plugin catalog that prevented the model from being selectable in [model settings](/model-providers)
+- Fixed Discord connector status not reflecting the desktop app's foreground state, which could leave your agent showing as offline when the app was active
+- Fixed a Discord channel cache hydration issue that occasionally caused stale channel lists in large servers
+
+</Update>
+
 <Update label="2026-04-25" description="Week of April 25; game app UX overhaul, automations sidebar, mobile pane navigation, lifeops and wallet polish" tags={["Feature", "Update", "Fix"]}>
 
 ## Game app UX overhaul

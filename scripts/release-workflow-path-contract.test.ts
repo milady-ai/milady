@@ -947,18 +947,25 @@ describe("release workflow path contract", () => {
     expect(fallbackScript).toContain(
       "symlink_installed_packages_into_manifest_node_modules",
     );
-    expect(fallbackScript).toContain("MINGW*|MSYS*|CYGWIN*)");
-    expect(fallbackScript).toContain('MSYS2_ARG_CONV_EXCL="*"');
-    expect(fallbackScript).toContain("mklink /J");
-    expect(fallbackScript).toContain("bun_store_entries");
+    // The bash function delegates to a single Node helper; doing the symlink
+    // work in bash on Windows previously triggered cygwin fork failures
+    // (`child_copy: cygheap read copy failed, ... Win32 error 299`) under
+    // load and cancelled the website-blocker-startup-smoke job.
     expect(fallbackScript).toContain(
-      "Bun can keep installed packages only in node_modules/.bun on every runner",
+      "node scripts/lib/symlink-store-packages.mjs",
     );
-    expect(fallbackScript).toContain('grep -Fxq -- "$package_name"');
-    expect(fallbackScript).toContain('"node_modules", ".bun"');
-    expect(fallbackScript).toContain("compareVersions");
-    expect(fallbackScript).toContain("stat.isSymbolicLink()");
-    expect(fallbackScript).toContain('cp -LR "$source_path" "$target_path"');
+
+    const symlinkHelper = fs.readFileSync(
+      path.join(repoRoot, "scripts", "lib", "symlink-store-packages.mjs"),
+      "utf8",
+    );
+    expect(symlinkHelper).toContain('"node_modules", ".bun"');
+    expect(symlinkHelper).toContain("compareVersions");
+    expect(symlinkHelper).toContain("isSymbolicLink");
+    expect(symlinkHelper).toContain('"junction"');
+    expect(symlinkHelper).toContain("symlinkSync");
+    expect(symlinkHelper).toContain("Bun can keep installed packages only");
+    expect(symlinkHelper).toContain("symlinkStorePackagesForManifest");
   });
 
   it("keeps agent runtime plugin dependencies declared for release packaging", () => {

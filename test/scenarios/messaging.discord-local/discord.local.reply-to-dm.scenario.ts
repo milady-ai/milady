@@ -93,6 +93,30 @@ export default scenario({
         minCount: 2,
       }),
     },
+    {
+      type: "custom",
+      name: "discord-local-reply-send-target-and-payload",
+      predicate: async (ctx) => {
+        const sendAction = [...ctx.actionsCalled]
+          .reverse()
+          .find((entry) => entry.actionName === "CROSS_CHANNEL_SEND");
+        if (!sendAction) {
+          return "expected a CROSS_CHANNEL_SEND action for the confirmed Discord reply";
+        }
+
+        const blob = JSON.stringify(sendAction).toLowerCase();
+        if (!blob.includes("discord")) {
+          return "expected the confirmed reply send payload to target Discord";
+        }
+        if (!blob.includes("bob")) {
+          return "expected the confirmed Discord reply send payload to preserve Bob as the DM target";
+        }
+        if (!/there soon|be there|i'?ll be there/.test(blob)) {
+          return "expected the confirmed Discord reply payload to include the typed reply text";
+        }
+        return undefined;
+      },
+    },
     judgeRubric({
       name: "discord-local-reply-rubric",
       threshold: 0.7,

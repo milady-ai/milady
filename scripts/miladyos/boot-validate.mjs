@@ -55,7 +55,9 @@ const FORBIDDEN_STOCK_PACKAGES = [
 
 const REQUIRED_BOOT_PROPERTIES = {
   "ro.setupwizard.mode": "DISABLED",
-  "ro.miladyos.boot_phase": "completed",
+  // miladyos.boot_phase is intentionally non-ro so init.milady.rc can
+  // re-set it at each phase. ro.* is immutable after first set.
+  "miladyos.boot_phase": "completed",
 };
 
 const LOGCAT_FAILURE_PATTERNS = [

@@ -124,6 +124,7 @@ describe("docker CI smoke contract", () => {
     expect(linker).toContain("eliza/packages/plugin-browser-bridge");
     expect(linker).toContain("eliza/packages/native-plugins/activity-tracker");
     expect(linker).toContain("eliza/plugins/plugin-cron/typescript");
+    expect(linker).toContain("eliza/plugins/plugin-sql/typescript");
     expect(linker).toContain("eliza/plugins/plugin-telegram");
     expect(linker).toContain("collectWorkspaceMaps");
     expect(linker).toContain(
@@ -131,6 +132,7 @@ describe("docker CI smoke contract", () => {
     );
     expect(linker).toContain("rewriteDistExportsToSource");
     expect(linker).toContain("pathExists(path.join(packageDir, sourcePath))");
+    expect(linker).toContain('replace("./dist/node/", "./")');
     expect(linker).toContain('key === "types"');
     expect(linker).toContain('replace("./dist/", "./src/")');
     expect(linker).toContain("linkPackageTarget");
