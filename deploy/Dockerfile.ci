@@ -56,12 +56,25 @@ RUN set -x; \
     cp eliza/plugins/plugin-sql/typescript/package.json node_modules/@elizaos/plugin-sql/; \
     cp -a eliza/plugins/plugin-sql/typescript/dist node_modules/@elizaos/plugin-sql/dist 2>/dev/null || true; \
     ls node_modules/@elizaos/plugin-sql/dist/node/index.node.js 2>/dev/null && echo "@elizaos/plugin-sql dist OK" || echo "WARN: plugin-sql dist missing"; \
+    # @elizaos/cloud-sdk: vendor private cloud workspace SDK required by plugin-elizacloud.
+    # It is not published to npm, so the cloud image must copy the built submodule package.
+    rm -rf node_modules/@elizaos/cloud-sdk; \
+    mkdir -p node_modules/@elizaos/cloud-sdk; \
+    cp eliza/cloud/packages/sdk/package.json node_modules/@elizaos/cloud-sdk/; \
+    cp -a eliza/cloud/packages/sdk/dist node_modules/@elizaos/cloud-sdk/dist 2>/dev/null || true; \
+    ls node_modules/@elizaos/cloud-sdk/dist/index.js 2>/dev/null && echo "@elizaos/cloud-sdk dist OK" || echo "WARN: cloud-sdk dist missing"; \
     # @elizaos/plugin-elizacloud: vendor submodule (not installed from npm due to overrides).
     rm -rf node_modules/@elizaos/plugin-elizacloud; \
     mkdir -p node_modules/@elizaos/plugin-elizacloud; \
     cp eliza/plugins/plugin-elizacloud/typescript/package.json node_modules/@elizaos/plugin-elizacloud/; \
     cp -a eliza/plugins/plugin-elizacloud/typescript/dist node_modules/@elizaos/plugin-elizacloud/dist 2>/dev/null || true; \
     ls node_modules/@elizaos/plugin-elizacloud/dist/cjs/index.node.cjs 2>/dev/null && echo "@elizaos/plugin-elizacloud dist OK" || echo "WARN: plugin-elizacloud dist missing"; \
+    # @elizaos/plugin-edge-tts: cloud-provisioned voice output provider.
+    rm -rf node_modules/@elizaos/plugin-edge-tts; \
+    mkdir -p node_modules/@elizaos/plugin-edge-tts; \
+    cp eliza/plugins/plugin-edge-tts/typescript/package.json node_modules/@elizaos/plugin-edge-tts/; \
+    cp -a eliza/plugins/plugin-edge-tts/typescript/dist node_modules/@elizaos/plugin-edge-tts/dist 2>/dev/null || true; \
+    ls node_modules/@elizaos/plugin-edge-tts/dist/node/index.node.js 2>/dev/null && echo "@elizaos/plugin-edge-tts dist OK" || echo "WARN: plugin-edge-tts dist missing"; \
     # @elizaos/plugin-discord: vendor companion connector plugin stripped by published-only CI.
     rm -rf node_modules/@elizaos/plugin-discord; \
     mkdir -p node_modules/@elizaos/plugin-discord; \
@@ -311,7 +324,7 @@ RUN for app_dir in eliza/apps/app-coding eliza/apps/app-shopify; do \
 # bun creates workspace symlinks like eliza/apps/app-lifeops/node_modules/@elizaos/core
 # and @elizaos/plugin-sql that resolve correctly in CI but point nowhere in Docker.
 # Removing them forces Node's module resolution to walk up to root node_modules.
-RUN find eliza \( -path '*/node_modules/@elizaos/core' -o -path '*/node_modules/@elizaos/shared' -o -path '*/node_modules/@elizaos/ui' -o -path '*/node_modules/@elizaos/app-training' -o -path '*/node_modules/@elizaos/app-steward' -o -path '*/node_modules/@elizaos/app-task-coordinator' -o -path '*/node_modules/@elizaos/app-vincent' -o -path '*/node_modules/@elizaos/app-companion' -o -path '*/node_modules/@elizaos/app-lifeops' -o -path '*/node_modules/@elizaos/plugin-sql' -o -path '*/node_modules/@elizaos/plugin-elizacloud' -o -path '*/node_modules/@elizaos/plugin-discord' -o -path '*/node_modules/@elizaos/plugin-openai' -o -path '*/node_modules/@elizaos/plugin-evm' -o -path '*/node_modules/@elizaos/plugin-pdf' -o -path '*/node_modules/@elizaos/plugin-agent-orchestrator' -o -path '*/node_modules/@elizaos/plugin-telegram' \) -not -path '*/node_modules/.bun/*' \
+RUN find eliza \( -path '*/node_modules/@elizaos/core' -o -path '*/node_modules/@elizaos/shared' -o -path '*/node_modules/@elizaos/ui' -o -path '*/node_modules/@elizaos/app-training' -o -path '*/node_modules/@elizaos/app-steward' -o -path '*/node_modules/@elizaos/app-task-coordinator' -o -path '*/node_modules/@elizaos/app-vincent' -o -path '*/node_modules/@elizaos/app-companion' -o -path '*/node_modules/@elizaos/app-lifeops' -o -path '*/node_modules/@elizaos/plugin-sql' -o -path '*/node_modules/@elizaos/cloud-sdk' -o -path '*/node_modules/@elizaos/plugin-elizacloud' -o -path '*/node_modules/@elizaos/plugin-edge-tts' -o -path '*/node_modules/@elizaos/plugin-n8n-workflow' -o -path '*/node_modules/@elizaos/plugin-discord' -o -path '*/node_modules/@elizaos/plugin-openai' -o -path '*/node_modules/@elizaos/plugin-evm' -o -path '*/node_modules/@elizaos/plugin-pdf' -o -path '*/node_modules/@elizaos/plugin-agent-orchestrator' -o -path '*/node_modules/@elizaos/plugin-telegram' \) -not -path '*/node_modules/.bun/*' \
     | while read p; do rm -rf "$p" && echo "Removed nested: $p"; done; true
 
 # ===== End symlink replacement =====
@@ -510,6 +523,8 @@ const phase2 = [
   '@elizaos/plugin-agent-skills',
   '@elizaos/plugin-anthropic',
   '@elizaos/plugin-local-embedding',
+  '@elizaos/plugin-n8n-workflow',
+  'node-edge-tts',
   'jsonrepair',
 ];
 (function next(i) { if (i >= phase2.length) return; installTarball(phase2[i], () => next(i+1)); })(0);

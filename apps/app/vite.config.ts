@@ -173,6 +173,69 @@ const CAPACITOR_BUILD_TARGET =
 const IS_CAPACITOR_MOBILE_BUILD =
   CAPACITOR_BUILD_TARGET === "ios" || CAPACITOR_BUILD_TARGET === "android";
 
+function buildServiceWorkerSource(precacheUrls: string[]): string {
+  return `const CACHE_VERSION = "milady-pwa-${Date.now()}";
+const PRECACHE_URLS = ${JSON.stringify(precacheUrls, null, 2)};
+
+self.addEventListener("install", (event) => {
+  self.skipWaiting();
+  event.waitUntil(
+    caches.open(CACHE_VERSION).then((cache) => cache.addAll(PRECACHE_URLS)),
+  );
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.filter((key) => key !== CACHE_VERSION).map((key) => caches.delete(key)));
+    await self.clients.claim();
+  })());
+});
+
+self.addEventListener("fetch", (event) => {
+  const request = event.request;
+  if (request.method !== "GET") return;
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin) return;
+
+  if (url.pathname.startsWith("/api/")) {
+    event.respondWith((async () => {
+      try {
+        const response = await fetch(request);
+        const cache = await caches.open(CACHE_VERSION);
+        cache.put(request, response.clone());
+        return response;
+      } catch (error) {
+        const cached = await caches.match(request);
+        if (cached) return cached;
+        throw error;
+      }
+    })());
+    return;
+  }
+
+  if (url.pathname.startsWith("/assets/")) {
+    event.respondWith(
+      caches.match(request).then((cached) => cached || fetch(request)),
+    );
+    return;
+  }
+
+  event.respondWith((async () => {
+    const cached = await caches.match(request);
+    if (cached) return cached;
+    try {
+      return await fetch(request);
+    } catch (error) {
+      const shell = await caches.match("/");
+      if (shell) return shell;
+      throw error;
+    }
+  })());
+});
+`;
+}
+
 function appShellMetadataPlugin(): Plugin {
   const manifest = `${JSON.stringify(
     {
@@ -218,24 +281,96 @@ function appShellMetadataPlugin(): Plugin {
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
         const pathname = req.url?.split("?")[0];
-        if (pathname !== "/site.webmanifest") {
-          next();
+        if (
+          pathname === "/site.webmanifest" ||
+          pathname === "/manifest.webmanifest"
+        ) {
+          res.setHeader(
+            "Content-Type",
+            "application/manifest+json; charset=utf-8",
+          );
+          res.end(manifest);
           return;
         }
-
-        res.setHeader(
-          "Content-Type",
-          "application/manifest+json; charset=utf-8",
-        );
-        res.end(manifest);
+        if (pathname === "/sw.js") {
+          res.setHeader("Content-Type", "application/javascript; charset=utf-8");
+          res.setHeader("Cache-Control", "no-store");
+          res.end(
+            buildServiceWorkerSource([
+              "/",
+              "/site.webmanifest",
+              "/manifest.webmanifest",
+            ]),
+          );
+          return;
+        }
+        next();
       });
     },
-    generateBundle() {
+    generateBundle(_options, bundle) {
+      const precacheUrls = new Set<string>([
+        "/",
+        "/site.webmanifest",
+        "/manifest.webmanifest",
+        "/favicon.ico",
+        "/favicon-16x16.png",
+        "/favicon-32x32.png",
+        "/apple-touch-icon.png",
+        "/android-chrome-192x192.png",
+        "/android-chrome-512x512.png",
+      ]);
+      for (const fileName of Object.keys(bundle)) {
+        if (fileName.startsWith("assets/")) {
+          precacheUrls.add(`/${fileName}`);
+        }
+      }
+      const serviceWorkerSource = buildServiceWorkerSource(
+        Array.from(precacheUrls).sort(),
+      );
       this.emitFile({
         type: "asset",
         fileName: "site.webmanifest",
         source: manifest,
       });
+      this.emitFile({
+        type: "asset",
+        fileName: "manifest.webmanifest",
+        source: manifest,
+      });
+      this.emitFile({
+        type: "asset",
+        fileName: "sw.js",
+        source: serviceWorkerSource,
+      });
+    },
+    writeBundle(options, bundle) {
+      const outDir =
+        typeof options.dir === "string"
+          ? options.dir
+          : path.resolve(here, "dist");
+      const precacheUrls = new Set<string>([
+        "/",
+        "/site.webmanifest",
+        "/manifest.webmanifest",
+        "/favicon.ico",
+        "/favicon-16x16.png",
+        "/favicon-32x32.png",
+        "/apple-touch-icon.png",
+        "/android-chrome-192x192.png",
+        "/android-chrome-512x512.png",
+      ]);
+      for (const fileName of Object.keys(bundle)) {
+        if (fileName.startsWith("assets/")) {
+          precacheUrls.add(`/${fileName}`);
+        }
+      }
+      fs.mkdirSync(outDir, { recursive: true });
+      fs.writeFileSync(path.join(outDir, "site.webmanifest"), manifest);
+      fs.writeFileSync(path.join(outDir, "manifest.webmanifest"), manifest);
+      fs.writeFileSync(
+        path.join(outDir, "sw.js"),
+        buildServiceWorkerSource(Array.from(precacheUrls).sort()),
+      );
     },
   };
 }

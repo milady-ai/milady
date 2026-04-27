@@ -104,7 +104,9 @@ jobs:
           # Nested plugin submodules vendored into the cloud image.
           # Keep these available before disable-local-eliza-workspace rewrites package.json.
           git -C eliza submodule update --init plugins/plugin-sql || echo "plugin-sql submodule init failed, continuing"
+          git -C eliza submodule update --init cloud || echo "cloud submodule init failed, continuing"
           git -C eliza submodule update --init plugins/plugin-elizacloud || echo "plugin-elizacloud submodule init failed, continuing"
+          git -C eliza submodule update --init plugins/plugin-edge-tts || echo "plugin-edge-tts submodule init failed, continuing"
           git -C eliza submodule update --init plugins/plugin-discord || echo "plugin-discord submodule init failed, continuing"
           git -C eliza submodule update --init plugins/plugin-openai || echo "plugin-openai submodule init failed, continuing"
           git -C eliza submodule update --init plugins/plugin-evm || echo "plugin-evm submodule init failed, continuing"
@@ -135,7 +137,9 @@ jobs:
           fi
           ls eliza/package.json && echo "eliza submodule OK" || echo "WARN: eliza submodule missing"
           ls eliza/plugins/plugin-sql/typescript/dist/node/index.node.js && echo "plugin-sql dist OK" || echo "WARN: plugin-sql dist missing"
+          ls eliza/cloud/packages/sdk/package.json && echo "cloud-sdk src OK" || echo "WARN: cloud-sdk src missing"
           ls eliza/plugins/plugin-elizacloud/typescript/dist/cjs/index.node.cjs && echo "plugin-elizacloud dist OK" || echo "WARN: plugin-elizacloud dist missing"
+          ls eliza/plugins/plugin-edge-tts/typescript/package.json && echo "plugin-edge-tts src OK" || echo "WARN: plugin-edge-tts src missing"
           ls eliza/plugins/plugin-discord/typescript/dist/index.js && echo "plugin-discord dist OK" || echo "WARN: plugin-discord dist missing"
           ls eliza/plugins/plugin-openai/typescript/dist/node/index.node.js && echo "plugin-openai dist OK" || echo "WARN: plugin-openai dist missing"
           ls eliza/plugins/plugin-evm/typescript/dist/index.js && echo "plugin-evm dist OK" || echo "WARN: plugin-evm dist missing"
@@ -345,11 +349,22 @@ jobs:
             ls dist/node/index.node.js && echo "plugin-sql build OK"
           ) || echo "plugin-sql build failed, continuing"
           (
+            cd eliza/cloud/packages/sdk
+            bun run build
+            ls dist/index.js && echo "cloud-sdk build OK"
+          ) || echo "cloud-sdk build failed, continuing"
+          (
             cd eliza/plugins/plugin-elizacloud/typescript
             bun install --no-save
             bun run build
             ls dist/cjs/index.node.cjs && echo "plugin-elizacloud build OK"
           ) || echo "plugin-elizacloud build failed, continuing"
+          (
+            cd eliza/plugins/plugin-edge-tts/typescript
+            bun install --no-save
+            bun run build
+            ls dist/node/index.node.js && echo "plugin-edge-tts build OK"
+          ) || echo "plugin-edge-tts build failed, continuing"
           (
             cd eliza/plugins/plugin-discord/typescript
             bun run build
