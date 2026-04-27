@@ -21,6 +21,13 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..");
 
+// On Windows, PowerShell does not set HOME — ensure-type-package-aliases.mjs
+// and similar scripts use it to locate the bun global cache. Fall back to
+// USERPROFILE (the Windows equivalent) so child processes find the cache.
+if (!process.env.HOME && process.env.USERPROFILE) {
+  process.env.HOME = process.env.USERPROFILE;
+}
+
 const setupPath = path.join(
   repoRoot,
   "eliza/packages/app-core/scripts/run-repo-setup.mjs",

@@ -407,6 +407,7 @@
         "@elizaos/plugin-imessage": "workspace:*",
         "@elizaos/plugin-signal": "workspace:*",
         "@elizaos/plugin-telegram": "workspace:*",
+        "@elizaos/plugin-whatsapp": "workspace:*",
         "@elizaos/shared": "workspace:*",
         "@elizaos/ui": "workspace:*",
         "drizzle-orm": "^0.45.1",
@@ -552,7 +553,7 @@
     },
     "eliza/packages/agent": {
       "name": "@elizaos/agent",
-      "version": "2.0.0-alpha.428",
+      "version": "2.0.0-alpha.446",
       "bin": {
         "eliza-autonomous": "./src/bin.ts",
       },
@@ -625,7 +626,7 @@
     },
     "eliza/packages/app-core": {
       "name": "@elizaos/app-core",
-      "version": "2.0.0-alpha.428",
+      "version": "2.0.0-alpha.446",
       "dependencies": {
         "@capacitor/barcode-scanner": "^3.0.0",
         "@capacitor/core": "8.3.1",
@@ -736,7 +737,7 @@
     },
     "eliza/packages/elizaos": {
       "name": "elizaos",
-      "version": "2.0.0-alpha.428",
+      "version": "2.0.0-alpha.446",
       "bin": {
         "elizaos": "./dist/cli.js",
       },
@@ -753,7 +754,7 @@
     },
     "eliza/packages/interop": {
       "name": "@elizaos/interop",
-      "version": "2.0.0-alpha.428",
+      "version": "2.0.0-alpha.446",
       "dependencies": {
         "@elizaos/core": "workspace:*",
       },
@@ -1083,11 +1084,11 @@
     },
     "eliza/packages/rust": {
       "name": "@elizaos/rust",
-      "version": "2.0.0-alpha.428",
+      "version": "2.0.0-alpha.446",
     },
     "eliza/packages/scenario-runner": {
       "name": "@elizaos/scenario-runner",
-      "version": "2.0.0-alpha.428",
+      "version": "2.0.0-alpha.446",
       "bin": {
         "milady-scenarios": "./bin/milady-scenarios",
       },
@@ -1103,18 +1104,18 @@
     },
     "eliza/packages/scenario-schema": {
       "name": "@elizaos/scenario-schema",
-      "version": "2.0.0-alpha.428",
+      "version": "2.0.0-alpha.446",
     },
     "eliza/packages/schemas": {
       "name": "@elizaos/schemas",
-      "version": "2.0.0-alpha.428",
+      "version": "2.0.0-alpha.446",
       "devDependencies": {
         "@bufbuild/buf": "^1.47.2",
       },
     },
     "eliza/packages/shared": {
       "name": "@elizaos/shared",
-      "version": "2.0.0-alpha.428",
+      "version": "2.0.0-alpha.446",
       "dependencies": {
         "@elizaos/core": "workspace:*",
         "zod": "^4.3.6",
@@ -1130,7 +1131,7 @@
     },
     "eliza/packages/skills": {
       "name": "@elizaos/skills",
-      "version": "2.0.0-alpha.428",
+      "version": "2.0.0-alpha.446",
       "dependencies": {
         "@elizaos/core": "workspace:*",
         "yaml": "^2.8.2",
@@ -1141,7 +1142,7 @@
     },
     "eliza/packages/typescript": {
       "name": "@elizaos/core",
-      "version": "2.0.0-alpha.428",
+      "version": "2.0.0-alpha.446",
       "dependencies": {
         "@ai-sdk/anthropic": "^3.0.13",
         "@ai-sdk/google": "^3.0.8",
@@ -1197,7 +1198,7 @@
     },
     "eliza/packages/ui": {
       "name": "@elizaos/ui",
-      "version": "2.0.0-alpha.428",
+      "version": "2.0.0-alpha.446",
       "dependencies": {
         "@radix-ui/react-checkbox": "^1.3.3",
         "@radix-ui/react-dialog": "^1.1.15",
