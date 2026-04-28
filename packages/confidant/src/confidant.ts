@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { decrypt, encrypt } from "./crypto/envelope.js";
 import {
   type MasterKeyResolver,
-  macOSKeychainMasterKey,
+  osKeyringMasterKey,
 } from "./crypto/master-key.js";
 import { EnvLegacyBackend } from "./backends/env-legacy.js";
 import { KeyringBackend } from "./backends/keyring.js";
@@ -75,7 +75,7 @@ export function createConfidant(opts: ConfidantOptions = {}): Confidant {
   const auditPath = opts.auditLogPath ?? join(root, "audit", "confidant.jsonl");
   const masterKeyResolver =
     opts.masterKey ??
-    macOSKeychainMasterKey({
+    osKeyringMasterKey({
       service: "elizaos",
       account: "confidant.masterKey",
     });

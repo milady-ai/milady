@@ -1,13 +1,18 @@
-import { execFileSync } from "node:child_process";
+import { Entry } from "@napi-rs/keyring";
 import { generateMasterKey, KEY_BYTES } from "./envelope.js";
 
 /**
  * Source of the master key for the FileBackend's at-rest encryption.
  *
- * - `keyring`: 32 bytes stored as a single OS-keychain entry (macOS only in
- *   phase 0). The recommended source on platforms that support it.
- * - `inMemory`: 32-byte buffer supplied by the caller. Intended for tests.
- * - Future: `passphrase` (Argon2id-derived) for headless / non-keyring hosts.
+ * - `keyring`: 32 bytes stored as a single OS-keychain entry. Cross-platform
+ *   via `@napi-rs/keyring` — macOS Keychain, Windows Credential Manager,
+ *   Linux Secret Service (libsecret). The recommended source.
+ * - `inMemory`: 32-byte buffer supplied by the caller. Intended for tests
+ *   and headless deployments that derive the key out-of-band.
+ *
+ * A passphrase-derived resolver (scrypt) is planned for phase 1 — it
+ * materializes a key from a user passphrase + persistent salt, for hosts
+ * with no usable secret service.
  */
 
 export interface MasterKeyResolver {
@@ -35,86 +40,74 @@ export function inMemoryMasterKey(key: Buffer): MasterKeyResolver {
 }
 
 export interface KeyringMasterKeyOptions {
-  /** Service name shown in macOS Keychain Access. */
+  /** Service name surfaced in the OS keychain UI. */
   readonly service: string;
-  /** Account name within the service. */
+  /** Account/username slot within the service. */
   readonly account: string;
 }
 
 /**
- * macOS-only resolver. On other platforms the load throws — callers should
- * fall through to a passphrase-based resolver (future) or `inMemory` for
- * tests.
+ * Cross-platform OS-keychain resolver. Backed by `@napi-rs/keyring` which
+ * uses macOS Keychain, Windows Credential Manager, and Linux Secret Service
+ * via a single API.
+ *
+ * On first use, generates a fresh 32-byte key and writes it to the keychain
+ * slot. Subsequent loads read it back. If the platform has no usable secret
+ * service (e.g., headless Linux without libsecret + a service-bus agent),
+ * the underlying call throws and the caller should supply an
+ * `inMemoryMasterKey` derived elsewhere.
  */
-export function macOSKeychainMasterKey(
+export function osKeyringMasterKey(
   opts: KeyringMasterKeyOptions,
 ): MasterKeyResolver {
   return {
-    load: async () => loadOrCreateMacOSKeychainEntry(opts),
+    load: async () => loadOrCreateKeychainEntry(opts),
     describe: () => `keyring://${opts.service}/${opts.account}`,
   };
 }
 
-function loadOrCreateMacOSKeychainEntry(
-  opts: KeyringMasterKeyOptions,
-): Buffer {
-  if (process.platform !== "darwin") {
+function loadOrCreateKeychainEntry(opts: KeyringMasterKeyOptions): Buffer {
+  let entry: Entry;
+  try {
+    entry = new Entry(opts.service, opts.account);
+  } catch (err) {
     throw new MasterKeyUnavailableError(
-      `macOS keychain master key requested on platform ${process.platform}; pass a different MasterKeyResolver.`,
+      `OS keychain entry construction failed for ${opts.service}/${opts.account}: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
     );
   }
-  const existing = readKeychainEntry(opts);
-  if (existing) {
+
+  let existing: string | null = null;
+  try {
+    existing = entry.getPassword();
+  } catch (err) {
+    throw new MasterKeyUnavailableError(
+      `Failed to read OS keychain entry ${opts.service}/${opts.account}: ${
+        err instanceof Error ? err.message : String(err)
+      }. On Linux, ensure libsecret + a Secret Service agent (gnome-keyring / kwallet) is running, or supply an inMemoryMasterKey.`,
+    );
+  }
+
+  if (existing && existing.length > 0) {
     const buf = Buffer.from(existing, "base64");
     if (buf.length !== KEY_BYTES) {
       throw new MasterKeyUnavailableError(
-        `keychain entry ${opts.service}/${opts.account} is not a ${KEY_BYTES}-byte key (got ${buf.length} bytes after base64 decode). Refusing to use.`,
+        `Keychain entry ${opts.service}/${opts.account} is not a ${KEY_BYTES}-byte key (got ${buf.length} bytes after base64 decode). Refusing to use.`,
       );
     }
     return buf;
   }
+
   const created = generateMasterKey();
-  writeKeychainEntry(opts, created.toString("base64"));
-  return created;
-}
-
-function readKeychainEntry(opts: KeyringMasterKeyOptions): string | null {
   try {
-    const output = execFileSync(
-      "security",
-      [
-        "find-generic-password",
-        "-s",
-        opts.service,
-        "-a",
-        opts.account,
-        "-w",
-      ],
-      { encoding: "utf8", timeout: 5000, stdio: ["pipe", "pipe", "pipe"] },
+    entry.setPassword(created.toString("base64"));
+  } catch (err) {
+    throw new MasterKeyUnavailableError(
+      `Failed to persist OS keychain entry ${opts.service}/${opts.account}: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
     );
-    const trimmed = output.trim();
-    return trimmed.length > 0 ? trimmed : null;
-  } catch {
-    return null;
   }
-}
-
-function writeKeychainEntry(
-  opts: KeyringMasterKeyOptions,
-  base64Value: string,
-): void {
-  execFileSync(
-    "security",
-    [
-      "add-generic-password",
-      "-s",
-      opts.service,
-      "-a",
-      opts.account,
-      "-w",
-      base64Value,
-      "-U", // update if exists
-    ],
-    { encoding: "utf8", timeout: 5000, stdio: ["pipe", "pipe", "pipe"] },
-  );
+  return created;
 }

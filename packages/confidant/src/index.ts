@@ -36,7 +36,7 @@ export type { ParsedReference } from "./references.js";
 
 export {
   inMemoryMasterKey,
-  macOSKeychainMasterKey,
+  osKeyringMasterKey,
   MasterKeyUnavailableError,
 } from "./crypto/master-key.js";
 export type {

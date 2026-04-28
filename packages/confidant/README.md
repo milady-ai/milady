@@ -73,9 +73,12 @@ underlying env vars, files, or storage backends.
 ## Storage
 
 `~/.milady/confidant.json` (mode `0600`). Literals are AES-256-GCM
-encrypted with a master key held in the OS keychain (macOS) or, in headless
-fallbacks, derived from a user passphrase. The secret id is bound as
-additional authenticated data, so a swapped ciphertext fails closed.
+encrypted with a master key held in the OS keychain (cross-platform via
+`@napi-rs/keyring` — macOS Keychain, Windows Credential Manager, Linux
+Secret Service / libsecret). Headless hosts without a Secret Service
+agent will need an `inMemoryMasterKey` (or, in phase 1, a passphrase-
+derived resolver). The secret id is bound as additional authenticated
+data, so a swapped ciphertext fails closed.
 
 ## Tests
 

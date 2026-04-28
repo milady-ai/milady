@@ -1,5 +1,4 @@
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
+import { Entry } from "@napi-rs/keyring";
 import { parseReference } from "../references.js";
 import type { VaultReference } from "../types.js";
 import {
@@ -8,38 +7,42 @@ import {
   type VaultBackend,
 } from "./types.js";
 
-const exec = promisify(execFile);
-
 /**
  * KeyringBackend persists literals as OS-keychain entries. Reference shape:
+ *
  *   keyring://{service}/{account}
  *
- * Phase 0: macOS only. Windows / Linux throw `BackendNotConfiguredError` so
- * higher layers can degrade to FileBackend without ambiguity. Adding the
- * other two platforms is mechanical and tracked separately.
+ * Cross-platform via `@napi-rs/keyring`:
+ *   - macOS: Keychain Services
+ *   - Windows: Credential Manager
+ *   - Linux: Secret Service (libsecret + gnome-keyring / kwallet)
  *
- * `service` defaults are decided by the caller (the runtime supplies a
- * branding-aware service name like `elizaos`). The backend itself is dumb:
- * it executes /usr/bin/security with argv arrays — no shell interpolation.
+ * The backend itself is dumb: it constructs an `Entry(service, account)` and
+ * calls `getPassword` / `setPassword` / `deleteCredential`. It does not
+ * shell out, so there is no argv-injection surface to defend.
+ *
+ * Headless Linux without a running Secret Service agent will see the
+ * underlying call throw; we re-throw as `BackendNotConfiguredError` so
+ * higher layers can degrade to a passphrase-derived master key (phase 1).
+ *
+ * `defaultService` is supplied by the caller (the runtime supplies a
+ * branding-aware service name like `elizaos`); `store(id, value)` writes
+ * under that service with `account = id`.
  */
 export class KeyringBackend implements VaultBackend {
   readonly source = "keyring" as const;
 
+  constructor(private readonly defaultService: string = "elizaos") {}
+
   async resolve(ref: VaultReference): Promise<string> {
     const { service, account } = parseKeyringRef(ref);
-    if (process.platform !== "darwin") {
-      throw new BackendNotConfiguredError(
-        this.source,
-        `OS keyring access on platform ${process.platform} is not implemented in phase 0; use the file backend or supply a different backend.`,
-      );
+    let value: string | null;
+    try {
+      value = new Entry(service, account).getPassword();
+    } catch (err) {
+      throw mapKeyringError(err, `read keychain entry ${service}/${account}`);
     }
-    const { stdout } = await exec(
-      "security",
-      ["find-generic-password", "-s", service, "-a", account, "-w"],
-      { encoding: "utf8", timeout: 5000 },
-    );
-    const value = stdout.trim();
-    if (value.length === 0) {
+    if (value === null || value.length === 0) {
       throw new BackendError(
         this.source,
         `keychain entry ${service}/${account} is empty`,
@@ -49,51 +52,24 @@ export class KeyringBackend implements VaultBackend {
   }
 
   async store(id: string, value: string): Promise<VaultReference> {
-    if (process.platform !== "darwin") {
-      throw new BackendNotConfiguredError(
-        this.source,
-        `OS keyring access on platform ${process.platform} is not implemented in phase 0`,
-      );
-    }
-    const service = "elizaos";
     const account = id;
-    await exec(
-      "security",
-      [
-        "add-generic-password",
-        "-s",
-        service,
-        "-a",
-        account,
-        "-w",
-        value,
-        "-U",
-      ],
-      { encoding: "utf8", timeout: 5000 },
-    );
+    const service = this.defaultService;
+    try {
+      new Entry(service, account).setPassword(value);
+    } catch (err) {
+      throw mapKeyringError(err, `write keychain entry ${service}/${account}`);
+    }
     return `keyring://${service}/${account}`;
   }
 
   async remove(ref: VaultReference): Promise<void> {
-    if (process.platform !== "darwin") {
-      throw new BackendNotConfiguredError(
-        this.source,
-        `OS keyring access on platform ${process.platform} is not implemented in phase 0`,
-      );
-    }
     const { service, account } = parseKeyringRef(ref);
     try {
-      await exec(
-        "security",
-        ["delete-generic-password", "-s", service, "-a", account],
-        { encoding: "utf8", timeout: 5000 },
-      );
+      new Entry(service, account).deleteCredential();
     } catch (err) {
-      // `security delete-generic-password` exits 44 when the entry doesn't
-      // exist — idempotent removal is the contract callers expect.
-      const code = (err as { code?: number | string }).code;
-      if (code === 44 || code === "44") return;
-      throw err;
+      // Idempotent: missing entries are not an error.
+      if (isNoEntryError(err)) return;
+      throw mapKeyringError(err, `delete keychain entry ${service}/${account}`);
     }
   }
 }
@@ -106,7 +82,10 @@ function parseKeyringRef(ref: VaultReference): {
   if (parsed.source !== "keyring") {
     throw new BackendError("keyring", `cannot resolve ref ${ref}`);
   }
-  const slash = parsed.path.indexOf("/");
+  // Split on the LAST `/` so service names containing slashes
+  // (e.g., `@elizaos/confidant`) are handled. Account names may not
+  // contain slashes.
+  const slash = parsed.path.lastIndexOf("/");
   if (slash <= 0 || slash === parsed.path.length - 1) {
     throw new BackendError(
       "keyring",
@@ -117,4 +96,29 @@ function parseKeyringRef(ref: VaultReference): {
     service: parsed.path.slice(0, slash),
     account: parsed.path.slice(slash + 1),
   };
+}
+
+function mapKeyringError(err: unknown, action: string): BackendError {
+  const message = err instanceof Error ? err.message : String(err);
+  // `@napi-rs/keyring` surfaces the OS error as message text; the most
+  // common Linux failure mode is "no Secret Service agent" which we want to
+  // distinguish from "real failure" so the caller can offer a passphrase
+  // fallback. The library doesn't expose a structured error code, so we
+  // keyword-match on the message.
+  if (
+    /no.*service|no.*backend|service.*not.*available|connection.*refused/i.test(
+      message,
+    )
+  ) {
+    return new BackendNotConfiguredError(
+      "keyring",
+      `${action}: OS keychain unavailable (${message}). On Linux, ensure libsecret + a Secret Service agent (gnome-keyring / kwallet) is running, or pass an inMemoryMasterKey.`,
+    );
+  }
+  return new BackendError("keyring", `${action} failed: ${message}`);
+}
+
+function isNoEntryError(err: unknown): boolean {
+  const message = err instanceof Error ? err.message : String(err);
+  return /no\s*entry|not\s*found|does\s*not\s*exist/i.test(message);
 }

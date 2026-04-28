@@ -17,6 +17,9 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
+  "dependencies": {
+    "@napi-rs/keyring": "^1.1.6"
+  },
   "devDependencies": {
     "@types/node": "^25.0.0",
     "typescript": "^6.0.0",
