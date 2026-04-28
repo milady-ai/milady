@@ -31,7 +31,6 @@
   ],
   "workspaces": [
     "apps/*",
-    "packages/*",
     "eliza/packages/native-plugins/*",
     "eliza/packages/app-core/platforms/*",
     "eliza/apps/*",

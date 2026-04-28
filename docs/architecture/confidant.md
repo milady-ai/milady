@@ -1,7 +1,7 @@
 # Confidant — secrets vault for elizaOS
 
-Status: design (pre-implementation), 2026-04-28
-Package (target): `@elizaos/confidant`
+Status: phase 0 implemented in elizaOS upstream — see https://github.com/elizaOS/eliza/pull/7167. Design doc, 2026-04-28.
+Package: `@elizaos/confidant` (lives in `eliza/packages/confidant/` after the upstream PR merges)
 Replaces: `process.env`-based credential storage, `~/.milady/milady.json`'s `env.*` / `env.vars.*` dual-write, the catalog-as-authoritative env-key map, and the `Object.values(config).find(non-empty)` heuristic in the provider-switch save path.
 
 ## 1. Statement
