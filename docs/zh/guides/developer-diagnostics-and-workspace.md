@@ -16,7 +16,7 @@ title: 开发者诊断和 workspace 工具
 
 **范围：** 这是**诊断**，不是隐藏错误。严重的解析错误仍然会正常显示。
 
-**相关代码：** `packages/agent/src/runtime/plugin-collector.ts`、`packages/agent/src/runtime/plugin-resolver.ts`。另见[插件解析和 NODE_PATH](/zh/plugin-resolution-and-node-path#optional-plugins-why-was-this-package-in-the-load-set)。
+**相关代码：** `eliza/packages/agent/src/runtime/plugin-collector.ts`、`eliza/packages/agent/src/runtime/plugin-resolver.ts`。另见[插件解析和 NODE_PATH](/zh/plugin-resolution-and-node-path#optional-plugins-why-was-this-package-in-the-load-set)。
 
 <div id="browser--stagehand-server-path">
 ## Browser / stagehand 服务器路径
@@ -28,7 +28,7 @@ title: 开发者诊断和 workspace 工具
 
 **操作说明：** 如果你不使用浏览器自动化，stagehand 的缺失是**预期行为**；消息在调试级别有意保持简洁，以免干扰日常开发。
 
-**相关：** `scripts/link-browser-server.mjs`、`packages/agent/src/runtime/eliza.ts`（`ensureBrowserServerLink`、`findPluginBrowserStagehandDir`）。
+**相关：** `scripts/link-browser-server.mjs`、`eliza/packages/agent/src/runtime/eliza.ts`（`ensureBrowserServerLink`、`findPluginBrowserStagehandDir`）。
 
 <div id="life-ops-schema-migrations-pglite">
 ## Life-ops 架构迁移（PGlite）

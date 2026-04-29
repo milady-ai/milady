@@ -15,7 +15,7 @@ OpenAI 插件将 Milady 代理连接到 OpenAI 的 API，提供对 GPT-4o、o1/o
 </div>
 
 ```bash
-milady plugins install openai
+milady plugins install @elizaos/plugin-openai
 ```
 
 或添加到 `milady.json`：
@@ -86,10 +86,11 @@ export OPENAI_API_KEY=sk-...
 
 | 模型 | 上下文 | 最适合 |
 |------|--------|--------|
-| `gpt-4o` | 128k | 多模态推理，默认选择 |
-| `gpt-4o-mini` | 128k | 快速、经济的任务 |
-| `gpt-4-turbo` | 128k | 高质量生成 |
-| `gpt-3.5-turbo` | 16k | 低成本的简单任务 |
+| `gpt-4.1` | 1M | 最新旗舰模型 |
+| `gpt-4.1-mini` | 1M | 快速、经济的任务 |
+| `gpt-4.1-nano` | 1M | 超快速、最低成本 |
+| `gpt-4o` | 128k | 多模态推理 |
+| `gpt-4o-mini` | 128k | 快速多模态任务 |
 
 <div id="reasoning-models">
 

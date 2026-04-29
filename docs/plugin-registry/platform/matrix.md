@@ -11,7 +11,7 @@ The Matrix plugin connects Milady agents to any Matrix homeserver, enabling mess
 ## Installation
 
 ```bash
-milady plugins install matrix
+milady plugins install @elizaos/plugin-matrix
 ```
 
 ## Setup

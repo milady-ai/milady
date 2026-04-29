@@ -165,7 +165,7 @@ Keys `__proto__`, `constructor`, and `prototype` are silently blocked during mer
 // connectors.json5
 {
   "connectors": {
-    "discord": { "botToken": "...", "guilds": { ... } },
+    "discord": { "token": "...", "guilds": { ... } },
     "telegram": { "botToken": "...", "groups": { ... } }
   }
 }

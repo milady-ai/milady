@@ -1,0 +1,36 @@
+# MiladyOS init script.
+#
+# Lands at /product/etc/init/init.milady.rc and is loaded by init at
+# boot. Use this for boot-time properties and service definitions
+# that the privapp-permissions whitelist + default-permissions XML
+# cannot express on their own.
+#
+# Reference: https://source.android.com/docs/core/init/init-language
+#
+# Property naming: do NOT prefix with `ro.` for properties that need
+# to change across boot phases. AOSP makes `ro.*` immutable after the
+# first set, so re-setting `ro.miladyos.boot_phase` at each phase
+# silently fails with "Read-only property was already set". Use a
+# non-`ro.` prefix (`miladyos.*`) for mutable boot markers.
+#
+# Appops grants: the JS-layer MiladyBootReceiver reflectively grants
+# GET_USAGE_STATS (and any future appops) at sys.boot_completed time.
+# Init.rc would need a custom SELinux service domain to fork sh, and
+# Java reflection in the priv-app context is the simpler escape hatch.
+
+on early-init
+    setprop miladyos.boot_phase early-init
+
+on init
+    setprop miladyos.boot_phase init
+
+on post-fs-data
+    # Ensure the Milady process has writable scratch directory regardless
+    # of which volume the user-data partition lands on. mkdir is idempotent.
+    mkdir /data/milady 0770 system system
+
+on boot
+    setprop miladyos.boot_phase boot
+
+on property:sys.boot_completed=1
+    setprop miladyos.boot_phase completed

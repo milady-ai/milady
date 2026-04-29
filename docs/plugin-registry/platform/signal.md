@@ -11,7 +11,7 @@ The Signal plugin connects Milady agents to Signal via signal-cli running in HTT
 ## Installation
 
 ```bash
-milady plugins install signal
+milady plugins install @elizaos/plugin-signal
 ```
 
 ## Setup
@@ -72,6 +72,15 @@ signal-cli -a +1234567890 daemon --http localhost:8080
 - **Reactions** — Reaction notifications at configurable levels
 - **Stories** — Optional story message processing
 - **Multi-account** — Supports multiple Signal accounts via `accounts` map
+
+## Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `SIGNAL_ACCOUNT_NUMBER` | Yes | Signal phone number (E.164 format) |
+| `SIGNAL_HTTP_URL` | No | HTTP URL for signal-cli daemon |
+| `SIGNAL_CLI_PATH` | No | Path to signal-cli binary |
+| `SIGNAL_SHOULD_IGNORE_GROUP_MESSAGES` | No | Ignore group messages |
 
 ## Auto-Enable
 

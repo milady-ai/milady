@@ -4,7 +4,7 @@ sidebarTitle: "代理"
 description: "用于代理生命周期管理、行政操作和传输（导出/导入）的 REST API 端点。"
 ---
 
-所有代理端点都需要代理运行时已初始化。API 服务器默认运行在端口 **2138** 上，所有路径以 `/api/` 为前缀。当设置了 `MILADY_API_TOKEN` 时，需在 `Authorization` 请求头中将其作为 `Bearer` 令牌传递。
+所有代理端点都需要代理运行时已初始化。API 服务器默认运行在端口 **31337** 上，所有路径以 `/api/` 为前缀。当设置了 `MILADY_API_TOKEN` 时，需在 `Authorization` 请求头中将其作为 `Bearer` 令牌传递。
 
 <div id="endpoints">
 ## 端点

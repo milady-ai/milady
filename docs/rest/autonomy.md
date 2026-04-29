@@ -23,13 +23,7 @@ The API layer interacts with the autonomy service through this interface:
 
 ### State Resolution
 
-The `enabled` field in the response is resolved with this priority:
-
-1. **Service status** — `svc.getStatus().enabled` if the service provides it (highest priority)
-2. **Runtime flag** — `runtime.enableAutonomy === true` as a fallback
-3. **Service existence** — `Boolean(svc)` as the final fallback (if the service is registered, autonomy is considered enabled)
-
-The `thinking` field is always `svc.isLoopRunning()` — it indicates whether the autonomy loop is actively executing right now (processing a tick), not just whether it is enabled.
+The `enabled` field in the response is resolved from the runtime flag `runtime.enableAutonomy === true`.
 
 ### Trigger Integration
 
@@ -48,15 +42,13 @@ Get the current autonomy state.
 
 ```json
 {
-  "enabled": true,
-  "thinking": false
+  "enabled": true
 }
 ```
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `enabled` | boolean | Whether autonomous operation is currently enabled |
-| `thinking` | boolean | Whether the autonomy loop is actively executing a tick right now |
 
 ---
 
@@ -82,22 +74,18 @@ When enabling, the autonomy task fires its first tick immediately. When disablin
 
 ```json
 {
-  "ok": true,
-  "autonomy": true,
-  "thinking": false
+  "enabled": true
 }
 ```
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `ok` | boolean | Always `true` on success |
-| `autonomy` | boolean | The new autonomy enabled state after the operation |
-| `thinking` | boolean | Whether the loop is currently executing a tick |
+| `enabled` | boolean | The current autonomy enabled state after the operation |
 
 **Behavior Notes**
 
-- If the `AUTONOMY` service is not registered in the runtime, the request body is silently ignored and the current state is returned
-- The `enabled` parameter must be a boolean; non-boolean values are ignored
+- If the `AUTONOMY` service is not registered in the runtime, the `enabled` property is set directly on the runtime object
+- The `enabled` parameter must be a boolean; non-boolean values return a `400` error
 
 ## Related
 

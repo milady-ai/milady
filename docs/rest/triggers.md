@@ -20,10 +20,12 @@ Get the trigger system health snapshot. This endpoint works even when triggers a
 
 ```json
 {
-  "enabled": true,
-  "taskServiceAvailable": true,
-  "activeTriggerCount": 3,
-  "limit": 20
+  "triggersEnabled": true,
+  "activeTriggers": 3,
+  "disabledTriggers": 1,
+  "totalExecutions": 42,
+  "totalFailures": 2,
+  "totalSkipped": 0
 }
 ```
 
@@ -77,7 +79,7 @@ Create a new trigger. Returns `429` if the active trigger limit for the creator 
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `kind` | string | No | Trigger kind: `"text"` (default) for coordinator-driven triggers, or `"workflow"` for n8n workflow triggers |
+| `kind` | string | No | Trigger kind: `"text"` (default) or `"workflow"`. Workflow triggers require `workflowId`. |
 | `displayName` | string | No | Human-readable trigger name (default: `"New Trigger"`) |
 | `instructions` | string | No | Instructions for the agent when this trigger fires |
 | `triggerType` | string | No | `"interval"`, `"cron"`, or `"once"` (default: `"interval"`) |
@@ -88,7 +90,7 @@ Create a new trigger. Returns `429` if the active trigger limit for the creator 
 | `wakeMode` | string | No | `"inject_now"` fires immediately (default), other modes defer |
 | `enabled` | boolean | No | Whether the trigger is active (default: `true`) |
 | `createdBy` | string | No | Creator identifier for limit tracking (default: `"api"`) |
-| `workflowId` | string | Conditional | Required when `kind` is `"workflow"`. The n8n workflow ID to associate |
+| `workflowId` | string | No | n8n workflow ID (required when `kind` is `"workflow"`) |
 | `workflowName` | string | No | Human-readable workflow name (for `kind: "workflow"`) |
 
 **Response (201 Created)**

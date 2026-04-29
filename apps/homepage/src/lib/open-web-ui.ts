@@ -1,18 +1,35 @@
 import { getToken } from "./auth";
 import { CLOUD_BASE, rewriteAgentUiUrl } from "./runtime-config";
 
-/**
- * Fetches a pairing token from the cloud backend for the given cloud agent ID.
- *
- * Works against both the local Express backend (localhost:3000) and the
- * Vercel proxy (elizacloud.ai).  The local backend exposes the route
- * at `/api/agents/:id/pairing-token` with `Authorization: Bearer`, while
- * the Vercel deployment rewrites to the same backend via milady-api.shad0w.xyz.
- */
-async function fetchPairingRedirectUrl(
+const PAIRING_POLL_MAX_ATTEMPTS = 60;
+const PAIRING_POLL_MAX_WALL_MS = 120_000;
+const PAIRING_POLL_DEFAULT_RETRY_MS = 1000;
+
+type PairingPollResult =
+  | { kind: "ready"; redirectUrl: string }
+  | { kind: "pending"; retryAfterMs: number };
+
+function readRetryAfterMs(res: Response, body: unknown): number {
+  if (
+    body &&
+    typeof body === "object" &&
+    "retryAfterMs" in body &&
+    typeof (body as { retryAfterMs?: unknown }).retryAfterMs === "number"
+  ) {
+    return Math.max(0, (body as { retryAfterMs: number }).retryAfterMs);
+  }
+  const header = res.headers.get("Retry-After");
+  if (header) {
+    const sec = Number(header);
+    if (Number.isFinite(sec) && sec >= 0) return sec * 1000;
+  }
+  return PAIRING_POLL_DEFAULT_RETRY_MS;
+}
+
+async function requestPairingToken(
   agentId: string,
   apiKey: string,
-): Promise<string> {
+): Promise<PairingPollResult> {
   const res = await fetch(
     `${CLOUD_BASE}/api/v1/milady/agents/${agentId}/pairing-token`,
     {
@@ -24,13 +41,21 @@ async function fetchPairingRedirectUrl(
     },
   );
 
+  if (res.status === 202) {
+    const body = await res.json().catch(() => ({}));
+    const data =
+      body && typeof body === "object" && "data" in body
+        ? (body as { data?: unknown }).data
+        : body;
+    return { kind: "pending", retryAfterMs: readRetryAfterMs(res, data) };
+  }
+
   if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(`Pairing token ${res.status}: ${body}`);
+    const text = await res.text().catch(() => "");
+    throw new Error(`Pairing token ${res.status}: ${text}`);
   }
 
   const json = await res.json();
-  // Backend wraps in { success, data: { token, redirectUrl, expiresIn } }
   const redirectUrl: string | undefined =
     json?.data?.redirectUrl ?? json?.redirectUrl;
 
@@ -38,7 +63,48 @@ async function fetchPairingRedirectUrl(
     throw new Error("No redirectUrl in pairing-token response");
   }
 
-  return rewriteAgentUiUrl(redirectUrl);
+  return { kind: "ready", redirectUrl: rewriteAgentUiUrl(redirectUrl) };
+}
+
+function delay(ms: number): Promise<void> {
+  if (ms <= 0) return Promise.resolve();
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Drives the pairing-token flow: POST → if 200, redirect; if 202, wait and
+ * retry until ready (or popup closes, or polling cap is hit).
+ */
+export async function redirectPopupToCloudAgent(
+  popup: Window,
+  agentId: string,
+  apiKey: string,
+): Promise<void> {
+  const startedAt = Date.now();
+
+  for (let attempt = 0; attempt < PAIRING_POLL_MAX_ATTEMPTS; attempt++) {
+    if (popup.closed) return;
+
+    const result = await requestPairingToken(agentId, apiKey);
+
+    if (popup.closed) return;
+
+    if (result.kind === "ready") {
+      popup.location.href = result.redirectUrl;
+      return;
+    }
+
+    if (
+      Date.now() - startedAt + result.retryAfterMs >
+      PAIRING_POLL_MAX_WALL_MS
+    ) {
+      throw new Error("Pairing token polling timed out");
+    }
+
+    await delay(result.retryAfterMs);
+  }
+
+  throw new Error("Pairing token polling exceeded max attempts");
 }
 
 /**
@@ -51,12 +117,15 @@ function extractUuidFromUrl(url: string): string | null {
   return match ? match[1] : null;
 }
 
-function renderPopupConnectingState(popup: Window): void {
+export function renderPopupConnectingState(
+  popup: Window,
+  message: string = "Connecting to agent…",
+): void {
   const { document } = popup;
   const { body } = document;
   if (!body) return;
 
-  document.title = "Connecting\u2026";
+  document.title = "Connecting…";
   body.style.margin = "0";
   body.replaceChildren();
 
@@ -72,11 +141,12 @@ function renderPopupConnectingState(popup: Window): void {
   spinner.style.cssText =
     "width:24px;height:24px;border:2px solid #27272a;border-top-color:#a1a1aa;border-radius:50%;margin:0 auto 16px;animation:milady-popup-spinner 0.8s linear infinite";
 
-  const message = document.createElement("div");
-  message.style.cssText = "font-size:14px;letter-spacing:0.02em";
-  message.textContent = "Connecting to agent\u2026";
+  const messageEl = document.createElement("div");
+  messageEl.id = "milady-popup-message";
+  messageEl.style.cssText = "font-size:14px;letter-spacing:0.02em";
+  messageEl.textContent = message;
 
-  content.append(spinner, message);
+  content.append(spinner, messageEl);
   container.append(content);
   body.append(container);
 
@@ -89,12 +159,20 @@ function renderPopupConnectingState(popup: Window): void {
   }
 }
 
+export function updatePopupMessage(popup: Window, message: string): void {
+  if (popup.closed) return;
+  const el = popup.document.getElementById("milady-popup-message");
+  if (el) {
+    el.textContent = message;
+  }
+}
+
 /**
  * Opens the Web UI for a remote/cloud agent with automatic authentication.
  *
  * Flow:
  *   1. Opens a popup immediately (must be in click handler for popup blockers)
- *   2. Calls the cloud backend pairing-token endpoint
+ *   2. Calls the cloud backend pairing-token endpoint, polling through 202s
  *   3. Redirects the popup to the returned URL (with token in path)
  *
  * The pairing token is exchanged by the agent's nginx Lua router or
@@ -105,7 +183,6 @@ async function openWebUIWithPairingToken(
   cloudApiKey: string,
   agentId?: string,
 ): Promise<void> {
-  // Open popup synchronously to avoid popup blockers
   const popup = window.open("", "_blank");
   if (!popup) {
     showToast("Popup blocked. Please allow popups and try again.");
@@ -125,14 +202,8 @@ async function openWebUIWithPairingToken(
   }
 
   try {
-    const redirectUrl = await fetchPairingRedirectUrl(
-      pairingAgentId,
-      cloudApiKey,
-    );
-    if (popup.closed) return;
-    popup.location.href = redirectUrl;
+    await redirectPopupToCloudAgent(popup, pairingAgentId, cloudApiKey);
   } catch (err) {
-    // Fallback: open the bare URL (user will see pairing screen)
     console.error("[open-web-ui] pairing token failed, falling back:", err);
     if (!popup.closed) {
       popup.location.href = rewriteAgentUiUrl(agentUrl);

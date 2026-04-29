@@ -1,26 +1,23 @@
----
-title: Telegram Connector
-sidebarTitle: Telegram
-description: Connect your agent to Telegram using the @elizaos/plugin-telegram package.
----
+# Telegram Connector
 
-Connect your agent to Telegram for private chats and group conversations.
+Connect your agent to Telegram for private chats and group conversations using the `@elizaos/plugin-telegram` package.
 
-## Overview
+## Prerequisites
 
-The Telegram connector is an external elizaOS plugin that bridges your agent to Telegram via the Bot API. It is auto-enabled by the runtime when a valid token is detected in your connector configuration.
+- A Telegram bot token from [@BotFather](https://t.me/BotFather)
 
-## Package Info
+## Configuration
 
-| Field | Value |
-|-------|-------|
-| Package | `@elizaos/plugin-telegram` |
-| Config key | `connectors.telegram` |
-| Auto-enable trigger | `botToken`, `token`, or `apiKey` is truthy in connector config |
+| Name | Required | Description |
+|------|----------|-------------|
+| `TELEGRAM_BOT_TOKEN` | Yes | Bot token from [@BotFather](https://t.me/BotFather) |
+| `TELEGRAM_API_ROOT` | No | Base URL for Telegram Bot API (allows overriding the default endpoint) |
+| `TELEGRAM_ALLOWED_CHATS` | No | JSON-encoded array of chat IDs authorized to interact with the bot |
+| `TELEGRAM_TEST_CHAT_ID` | No | Chat ID used by the test suite for validation |
 
-## Minimal Configuration
+The connector auto-enables when `botToken`, `token`, or `apiKey` is truthy in the connector config and `enabled` is not explicitly `false`.
 
-In `~/.milady/milady.json`:
+Configure in `~/.milady/milady.json`:
 
 ```json
 {
@@ -47,19 +44,24 @@ To explicitly disable the connector even when a token is present:
 }
 ```
 
-## Auto-Enable Mechanism
+## Setup
 
-The `plugin-auto-enable.ts` module checks `connectors.telegram` in your config. If any of the fields `botToken`, `token`, or `apiKey` is truthy (and `enabled` is not explicitly `false`), the runtime automatically loads `@elizaos/plugin-telegram`.
+1. Open Telegram and message [@BotFather](https://t.me/BotFather).
+2. Use `/newbot` to create a new bot and copy the **bot token**.
+3. Add the token to `connectors.telegram.botToken` in your config.
+4. Start your agent -- the Telegram connector will auto-enable.
 
-No environment variable is required to trigger auto-enable — it is driven entirely by the connector config object.
+## Features
 
 ## Environment Variables
 
 When the connector is loaded, the runtime pushes the following secret from your config into `process.env` for the plugin to consume:
 
-| Variable | Source | Description |
-|----------|--------|-------------|
-| `TELEGRAM_BOT_TOKEN` | `botToken` | Bot token from [@BotFather](https://t.me/BotFather) |
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `TELEGRAM_BOT_TOKEN` | Yes | Bot token from [@BotFather](https://t.me/BotFather) |
+| `TELEGRAM_API_ROOT` | No | Override the default Telegram Bot API base URL |
+| `TELEGRAM_ALLOWED_CHATS` | No | JSON-encoded array of authorized chat IDs |
 
 ## Full Configuration Reference
 

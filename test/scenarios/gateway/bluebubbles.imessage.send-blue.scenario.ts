@@ -64,11 +64,14 @@ export default scenario({
             return false;
           }
           const blob = JSON.stringify(write.content ?? {});
-          return blob.includes('"source":"bluebubbles"');
+          return (
+            blob.includes('"source":"bluebubbles"') &&
+            /10 minutes|there in 10/i.test(blob)
+          );
         });
 
         if (!outboundWrite) {
-          return "expected the BlueBubbles send action to persist an outbound message memory";
+          return "expected the BlueBubbles send action to persist an outbound message memory containing the confirmed 10 minute reply";
         }
 
         return undefined;
@@ -108,7 +111,7 @@ export default scenario({
       predicate: expectMemoryWrite({
         description: "BlueBubbles outbound message memory",
         table: "messages",
-        contentIncludesAny: [/bluebubbles/i],
+        contentIncludesAny: [/bluebubbles/i, /10 minutes|there in 10/i],
       }),
     },
   ],

@@ -39,7 +39,7 @@ Obtenir les entrées de journal mises en mémoire tampon avec filtrage optionnel
       "level": "info",
       "source": "milady-api",
       "tags": ["startup"],
-      "message": "API server started on port 2138"
+      "message": "API server started on port 31337"
     }
   ],
   "sources": ["milady-api", "runtime", "plugin-anthropic"],

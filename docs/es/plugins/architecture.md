@@ -22,7 +22,7 @@ AgentRuntime
 └── Local            (desde el directorio plugins/)
 ```
 
-La fuente de verdad sobre qué plugins se cargan siempre se encuentra en `packages/agent/src/runtime/core-plugins.ts` (re-exportado por `packages/app-core/src/runtime/core-plugins.ts`):
+La fuente de verdad sobre qué plugins se cargan siempre se encuentra en `eliza/packages/agent/src/runtime/core-plugins.ts` (en el submódulo upstream de elizaOS, re-exportado por `eliza/packages/app-core/src/runtime/core-plugins.ts`):
 
 ```typescript
 export const CORE_PLUGINS: readonly string[] = [
@@ -41,7 +41,7 @@ export const CORE_PLUGINS: readonly string[] = [
 ];
 ```
 
-> **Nota:** `@elizaos/plugin-secrets-manager`, `relationships`, `@elizaos/plugin-trust`, `@elizaos/plugin-personality` y `@elizaos/plugin-experience` se importan estáticamente para una resolución rápida, pero están comentados en la lista principal. Podrían ser re-habilitados en una versión futura. Milady no incluye `@elizaos/plugin-todo`; la funcionalidad de todos se gestiona mediante la API del workbench y tareas del runtime relacionadas con LifeOps.
+> **Nota:** `@elizaos/plugin-secrets-manager`, `relationships`, `@elizaos/plugin-trust` y `@elizaos/plugin-personality` se importan estáticamente para una resolución rápida, pero están comentados en la lista principal. Experience ahora se distribuye como una capacidad avanzada integrada en lugar de un plugin independiente. Milady no incluye `@elizaos/plugin-todo`; la funcionalidad de todos se gestiona mediante la API del workbench y tareas del runtime relacionadas con LifeOps.
 
 <div id="optional-core-plugins">
 
@@ -49,7 +49,7 @@ export const CORE_PLUGINS: readonly string[] = [
 
 </div>
 
-Una lista separada de plugins principales opcionales puede habilitarse desde el panel de administración. No se cargan por defecto debido a restricciones de empaquetado o especificación. La lista se encuentra en `packages/agent/src/runtime/core-plugins.ts`:
+Una lista separada de plugins principales opcionales puede habilitarse desde el panel de administración. No se cargan por defecto debido a restricciones de empaquetado o especificación. La lista se encuentra en `eliza/packages/agent/src/runtime/core-plugins.ts`:
 
 ```typescript
 export const OPTIONAL_CORE_PLUGINS: readonly string[] = [
@@ -144,7 +144,7 @@ interface Plugin {
 
 </div>
 
-Los plugins se habilitan automáticamente cuando se detecta su configuración requerida. Esta lógica se encuentra en `packages/agent/src/config/plugin-auto-enable.ts` (extendida por `packages/app-core/src/config/plugin-auto-enable.ts` para conectores específicos de Milady como WeChat) y se ejecuta antes de la inicialización del runtime.
+Los plugins se habilitan automáticamente cuando se detecta su configuración requerida. Esta lógica se encuentra en `eliza/packages/agent/src/config/plugin-auto-enable.ts` (extendida por el `plugin-auto-enable.ts` de Milady para conectores como WeChat) y se ejecuta antes de la inicialización del runtime.
 
 <div id="trigger-sources">
 
@@ -242,7 +242,7 @@ const FEATURE_PLUGINS = {
   webhooks:             "@elizaos/plugin-webhooks",
   gmailWatch:           "@elizaos/plugin-gmail-watch",
   personality:          "@elizaos/plugin-personality",
-  experience:           "@elizaos/plugin-experience",
+  experience:           "(capacidad avanzada integrada)",
   form:                 "@elizaos/plugin-form",
   x402:                 "@elizaos/plugin-x402",
   fal:                  "@elizaos/plugin-fal",
@@ -318,19 +318,16 @@ Los plugins no comparten estado mutable directamente — se comunican a través 
 
 </div>
 
-Cuando un paquete de plugin es importado dinámicamente, el runtime busca una exportación de plugin en este orden:
+Cuando un paquete de plugin es importado dinámicamente, `findRuntimePluginExport()` localiza la exportación de Plugin siguiendo este orden de prioridad:
 
-1. `module.default`
-2. `module.plugin`
-3. Cualquier clave cuyo valor coincida con la forma de la interfaz Plugin
+1. `module.default` — exportación por defecto de módulo ES
+2. `module.plugin` — exportación nombrada `plugin`
+3. El propio `module` — patrón por defecto de CJS
+4. Exportaciones nombradas que terminan en `Plugin` o comienzan con `plugin`
+5. Otras exportaciones nombradas que coincidan con la forma de la interfaz Plugin
+6. Exportaciones mínimas `{ name, description }` para claves nombradas que coincidan con `plugin`
 
-```typescript
-interface PluginModuleShape {
-  default?: Plugin;
-  plugin?: Plugin;
-  [key: string]: Plugin | undefined;
-}
-```
+Una exportación de módulo se acepta como Plugin cuando tiene los campos `name` y `description`, además de al menos uno de `services`, `providers`, `actions`, `routes`, `events` (como arreglos) o `init` (como función).
 
 <div id="related">
 

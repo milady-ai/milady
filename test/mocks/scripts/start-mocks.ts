@@ -4,6 +4,19 @@ import http from "node:http";
 import type { AddressInfo } from "node:net";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  GITHUB_FIXTURE_NOTIFICATIONS,
+  GITHUB_FIXTURE_PULLS,
+  GITHUB_FIXTURE_SEARCH_ITEMS,
+} from "../helpers/github-octokit-fixture.ts";
+import type { GoogleCalendarRequestLedgerMetadata } from "./google-calendar-state.ts";
+import {
+  createGoogleMockState,
+  type GmailRequestLedgerMetadata,
+  type GoogleMockState,
+  googleDynamicFixture,
+} from "./google-gmail-state.ts";
+import { MockHttpError } from "./mock-http-error.ts";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ENVS_DIR = path.resolve(__dirname, "..", "environments");
@@ -15,6 +28,10 @@ export const MOCK_ENVIRONMENTS = [
   "x-twitter",
   "calendly",
   "cloud-managed",
+  "signal",
+  "browser-workspace",
+  "bluebubbles",
+  "github",
 ] as const;
 
 export type MockEnvironmentName = (typeof MOCK_ENVIRONMENTS)[number];
@@ -70,49 +87,67 @@ export interface MockRequestLedgerEntry {
   createdAt: string;
   runId?: string;
   gmail?: GmailRequestLedgerMetadata;
+  calendar?: GoogleCalendarRequestLedgerMetadata;
+  x?: XRequestLedgerMetadata;
+  whatsapp?: WhatsAppRequestLedgerMetadata;
+  signal?: SignalRequestLedgerMetadata;
+  browserWorkspace?: BrowserWorkspaceRequestLedgerMetadata;
+  bluebubbles?: BlueBubblesRequestLedgerMetadata;
+  github?: GitHubRequestLedgerMetadata;
 }
 
-interface GmailDecodedSendMetadata {
-  rawLength: number;
-  from: string | null;
-  to: string[];
-  cc: string[];
-  bcc: string[];
-  subject: string | null;
-  messageId: string | null;
-  inReplyTo: string | null;
-  references: string | null;
-  runIdHeader: string | null;
-  bodyText: string;
-}
-
-interface GmailRequestLedgerMetadata {
+interface XRequestLedgerMetadata {
   action: string;
-  messageId?: string;
-  threadId?: string;
-  draftId?: string;
-  ids?: string[];
-  batchIds?: string[];
-  addLabelIds?: string[];
-  removeLabelIds?: string[];
-  decodedSend?: GmailDecodedSendMetadata;
+  userId?: string;
+  query?: string;
+  tweetId?: string;
+  conversationId?: string;
+  dmEventId?: string;
+  limit?: number;
   runId?: string;
-  historyId?: string;
 }
 
-interface DynamicFixtureResponse {
-  statusCode: number;
-  body: JsonValue;
-  headers?: Record<string, string>;
+interface WhatsAppRequestLedgerMetadata {
+  action: string;
+  phoneNumberId?: string;
+  recipient?: string;
+  messageId?: string;
+  ingested?: number;
+  runId?: string;
 }
 
-class MockHttpError extends Error {
-  constructor(
-    public readonly statusCode: number,
-    message: string,
-  ) {
-    super(message);
-  }
+interface SignalRequestLedgerMetadata {
+  action: string;
+  account?: string;
+  recipients?: string[];
+  groupId?: string;
+  timestamp?: number;
+  runId?: string;
+}
+
+interface BrowserWorkspaceRequestLedgerMetadata {
+  action: string;
+  tabId?: string;
+  partition?: string;
+  url?: string;
+  runId?: string;
+}
+
+interface BlueBubblesRequestLedgerMetadata {
+  action: string;
+  chatGuid?: string;
+  messageGuid?: string;
+  query?: string;
+  runId?: string;
+}
+
+interface GitHubRequestLedgerMetadata {
+  action: string;
+  owner?: string;
+  repo?: string;
+  number?: number;
+  query?: string;
+  runId?: string;
 }
 
 export interface StartedMocks {
@@ -143,6 +178,25 @@ function envVarsFor(
     out.MILADY_MOCK_CALENDLY_BASE = baseUrls.calendly;
   if (envs.includes("cloud-managed"))
     out.ELIZA_CLOUD_BASE_URL = baseUrls["cloud-managed"];
+  if (envs.includes("signal")) {
+    out.SIGNAL_HTTP_URL = baseUrls.signal;
+    out.SIGNAL_ACCOUNT_NUMBER = "+15550000000";
+  }
+  if (envs.includes("browser-workspace")) {
+    out.ELIZA_BROWSER_WORKSPACE_URL = baseUrls["browser-workspace"];
+    out.ELIZA_BROWSER_WORKSPACE_TOKEN = "mock-browser-workspace-token";
+  }
+  if (envs.includes("bluebubbles")) {
+    out.ELIZA_IMESSAGE_BACKEND = "bluebubbles";
+    out.ELIZA_BLUEBUBBLES_URL = baseUrls.bluebubbles;
+    out.BLUEBUBBLES_SERVER_URL = baseUrls.bluebubbles;
+    out.ELIZA_BLUEBUBBLES_PASSWORD = "mock-bluebubbles-password";
+    out.BLUEBUBBLES_PASSWORD = "mock-bluebubbles-password";
+  }
+  if (envs.includes("github")) {
+    out.MILADY_MOCK_GITHUB_BASE = baseUrls.github;
+    out.GITHUB_API_URL = baseUrls.github;
+  }
   return out;
 }
 
@@ -376,763 +430,6 @@ function findRoute(
   return null;
 }
 
-function jsonFixture(
-  body: JsonValue,
-  statusCode = 200,
-): DynamicFixtureResponse {
-  return { statusCode, body, headers: { "Content-Type": "application/json" } };
-}
-
-function routeParam(pathname: string, pattern: RegExp): string | null {
-  const match = pattern.exec(pathname);
-  return match ? decodeURIComponent(match[1] ?? "") : null;
-}
-
-type MessageResponse = {
-  id: string;
-  threadId: string;
-  labelIds?: string[];
-};
-
-type GmailFixtureMessage = MessageResponse & {
-  snippet: string;
-  internalDateOffsetMs: number;
-  headers: Array<{ name: string; value: string }>;
-  bodyText: string;
-};
-
-const GMAIL_FIXTURE_MESSAGES: GmailFixtureMessage[] = [
-  {
-    id: "msg-finance",
-    threadId: "thr-finance",
-    labelIds: ["INBOX", "UNREAD", "IMPORTANT"],
-    snippet: "Please confirm receipt of invoice 4831 when you get a chance.",
-    internalDateOffsetMs: -60 * 60 * 1000,
-    headers: [
-      { name: "From", value: "Finance Team <finance@example.com>" },
-      { name: "To", value: "Owner <owner@example.test>" },
-      { name: "Subject", value: "Invoice 4831 received" },
-      { name: "Message-Id", value: "<finance-4831@example.com>" },
-    ],
-    bodyText:
-      "Hi there,\n\nWe received invoice 4831 for April. Please confirm receipt when you get a chance.\n\nThanks,\nFinance Team\n",
-  },
-  {
-    id: "msg-sarah",
-    threadId: "thr-sarah",
-    labelIds: ["INBOX", "UNREAD"],
-    snippet:
-      "Could you review the product brief tomorrow and send notes before lunch?",
-    internalDateOffsetMs: -3 * 60 * 60 * 1000,
-    headers: [
-      { name: "From", value: "Sarah Lee <sarah@example.com>" },
-      { name: "To", value: "Owner <owner@example.test>" },
-      { name: "Subject", value: "Can you review the product brief?" },
-      { name: "Message-Id", value: "<sarah-brief@example.com>" },
-    ],
-    bodyText:
-      "Hey,\n\nCan you review the product brief tomorrow and send me notes before lunch?\n\nThanks,\nSarah\n",
-  },
-  {
-    id: "msg-julia",
-    threadId: "thr-julia",
-    labelIds: ["INBOX"],
-    snippet: "Looking forward to our intro meeting tomorrow.",
-    internalDateOffsetMs: -6 * 60 * 60 * 1000,
-    headers: [
-      { name: "From", value: "Julia Chen <julia.chen@example.com>" },
-      { name: "To", value: "Owner <owner@example.test>" },
-      { name: "Subject", value: "Looking forward to tomorrow" },
-      { name: "Message-Id", value: "<julia-intro@example.com>" },
-    ],
-    bodyText:
-      "Looking forward to our intro meeting tomorrow. I'd love to compare notes on product strategy and AI assistants.\n\nBest,\nJulia\n",
-  },
-  {
-    id: "msg-newsletter",
-    threadId: "thr-news",
-    labelIds: ["INBOX", "CATEGORY_PROMOTIONS"],
-    snippet:
-      "This week in ops: ship the launch checklist and review the metrics deck.",
-    internalDateOffsetMs: -10 * 60 * 60 * 1000,
-    headers: [
-      { name: "From", value: "Weekly Digest <digest@example.com>" },
-      { name: "To", value: "Owner <owner@example.test>" },
-      { name: "Subject", value: "Weekly ops digest" },
-      { name: "Precedence", value: "bulk" },
-      { name: "List-Id", value: "<weekly.digest.example.com>" },
-      { name: "Message-Id", value: "<weekly-digest@example.com>" },
-    ],
-    bodyText:
-      "This week in ops: ship the launch checklist, review the metrics deck, and confirm next week's travel.\n",
-  },
-  {
-    id: "msg-spam",
-    threadId: "thr-spam",
-    labelIds: ["SPAM", "UNREAD"],
-    snippet: "Suspicious account notice routed to spam.",
-    internalDateOffsetMs: -2 * 60 * 60 * 1000,
-    headers: [
-      { name: "From", value: "Security Notice <security@example.com>" },
-      { name: "To", value: "Owner <owner@example.test>" },
-      { name: "Subject", value: "Account notice" },
-      { name: "Message-Id", value: "<spam-notice@example.com>" },
-    ],
-    bodyText: "This is a synthetic spam-folder fixture.\n",
-  },
-  {
-    id: "msg-unresponded-inbound",
-    threadId: "thr-unresponded",
-    labelIds: ["INBOX"],
-    snippet: "Could you send the signed vendor packet?",
-    internalDateOffsetMs: -16 * 24 * 60 * 60 * 1000,
-    headers: [
-      { name: "From", value: "Vendor Ops <vendor@example.com>" },
-      { name: "To", value: "Owner <owner@example.test>" },
-      { name: "Subject", value: "Signed vendor packet" },
-      { name: "Message-Id", value: "<vendor-inbound@example.com>" },
-    ],
-    bodyText: "Could you send the signed vendor packet when you can?\n",
-  },
-  {
-    id: "msg-unresponded-sent",
-    threadId: "thr-unresponded",
-    labelIds: ["SENT"],
-    snippet: "Following up on the signed packet.",
-    internalDateOffsetMs: -14 * 24 * 60 * 60 * 1000,
-    headers: [
-      { name: "From", value: "Owner <owner@example.test>" },
-      { name: "To", value: "Vendor Ops <vendor@example.com>" },
-      { name: "Subject", value: "Re: Signed vendor packet" },
-      { name: "Message-Id", value: "<vendor-sent@example.test>" },
-      { name: "In-Reply-To", value: "<vendor-inbound@example.com>" },
-      {
-        name: "References",
-        value: "<vendor-inbound@example.com> <vendor-sent@example.test>",
-      },
-    ],
-    bodyText: "Following up on the signed packet. Can you confirm receipt?\n",
-  },
-];
-
-type GmailMockMessage = Omit<GmailFixtureMessage, "internalDateOffsetMs"> & {
-  internalDateMs: number;
-  historyId: string;
-  deleted: boolean;
-  raw?: string;
-};
-
-interface GmailMockDraft {
-  id: string;
-  message: GmailMockMessage;
-}
-
-interface GmailHistoryMessageRef {
-  message: { id: string; threadId: string };
-}
-
-interface GmailHistoryLabelRef extends GmailHistoryMessageRef {
-  labelIds: string[];
-}
-
-interface GmailHistoryRecord {
-  id: string;
-  messagesAdded?: GmailHistoryMessageRef[];
-  messagesDeleted?: GmailHistoryMessageRef[];
-  labelsAdded?: GmailHistoryLabelRef[];
-  labelsRemoved?: GmailHistoryLabelRef[];
-}
-
-interface GoogleMockState {
-  gmailMessages: Map<string, GmailMockMessage>;
-  gmailDrafts: Map<string, GmailMockDraft>;
-  gmailHistoryId: number;
-  gmailHistory: GmailHistoryRecord[];
-  googleTokens: Map<string, Set<string>>;
-}
-
-const GOOGLE_DEFAULT_TOKEN_SCOPES = [
-  "openid",
-  "email",
-  "profile",
-  "https://www.googleapis.com/auth/calendar.readonly",
-  "https://www.googleapis.com/auth/calendar.events",
-  "https://www.googleapis.com/auth/gmail.readonly",
-  "https://www.googleapis.com/auth/gmail.send",
-  "https://www.googleapis.com/auth/gmail.modify",
-  "https://www.googleapis.com/auth/gmail.settings.basic",
-] as const;
-
-const GOOGLE_GMAIL_READ_SCOPES = [
-  "https://www.googleapis.com/auth/gmail.readonly",
-  "https://www.googleapis.com/auth/gmail.metadata",
-  "https://www.googleapis.com/auth/gmail.modify",
-] as const;
-const GOOGLE_GMAIL_SEND_SCOPES = [
-  "https://www.googleapis.com/auth/gmail.send",
-  "https://www.googleapis.com/auth/gmail.compose",
-  "https://www.googleapis.com/auth/gmail.modify",
-] as const;
-const GOOGLE_GMAIL_MODIFY_SCOPES = [
-  "https://www.googleapis.com/auth/gmail.modify",
-] as const;
-const GOOGLE_GMAIL_DRAFT_SCOPES = [
-  "https://www.googleapis.com/auth/gmail.compose",
-  "https://www.googleapis.com/auth/gmail.modify",
-] as const;
-const GOOGLE_GMAIL_SETTINGS_SCOPES = [
-  "https://www.googleapis.com/auth/gmail.settings.basic",
-  "https://www.googleapis.com/auth/gmail.modify",
-] as const;
-
-function createGoogleMockState(): GoogleMockState {
-  const messages = new Map<string, GmailMockMessage>();
-  for (const fixture of GMAIL_FIXTURE_MESSAGES) {
-    messages.set(fixture.id, {
-      id: fixture.id,
-      threadId: fixture.threadId,
-      labelIds: [...(fixture.labelIds ?? [])],
-      snippet: fixture.snippet,
-      internalDateMs: Date.now() + fixture.internalDateOffsetMs,
-      headers: fixture.headers.map((header) => ({ ...header })),
-      bodyText: fixture.bodyText,
-      historyId: "123456",
-      deleted: false,
-    });
-  }
-
-  const draftMessage = buildGmailMessageFromRaw({
-    id: "draft-message-mock",
-    threadId: "thr-draft",
-    labelIds: ["DRAFT"],
-    raw: Buffer.from(
-      "To: test@example.test\r\nSubject: Mock Gmail draft\r\n\r\nMock Gmail draft",
-      "utf8",
-    ).toString("base64url"),
-    historyId: "123456",
-  });
-
-  return {
-    gmailMessages: messages,
-    gmailDrafts: new Map([
-      ["draft-mock", { id: "draft-mock", message: draftMessage }],
-    ]),
-    gmailHistoryId: 123456,
-    gmailHistory: [
-      {
-        id: "123456",
-        messagesAdded: [
-          { message: { id: "msg-finance", threadId: "thr-finance" } },
-        ],
-        labelsAdded: [
-          {
-            message: { id: "msg-finance", threadId: "thr-finance" },
-            labelIds: ["INBOX", "UNREAD"],
-          },
-        ],
-      },
-    ],
-    googleTokens: new Map(),
-  };
-}
-
-function gmailFixtureInternalDate(
-  message: GmailFixtureMessage | GmailMockMessage,
-): number {
-  return "internalDateMs" in message
-    ? message.internalDateMs
-    : Date.now() + message.internalDateOffsetMs;
-}
-
-function gmailFixtureResponse(
-  message: GmailFixtureMessage | GmailMockMessage,
-): JsonValue {
-  const date = new Date(gmailFixtureInternalDate(message));
-  return {
-    id: message.id,
-    threadId: message.threadId,
-    labelIds: message.labelIds ?? [],
-    snippet: message.snippet,
-    historyId: "123456",
-    internalDate: String(date.getTime()),
-    sizeEstimate: message.bodyText.length,
-    payload: {
-      mimeType: "text/plain",
-      headers: [
-        ...message.headers,
-        { name: "Date", value: formatHttpDate(date) },
-      ],
-      body: {
-        data: Buffer.from(message.bodyText, "utf8").toString("base64url"),
-        size: message.bodyText.length,
-      },
-    },
-  };
-}
-
-function gmailQueryMatches(
-  message: GmailFixtureMessage | GmailMockMessage,
-  query: string,
-): boolean {
-  const normalized = query.trim().toLowerCase();
-  if (!normalized) return true;
-  const labels = new Set(
-    (message.labelIds ?? []).map((label) => label.toUpperCase()),
-  );
-  const haystack = [
-    message.id,
-    message.threadId,
-    message.snippet,
-    ...message.headers.map((header) => header.value),
-    ...(message.labelIds ?? []),
-  ]
-    .join(" ")
-    .toLowerCase();
-  const ageMs = Date.now() - gmailFixtureInternalDate(message);
-  const tokens = normalized.split(/\s+/).filter(Boolean);
-  return tokens.every((token) => {
-    if (token === "in:anywhere") return true;
-    if (token === "in:inbox") return labels.has("INBOX");
-    if (token === "in:sent") return labels.has("SENT");
-    if (token === "in:spam") return labels.has("SPAM");
-    if (token === "in:trash") return labels.has("TRASH");
-    if (token === "is:unread") return labels.has("UNREAD");
-    if (token === "is:read") return !labels.has("UNREAD");
-    if (token === "is:important") return labels.has("IMPORTANT");
-    if (token.startsWith("label:")) {
-      return labels.has(token.slice("label:".length).toUpperCase());
-    }
-    if (token.startsWith("category:")) {
-      return labels.has(
-        `CATEGORY_${token.slice("category:".length).toUpperCase()}`,
-      );
-    }
-    if (token.startsWith("from:")) {
-      const from = message.headers.find(
-        (header) => header.name.toLowerCase() === "from",
-      )?.value;
-      return (from ?? "").toLowerCase().includes(token.slice("from:".length));
-    }
-    if (token.startsWith("subject:")) {
-      const subject = message.headers.find(
-        (header) => header.name.toLowerCase() === "subject",
-      )?.value;
-      return (subject ?? "")
-        .toLowerCase()
-        .includes(token.slice("subject:".length));
-    }
-    const relative = token.match(/^(older|newer)_than:(\d+)([dmy])$/);
-    if (relative) {
-      const amount = Number.parseInt(relative[2] ?? "", 10);
-      const unit = relative[3];
-      const dayCount =
-        unit === "d" ? amount : unit === "m" ? amount * 30 : amount * 365;
-      const boundaryMs = dayCount * 24 * 60 * 60 * 1000;
-      return relative[1] === "older"
-        ? ageMs >= boundaryMs
-        : ageMs <= boundaryMs;
-    }
-    return haystack.includes(token.replace(/^"|"$/g, ""));
-  });
-}
-
-function gmailLiveMessages(state: GoogleMockState): GmailMockMessage[] {
-  return [...state.gmailMessages.values()].filter(
-    (message) => !message.deleted,
-  );
-}
-
-function isStringArray(value: JsonValue | undefined): value is string[] {
-  return (
-    Array.isArray(value) && value.every((entry) => typeof entry === "string")
-  );
-}
-
-function readOptionalStringArray(
-  body: RequestBody,
-  key: string,
-): string[] | undefined {
-  const value = body[key];
-  if (value === undefined) return undefined;
-  if (!isStringArray(value)) {
-    throw new MockHttpError(400, `${key} must be an array of strings`);
-  }
-  return value.map((entry) => entry.trim()).filter(Boolean);
-}
-
-function readRequiredStringArray(body: RequestBody, key: string): string[] {
-  const value = readOptionalStringArray(body, key);
-  if (!value || value.length === 0) {
-    throw new MockHttpError(400, `${key} must contain at least one string`);
-  }
-  return value;
-}
-
-function readRequiredString(body: RequestBody, key: string): string {
-  const value = body[key];
-  if (typeof value !== "string" || value.trim().length === 0) {
-    throw new MockHttpError(400, `${key} must be a non-empty string`);
-  }
-  return value.trim();
-}
-
-function getMessageOrThrow(
-  state: GoogleMockState,
-  messageId: string,
-): GmailMockMessage {
-  const message = state.gmailMessages.get(messageId);
-  if (!message || message.deleted) {
-    throw new MockHttpError(404, "Requested entity was not found.");
-  }
-  return message;
-}
-
-function jsonError(
-  statusCode: number,
-  message: string,
-): DynamicFixtureResponse {
-  const status =
-    statusCode === 401
-      ? "UNAUTHENTICATED"
-      : statusCode === 403
-        ? "PERMISSION_DENIED"
-        : statusCode === 404
-          ? "NOT_FOUND"
-          : "INVALID_ARGUMENT";
-  return jsonFixture(
-    {
-      error: {
-        code: statusCode,
-        message,
-        status,
-      },
-    },
-    statusCode,
-  );
-}
-
-function addHistoryRecord(
-  state: GoogleMockState,
-  record: Omit<GmailHistoryRecord, "id">,
-): string {
-  state.gmailHistoryId += 1;
-  const id = String(state.gmailHistoryId);
-  state.gmailHistory.push({ id, ...record });
-  return id;
-}
-
-function gmailHistoryRecordResponse(
-  record: GmailHistoryRecord,
-): Record<string, JsonValue> {
-  return {
-    id: record.id,
-    ...(record.messagesAdded
-      ? {
-          messagesAdded: record.messagesAdded.map((entry) => ({
-            message: { ...entry.message },
-          })),
-        }
-      : {}),
-    ...(record.messagesDeleted
-      ? {
-          messagesDeleted: record.messagesDeleted.map((entry) => ({
-            message: { ...entry.message },
-          })),
-        }
-      : {}),
-    ...(record.labelsAdded
-      ? {
-          labelsAdded: record.labelsAdded.map((entry) => ({
-            message: { ...entry.message },
-            labelIds: [...entry.labelIds],
-          })),
-        }
-      : {}),
-    ...(record.labelsRemoved
-      ? {
-          labelsRemoved: record.labelsRemoved.map((entry) => ({
-            message: { ...entry.message },
-            labelIds: [...entry.labelIds],
-          })),
-        }
-      : {}),
-  };
-}
-
-function applyLabelPatch(
-  message: GmailMockMessage,
-  addLabelIds: readonly string[] | undefined,
-  removeLabelIds: readonly string[] | undefined,
-): {
-  added: string[];
-  removed: string[];
-} {
-  const labels = new Set(message.labelIds ?? []);
-  const added: string[] = [];
-  const removed: string[] = [];
-  for (const labelId of removeLabelIds ?? []) {
-    if (labels.delete(labelId)) {
-      removed.push(labelId);
-    }
-  }
-  for (const labelId of addLabelIds ?? []) {
-    if (!labels.has(labelId)) {
-      labels.add(labelId);
-      added.push(labelId);
-    }
-  }
-  message.labelIds = [...labels];
-  return { added, removed };
-}
-
-function modifyGmailMessages(
-  state: GoogleMockState,
-  ids: readonly string[],
-  addLabelIds: readonly string[] | undefined,
-  removeLabelIds: readonly string[] | undefined,
-): string {
-  if (
-    (!addLabelIds || addLabelIds.length === 0) &&
-    (!removeLabelIds || removeLabelIds.length === 0)
-  ) {
-    throw new MockHttpError(
-      400,
-      "modify requires addLabelIds or removeLabelIds",
-    );
-  }
-
-  const labelsAdded: GmailHistoryLabelRef[] = [];
-  const labelsRemoved: GmailHistoryLabelRef[] = [];
-  for (const id of ids) {
-    const message = getMessageOrThrow(state, id);
-    const changed = applyLabelPatch(message, addLabelIds, removeLabelIds);
-    if (changed.added.length > 0) {
-      labelsAdded.push({
-        message: { id: message.id, threadId: message.threadId },
-        labelIds: changed.added,
-      });
-    }
-    if (changed.removed.length > 0) {
-      labelsRemoved.push({
-        message: { id: message.id, threadId: message.threadId },
-        labelIds: changed.removed,
-      });
-    }
-  }
-
-  const historyId = addHistoryRecord(state, {
-    ...(labelsAdded.length > 0 ? { labelsAdded } : {}),
-    ...(labelsRemoved.length > 0 ? { labelsRemoved } : {}),
-  });
-  for (const id of ids) {
-    const message = state.gmailMessages.get(id);
-    if (message && !message.deleted) message.historyId = historyId;
-  }
-  return historyId;
-}
-
-function deleteGmailMessages(
-  state: GoogleMockState,
-  ids: readonly string[],
-): string {
-  const messagesDeleted: GmailHistoryMessageRef[] = [];
-  for (const id of ids) {
-    const message = getMessageOrThrow(state, id);
-    message.deleted = true;
-    messagesDeleted.push({
-      message: { id: message.id, threadId: message.threadId },
-    });
-  }
-  return addHistoryRecord(state, { messagesDeleted });
-}
-
-function splitAddressHeader(value: string | null): string[] {
-  if (!value) return [];
-  return value
-    .split(",")
-    .map((entry) => entry.trim())
-    .filter(Boolean);
-}
-
-function decodeGmailRaw(raw: string): string {
-  if (!/^[A-Za-z0-9_-]+={0,2}$/.test(raw)) {
-    throw new MockHttpError(400, "raw must be a base64url RFC 822 message");
-  }
-  const decoded = Buffer.from(raw, "base64url").toString("utf8");
-  if (decoded.trim().length === 0 || !decoded.includes(":")) {
-    throw new MockHttpError(400, "raw must decode to an RFC 822 message");
-  }
-  return decoded;
-}
-
-function parseRfc822(raw: string): {
-  headers: Array<{ name: string; value: string }>;
-  bodyText: string;
-} {
-  const normalized = raw.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
-  const separatorIndex = normalized.indexOf("\n\n");
-  const headerBlock =
-    separatorIndex >= 0 ? normalized.slice(0, separatorIndex) : normalized;
-  const bodyText =
-    separatorIndex >= 0 ? normalized.slice(separatorIndex + 2) : "";
-  const unfolded = headerBlock.replace(/\n[ \t]+/g, " ");
-  const headers = unfolded
-    .split("\n")
-    .map((line) => {
-      const index = line.indexOf(":");
-      if (index <= 0) return null;
-      return {
-        name: line.slice(0, index).trim(),
-        value: line.slice(index + 1).trim(),
-      };
-    })
-    .filter(
-      (header): header is { name: string; value: string } => header !== null,
-    );
-  return { headers, bodyText };
-}
-
-function readRfc822Header(
-  headers: readonly { name: string; value: string }[],
-  name: string,
-): string | null {
-  const lower = name.toLowerCase();
-  return (
-    headers.find((header) => header.name.toLowerCase() === lower)?.value ?? null
-  );
-}
-
-function decodedSendMetadata(raw: string): GmailDecodedSendMetadata {
-  const decoded = decodeGmailRaw(raw);
-  const parsed = parseRfc822(decoded);
-  return {
-    rawLength: raw.length,
-    from: readRfc822Header(parsed.headers, "From"),
-    to: splitAddressHeader(readRfc822Header(parsed.headers, "To")),
-    cc: splitAddressHeader(readRfc822Header(parsed.headers, "Cc")),
-    bcc: splitAddressHeader(readRfc822Header(parsed.headers, "Bcc")),
-    subject: readRfc822Header(parsed.headers, "Subject"),
-    messageId: readRfc822Header(parsed.headers, "Message-Id"),
-    inReplyTo: readRfc822Header(parsed.headers, "In-Reply-To"),
-    references: readRfc822Header(parsed.headers, "References"),
-    runIdHeader:
-      readRfc822Header(parsed.headers, "X-Milady-Test-Run") ??
-      readRfc822Header(parsed.headers, "X-Milady-Run-Id"),
-    bodyText: parsed.bodyText.trim(),
-  };
-}
-
-function buildGmailMessageFromRaw(args: {
-  id: string;
-  threadId: string;
-  labelIds: string[];
-  raw: string;
-  historyId: string;
-}): GmailMockMessage {
-  const decoded = decodeGmailRaw(args.raw);
-  const parsed = parseRfc822(decoded);
-  const subject = readRfc822Header(parsed.headers, "Subject") ?? "(no subject)";
-  return {
-    id: args.id,
-    threadId: args.threadId,
-    labelIds: [...args.labelIds],
-    snippet: parsed.bodyText.trim().replace(/\s+/g, " ").slice(0, 160),
-    internalDateMs: Date.now(),
-    headers:
-      parsed.headers.length > 0
-        ? parsed.headers
-        : [{ name: "Subject", value: subject }],
-    bodyText: parsed.bodyText,
-    historyId: args.historyId,
-    deleted: false,
-    raw: args.raw,
-  };
-}
-
-function inferThreadIdFromRaw(
-  state: GoogleMockState,
-  raw: string,
-  requestedThreadId: JsonValue | undefined,
-): string {
-  if (
-    typeof requestedThreadId === "string" &&
-    requestedThreadId.trim().length > 0
-  ) {
-    return requestedThreadId.trim();
-  }
-  const decoded = decodedSendMetadata(raw);
-  const referencedHeaders = [decoded.inReplyTo, decoded.references].filter(
-    (value): value is string => typeof value === "string" && value.length > 0,
-  );
-  for (const message of gmailLiveMessages(state)) {
-    const messageId = readRfc822Header(message.headers, "Message-Id");
-    if (
-      messageId &&
-      referencedHeaders.some((header) => header.includes(messageId))
-    ) {
-      return message.threadId;
-    }
-  }
-  return `thr-sent-${randomFromAlphabet("abcdefghijklmnopqrstuvwxyz0123456789", 8)}`;
-}
-
-function gmailListMessages(
-  state: GoogleMockState,
-  searchParams: URLSearchParams,
-): DynamicFixtureResponse {
-  const includeSpamTrash = searchParams.get("includeSpamTrash") === "true";
-  const query = searchParams.get("q") ?? "";
-  const labelIds = searchParams.getAll("labelIds");
-  const maxResults = Math.max(
-    1,
-    Math.min(Number.parseInt(searchParams.get("maxResults") ?? "20", 10), 50),
-  );
-  const pageOffset = Math.max(
-    0,
-    Number.parseInt(searchParams.get("pageToken") ?? "0", 10) || 0,
-  );
-  const queryTargetsSpamTrash = /\bin:(?:spam|trash|anywhere)\b/i.test(query);
-  const labelTargetsSpamTrash = labelIds.some((labelId) =>
-    /^(SPAM|TRASH)$/i.test(labelId),
-  );
-  const filtered = gmailLiveMessages(state)
-    .filter((message) => {
-      const labels = new Set(
-        (message.labelIds ?? []).map((label) => label.toUpperCase()),
-      );
-      if (
-        !includeSpamTrash &&
-        !queryTargetsSpamTrash &&
-        !labelTargetsSpamTrash &&
-        (labels.has("SPAM") || labels.has("TRASH"))
-      ) {
-        return false;
-      }
-      if (
-        labelIds.length > 0 &&
-        !labelIds.every((labelId) => labels.has(labelId.toUpperCase()))
-      ) {
-        return false;
-      }
-      return gmailQueryMatches(message, query);
-    })
-    .sort(
-      (left, right) =>
-        gmailFixtureInternalDate(right) - gmailFixtureInternalDate(left),
-    );
-  const page = filtered.slice(pageOffset, pageOffset + maxResults);
-  return jsonFixture({
-    messages: page.map((message) => ({
-      id: message.id,
-      threadId: message.threadId,
-    })),
-    resultSizeEstimate: filtered.length,
-    ...(pageOffset + maxResults < filtered.length
-      ? { nextPageToken: String(pageOffset + maxResults) }
-      : {}),
-  });
-}
-
 function headerValue(
   headers: http.IncomingHttpHeaders,
   key: string,
@@ -1151,651 +448,1292 @@ function requestRunId(headers: http.IncomingHttpHeaders): string | undefined {
   );
 }
 
-function bearerToken(headers: http.IncomingHttpHeaders): string | null {
-  const authorization = headerValue(headers, "authorization")?.trim();
-  const match = authorization?.match(/^Bearer\s+(.+)$/i);
-  return match?.[1]?.trim() ?? null;
+interface DynamicFixtureResponse {
+  statusCode: number;
+  body: JsonValue;
+  headers?: Record<string, string>;
 }
 
-function googleOAuthSearchDirs(): string[] {
-  const explicitOAuthDir = process.env.ELIZA_OAUTH_DIR?.trim();
-  if (explicitOAuthDir) {
-    return [path.join(explicitOAuthDir, "lifeops", "google")];
-  }
-  const stateDir =
-    process.env.MILADY_STATE_DIR?.trim() ?? process.env.ELIZA_STATE_DIR?.trim();
-  return stateDir
-    ? [path.join(stateDir, "credentials", "lifeops", "google")]
+function jsonFixture(
+  body: JsonValue | object,
+  statusCode = 200,
+): DynamicFixtureResponse {
+  return {
+    statusCode,
+    body: body as JsonValue,
+    headers: { "Content-Type": "application/json" },
+  };
+}
+
+function mockJsonError(
+  statusCode: number,
+  message: string,
+): DynamicFixtureResponse {
+  return jsonFixture({ error: message }, statusCode);
+}
+
+function routeParam(pathname: string, pattern: RegExp): string | null {
+  const match = pattern.exec(pathname);
+  return match ? decodeURIComponent(match[1] ?? "") : null;
+}
+
+function readOptionalString(body: RequestBody, key: string): string | null {
+  const value = body[key];
+  return typeof value === "string" && value.trim().length > 0
+    ? value.trim()
+    : null;
+}
+
+function readRequiredFixtureString(body: RequestBody, key: string): string {
+  const value = readOptionalString(body, key);
+  if (!value) throw new MockHttpError(400, `${key} must be a non-empty string`);
+  return value;
+}
+
+function readStringArray(body: RequestBody, key: string): string[] {
+  const value = body[key];
+  return Array.isArray(value)
+    ? value.filter((entry): entry is string => typeof entry === "string")
     : [];
 }
 
-function readJsonFilesRecursively(
-  dir: string,
-  out: string[],
-  remaining: number,
+function numericSearchParam(
+  searchParams: URLSearchParams,
+  key: string,
+  fallback: number,
 ): number {
-  if (remaining <= 0 || !fs.existsSync(dir)) return remaining;
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    if (remaining <= 0) break;
-    const fullPath = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      remaining = readJsonFilesRecursively(fullPath, out, remaining);
-      continue;
-    }
-    if (entry.isFile() && entry.name.endsWith(".json")) {
-      out.push(fullPath);
-      remaining -= 1;
-    }
-  }
-  return remaining;
+  const parsed = Number.parseInt(searchParams.get(key) ?? "", 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
-function refreshGoogleTokensFromSeededGrants(state: GoogleMockState): void {
-  const files: string[] = [];
-  for (const dir of googleOAuthSearchDirs()) {
-    readJsonFilesRecursively(dir, files, 100);
-  }
-  for (const file of files) {
-    const parsed = JSON.parse(fs.readFileSync(file, "utf8")) as JsonValue;
-    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-      continue;
-    }
-    const record = parsed as Record<string, JsonValue>;
-    const accessToken = record.accessToken;
-    const grantedScopes = record.grantedScopes;
-    if (typeof accessToken !== "string" || !isStringArray(grantedScopes)) {
-      continue;
-    }
-    state.googleTokens.set(accessToken, new Set(grantedScopes));
-  }
+function withRunId<T extends { runId?: string }>(
+  ledgerEntry: MockRequestLedgerEntry,
+  metadata: Omit<T, "runId">,
+): T {
+  return {
+    ...(metadata as T),
+    ...(ledgerEntry.runId ? { runId: ledgerEntry.runId } : {}),
+  };
 }
 
-function requiredGmailScopes(
-  method: string,
-  pathname: string,
-): readonly string[] {
-  if (!pathname.startsWith("/gmail/v1/users/me/")) return [];
-  if (pathname.includes("/settings/filters")) {
-    return GOOGLE_GMAIL_SETTINGS_SCOPES;
-  }
-  if (pathname.endsWith("/messages/send")) return GOOGLE_GMAIL_SEND_SCOPES;
-  if (pathname.endsWith("/drafts/send")) return GOOGLE_GMAIL_SEND_SCOPES;
-  if (pathname.includes("/drafts")) {
-    return method === "GET"
-      ? GOOGLE_GMAIL_READ_SCOPES
-      : GOOGLE_GMAIL_DRAFT_SCOPES;
-  }
-  if (
-    method === "POST" &&
-    (pathname.includes("/modify") ||
-      pathname.endsWith("/batchModify") ||
-      pathname.endsWith("/batchDelete") ||
-      pathname.endsWith("/trash") ||
-      pathname.endsWith("/untrash"))
-  ) {
-    return GOOGLE_GMAIL_MODIFY_SCOPES;
-  }
-  if (method === "DELETE") return GOOGLE_GMAIL_MODIFY_SCOPES;
-  return GOOGLE_GMAIL_READ_SCOPES;
+type XUser = { id: string; username: string };
+type XTweet = {
+  id: string;
+  text: string;
+  author_id: string;
+  created_at: string;
+  conversation_id: string;
+  referenced_tweets?: Array<{ type: string; id: string }>;
+};
+type XDmEvent = {
+  id: string;
+  event_type: "MessageCreate";
+  text: string;
+  sender_id: string;
+  dm_conversation_id: string;
+  created_at: string;
+};
+
+interface XMockState {
+  users: XUser[];
+  homeTweets: XTweet[];
+  mentionTweets: XTweet[];
+  searchTweets: XTweet[];
+  dmEvents: XDmEvent[];
 }
 
-function enforceGoogleAuthIfPresent(
-  state: GoogleMockState,
-  method: string,
-  pathname: string,
-  headers: http.IncomingHttpHeaders,
-): DynamicFixtureResponse | null {
-  const requiredScopes = requiredGmailScopes(method, pathname);
-  if (requiredScopes.length === 0) return null;
-  const token = bearerToken(headers);
-  if (!token) return null;
-  if (!state.googleTokens.has(token)) {
-    refreshGoogleTokensFromSeededGrants(state);
-  }
-  const scopes = state.googleTokens.get(token);
-  if (!scopes) {
-    return jsonError(401, "Unknown or expired mock Google access token");
-  }
-  return requiredScopes.some((scope) => scopes.has(scope))
-    ? null
-    : jsonError(403, "Google mock token is missing required Gmail scope");
+function createXMockState(): XMockState {
+  const createdAt = "2026-04-25T18:30:00.000Z";
+  return {
+    users: [
+      { id: "user-owner", username: "mocked_owner" },
+      { id: "user-alice", username: "alice_ops" },
+      { id: "user-bob", username: "bob_builder" },
+    ],
+    homeTweets: [
+      {
+        id: "tweet-home-1",
+        text: "Milady central mocks are ready for connector smoke tests.",
+        author_id: "user-alice",
+        created_at: createdAt,
+        conversation_id: "tweet-home-1",
+      },
+      {
+        id: "tweet-home-2",
+        text: "elizaOS agents should read DTOs instead of recomputing.",
+        author_id: "user-bob",
+        created_at: "2026-04-25T17:45:00.000Z",
+        conversation_id: "tweet-home-2",
+      },
+    ],
+    mentionTweets: [
+      {
+        id: "tweet-mention-1",
+        text: "@mocked_owner can you review the LifeOps provider fixture?",
+        author_id: "user-alice",
+        created_at: "2026-04-25T16:00:00.000Z",
+        conversation_id: "tweet-mention-1",
+        referenced_tweets: [{ type: "replied_to", id: "tweet-home-1" }],
+      },
+    ],
+    searchTweets: [
+      {
+        id: "tweet-search-1",
+        text: "Testing elizaOS X search through a deterministic mock.",
+        author_id: "user-bob",
+        created_at: "2026-04-25T15:00:00.000Z",
+        conversation_id: "tweet-search-1",
+      },
+      {
+        id: "tweet-search-2",
+        text: "Milady LifeOps search fixtures cover pagination metadata.",
+        author_id: "user-alice",
+        created_at: "2026-04-25T14:00:00.000Z",
+        conversation_id: "tweet-search-2",
+      },
+    ],
+    dmEvents: [
+      {
+        id: "dm-event-1",
+        event_type: "MessageCreate",
+        text: "Can you check the connector fixture today?",
+        sender_id: "user-alice",
+        dm_conversation_id: "dm-user-owner-user-alice",
+        created_at: "2026-04-25T13:00:00.000Z",
+      },
+      {
+        id: "dm-event-2",
+        event_type: "MessageCreate",
+        text: "I replied from the owner account.",
+        sender_id: "user-owner",
+        dm_conversation_id: "dm-user-owner-user-alice",
+        created_at: "2026-04-25T13:05:00.000Z",
+      },
+    ],
+  };
 }
 
-function googleDynamicFixture(
-  state: GoogleMockState,
+function xPageResponse<T extends JsonValue>(
+  data: T[],
+  users: readonly XUser[],
+  limit: number,
+): DynamicFixtureResponse {
+  const page = data.slice(0, Math.max(1, limit));
+  return jsonFixture({
+    data: page,
+    includes: { users: [...users] },
+    meta: {
+      result_count: page.length,
+      ...(data.length > page.length ? { next_token: "mock-next-page" } : {}),
+    },
+  });
+}
+
+function xDynamicFixture(
+  state: XMockState,
   method: string,
   pathname: string,
   searchParams: URLSearchParams,
   requestBody: RequestBody,
-  headers: http.IncomingHttpHeaders,
   ledgerEntry: MockRequestLedgerEntry,
 ): DynamicFixtureResponse | null {
-  if (method === "POST" && pathname === "/token") {
-    const scopeText =
-      typeof requestBody.scope === "string"
-        ? requestBody.scope
-        : GOOGLE_DEFAULT_TOKEN_SCOPES.join(" ");
-    const scopes = scopeText.split(/\s+/).filter(Boolean);
-    const accessToken = `fake-${crypto.randomUUID()}`;
-    state.googleTokens.set(accessToken, new Set(scopes));
-    return jsonFixture({
-      access_token: accessToken,
-      expires_in: 3600,
-      refresh_token: "mock-google-refresh-token",
-      token_type: "Bearer",
-      scope: scopes.join(" "),
+  if (method === "GET" && pathname === "/2/dm_events") {
+    const limit = numericSearchParam(searchParams, "max_results", 25);
+    ledgerEntry.x = withRunId<XRequestLedgerMetadata>(ledgerEntry, {
+      action: "dm_events.list",
+      limit,
     });
+    return xPageResponse(state.dmEvents, state.users, limit);
   }
 
-  if (!pathname.startsWith("/gmail/v1/users/me/")) return null;
-
-  const authFailure = enforceGoogleAuthIfPresent(
-    state,
-    method,
+  const homeUserId = routeParam(
     pathname,
-    headers,
+    /^\/2\/users\/([^/]+)\/timelines\/reverse_chronological\/?$/,
   );
-  if (authFailure) return authFailure;
-
-  if (method === "GET" && pathname === "/gmail/v1/users/me/messages") {
-    return gmailListMessages(state, searchParams);
-  }
-
-  if (method === "GET" && pathname === "/gmail/v1/users/me/labels") {
-    return jsonFixture({
-      labels: [
-        { id: "INBOX", name: "INBOX", type: "system" },
-        { id: "SENT", name: "SENT", type: "system" },
-        { id: "DRAFT", name: "DRAFT", type: "system" },
-        { id: "SPAM", name: "SPAM", type: "system" },
-        { id: "TRASH", name: "TRASH", type: "system" },
-        { id: "UNREAD", name: "UNREAD", type: "system" },
-        { id: "IMPORTANT", name: "IMPORTANT", type: "system" },
-        { id: "STARRED", name: "STARRED", type: "system" },
-        {
-          id: "CATEGORY_PROMOTIONS",
-          name: "CATEGORY_PROMOTIONS",
-          type: "system",
-        },
-        { id: "Label_1", name: "milady-e2e", type: "user" },
-      ],
+  if (method === "GET" && homeUserId) {
+    const limit = numericSearchParam(searchParams, "max_results", 25);
+    ledgerEntry.x = withRunId<XRequestLedgerMetadata>(ledgerEntry, {
+      action: "timelines.reverse_chronological",
+      userId: homeUserId,
+      limit,
     });
+    return xPageResponse(state.homeTweets, state.users, limit);
   }
 
-  if (
-    method === "POST" &&
-    pathname === "/gmail/v1/users/me/messages/batchModify"
-  ) {
-    const ids = readRequiredStringArray(requestBody, "ids");
-    const addLabelIds = readOptionalStringArray(requestBody, "addLabelIds");
-    const removeLabelIds = readOptionalStringArray(
-      requestBody,
-      "removeLabelIds",
-    );
-    const historyId = modifyGmailMessages(
-      state,
-      ids,
-      addLabelIds,
-      removeLabelIds,
-    );
-    ledgerEntry.gmail = {
-      action: "messages.batchModify",
-      batchIds: ids,
-      ids,
-      ...(addLabelIds ? { addLabelIds } : {}),
-      ...(removeLabelIds ? { removeLabelIds } : {}),
-      historyId,
-      ...(ledgerEntry.runId ? { runId: ledgerEntry.runId } : {}),
-    };
-    return jsonFixture({});
-  }
-
-  if (
-    method === "POST" &&
-    pathname === "/gmail/v1/users/me/messages/batchDelete"
-  ) {
-    const ids = readRequiredStringArray(requestBody, "ids");
-    const historyId = deleteGmailMessages(state, ids);
-    ledgerEntry.gmail = {
-      action: "messages.batchDelete",
-      batchIds: ids,
-      ids,
-      historyId,
-      ...(ledgerEntry.runId ? { runId: ledgerEntry.runId } : {}),
-    };
-    return jsonFixture({});
-  }
-
-  if (method === "POST" && pathname === "/gmail/v1/users/me/messages/send") {
-    const raw = readRequiredString(requestBody, "raw");
-    const metadata = decodedSendMetadata(raw);
-    const message = buildGmailMessageFromRaw({
-      id: `sent-${randomFromAlphabet("abcdefghijklmnopqrstuvwxyz0123456789", 12)}`,
-      threadId: inferThreadIdFromRaw(state, raw, requestBody.threadId),
-      labelIds: ["SENT"],
-      raw,
-      historyId: String(state.gmailHistoryId + 1),
-    });
-    state.gmailMessages.set(message.id, message);
-    const finalHistoryId = addHistoryRecord(state, {
-      messagesAdded: [
-        { message: { id: message.id, threadId: message.threadId } },
-      ],
-    });
-    message.historyId = finalHistoryId;
-    ledgerEntry.gmail = {
-      action: "messages.send",
-      messageId: message.id,
-      threadId: message.threadId,
-      decodedSend: metadata,
-      historyId: finalHistoryId,
-      ...(metadata.runIdHeader ? { runId: metadata.runIdHeader } : {}),
-    };
-    return jsonFixture(gmailFixtureResponse(message));
-  }
-
-  const modifyMessageId = routeParam(
+  const mentionsUserId = routeParam(
     pathname,
-    /^\/gmail\/v1\/users\/me\/messages\/([^/]+)\/modify\/?$/,
+    /^\/2\/users\/([^/]+)\/mentions\/?$/,
   );
-  if (method === "POST" && modifyMessageId) {
-    const addLabelIds = readOptionalStringArray(requestBody, "addLabelIds");
-    const removeLabelIds = readOptionalStringArray(
-      requestBody,
-      "removeLabelIds",
-    );
-    const historyId = modifyGmailMessages(
-      state,
-      [modifyMessageId],
-      addLabelIds,
-      removeLabelIds,
-    );
-    const message = getMessageOrThrow(state, modifyMessageId);
-    ledgerEntry.gmail = {
-      action: "messages.modify",
-      messageId: modifyMessageId,
-      ids: [modifyMessageId],
-      ...(addLabelIds ? { addLabelIds } : {}),
-      ...(removeLabelIds ? { removeLabelIds } : {}),
-      historyId,
-      ...(ledgerEntry.runId ? { runId: ledgerEntry.runId } : {}),
-    };
-    return jsonFixture(gmailFixtureResponse(message));
+  if (method === "GET" && mentionsUserId) {
+    const limit = numericSearchParam(searchParams, "max_results", 25);
+    ledgerEntry.x = withRunId<XRequestLedgerMetadata>(ledgerEntry, {
+      action: "users.mentions",
+      userId: mentionsUserId,
+      limit,
+    });
+    return xPageResponse(state.mentionTweets, state.users, limit);
   }
 
-  const trashMessageId = routeParam(
+  if (method === "GET" && pathname === "/2/tweets/search/recent") {
+    const query = searchParams.get("query")?.trim();
+    if (!query) return mockJsonError(400, "query is required");
+    const limit = numericSearchParam(searchParams, "max_results", 25);
+    const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
+    const matches = state.searchTweets.filter((tweet) =>
+      tokens.some((token) => tweet.text.toLowerCase().includes(token)),
+    );
+    ledgerEntry.x = withRunId<XRequestLedgerMetadata>(ledgerEntry, {
+      action: "tweets.search_recent",
+      query,
+      limit,
+    });
+    return xPageResponse(
+      matches.length > 0 ? matches : state.searchTweets,
+      state.users,
+      limit,
+    );
+  }
+
+  if (method === "POST" && pathname === "/2/tweets") {
+    const text = readRequiredFixtureString(requestBody, "text");
+    const tweet: XTweet = {
+      id: `tweet-${randomFromAlphabet("0123456789", 18)}`,
+      text,
+      author_id: "user-owner",
+      created_at: new Date().toISOString(),
+      conversation_id: `tweet-${randomFromAlphabet("0123456789", 18)}`,
+    };
+    state.homeTweets.unshift(tweet);
+    ledgerEntry.x = withRunId<XRequestLedgerMetadata>(ledgerEntry, {
+      action: "tweets.create",
+      tweetId: tweet.id,
+    });
+    return jsonFixture({ data: { id: tweet.id, text: tweet.text } });
+  }
+
+  const dmRecipientId = routeParam(
     pathname,
-    /^\/gmail\/v1\/users\/me\/messages\/([^/]+)\/trash\/?$/,
+    /^\/2\/dm_conversations\/with\/([^/]+)\/messages\/?$/,
   );
-  if (method === "POST" && trashMessageId) {
-    const historyId = modifyGmailMessages(
-      state,
-      [trashMessageId],
-      ["TRASH"],
-      ["INBOX", "SPAM"],
-    );
-    const message = getMessageOrThrow(state, trashMessageId);
-    ledgerEntry.gmail = {
-      action: "messages.trash",
-      messageId: trashMessageId,
-      addLabelIds: ["TRASH"],
-      removeLabelIds: ["INBOX", "SPAM"],
-      historyId,
-      ...(ledgerEntry.runId ? { runId: ledgerEntry.runId } : {}),
+  if (method === "POST" && dmRecipientId) {
+    const text = readRequiredFixtureString(requestBody, "text");
+    const event: XDmEvent = {
+      id: `dm-event-${randomFromAlphabet("0123456789", 18)}`,
+      event_type: "MessageCreate",
+      text,
+      sender_id: "user-owner",
+      dm_conversation_id: `dm-user-owner-${dmRecipientId}`,
+      created_at: new Date().toISOString(),
     };
-    return jsonFixture(gmailFixtureResponse(message));
-  }
-
-  const untrashMessageId = routeParam(
-    pathname,
-    /^\/gmail\/v1\/users\/me\/messages\/([^/]+)\/untrash\/?$/,
-  );
-  if (method === "POST" && untrashMessageId) {
-    const historyId = modifyGmailMessages(
-      state,
-      [untrashMessageId],
-      ["INBOX"],
-      ["TRASH"],
-    );
-    const message = getMessageOrThrow(state, untrashMessageId);
-    ledgerEntry.gmail = {
-      action: "messages.untrash",
-      messageId: untrashMessageId,
-      addLabelIds: ["INBOX"],
-      removeLabelIds: ["TRASH"],
-      historyId,
-      ...(ledgerEntry.runId ? { runId: ledgerEntry.runId } : {}),
-    };
-    return jsonFixture(gmailFixtureResponse(message));
-  }
-
-  const deleteMessageId = routeParam(
-    pathname,
-    /^\/gmail\/v1\/users\/me\/messages\/([^/]+)\/?$/,
-  );
-  if (method === "DELETE" && deleteMessageId) {
-    const historyId = deleteGmailMessages(state, [deleteMessageId]);
-    ledgerEntry.gmail = {
-      action: "messages.delete",
-      messageId: deleteMessageId,
-      ids: [deleteMessageId],
-      historyId,
-      ...(ledgerEntry.runId ? { runId: ledgerEntry.runId } : {}),
-    };
-    return jsonFixture({});
-  }
-  if (method === "GET" && deleteMessageId) {
-    const message = state.gmailMessages.get(deleteMessageId);
-    return message && !message.deleted
-      ? jsonFixture(gmailFixtureResponse(message))
-      : jsonError(404, "Requested entity was not found.");
-  }
-
-  if (method === "POST" && pathname === "/gmail/v1/users/me/drafts") {
-    const messageBody = requestBody.message;
-    if (
-      !messageBody ||
-      typeof messageBody !== "object" ||
-      Array.isArray(messageBody)
-    ) {
-      throw new MockHttpError(400, "message must be an object");
-    }
-    const messageRecord = messageBody as Record<string, JsonValue>;
-    const raw = messageRecord.raw;
-    if (typeof raw !== "string" || raw.trim().length === 0) {
-      throw new MockHttpError(400, "message.raw must be a non-empty string");
-    }
-    const historyId = addHistoryRecord(state, {});
-    const draft: GmailMockDraft = {
-      id: `draft-${randomFromAlphabet("abcdefghijklmnopqrstuvwxyz0123456789", 10)}`,
-      message: buildGmailMessageFromRaw({
-        id: `draft-message-${randomFromAlphabet("abcdefghijklmnopqrstuvwxyz0123456789", 10)}`,
-        threadId: inferThreadIdFromRaw(state, raw, messageRecord.threadId),
-        labelIds: ["DRAFT"],
-        raw,
-        historyId,
-      }),
-    };
-    state.gmailDrafts.set(draft.id, draft);
-    ledgerEntry.gmail = {
-      action: "drafts.create",
-      draftId: draft.id,
-      messageId: draft.message.id,
-      threadId: draft.message.threadId,
-      decodedSend: decodedSendMetadata(raw),
-      historyId,
-      ...(ledgerEntry.runId ? { runId: ledgerEntry.runId } : {}),
-    };
+    state.dmEvents.unshift(event);
+    ledgerEntry.x = withRunId<XRequestLedgerMetadata>(ledgerEntry, {
+      action: "dm_conversations.messages.create",
+      conversationId: event.dm_conversation_id,
+      dmEventId: event.id,
+    });
     return jsonFixture({
-      id: draft.id,
-      message: gmailFixtureResponse(draft.message),
-    });
-  }
-
-  if (method === "GET" && pathname === "/gmail/v1/users/me/drafts") {
-    const drafts = [...state.gmailDrafts.values()];
-    return jsonFixture({
-      drafts: drafts.map((draft) => ({
-        id: draft.id,
-        message: {
-          id: draft.message.id,
-          threadId: draft.message.threadId,
-        },
-      })),
-      resultSizeEstimate: drafts.length,
-    });
-  }
-
-  const draftId = routeParam(
-    pathname,
-    /^\/gmail\/v1\/users\/me\/drafts\/([^/]+)\/?$/,
-  );
-  if (method === "GET" && draftId) {
-    const draft = state.gmailDrafts.get(draftId);
-    if (!draft) return jsonError(404, "Requested entity was not found.");
-    return jsonFixture({
-      id: draft.id,
-      message: gmailFixtureResponse(draft.message),
-    });
-  }
-  if (method === "DELETE" && draftId) {
-    if (!state.gmailDrafts.has(draftId)) {
-      return jsonError(404, "Requested entity was not found.");
-    }
-    state.gmailDrafts.delete(draftId);
-    ledgerEntry.gmail = {
-      action: "drafts.delete",
-      draftId,
-      ...(ledgerEntry.runId ? { runId: ledgerEntry.runId } : {}),
-    };
-    return jsonFixture({});
-  }
-
-  if (method === "POST" && pathname === "/gmail/v1/users/me/drafts/send") {
-    const draftIdToSend = readRequiredString(requestBody, "id");
-    const draft = state.gmailDrafts.get(draftIdToSend);
-    if (!draft) return jsonError(404, "Requested entity was not found.");
-    const raw = draft.message.raw;
-    if (!raw) {
-      throw new MockHttpError(400, "draft message is missing raw content");
-    }
-    const sentMessage = buildGmailMessageFromRaw({
-      id: `sent-draft-${randomFromAlphabet("abcdefghijklmnopqrstuvwxyz0123456789", 12)}`,
-      threadId: draft.message.threadId,
-      labelIds: ["SENT"],
-      raw,
-      historyId: String(state.gmailHistoryId + 1),
-    });
-    state.gmailDrafts.delete(draftIdToSend);
-    state.gmailMessages.set(sentMessage.id, sentMessage);
-    const finalHistoryId = addHistoryRecord(state, {
-      messagesAdded: [
-        { message: { id: sentMessage.id, threadId: sentMessage.threadId } },
-      ],
-    });
-    sentMessage.historyId = finalHistoryId;
-    ledgerEntry.gmail = {
-      action: "drafts.send",
-      draftId: draftIdToSend,
-      messageId: sentMessage.id,
-      threadId: sentMessage.threadId,
-      decodedSend: decodedSendMetadata(raw),
-      historyId: finalHistoryId,
-      ...(ledgerEntry.runId ? { runId: ledgerEntry.runId } : {}),
-    };
-    return jsonFixture(gmailFixtureResponse(sentMessage));
-  }
-
-  if (method === "POST" && pathname === "/gmail/v1/users/me/watch") {
-    const topicName = requestBody.topicName;
-    if (typeof topicName !== "string" || topicName.trim().length === 0) {
-      throw new MockHttpError(400, "topicName must be a non-empty string");
-    }
-    const labelIds = readOptionalStringArray(requestBody, "labelIds");
-    ledgerEntry.gmail = {
-      action: "watch",
-      ...(labelIds ? { ids: labelIds } : {}),
-      historyId: String(state.gmailHistoryId),
-      ...(ledgerEntry.runId ? { runId: ledgerEntry.runId } : {}),
-    };
-    return jsonFixture({
-      historyId: String(state.gmailHistoryId),
-      expiration: String(Date.now() + 60 * 60 * 1000),
-    });
-  }
-
-  if (method === "GET" && pathname === "/gmail/v1/users/me/history") {
-    const startHistoryId = Number.parseInt(
-      searchParams.get("startHistoryId") ?? "0",
-      10,
-    );
-    const history = state.gmailHistory.filter(
-      (entry) => Number.parseInt(entry.id, 10) > startHistoryId,
-    );
-    return jsonFixture({
-      history: history.map((entry) => gmailHistoryRecordResponse(entry)),
-      historyId: String(state.gmailHistoryId),
-    });
-  }
-
-  if (method === "GET" && pathname === "/gmail/v1/users/me/threads") {
-    const threadIds = [
-      ...new Set(gmailLiveMessages(state).map((message) => message.threadId)),
-    ];
-    return jsonFixture({
-      threads: threadIds.map((id) => ({
-        id,
-        historyId: String(state.gmailHistoryId),
-        snippet:
-          gmailLiveMessages(state).find((message) => message.threadId === id)
-            ?.snippet ?? "",
-      })),
-      resultSizeEstimate: threadIds.length,
-    });
-  }
-
-  const threadId = routeParam(
-    pathname,
-    /^\/gmail\/v1\/users\/me\/threads\/([^/]+)\/?$/,
-  );
-  if (method === "GET" && threadId) {
-    const messages = gmailLiveMessages(state).filter(
-      (message) => message.threadId === threadId,
-    );
-    if (messages.length === 0) {
-      return jsonError(404, "Requested entity was not found.");
-    }
-    return jsonFixture({
-      id: threadId,
-      historyId: String(state.gmailHistoryId),
-      messages: messages.map((message) => gmailFixtureResponse(message)),
-    });
-  }
-
-  const modifyThreadId = routeParam(
-    pathname,
-    /^\/gmail\/v1\/users\/me\/threads\/([^/]+)\/modify\/?$/,
-  );
-  if (method === "POST" && modifyThreadId) {
-    const ids = gmailLiveMessages(state)
-      .filter((message) => message.threadId === modifyThreadId)
-      .map((message) => message.id);
-    if (ids.length === 0) {
-      return jsonError(404, "Requested entity was not found.");
-    }
-    const addLabelIds = readOptionalStringArray(requestBody, "addLabelIds");
-    const removeLabelIds = readOptionalStringArray(
-      requestBody,
-      "removeLabelIds",
-    );
-    const historyId = modifyGmailMessages(
-      state,
-      ids,
-      addLabelIds,
-      removeLabelIds,
-    );
-    ledgerEntry.gmail = {
-      action: "threads.modify",
-      threadId: modifyThreadId,
-      ids,
-      ...(addLabelIds ? { addLabelIds } : {}),
-      ...(removeLabelIds ? { removeLabelIds } : {}),
-      historyId,
-      ...(ledgerEntry.runId ? { runId: ledgerEntry.runId } : {}),
-    };
-    return jsonFixture({
-      id: modifyThreadId,
-      historyId,
-      messages: ids.map((id) =>
-        gmailFixtureResponse(getMessageOrThrow(state, id)),
-      ),
-    });
-  }
-
-  const trashThreadId = routeParam(
-    pathname,
-    /^\/gmail\/v1\/users\/me\/threads\/([^/]+)\/trash\/?$/,
-  );
-  if (method === "POST" && trashThreadId) {
-    const ids = gmailLiveMessages(state)
-      .filter((message) => message.threadId === trashThreadId)
-      .map((message) => message.id);
-    if (ids.length === 0) {
-      return jsonError(404, "Requested entity was not found.");
-    }
-    const historyId = modifyGmailMessages(
-      state,
-      ids,
-      ["TRASH"],
-      ["INBOX", "SPAM"],
-    );
-    ledgerEntry.gmail = {
-      action: "threads.trash",
-      threadId: trashThreadId,
-      ids,
-      addLabelIds: ["TRASH"],
-      removeLabelIds: ["INBOX", "SPAM"],
-      historyId,
-      ...(ledgerEntry.runId ? { runId: ledgerEntry.runId } : {}),
-    };
-    return jsonFixture({
-      id: trashThreadId,
-      historyId,
-      messages: ids.map((id) =>
-        gmailFixtureResponse(getMessageOrThrow(state, id)),
-      ),
-    });
-  }
-
-  const untrashThreadId = routeParam(
-    pathname,
-    /^\/gmail\/v1\/users\/me\/threads\/([^/]+)\/untrash\/?$/,
-  );
-  if (method === "POST" && untrashThreadId) {
-    const ids = gmailLiveMessages(state)
-      .filter((message) => message.threadId === untrashThreadId)
-      .map((message) => message.id);
-    if (ids.length === 0) {
-      return jsonError(404, "Requested entity was not found.");
-    }
-    const historyId = modifyGmailMessages(state, ids, ["INBOX"], ["TRASH"]);
-    ledgerEntry.gmail = {
-      action: "threads.untrash",
-      threadId: untrashThreadId,
-      ids,
-      addLabelIds: ["INBOX"],
-      removeLabelIds: ["TRASH"],
-      historyId,
-      ...(ledgerEntry.runId ? { runId: ledgerEntry.runId } : {}),
-    };
-    return jsonFixture({
-      id: untrashThreadId,
-      historyId,
-      messages: ids.map((id) =>
-        gmailFixtureResponse(getMessageOrThrow(state, id)),
-      ),
-    });
-  }
-
-  if (method === "POST" && pathname === "/gmail/v1/users/me/settings/filters") {
-    if (!requestBody.criteria || !requestBody.action) {
-      throw new MockHttpError(400, "filter requires criteria and action");
-    }
-    ledgerEntry.gmail = {
-      action: "settings.filters.create",
-      ...(ledgerEntry.runId ? { runId: ledgerEntry.runId } : {}),
-    };
-    return jsonFixture({
-      id: `filter-${randomFromAlphabet(
-        "abcdefghijklmnopqrstuvwxyz0123456789",
-        8,
-      )}`,
-      criteria: { from: "*@example.com" },
-      action: { removeLabelIds: ["INBOX"] },
+      data: {
+        dm_event_id: event.id,
+        dm_conversation_id: event.dm_conversation_id,
+      },
     });
   }
 
   return null;
+}
+
+interface WhatsAppInboundMessage {
+  id: string;
+  from: string;
+  timestamp: string;
+  type: string;
+  text?: { body?: string };
+}
+
+function whatsappInboundMessageToJson(
+  message: WhatsAppInboundMessage,
+): JsonValue {
+  return {
+    id: message.id,
+    from: message.from,
+    timestamp: message.timestamp,
+    type: message.type,
+    ...(message.text ? { text: { ...message.text } } : {}),
+  };
+}
+
+interface WhatsAppMockState {
+  inboundMessages: WhatsAppInboundMessage[];
+}
+
+function createWhatsAppMockState(): WhatsAppMockState {
+  return { inboundMessages: [] };
+}
+
+function readNestedRecord(
+  value: JsonValue | undefined,
+): Record<string, JsonValue> | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? value
+    : null;
+}
+
+function parseWhatsAppWebhookMessages(
+  payload: RequestBody,
+): WhatsAppInboundMessage[] {
+  const entries = payload.entry;
+  if (!Array.isArray(entries)) return [];
+  const messages: WhatsAppInboundMessage[] = [];
+  for (const entry of entries) {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) continue;
+    const changes = entry.changes;
+    if (!Array.isArray(changes)) continue;
+    for (const change of changes) {
+      if (!change || typeof change !== "object" || Array.isArray(change)) {
+        continue;
+      }
+      const value = readNestedRecord(change.value);
+      const rawMessages = value?.messages;
+      if (!Array.isArray(rawMessages)) continue;
+      for (const rawMessage of rawMessages) {
+        if (
+          !rawMessage ||
+          typeof rawMessage !== "object" ||
+          Array.isArray(rawMessage)
+        ) {
+          continue;
+        }
+        if (
+          typeof rawMessage.id !== "string" ||
+          typeof rawMessage.from !== "string"
+        ) {
+          continue;
+        }
+        const text = readNestedRecord(rawMessage.text);
+        messages.push({
+          id: rawMessage.id,
+          from: rawMessage.from,
+          timestamp:
+            typeof rawMessage.timestamp === "string"
+              ? rawMessage.timestamp
+              : String(Math.floor(Date.now() / 1000)),
+          type:
+            typeof rawMessage.type === "string" ? rawMessage.type : "unknown",
+          ...(text && typeof text.body === "string"
+            ? { text: { body: text.body } }
+            : {}),
+        });
+      }
+    }
+  }
+  return messages;
+}
+
+function whatsappDynamicFixture(
+  state: WhatsAppMockState,
+  method: string,
+  pathname: string,
+  requestBody: RequestBody,
+  ledgerEntry: MockRequestLedgerEntry,
+): DynamicFixtureResponse | null {
+  const phoneNumberId = routeParam(
+    pathname,
+    /^\/v[^/]+\/([^/]+)\/messages\/?$/,
+  );
+  if (method === "POST" && phoneNumberId) {
+    const recipient = readRequiredFixtureString(requestBody, "to");
+    const messageId = `wamid.${randomFromAlphabet(
+      "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+      20,
+    )}`;
+    ledgerEntry.whatsapp = withRunId<WhatsAppRequestLedgerMetadata>(
+      ledgerEntry,
+      {
+        action: "messages.send",
+        phoneNumberId,
+        recipient,
+        messageId,
+      },
+    );
+    return jsonFixture({
+      messaging_product: "whatsapp",
+      contacts: [{ input: recipient, wa_id: recipient }],
+      messages: [{ id: messageId }],
+    });
+  }
+
+  if (
+    method === "POST" &&
+    (pathname === "/webhook" || pathname === "/webhooks/whatsapp")
+  ) {
+    const messages = parseWhatsAppWebhookMessages(requestBody);
+    for (const message of messages) {
+      const existingIndex = state.inboundMessages.findIndex(
+        (candidate) => candidate.id === message.id,
+      );
+      if (existingIndex >= 0) {
+        state.inboundMessages[existingIndex] = message;
+      } else {
+        state.inboundMessages.push(message);
+      }
+    }
+    ledgerEntry.whatsapp = withRunId<WhatsAppRequestLedgerMetadata>(
+      ledgerEntry,
+      { action: "webhook.ingest", ingested: messages.length },
+    );
+    return jsonFixture({
+      ok: true,
+      ingested: messages.length,
+      messages: messages.map(whatsappInboundMessageToJson),
+    });
+  }
+
+  if (pathname === "/__mock/whatsapp/inbound") {
+    ledgerEntry.whatsapp = withRunId<WhatsAppRequestLedgerMetadata>(
+      ledgerEntry,
+      { action: "webhook.buffer" },
+    );
+    if (method === "GET") {
+      return jsonFixture({
+        messages: state.inboundMessages.map(whatsappInboundMessageToJson),
+      });
+    }
+    if (method === "DELETE") {
+      const drained = state.inboundMessages.splice(
+        0,
+        state.inboundMessages.length,
+      );
+      return jsonFixture({
+        drained: drained.length,
+        messages: drained.map(whatsappInboundMessageToJson),
+      });
+    }
+  }
+
+  return null;
+}
+
+interface SignalEnvelopeMessage {
+  envelope: {
+    source: string;
+    sourceNumber: string;
+    sourceName: string;
+    timestamp: number;
+    dataMessage: {
+      timestamp: number;
+      message: string;
+      groupInfo?: { groupId: string; type: string };
+    };
+  };
+  account: string;
+}
+
+function signalEnvelopeMessageToJson(
+  message: SignalEnvelopeMessage,
+): JsonValue {
+  return {
+    account: message.account,
+    envelope: {
+      source: message.envelope.source,
+      sourceNumber: message.envelope.sourceNumber,
+      sourceName: message.envelope.sourceName,
+      timestamp: message.envelope.timestamp,
+      dataMessage: {
+        timestamp: message.envelope.dataMessage.timestamp,
+        message: message.envelope.dataMessage.message,
+        ...(message.envelope.dataMessage.groupInfo
+          ? { groupInfo: { ...message.envelope.dataMessage.groupInfo } }
+          : {}),
+      },
+    },
+  };
+}
+
+interface SignalMockState {
+  receiveQueue: SignalEnvelopeMessage[];
+}
+
+function createSignalMockState(): SignalMockState {
+  const now = Date.parse("2026-04-25T12:00:00.000Z");
+  return {
+    receiveQueue: [
+      {
+        envelope: {
+          source: "+15551110001",
+          sourceNumber: "+15551110001",
+          sourceName: "Alice Signal",
+          timestamp: now,
+          dataMessage: {
+            timestamp: now,
+            message: "Signal fixture inbound message",
+          },
+        },
+        account: "+15550000000",
+      },
+      {
+        envelope: {
+          source: "+15551110002",
+          sourceNumber: "+15551110002",
+          sourceName: "Ops Group",
+          timestamp: now + 1_000,
+          dataMessage: {
+            timestamp: now + 1_000,
+            message: "Signal group fixture message",
+            groupInfo: { groupId: "group-signal-fixture", type: "DELIVER" },
+          },
+        },
+        account: "+15550000000",
+      },
+    ],
+  };
+}
+
+function signalRpcResponse(
+  requestBody: RequestBody,
+  result: JsonValue,
+): DynamicFixtureResponse {
+  return jsonFixture({
+    jsonrpc: "2.0",
+    id: requestBody.id ?? null,
+    result,
+  });
+}
+
+function signalDynamicFixture(
+  state: SignalMockState,
+  method: string,
+  pathname: string,
+  requestBody: RequestBody,
+  ledgerEntry: MockRequestLedgerEntry,
+): DynamicFixtureResponse | null {
+  if (method === "GET" && pathname === "/api/v1/check") {
+    ledgerEntry.signal = withRunId<SignalRequestLedgerMetadata>(ledgerEntry, {
+      action: "check",
+    });
+    return jsonFixture({ ok: true });
+  }
+
+  if (method === "POST" && pathname === "/api/v1/rpc") {
+    const rpcMethod = readRequiredFixtureString(requestBody, "method");
+    const params = readNestedRecord(requestBody.params) ?? {};
+    const account =
+      typeof params.account === "string" ? params.account : "+15550000000";
+    ledgerEntry.signal = withRunId<SignalRequestLedgerMetadata>(ledgerEntry, {
+      action: `rpc.${rpcMethod}`,
+      account,
+      recipients: Array.isArray(params.recipients)
+        ? params.recipients.filter(
+            (entry): entry is string => typeof entry === "string",
+          )
+        : undefined,
+      groupId: typeof params.groupId === "string" ? params.groupId : undefined,
+      timestamp: Date.now(),
+    });
+    if (rpcMethod === "version")
+      return signalRpcResponse(requestBody, "mock-signal-cli");
+    if (rpcMethod === "listAccounts") {
+      return signalRpcResponse(requestBody, [
+        { number: "+15550000000", uuid: "mock-signal-account" },
+      ]);
+    }
+    if (rpcMethod === "listContacts") {
+      return signalRpcResponse(requestBody, [
+        {
+          number: "+15551110001",
+          uuid: "mock-contact-alice",
+          name: "Alice Signal",
+        },
+      ]);
+    }
+    if (rpcMethod === "listGroups") {
+      return signalRpcResponse(requestBody, [
+        {
+          id: "group-signal-fixture",
+          name: "Ops Group",
+          isMember: true,
+          isBlocked: false,
+          members: [{ uuid: "mock-contact-alice", number: "+15551110001" }],
+        },
+      ]);
+    }
+    if (rpcMethod === "send") {
+      return signalRpcResponse(requestBody, { timestamp: Date.now() });
+    }
+    return signalRpcResponse(requestBody, {});
+  }
+
+  const receiveAccount = routeParam(pathname, /^\/v1\/receive\/([^/]+)\/?$/);
+  if (method === "GET" && receiveAccount) {
+    const messages = state.receiveQueue.splice(0, state.receiveQueue.length);
+    ledgerEntry.signal = withRunId<SignalRequestLedgerMetadata>(ledgerEntry, {
+      action: "receive",
+      account: receiveAccount,
+    });
+    return jsonFixture(messages.map(signalEnvelopeMessageToJson));
+  }
+
+  if (method === "POST" && pathname === "/v2/send") {
+    const recipients = readStringArray(requestBody, "recipients");
+    const timestamp = Date.now();
+    ledgerEntry.signal = withRunId<SignalRequestLedgerMetadata>(ledgerEntry, {
+      action: "send",
+      account: readOptionalString(requestBody, "number") ?? undefined,
+      recipients,
+      timestamp,
+    });
+    return jsonFixture({ timestamp });
+  }
+
+  return null;
+}
+
+const MOCK_SCREENSHOT_BASE64 =
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO7+R4QAAAAASUVORK5CYII=";
+
+interface BrowserWorkspaceTab {
+  id: string;
+  url: string;
+  partition: string;
+  title?: string;
+  kind?: string;
+  show?: boolean;
+}
+
+interface BrowserWorkspaceMockState {
+  tabs: Map<string, BrowserWorkspaceTab>;
+  nextTabId: number;
+}
+
+function createBrowserWorkspaceMockState(): BrowserWorkspaceMockState {
+  return { tabs: new Map(), nextTabId: 1 };
+}
+
+function requireBearerToken(
+  headers: http.IncomingHttpHeaders,
+  token: string,
+): DynamicFixtureResponse | null {
+  const authorization = headerValue(headers, "authorization");
+  return authorization === `Bearer ${token}`
+    ? null
+    : mockJsonError(401, "unauthorized");
+}
+
+function browserWorkspaceEvalResult(
+  script: string,
+  tab: BrowserWorkspaceTab,
+): JsonValue {
+  if (script.includes("searchMessages")) {
+    return { injected: true };
+  }
+  if (
+    script.includes("searchResultMessage") ||
+    script.includes("search-result-message")
+  ) {
+    return [
+      {
+        id: "123456789012345678",
+        content: "the quick brown fox from Discord",
+        authorName: "alice",
+        channelId: "222",
+        timestamp: "2026-04-25T12:00:00.000Z",
+        deliveryStatus: "unknown",
+      },
+    ];
+  }
+  if (script.includes("deliveryStatus")) {
+    return [
+      {
+        id: "223456789012345678",
+        content: "sent through Discord fixture",
+        authorName: null,
+        channelId: "222",
+        timestamp: "2026-04-25T12:05:00.000Z",
+        deliveryStatus: "sent",
+      },
+    ];
+  }
+  if (
+    script.includes("probeDiscordDocumentState") ||
+    script.includes("DISCORD_DM_PREVIEW_LIMIT")
+  ) {
+    return {
+      loggedIn: true,
+      url: tab.url,
+      identity: { id: null, username: "mocked_owner", discriminator: "0001" },
+      rawSnippet: "mocked_owner | Direct messages",
+      dmInbox: {
+        visible: true,
+        count: 2,
+        selectedChannelId: "222",
+        previews: [
+          {
+            channelId: "111",
+            href: "/channels/@me/111",
+            label: "Alice",
+            selected: false,
+            unread: true,
+            snippet: "Are we meeting tomorrow?",
+          },
+          {
+            channelId: "222",
+            href: "/channels/@me/222",
+            label: "Bob",
+            selected: true,
+            unread: false,
+            snippet: "Sent you the file",
+          },
+        ],
+      },
+    };
+  }
+  return { ok: true };
+}
+
+function browserWorkspaceDynamicFixture(
+  state: BrowserWorkspaceMockState,
+  method: string,
+  pathname: string,
+  requestBody: RequestBody,
+  headers: http.IncomingHttpHeaders,
+  ledgerEntry: MockRequestLedgerEntry,
+): DynamicFixtureResponse | null {
+  const authFailure = requireBearerToken(
+    headers,
+    "mock-browser-workspace-token",
+  );
+  if (authFailure) return authFailure;
+
+  if (method === "GET" && pathname === "/tabs") {
+    ledgerEntry.browserWorkspace =
+      withRunId<BrowserWorkspaceRequestLedgerMetadata>(ledgerEntry, {
+        action: "tabs.list",
+      });
+    return jsonFixture({ tabs: [...state.tabs.values()] });
+  }
+
+  if (method === "POST" && pathname === "/tabs") {
+    const id = `tab_${state.nextTabId++}`;
+    const url = readOptionalString(requestBody, "url") ?? "about:blank";
+    const partition = readOptionalString(requestBody, "partition") ?? "";
+    const title = readOptionalString(requestBody, "title") ?? undefined;
+    const kind = readOptionalString(requestBody, "kind") ?? undefined;
+    const show = requestBody.show === true;
+    const tab: BrowserWorkspaceTab = {
+      id,
+      url,
+      partition,
+      ...(title ? { title } : {}),
+      ...(kind ? { kind } : {}),
+      show,
+    };
+    state.tabs.set(id, tab);
+    ledgerEntry.browserWorkspace =
+      withRunId<BrowserWorkspaceRequestLedgerMetadata>(ledgerEntry, {
+        action: "tabs.create",
+        tabId: id,
+        partition,
+        url,
+      });
+    return jsonFixture({ tab });
+  }
+
+  const tabMatch =
+    /^\/tabs\/([^/]+)(?:\/(navigate|eval|show|hide|snapshot))?\/?$/.exec(
+      pathname,
+    );
+  if (!tabMatch) return null;
+
+  const tabId = decodeURIComponent(tabMatch[1] ?? "");
+  const action = tabMatch[2] ?? null;
+  const tab = state.tabs.get(tabId);
+
+  if (!action && method === "DELETE") {
+    const closed = state.tabs.delete(tabId);
+    ledgerEntry.browserWorkspace =
+      withRunId<BrowserWorkspaceRequestLedgerMetadata>(ledgerEntry, {
+        action: "tabs.close",
+        tabId,
+      });
+    return closed
+      ? jsonFixture({ closed: true })
+      : mockJsonError(404, "tab not found");
+  }
+
+  if (!tab) return mockJsonError(404, "tab not found");
+
+  if (action === "show" && method === "POST") {
+    ledgerEntry.browserWorkspace =
+      withRunId<BrowserWorkspaceRequestLedgerMetadata>(ledgerEntry, {
+        action: "tabs.show",
+        tabId,
+      });
+    return jsonFixture({ tab: { ...tab, show: true } });
+  }
+
+  if (action === "hide" && method === "POST") {
+    ledgerEntry.browserWorkspace =
+      withRunId<BrowserWorkspaceRequestLedgerMetadata>(ledgerEntry, {
+        action: "tabs.hide",
+        tabId,
+      });
+    return jsonFixture({ tab: { ...tab, show: false } });
+  }
+
+  if (action === "navigate" && method === "POST") {
+    const url = readRequiredFixtureString(requestBody, "url");
+    const nextTab = { ...tab, url };
+    state.tabs.set(tabId, nextTab);
+    ledgerEntry.browserWorkspace =
+      withRunId<BrowserWorkspaceRequestLedgerMetadata>(ledgerEntry, {
+        action: "tabs.navigate",
+        tabId,
+        url,
+      });
+    return jsonFixture({ tab: nextTab });
+  }
+
+  if (action === "eval" && method === "POST") {
+    const script = readOptionalString(requestBody, "script") ?? "";
+    ledgerEntry.browserWorkspace =
+      withRunId<BrowserWorkspaceRequestLedgerMetadata>(ledgerEntry, {
+        action: "tabs.eval",
+        tabId,
+      });
+    return jsonFixture({ result: browserWorkspaceEvalResult(script, tab) });
+  }
+
+  if (action === "snapshot" && method === "GET") {
+    ledgerEntry.browserWorkspace =
+      withRunId<BrowserWorkspaceRequestLedgerMetadata>(ledgerEntry, {
+        action: "tabs.snapshot",
+        tabId,
+      });
+    return jsonFixture({ data: MOCK_SCREENSHOT_BASE64 });
+  }
+
+  return mockJsonError(405, "method not allowed");
+}
+
+interface BlueBubblesChatFixture {
+  guid: string;
+  displayName: string;
+  chatIdentifier: string;
+  participants: Array<{ address: string }>;
+  lastMessageAt: number;
+}
+
+interface BlueBubblesMessageFixture {
+  guid: string;
+  text: string;
+  handle: { address: string } | null;
+  chatGuid: string;
+  chats: Array<{ guid: string }>;
+  isFromMe: boolean;
+  dateCreated: number;
+  isRead?: boolean;
+  isDelivered?: boolean;
+  error?: number | null;
+  errorDescription?: string | null;
+}
+
+interface BlueBubblesMockState {
+  chats: BlueBubblesChatFixture[];
+  messages: BlueBubblesMessageFixture[];
+}
+
+function createBlueBubblesMockState(): BlueBubblesMockState {
+  const chatGuid = "iMessage;-;+15551112222";
+  return {
+    chats: [
+      {
+        guid: chatGuid,
+        displayName: "Alice iMessage",
+        chatIdentifier: "+15551112222",
+        participants: [{ address: "+15551112222" }],
+        lastMessageAt: Date.parse("2026-04-25T12:00:00.000Z"),
+      },
+    ],
+    messages: [
+      {
+        guid: "imsg-fixture-1",
+        text: "Can you review the BlueBubbles fixture?",
+        handle: { address: "+15551112222" },
+        chatGuid,
+        chats: [{ guid: chatGuid }],
+        isFromMe: false,
+        dateCreated: Date.parse("2026-04-25T12:00:00.000Z"),
+        isRead: true,
+        isDelivered: true,
+      },
+    ],
+  };
+}
+
+function bluebubblesResponse(data: JsonValue | object): DynamicFixtureResponse {
+  return jsonFixture({ status: 200, data });
+}
+
+function bluebubblesDynamicFixture(
+  state: BlueBubblesMockState,
+  method: string,
+  pathname: string,
+  requestBody: RequestBody,
+  headers: http.IncomingHttpHeaders,
+  ledgerEntry: MockRequestLedgerEntry,
+): DynamicFixtureResponse | null {
+  const authFailure = requireBearerToken(headers, "mock-bluebubbles-password");
+  if (authFailure) return authFailure;
+
+  if (method === "GET" && pathname === "/api/v1/server/info") {
+    ledgerEntry.bluebubbles = withRunId<BlueBubblesRequestLedgerMetadata>(
+      ledgerEntry,
+      {
+        action: "server.info",
+      },
+    );
+    return bluebubblesResponse({
+      private_api: true,
+      helper_connected: true,
+      detected_imessage: "owner@example.test",
+      detected_icloud: "owner@icloud.test",
+    });
+  }
+
+  if (method === "POST" && pathname === "/api/v1/chat/query") {
+    ledgerEntry.bluebubbles = withRunId<BlueBubblesRequestLedgerMetadata>(
+      ledgerEntry,
+      {
+        action: "chat.query",
+      },
+    );
+    return bluebubblesResponse(state.chats);
+  }
+
+  if (method === "POST" && pathname === "/api/v1/message/query") {
+    const search = readOptionalString(requestBody, "search");
+    const chatGuid = readOptionalString(requestBody, "chatGuid");
+    const messages = state.messages.filter((message) => {
+      if (chatGuid && message.chatGuid !== chatGuid) return false;
+      if (
+        search &&
+        !message.text.toLowerCase().includes(search.toLowerCase())
+      ) {
+        return false;
+      }
+      return true;
+    });
+    ledgerEntry.bluebubbles = withRunId<BlueBubblesRequestLedgerMetadata>(
+      ledgerEntry,
+      {
+        action: search ? "message.search" : "message.query",
+        ...(chatGuid ? { chatGuid } : {}),
+        ...(search ? { query: search } : {}),
+      },
+    );
+    return bluebubblesResponse(messages);
+  }
+
+  const chatMessageId = routeParam(
+    pathname,
+    /^\/api\/v1\/chat\/([^/]+)\/message\/?$/,
+  );
+  if (method === "GET" && chatMessageId) {
+    const messages = state.messages.filter(
+      (message) => message.chatGuid === chatMessageId,
+    );
+    ledgerEntry.bluebubbles = withRunId<BlueBubblesRequestLedgerMetadata>(
+      ledgerEntry,
+      {
+        action: "chat.messages",
+        chatGuid: chatMessageId,
+      },
+    );
+    return bluebubblesResponse(messages);
+  }
+
+  if (method === "POST" && pathname === "/api/v1/message/text") {
+    const chatGuid = readRequiredFixtureString(requestBody, "chatGuid");
+    const text = readRequiredFixtureString(requestBody, "message");
+    const message: BlueBubblesMessageFixture = {
+      guid: `imsg-${randomFromAlphabet("0123456789abcdef", 12)}`,
+      text,
+      handle: null,
+      chatGuid,
+      chats: [{ guid: chatGuid }],
+      isFromMe: true,
+      dateCreated: Date.now(),
+      isRead: false,
+      isDelivered: true,
+    };
+    state.messages.unshift(message);
+    ledgerEntry.bluebubbles = withRunId<BlueBubblesRequestLedgerMetadata>(
+      ledgerEntry,
+      {
+        action: "message.text",
+        chatGuid,
+        messageGuid: message.guid,
+      },
+    );
+    return bluebubblesResponse(message);
+  }
+
+  const messageGuid = routeParam(pathname, /^\/api\/v1\/message\/([^/]+)\/?$/);
+  if (method === "GET" && messageGuid) {
+    const message = state.messages.find(
+      (candidate) => candidate.guid === messageGuid,
+    );
+    ledgerEntry.bluebubbles = withRunId<BlueBubblesRequestLedgerMetadata>(
+      ledgerEntry,
+      {
+        action: "message.get",
+        messageGuid,
+      },
+    );
+    return message
+      ? bluebubblesResponse(message)
+      : mockJsonError(404, "message not found");
+  }
+
+  return null;
+}
+
+interface GitHubMockState {
+  nextIssueNumber: number;
+  nextReviewId: number;
+}
+
+function createGitHubMockState(): GitHubMockState {
+  return { nextIssueNumber: 101, nextReviewId: 777 };
+}
+
+function parseGitHubRepoPath(
+  pathname: string,
+  suffix: RegExp,
+): { owner: string; repo: string; match: RegExpExecArray } | null {
+  const match = suffix.exec(pathname);
+  if (!match) return null;
+  return {
+    owner: decodeURIComponent(match[1] ?? ""),
+    repo: decodeURIComponent(match[2] ?? ""),
+    match,
+  };
+}
+
+function githubDynamicFixture(
+  state: GitHubMockState,
+  method: string,
+  pathname: string,
+  searchParams: URLSearchParams,
+  requestBody: RequestBody,
+  ledgerEntry: MockRequestLedgerEntry,
+): DynamicFixtureResponse | null {
+  const pullsPath = parseGitHubRepoPath(
+    pathname,
+    /^\/repos\/([^/]+)\/([^/]+)\/pulls\/?$/,
+  );
+  if (method === "GET" && pullsPath) {
+    const requestedState = searchParams.get("state") ?? "open";
+    const pulls = GITHUB_FIXTURE_PULLS.filter(
+      (pull) => requestedState === "all" || pull.state === requestedState,
+    );
+    ledgerEntry.github = withRunId<GitHubRequestLedgerMetadata>(ledgerEntry, {
+      action: "pulls.list",
+      owner: pullsPath.owner,
+      repo: pullsPath.repo,
+    });
+    return jsonFixture(pulls);
+  }
+
+  const reviewPath = parseGitHubRepoPath(
+    pathname,
+    /^\/repos\/([^/]+)\/([^/]+)\/pulls\/(\d+)\/reviews\/?$/,
+  );
+  if (method === "POST" && reviewPath) {
+    const number = Number.parseInt(reviewPath.match[3] ?? "", 10);
+    const id = state.nextReviewId++;
+    ledgerEntry.github = withRunId<GitHubRequestLedgerMetadata>(ledgerEntry, {
+      action: "pulls.createReview",
+      owner: reviewPath.owner,
+      repo: reviewPath.repo,
+      number,
+    });
+    return jsonFixture({ id });
+  }
+
+  const createIssuePath = parseGitHubRepoPath(
+    pathname,
+    /^\/repos\/([^/]+)\/([^/]+)\/issues\/?$/,
+  );
+  if (method === "POST" && createIssuePath) {
+    const number = state.nextIssueNumber++;
+    ledgerEntry.github = withRunId<GitHubRequestLedgerMetadata>(ledgerEntry, {
+      action: "issues.create",
+      owner: createIssuePath.owner,
+      repo: createIssuePath.repo,
+      number,
+    });
+    return jsonFixture({
+      number,
+      html_url: `https://github.com/${createIssuePath.owner}/${createIssuePath.repo}/issues/${number}`,
+      title: readOptionalString(requestBody, "title") ?? "Mock issue",
+    });
+  }
+
+  const assigneesPath = parseGitHubRepoPath(
+    pathname,
+    /^\/repos\/([^/]+)\/([^/]+)\/issues\/(\d+)\/assignees\/?$/,
+  );
+  if (method === "POST" && assigneesPath) {
+    const number = Number.parseInt(assigneesPath.match[3] ?? "", 10);
+    const assignees = readStringArray(requestBody, "assignees").map(
+      (login) => ({ login }),
+    );
+    ledgerEntry.github = withRunId<GitHubRequestLedgerMetadata>(ledgerEntry, {
+      action: "issues.addAssignees",
+      owner: assigneesPath.owner,
+      repo: assigneesPath.repo,
+      number,
+    });
+    return jsonFixture({ assignees });
+  }
+
+  if (method === "GET" && pathname === "/search/issues") {
+    const query = searchParams.get("q") ?? "";
+    ledgerEntry.github = withRunId<GitHubRequestLedgerMetadata>(ledgerEntry, {
+      action: "search.issuesAndPullRequests",
+      query,
+    });
+    return jsonFixture({
+      total_count: GITHUB_FIXTURE_SEARCH_ITEMS.length,
+      incomplete_results: false,
+      items: GITHUB_FIXTURE_SEARCH_ITEMS,
+    });
+  }
+
+  if (method === "GET" && pathname === "/notifications") {
+    ledgerEntry.github = withRunId<GitHubRequestLedgerMetadata>(ledgerEntry, {
+      action: "activity.listNotificationsForAuthenticatedUser",
+    });
+    return jsonFixture(GITHUB_FIXTURE_NOTIFICATIONS);
+  }
+
+  return null;
+}
+
+type DynamicProviderState =
+  | { kind: "google"; state: GoogleMockState }
+  | { kind: "x-twitter"; state: XMockState }
+  | { kind: "whatsapp"; state: WhatsAppMockState }
+  | { kind: "signal"; state: SignalMockState }
+  | { kind: "browser-workspace"; state: BrowserWorkspaceMockState }
+  | { kind: "bluebubbles"; state: BlueBubblesMockState }
+  | { kind: "github"; state: GitHubMockState }
+  | null;
+
+function createDynamicProviderState(
+  environmentName: string | undefined,
+): DynamicProviderState {
+  if (environmentName === "Google APIs") {
+    return { kind: "google", state: createGoogleMockState() };
+  }
+  if (environmentName === "X (Twitter)") {
+    return { kind: "x-twitter", state: createXMockState() };
+  }
+  if (environmentName === "WhatsApp") {
+    return { kind: "whatsapp", state: createWhatsAppMockState() };
+  }
+  if (environmentName === "Signal HTTP") {
+    return { kind: "signal", state: createSignalMockState() };
+  }
+  if (environmentName === "Browser Workspace") {
+    return {
+      kind: "browser-workspace",
+      state: createBrowserWorkspaceMockState(),
+    };
+  }
+  if (environmentName === "BlueBubbles") {
+    return { kind: "bluebubbles", state: createBlueBubblesMockState() };
+  }
+  if (environmentName === "GitHub REST") {
+    return { kind: "github", state: createGitHubMockState() };
+  }
+  return null;
+}
+
+function dynamicProviderFixture(args: {
+  provider: DynamicProviderState;
+  method: string;
+  pathname: string;
+  searchParams: URLSearchParams;
+  requestBody: RequestBody;
+  headers: http.IncomingHttpHeaders;
+  ledgerEntry: MockRequestLedgerEntry;
+}): DynamicFixtureResponse | null {
+  if (!args.provider) return null;
+  switch (args.provider.kind) {
+    case "google":
+      return googleDynamicFixture(
+        args.provider.state,
+        args.method,
+        args.pathname,
+        args.searchParams,
+        args.requestBody,
+        args.headers,
+        args.ledgerEntry,
+      );
+    case "x-twitter":
+      return xDynamicFixture(
+        args.provider.state,
+        args.method,
+        args.pathname,
+        args.searchParams,
+        args.requestBody,
+        args.ledgerEntry,
+      );
+    case "whatsapp":
+      return whatsappDynamicFixture(
+        args.provider.state,
+        args.method,
+        args.pathname,
+        args.requestBody,
+        args.ledgerEntry,
+      );
+    case "signal":
+      return signalDynamicFixture(
+        args.provider.state,
+        args.method,
+        args.pathname,
+        args.requestBody,
+        args.ledgerEntry,
+      );
+    case "browser-workspace":
+      return browserWorkspaceDynamicFixture(
+        args.provider.state,
+        args.method,
+        args.pathname,
+        args.requestBody,
+        args.headers,
+        args.ledgerEntry,
+      );
+    case "bluebubbles":
+      return bluebubblesDynamicFixture(
+        args.provider.state,
+        args.method,
+        args.pathname,
+        args.requestBody,
+        args.headers,
+        args.ledgerEntry,
+      );
+    case "github":
+      return githubDynamicFixture(
+        args.provider.state,
+        args.method,
+        args.pathname,
+        args.searchParams,
+        args.requestBody,
+        args.ledgerEntry,
+      );
+  }
 }
 
 async function startFixtureServer(
@@ -1804,8 +1742,7 @@ async function startFixtureServer(
   const environment = readEnvironment(dataPath);
   const routes = compileRoutes(environment);
   const requests: MockRequestLedgerEntry[] = [];
-  const googleState =
-    environment.name === "Google APIs" ? createGoogleMockState() : null;
+  const dynamicProvider = createDynamicProviderState(environment.name);
   let stopped = false;
 
   const server = http.createServer(async (req, res) => {
@@ -1836,17 +1773,15 @@ async function startFixtureServer(
           : {}),
       };
       requests.push(ledgerEntry);
-      const dynamicResponse = googleState
-        ? googleDynamicFixture(
-            googleState,
-            method,
-            requestUrl.pathname,
-            requestUrl.searchParams,
-            requestBody,
-            req.headers,
-            ledgerEntry,
-          )
-        : null;
+      const dynamicResponse = dynamicProviderFixture({
+        provider: dynamicProvider,
+        method,
+        pathname: requestUrl.pathname,
+        searchParams: requestUrl.searchParams,
+        requestBody,
+        headers: req.headers,
+        ledgerEntry,
+      });
       if (dynamicResponse) {
         res.writeHead(dynamicResponse.statusCode, {
           "Content-Type": "application/json",

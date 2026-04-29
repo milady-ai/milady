@@ -964,7 +964,7 @@ Messaging connector configuration. Each key is a connector ID (e.g. `telegram`, 
     },
     "discord": {
       "enabled": true,
-      "token": "Bot ..."
+      "botToken": "Bot ..."
     }
   }
 }
@@ -1484,7 +1484,9 @@ Feature flags for plugin auto-enable and feature toggles. Each key maps to eithe
 ```json
 {
   "features": {
-    "shellEnabled": true,
+    "shell": true,
+    "browser": true,
+    "cron": true,
     "someFeature": { "enabled": true, "option": "value" }
   }
 }

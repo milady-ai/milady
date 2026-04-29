@@ -340,15 +340,11 @@ Optional JSON manifest for rich UI integration and marketplace metadata.
 
 | Value | Description |
 |-------|-------------|
-| `feature` | General-purpose feature plugins (most common) |
-| `ai-provider` | LLM and AI model providers |
+| `ai-provider` | AI/LLM model providers |
+| `app` | Application plugins |
 | `connector` | Messaging platform connectors |
+| `feature` | Feature extensions and skills |
 | `database` | Database adapters |
-| `app` | Launchable applications |
-| `memory` | Memory or storage adapters |
-| `channel` | Messaging platform connectors (alias) |
-| `provider` | Context or data providers |
-| `skill` | Skill-based feature extensions |
 
 ## Component Type Schema
 

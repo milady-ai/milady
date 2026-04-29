@@ -1,7 +1,7 @@
 ---
 title: "Conectores de Plataforma"
 sidebarTitle: "Connectors"
-description: "Puentes de plataforma para 27 plataformas de mensajería — 18 habilitados automáticamente desde la configuración (Discord, Telegram, Slack, WhatsApp, Signal, iMessage, Blooio, MS Teams, Google Chat, Twitter, Farcaster, Twitch, Mattermost, Matrix, Feishu, Nostr, Lens, WeChat) más 9 instalables desde el registro (Bluesky, Instagram, LINE, Zalo, Twilio, GitHub, Gmail Watch, Nextcloud Talk, Tlon)."
+description: "Puentes de plataforma para 28 plataformas de mensajería — 18 habilitados automáticamente desde la configuración (Discord, Telegram, Slack, WhatsApp, Signal, iMessage, Blooio, MS Teams, Google Chat, Twitter, Farcaster, Twitch, Mattermost, Matrix, Feishu, Nostr, Lens, WeChat) más 10 instalables desde el registro (BlueBubbles, Bluesky, Instagram, LINE, Zalo, Twilio, GitHub, Gmail Watch, Nextcloud Talk, Tlon)."
 ---
 
 Los conectores son puentes de plataforma que permiten a tu agente comunicarse a través de plataformas de mensajería y redes sociales. Cada conector gestiona la autenticación, el enrutamiento de mensajes, la gestión de sesiones y las funcionalidades específicas de cada plataforma.
@@ -18,8 +18,9 @@ Los conectores son puentes de plataforma que permiten a tu agente comunicarse a 
 6. [WhatsApp](#whatsapp)
 7. [Signal](#signal)
 8. [iMessage](#imessage)
-9. [Blooio](#blooio)
-10. [Microsoft Teams](#microsoft-teams)
+9. [BlueBubbles](#bluebubbles)
+10. [Blooio](#blooio)
+11. [Microsoft Teams](#microsoft-teams)
 11. [Google Chat](#google-chat)
 12. [Twitter](#twitter)
 13. [Farcaster](#farcaster)
@@ -59,18 +60,19 @@ Los conectores marcados como **Auto** se cargan automáticamente cuando su confi
 | WhatsApp | Código QR (Baileys) o Cloud API | Sí | Sí | Sí | Auto |
 | Signal | API HTTP de signal-cli | Sí | Sí | Sí | Auto |
 | iMessage | CLI nativo (macOS) | Sí | Sí | Sí | Auto |
+| BlueBubbles | Contraseña del servidor | Sí | Sí | No | Auto |
 | Blooio | Clave API + webhook | Sí | Sí | No | Auto |
 | Microsoft Teams | ID de app + contraseña | Sí | Sí (equipos/canales) | No | Auto |
 | Google Chat | Cuenta de servicio | Sí | Sí (espacios) | Sí | Auto |
-| Twitter | Claves API + tokens | MDs | N/A | No | Auto |
+| Twitter | Claves API + tokens | MDs | N/A | No | Registry |
 | Farcaster | Clave API de Neynar + firmante | Casts | Sí (canales) | No | Auto |
 | Twitch | Client ID + token de acceso | Sí (chat) | Sí (canales) | No | Auto |
 | Mattermost | Token de bot | Sí | Sí (canales) | No | Auto |
-| WeChat | Clave API de proxy + código QR | Sí | Sí | Sí | Auto |
+| WeChat | Clave API de proxy + código QR | Sí | Sí | Sí | Registry |
 | Matrix | Token de acceso | Sí | Sí (salas) | No | Auto |
 | Feishu / Lark | ID de app + secreto | Sí | Sí (chats grupales) | No | Auto |
 | Nostr | Clave privada (nsec/hex) | Sí (NIP-04) | N/A | No | Auto |
-| Lens | Clave API | Sí | N/A | No | Auto |
+| Lens | Clave API | Sí | N/A | No | Registry |
 | Bluesky | Credenciales de cuenta | Publicaciones | N/A | No | Registry |
 | Instagram | Usuario + contraseña | MDs | N/A | No | Registry |
 | LINE | Token de acceso de canal + secreto | Sí | Sí | No | Registry |
@@ -401,6 +403,47 @@ Consulta la [Guía de Integración de WhatsApp](/es/guides/whatsapp) para instru
 - Configuración de región
 - Opción de inclusión de adjuntos
 - Configuración de mención y herramientas por grupo
+
+---
+
+<div id="bluebubbles">
+## BlueBubbles
+</div>
+
+Se conecta a iMessage a través de un servidor [BlueBubbles](https://bluebubbles.app) local en macOS. A diferencia del conector directo de iMessage, BlueBubbles es accesible por red — el agente no necesita ejecutarse en la misma Mac que iMessage.
+
+### Requisitos de configuración
+
+- Una Mac con iMessage conectado y el [servidor BlueBubbles](https://bluebubbles.app) instalado
+- La contraseña del servidor y URL accesible desde la máquina que ejecuta Milady
+
+### Configuración clave
+
+```json
+{
+  "connectors": {
+    "bluebubbles": {
+      "password": "TU_CONTRASEÑA_BLUEBUBBLES",
+      "serverUrl": "http://192.168.1.50:1234"
+    }
+  }
+}
+```
+
+**Variables de entorno:** `BLUEBUBBLES_PASSWORD`, `BLUEBUBBLES_SERVER_URL`
+
+### Funcionalidades
+
+- Enviar y recibir iMessages y SMS a través de un servidor BlueBubbles local
+- Reacciones tapback (agregar y eliminar)
+- Responder a mensajes específicos en hilos
+- Editar y anular mensajes enviados (dependiente de la versión de macOS)
+- Enviar archivos adjuntos con subtítulos y efectos de iMessage
+- Gestión de participantes de chats grupales
+- Soporte de confirmación de lectura
+- Manejo de mensajes entrantes basado en webhooks
+
+Consulta la [referencia del conector BlueBubbles](/connectors/bluebubbles) para la referencia completa de configuración.
 
 ---
 
@@ -777,7 +820,7 @@ Se conecta a mensajería de iMessage y SMS a través del servicio Blooio con web
 }
 ```
 
-**Variables de entorno:** `MATTERMOST_BOT_TOKEN`, `MATTERMOST_BASE_URL`
+**Variables de entorno:** `MATTERMOST_BOT_TOKEN`, `MATTERMOST_SERVER_URL`
 
 <div id="features-14">
 ### Funcionalidades
@@ -1365,7 +1408,7 @@ Las opciones de `dmPolicy` son:
 **Fallos generales de conectores:**
 
 - El plugin del conector no se carga:
-  Verificar el mapeo de ID del conector en `packages/agent/src/config/plugin-auto-enable.ts` (en el submódulo `eliza`), la disponibilidad del plugin y las anulaciones de `plugins.entries`. La capa de habilitación automática mapea las claves de configuración del conector a nombres de paquetes de plugins — una discrepancia significa que el plugin se omite silenciosamente.
+  Verificar el mapeo de ID del conector en `eliza/packages/agent/src/config/plugin-auto-enable.ts` (en el submódulo upstream de elizaOS), la disponibilidad del plugin y las anulaciones de `plugins.entries`. La capa de habilitación automática mapea las claves de configuración del conector a nombres de paquetes de plugins — una discrepancia significa que el plugin se omite silenciosamente.
 - La autenticación tiene éxito pero no llegan mensajes:
   Verificar la configuración de webhook/socket de la plataforma y las puertas de política (`dmPolicy`, `groupPolicy`). Para conectores basados en webhook, confirmar que la URL de callback es accesible públicamente.
 - Secretos de conector mal enrutados:

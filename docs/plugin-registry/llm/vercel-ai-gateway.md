@@ -11,7 +11,7 @@ The Vercel AI Gateway plugin connects Milady agents to Vercel's AI Gateway, prov
 ## Installation
 
 ```bash
-milady plugins install vercel-ai-gateway
+milady plugins install @elizaos/plugin-vercel-ai-gateway
 ```
 
 ## Auto-Enable
@@ -26,16 +26,18 @@ export AI_GATEWAY_API_KEY=your-gateway-key
 
 | Environment Variable | Required | Description |
 |---------------------|----------|-------------|
-| `AI_GATEWAY_API_KEY` | Yes* | Vercel AI Gateway API key |
-| `AIGATEWAY_API_KEY` | Yes* | Alias that also triggers auto-enable |
+| `AI_GATEWAY_API_KEY` | No | Vercel AI Gateway API key |
+| `AIGATEWAY_API_KEY` | No | Alias that also triggers auto-enable (primary env key for auto-enable) |
+| `VERCEL_OIDC_TOKEN` | No | Vercel OIDC token for authentication |
 | `AI_GATEWAY_BASE_URL` | No | Custom base URL for the gateway endpoint |
 | `AI_GATEWAY_SMALL_MODEL` | No | Override the small model identifier |
 | `AI_GATEWAY_LARGE_MODEL` | No | Override the large model identifier |
 | `AI_GATEWAY_EMBEDDING_MODEL` | No | Override the embedding model |
+| `AI_GATEWAY_EMBEDDING_DIMENSIONS` | No | Override embedding vector dimensions |
 | `AI_GATEWAY_IMAGE_MODEL` | No | Override the image generation model |
 | `AI_GATEWAY_TIMEOUT_MS` | No | Request timeout in milliseconds |
 
-\* Either variable activates the plugin.
+Either `AI_GATEWAY_API_KEY`, `AIGATEWAY_API_KEY`, or `VERCEL_OIDC_TOKEN` activates the plugin.
 
 ### milady.json Example
 

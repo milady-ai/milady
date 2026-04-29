@@ -1,0 +1,62 @@
+# Connect to iMessage via BlueBubbles
+
+BlueBubbles lets your Milady agent send and receive iMessages through a self-hosted server running on a Mac. Unlike the native iMessage connector (which reads the local Messages database), BlueBubbles works over HTTP so your agent can run on any machine on the same network.
+
+**What you'll learn:** install BlueBubbles on a Mac, get the server URL and password, and connect Milady to it. About fifteen minutes.
+
+## What you need before you start
+
+- **A Mac** with Messages signed in to your Apple ID.
+- **BlueBubbles server** installed and running on that Mac — download from [bluebubbles.app](https://bluebubbles.app).
+- **Milady running** on any machine (the same Mac or another device on the network).
+
+<Callout kind="tip" title="BlueBubbles vs native iMessage">
+The native iMessage connector requires Milady to run on the same Mac as Messages and needs Full Disk Access. BlueBubbles is more flexible — your agent can run on a different machine entirely, including Linux or Windows, as long as it can reach the BlueBubbles server over HTTP.
+</Callout>
+
+## Step 1 — Set up the BlueBubbles server
+
+<Steps>
+  <li>Download and install <a href="https://bluebubbles.app">BlueBubbles</a> on your Mac.</li>
+  <li>Open BlueBubbles and complete the setup wizard. It will ask for macOS permissions (Accessibility, Full Disk Access).</li>
+  <li>Once the server starts, note the <strong>server URL</strong> (e.g., <code>http://192.168.1.10:1234</code>) and <strong>password</strong> shown in the BlueBubbles settings.</li>
+</Steps>
+
+## Step 2 — Hand the credentials to Milady
+
+<Steps>
+  <li>Open Milady. Go to <strong>Settings → Plugins → BlueBubbles → Configure</strong>.</li>
+  <li>Enter the <strong>Server URL</strong> from Step 1.</li>
+  <li>Enter the <strong>Password</strong> from Step 1.</li>
+  <li>Click <strong>Save</strong>.</li>
+</Steps>
+
+The BlueBubbles connector auto-enables when `serverUrl` or `password` is present in the config.
+
+## Step 3 — Test it
+
+From another Apple device, send an iMessage to the phone number or email signed into Messages on the BlueBubbles Mac. Milady should see the message and reply within a few seconds.
+
+## Useful options
+
+| Option | What it does |
+| --- | --- |
+| **DM policy** | `pairing` (default) requires an onboarding flow. `open` responds to everyone. `allowlist` restricts to specific contacts. |
+| **Group policy** | Control whether the agent participates in group chats. |
+| **Send read receipts** | Whether to mark incoming messages as read. |
+
+## Troubleshooting
+
+**"Connection refused" when saving.**
+Make sure the BlueBubbles server is running on the Mac and the URL is reachable from the machine running Milady. If they're on different networks, you'll need port forwarding or a tunnel.
+
+**Messages arrive but no replies are sent.**
+Check that BlueBubbles has the required macOS permissions (Accessibility, Full Disk Access). Without these, it can receive but not send.
+
+**Connector not loading.**
+This connector is in the plugin registry. Install it with `milady plugins install bluebubbles`.
+
+## What's next
+
+- [Native iMessage connector](/docs/intermediate/connect-imessage) — if Milady runs on the same Mac as Messages.
+- [Blooio connector](/docs/intermediate/connect-blooio) — cloud-based iMessage/SMS bridge as an alternative.

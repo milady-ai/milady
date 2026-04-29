@@ -213,7 +213,11 @@ export async function createMockedTestRuntime(
         await seedGoogleConnectorGrant(real.runtime);
       }
       if (shouldSeedX) {
-        await seedXConnectorGrant(real.runtime);
+        await seedXConnectorGrant(real.runtime, { side: "owner" });
+        await seedXConnectorGrant(real.runtime, {
+          side: "agent",
+          handle: "@mocked-lifeops-agent",
+        });
       }
       if (shouldSeedBenchmarkFixtures) {
         await seedBenchmarkLifeOpsFixtures(real.runtime);

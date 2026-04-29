@@ -13,6 +13,9 @@ import {
 const scriptFile = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(scriptFile);
 const _appDir = path.resolve(__dirname, "..");
+const verbosePluginBuild =
+  process.env.MILADY_VERBOSE_PLUGIN_BUILD === "1" ||
+  process.env.ELIZA_VERBOSE_PLUGIN_BUILD === "1";
 
 // Only these values in a plugin's `platforms` array are treated as build-host
 // gates. Anything else (e.g. "node", "browser") is a runtime hint and does
@@ -57,10 +60,15 @@ export function shouldBuildPluginForHost(pkg, hostPlatform) {
 
 function readPluginPackageJson(pluginsDir, name) {
   const pkgPath = path.join(pluginsDir, name, "package.json");
+  const raw = fs.readFileSync(pkgPath, "utf8");
   try {
-    return JSON.parse(fs.readFileSync(pkgPath, "utf8"));
-  } catch {
-    return undefined;
+    return JSON.parse(raw);
+  } catch (error) {
+    throw new Error(
+      `[plugins] ${pkgPath} is not valid JSON: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
   }
 }
 
@@ -70,6 +78,9 @@ function run(command, args, cwd) {
       cwd,
       stdio: "inherit",
       env: process.env,
+    });
+    child.on("error", (error) => {
+      reject(new Error(`${command} failed to start: ${error.message}`));
     });
     child.on("exit", (code, signal) => {
       if (signal) {
@@ -83,6 +94,12 @@ function run(command, args, cwd) {
       resolve();
     });
   });
+}
+
+function logVerbose(message) {
+  if (verbosePluginBuild) {
+    console.log(message);
+  }
 }
 
 async function main() {
@@ -105,7 +122,7 @@ async function main() {
       return true;
     }
     const platforms = pkg?.milady?.platforms ?? pkg?.elizaos?.platforms;
-    console.log(
+    logVerbose(
       `[plugin:${name}] skipping — declares platforms=${JSON.stringify(
         platforms,
       )}, host is ${process.platform}`,
@@ -115,9 +132,9 @@ async function main() {
 
   await Promise.all(
     buildablePluginNames.map(async (name) => {
-      console.log(`[plugin:${name}] building...`);
+      logVerbose(`[plugin:${name}] building...`);
       await run("bun", ["run", "build"], path.join(pluginsDir, name));
-      console.log(`[plugin:${name}] done`);
+      logVerbose(`[plugin:${name}] done`);
     }),
   );
 }

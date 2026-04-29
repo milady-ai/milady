@@ -11,7 +11,7 @@ The Twitch plugin connects Milady agents to Twitch, enabling chat messaging and 
 ## Installation
 
 ```bash
-milady plugins install twitch
+milady plugins install @elizaos/plugin-twitch
 ```
 
 ## Setup
@@ -67,6 +67,20 @@ The plugin auto-enables when any of these are present:
 | `enabled` | No | Force-enable without credentials |
 
 \* At least one of `accessToken`, `clientId`, or `enabled: true` is required.
+
+## Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `TWITCH_ACCESS_TOKEN` | Yes | Twitch OAuth access token (primary auto-enable trigger) |
+| `TWITCH_CLIENT_ID` | No | Twitch application Client ID |
+| `TWITCH_CLIENT_SECRET` | No | Twitch client secret |
+| `TWITCH_REFRESH_TOKEN` | No | Refresh token for token renewal |
+| `TWITCH_USERNAME` | No | Twitch username for the bot |
+| `TWITCH_CHANNEL` | No | Primary channel name to join |
+| `TWITCH_CHANNELS` | No | Additional channel names to join |
+| `TWITCH_ALLOWED_ROLES` | No | Comma-separated allowed roles |
+| `TWITCH_REQUIRE_MENTION` | No | Only respond when mentioned |
 
 ## Features
 

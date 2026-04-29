@@ -39,16 +39,20 @@ Get token balances across all supported chains. Requires `ALCHEMY_API_KEY` for E
     "address": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
     "chains": [
       {
+        "chain": "ethereum",
         "chainId": 1,
-        "name": "Ethereum",
-        "nativeBalance": "1.5",
-        "tokens": []
+        "nativeBalance": "1.234",
+        "nativeSymbol": "ETH",
+        "nativeValueUsd": "3200.00",
+        "tokens": [],
+        "error": null
       }
     ]
   },
   "solana": {
     "address": "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgHU",
-    "nativeBalance": "2.5",
+    "solBalance": "0.5",
+    "solValueUsd": "50.00",
     "tokens": []
   }
 }
@@ -382,6 +386,77 @@ Get the current status of the Steward bridge connection, including whether the s
 
 ---
 
+### GET /api/wallet/steward-pending-approvals
+
+List transactions awaiting Steward approval.
+
+**Response**
+
+Returns an array of pending approval objects, each containing the transaction details and the policy that triggered the hold.
+
+---
+
+### POST /api/wallet/steward-approve-tx
+
+Approve a held transaction.
+
+**Request body**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `txId` | string | Yes | Transaction ID to approve |
+
+**Response**
+
+Returns the approval result with the transaction's new status.
+
+---
+
+### POST /api/wallet/steward-deny-tx
+
+Deny a held transaction.
+
+**Request body**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `txId` | string | Yes | Transaction ID to deny |
+| `reason` | string | No | Reason for denial |
+
+**Response**
+
+Returns the denial result with the transaction's new status.
+
+---
+
+### GET /api/wallet/steward-policies
+
+Get the current Steward policy rules.
+
+**Response**
+
+Returns an array of policy rule objects that control which transactions require approval.
+
+---
+
+### PUT /api/wallet/steward-policies
+
+Update the Steward policy rules.
+
+**Request body**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `policies` | array | Yes | Array of policy rule objects |
+
+**Response**
+
+```json
+{ "ok": true }
+```
+
+---
+
 ## Trading
 
 ### POST /api/wallet/trade/preflight
@@ -437,7 +512,7 @@ Execute a token trade on BSC. Behavior depends on wallet configuration, Steward 
 
 | Header | Type | Required | Description |
 |--------|------|----------|-------------|
-| `x-milady-agent-action` | string | No | Set to `1`, `true`, `yes`, or `agent` to mark this as an agent-automated request. Affects trade permission mode resolution. |
+| `x-eliza-agent-action` | string | No | Set to `1`, `true`, `yes`, or `agent` to mark this as an agent-automated request. Affects trade permission mode resolution. |
 
 **Request body**
 
@@ -653,7 +728,7 @@ Transfer native tokens (BNB) or ERC-20 tokens on BSC.
 
 | Header | Type | Required | Description |
 |--------|------|----------|-------------|
-| `x-milady-agent-action` | string | No | Set to `1`, `true`, `yes`, or `agent` to mark this as an agent-automated request. Affects trade permission mode resolution. |
+| `x-eliza-agent-action` | string | No | Set to `1`, `true`, `yes`, or `agent` to mark this as an agent-automated request. Affects trade permission mode resolution. |
 
 **Request body**
 

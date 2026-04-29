@@ -43,6 +43,36 @@ gh secret set DEPOT_TOKEN --repo milady-ai/milady --body "<new-token>"
 
 ---
 
+## Disabling Depot (account unavailable / billing hold)
+
+`build-docker.yml`, `build-cloud-agent.yml`, and `build-cloud-image.yml` all
+gate their Depot steps on the **`DEPOT_ENABLED`** repo variable. Default
+behavior is unchanged (Depot runs when the variable is unset or any value
+other than `false`).
+
+To force Docker builds onto the in-workflow Buildx fallback — useful when the
+Depot account is on hold and you don't want every run to waste ~30s failing
+the Depot step before falling back:
+
+```bash
+# Disable
+gh variable set DEPOT_ENABLED --repo milady-ai/milady --body "false"
+
+# Re-enable
+gh variable delete DEPOT_ENABLED --repo milady-ai/milady
+```
+
+Or via the GitHub UI: **Settings → Secrets and variables → Actions → Variables → New repository variable**, name `DEPOT_ENABLED`, value `false`.
+
+When disabled:
+- `Set up Depot CLI` and `Build and push Docker image with Depot` are skipped.
+- The Buildx fallback (`docker/build-push-action@v6` on the GHA-native daemon)
+  runs unconditionally.
+- All other Depot infrastructure (`.depot/`, `scripts/depot-ci-sync.mjs`,
+  CI mirror workflows) stays in place — flip the variable back to re-enable.
+
+---
+
 ## Regenerating the Depot mirror safely
 
 **Never run `depot ci migrate workflows --overwrite` by hand.** The wrapper below

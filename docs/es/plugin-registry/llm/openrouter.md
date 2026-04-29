@@ -35,7 +35,7 @@ Después de que upstream publique una versión corregida, verifica que `dist/nod
 </div>
 
 ```bash
-milady plugins install openrouter
+milady plugins install @elizaos/plugin-openrouter
 ```
 
 <div id="auto-enable">

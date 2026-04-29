@@ -7,6 +7,7 @@ import {
   collectWorkspaceProtocolDependencyNames,
   disableLocalElizaWorkspace,
   ELIZA_RUNTIME_CI_OVERRIDE_SPECIFIERS,
+  LLAMA_CPP_CAPACITOR_PATCH_PATH,
   PINNED_VERSION_SOURCE_OVERRIDE,
   PINNED_VERSION_SOURCE_TEMPLATE,
   PINNED_VERSION_SOURCE_WORKSPACE,
@@ -99,6 +100,115 @@ describe("disable-local-eliza-workspace", () => {
       ]),
     );
     expect(readRegistryInfo).toHaveBeenCalledTimes(2);
+  });
+
+  it("skips registry resolution for packages with file: overrides", () => {
+    const pinnedVersions = new Map([
+      ["@elizaos/core", "2.0.0-alpha.153"],
+      ["@elizaos/plugin-app-control", "2.0.0-alpha.99"],
+      ["@elizaos/plugin-wechat", "2.0.0-alpha.99"],
+    ]);
+    const versionSources = new Map([
+      ["@elizaos/core", PINNED_VERSION_SOURCE_WORKSPACE],
+      ["@elizaos/plugin-app-control", PINNED_VERSION_SOURCE_WORKSPACE],
+      ["@elizaos/plugin-wechat", PINNED_VERSION_SOURCE_WORKSPACE],
+    ]);
+    const dependencyNames = new Set([
+      "@elizaos/core",
+      "@elizaos/plugin-app-control",
+      "@elizaos/plugin-wechat",
+    ]);
+    const fileOverrideNames = new Set([
+      "@elizaos/plugin-app-control",
+      "@elizaos/plugin-wechat",
+    ]);
+    const readRegistryInfo = vi.fn((packageName: string) => {
+      if (packageName === "@elizaos/core") {
+        return {
+          versions: ["2.0.0-alpha.152"],
+          "dist-tags": { alpha: "2.0.0-alpha.152", latest: "0.25.9" },
+          version: "0.25.9",
+        };
+      }
+      throw new Error(
+        `registry should not be queried for overridden ${packageName}`,
+      );
+    });
+
+    const resolved = resolvePublishSafePinnedVersions(pinnedVersions, {
+      dependencyNames,
+      versionSources,
+      fileOverrideNames,
+      readRegistryInfo,
+      log: () => {},
+      warn: () => {},
+    });
+
+    expect(resolved.get("@elizaos/plugin-app-control")).toBe("2.0.0-alpha.99");
+    expect(resolved.get("@elizaos/plugin-wechat")).toBe("2.0.0-alpha.99");
+    expect(readRegistryInfo).toHaveBeenCalledTimes(1);
+    expect(readRegistryInfo).toHaveBeenCalledWith("@elizaos/core");
+  });
+
+  it("downgrades unpublished-package npm 404s to a tidy log line", () => {
+    const pinnedVersions = new Map([
+      ["@elizaos/plugin-music-library", "2.0.0-alpha.10"],
+    ]);
+    const versionSources = new Map([
+      ["@elizaos/plugin-music-library", PINNED_VERSION_SOURCE_WORKSPACE],
+    ]);
+    const dependencyNames = new Set(["@elizaos/plugin-music-library"]);
+    const readRegistryInfo = vi.fn(() => {
+      throw new Error(
+        "Command failed: npm view ...\nnpm error code E404\nnpm error 404 Not Found",
+      );
+    });
+    const logged: string[] = [];
+    const warned: string[] = [];
+
+    const resolved = resolvePublishSafePinnedVersions(pinnedVersions, {
+      dependencyNames,
+      versionSources,
+      readRegistryInfo,
+      log: (message: string) => {
+        logged.push(message);
+      },
+      warn: (message: string) => {
+        warned.push(message);
+      },
+    });
+
+    expect(resolved.get("@elizaos/plugin-music-library")).toBe(
+      "2.0.0-alpha.10",
+    );
+    expect(warned).toEqual([]);
+    expect(logged.some((entry) => entry.includes("not published to npm"))).toBe(
+      true,
+    );
+  });
+
+  it("still warns when registry resolution fails for a non-404 reason", () => {
+    const pinnedVersions = new Map([["@elizaos/core", "2.0.0-alpha.10"]]);
+    const versionSources = new Map([
+      ["@elizaos/core", PINNED_VERSION_SOURCE_WORKSPACE],
+    ]);
+    const dependencyNames = new Set(["@elizaos/core"]);
+    const readRegistryInfo = vi.fn(() => {
+      throw new Error("ETIMEDOUT");
+    });
+    const warned: string[] = [];
+
+    resolvePublishSafePinnedVersions(pinnedVersions, {
+      dependencyNames,
+      versionSources,
+      readRegistryInfo,
+      log: () => {},
+      warn: (message: string) => {
+        warned.push(message);
+      },
+    });
+
+    expect(warned.some((entry) => entry.includes("ETIMEDOUT"))).toBe(true);
   });
 
   it("collects workspace protocol dependencies and excludes local-only packages", () => {
@@ -195,8 +305,62 @@ describe("disable-local-eliza-workspace", () => {
     expect(agentPackage.dependencies).toMatchObject({
       "@elizaos/core": "2.0.0-alpha.163",
       "@elizaos/plugin-agent-orchestrator": "0.6.2-alpha.0",
-      "@elizaos/skills": "2.0.0-alpha.163",
+      "@elizaos/skills": "workspace:*",
     });
+
+    const rootPackage = JSON.parse(
+      fs.readFileSync(path.join(repoRoot, "package.json"), "utf8"),
+    );
+    expect(rootPackage.workspaces).toContain("eliza/packages/skills");
+    expect(rootPackage.overrides).toMatchObject({
+      "@elizaos/skills":
+        resolveCiOverrideSpecifiers(repoRoot)["@elizaos/skills"],
+    });
+  });
+
+  it("repairs known malformed eliza patch files before install", () => {
+    const repoRoot = makeTempDir();
+    writeJson(path.join(repoRoot, "package.json"), {
+      name: "milady-test",
+      workspaces: ["eliza/packages/*"],
+      overrides: {
+        "@elizaos/core": "2.0.0-alpha.163",
+      },
+    });
+    writeJson(
+      path.join(repoRoot, "eliza", "packages", "typescript", "package.json"),
+      {
+        name: "@elizaos/typescript",
+        version: "2.0.0-alpha.163",
+      },
+    );
+    const patchPath = path.join(repoRoot, LLAMA_CPP_CAPACITOR_PATCH_PATH);
+    fs.mkdirSync(path.dirname(patchPath), { recursive: true });
+    fs.writeFileSync(
+      patchPath,
+      [
+        "diff --git a/android/build.gradle b/android/build.gradle",
+        "@@ -18,7 +18,7 @@ apply plugin: 'com.android.library'",
+        " ",
+        " android {",
+        '-    namespace "ai.annadata.plugin.capacitor"',
+        '+    namespace = "ai.annadata.plugin.capacitor"',
+        "     compileSdk project.hasProperty('compileSdkVersion') ? rootProject.ext.compileSdkVersion : 35",
+        "     defaultConfig {",
+        "         minSdkVersion project.hasProperty('minSdkVersion') ? rootProject.ext.minSdkVersion : 23",
+        "",
+      ].join("\n"),
+    );
+
+    disableLocalElizaWorkspace(repoRoot, {
+      log: () => {},
+      warn: () => {},
+      errorLog: () => {},
+    });
+
+    expect(fs.readFileSync(patchPath, "utf8")).toContain(
+      "@@ -18,6 +18,6 @@ apply plugin: 'com.android.library'",
+    );
   });
 
   it("rewrites nested installable package manifests under app-core platforms", () => {
@@ -315,6 +479,8 @@ describe("disable-local-eliza-workspace", () => {
       fs.readFileSync(path.join(repoRoot, "package.json"), "utf8"),
     );
     expect(rootPackage.overrides).toMatchObject({
+      "@elizaos/app-core":
+        resolveCiOverrideSpecifiers(repoRoot)["@elizaos/app-core"],
       "@elizaos/ui": resolveCiOverrideSpecifiers(repoRoot)["@elizaos/ui"],
       "@elizaos/plugin-app-control":
         CI_OVERRIDE_SPECIFIERS["@elizaos/plugin-app-control"],
@@ -354,6 +520,8 @@ describe("disable-local-eliza-workspace", () => {
       fs.readFileSync(path.join(repoRoot, "package.json"), "utf8"),
     );
     expect(rootPackage.overrides).toMatchObject({
+      "@elizaos/app-core":
+        resolveCiOverrideSpecifiers(repoRoot)["@elizaos/app-core"],
       "@elizaos/ui": resolveCiOverrideSpecifiers(repoRoot)["@elizaos/ui"],
       "@elizaos/plugin-app-control":
         CI_OVERRIDE_SPECIFIERS["@elizaos/plugin-app-control"],
@@ -388,7 +556,7 @@ describe("disable-local-eliza-workspace", () => {
       path.join(
         repoRoot,
         "eliza",
-        "packages",
+        "plugins",
         "plugin-browser-bridge",
         "package.json",
       ),
@@ -421,7 +589,7 @@ describe("disable-local-eliza-workspace", () => {
       fs.readFileSync(path.join(repoRoot, "package.json"), "utf8"),
     );
     expect(rootPackage.workspaces).toContain(
-      "eliza/packages/plugin-browser-bridge",
+      "eliza/plugins/plugin-browser-bridge",
     );
     expect(rootPackage.dependencies).toMatchObject({
       "@elizaos/core": "2.0.0-alpha.163",
@@ -437,7 +605,7 @@ describe("disable-local-eliza-workspace", () => {
         path.join(
           repoRoot,
           "eliza",
-          "packages",
+          "plugins",
           "plugin-browser-bridge",
           "package.json",
         ),
@@ -447,6 +615,79 @@ describe("disable-local-eliza-workspace", () => {
     expect(browserBridgePackage.dependencies).toMatchObject({
       "@elizaos/app-lifeops": "workspace:*",
       "@elizaos/core": "2.0.0-alpha.163",
+    });
+  });
+
+  it("keeps source-only runtime packages resolvable in published-only CI", () => {
+    const repoRoot = makeTempDir();
+    writeJson(path.join(repoRoot, "package.json"), {
+      name: "milady-test",
+      workspaces: [
+        "eliza/packages/*",
+        "eliza/plugins/*",
+        "eliza/plugins/plugin-*/typescript",
+      ],
+      dependencies: {
+        "@elizaos/core": "workspace:*",
+        "@elizaos/plugin-signal": "workspace:*",
+        "@elizaos/skills": "workspace:*",
+      },
+      overrides: {
+        "@elizaos/core": "2.0.0-alpha.163",
+      },
+    });
+    writeJson(
+      path.join(repoRoot, "eliza", "packages", "typescript", "package.json"),
+      {
+        name: "@elizaos/typescript",
+        version: "2.0.0-alpha.163",
+      },
+    );
+    writeJson(
+      path.join(repoRoot, "eliza", "packages", "skills", "package.json"),
+      {
+        name: "@elizaos/skills",
+        version: "2.0.0-alpha.163",
+      },
+    );
+    writeJson(
+      path.join(
+        repoRoot,
+        "eliza",
+        "plugins",
+        "plugin-signal",
+        "typescript",
+        "package.json",
+      ),
+      {
+        name: "@elizaos/plugin-signal",
+        version: "2.0.0-alpha.7",
+      },
+    );
+
+    disableLocalElizaWorkspace(repoRoot, {
+      log: () => {},
+      warn: () => {},
+      errorLog: () => {},
+    });
+
+    const rootPackage = JSON.parse(
+      fs.readFileSync(path.join(repoRoot, "package.json"), "utf8"),
+    );
+    expect(rootPackage.workspaces).toContain("eliza/packages/skills");
+    expect(rootPackage.workspaces).toContain(
+      "eliza/plugins/plugin-signal/typescript",
+    );
+    expect(rootPackage.dependencies).toMatchObject({
+      "@elizaos/core": "2.0.0-alpha.163",
+      "@elizaos/plugin-signal": "workspace:*",
+      "@elizaos/skills": "workspace:*",
+    });
+    expect(rootPackage.overrides).toMatchObject({
+      "@elizaos/plugin-signal":
+        resolveCiOverrideSpecifiers(repoRoot)["@elizaos/plugin-signal"],
+      "@elizaos/skills":
+        resolveCiOverrideSpecifiers(repoRoot)["@elizaos/skills"],
     });
   });
 

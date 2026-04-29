@@ -15,7 +15,7 @@ El plugin de Twilio conecta agentes de Milady a Twilio, permitiendo mensajería 
 </div>
 
 ```bash
-milady plugins install twilio
+milady plugins install @elizaos/plugin-twilio
 ```
 
 <div id="setup">

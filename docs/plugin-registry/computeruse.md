@@ -15,7 +15,7 @@ Computer use enables agents to operate the computer as a human would: viewing th
 ## Installation
 
 ```bash
-milady plugins install computeruse
+milady plugins install @elizaos/plugin-computeruse
 ```
 
 ## Enable via Features
@@ -37,6 +37,16 @@ Or uncomment in `OPTIONAL_CORE_PLUGINS` in your configuration:
   }
 }
 ```
+
+## Configuration
+
+| Environment Variable | Required | Description |
+|---------------------|----------|-------------|
+| `COMPUTER_USE_ENABLED` | No | Enable or disable computer use (default: disabled) |
+| `COMPUTER_USE_SCREENSHOT_AFTER_ACTION` | No | Take a screenshot after each action |
+| `COMPUTER_USE_ACTION_TIMEOUT_MS` | No | Timeout for individual actions in milliseconds |
+| `COMPUTER_USE_APPROVAL_MODE` | No | Require human approval before actions |
+| `COMPUTER_USE_BROWSER_HEADLESS` | No | Run the browser in headless mode |
 
 ## Platform Support
 

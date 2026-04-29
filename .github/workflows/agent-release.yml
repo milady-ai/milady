@@ -39,9 +39,10 @@ permissions:
   issues: write
   packages: write
   id-token: write
+  pages: write
 
 env:
-  BUN_VERSION: "1.3.10"
+  BUN_VERSION: "1.3.13"
   MILADY_SKIP_LOCAL_UPSTREAMS: "1"
   # Runner selection: all jobs use ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}.
   # To override (e.g. point at a self-hosted or large-runner pool), set the
@@ -115,13 +116,27 @@ jobs:
             // ── Step 2: Trust check ─────────────────────────────────
             const { computeTrustScore, DEFAULT_CONFIG, expandState } = require('./.github/trust-scoring.cjs');
 
+            const isCanonicalRepo = context.repo.owner === 'milady-ai';
+            const isForkOwner = !isCanonicalRepo && actor === context.repo.owner;
+
             let isOrgMember = false;
             try {
               const { status } = await github.rest.orgs.checkMembershipForUser({ org: context.repo.owner, username: actor });
               isOrgMember = status === 204 || status === 302;
             } catch (e) {}
 
-            let allowed = isOrgMember;
+            let repoPermission = 'none';
+            try {
+              const { data } = await github.rest.repos.getCollaboratorPermissionLevel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                username: actor,
+              });
+              repoPermission = data.permission ?? 'none';
+            } catch (e) { core.info(`Repo permission unavailable: ${e.message}`); }
+
+            const isRepoMaintainer = ['admin', 'maintain', 'write'].includes(repoPermission);
+            let allowed = isOrgMember || isForkOwner || isRepoMaintainer;
             if (!allowed) {
               let trustTier = 'untested', trustScore = DEFAULT_CONFIG.initialScore;
               try {
@@ -145,7 +160,7 @@ jobs:
               }
             }
 
-            core.info(`Trust: allowed=${allowed} (org=${isOrgMember})`);
+            core.info(`Trust: allowed=${allowed} (org=${isOrgMember}, forkOwner=${isForkOwner}, repoPermission=${repoPermission})`);
             core.setOutput('proceed', allowed ? 'true' : 'false');
 
   # ── 2. Resolve version ─────────────────────────────────────────────
@@ -164,6 +179,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Fetch canonical release tags
+        run: git fetch --tags --force https://github.com/milady-ai/milady.git 'refs/tags/v*:refs/tags/v*'
       - name: Compute next version
         id: ver
         env:
@@ -180,8 +197,8 @@ jobs:
           if [ -n "$VERSION_OVERRIDE" ]; then
             VERSION="${VERSION_OVERRIDE#v}"
           elif [ "$STABLE" = "true" ]; then
-            LATEST_ALPHA="$(git tag --sort=-creatordate | grep '^v[0-9]\+\.[0-9]\+\.[0-9]\+-alpha\.[0-9]\+$' | head -1 || true)"
-            LATEST_STABLE="$(git tag --sort=-creatordate | grep '^v[0-9]\+\.[0-9]\+\.[0-9]\+$' | head -1 || true)"
+            LATEST_ALPHA="$(git tag | grep '^v[0-9]\+\.[0-9]\+\.[0-9]\+-alpha\.[0-9]\+$' | sort -V | tail -1 || true)"
+            LATEST_STABLE="$(git tag | grep '^v[0-9]\+\.[0-9]\+\.[0-9]\+$' | sort -V | tail -1 || true)"
             ALPHA_BASE="$(echo "$LATEST_ALPHA" | sed 's/^v//' | sed 's/-alpha\.[0-9]*$//' )"
             STABLE_VERSION="${LATEST_STABLE#v}"
 
@@ -195,7 +212,7 @@ jobs:
               VERSION="$(bump_patch "$STABLE_VERSION")"
             fi
           else
-            LATEST="$(git tag --sort=-creatordate | grep '^v[0-9]\+\.[0-9]\+\.[0-9]\+-alpha\.[0-9]\+$' | head -1 || true)"
+            LATEST="$(git tag | grep '^v[0-9]\+\.[0-9]\+\.[0-9]\+-alpha\.[0-9]\+$' | sort -V | tail -1 || true)"
             if [ -z "$LATEST" ]; then VERSION="2.0.0-alpha.1"
             else
               PREFIX=$(echo "$LATEST" | sed 's/\.[0-9]*$/\./' | sed 's/^v//')
@@ -203,20 +220,67 @@ jobs:
               VERSION="${PREFIX}$((NUM + 1))"
             fi
           fi
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z][0-9A-Za-z.-]*)?$ ]]; then
+            echo "::error::Invalid release version: $VERSION"
+            exit 1
+          fi
+          if git ls-remote --exit-code --tags https://github.com/milady-ai/milady.git "refs/tags/v$VERSION" >/dev/null 2>&1; then
+            echo "::error::Release tag v$VERSION already exists in the canonical repository"
+            exit 1
+          fi
           PRERELEASE=$( [ "$STABLE" = "true" ] && echo false || echo true )
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
-          echo "prerelease=$PRERELEASE" >> "$GITHUB_OUTPUT"
+          {
+            echo "version=$VERSION"
+            echo "tag=v$VERSION"
+            echo "prerelease=$PRERELEASE"
+          } >> "$GITHUB_OUTPUT"
           echo "Next: v$VERSION (prerelease=$PRERELEASE)"
 
   # ── 3. FULL BUILD MATRIX (blocking — electrobun + generic/cloud docker) ─
+  # ── P0 auth smoke — cloud-provisioned bootstrap exchange ────────────
+  # Blocks publish on contract violations of the cloud-provisioned auth
+  # path. See `docs/security/remote-auth-hardening-plan.md` §12.
+  # The smoke generates an RS256 keypair at runtime, serves a fixture
+  # JWKS via loopback HTTP, boots the real bootstrap exchange + onboarding
+  # routes against a real pglite database, and asserts:
+  #   - GET /api/onboarding/status without auth returns 401
+  #     (audited bypass closed)
+  #   - POST /api/auth/bootstrap/exchange with a valid token → 200
+  #   - replayed token → 401 reason=replay
+  #   - tampered, wrong-iss, attacker-signed (same kid), wrong-containerId
+  #     → 401
+  # The private key is generated per-run and never written to disk.
+  smoke-auth:
+    name: Auth bootstrap smoke (P0 gate)
+    needs: [version]
+    runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: false
+      - name: Setup workspace dependencies
+        uses: ./.github/actions/setup-bun-workspace
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+          install-command: bun install --ignore-scripts --no-frozen-lockfile
+          install-native-deps: "false"
+          run-postinstall: "true"
+          skip-avatar-clone: "true"
+          no-vision-deps: "true"
+          prepare-local-eliza-runtime: "true"
+      - name: Run auth bootstrap smoke
+        run: bun run test:auth
+
   build-electrobun:
     name: Electrobun full matrix
     needs: [version]
     uses: ./.github/workflows/release-electrobun.yml
     with:
       tag: ${{ needs.version.outputs.tag }}
-      draft: true
+      draft: false
       publish_release: false
     secrets: inherit
 
@@ -244,7 +308,6 @@ jobs:
     name: npm package build
     needs: [version]
     runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
         with:
@@ -253,24 +316,23 @@ jobs:
         with:
           disable-local-eliza-workspace: "true"
           install-command: bun install --ignore-scripts --no-frozen-lockfile
-      - name: Restore eliza workspace paths for release scripts
-        run: node scripts/restore-local-eliza-workspace.mjs
       - name: Build
         run: |
           bunx tsdown
           printf '{"type":"module"}\n' > dist/package.json
           node --import tsx scripts/write-build-info.ts
+      - name: Sanitize npm package metadata
+        run: node scripts/sanitize-npm-package-metadata.mjs
       - name: Validate package
         run: |
           npm pack --dry-run 2>&1 | tee /tmp/pack-output.txt
-          grep -q "package.json" /tmp/pack-output.txt || echo "::warning::package.json missing from pack"
+          grep -q "package.json" /tmp/pack-output.txt
 
-  # ── Non-blocking platform builds (open issues on failure) ───────────
+  # ── Release validation builds (blocking) ────────────────────────────
   build-android:
     name: Android AAB build
     needs: [version]
     runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
         with:
@@ -285,7 +347,7 @@ jobs:
       - name: Setup workspace dependencies
         uses: ./.github/actions/setup-bun-workspace
         with:
-          bun-version: "1.3.11"
+          bun-version: ${{ env.BUN_VERSION }}
           install-command: bun install --ignore-scripts --no-frozen-lockfile
           install-native-deps: "false"
           run-postinstall: "true"
@@ -293,13 +355,19 @@ jobs:
           no-vision-deps: "true"
       - name: Restore legacy electrobun compatibility path
         run: node scripts/ensure-legacy-electrobun-compat.mjs
+      - name: Install Android NDK
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;29.0.13113456"
+      - name: Patch Android release build compatibility
+        run: node scripts/patch-mobile-build-release-compat.mjs
       - name: Prepare Android project
         run: node eliza/packages/app-core/scripts/run-mobile-build.mjs android
       - name: Build AAB
         working-directory: apps/app/android
         run: |
           chmod +x ./gradlew
-          ./gradlew bundleRelease --no-daemon || echo "::warning::Android AAB build failed (non-blocking)"
+          ./gradlew bundleRelease --no-daemon
       - name: Upload AAB artifact
         if: success()
         uses: actions/upload-artifact@v4
@@ -307,22 +375,24 @@ jobs:
           name: android-aab
           path: apps/app/android/app/build/outputs/bundle/release/*.aab
           retention-days: 30
-          if-no-files-found: warn
+          if-no-files-found: error
 
   build-snap:
     name: Snap build
     needs: [version]
     runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
-    continue-on-error: true
     env:
       MILADY_SKIP_LOCAL_UPSTREAMS: "1"
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: recursive
+          submodules: false
       - name: Init non-eliza submodules
         run: |
+          git submodule sync -- eliza
+          git submodule update --init --depth=1 eliza
           node scripts/init-submodules.mjs
+          node scripts/apply-eliza-ci-patches.mjs
           node scripts/disable-local-eliza-workspace.mjs
       - name: Stage snapcraft.yaml
         run: |
@@ -346,8 +416,7 @@ jobs:
       - uses: snapcore/action-build@v1
         id: snap
       - name: Verify snap
-        run: |
-          sudo snap install --dangerous ${{ steps.snap.outputs.snap }} || echo "::warning::Snap install test failed (non-blocking)"
+        run: sudo snap install --dangerous ${{ steps.snap.outputs.snap }}
       - name: Upload snap artifact
         if: success()
         uses: actions/upload-artifact@v4
@@ -355,17 +424,23 @@ jobs:
           name: snap-package
           path: ${{ steps.snap.outputs.snap }}
           retention-days: 30
-          if-no-files-found: warn
+          if-no-files-found: error
 
   build-flatpak:
     name: Flatpak build
     needs: [version]
     runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: recursive
+          submodules: false
+      - name: Init non-eliza submodules
+        run: |
+          git submodule sync -- eliza
+          git submodule update --init --depth=1 eliza
+          node scripts/init-submodules.mjs
+          node scripts/apply-eliza-ci-patches.mjs
+          node scripts/disable-local-eliza-workspace.mjs
       - name: Install flatpak tools
         run: |
           sudo apt-get update
@@ -373,33 +448,41 @@ jobs:
           flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
           flatpak install --user -y flathub org.freedesktop.Platform//24.08 org.freedesktop.Sdk//24.08 org.freedesktop.Sdk.Extension.node22//24.08
       - name: Build flatpak
+        working-directory: eliza/packages/app-core/packaging/flatpak
         run: |
-          flatpak-builder --user --install-deps-from=flathub --force-clean build-dir eliza/packages/app-core/packaging/flatpak/com.milady.Milady.yml || echo "::warning::Flatpak build failed (non-blocking)"
+          flatpak-builder --repo=repo --user --install-deps-from=flathub --force-clean build-dir ai.elizaos.App.yml
+          flatpak build-bundle repo elizaos-app.flatpak ai.elizaos.App
       - name: Upload flatpak artifact
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: flatpak-bundle
-          path: eliza/packages/app-core/packaging/flatpak/*.flatpak
+          path: eliza/packages/app-core/packaging/flatpak/elizaos-app.flatpak
           retention-days: 30
-          if-no-files-found: warn
+          if-no-files-found: error
 
   build-pypi:
     name: PyPI package build
     needs: [version]
     runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: recursive
+          submodules: false
+      - name: Init non-eliza submodules
+        run: |
+          git submodule sync -- eliza
+          git submodule update --init --depth=1 eliza
+          node scripts/init-submodules.mjs
+          node scripts/apply-eliza-ci-patches.mjs
+          node scripts/disable-local-eliza-workspace.mjs
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - name: Build wheel
         run: |
           pip install build
-          python -m build eliza/packages/app-core/packaging/pypi/ || echo "::warning::PyPI build failed (non-blocking)"
+          python -m build eliza/packages/app-core/packaging/pypi/
       - name: Upload PyPI artifact
         if: success()
         uses: actions/upload-artifact@v4
@@ -407,41 +490,73 @@ jobs:
           name: pypi-package
           path: eliza/packages/app-core/packaging/pypi/dist/
           retention-days: 30
-          if-no-files-found: warn
+          if-no-files-found: error
 
   build-debian:
     name: Debian package build
     needs: [version]
     runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: recursive
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Install build deps
+          submodules: false
+      - name: Init non-eliza submodules
         run: |
+          git submodule sync -- eliza
+          git submodule update --init --depth=1 eliza
+          node scripts/init-submodules.mjs
+          node scripts/apply-eliza-ci-patches.mjs
+          node scripts/disable-local-eliza-workspace.mjs
+      - name: Install Debian build deps
+        run: |
+          curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
           sudo apt-get update
-          sudo apt-get install -y dpkg-dev debhelper fakeroot
-          curl -fsSL https://bun.sh/install | bash -s "bun-v1.3.10"
-          echo "$HOME/.bun/bin" >> "$GITHUB_PATH"
+          sudo apt-get install -y build-essential nodejs dpkg-dev debhelper fakeroot
+          node --version
+          npm --version
+          dpkg-query -W -f='${Version} ${Provides}\n' nodejs | grep -Eq '(^|, )npm(,|$)'
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+      - name: Generate eliza i18n keyword data
+        # eliza/packages/shared/src/i18n/keyword-matching.ts imports from
+        # ./generated/validation-keyword-data.js, which is gitignored and
+        # produced by packages/shared/scripts/generate-keywords.mjs. The
+        # Debian build runs a Vite/Rolldown production build via
+        # debian/rules and will fail to resolve the generated module on a
+        # fresh checkout unless this step runs first.
+        run: node eliza/packages/app-core/scripts/ensure-shared-i18n-data.mjs
+      - name: Stage Debian packaging
+        run: |
+          rm -rf debian
+          cp -R eliza/packages/app-core/packaging/debian debian
+          # Eliza's debian packaging hardcodes the legacy entry name
+          # "elizaos-app.mjs" from before the upstream rename. Milady's
+          # actual entry script is milady.mjs, so rewrite the install
+          # manifest and rules to point at it. The package itself stays
+          # named elizaos-app for now (binary path /usr/bin/elizaos-app)
+          # since renaming the deb package is its own task.
+          if [ -f milady.mjs ] && [ ! -f elizaos-app.mjs ]; then
+            sed -i 's/elizaos-app\.mjs/milady.mjs/g' debian/install debian/rules
+          fi
+          test -f debian/changelog
+          test -x debian/rules
+          dpkg-checkbuilddeps debian/control
       - name: Build deb
         run: |
-          if [ -f eliza/packages/app-core/packaging/debian/Makefile ] || [ -f eliza/packages/app-core/packaging/debian/rules ]; then
-            cd eliza/packages/app-core/packaging/debian
-            dpkg-buildpackage -us -uc -b || echo "::warning::Debian package build failed (non-blocking)"
-          elif [ -d debian ]; then
-            dpkg-buildpackage -us -uc -b || echo "::warning::Debian package build failed (non-blocking)"
-          else
-            echo "::warning::No debian packaging found — skipping"
-          fi
+          dpkg-buildpackage -us -uc -b
       - name: Collect deb artifacts
         if: success()
         run: |
           mkdir -p deb-output
-          cp ../*.deb deb-output/ 2>/dev/null || true
+          shopt -s nullglob
+          debs=(../*.deb)
+          if [ "${#debs[@]}" -eq 0 ]; then
+            echo "::error::No .deb artifacts found after dpkg-buildpackage"
+            exit 1
+          fi
+          cp "${debs[@]}" deb-output/
       - name: Upload deb artifact
         if: success()
         uses: actions/upload-artifact@v4
@@ -449,12 +564,11 @@ jobs:
           name: debian-package
           path: deb-output/
           retention-days: 30
-          if-no-files-found: warn
+          if-no-files-found: error
   build-ios:
     name: iOS build validation
     needs: [version]
     runs-on: macos-14
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
         with:
@@ -465,7 +579,7 @@ jobs:
       - name: Setup workspace dependencies
         uses: ./.github/actions/setup-bun-workspace
         with:
-          bun-version: "1.3.11"
+          bun-version: ${{ env.BUN_VERSION }}
           install-command: bun install --ignore-scripts --no-frozen-lockfile
           install-native-deps: "false"
           run-postinstall: "true"
@@ -479,40 +593,46 @@ jobs:
           LANG: en_US.UTF-8
       - name: Verify Xcode project
         run: |
-          if [ -d ios/App ]; then
-            xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release -destination 'generic/platform=iOS' -dry-run || echo "::warning::iOS xcodebuild dry-run failed (non-blocking)"
+          if [ -d apps/app/ios/App ]; then
+            xcodebuild -project apps/app/ios/App/App.xcodeproj -scheme App -configuration Release -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" -showBuildSettings > /tmp/milady-xcodebuild-settings.txt
+            grep -q "PRODUCT_BUNDLE_IDENTIFIER = com.miladyai.milady" /tmp/milady-xcodebuild-settings.txt
           else
-            echo "::warning::ios/App directory not found — skipping Xcode validation"
+            echo "::error::apps/app/ios/App directory not found"
+            exit 1
           fi
 
   build-macos-store:
     name: macOS App Store build validation
     needs: [version]
     runs-on: macos-14
-    continue-on-error: true
+    env:
+      MILADY_SKIP_LOCAL_UPSTREAMS: ""
+      ELIZA_SKIP_LOCAL_UPSTREAMS: ""
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: false
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - uses: oven-sh/setup-bun@v2
+      - name: Setup workspace dependencies
+        uses: ./.github/actions/setup-bun-workspace
         with:
-          bun-version: "1.3.10"
-      - name: Init non-eliza submodules
-        run: |
-          node scripts/init-submodules.mjs
-          node scripts/disable-local-eliza-workspace.mjs
+          bun-version: ${{ env.BUN_VERSION }}
+          install-command: bun install --ignore-scripts --no-frozen-lockfile
+          install-native-deps: "false"
+          run-postinstall: "true"
+          skip-avatar-clone: "true"
+          no-vision-deps: "true"
+      - name: Restore legacy electrobun compatibility path
+        run: node scripts/ensure-legacy-electrobun-compat.mjs
       - name: Build web assets and Electrobun
-        run: |
-          bun install --ignore-scripts
-          bun run postinstall
-          ELECTROBUN_SKIP_CODESIGN=1 bun run build || echo "::warning::macOS build failed (non-blocking)"
+        run: ELECTROBUN_SKIP_CODESIGN=1 bun run build
 
   build-homepage:
     name: Homepage build
     needs: [version]
     runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
         with:
@@ -524,7 +644,7 @@ jobs:
       - name: Restore eliza workspace paths for homepage scripts
         run: node scripts/restore-local-eliza-workspace.mjs
       - name: Generate release metadata
-        run: node scripts/write-homepage-release-data.mjs || echo "::warning::Release metadata gen failed"
+        run: node scripts/write-homepage-release-data.mjs
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build homepage
@@ -534,36 +654,60 @@ jobs:
     name: Docs validation
     needs: [version]
     runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
       - name: Validate docs config
-        run: |
-          node -e "const c = require('./docs/docs.json'); console.log('Docs config valid:', c.name)" || echo "::warning::docs.json invalid"
+        run: node -e "const c = require('./docs/docs.json'); console.log('Docs config valid:', c.name)"
       - name: Check for broken internal links
         run: |
-          find docs -name '*.md' -o -name '*.mdx' | head -5 | while read f; do
+          find docs -name '*.md' -o -name '*.mdx' | head -5 | while read -r f; do
             grep -oE '\]\([^)]+\)' "$f" | grep -v 'http' | head -3
           done
           echo "Docs link check complete"
 
-  # ── 4. Electrobun + Docker green → tag and publish ─────────────────
-  # NOTE: After the publish job creates a GitHub Release, release-orchestrator.yml
-  # fans out the post-release distribution graph:
-  #   - publish-npm.yml          → npm registry
-  #   - publish-packages.yml     → PyPI, Snap Store, Debian/APT, Flatpak
-  #   - android-release.yml      → Google Play Store
-  #   - apple-store-release.yml  → TestFlight / App Store / Mac App Store
-  #   - deploy-web.yml           → Homepage deployment
-  #   - update-homebrew.yml      → Homebrew tap update
-  # The cloud image is still pushed via the explicit post-publish job below.
+  # ── 4. Electrobun + Docker + npm green → tag and publish ────────────
+  # The GitHub release is created with GITHUB_TOKEN for scoped permissions.
+  # Post-release distribution is called explicitly below instead of relying
+  # on release-event fan-out semantics.
   publish:
     name: Tag & publish release
-    needs: [version, build-electrobun, build-docker, build-cloud-image, build-npm]
-    if: always() && needs.build-electrobun.result == 'success' && needs.build-docker.result == 'success' && needs.build-cloud-image.result == 'success'
+    needs:
+      [
+        version,
+        smoke-auth,
+        build-electrobun,
+        build-docker,
+        build-cloud-image,
+        build-npm,
+        build-android,
+        build-snap,
+        build-flatpak,
+        build-pypi,
+        build-debian,
+        build-ios,
+        build-macos-store,
+        build-homepage,
+        build-docs,
+      ]
+    if: >-
+      always() &&
+      needs.smoke-auth.result == 'success' &&
+      needs.build-electrobun.result == 'success' &&
+      needs.build-docker.result == 'success' &&
+      needs.build-cloud-image.result == 'success' &&
+      needs.build-npm.result == 'success' &&
+      needs.build-android.result == 'success' &&
+      needs.build-snap.result == 'success' &&
+      needs.build-flatpak.result == 'success' &&
+      needs.build-pypi.result == 'success' &&
+      needs.build-debian.result == 'success' &&
+      needs.build-ios.result == 'success' &&
+      needs.build-macos-store.result == 'success' &&
+      needs.build-homepage.result == 'success' &&
+      needs.build-docs.result == 'success'
     runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
     permissions:
       contents: write
@@ -572,7 +716,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
 
       - name: Configure git
         run: |
@@ -632,7 +775,7 @@ jobs:
           PREVIOUS_TAG: ${{ steps.changelog.outputs.previous_tag }}
           CHANGELOG_FILE: ${{ steps.changelog.outputs.file }}
         with:
-          github-token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
             const tag = process.env.TAG;
@@ -671,20 +814,20 @@ jobs:
                 '- ✅ Electrobun desktop — full matrix (macOS ARM, macOS Intel, Windows, Linux)',
                 '- ✅ Canonical agent image — built successfully',
                 '- ✅ Cloud app image — built successfully',
-                npmOk ? '- ✅ npm package — built and validated' : '- ⚠️ npm package — build failed (non-blocking)',
+                npmOk ? '- ✅ npm package — built and validated' : '- ❌ npm package — build failed',
                 '',
                 generatedNotes ? '## Release notes' : null,
                 generatedNotes || null,
                 generatedNotes ? '' : null,
                 fullChangelog,
                 '',
-                '### Publishing pipelines (auto-triggered by this release)',
+                '### Publishing pipelines (called explicitly by this workflow)',
                 '- ✅ Electrobun artifacts (uploaded during build phase)',
+                '- 🔄 Agent Docker image → post-publish push',
+                '- 🔄 Cloud app Docker image → post-publish push',
                 '- 🔄 Post-release distribution orchestrator → release-orchestrator.yml',
                 '- 🔄 npm publish → publish-npm.yml',
                 '- 🔄 PyPI / Snap / Debian / Flatpak → publish-packages.yml',
-                '- 🔄 Agent Docker image → build-docker.yml (GHCR push)',
-                '- 🔄 Cloud app Docker image → post-publish push',
                 '- 🔄 Android → android-release.yml (Play Store track by channel)',
                 '- 🔄 iOS / macOS → apple-store-release.yml (TestFlight or App Store by channel)',
                 '- 🔄 Homebrew → update-homebrew.yml',
@@ -748,7 +891,18 @@ jobs:
               try { await github.rest.issues.removeLabel({ owner: context.repo.owner, repo: context.repo.repo, issue_number: issue, name: 'release-ready' }); } catch (e) {}
             }
 
-  # ── 5. Post-publish: push Docker images that were build-only verified ─
+  # ── 5. Post-publish: push and distribute what was build-only verified ─
+  push-agent-image:
+    name: Push agent image to GHCR
+    needs: [version, publish]
+    if: needs.publish.result == 'success'
+    uses: ./.github/workflows/build-docker.yml
+    with:
+      version: ${{ needs.version.outputs.tag }}
+      push_image: true
+      source_sha: ${{ github.sha }}
+    secrets: inherit
+
   push-cloud-image:
     name: Push cloud app image to GHCR
     needs: [version, publish]
@@ -760,3 +914,17 @@ jobs:
       source_sha: ${{ github.sha }}
     secrets: inherit
 
+  distribute-release:
+    name: Distribute release
+    needs: [version, publish, push-agent-image, push-cloud-image]
+    if: needs.publish.result == 'success' && needs.push-agent-image.result == 'success' && needs.push-cloud-image.result == 'success'
+    uses: ./.github/workflows/release-orchestrator.yml
+    with:
+      version: ${{ needs.version.outputs.version }}
+      publish_npm: true
+      publish_packages: true
+      publish_android: true
+      publish_apple: true
+      update_homebrew: true
+      deploy_homepage: true
+    secrets: inherit

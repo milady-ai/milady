@@ -12,6 +12,23 @@ GET /api/whitelist/status
 
 Returns the current whitelist status for the agent.
 
+**Response:**
+```json
+{
+  "eligible": false,
+  "twitterVerified": false,
+  "ogCode": null,
+  "walletAddress": "0x1234567890abcdef1234567890abcdef12345678"
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `eligible` | boolean | Whether the wallet is eligible for whitelist minting |
+| `twitterVerified` | boolean | Whether the Twitter verification step is complete |
+| `ogCode` | string\|null | OG verification code, if any |
+| `walletAddress` | string | The wallet address being checked |
+
 ## Twitter Verification
 
 ### Get Verification Message

@@ -259,6 +259,7 @@ export function runInitSubmodules({
     let needsInit = !checkoutReady;
     let initReason = checkoutReady ? "" : "checkout is incomplete";
 
+    let hasUncommittedChanges = false;
     try {
       const status = exec(`git submodule status -- "${submodule.path}"`, {
         cwd: rootDir,
@@ -269,8 +270,10 @@ export function runInitSubmodules({
         needsInit = true;
         initReason = "submodule is not initialized";
       } else if (status.startsWith("+")) {
+        needsInit = true;
+        initReason = "checkout is not at the parent repo's recorded commit";
         log(
-          `[init-submodules] ⚠ ${submodule.name} (${submodule.path}) has commits not recorded in the parent repo`,
+          `[init-submodules] ${submodule.name} (${submodule.path}) is not at the parent repo's recorded commit`,
         );
       }
       if (!status.startsWith("-")) {
@@ -282,6 +285,7 @@ export function runInitSubmodules({
             stdio: ["ignore", "pipe", "ignore"],
           }).trim();
           if (dirty) {
+            hasUncommittedChanges = true;
             log(
               `[init-submodules] ⚠ ${submodule.name} (${submodule.path}) has uncommitted local changes`,
             );
@@ -293,6 +297,14 @@ export function runInitSubmodules({
       if (!initReason) {
         initReason = "status check failed";
       }
+    }
+
+    if (needsInit && hasUncommittedChanges) {
+      failed++;
+      logError(
+        `[init-submodules] Refusing to update ${submodule.name} (${submodule.path}) because it has uncommitted local changes`,
+      );
+      continue;
     }
 
     if (!needsInit) {
@@ -407,6 +419,8 @@ export function runInitSubmodules({
         }
 
         let needsInit = true;
+        let initReason = "status check failed";
+        let hasUncommittedChanges = false;
         try {
           const status = exec(
             `git submodule status -- "${nestedSubmodule.path}"`,
@@ -416,7 +430,33 @@ export function runInitSubmodules({
               stdio: ["ignore", "pipe", "ignore"],
             },
           ).trim();
-          needsInit = status.startsWith("-");
+          if (status.startsWith("-")) {
+            needsInit = true;
+            initReason = "submodule is not initialized";
+          } else if (status.startsWith("+")) {
+            needsInit = true;
+            initReason = "checkout is not at eliza's recorded commit";
+          } else {
+            needsInit = false;
+            initReason = "";
+          }
+
+          if (!status.startsWith("-")) {
+            try {
+              const nestedRoot = resolve(elizaRoot, nestedSubmodule.path);
+              const dirty = exec("git status --porcelain", {
+                cwd: nestedRoot,
+                encoding: "utf8",
+                stdio: ["ignore", "pipe", "ignore"],
+              }).trim();
+              if (dirty) {
+                hasUncommittedChanges = true;
+                log(
+                  `[init-submodules] ⚠ nested ${nestedSubmodule.name} (${rootRelativePath}) has uncommitted local changes`,
+                );
+              }
+            } catch {}
+          }
         } catch {
           needsInit = true;
         }
@@ -425,7 +465,20 @@ export function runInitSubmodules({
           continue;
         }
 
+        if (hasUncommittedChanges) {
+          failed++;
+          logError(
+            `[init-submodules] Refusing to update nested ${nestedSubmodule.name} (${rootRelativePath}) because it has uncommitted local changes`,
+          );
+          continue;
+        }
+
         try {
+          log(
+            `[init-submodules] Updating nested ${nestedSubmodule.name} (${rootRelativePath})${
+              initReason ? ` because ${initReason}` : ""
+            }...`,
+          );
           exec(
             `git submodule update --init --recursive -- "${nestedSubmodule.path}"`,
             {

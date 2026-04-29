@@ -66,7 +66,7 @@ See `src/security/network-policy.test.ts` for comprehensive tests including IPv4
 
 ## Environment Variable Blocklist
 
-**File:** `src/api/server.ts` (line ~812)
+**File:** `src/api/server.ts`
 
 The `BLOCKED_ENV_KEYS` set prevents the API from writing to security-sensitive environment variables via `PUT /api/env`. Without this, an attacker with API access could:
 
@@ -74,7 +74,7 @@ The `BLOCKED_ENV_KEYS` set prevents the API from writing to security-sensitive e
 - `LD_PRELOAD`, `LD_LIBRARY_PATH` — shared library injection (Linux)
 - `DYLD_INSERT_LIBRARIES`, `DYLD_LIBRARY_PATH` — dylib injection (macOS)
 - `NODE_OPTIONS` — arbitrary Node.js flags (e.g. `--require` for code injection)
-- - `NODE_PATH` — module resolution override
+- `NODE_PATH` — module resolution override
 
 ### TLS/Proxy Hijack (blocked)
 - `NODE_TLS_REJECT_UNAUTHORIZED` — setting to `"0"` disables **all** certificate verification, enabling MITM of API key traffic
@@ -209,7 +209,7 @@ Host header validation prevents DNS rebinding attacks where an attacker's domain
 **File:** `src/api/server.ts`
 
 ### `$include` Directive Blocking
-The `isBlockedObjectKey()` function (line ~2835) blocks dangerous property keys including `$include` directives across **all object property manipulation endpoints** — not just config writes. This prevents including arbitrary files from the filesystem into any object, potentially leaking secrets or overriding security settings. The same guard also blocks `__proto__`, `constructor`, and `prototype` (see [Prototype Pollution Prevention](#prototype-pollution-prevention)).
+The `isBlockedObjectKey()` function blocks dangerous property keys including `$include` directives across **all object property manipulation endpoints** — not just config writes. This prevents including arbitrary files from the filesystem into any object, potentially leaking secrets or overriding security settings. The same guard also blocks `__proto__`, `constructor`, and `prototype` (see [Prototype Pollution Prevention](#prototype-pollution-prevention)).
 
 ### Top-Level Key Allowlist
 Only known top-level configuration keys are accepted (`CONFIG_WRITE_ALLOWED_TOP_KEYS`). This prevents injection of arbitrary configuration properties.

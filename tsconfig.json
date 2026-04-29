@@ -6,6 +6,7 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
+    "ignoreDeprecations": "6.0",
     "lib": ["DOM", "DOM.Iterable", "ES2023", "ScriptHost"],
     "module": "ESNext",
     "moduleResolution": "bundler",
@@ -19,6 +20,8 @@
     "paths": {
       "@elizaos/app-lifeops": ["./eliza/apps/app-lifeops/src/index.ts"],
       "@elizaos/app-lifeops/*": ["./eliza/apps/app-lifeops/src/*"],
+      "@elizaos/app-screenshare": ["./eliza/apps/app-screenshare/src/index.ts"],
+      "@elizaos/app-screenshare/*": ["./eliza/apps/app-screenshare/src/*"],
       "@elizaos/app-companion": ["./eliza/apps/app-companion/src/index.ts"],
       "@elizaos/app-companion/*": ["./eliza/apps/app-companion/src/*"],
       "@elizaos/app-shopify": ["./eliza/apps/app-shopify/src/index.ts"],
@@ -37,6 +40,9 @@
       "@elizaos/agent/*": ["./eliza/packages/agent/src/*"],
       "@elizaos/ui": ["./eliza/packages/ui/src/index.ts"],
       "@elizaos/ui/*": ["./eliza/packages/ui/src/*"],
+      "@elizaos/capacitor-mobile-signals": [
+        "./eliza/packages/native-plugins/mobile-signals/src/index.ts"
+      ],
       "@elizaos/app-steward": ["./eliza/apps/app-steward/src/index.ts"],
       "@elizaos/app-steward/*": ["./eliza/apps/app-steward/src/*"]
     }

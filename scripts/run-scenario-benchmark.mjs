@@ -5,7 +5,7 @@
  * connector certification scenarios.
  *
  * Loads scenario ids from the filesystem (test/scenarios/executive-assistant/
- * and test/scenarios/connector-certification/), invokes the unified
+ * and test/scenarios/connector-certification/), invokes the
  * `@elizaos/scenario-runner` CLI through scripts/run-live-scenarios.mjs (which
  * enforces SKIP_REASON + judge thresholds), and emits a markdown report to
  * artifacts/benchmark-report.md plus the raw JSON at

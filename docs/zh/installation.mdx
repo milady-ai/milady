@@ -40,7 +40,7 @@ description: "下载桌面应用或通过 CLI 在 macOS、Windows 或 Linux 上�
 | macOS (Intel) | [`Milady-x64.dmg`](https://github.com/milady-ai/milady/releases/latest) | 2020 年之前的 Mac |
 | Windows | [`Milady-Setup.exe`](https://github.com/milady-ai/milady/releases/latest) | Windows 10+ |
 | Linux | [`Milady.AppImage`](https://github.com/milady-ai/milady/releases/latest) / [`.deb`](https://github.com/milady-ai/milady/releases/latest) | AppImage 或 Debian 包 |
-| iOS | [App Store](https://apps.apple.com/app/milady-private-ai-assistant/id0000000000) | iPhone 和 iPad |
+| iOS | App Store（即将推出）| iPhone 和 iPad |
 | Android | [Google Play](https://play.google.com/store/apps/details?id=ai.milady.app) / [APK](https://github.com/milady-ai/milady/releases/latest) | Android 10+ |
 
 所有发行版均已签名并经过公证。macOS 上不会出现 Gatekeeper 警告。
@@ -64,7 +64,7 @@ shasum -a 256 --check --ignore-missing SHA256SUMS.txt
     安装脚本会下载最新版本，将二进制文件放入您的 PATH 中，并运行初始设置：
 
     ```bash
-    curl -fsSL https://milady-ai.github.io/milady/install.sh | bash
+    curl -fsSL https://get.milady.ai | bash
     milady setup
     ```
 
@@ -76,7 +76,7 @@ shasum -a 256 --check --ignore-missing SHA256SUMS.txt
   </Tab>
   <Tab title="Windows (PowerShell)">
     ```powershell
-    irm https://milady-ai.github.io/milady/install.ps1 | iex
+    irm https://get.milady.ai/install.ps1 | iex
     ```
 
     安装完成后，打开新的终端窗口并运行：
@@ -168,7 +168,7 @@ shasum -a 256 --check --ignore-missing SHA256SUMS.txt
     bun install
     ```
 
-    `postinstall` 脚本会自动初始化 git 子模块、确保 skills 目录存在、链接浏览器服务器并修补依赖项。
+    `preinstall` 钩子会先初始化 git 子模块；随后的 `postinstall` 会确保 skills 目录存在、链接浏览器服务器并修补依赖项。
   </Step>
   <Step title="构建所有内容">
     ```bash

@@ -8,18 +8,30 @@ import { fileURLToPath } from "node:url";
 import { main as syncToAospMain } from "./sync-to-aosp.mjs";
 import { main as validateMain } from "./validate.mjs";
 
-const PRODUCT_LUNCH = "milady_cf_x86_64_phone-userdebug";
+const PRODUCT_LUNCH = "milady_cf_x86_64_phone-trunk_staging-userdebug";
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "../..");
+
+// soong_build is single-process and routinely peaks at ~25 GB RSS for a
+// trunk_staging build. Once the kati/clang phases start they fan out to -jN
+// workers that each take a few GB. On a 30 GB host with -j24 we hit the
+// kernel OOM killer; the safe heuristic is roughly one worker per 4 GB of
+// physical RAM, leaving 4 GB headroom for the kernel + soong itself.
+export function recommendedJobs(totalMemBytes, cpuCount) {
+  const totalGiB = totalMemBytes / (1024 * 1024 * 1024);
+  const ramCap = Math.max(1, Math.floor((totalGiB - 4) / 4));
+  return Math.max(1, Math.min(cpuCount, ramCap));
+}
 
 export function parseArgs(argv) {
   const args = {
     aospRoot: null,
-    jobs: os.cpus().length,
+    jobs: recommendedJobs(os.totalmem(), os.cpus().length),
     sourceVendor: null,
     skipBuild: false,
     launch: false,
     bootValidate: false,
+    skipStopCvd: false,
   };
 
   const readFlagValue = (flag, index) => {
@@ -47,9 +59,11 @@ export function parseArgs(argv) {
       args.launch = true;
     } else if (arg === "--boot-validate") {
       args.bootValidate = true;
+    } else if (arg === "--skip-stop-cvd") {
+      args.skipStopCvd = true;
     } else if (arg === "-h" || arg === "--help") {
       console.log(
-        "Usage: node scripts/miladyos/build-aosp.mjs --aosp-root <AOSP_ROOT> [--source-vendor <VENDOR_DIR>] [--jobs <N>] [--skip-build] [--launch] [--boot-validate]",
+        "Usage: node scripts/miladyos/build-aosp.mjs --aosp-root <AOSP_ROOT> [--source-vendor <VENDOR_DIR>] [--jobs <N>] [--skip-build] [--skip-stop-cvd] [--launch] [--boot-validate]",
       );
       process.exit(0);
     } else if (arg.startsWith("--")) {
@@ -104,6 +118,23 @@ function run(command, args, options = {}) {
   }
 }
 
+// A previous --launch run leaves crosvm + cuttlefish workers holding several
+// GB of RAM. If we then re-enter `m`, soong_build stacks on top and OOMs the
+// host. Tear them down before compiling. cvd 1.x exposes `cvd reset -y`;
+// older host packages used `stop_cvd`. Best-effort: never fail the build if
+// no device is running.
+function stopRunningCvd() {
+  spawnSync(
+    "bash",
+    ["-lc", "cvd reset -y >/dev/null 2>&1 || stop_cvd >/dev/null 2>&1 || true"],
+    {
+      cwd: repoRoot,
+      env: process.env,
+      stdio: "inherit",
+    },
+  );
+}
+
 function runAospBuild(aospRoot, jobs) {
   run(
     "bash",
@@ -116,11 +147,15 @@ function runAospBuild(aospRoot, jobs) {
 }
 
 function launchCuttlefish(aospRoot) {
+  // Cuttlefish 1.x ships `cvd start`; 0.x exposed `launch_cvd`. Prefer the
+  // newer command and fall back so older host packages keep working.
+  // `cvd start` reads host artifacts from $ANDROID_HOST_OUT, which lunch
+  // populates from build/envsetup.sh.
   run(
     "bash",
     [
       "-lc",
-      `source build/envsetup.sh && lunch ${PRODUCT_LUNCH} && launch_cvd --daemon`,
+      `source build/envsetup.sh && lunch ${PRODUCT_LUNCH} && (cvd start --daemon 2>/dev/null || launch_cvd --daemon)`,
     ],
     { cwd: aospRoot },
   );
@@ -140,6 +175,10 @@ export async function main(argv = process.argv.slice(2)) {
     ? ["--vendor-dir", args.sourceVendor, "--aosp-root", args.aospRoot]
     : ["--aosp-root", args.aospRoot];
   await validateMain(validateArgs);
+
+  if (!args.skipStopCvd) {
+    stopRunningCvd();
+  }
 
   if (!args.skipBuild) {
     runAospBuild(args.aospRoot, args.jobs);

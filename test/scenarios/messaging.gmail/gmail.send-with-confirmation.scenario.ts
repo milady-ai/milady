@@ -1,8 +1,5 @@
 import { scenario } from "@elizaos/scenario-schema";
-import {
-  expectTurnToCallAction,
-  judgeRubric,
-} from "../_helpers/action-assertions.ts";
+import { judgeRubric } from "../_helpers/action-assertions.ts";
 
 export default scenario({
   id: "gmail.send-with-confirmation",
@@ -35,11 +32,6 @@ export default scenario({
       name: "draft reply saying thanks",
       room: "main",
       text: "Draft a reply to Sarah's latest email saying thanks and that I can review it Friday afternoon, but hold it for approval.",
-      assertTurn: expectTurnToCallAction({
-        acceptedActions: ["GMAIL_ACTION", "INBOX"],
-        description: "gmail approval-gated draft",
-        includesAny: ["draft", "approval", "thanks", "Friday"],
-      }),
       responseJudge: {
         minimumScore: 0.7,
         rubric:
@@ -51,15 +43,10 @@ export default scenario({
       name: "confirm send",
       room: "main",
       text: "Send that Gmail reply now.",
-      assertTurn: expectTurnToCallAction({
-        acceptedActions: ["GMAIL_ACTION", "INBOX"],
-        description: "gmail send after explicit confirmation",
-        includesAny: ["send", "reply", "Gmail"],
-      }),
       responseJudge: {
         minimumScore: 0.7,
         rubric:
-          "Turn 2 must reflect that the previously drafted Gmail reply is now being sent because the user explicitly confirmed it.",
+          "Turn 2 must send only the previously drafted Sarah Gmail reply because the user explicitly confirmed that selected draft. It must not send a different message or treat the confirmation as generic consent.",
       },
     },
   ],
@@ -68,6 +55,12 @@ export default scenario({
       type: "gmailActionArguments",
       actionName: ["GMAIL_ACTION", "INBOX"],
       subaction: "draft_reply",
+    },
+    {
+      type: "gmailMockRequest",
+      method: "GET",
+      path: "/gmail/v1/users/me/messages",
+      minCount: 1,
     },
     {
       type: "gmailDraftCreated",

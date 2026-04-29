@@ -2,11 +2,26 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
+import { parseArgs as parseAvdTestArgs } from "./miladyos/avd-test.mjs";
 import {
   parseArgs as parseBootValidateArgs,
   resolveAdb,
 } from "./miladyos/boot-validate.mjs";
-import { parseArgs as parseBuildAospArgs } from "./miladyos/build-aosp.mjs";
+import {
+  parseArgs as parseBuildAospArgs,
+  recommendedJobs,
+} from "./miladyos/build-aosp.mjs";
+import {
+  inspectBootAnimationDir,
+  parseArgs as parseBootAnimationArgs,
+} from "./miladyos/build-bootanimation.mjs";
+import {
+  parseArgs as parseCaptureArgs,
+  STEP_MAP,
+} from "./miladyos/capture-screens.mjs";
+import { parseArgs as parseE2eArgs } from "./miladyos/e2e-validate.mjs";
+import { lintInitRc } from "./miladyos/lint-init-rc.mjs";
+import { parseArgs as parseSimArgs } from "./miladyos/sim.mjs";
 import {
   parseArgs as parseSyncArgs,
   syncToAosp,
@@ -69,7 +84,11 @@ describe("MiladyOS script contracts", () => {
       jobs: 12,
       launch: true,
       bootValidate: true,
+      skipStopCvd: false,
     });
+    expect(
+      parseBuildAospArgs(["--aosp-root", aospRoot, "--skip-stop-cvd"]),
+    ).toMatchObject({ skipStopCvd: true });
     expect(
       parseBootValidateArgs([
         "--adb",
@@ -126,5 +145,171 @@ describe("MiladyOS script contracts", () => {
     expect(() => parseBootValidateArgs(["--adb"])).toThrow(
       /--adb requires a value/,
     );
+    expect(() => parseCaptureArgs(["--out"])).toThrow(/--out requires a value/);
+    expect(() => parseE2eArgs(["--out"])).toThrow(/--out requires a value/);
+    expect(() => parseAvdTestArgs(["--avd"])).toThrow(/--avd requires a value/);
+  });
+
+  it("parses capture-screens / e2e-validate / avd-test flags without side effects", () => {
+    const outDir = path.join(makeTempDir(), "shots");
+    expect(
+      parseCaptureArgs([
+        "--out",
+        outDir,
+        "--steps",
+        "home,dialer",
+        "--label",
+        "smoke",
+        "--no-launch",
+      ]),
+    ).toMatchObject({
+      outDir,
+      steps: ["home", "dialer"],
+      label: "smoke",
+      noLaunch: true,
+    });
+
+    expect(
+      parseE2eArgs([
+        "--out",
+        outDir,
+        "--skip-boot-validate",
+        "--steps",
+        "home",
+        "--timeout-ms",
+        "500",
+      ]),
+    ).toMatchObject({
+      outDir,
+      skipBootValidate: true,
+      steps: ["home"],
+      timeoutMs: 500,
+    });
+
+    const apk = path.join(makeTempDir(), "vendor", "milady.apk");
+    fs.mkdirSync(path.dirname(apk), { recursive: true });
+    fs.writeFileSync(apk, "apk\n");
+    expect(
+      parseAvdTestArgs([
+        "--avd",
+        "Pixel6_API34",
+        "--apk",
+        apk,
+        "--capture",
+        outDir,
+        "--no-reuse",
+      ]),
+    ).toMatchObject({
+      avd: "Pixel6_API34",
+      apk,
+      capture: outDir,
+      reuse: false,
+    });
+  });
+
+  it("parses sim runner flags including --wait-for-build / --stop-after", () => {
+    expect(
+      parseSimArgs([
+        "--aosp-root",
+        "/tmp/aosp",
+        "--product",
+        "milady_pixel_phone",
+        "--variant",
+        "user",
+        "--out",
+        "/tmp/reports",
+        "--wait-for-build",
+        "--stop-after",
+        "--boot-timeout-ms",
+        "60000",
+      ]),
+    ).toMatchObject({
+      aospRoot: "/tmp/aosp",
+      product: "milady_pixel_phone",
+      variant: "user",
+      outDir: "/tmp/reports",
+      waitForBuild: true,
+      stopAfter: true,
+      bootTimeoutMs: 60_000,
+    });
+    expect(parseSimArgs([])).toMatchObject({
+      aospRoot: path.join(os.homedir(), "aosp"),
+      product: "milady_cf_x86_64_phone",
+      variant: "trunk_staging-userdebug",
+      noLaunch: false,
+      stopAfter: false,
+      waitForBuild: false,
+    });
+  });
+
+  it("caps build-aosp --jobs by available RAM, not by CPU count", () => {
+    // 30 GiB host with 24 cores → (30-4)/4 = 6 workers, well under cpu count.
+    expect(recommendedJobs(30 * 1024 ** 3, 24)).toBe(6);
+    // Tiny host: still at least one worker.
+    expect(recommendedJobs(2 * 1024 ** 3, 4)).toBe(1);
+    // Big builder: cpu count wins because RAM is plentiful.
+    expect(recommendedJobs(256 * 1024 ** 3, 16)).toBe(16);
+  });
+
+  it("rejects unknown capture steps", () => {
+    expect(() =>
+      parseCaptureArgs(["--out", "/tmp", "--steps", "bogus"]),
+    ).toThrow(/Unknown step "bogus"/);
+    expect(Object.keys(STEP_MAP).sort()).toEqual(
+      ["assist", "dialer", "home", "launcher", "recents", "sms"].sort(),
+    );
+  });
+
+  it("lints init.rc — accepts valid script, rejects bad triggers / commands", () => {
+    const dir = makeTempDir();
+    const ok = path.join(dir, "ok.rc");
+    fs.writeFileSync(
+      ok,
+      "on init\n    setprop ro.foo bar\non property:sys.boot_completed=1\n    setprop ro.x y\n",
+    );
+    expect(lintInitRc(ok)).toEqual([]);
+
+    const bad = path.join(dir, "bad.rc");
+    fs.writeFileSync(
+      bad,
+      "on bootp\n    setprop ro.x\n    bogus_cmd foo\n\nunknown_top\n    setprop ro.y z\n",
+    );
+    const issues = lintInitRc(bad);
+    const messages = issues.map((i) => i.message);
+    expect(messages.some((m) => /unknown init event "bootp"/.test(m))).toBe(
+      true,
+    );
+    expect(
+      messages.some((m) => /setprop requires <name> <value>/.test(m)),
+    ).toBe(true);
+    expect(
+      messages.some((m) => /unknown top-level keyword "unknown_top"/.test(m)),
+    ).toBe(true);
+  });
+
+  it("inspects bootanimation directories and rejects malformed input", () => {
+    const framesDir = makeTempDir();
+    expect(() => inspectBootAnimationDir(framesDir)).toThrow(
+      /Missing desc\.txt/,
+    );
+
+    fs.writeFileSync(
+      path.join(framesDir, "desc.txt"),
+      "1080 2400 30\np 0 0 part0\n",
+    );
+    expect(() => inspectBootAnimationDir(framesDir)).not.toThrow();
+    const inspection = inspectBootAnimationDir(framesDir);
+    expect(inspection.parts).toEqual(["part0"]);
+    expect(inspection.issues).toContain("missing part directory: part0/");
+
+    fs.mkdirSync(path.join(framesDir, "part0"));
+    const empty = inspectBootAnimationDir(framesDir);
+    expect(empty.issues).toContain("part part0/ has zero PNG frames");
+
+    expect(parseBootAnimationArgs(["--frames", framesDir, "--check"])).toEqual({
+      framesDir,
+      outPath: path.join(framesDir, "bootanimation.zip"),
+      check: true,
+    });
   });
 });

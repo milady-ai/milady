@@ -49,7 +49,7 @@ Build support agents that live in your Discord server and Telegram group simulta
   "name": "Support Agent",
   "bio": ["Technical support specialist for the community"],
   "connectors": {
-    "discord": { "botToken": "..." },
+    "discord": { "token": "..." },
     "telegram": { "botToken": "..." }
   },
   "plugins": { "allow": ["knowledge"] }

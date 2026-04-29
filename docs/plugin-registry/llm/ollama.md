@@ -23,11 +23,11 @@ brew install ollama
 ### 2. Pull a Model
 
 ```bash
+ollama pull gemma3
+# or
 ollama pull llama3.3
 # or
 ollama pull mistral
-# or
-ollama pull gemma3:12b
 ```
 
 ### 3. Start Ollama
@@ -41,14 +41,16 @@ Ollama listens on `http://localhost:11434` by default.
 ### 4. Enable the Plugin
 
 ```bash
-milady plugins install ollama
+milady plugins install @elizaos/plugin-ollama
 ```
 
 ## Auto-Enable
 
-The plugin auto-enables when `OLLAMA_BASE_URL` is present:
+The plugin auto-enables when `OLLAMA_API_ENDPOINT` or `OLLAMA_BASE_URL` is present:
 
 ```bash
+export OLLAMA_API_ENDPOINT=http://localhost:11434
+# or
 export OLLAMA_BASE_URL=http://localhost:11434
 ```
 
@@ -57,10 +59,13 @@ export OLLAMA_BASE_URL=http://localhost:11434
 | Environment Variable | Required | Description |
 |---------------------|----------|-------------|
 | `OLLAMA_API_ENDPOINT` | Yes | Ollama server URL (e.g., `http://localhost:11434`) |
-| `OLLAMA_BASE_URL` | No | Alias that triggers auto-enable (resolved to `OLLAMA_API_ENDPOINT`) |
+| `OLLAMA_BASE_URL` | No | Alias for convenience (resolved to `OLLAMA_API_ENDPOINT`) |
 | `OLLAMA_SMALL_MODEL` | No | Override the small model identifier |
+| `OLLAMA_MEDIUM_MODEL` | No | Override the medium model identifier |
 | `OLLAMA_LARGE_MODEL` | No | Override the large model identifier |
 | `OLLAMA_EMBEDDING_MODEL` | No | Override the embedding model identifier |
+| `SMALL_MODEL` | No | Global alias to override the small model identifier |
+| `LARGE_MODEL` | No | Global alias to override the large model identifier |
 
 ### milady.json Example
 
@@ -99,12 +104,12 @@ Browse all available models at [ollama.com/library](https://ollama.com/library).
 
 | elizaOS Model Type | Default Ollama Model |
 |-------------------|---------------------|
-| `TEXT_SMALL` | `llama3.2` (3B) |
-| `TEXT_LARGE` | `llama3.3` (70B) |
+| `TEXT_SMALL` | `gemma3:latest` |
+| `TEXT_LARGE` | `gemma3:latest` |
 | `TEXT_EMBEDDING` | `nomic-embed-text` |
 | `IMAGE_DESCRIPTION` | `llava` (if installed) |
 
-Override defaults in your auth profile:
+Override defaults via environment variables or in your auth profile:
 
 ```json
 {
@@ -112,8 +117,8 @@ Override defaults in your auth profile:
     "profiles": {
       "default": {
         "provider": "ollama",
-        "model": "mistral",
-        "modelSmall": "llama3.2:3b"
+        "model": "llama3.3",
+        "modelSmall": "gemma3:4b"
       }
     }
   }
@@ -142,10 +147,10 @@ Models run on CPU if insufficient VRAM is available, but with reduced speed.
 
 ## Remote Ollama
 
-Ollama can run on a remote machine or NAS. Set `OLLAMA_BASE_URL` to the remote address:
+Ollama can run on a remote machine or NAS. Set `OLLAMA_API_ENDPOINT` to the remote address:
 
 ```bash
-export OLLAMA_BASE_URL=http://192.168.1.100:11434
+export OLLAMA_API_ENDPOINT=http://192.168.1.100:11434
 ```
 
 Secure with a reverse proxy (Nginx + TLS) for production.
@@ -188,7 +193,7 @@ If Milady doesn't detect your Ollama instance:
 
 1. Verify Ollama is running: `curl http://localhost:11434/api/tags`
 2. Check you have models pulled: `ollama list`
-3. If using a non-default port, set `OLLAMA_BASE_URL` accordingly
+3. If using a non-default port, set `OLLAMA_API_ENDPOINT` accordingly
 
 ### Slow Responses
 

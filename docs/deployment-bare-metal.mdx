@@ -1,16 +1,17 @@
 ---
 title: Bare-Metal Deployment (systemd)
 sidebarTitle: Bare-Metal
-description: Run Milady directly on a Linux host as a systemd user service. Best for single-bot VPS deployments using a Claude Code Max subscription.
+description: Run Milady directly on a Linux host as a systemd user service. Best for single-bot VPS deployments using a Claude Max subscription with CLI access.
 ---
 
 The Docker-based deployment in [Deployment Guide](/deployment) is the
 right default for most operators. Bare-metal systemd is the better fit
 when:
 
-- You run **one bot on one VPS** against a personal Claude Code Max
-  subscription, and you want the bot to use the same OAuth credentials
-  the `claude` CLI creates when you log in.
+- You run **one bot on one VPS** against a personal Claude Max
+  subscription (the Anthropic plan that includes `claude` CLI access),
+  and you want the bot to use the same OAuth credentials the `claude`
+  CLI creates when you log in.
 - You want PTY subagents (the bot spawning `claude` itself) to run
   natively on the host so there is no container-in-container plumbing.
 

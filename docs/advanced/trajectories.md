@@ -50,7 +50,12 @@ The detail view for an individual trajectory shows:
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/trajectories` | List trajectory entries |
-| GET | `/api/trajectories/:id` | Get a specific trajectory detail |
+| GET | `/api/trajectories` | List and search trajectory entries with filters |
+| GET | `/api/trajectories/:id` | Get trajectory details with LLM calls and provider accesses |
+| GET | `/api/trajectories/stats` | Get aggregate trajectory statistics |
+| GET | `/api/trajectories/config` | Get trajectory logging configuration (enabled/disabled) |
+| PUT | `/api/trajectories/config` | Enable or disable trajectory logging |
+| POST | `/api/trajectories/export` | Export trajectories (JSON, CSV, ART, or ZIP) |
+| DELETE | `/api/trajectories` | Delete trajectories (by IDs or all) |
 
 See the [REST API Reference](/rest/trajectories) for full endpoint documentation.

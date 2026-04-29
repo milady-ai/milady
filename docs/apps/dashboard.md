@@ -81,12 +81,13 @@ The default landing tab — a full messaging interface with voice chat, 3D avata
 
 ### Character
 
-Configure your agent's identity and personality. The view is organized into four sections:
+Configure your agent through the Character hub. The view is organized into five sections:
 
-1. **Identity & Personality** -- agent name, avatar selection, bio, adjectives, topics, and system prompt.
-2. **Style** -- three-column style rule textareas for controlling how the agent communicates.
-3. **Examples** -- collapsible chat examples and post examples to guide the agent's behavior.
-4. **Voice** -- voice provider selection (ElevenLabs) and preview, with model configuration.
+1. **Overview** -- a high-level snapshot of the agent's current identity and character state.
+2. **Personality** -- editable persona fields such as name, bio, system prompt, style, topics, adjectives, examples, and voice-shaping copy.
+3. **Knowledge** -- uploaded documents and supporting reference material used for retrieval.
+4. **Experience** -- surfaced learnings and experience signals gathered by the runtime.
+5. **Relationships** -- people and relationship context associated with the agent.
 
 Changes are saved via a save bar at the bottom of the view.
 
@@ -144,16 +145,7 @@ Provider selection and model configuration via the `ProviderSwitcher` component.
 
 Embedded configuration view (`ConfigPageView` with `embedded` prop) for managing wallet addresses, RPC endpoint URLs, and secret values (API keys, tokens). This is the same configuration system available through the Config page, rendered inline within Settings.
 
-#### 4. Media Generation
-
-The `MediaSettingsSection` component provides provider selection for:
-
-- **Image generation** -- select and configure image generation providers.
-- **Video generation** -- select and configure video generation providers.
-- **Audio generation** -- select and configure audio generation providers.
-- **Vision** -- select and configure vision/image understanding providers.
-
-#### 5. Speech (TTS / STT)
+#### 4. Speech (TTS / STT)
 
 The `VoiceConfigView` component configures:
 
@@ -161,11 +153,11 @@ The `VoiceConfigView` component configures:
 - **Speech-to-Text** -- transcription provider configuration.
 - **Voice preview** -- test the selected voice configuration.
 
-#### 6. Permissions & Capabilities
+#### 5. Permissions & Capabilities
 
 The `PermissionsSection` component manages system permission grants for native platforms (Electrobun desktop app). Controls access to features like file system, microphone, camera, and notifications.
 
-#### 7. Software Updates
+#### 6. Software Updates
 
 - **Current version** display.
 - **Release channel** selection via radio buttons: Stable (recommended), Beta (preview), or Nightly (bleeding edge).
@@ -173,7 +165,7 @@ The `PermissionsSection` component manages system permission grants for native p
 - **Update available** banner showing current and latest version with instructions to run `milady update`.
 - **Last checked** timestamp.
 
-#### 8. Chrome Extension
+#### 7. Chrome Extension
 
 - **Relay server status** -- shows whether the WebSocket relay at `ws://127.0.0.1:{port}/extension` is reachable, with a green/red indicator.
 - **Check Connection** button to re-test relay status.

@@ -16,6 +16,7 @@
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
     "forceConsistentCasingInFileNames": true,
+    "ignoreDeprecations": "6.0",
     "experimentalDecorators": true,
     "useUnknownInCatchVariables": true,
     "types": ["vite/client", "bun-types"],
@@ -36,12 +37,16 @@
       ],
       "@elizaos/app-companion": ["./eliza/apps/app-companion/src/index.ts"],
       "@elizaos/app-companion/*": ["./eliza/apps/app-companion/src/*"],
+      "@clawville/app-clawville": ["./eliza/apps/app-clawville/src/index.ts"],
+      "@clawville/app-clawville/*": ["./eliza/apps/app-clawville/src/*"],
       "@elizaos/app-lifeops": ["./eliza/apps/app-lifeops/src/index.ts"],
       "@elizaos/app-lifeops/*": ["./eliza/apps/app-lifeops/src/*"],
       "@elizaos/app-shopify": ["./eliza/apps/app-shopify/src/index.ts"],
       "@elizaos/app-shopify/*": ["./eliza/apps/app-shopify/src/*"],
       "@elizaos/app-steward": ["./eliza/apps/app-steward/src/index.ts"],
       "@elizaos/app-steward/*": ["./eliza/apps/app-steward/src/*"],
+      "@elizaos/app-screenshare": ["./eliza/apps/app-screenshare/src/index.ts"],
+      "@elizaos/app-screenshare/*": ["./eliza/apps/app-screenshare/src/*"],
       "@elizaos/app-training": ["./eliza/apps/app-training/src/index.ts"],
       "@elizaos/app-training/*": ["./eliza/apps/app-training/src/*"],
       "@elizaos/app-vincent": ["./eliza/apps/app-vincent/src/index.ts"],
@@ -60,6 +65,9 @@
       ],
       "@elizaos/capacitor-llama": [
         "./eliza/packages/native-plugins/llama/src/index.ts"
+      ],
+      "@elizaos/capacitor-mobile-signals": [
+        "./eliza/packages/native-plugins/mobile-signals/src/index.ts"
       ],
       "@elizaos/native-activity-tracker": [
         "./eliza/packages/native-plugins/activity-tracker/src/index.ts"

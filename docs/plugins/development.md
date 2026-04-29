@@ -1,10 +1,10 @@
 ---
 title: "Plugin Development"
 sidebarTitle: "Plugin Development"
-description: "Create, test, and publish plugins for Eliza/elizaOS."
+description: "Create, test, and publish plugins for elizaOS."
 ---
 
-This guide walks you through creating, testing, and publishing plugins for Eliza/elizaOS.
+This guide walks you through creating, testing, and publishing plugins for elizaOS.
 
 ## Table of Contents
 
@@ -124,7 +124,7 @@ my-plugin/
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "@elizaos/core": "^2.0.0"
+    "@elizaos/core": "alpha"
   },
   "devDependencies": {
     "typescript": "^5.0.0"
@@ -751,7 +751,7 @@ For local plugin development without publishing:
 
 1. **Workspace discovery** — Place your plugin in:
    - `./plugins/my-plugin/` (project-local)
-   - `~/.milady/plugins/my-plugin/` (global)
+   - `~/.milady/plugins/custom/my-plugin/` (global drop-in)
 
 2. **Config-based loading** — Add to `milady.json`:
    ```json
@@ -762,7 +762,7 @@ For local plugin development without publishing:
 
 3. **Symlink for development:**
    ```bash
-   cd ~/.milady/plugins
+   cd ~/.milady/plugins/custom
    ln -s /path/to/my-plugin my-plugin
    ```
 
@@ -821,15 +821,11 @@ Plugins can include an `elizaos.plugin.json` manifest file for rich metadata:
 
 | Kind | Description |
 |------|-------------|
-| `feature` | General-purpose feature plugins (most common) |
-| `ai-provider` | LLM and AI model providers |
+| `ai-provider` | AI/LLM model providers |
+| `app` | Application plugins |
 | `connector` | Messaging platform connectors |
+| `feature` | Feature extensions and skills |
 | `database` | Database adapters |
-| `app` | Launchable applications |
-| `memory` | Memory/storage adapters |
-| `channel` | Messaging platform connectors (alias for `connector`) |
-| `provider` | Context/data providers |
-| `skill` | Skill-based extensions |
 
 ### PluginOrigin Types
 
@@ -1087,6 +1083,6 @@ const myPlugin: Plugin = {
 
 ## Next Steps
 
-- [Skills Documentation](./skills.md) — Learn about markdown-based skill extensions
-- [Registry Guide](./registry.md) — Publishing to the plugin registry
+- [Skills Documentation](/plugins/skills) — Learn about markdown-based skill extensions
+- [Registry Guide](/plugins/registry) — Publishing to the plugin registry
 - [Contributing Guide](/guides/contribution-guide) — Contributing to Milady/elizaOS

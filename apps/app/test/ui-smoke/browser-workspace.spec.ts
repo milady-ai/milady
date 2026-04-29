@@ -54,12 +54,34 @@ test("browser workspace can create live tabs and switch selection", async ({
     timeout: 60_000,
   });
 
-  const newTabButton = browserWorkspaceView.getByRole("button", {
+  const tabsSidebar = browserWorkspaceView.getByTestId(
+    "browser-workspace-sidebar",
+  );
+  await expect(tabsSidebar).toBeVisible({ timeout: 120_000 });
+
+  const newTabButton = tabsSidebar.getByRole("button", {
     name: "New tab",
   });
   await expect(newTabButton).toBeVisible({ timeout: 120_000 });
+  await expect(
+    tabsSidebar.getByTestId("browser-tab-section-toggle-user"),
+  ).toBeVisible({
+    timeout: 120_000,
+  });
+  await expect(
+    tabsSidebar.getByTestId("browser-tab-section-toggle-agent"),
+  ).toBeVisible({
+    timeout: 120_000,
+  });
+  await expect(
+    tabsSidebar.getByTestId("browser-tab-section-toggle-app"),
+  ).toBeVisible({
+    timeout: 120_000,
+  });
   const addressInput = browserWorkspaceView.locator("input").first();
   await expect(addressInput).toBeVisible({ timeout: 120_000 });
+  const goButton = browserWorkspaceView.getByRole("button", { name: "Go" });
+  await expect(goButton).toBeVisible({ timeout: 120_000 });
   const chatSidebar = browserWorkspaceView.getByTestId(
     "browser-workspace-view-chat-sidebar",
   );
@@ -71,7 +93,7 @@ test("browser workspace can create live tabs and switch selection", async ({
   }
   expect(chatSidebarBox.y).toBeLessThan(addressInputBox.y);
 
-  const initialHomeTabButtons = browserWorkspaceView.locator(
+  const initialHomeTabButtons = tabsSidebar.locator(
     '[role="tab"][title="https://milady.ai/"]',
   );
   await expect(initialHomeTabButtons.first()).toBeVisible({
@@ -85,7 +107,7 @@ test("browser workspace can create live tabs and switch selection", async ({
   await expect(addressInput).toHaveValue("example.com");
   await newTabButton.click();
 
-  const exampleTabButton = browserWorkspaceView.locator(
+  const exampleTabButton = tabsSidebar.locator(
     '[role="tab"][title="https://example.com/"]',
   );
   await expect(exampleTabButton).toBeVisible();
@@ -96,7 +118,7 @@ test("browser workspace can create live tabs and switch selection", async ({
   );
   await expect(addressInput).toHaveValue("https://example.com/");
 
-  const blankTabButtons = browserWorkspaceView.locator(
+  const blankTabButtons = tabsSidebar.locator(
     '[role="tab"][title="about:blank"]',
   );
   const blankTabCount = await blankTabButtons.count();
@@ -112,4 +134,8 @@ test("browser workspace can create live tabs and switch selection", async ({
 
   await exampleTabButton.click();
   await expect(addressInput).toHaveValue("https://example.com/");
+
+  await addressInput.fill("example.org");
+  await goButton.click();
+  await expect(addressInput).toHaveValue("https://example.org/");
 });

@@ -23,30 +23,49 @@ Returns all known secret keys with redacted values and metadata about which plug
 
 ```json
 {
-  "secrets": {
-    "OPENAI_API_KEY": {
-      "value": "sk-****...xxxx",
-      "set": true,
-      "pluginId": "@elizaos/plugin-openai",
-      "pluginEnabled": true
+  "secrets": [
+    {
+      "key": "OPENAI_API_KEY",
+      "description": "OpenAI API key",
+      "category": "ai-provider",
+      "sensitive": true,
+      "required": true,
+      "isSet": true,
+      "maskedValue": "sk-****...xxxx",
+      "usedBy": [
+        { "pluginId": "openai", "pluginName": "OpenAI", "enabled": true }
+      ]
     },
-    "ANTHROPIC_API_KEY": {
-      "value": "",
-      "set": false,
-      "pluginId": "@elizaos/plugin-anthropic",
-      "pluginEnabled": false
+    {
+      "key": "ANTHROPIC_API_KEY",
+      "description": "Anthropic API key",
+      "category": "ai-provider",
+      "sensitive": true,
+      "required": true,
+      "isSet": false,
+      "maskedValue": null,
+      "usedBy": [
+        { "pluginId": "anthropic", "pluginName": "Anthropic", "enabled": false }
+      ]
     }
-  }
+  ]
 }
 ```
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `secrets` | object | Map of environment variable name to secret metadata |
-| `secrets[key].value` | string | Redacted value (e.g. `sk-****...xxxx`) or empty string if unset |
-| `secrets[key].set` | boolean | Whether the key has a non-empty value |
-| `secrets[key].pluginId` | string | The plugin that uses this key |
-| `secrets[key].pluginEnabled` | boolean | Whether the associated plugin is currently enabled |
+| `secrets` | array | List of secret entries aggregated from all plugin parameters |
+| `secrets[].key` | string | Environment variable name |
+| `secrets[].description` | string | Human-readable description of the secret |
+| `secrets[].category` | string | Plugin category (e.g. `ai-provider`, `connector`) |
+| `secrets[].sensitive` | boolean | Whether this is a sensitive parameter |
+| `secrets[].required` | boolean | Whether this parameter is required by its plugin |
+| `secrets[].isSet` | boolean | Whether the key has a non-empty value in the environment |
+| `secrets[].maskedValue` | string\|null | Redacted value (e.g. `sk-****...xxxx`) or `null` if unset |
+| `secrets[].usedBy` | array | List of plugins that declare this parameter |
+| `secrets[].usedBy[].pluginId` | string | Plugin identifier |
+| `secrets[].usedBy[].pluginName` | string | Plugin display name |
+| `secrets[].usedBy[].enabled` | boolean | Whether the plugin is currently loaded in the runtime |
 
 ---
 

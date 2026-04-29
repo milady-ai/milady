@@ -3,6 +3,62 @@ title: 更新日志
 description: Milady 的最新动态——新功能、改进和修复。
 ---
 
+<Update label="2026-04-23" description="4月23日当周；双钱包和云钱包配置、Agent Browser Bridge、自动化草稿、云代理配置 UX、BlueBubbles 连接器" tags={["Feature", "Update", "Fix"]}>
+
+<div id="dual-wallet-with-cloud-wallet-provisioning">
+## 带云钱包配置的双钱包
+</div>
+
+你的代理现在支持双钱包架构，[本地钱包和云钱包](/zh/rest/wallet)共存，每条链有一个主源。当你启用云钱包功能登录 [Eliza Cloud](/zh/guides/cloud) 时，EVM 和 Solana 钱包会从云端自动导入并设置为主钱包——无需手动设置。你可以随时切换主源，云钱包描述符也可以按需重新查询。如果登录期间配置失败，身份验证仍会成功，你可以稍后重试钱包配置。
+
+<div id="agent-browser-bridge">
+## Agent Browser Bridge
+</div>
+
+LifeOps Browser 扩展已重命名并重新定位为 **Agent Browser Bridge**——一个独立的浏览器扩展（Chrome 和 Safari），让你的代理能够在浏览器会话中观察和执行操作。该 bridge 作为独立应用运行，带有专用的设置面板、刷新的安装程序工件以及浏览器工作区视图中的新主页标签。现有的 LifeOps 浏览器工作流程可继续使用新的 bridge。
+
+<div id="automation-drafts">
+## 自动化草稿
+</div>
+
+[自动化](/zh/guides/cloud)视图现在支持在激活工作流之前起草工作流。一个新的草稿窗格让你可以编写范围限定于特定房间的工作流、规范化其标题，并在草稿无法交付时优雅地处理发送错误。草稿会一直保持在你的活动自动化列表之外，直到你准备好发布它们。
+
+<div id="cloud-agent-provisioning-ux">
+## 云代理配置 UX
+</div>
+
+云[仪表板](/zh/guides/cloud)现在能清晰地处理非运行中的 runtime 卡片。在卡片轮询就绪状态期间，主要的**打开**按钮会被禁用并标记为代理的当前状态（"启动中…"、"已停止"、"已暂停"、"无法访问"），配置期间会有脉动的状态点，以及一个解释预期启动时间的工具提示。一旦健康探测返回运行中状态，按钮会自动切换回实心的**打开**状态。从仪表板删除云代理和内联配置也已恢复。
+
+<div id="bluebubbles-connector">
+## BlueBubbles 连接器
+</div>
+
+新的 [BlueBubbles 连接器](/zh/connectors/bluebubbles)让你的代理能够通过 HTTP 连接到自托管的 [BlueBubbles](https://bluebubbles.app) 服务器，从而桥接到 iMessage。与直接读取本地 Messages 数据库的原生 iMessage 连接器不同，BlueBubbles 可以从同一网络上的任何机器访问，这使得它非常适合你的代理没有运行在保存 Messages 数据库的 Mac 上的情况。
+
+<div id="updates">
+## 更新
+</div>
+
+- **聊天和页面优化** — 页面范围内的聊天上下文、聊天小组件标题、聊天标题和聊天侧边栏都已精细化，以获得更干净的布局，并在页面切换之间提供更可靠的上下文。
+- **侧边栏和应用视图现代化** — 仪表板侧边栏控件、[应用视图](/zh/dashboard/apps)目录和应用侧边栏已经过清理，具有折叠的控件和更紧凑的密度。角色编辑器、[角色](/zh/agents/character-interface)布局、角色面板和角色侧边栏也已经过优化，以获得更一致的导航体验。
+- **连接器侧边栏清理** — 连接器配置侧边栏已经过清理和优化，具有更清晰的开关和用于启用/禁用各个平台的连接器开关。
+- **嵌入式知识上传** — [知识](/zh/guides/knowledge)系统现在支持直接从角色编辑器进行嵌入式上传，因此你可以在配置代理人格时附加参考材料。
+- **X (Twitter) 计费和状态** — X 连接器计费现在与其他云使用情况一起呈现，状态报告也通过新的测试覆盖得到了加强。
+- **云迁移修复** — 一个影响云部署代理的迁移问题已被解决，因此升级在首次启动时能干净地应用。
+- **iOS runtime 入门模式** — iOS 应用现在支持不同的 runtime 构建和入门模式，为移动用户提供更流畅的首次运行体验。
+- **可访问性清理** — 仪表板微标签、页面 chrome 和状态 affordances 已经过清理，以获得更好的可访问性一致性。
+
+<div id="bug-fixes">
+## 错误修复
+</div>
+
+- 修复了 n8n sidecar 在某些配置中无法干净恢复的问题——sidecar 现在能可靠地启动和故障转移
+- 修复了从侧边栏打开时自动化深层链接未滚动到正确部分的问题——哈希锚点现在能正确解析
+- 修复了云仪表板允许用户点击非运行中 runtime 卡片上的"打开"按钮，导致页面失效的问题
+- 修复了 Agent Browser Bridge 中浏览器工作区标签未在会话之间重置的问题
+
+</Update>
+
 <Update label="2026-04-20" description="4月20日当周；更智能的动作路由、跨渠道消息准确性、训练优化器改进" tags={["Update", "Fix"]}>
 
 <div id="smarter-action-routing">

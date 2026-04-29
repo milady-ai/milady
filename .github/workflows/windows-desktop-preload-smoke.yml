@@ -53,6 +53,7 @@ jobs:
             apps/
             apps/app/electrobun/**
             packages/
+            patches/
             scripts/
             eliza/apps/
             eliza/packages/app-core/

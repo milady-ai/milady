@@ -19,12 +19,12 @@ where to get the credentials, minimum required fields, and tips for optional fie
 **Variables:**
 - `OPENAI_API_KEY` — Your secret API key from platform.openai.com
 - `OPENAI_BASE_URL` — Leave blank for OpenAI default; set to a proxy URL if using a custom endpoint
-- `OPENAI_SMALL_MODEL` — e.g. `gpt-4o-mini` (used for fast/cheap tasks)
-- `OPENAI_LARGE_MODEL` — e.g. `gpt-4o` (used for complex reasoning)
+- `OPENAI_SMALL_MODEL` — e.g. `gpt-5-mini` (used for fast/cheap tasks)
+- `OPENAI_LARGE_MODEL` — e.g. `gpt-5` (used for complex reasoning)
 - `OPENAI_EMBEDDING_MODEL` — e.g. `text-embedding-3-small` (for semantic search)
 - `OPENAI_TTS_MODEL` / `OPENAI_TTS_VOICE` — e.g. `tts-1` / `alloy` (for voice synthesis)
-- `OPENAI_IMAGE_DESCRIPTION_MODEL` — e.g. `gpt-4o` (for image understanding)
-**Tips:** OpenAI is the default fallback for most features. If you have credits, set this first. Use `gpt-4o-mini` as small model to save costs.
+- `OPENAI_IMAGE_DESCRIPTION_MODEL` — e.g. `gpt-5` (for image understanding)
+**Tips:** OpenAI is the default fallback for most features. If you have credits, set this first. Use `gpt-5-mini` as small model to save costs.
 
 ### Anthropic
 **Get credentials:** https://console.anthropic.com/settings/keys
@@ -41,10 +41,10 @@ where to get the credentials, minimum required fields, and tips for optional fie
 **Minimum required:** `GOOGLE_GENERATIVE_AI_API_KEY` or `GOOGLE_API_KEY`
 **Variables:**
 - `GOOGLE_GENERATIVE_AI_API_KEY` / `GOOGLE_API_KEY` — From AI Studio or Google Cloud (either works for auto-enable)
-- `GOOGLE_SMALL_MODEL` — e.g. `gemini-2.0-flash`
-- `GOOGLE_LARGE_MODEL` — e.g. `gemini-2.0-pro`
+- `GOOGLE_SMALL_MODEL` — e.g. `gemini-2.5-flash`
+- `GOOGLE_LARGE_MODEL` — e.g. `gemini-2.5-pro`
 - `GOOGLE_EMBEDDING_MODEL` — e.g. `text-embedding-004`
-- `GOOGLE_IMAGE_MODEL` — e.g. `imagen-3.0-generate-002`
+- `GOOGLE_IMAGE_MODEL` — e.g. `gemini-2.0-flash-001`
 **Tips:** Gemini Flash is fast and cheap; great for small model. The free tier is generous.
 
 ### Groq
@@ -52,22 +52,23 @@ where to get the credentials, minimum required fields, and tips for optional fie
 **Minimum required:** `GROQ_API_KEY`
 **Variables:**
 - `GROQ_API_KEY` — From console.groq.com
-- `GROQ_SMALL_MODEL` — e.g. `llama-3.1-8b-instant`
+- `GROQ_SMALL_MODEL` — e.g. `openai/gpt-oss-20b`
 - `GROQ_LARGE_MODEL` — e.g. `llama-3.3-70b-versatile`
-- `GROQ_TTS_MODEL` / `GROQ_TTS_VOICE` — e.g. `playai-tts` / `Fritz-PlayAI`
-**Tips:** Groq is extremely fast inference — great for latency-sensitive use cases. Free tier available. Supports TTS via PlayAI voices.
+- `GROQ_TTS_MODEL` / `GROQ_TTS_VOICE` — e.g. `canopylabs/orpheus-v1-english` / `troy`
+- `GROQ_TTS_RESPONSE_FORMAT` — Audio response format (default: `wav`)
+**Tips:** Groq is extremely fast inference — great for latency-sensitive use cases. Free tier available.
 
 ### OpenRouter
 **Get credentials:** https://openrouter.ai/keys
 **Minimum required:** `OPENROUTER_API_KEY`
 **Variables:**
 - `OPENROUTER_API_KEY` — From openrouter.ai/keys
-- `OPENROUTER_SMALL_MODEL` — e.g. `openai/gpt-4o-mini` or `meta-llama/llama-3.3-70b`
+- `OPENROUTER_SMALL_MODEL` — e.g. `openai/gpt-5-mini` or `meta-llama/llama-3.3-70b`
 - `OPENROUTER_LARGE_MODEL` — e.g. `anthropic/claude-sonnet-4-6`
-- `OPENROUTER_IMAGE_MODEL` — e.g. `openai/gpt-4o` (for vision tasks)
+- `OPENROUTER_IMAGE_MODEL` — e.g. `openai/gpt-5` (for vision tasks)
 - `OPENROUTER_IMAGE_GENERATION_MODEL` — e.g. `openai/dall-e-3`
 - `OPENROUTER_EMBEDDING_MODEL` — e.g. `openai/text-embedding-3-small`
-- `OPENROUTER_TOOL_EXECUTION_MAX_STEPS` — Max tool call steps per turn (default: 5)
+- `OPENROUTER_TOOL_EXECUTION_MAX_STEPS` — Max tool call steps per turn (default: 15)
 **Tips:** OpenRouter gives you access to 200+ models through one API key. Great if you want to switch models without managing multiple accounts. Use model IDs in `provider/model-name` format.
 
 ### xAI (Grok)
@@ -75,13 +76,13 @@ where to get the credentials, minimum required fields, and tips for optional fie
 **Minimum required:** `XAI_API_KEY` or `GROK_API_KEY`
 **Variables:**
 - `XAI_API_KEY` / `GROK_API_KEY` — From console.x.ai (either works for auto-enable)
-- `XAI_MODEL` — e.g. `grok-2-1212` (overrides small/large)
+- `XAI_MODEL` — e.g. `grok-3` (overrides small/large)
 - `XAI_SMALL_MODEL` / `XAI_LARGE_MODEL` — Specific model slots
-- `XAI_EMBEDDING_MODEL` — e.g. `v1`
-- `X_AUTH_MODE` — `api_key` (default) or `oauth`
+- `XAI_EMBEDDING_MODEL` — e.g. `grok-embedding`
+- `X_AUTH_MODE` — `env` (default) or `oauth`
 - `X_API_KEY`, `X_API_SECRET`, `X_ACCESS_TOKEN`, `X_ACCESS_TOKEN_SECRET` — Twitter OAuth keys (for the X connector side of xAI)
 - `X_ENABLE_POST`, `X_ENABLE_REPLIES`, `X_ENABLE_ACTIONS` — Toggle X/Twitter behaviors
-**Tips:** xAI = Grok models. The `X_*` vars are for the Twitter integration bundled with xAI. Keep auth mode as `api_key` unless you need OAuth.
+**Tips:** xAI = Grok models. The `X_*` vars are for the Twitter integration bundled with xAI. Keep auth mode as `api_key` unless you need OAuth. For a standalone Twitter connector (without Grok), see the [Twitter/X connector](#twitter--x) section below — it uses `TWITTER_*` env vars and `connectors.twitter` config instead.
 
 ### Ollama (Local Models)
 **Get credentials:** No API key needed — install Ollama locally
@@ -90,9 +91,9 @@ where to get the credentials, minimum required fields, and tips for optional fie
 **Variables:**
 - `OLLAMA_BASE_URL` — Auto-enable trigger. Default: `http://localhost:11434`
 - `OLLAMA_API_ENDPOINT` — Plugin endpoint. Default: `http://localhost:11434/api`
-- `OLLAMA_SMALL_MODEL` — e.g. `llama3.2:3b`
-- `OLLAMA_MEDIUM_MODEL` — e.g. `llama3.2`
-- `OLLAMA_LARGE_MODEL` — e.g. `llama3.3:70b`
+- `OLLAMA_SMALL_MODEL` — e.g. `gemma3:latest` (default)
+- `OLLAMA_MEDIUM_MODEL` — e.g. `gemma3:latest`
+- `OLLAMA_LARGE_MODEL` — e.g. `gemma3:latest` (default)
 - `OLLAMA_EMBEDDING_MODEL` — e.g. `nomic-embed-text`
 **Tips:** Completely free and private. Requires Ollama running on your machine or a server. Pull models with `ollama pull <model>`. For embeddings use `nomic-embed-text`.
 
@@ -115,83 +116,8 @@ where to get the credentials, minimum required fields, and tips for optional fie
 - `AI_GATEWAY_BASE_URL` — Your gateway endpoint URL
 - `AI_GATEWAY_SMALL_MODEL` / `AI_GATEWAY_LARGE_MODEL` / `AI_GATEWAY_EMBEDDING_MODEL` — Model IDs
 - `AI_GATEWAY_IMAGE_MODEL` — For image generation
-- `AI_GATEWAY_TIMEOUT_MS` — Request timeout, default 30000ms
+- `AI_GATEWAY_TIMEOUT_MS` — Request timeout, default 60000ms
 **Tips:** Routes model calls through Vercel's AI gateway for caching, rate limiting, and observability. Useful if you're already on Vercel.
-
-### DeepSeek
-**Get credentials:** https://platform.deepseek.com/api_keys
-**Minimum required:** `DEEPSEEK_API_KEY`
-**Variables:**
-- `DEEPSEEK_API_KEY` — Your API key from platform.deepseek.com
-- `DEEPSEEK_SMALL_MODEL` — e.g. `deepseek-chat`
-- `DEEPSEEK_LARGE_MODEL` — e.g. `deepseek-reasoner`
-**Tips:** DeepSeek offers competitive pricing and strong reasoning models. The `deepseek-reasoner` model supports chain-of-thought reasoning.
-
-### Together AI
-**Get credentials:** https://api.together.xyz/settings/api-keys
-**Minimum required:** `TOGETHER_API_KEY`
-**Variables:**
-- `TOGETHER_API_KEY` — From api.together.xyz
-- `TOGETHER_SMALL_MODEL` — e.g. `meta-llama/Llama-3.2-3B-Instruct-Turbo`
-- `TOGETHER_LARGE_MODEL` — e.g. `meta-llama/Llama-3.3-70B-Instruct-Turbo`
-- `TOGETHER_EMBEDDING_MODEL` — e.g. `togethercomputer/m2-bert-80M-8k-retrieval`
-- `TOGETHER_IMAGE_MODEL` — e.g. `black-forest-labs/FLUX.1-schnell`
-**Tips:** Together AI hosts a wide range of open-source models. Great for accessing Llama, Mixtral, and other open models via API.
-
-### Mistral
-**Get credentials:** https://console.mistral.ai/api-keys
-**Minimum required:** `MISTRAL_API_KEY`
-**Variables:**
-- `MISTRAL_API_KEY` — From console.mistral.ai
-- `MISTRAL_SMALL_MODEL` — e.g. `mistral-small-latest`
-- `MISTRAL_LARGE_MODEL` — e.g. `mistral-large-latest`
-- `MISTRAL_EMBEDDING_MODEL` — e.g. `mistral-embed`
-**Tips:** Mistral models are fast and cost-effective. Good for European data residency requirements.
-
-### Cohere
-**Get credentials:** https://dashboard.cohere.com/api-keys
-**Minimum required:** `COHERE_API_KEY`
-**Variables:**
-- `COHERE_API_KEY` — From dashboard.cohere.com
-- `COHERE_SMALL_MODEL` — e.g. `command-r`
-- `COHERE_LARGE_MODEL` — e.g. `command-r-plus`
-- `COHERE_EMBEDDING_MODEL` — e.g. `embed-english-v3.0`
-**Tips:** Cohere excels at RAG (retrieval-augmented generation) and multilingual tasks. Their embedding models are production-grade.
-
-### Perplexity
-**Get credentials:** https://www.perplexity.ai/settings/api
-**Minimum required:** `PERPLEXITY_API_KEY`
-**Variables:**
-- `PERPLEXITY_API_KEY` — From perplexity.ai settings
-- `PERPLEXITY_SMALL_MODEL` — e.g. `llama-3.1-sonar-small-128k-online`
-- `PERPLEXITY_LARGE_MODEL` — e.g. `llama-3.1-sonar-large-128k-online`
-**Tips:** Perplexity models have built-in web search — ideal for tasks requiring up-to-date information.
-
-### Google Antigravity
-**Get credentials:** Google Cloud API key with Antigravity access
-**Minimum required:** `GOOGLE_CLOUD_API_KEY`
-**Variables:**
-- `GOOGLE_CLOUD_API_KEY` — Google Cloud API key
-**Tips:** Google Antigravity is a specialized Google model provider. Requires separate Google Cloud credentials from Google Gemini.
-
-### Qwen
-**Minimum required:** Configure via provider plugins config in `milady.json`
-**Variables:**
-- Set model IDs via the `providers.qwen` config block in `milady.json`
-**Tips:** Qwen models from Alibaba Cloud. Configure through the providers section of your config.
-
-### Minimax
-**Minimum required:** Configure via provider plugins config in `milady.json`
-**Variables:**
-- Set model IDs via the `providers.minimax` config block in `milady.json`
-**Tips:** Minimax provides Chinese and multilingual AI models.
-
-### Zai
-**Get credentials:** From Homunculus Labs
-**Minimum required:** `ZAI_API_KEY`
-**Variables:**
-- `ZAI_API_KEY` — Your Zai API key from Homunculus Labs
-**Tips:** Zai is a model provider from Homunculus Labs. Plugin package: `@homunculuslabs/plugin-zai`.
 
 ### Eliza Cloud
 **Get credentials:** From the elizaOS Cloud service
@@ -242,27 +168,32 @@ where to get the credentials, minimum required fields, and tips for optional fie
 **Tips:** Use negative IDs for groups (they start with -100). Use `TELEGRAM_ALLOWED_CHATS` to restrict who can talk to the bot for safety.
 
 ### Twitter / X
+Twitter/X integration is bundled with the **xAI** provider plugin (`@elizaos/plugin-xai`). There is no separate `@elizaos/plugin-twitter`.
+
 **Get credentials:** https://developer.twitter.com/en/portal/dashboard
-**Minimum required:** All 4 OAuth keys: `TWITTER_API_KEY`, `TWITTER_API_SECRET_KEY`, `TWITTER_ACCESS_TOKEN`, `TWITTER_ACCESS_TOKEN_SECRET`
-**Variables:**
-- `TWITTER_API_KEY` — Consumer API Key
-- `TWITTER_API_SECRET_KEY` — Consumer API Secret
-- `TWITTER_ACCESS_TOKEN` — Access Token (from "Keys and Tokens" tab)
-- `TWITTER_ACCESS_TOKEN_SECRET` — Access Token Secret
-- `TWITTER_DRY_RUN` — `true` to test without actually posting
-- `TWITTER_POST_ENABLE` — `true` to enable autonomous posting
-- `TWITTER_POST_INTERVAL_MIN` / `TWITTER_POST_INTERVAL_MAX` — Minutes between posts (e.g. 90/180)
-- `TWITTER_POST_IMMEDIATELY` — `true` to post on startup
-- `TWITTER_AUTO_RESPOND_MENTIONS` — `true` to reply to @mentions
-- `TWITTER_POLL_INTERVAL` — Seconds between mention checks (e.g. 120)
-- `TWITTER_SEARCH_ENABLE` / `TWITTER_ENABLE_TIMELINE` / `TWITTER_ENABLE_DISCOVERY` — Advanced engagement modes
+**Minimum required:** xAI plugin enabled + Twitter OAuth keys in connector config or env vars.
+**Variables (xAI plugin `X_*` convention):**
+- `X_API_KEY` — Twitter API consumer key
+- `X_API_SECRET` — Twitter API consumer secret
+- `X_ACCESS_TOKEN` — OAuth access token
+- `X_ACCESS_TOKEN_SECRET` — OAuth access token secret
+- `X_AUTH_MODE` — `api_key` (default) or `oauth`
+- `X_ENABLE_POST` — `true` to enable autonomous posting
+- `X_ENABLE_REPLIES` — `true` to reply to @mentions
+- `X_ENABLE_ACTIONS` — `true` to enable like/retweet/quote actions
+
+**Connector config alternative** — set these under `connectors.twitter` in `milady.json`:
+- `apiKey`, `apiSecretKey`, `accessToken`, `accessTokenSecret` — OAuth credentials
+- `postEnable`, `postIntervalMin`, `postIntervalMax`, `dryRun` — posting behavior
+- `searchEnable`, `autoRespondMentions`, `pollInterval` — engagement settings
+
 **Setup steps:**
 1. Apply for developer account at developer.twitter.com (instant for basic tier)
 2. Create a Project and App
 3. Generate all 4 keys from "Keys and Tokens" tab
 4. Set app permissions to Read and Write
 5. Regenerate tokens AFTER setting permissions
-**Tips:** Start with `TWITTER_DRY_RUN=true` to verify without posting. Free API tier has 500 posts/month. You need ALL 4 OAuth keys — missing any one will cause auth failure.
+**Tips:** Start with `TWITTER_DRY_RUN=true` to verify without posting. Free API tier has very limited write access — check [X developer docs](https://developer.twitter.com/en/docs/twitter-api/rate-limits) for current limits. You need ALL 4 OAuth keys — missing any one will cause auth failure.
 
 ### Slack
 **Get credentials:** https://api.slack.com/apps → Create New App
@@ -344,6 +275,9 @@ where to get the credentials, minimum required fields, and tips for optional fie
 **Tips:** Neynar is required — it's the indexer that makes Farcaster data accessible via API.
 
 ### WeChat
+
+> **Not yet available:** The `@elizaos/plugin-wechat` package is not currently in the plugin registry. The configuration below is for reference when the plugin becomes available.
+
 **Get credentials:** From your WeChat proxy service provider
 **Minimum required:** `WECHAT_API_KEY` + proxy URL in config
 **Variables:**
@@ -475,6 +409,21 @@ where to get the credentials, minimum required fields, and tips for optional fie
 - `IMESSAGE_ENABLED` — `true` to enable
 **Tips:** macOS only. Requires Full Disk Access permission for the app to read the Messages database. Only works on the machine that has iMessage configured.
 
+### BlueBubbles (iMessage via local server)
+**Get credentials:** Install [BlueBubbles server](https://bluebubbles.app) on a Mac with iMessage
+**Minimum required:** `BLUEBUBBLES_PASSWORD`
+**Variables:**
+- `BLUEBUBBLES_PASSWORD` — Password set in the BlueBubbles server app
+- `BLUEBUBBLES_SERVER_URL` — BlueBubbles server URL (e.g. `http://192.168.1.50:1234`)
+- `BLUEBUBBLES_WEBHOOK_PATH` — Custom webhook endpoint path
+- `BLUEBUBBLES_DM_POLICY` — `allow`, `deny`, or `allowlist`
+- `BLUEBUBBLES_ALLOW_FROM` — Comma-separated allowed senders
+- `BLUEBUBBLES_GROUP_POLICY` — Group message policy
+- `BLUEBUBBLES_GROUP_ALLOW_FROM` — Comma-separated allowed groups
+- `BLUEBUBBLES_SEND_READ_RECEIPTS` — `true` to send read receipts
+- `BLUEBUBBLES_ENABLED` — `true` to enable
+**Tips:** Unlike direct iMessage, BlueBubbles works over the network — the agent doesn't need to run on the same Mac. Supports rich actions: tapbacks, edit/unsend, effects, attachments, and group management.
+
 ### Blooio (SMS via API)
 **Get credentials:** https://bloo.io
 **Minimum required:** `BLOOIO_API_KEY`
@@ -483,7 +432,7 @@ where to get the credentials, minimum required fields, and tips for optional fie
 - `BLOOIO_WEBHOOK_URL` — Your public URL for incoming SMS webhooks
 - `BLOOIO_WEBHOOK_SECRET` — Secret for webhook signature verification
 - `BLOOIO_BASE_URL` — bloo.io API base URL (leave as default)
-- `BLOOIO_PHONE_NUMBER` — Phone number to send from
+- `BLOOIO_FROM_NUMBER` — Phone number to send from
 - `BLOOIO_WEBHOOK_PORT` — Port for webhook listener
 **Tips:** Blooio bridges iMessage/SMS. Requires a Mac running the Blooio app.
 
@@ -526,9 +475,9 @@ where to get the credentials, minimum required fields, and tips for optional fie
 
 ### Mattermost
 **Get credentials:** Your Mattermost instance → System Console → Integrations → Bot Accounts
-**Minimum required:** `MATTERMOST_BASE_URL` + `MATTERMOST_BOT_TOKEN`
+**Minimum required:** `MATTERMOST_SERVER_URL` + `MATTERMOST_BOT_TOKEN`
 **Variables:**
-- `MATTERMOST_BASE_URL` — e.g. `https://mattermost.yourcompany.com`
+- `MATTERMOST_SERVER_URL` — e.g. `https://mattermost.yourcompany.com`
 - `MATTERMOST_BOT_TOKEN` — From System Console → Bot Accounts → Add Bot Account
 - `MATTERMOST_TEAM_ID` — Your team ID (from team URL or API)
 - `MATTERMOST_DM_POLICY` / `MATTERMOST_GROUP_POLICY` — `allow-all` or `allow-from`
@@ -593,6 +542,8 @@ Connect to any MCP server for extended tool capabilities.
 **Tips:** MCP servers can provide tools (web search, code execution, file access, databases, etc.) directly to the AI. See https://modelcontextprotocol.io for available servers.
 
 ### IQ (Solana On-chain)
+> **Note:** The IQ plugin is an upstream elizaOS connector not included in the bundled `plugins.json` registry. Install from the remote registry if needed.
+
 On-chain chat via Solana blockchain.
 **Minimum required:** `SOLANA_PRIVATE_KEY` + `IQ_GATEWAY_URL`
 **Variables:**
@@ -612,6 +563,8 @@ Monitors Gmail via Google Pub/Sub push notifications.
 ---
 
 ## Streaming (Live Broadcasting)
+
+> **Note:** All streaming plugins listed below are upstream elizaOS plugins and are not included in the bundled `plugins.json` registry. They are installable from the remote elizaOS plugin registry.
 
 ### Enable Streaming (streaming-base)
 Adds the Stream tab to the UI with RTMP destination management.

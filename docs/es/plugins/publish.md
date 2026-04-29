@@ -46,10 +46,10 @@ El `package.json` de tu plugin debe incluir estos campos:
     "url": "https://github.com/yourorg/plugin-my-feature"
   },
   "peerDependencies": {
-    "@elizaos/core": "workspace:*"
+    "@elizaos/core": ">=2.0.0-alpha"
   },
   "devDependencies": {
-    "@elizaos/core": "workspace:*",
+    "@elizaos/core": "alpha",
     "typescript": "^5.0.0"
   }
 }

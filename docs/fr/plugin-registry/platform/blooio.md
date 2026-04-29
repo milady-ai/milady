@@ -13,7 +13,7 @@ Le plugin Blooio connecte les agents Milady à la messagerie iMessage et SMS via
 </div>
 
 ```bash
-milady plugins install blooio
+milady plugins install @elizaos/plugin-blooio
 ```
 
 <div id="setup">

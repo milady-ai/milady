@@ -60,6 +60,22 @@ export default scenario({
         includesAny: ["whatsapp", "message", "chat"],
       }),
     },
+    {
+      type: "custom",
+      name: "whatsapp-read-requires-channel-context",
+      predicate: async (ctx) => {
+        const inboxActions = ctx.actionsCalled.filter((action) =>
+          ["INBOX", "OWNER_INBOX"].includes(action.actionName),
+        );
+        const blob = JSON.stringify(inboxActions).toLowerCase();
+        if (!blob.includes("whatsapp")) {
+          return "expected the inbox read to be scoped to WhatsApp";
+        }
+        if (!/(chat|thread|room|message)/i.test(blob)) {
+          return "expected WhatsApp chat/message context in the inbox read payload";
+        }
+      },
+    },
     judgeRubric({
       name: "whatsapp-read-rubric",
       threshold: 0.7,

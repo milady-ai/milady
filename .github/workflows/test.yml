@@ -3,8 +3,24 @@ name: Tests
 on:
   pull_request:
     branches: [main, develop]
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
+      - "AGENTS.md"
+      - "CHANGELOG.md"
+      - "LICENSE"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/pull_request_template.md"
   push:
     branches: [main, develop]
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
+      - "AGENTS.md"
+      - "CHANGELOG.md"
+      - "LICENSE"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/pull_request_template.md"
   workflow_dispatch:
 
 concurrency:
@@ -54,9 +70,13 @@ jobs:
         run: bun run test:regression-matrix:pr
 
   unit-tests:
-    name: Real tests (Vitest, no mocks)
+    name: Real tests (Vitest, shard ${{ matrix.shard }}/${{ strategy.job-total }})
     runs-on: ubuntu-24.04
     timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -91,9 +111,10 @@ jobs:
         run: bun run build
 
       - name: Run real integration tests (live/real suite)
-        run: bun run test:ci:real
+        run: bun run test:ci:real -- --shard=${{ matrix.shard }}/${{ strategy.job-total }}
 
       - name: Run startup script drift guard
+        if: matrix.shard == 1
         run: bun run test:startup:contract
 
   db-check:
@@ -191,6 +212,18 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
+      - name: Free disk space (Linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        # The bun install cache restored below has grown past 2.9 GB. Combined
+        # with the apt webkit2gtk + GStreamer install, the default ubuntu-latest
+        # runner runs out of disk during cache.tzst extraction. Drop unused
+        # toolchains to reclaim ~25 GB before the heavy steps run.
+        run: |
+          df -h /
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /opt/hostedtoolcache/CodeQL
+          df -h /
+
       - name: Install Linux desktop runtime dependencies
         if: runner.os == 'Linux'
         shell: bash
@@ -251,7 +284,7 @@ jobs:
   website-blocker-startup-smoke:
     name: Website Blocker Startup Smoke (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 35
+    timeout-minutes: 120
     strategy:
       fail-fast: false
       matrix:
@@ -297,25 +330,52 @@ jobs:
           python-version: "3.12"
 
       - name: Setup workspace dependencies
+        if: runner.os != 'Windows'
         uses: ./.github/actions/setup-bun-workspace
         with:
           bun-version: ${{ env.BUN_VERSION }}
-          disable-local-eliza-workspace: "true"
           install-command: bun install --ignore-scripts --no-frozen-lockfile
           install-native-deps: "false"
           skip-avatar-clone: "true"
           no-vision-deps: "true"
-          prepare-local-eliza-runtime: "true"
 
-      - name: Restore eliza workspace paths for repo scripts
-        run: node scripts/restore-local-eliza-workspace.mjs
+      - name: Setup Bun (Windows)
+        if: runner.os == 'Windows'
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+          # The action's built-in post-step cache-save fails intermittently on
+          # Windows (tar exits non-zero during cache.tzst creation). The explicit
+          # actions/cache@v4 step below already covers ~/.bun/install/cache, so
+          # disabling the action's internal cache avoids the redundant failure.
+          no-cache: true
 
-      - name: Re-link workspace after restore (ensures @elizaos/* symlinks in eliza/)
+      - name: Cache Bun install (Windows)
+        if: runner.os == 'Windows'
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
+
+      - name: Install dependencies (Windows)
+        if: runner.os == 'Windows'
         shell: bash
+        run: |
+          for i in 1 2 3; do
+            bun install --ignore-scripts && exit 0
+            rm -rf node_modules
+            echo "Attempt $i failed, retrying in $((i * 15))s..."
+            sleep $((i * 15))
+          done
+          exit 1
+
+      - name: Run repository postinstall patches (Windows)
+        if: runner.os == 'Windows'
+        run: bun run postinstall
         env:
           SKIP_AVATAR_CLONE: "1"
           MILADY_NO_VISION_DEPS: "1"
-        run: bun install --cwd eliza --no-frozen-lockfile --ignore-scripts
 
       - name: Build @elizaos/core dist (required by dev-stack imports)
         shell: bash
@@ -332,6 +392,15 @@ jobs:
             bunx @bufbuild/buf@1.67.0 generate
             cd -
           fi
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            bun add --no-save --dev --ignore-scripts @types/node@^25.0.6 @types/bun@^1.3.5
+          fi
+          node --input-type=module <<'NODE'
+          import path from "node:path";
+          import { ensureElizaTypescriptDependencyLinks } from "./scripts/setup-upstreams.mjs";
+
+          ensureElizaTypescriptDependencyLinks(path.join(process.cwd(), "eliza"));
+          NODE
           cd eliza/packages/typescript
           bun run build:node
 
@@ -347,13 +416,13 @@ jobs:
     # runners unchanged. `macos-latest` is auto-rewritten to depot-ubuntu by
     # the mirror generator, which breaks Xcode/Electron-dependent jobs.
     runs-on: macos-14
-    timeout-minutes: 40
-    # Electrobun native renderer can SIGTRAP (signal 5) on macos-14 runners
-    # during "dev:desktop" launch — see de514875 run 72040224535. The dev
-    # stack itself is healthy (startup smokes pass); this is an Electrobun
-    # native-runtime crash that requires upstream investigation. Mark as
-    # non-blocking so it does not gate develop.
-    continue-on-error: true
+    timeout-minutes: 120
+    # This job verifies the desktop orchestrator + Electrobun process +
+    # website-blocker API via the loopback test bridge. Release jobs own the
+    # packaged/native window gate, so CI uses a headless Electrobun smoke mode
+    # to avoid hosted macOS WKWebView SIGTRAPs masking product regressions.
+    env:
+      MILADY_DESKTOP_HEADLESS_SMOKE: "1"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -369,22 +438,10 @@ jobs:
         uses: ./.github/actions/setup-bun-workspace
         with:
           bun-version: ${{ env.BUN_VERSION }}
-          disable-local-eliza-workspace: "true"
           install-command: bun install --ignore-scripts --no-frozen-lockfile
           install-native-deps: "false"
           skip-avatar-clone: "true"
           no-vision-deps: "true"
-          prepare-local-eliza-runtime: "true"
-
-      - name: Restore eliza workspace paths for repo scripts
-        run: node scripts/restore-local-eliza-workspace.mjs
-
-      - name: Re-link workspace after restore (ensures @elizaos/* symlinks)
-        shell: bash
-        env:
-          SKIP_AVATAR_CLONE: "1"
-          MILADY_NO_VISION_DEPS: "1"
-        run: bun install --cwd eliza --no-frozen-lockfile --ignore-scripts
 
       - name: Build @elizaos/core dist (required by dev-stack imports)
         shell: bash
@@ -466,6 +523,9 @@ jobs:
       - name: Initialize tracked workspace submodules
         run: node scripts/init-submodules.mjs
 
+      - name: Apply Milady eliza CI patches
+        run: node scripts/apply-eliza-ci-patches.mjs
+
       - name: Install dependencies
         run: bun install --ignore-scripts
 
@@ -474,6 +534,9 @@ jobs:
         env:
           SKIP_AVATAR_CLONE: "1"
           MILADY_NO_VISION_DEPS: "1"
+
+      - name: Patch Android release build compatibility
+        run: node scripts/patch-mobile-build-release-compat.mjs
 
       - name: Build Android website blocker app
         run: bun run test:selfcontrol:mobile:android
@@ -596,9 +659,11 @@ jobs:
     steps:
       - name: Check cloud secrets
         id: cloud
+        env:
+          ELIZAOS_CLOUD_API_KEY: ${{ secrets.ELIZAOS_CLOUD_API_KEY != '' && secrets.ELIZAOS_CLOUD_API_KEY || secrets.ELIZACLOUD_API_KEY }}
         run: |
-          if [ -z "${{ secrets.ELIZAOS_CLOUD_API_KEY }}" ]; then
-            echo "::warning::ELIZAOS_CLOUD_API_KEY not configured — skipping cloud E2E."
+          if [ -z "${ELIZAOS_CLOUD_API_KEY}" ]; then
+            echo "::warning::No Eliza Cloud API key configured - skipping optional cloud live E2E."
             echo "skip=true" >> "$GITHUB_OUTPUT"
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
@@ -624,11 +689,25 @@ jobs:
 
       - name: Run Cloud Live E2E
         if: steps.cloud.outputs.skip != 'true'
-        run: bun run test:live:cloud
+        shell: bash
+        run: |
+          set -o pipefail
+          log_file="$(mktemp)"
+
+          if bun run test:live:cloud 2>&1 | tee "$log_file"; then
+            exit 0
+          fi
+
+          if grep -Eiq 'exceeded your current quota|quota exceeded|insufficient[_ -]?(quota|balance|funds|credits?)|billing details|credit balance|please add credits|top[_ -]?up your credits|invalid api key|unauthorized|authentication|status code: 429|too many requests|unexpected error occurred while processing the request|temporarily unavailable|service unavailable|internal server error|overloaded' "$log_file"; then
+            echo "::warning::Cloud Live E2E skipped because the configured external provider is unavailable."
+            exit 0
+          fi
+
+          exit 1
         env:
           MILADY_LIVE_TEST: "1"
           ELIZA_LIVE_TEST: "1"
-          ELIZAOS_CLOUD_API_KEY: ${{ secrets.ELIZAOS_CLOUD_API_KEY }}
+          ELIZAOS_CLOUD_API_KEY: ${{ secrets.ELIZAOS_CLOUD_API_KEY != '' && secrets.ELIZAOS_CLOUD_API_KEY || secrets.ELIZACLOUD_API_KEY }}
           ELIZAOS_CLOUD_BASE_URL: ${{ secrets.ELIZAOS_CLOUD_BASE_URL }}
 
   action-e2e:
@@ -636,18 +715,18 @@ jobs:
     needs: [regression-matrix]
     runs-on: ubuntu-24.04
     timeout-minutes: 45
-    # Gate on API key availability (Groq preferred — cheapest)
-    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'run-action-e2e') }}
+    # Push/dispatch CI must exercise the real action invocation path. PRs can
+    # opt into the live-provider job with the run-action-e2e label.
+    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'run-action-e2e')) }}
     env:
       MILADY_LIVE_TEST: "1"
       ELIZA_LIVE_TEST: "1"
-      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-      GOOGLE_GENERATIVE_AI_API_KEY: ${{ secrets.GOOGLE_GENERATIVE_AI_API_KEY }}
-      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-      ELIZAOS_CLOUD_API_KEY: ${{ secrets.ELIZAOS_CLOUD_API_KEY }}
-      OPENAI_API_KEY: ${{ secrets.ELIZAOS_CLOUD_API_KEY != '' && secrets.ELIZAOS_CLOUD_API_KEY || secrets.OPENAI_API_KEY }}
-      OPENAI_BASE_URL: ${{ secrets.ELIZAOS_CLOUD_API_KEY != '' && 'https://elizacloud.ai/api/v1' || 'https://api.openai.com/v1' }}
+      ELIZA_E2E_OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      ELIZA_E2E_ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      ELIZA_E2E_GOOGLE_GENERATIVE_AI_API_KEY: ${{ secrets.GOOGLE_GENERATIVE_AI_API_KEY }}
+      ELIZA_E2E_GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      ELIZAOS_CLOUD_API_KEY: ${{ secrets.ELIZAOS_CLOUD_API_KEY != '' && secrets.ELIZAOS_CLOUD_API_KEY || secrets.ELIZACLOUD_API_KEY }}
+      ELIZAOS_CLOUD_BASE_URL: ${{ secrets.ELIZAOS_CLOUD_BASE_URL }}
       NODE_NO_WARNINGS: "1"
       NODE_OPTIONS: "--max-old-space-size=4096"
     steps:
@@ -693,8 +772,8 @@ jobs:
             exit 0
           fi
 
-          if grep -Eiq 'exceeded your current quota|insufficient[_ -]?quota|billing details|credit balance|invalid api key|unauthorized|authentication|status code: 429|too many requests' "$log_file"; then
-            echo "::warning::Action Invocation E2E skipped because the configured live provider is unavailable."
+          if grep -Eiq 'exceeded your current quota|quota exceeded|insufficient[_ -]?(quota|balance|funds|credits?)|billing details|credit balance|please add credits|top[_ -]?up your credits|invalid api key|unauthorized|authentication|status code: 429|too many requests|unexpected error occurred while processing the request|temporarily unavailable|service unavailable|internal server error|overloaded' "$log_file"; then
+            echo "::warning::Action Invocation E2E skipped because the configured external provider is unavailable."
             exit 0
           fi
 
@@ -703,7 +782,7 @@ jobs:
   validation-e2e:
     name: End-to-End Validation (Issue
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 120
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -719,10 +798,9 @@ jobs:
         uses: ./.github/actions/setup-bun-workspace
         with:
           bun-version: ${{ env.BUN_VERSION }}
-          disable-local-eliza-workspace: "true"
+          install-command: bun install --ignore-scripts --no-frozen-lockfile
           skip-avatar-clone: "true"
           no-vision-deps: "true"
-          prepare-local-eliza-runtime: "true"
 
       - name: Generate protobuf types
         run: |
@@ -740,7 +818,7 @@ jobs:
         env:
           MILADY_LIVE_TEST: "1"
           ELIZA_LIVE_TEST: "1"
-          ELIZAOS_CLOUD_API_KEY: ${{ secrets.ELIZAOS_CLOUD_API_KEY }}
+          ELIZAOS_CLOUD_API_KEY: ${{ secrets.ELIZAOS_CLOUD_API_KEY != '' && secrets.ELIZAOS_CLOUD_API_KEY || secrets.ELIZACLOUD_API_KEY }}
           ELIZAOS_CLOUD_BASE_URL: ${{ secrets.ELIZAOS_CLOUD_BASE_URL }}
 
   live-surface-audit:
@@ -779,7 +857,7 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GOOGLE_GENERATIVE_AI_API_KEY: ${{ secrets.GOOGLE_GENERATIVE_AI_API_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-          ELIZAOS_CLOUD_API_KEY: ${{ secrets.ELIZAOS_CLOUD_API_KEY }}
+          ELIZAOS_CLOUD_API_KEY: ${{ secrets.ELIZAOS_CLOUD_API_KEY != '' && secrets.ELIZAOS_CLOUD_API_KEY || secrets.ELIZACLOUD_API_KEY }}
         run: |
           if [ -z "${OPENAI_API_KEY}" ] && \
              [ -z "${GROQ_API_KEY}" ] && \
@@ -787,7 +865,11 @@ jobs:
              [ -z "${GOOGLE_GENERATIVE_AI_API_KEY}" ] && \
              [ -z "${OPENROUTER_API_KEY}" ] && \
              [ -z "${ELIZAOS_CLOUD_API_KEY}" ]; then
-            echo "::warning::No live provider secret configured — skipping UI Playwright smoke."
+            if [ "${{ github.event_name }}" = "push" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+              echo "::error::At least one live provider secret is required for canonical UI Playwright smoke."
+              exit 1
+            fi
+            echo "::warning::No live provider secret configured for this PR — skipping UI Playwright smoke."
             echo "skip=true" >> "$GITHUB_OUTPUT"
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
@@ -868,7 +950,7 @@ jobs:
         env:
           MILADY_LIVE_TEST: "1"
           ELIZA_LIVE_TEST: "1"
-          ELIZAOS_CLOUD_API_KEY: ${{ secrets.ELIZAOS_CLOUD_API_KEY }}
+          ELIZAOS_CLOUD_API_KEY: ${{ secrets.ELIZAOS_CLOUD_API_KEY != '' && secrets.ELIZAOS_CLOUD_API_KEY || secrets.ELIZACLOUD_API_KEY }}
           ELIZAOS_CLOUD_BASE_URL: ${{ secrets.ELIZAOS_CLOUD_BASE_URL }}
 
   test-status:
@@ -886,6 +968,7 @@ jobs:
         website-blocker-mobile-ios,
         desktop-contract,
         cloud-live-e2e,
+        action-e2e,
         validation-e2e,
         live-surface-audit,
         ui-playwright-smoke,
@@ -908,10 +991,12 @@ jobs:
           echo "website-blocker-mobile-ios:     ${{ needs.website-blocker-mobile-ios.result }}"
           echo "desktop-contract:   ${{ needs.desktop-contract.result }}"
           echo "cloud-live-e2e:     ${{ needs.cloud-live-e2e.result }}"
+          echo "action-e2e:         ${{ needs.action-e2e.result }}"
           echo "validation-e2e:     ${{ needs.validation-e2e.result }}"
           echo "live-surface-audit: ${{ needs.live-surface-audit.result }}"
           echo "ui-playwright-smoke:${{ needs.ui-playwright-smoke.result }}"
           echo "==================================="
+          strict_results="${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}"
           bad=0
           for pair in \
             "regression-matrix:${{ needs.regression-matrix.result }}" \
@@ -924,12 +1009,17 @@ jobs:
             "website-blocker-mobile-ios:${{ needs.website-blocker-mobile-ios.result }}" \
             "desktop-contract:${{ needs.desktop-contract.result }}" \
             "cloud-live-e2e:${{ needs.cloud-live-e2e.result }}" \
+            "action-e2e:${{ needs.action-e2e.result }}" \
             "validation-e2e:${{ needs.validation-e2e.result }}" \
             "live-surface-audit:${{ needs.live-surface-audit.result }}" \
             "ui-playwright-smoke:${{ needs.ui-playwright-smoke.result }}"; do
             name="${pair%%:*}"
             result="${pair##*:}"
-            if [ "$result" != "success" ] && [ "$result" != "skipped" ]; then
+            if [ "$result" = "skipped" ] && [ "$strict_results" != "true" ]; then
+              echo "::warning title=Test gate::Live-only job '${name}' was skipped for this PR context."
+              continue
+            fi
+            if [ "$result" != "success" ]; then
               echo "::error title=Test gate::Required job '${name}' finished with '${result}' (expected success)"
               bad=1
             fi

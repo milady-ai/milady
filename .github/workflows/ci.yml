@@ -3,8 +3,24 @@ name: CI
 on:
   pull_request:
     branches: [main, develop]
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
+      - "AGENTS.md"
+      - "CHANGELOG.md"
+      - "LICENSE"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/pull_request_template.md"
   push:
     branches: [main, develop, "codex/**"]
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
+      - "AGENTS.md"
+      - "CHANGELOG.md"
+      - "LICENSE"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/pull_request_template.md"
   workflow_dispatch:
 
 concurrency:

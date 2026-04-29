@@ -134,7 +134,7 @@ That means a reloaded conversation shows the same **status trail + final outcome
 
 - **Implementation:** `eliza/packages/agent/src/api/chat-routes.ts` — `replaceCallbackText`, `preCallbackText`, `actionCallbackHistory`.
 - **Persistence + replay:** `eliza/packages/agent/src/api/conversation-routes.ts`.
-- **Example helper:** `eliza/plugins/plugin-music-player/src/utils/progressiveMessage.ts`.
+- **Example helper:** `eliza/plugins/plugin-music-player/` (submodule -- check that it is initialized).
 - **UI streaming:** [Dashboard — Chat](/dashboard/chat) (SSE / typing indicator).
 - **Changelog:** [Changelog](/changelog) — search for “action callback” or the ship date.
 

@@ -93,6 +93,32 @@ export default scenario({
         minCount: 2,
       }),
     },
+    {
+      type: "custom",
+      name: "whatsapp-reply-send-payload-is-addressed",
+      predicate: async (ctx) => {
+        const sendActions = ctx.actionsCalled.filter((action) =>
+          ["CROSS_CHANNEL_SEND", "OWNER_SEND_MESSAGE"].includes(
+            action.actionName,
+          ),
+        );
+        const confirmedSends = sendActions.filter((action) => {
+          const blob = JSON.stringify(action).toLowerCase();
+          return blob.includes("whatsapp") && /send|sent|confirmed/.test(blob);
+        });
+        if (confirmedSends.length === 0) {
+          return "expected a confirmed WhatsApp send action after the user approved the draft";
+        }
+
+        const blob = JSON.stringify(confirmedSends).toLowerCase();
+        if (!blob.includes("eve")) {
+          return "expected the WhatsApp send payload to address Eve";
+        }
+        if (!blob.includes("see you at 7")) {
+          return "expected the WhatsApp send payload to include the approved reply text";
+        }
+      },
+    },
     judgeRubric({
       name: "whatsapp-reply-rubric",
       threshold: 0.7,

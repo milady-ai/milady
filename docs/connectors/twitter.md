@@ -1,26 +1,42 @@
 ---
 title: Twitter/X Connector
 sidebarTitle: Twitter/X
-description: Connect your agent to Twitter/X using the @elizaos/plugin-twitter package.
+description: Connect your agent to Twitter/X via the xAI plugin (@elizaos/plugin-xai).
 ---
+
+> **Registry note:** `@elizaos/plugin-twitter` is not currently listed in the Milady plugin registry (`plugins.json`). The package may be available from npm or a separate elizaOS plugin repository. Verify availability before configuring.
 
 Connect your agent to Twitter/X for social media engagement.
 
+> **Availability:** `@elizaos/plugin-twitter` is an on-demand elizaOS plugin resolved from the remote plugin registry. It is **not** included in Milady's bundled `plugins.json` index. The plugin auto-installs at runtime when a valid token is detected in your connector configuration.
+
 ## Overview
 
-The Twitter connector is an external elizaOS plugin that bridges your agent to Twitter/X. It is auto-enabled by the runtime when a valid token is detected in your connector configuration.
+The Twitter connector is an elizaOS plugin that bridges your agent to Twitter/X. It is auto-enabled by the runtime when a valid token is detected in your connector configuration.
 
-## Package Info
+## Installation
+
+```bash
+milady plugins install @elizaos/plugin-twitter
+```
+
+## Configuration
 
 | Field | Value |
 |-------|-------|
-| Package | `@elizaos/plugin-twitter` |
+| Package | `@elizaos/plugin-xai` |
 | Config key | `connectors.twitter` |
-| Auto-enable trigger | `botToken`, `token`, or `apiKey` is truthy in connector config |
+| Auto-enable trigger | `apiKey`, `token`, or X OAuth env vars (`X_API_KEY`, etc.) |
+
+<Note>
+`@elizaos/plugin-twitter` is the dedicated Twitter connector and handles posting, mentions, and timeline interactions. The separate `@elizaos/plugin-xai` package also includes X/Twitter integration alongside Grok model access — if you already have xAI configured with `X_*` env vars, you may not need this connector separately.
+</Note>
 
 ## Minimal Configuration
 
-In `~/.milady/milady.json`:
+The connector auto-enables when `botToken`, `token`, or `apiKey` is truthy in the connector config and `enabled` is not explicitly `false`.
+
+Configure in `~/.milady/milady.json`:
 
 ```json
 {
@@ -47,21 +63,39 @@ To explicitly disable the connector even when a token is present:
 }
 ```
 
-## Auto-Enable Mechanism
+## Setup
 
-The `plugin-auto-enable.ts` module checks `connectors.twitter` in your config. If any of the fields `botToken`, `token`, or `apiKey` is truthy (and `enabled` is not explicitly `false`), the runtime automatically loads `@elizaos/plugin-twitter`.
+After installation, the `plugin-auto-enable.ts` module checks `connectors.twitter` in your config. If any of the fields `botToken`, `token`, or `apiKey` is truthy (and `enabled` is not explicitly `false`), the runtime automatically loads `@elizaos/plugin-twitter`.
 
-No environment variable is required to trigger auto-enable — it is driven entirely by the connector config object.
+No environment variable is required to trigger auto-enable — it is driven entirely by the connector config object. However, the plugin must first be installed via the registry (see [Installation](#installation) above).
 
 ## Environment Variables
 
-Unlike Discord, Telegram, and Slack, the Twitter connector does **not** inject secrets into `process.env` via the runtime's `CHANNEL_ENV_MAP`. Twitter credentials are read directly from the `connectors.twitter` config object by the plugin.
+Unlike Discord, Telegram, and Slack, the Milady runtime does **not** inject Twitter secrets into `process.env` via the `CHANNEL_ENV_MAP`. The plugin reads credentials directly from the `connectors.twitter` config object.
+
+The plugin also reads these environment variables as a fallback if the corresponding config fields are absent:
+
+| Variable | Config Equivalent |
+|----------|-------------------|
+| `TWITTER_API_KEY` | `apiKey` |
+| `TWITTER_API_SECRET_KEY` | `apiSecretKey` |
+| `TWITTER_ACCESS_TOKEN` | `accessToken` |
+| `TWITTER_ACCESS_TOKEN_SECRET` | `accessTokenSecret` |
+| `TWITTER_DRY_RUN` | `dryRun` |
+| `TWITTER_POST_ENABLE` | `postEnable` |
+| `TWITTER_POST_INTERVAL_MIN` | `postIntervalMin` |
+| `TWITTER_POST_INTERVAL_MAX` | `postIntervalMax` |
+| `TWITTER_SEARCH_ENABLE` | `searchEnable` |
+| `TWITTER_AUTO_RESPOND_MENTIONS` | `autoRespondMentions` |
+| `TWITTER_POLL_INTERVAL` | `pollInterval` |
+
+Config fields take precedence over environment variables. When using config-based setup, you do not need to set any environment variables.
 
 ## Full Configuration Reference
 
 All fields are nested under `connectors.twitter` in `milady.json`.
 
-Note: Twitter does **not** support multi-account configuration or the `accounts` array pattern used by some other connectors. Only a single Twitter account can be configured per agent.
+Note: Twitter does **not** support multi-account configuration. Only a single Twitter account can be configured per agent.
 
 ### Authentication
 
@@ -134,6 +168,6 @@ The posting interval is calculated as a random value between `postIntervalMin` a
 
 ## Related
 
-- [Twitter plugin reference](/plugin-registry/platform/twitter)
+- [xAI plugin reference](/plugin-registry/llm/xai)
 - [Connectors overview](/guides/connectors)
 - [Configuration reference](/configuration)

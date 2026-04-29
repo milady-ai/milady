@@ -4,7 +4,7 @@ sidebarTitle: Self-Updates
 description: How Milady checks for updates, manages release channels, detects installation methods, and performs self-upgrades.
 ---
 
-Milady includes a built-in update system that checks the npm registry for new versions, notifies users of available updates, and can perform in-place upgrades across multiple installation methods. The system is implemented across three service modules: `update-checker.ts` (registry communication), `update-notifier.ts` (background notifications), and `self-updater.ts` (install-method detection and upgrade execution).
+Milady includes a built-in update system inherited from the elizaOS framework. It checks the npm registry for new versions, notifies users of available updates, and can perform in-place upgrades across multiple installation methods. The system is implemented across three service modules: `update-checker.ts` (registry communication), `update-notifier.ts` (background notifications), and `self-updater.ts` (install-method detection and upgrade execution).
 
 ## How It Works Internally
 
@@ -12,7 +12,7 @@ The update system has three layers that work together:
 
 ### Version Resolution
 
-The current Milady version is resolved at import time via `src/runtime/version.ts`, which calls `resolveMiladyVersion()`. This function checks, in order:
+The current Milady version is resolved at import time via the version module, which calls `resolveMiladyVersion()`. This function checks, in order:
 
 1. A build-time injected define or environment variable (for bundled/embedded builds)
 2. The `version` field from the nearest `package.json`
@@ -22,14 +22,14 @@ This version string is used as the baseline for all update comparisons.
 
 ### Registry Queries
 
-The update checker (`src/services/update-checker.ts`) fetches version metadata from the npm registry using the abbreviated metadata endpoint:
+The update checker (`@elizaos/agent/services/update-checker.ts`) fetches version metadata from the npm registry using the abbreviated metadata endpoint:
 
 ```
-GET https://registry.npmjs.org/milady
+GET https://registry.npmjs.org/elizaos
 Accept: application/vnd.npm.install-v1+json
 ```
 
-The `application/vnd.npm.install-v1+json` accept header requests only the abbreviated package metadata (dist-tags, versions), rather than the full document with all tarball URLs and readmes. This keeps the response small and fast.
+Milady inherits its update system from the elizaOS framework, so the checker queries the upstream `elizaos` npm package. The `application/vnd.npm.install-v1+json` accept header requests only the abbreviated package metadata (dist-tags, versions), rather than the full document with all tarball URLs and readmes. This keeps the response small and fast.
 
 The response's `dist-tags` object maps npm dist-tag names to version strings:
 
@@ -85,10 +85,14 @@ On every CLI startup, the `scheduleUpdateNotification()` function fires a backgr
 
 ```
 Update available: 1.2.0 -> 1.3.0
-Run milady update to install
+Run eliza update to install
 ```
 
-The notification uses Milady's terminal theme for coloring: the current version is dimmed, the new version is highlighted in green, and the channel suffix (for non-stable channels) is shown in parentheses.
+The notification uses the terminal theme for coloring: the current version is dimmed, the new version is highlighted in green, and the channel suffix (for non-stable channels) is shown in parentheses.
+
+<Note>
+The update notification text says `eliza update` because Milady's update system is inherited from the elizaOS framework. Both `milady update` and `eliza update` work as CLI commands.
+</Note>
 
 The background check is skipped when:
 
@@ -117,7 +121,7 @@ When the interval has not elapsed, the `shouldSkipCheck()` function returns `tru
 The update checker fetches dist-tags from the npm registry:
 
 ```
-GET https://registry.npmjs.org/milady
+GET https://registry.npmjs.org/elizaos
 Accept: application/vnd.npm.install-v1+json
 ```
 
@@ -242,24 +246,24 @@ When switching channels, the cached `lastCheckAt` and `lastCheckVersion` are cle
 
 ## Installation Method Detection
 
-Milady automatically detects how it was installed to determine the correct update command. The `detectInstallMethod()` function in `src/services/self-updater.ts` works by:
+Milady automatically detects how it was installed to determine the correct update command. The `detectInstallMethod()` function works by:
 
-1. Running `which milady` to find the binary path (5-second timeout)
+1. Running `which eliza` to find the binary path (5-second timeout)
 2. Resolving symlinks via `fs.realpathSync()` to get the true filesystem location
 3. Checking the resolved path against heuristic patterns
 
 | Install Method | Detection Heuristic | Update Command |
 |---------------|--------------------|--------------------|
-| `npm-global` | Binary path contains `node_modules` | `npm install -g miladyai@<dist-tag>` |
-| `bun-global` | Binary path contains `/.bun/` | `bun install -g miladyai@<dist-tag>` |
+| `npm-global` | Binary path contains `node_modules` | `npm install -g elizaos@<dist-tag>` |
+| `bun-global` | Binary path contains `/.bun/` | `bun install -g elizaos@<dist-tag>` |
 | `homebrew` | Binary path contains `/Cellar/` or `/homebrew/` | `brew upgrade milady` |
 | `snap` | Binary path contains `/snap/` | `sudo snap refresh milady --channel=<channel>` |
 | `apt` | Binary path starts with `/usr/` (no `node_modules`) | `sudo apt-get update && sudo apt-get install --only-upgrade -y milady` |
 | `flatpak` | Binary path contains `/flatpak/` or `ai.milady.Milady` | `flatpak update ai.milady.Milady` |
 | `local-dev` | `devDependencies` found in root `package.json` | Not supported -- use `git pull` |
-| `unknown` | Fallback when no heuristic matches | `npm install -g miladyai@<dist-tag>` (fallback) |
+| `unknown` | Fallback when no heuristic matches | `npm install -g elizaos@<dist-tag>` (fallback) |
 
-If `which milady` returns nothing (binary not in PATH), the detection falls back to checking whether the current directory is a local development checkout (by looking for `devDependencies` in the root `package.json`).
+If `which eliza` returns nothing (binary not in PATH), the detection falls back to checking whether the current directory is a local development checkout (by looking for `devDependencies` in the root `package.json`).
 
 <Info>
 For Snap installations, the channel mapping differs slightly: `nightly` maps to the Snap `edge` channel, since Snap does not have a `nightly` channel concept.
@@ -278,9 +282,9 @@ For Snap installations, the channel mapping differs slightly: `nightly` maps to 
 The `buildUpdateCommand()` function takes the detected install method and target channel, then returns the appropriate shell command and arguments. For npm and bun installs, the version specifier uses the channel's dist-tag:
 
 ```
-miladyai@latest     (stable channel)
-miladyai@beta       (beta channel)
-miladyai@nightly    (nightly channel)
+elizaos@latest     (stable channel)
+elizaos@beta       (beta channel)
+elizaos@nightly    (nightly channel)
 ```
 
 For Homebrew, the command is simply `brew upgrade milady` (Homebrew manages version resolution internally). The `apt` case wraps the update in `sh -c` since it requires two sequential commands.
@@ -320,7 +324,7 @@ When `milady update` runs (without `--check`), the following steps occur:
 
 ### Post-Update Verification
 
-After the update command completes, Milady verifies the installation by running `milady --version` and parsing the output. The regex `(\d+\.\d+\.\d+(?:-[\w.]+)?)` handles both stable versions (e.g., `2.0.0`) and pre-release tags (e.g., `2.1.0-beta.3`). The version output may include a prefix like `milady/2.0.0`, which the parser handles.
+After the update command completes, the updater verifies the installation by running the CLI with `--version` and parsing the output. The regex `(\d+\.\d+\.\d+(?:-[\w.]+)?)` handles both stable versions (e.g., `2.0.0`) and pre-release tags (e.g., `2.1.0-beta.3`).
 
 If the version cannot be read (e.g., the binary is missing or corrupted), the command reports success for the update itself but warns that it could not verify the new version.
 
@@ -369,6 +373,10 @@ npm install -g miladyai@2.0.0
 bun install -g miladyai@2.0.0
 ```
 
+<Note>
+The npm package name for end-user installation is `miladyai`, while the update checker queries the upstream `elizaos` package for version comparisons.
+</Note>
+
 The `--force` flag on `milady update` bypasses the interval cache but still respects the configured channel. It does not bypass version pinning at the package manager level.
 
 ## Rollback
@@ -399,14 +407,14 @@ The background update notification writes to stderr (not stdout) to avoid interf
 
 ```
 Update available: 2.0.0-alpha.26 -> 2.0.0
-Run milady update to install
+Run eliza update to install
 ```
 
 For non-stable channels, the channel name is appended:
 
 ```
 Update available: 2.0.0-alpha.26 -> 2.1.0-beta.3 (beta)
-Run milady update to install
+Run eliza update to install
 ```
 
 ### Suppressing Notifications
@@ -452,8 +460,8 @@ To perform offline updates, download the package tarball on a connected machine 
 # On a connected machine
 npm pack miladyai@2.0.0
 
-# Transfer milady-2.0.0.tgz to the air-gapped machine, then:
-npm install -g ./milady-2.0.0.tgz
+# Transfer miladyai-2.0.0.tgz to the air-gapped machine, then:
+npm install -g ./miladyai-2.0.0.tgz
 ```
 
 ## Configuration Reference
@@ -502,7 +510,7 @@ When a new Milady version introduces breaking changes:
 
 ## Plugin Version Compatibility
 
-The `src/services/version-compat.ts` module maintains a map of critical exports and the core version that introduced them. When plugins fail to load, the `diagnoseNoAIProvider()` function checks whether the failure is due to version skew and produces actionable error messages like:
+The version compatibility module maintains a map of critical exports and the core version that introduced them. When plugins fail to load, the `diagnoseNoAIProvider()` function checks whether the failure is due to version skew and produces actionable error messages like:
 
 ```
 No AI model provider loaded. This may be caused by a version mismatch

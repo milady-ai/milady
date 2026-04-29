@@ -92,6 +92,24 @@ append_dependency_spec_package() {
   packages+=("$package_name")
 }
 
+ensure_eliza_submodule_manifest() {
+  local manifest="$1"
+  local submodule_path="$2"
+
+  [[ -f "$manifest" ]] && return 0
+  [[ -d eliza ]] || return 0
+  command -v git >/dev/null 2>&1 || return 0
+
+  if ! git -C eliza submodule update --init --depth=1 "$submodule_path" >/dev/null; then
+    echo "::warning::Could not initialize eliza/$submodule_path before fallback dependency install"
+    return 0
+  fi
+
+  if [[ ! -f "$manifest" ]]; then
+    echo "::warning::Expected fallback dependency manifest is still missing: $manifest"
+  fi
+}
+
 # Append every third-party dependency from a manifest's `dependencies` section,
 # preserving the manifest's pinned spec. Used to keep package builds (e.g.
 # eliza/packages/typescript) functional after disable-local-eliza-workspace
@@ -122,43 +140,26 @@ append_third_party_dependencies_from_manifest() {
   done <<< "$entries"
 }
 
+# Delegates manifest-scoped node_modules linking to a single Node process.
+#
+# The previous bash version iterated per package and on Windows spawned
+# `cygpath` + `cmd.exe /C "rmdir"` + `cmd.exe /C "mklink /J"` per entry across
+# multiple manifest passes. Hundreds of cygwin forks under load triggered
+# `child_copy: cygheap read copy failed, ... Win32 error 299` and crashed bash
+# mid-script, surfacing as a cancelled `website-blocker-startup-smoke` run.
+# Doing the same work in one Node process eliminates the fork pressure and
+# uses `fs.symlinkSync(..., "junction")` instead of cmd.exe on Windows.
+#
+# Bun can keep installed packages only in node_modules/.bun on every runner
+# OS, so the helper also scans that store and links the highest-version copy
+# of each package. With link_all_store_packages=1 it links every store package;
+# otherwise it only links those declared in the manifest. The grep for
+# "$package_name" against bun_store_entries is preserved inside the helper.
 symlink_installed_packages_into_manifest_node_modules() {
   local manifest="$1"
+  local link_all_store_packages="${2:-0}"
   [[ -f "$manifest" ]] || return 0
-
-  local package_dir target_node_modules entries
-  package_dir="$(dirname "$manifest")"
-  target_node_modules="$package_dir/node_modules"
-  mkdir -p "$target_node_modules"
-
-  entries="$(node -e '
-    const fs = require("node:fs");
-    const pkg = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
-    const dependencyFields = ["dependencies", "devDependencies"];
-    const seen = new Set();
-
-    for (const field of dependencyFields) {
-      for (const [name, spec] of Object.entries(pkg[field] ?? {})) {
-        if (typeof spec !== "string" || spec.length === 0) continue;
-        if (spec.startsWith("workspace:") || spec.startsWith("file:")) continue;
-        if (seen.has(name)) continue;
-        seen.add(name);
-        process.stdout.write(name + "\n");
-      }
-    }
-  ' "$manifest")"
-
-  while IFS= read -r package_name; do
-    [[ -z "$package_name" ]] && continue
-
-    local source_path="node_modules/$package_name"
-    local target_path="$target_node_modules/$package_name"
-    [[ -e "$source_path" || -L "$source_path" ]] || continue
-
-    mkdir -p "$(dirname "$target_path")"
-    rm -rf "$target_path"
-    ln -sfn "$(pwd)/$source_path" "$target_path"
-  done <<< "$entries"
+  node scripts/lib/symlink-store-packages.mjs "$manifest" "$link_all_store_packages"
 }
 
 packages=(
@@ -215,6 +216,38 @@ append_versioned_package \
   "eliza/plugins/plugin-agent-orchestrator/package.json" \
   ".eliza.ci-disabled/plugins/plugin-agent-orchestrator/package.json"
 
+# Published @elizaos/agent eagerly imports static runtime plugins during live
+# release validation. Keep those published plugins available when the root
+# workspace graph has been rewritten away.
+ensure_eliza_submodule_manifest \
+  "eliza/plugins/plugin-agent-skills/typescript/package.json" \
+  "plugins/plugin-agent-skills"
+append_versioned_package \
+  "@elizaos/plugin-agent-skills" \
+  "eliza/plugins/plugin-agent-skills/typescript/package.json" \
+  ".eliza.ci-disabled/plugins/plugin-agent-skills/typescript/package.json"
+ensure_eliza_submodule_manifest \
+  "eliza/plugins/plugin-local-embedding/typescript/package.json" \
+  "plugins/plugin-local-embedding"
+append_versioned_package \
+  "@elizaos/plugin-local-embedding" \
+  "eliza/plugins/plugin-local-embedding/typescript/package.json" \
+  ".eliza.ci-disabled/plugins/plugin-local-embedding/typescript/package.json"
+ensure_eliza_submodule_manifest \
+  "eliza/plugins/plugin-pdf/typescript/package.json" \
+  "plugins/plugin-pdf"
+append_versioned_package \
+  "@elizaos/plugin-pdf" \
+  "eliza/plugins/plugin-pdf/typescript/package.json" \
+  ".eliza.ci-disabled/plugins/plugin-pdf/typescript/package.json"
+ensure_eliza_submodule_manifest \
+  "eliza/plugins/plugin-sql/typescript/package.json" \
+  "plugins/plugin-sql"
+append_versioned_package \
+  "@elizaos/plugin-sql" \
+  "eliza/plugins/plugin-sql/typescript/package.json" \
+  ".eliza.ci-disabled/plugins/plugin-sql/typescript/package.json"
+
 # coding-agent-adapters is a transitive dep of eliza/packages/agent's server.ts.
 # After disable-local-eliza-workspace drops eliza/packages/agent from the
 # workspace, its transitive deps don't get installed — but the Docker CI smoke
@@ -239,6 +272,15 @@ append_dependency_spec_package \
   "eliza/packages/agent/package.json" \
   ".eliza.ci-disabled/packages/agent/package.json"
 
+# Unit coverage imports agent source through app workspaces after the local
+# workspace graph is restored. Install the agent's third-party deps explicitly
+# so transitive ESM imports such as viem/accounts and puppeteer-core do not rely
+# on incidental root hoisting in published-only CI.
+append_third_party_dependencies_from_manifest \
+  "eliza/packages/agent/package.json"
+append_third_party_dependencies_from_manifest \
+  ".eliza.ci-disabled/packages/agent/package.json"
+
 # eliza/packages/typescript (@elizaos/core) is rebuilt from source in the
 # cloud-image and snap pipelines so the local agent-orchestrator override is
 # included. After disable-local-eliza-workspace removes the package from the
@@ -261,6 +303,22 @@ append_third_party_dependencies_from_manifest \
 append_third_party_dependencies_from_manifest \
   ".eliza.ci-disabled/packages/app-core/package.json"
 
+# The release validation cloud live suite imports local plugin provider source
+# before package builds have materialized plugin dist. Keep provider source
+# dependencies available after the workspace graph is disabled; otherwise
+# plugin-anthropic fails at import time on jsonrepair.
+ensure_eliza_submodule_manifest \
+  "eliza/plugins/plugin-anthropic/typescript/package.json" \
+  "plugins/plugin-anthropic"
+append_third_party_dependencies_from_manifest \
+  "eliza/plugins/plugin-anthropic/typescript/package.json"
+append_third_party_dependencies_from_manifest \
+  ".eliza.ci-disabled/plugins/plugin-anthropic/typescript/package.json"
+append_dependency_spec_package \
+  "jsonrepair" \
+  "eliza/plugins/plugin-anthropic/typescript/package.json" \
+  ".eliza.ci-disabled/plugins/plugin-anthropic/typescript/package.json"
+
 # @elizaos/core's declaration build expects the explicit `bun-types` ambient
 # library named in tsconfig, plus the @types/bun package used by the source
 # workspace. Both disappear when the local workspace is disabled.
@@ -274,6 +332,13 @@ append_dependency_spec_package \
   "eliza/packages/typescript/package.json" \
   ".eliza.ci-disabled/packages/typescript/package.json"
 append_dependency_spec_package \
+  "@types/node" \
+  "eliza/package.json" \
+  ".eliza.ci-disabled/package.json" \
+  "eliza/packages/typescript/package.json" \
+  ".eliza.ci-disabled/packages/typescript/package.json" \
+  "package.json"
+append_dependency_spec_package \
   "@types/fast-redact" \
   "eliza/packages/typescript/package.json" \
   ".eliza.ci-disabled/packages/typescript/package.json"
@@ -285,9 +350,39 @@ append_dependency_spec_package \
 for attempt in 1 2 3; do
   if bun add --no-save --dev --ignore-scripts "${packages[@]}"; then
     symlink_installed_packages_into_manifest_node_modules \
-      "eliza/packages/typescript/package.json"
+      "eliza/packages/typescript/package.json" \
+      1
     symlink_installed_packages_into_manifest_node_modules \
-      ".eliza.ci-disabled/packages/typescript/package.json"
+      ".eliza.ci-disabled/packages/typescript/package.json" \
+      1
+    symlink_installed_packages_into_manifest_node_modules \
+      "eliza/package.json"
+    symlink_installed_packages_into_manifest_node_modules \
+      ".eliza.ci-disabled/package.json"
+    symlink_installed_packages_into_manifest_node_modules \
+      "eliza/packages/app-core/package.json" \
+      1
+    symlink_installed_packages_into_manifest_node_modules \
+      ".eliza.ci-disabled/packages/app-core/package.json" \
+      1
+    symlink_installed_packages_into_manifest_node_modules \
+      "eliza/packages/agent/package.json" \
+      1
+    symlink_installed_packages_into_manifest_node_modules \
+      ".eliza.ci-disabled/packages/agent/package.json" \
+      1
+    symlink_installed_packages_into_manifest_node_modules \
+      "eliza/apps/app-lifeops/package.json" \
+      1
+    symlink_installed_packages_into_manifest_node_modules \
+      "eliza/apps/app-vincent/package.json" \
+      1
+    symlink_installed_packages_into_manifest_node_modules \
+      "eliza/plugins/plugin-anthropic/typescript/package.json" \
+      1
+    symlink_installed_packages_into_manifest_node_modules \
+      ".eliza.ci-disabled/plugins/plugin-anthropic/typescript/package.json" \
+      1
 
     # @types/uuid shadows uuid@13's bundled types and makes TS report that
     # v4/v5 do not exist. Remove the stale package anywhere the core build can

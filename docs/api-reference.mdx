@@ -4,7 +4,7 @@ sidebarTitle: API Reference
 description: Complete reference for all Milady REST API endpoints, organized by resource group.
 ---
 
-The Milady API server runs on port **31337** by default (`MILADY_API_PORT`). All endpoints are prefixed with `/api/`. Authentication is required when `MILADY_API_TOKEN` is set.
+The Milady API server runs on port **31337** (`MILADY_API_PORT`) in development and on port **2138** (`MILADY_PORT`) in production, where the API and dashboard share the same port. All endpoints are prefixed with `/api/`. Authentication is required when `MILADY_API_TOKEN` is set.
 
 <Warning>
 When `MILADY_API_TOKEN` is configured, include the token as a `Bearer` token in the `Authorization` header, or use the pairing flow to obtain it.
@@ -12,7 +12,7 @@ When `MILADY_API_TOKEN` is configured, include the token as a `Bearer` token in 
 
 ## Quick Start
 
-These examples assume the API is running on `localhost:31337`. Replace `YOUR_TOKEN` with the value of `MILADY_API_TOKEN` or the token received from the pairing flow.
+These examples use port `31337` (the development default). In production, replace with port `2138` or your configured `MILADY_PORT`. Replace `YOUR_TOKEN` with the value of `MILADY_API_TOKEN` or the token received from the pairing flow.
 
 ### Check agent status
 
@@ -22,10 +22,11 @@ curl http://localhost:31337/api/status
 
 ```json
 {
-  "name": "Milady",
-  "status": "running",
-  "model": "claude-sonnet-4-6",
-  "uptime": 3600
+  "state": "running",
+  "agentName": "Milady",
+  "model": "@elizaos/plugin-anthropic",
+  "uptime": 3600000,
+  "startedAt": 1718000000000
 }
 ```
 
@@ -153,7 +154,7 @@ Example `GET /api/status` response:
 {
   "name": "Milady",
   "status": "running",
-  "model": "anthropic/claude-sonnet-4-6",
+  "model": "anthropic/claude-sonnet-4.6",
   "uptime": 3600,
   "autonomy": { "enabled": true },
   "pendingRestart": false
@@ -166,7 +167,7 @@ Example `GET /api/status` response:
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `POST` | `/api/agent/start` | Start the agent (starts paused; use `/api/agent/autonomy` to enable autonomy) |
+| `POST` | `/api/agent/start` | Start the agent |
 | `POST` | `/api/agent/stop` | Stop the agent and disable autonomy |
 | `POST` | `/api/agent/pause` | Pause the agent (keep uptime, disable autonomy) |
 | `POST` | `/api/agent/resume` | Resume a paused agent and re-enable autonomy |
@@ -198,7 +199,7 @@ Example `GET /api/status` response:
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `GET` | `/api/agent/autonomy` | Get autonomy state (enabled, thinking) |
+| `GET` | `/api/agent/autonomy` | Get autonomy state (enabled) |
 | `POST` | `/api/agent/autonomy` | Enable or disable autonomy (`{ enabled: boolean }`) |
 
 ---
@@ -443,6 +444,15 @@ The inbox aggregates messages from every connected platform (iMessage, Telegram,
 
 ---
 
+## n8n Workflows
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/n8n/workflows` | List n8n workflows |
+| `GET` | `/api/n8n/status` | Get n8n integration status (mode, health, platform) |
+
+---
+
 ## Trajectories
 
 | Method | Path | Description |
@@ -474,6 +484,8 @@ The inbox aggregates messages from every connected platform (iMessage, Telegram,
 | `POST` | `/api/training/models/:id/import-ollama` | Import a model to Ollama |
 | `POST` | `/api/training/models/:id/activate` | Activate a fine-tuned model |
 | `POST` | `/api/training/models/:id/benchmark` | Benchmark a fine-tuned model |
+| `GET` | `/api/training/auto/config` | Get auto-training configuration (thresholds, cooldown) |
+| `PUT` | `/api/training/auto/config` | Update auto-training configuration |
 
 ---
 
@@ -603,14 +615,23 @@ Routes under `/api/cloud/v1/` are forwarded as `/api/v1/` on the cloud backend, 
 
 ---
 
+## Automations
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/automations` | Unified list of all automations (triggers, workflows, workbench tasks) |
+| `GET` | `/api/automations/nodes` | Node catalog — available trigger, action, context, integration, and agent nodes |
+
+---
+
 ## Workbench
 
 | Method | Path | Description |
 |--------|------|-------------|
 | `GET` | `/api/workbench/overview` | Get workbench overview (tasks, triggers, todos, life-ops, autonomy state) |
 | `GET` | `/api/workbench/tasks` | List workbench tasks |
-| `POST` | `/api/workbench/tasks` | Create a new workbench task |
-| `GET` | `/api/workbench/tasks/:id` | Get a single workbench task by ID |
+| `POST` | `/api/workbench/tasks` | Create a workbench task |
+| `GET` | `/api/workbench/tasks/:id` | Get a single workbench task |
 | `PUT` | `/api/workbench/tasks/:id` | Update a workbench task |
 | `DELETE` | `/api/workbench/tasks/:id` | Delete a workbench task |
 | `GET` | `/api/workbench/todos` | List workbench todos |
@@ -722,6 +743,17 @@ Routes under `/api/cloud/v1/` are forwarded as `/api/v1/` on the cloud backend, 
 | `GET` | `/api/wallet/trade/tx-status` | Check on-chain status of a trade transaction |
 | `GET` | `/api/wallet/trading/profile` | Get trading P&L profile from the local ledger |
 | `POST` | `/api/wallet/transfer/execute` | Transfer native or ERC-20 tokens on BSC |
+
+### Wallet Steward Bridge
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/wallet/steward-status` | Get Steward bridge connection status |
+| `GET` | `/api/wallet/steward-policies` | Get Steward policy configurations |
+| `GET` | `/api/wallet/steward-pending-approvals` | List pending Steward transaction approvals |
+| `POST` | `/api/wallet/steward-approve-tx` | Approve a pending Steward transaction |
+| `POST` | `/api/wallet/steward-deny-tx` | Deny a pending Steward transaction |
+| `GET` | `/api/wallet/steward-tx-records` | Get Steward transaction history |
 
 ---
 

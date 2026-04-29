@@ -16,6 +16,7 @@ import {
 } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { asSetupUpstreamsCiStubs } from "./lib/ci-stubs.mjs";
 import { readPackageJson } from "./lib/read-package-json.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -66,6 +67,14 @@ export const ELIZA_BUILD_STEPS = [
     label: "@elizaos/skills",
   },
 ];
+export const ELIZA_TYPESCRIPT_BUILD_DEPENDENCIES = [
+  "@types/node",
+  "@types/bun",
+  "bun-types",
+];
+const ELIZA_TYPESCRIPT_AMBIENT_DEPENDENCIES = new Set(
+  ELIZA_TYPESCRIPT_BUILD_DEPENDENCIES,
+);
 
 const OPTIONAL_ELIZA_PLUGIN_FALLBACK_TAG = "alpha";
 const ELIZA_INSTALL_RETRY_DELAY_MS = 3_000;
@@ -74,20 +83,8 @@ const ELIZA_INSTALL_RETRY_DELAY_MS = 3_000;
 // provided by a CI stub in the root repo rather than published on npm. Before
 // `bun install --cwd eliza`, we inject an override into eliza/package.json so
 // the workspace:* specifier resolves to the stub instead of failing.
-const UNPUBLISHED_ELIZA_PLUGIN_CI_STUBS = [
-  {
-    packageName: "@elizaos/plugin-app-control",
-    workspaceEntry: "plugins/plugin-app-control/typescript",
-    /** Relative from eliza/ to the CI stub directory. */
-    stubRelativePath: "../scripts/ci-stubs/elizaos-plugin-app-control",
-  },
-  {
-    packageName: "@elizaos/plugin-wechat",
-    workspaceEntry: "plugins/plugin-wechat",
-    /** Relative from eliza/ to the CI stub directory. */
-    stubRelativePath: "../scripts/ci-stubs/elizaos-plugin-wechat",
-  },
-];
+// Registry is centralized in scripts/lib/ci-stubs.mjs.
+const UNPUBLISHED_ELIZA_PLUGIN_CI_STUBS = asSetupUpstreamsCiStubs();
 
 const OPTIONAL_ELIZA_PLUGIN_PACKAGES = [
   {
@@ -187,10 +184,31 @@ const ELIZA_EDGE_TTS_PLUGIN_BUILD = {
   ),
   args: ["run", "build"],
 };
+const ELIZA_LOCAL_EMBEDDING_PLUGIN_BUILD = {
+  label: "@elizaos/plugin-local-embedding",
+  cwd: path.join("eliza", "plugins", "plugin-local-embedding", "typescript"),
+  manifest: path.join(
+    "eliza",
+    "plugins",
+    "plugin-local-embedding",
+    "typescript",
+    "package.json",
+  ),
+  artifact: path.join(
+    "eliza",
+    "plugins",
+    "plugin-local-embedding",
+    "typescript",
+    "dist",
+    "index.js",
+  ),
+  args: ["run", "build"],
+};
 const ELIZA_REQUIRED_PLUGIN_BUILDS = [
   ELIZA_AGENT_SKILLS_PLUGIN_BUILD,
   ELIZA_TELEGRAM_PLUGIN_BUILD,
   ELIZA_EDGE_TTS_PLUGIN_BUILD,
+  ELIZA_LOCAL_EMBEDDING_PLUGIN_BUILD,
 ];
 const INBOX_REPLY_HINT_LEGACY =
   "Sent through the connected {{source}} account on this Mac.";
@@ -264,10 +282,19 @@ const TS_IGNORE_DEPRECATIONS_COMPAT_FILES = [
   path.join("packages", "shared", "tsconfig.json"),
   path.join("packages", "interop", "tsconfig.json"),
 ];
-const TSUP_IGNORE_DEPRECATIONS_COMPAT_FILES = [
+const PLUGIN_TS_IGNORE_DEPRECATIONS_COMPAT_FILES = [
+  path.join("plugins", "plugin-agent-skills", "typescript", "tsconfig.json"),
   path.join("plugins", "plugin-calendly", "tsconfig.json"),
   path.join("plugins", "plugin-github", "tsconfig.json"),
+  path.join("plugins", "plugin-local-ai", "typescript", "tsconfig.json"),
   path.join("plugins", "plugin-shopify", "tsconfig.json"),
+  path.join("plugins", "plugin-wechat", "tsconfig.json"),
+];
+const PLUGIN_TS_IGNORE_DEPRECATIONS_INSERT_FILES = [
+  path.join("plugins", "plugin-agent-skills", "typescript", "tsconfig.json"),
+  path.join("plugins", "plugin-signal", "typescript", "tsconfig.json"),
+  path.join("plugins", "plugin-telegram", "tsconfig.json"),
+  path.join("plugins", "plugin-telegram", "tsconfig.build.json"),
 ];
 const LIFEOPS_SETTINGS_SECTION_RELATIVE_PATH = path.join(
   "apps",
@@ -361,19 +388,25 @@ export function resolveTypeScriptIgnoreDeprecationsTarget(
   const candidateRoots = [repoRoot, fallbackRoot].filter(
     (candidate) => typeof candidate === "string" && candidate.length > 0,
   );
+  const versionSpecifiers = [];
 
   for (const candidateRoot of candidateRoots) {
     const rootPackageJson = readPackageJson(candidateRoot);
-    const versionSpecifier =
-      rootPackageJson?.devDependencies?.typescript ??
-      rootPackageJson?.dependencies?.typescript;
-    const major = parseFirstNumericVersionSegment(versionSpecifier);
-    if (major !== null) {
-      return major >= 6 ? "6.0" : "5.0";
-    }
+    versionSpecifiers.push(
+      rootPackageJson?.devDependencies?.typescript,
+      rootPackageJson?.dependencies?.typescript,
+    );
   }
 
-  return "5.0";
+  const major = versionSpecifiers.reduce((highest, versionSpecifier) => {
+    const parsed = parseFirstNumericVersionSegment(versionSpecifier);
+    if (parsed === null) {
+      return highest;
+    }
+    return highest === null ? parsed : Math.max(highest, parsed);
+  }, null);
+
+  return major !== null && major >= 6 ? "6.0" : "5.0";
 }
 
 function buildIgnoreDeprecationsCompatibilityReplacements(targetVersion) {
@@ -464,6 +497,33 @@ function applyTextReplacements(filePath, replacements, { label }) {
   return patchedReplacements;
 }
 
+function applyCompilerOption(filePath, option, value, { label }) {
+  if (!existsSync(filePath)) {
+    return 0;
+  }
+
+  try {
+    const raw = readFileSync(filePath, "utf8");
+    const config = JSON.parse(raw);
+    const current = config.compilerOptions?.[option];
+    if (current === value) {
+      return 0;
+    }
+    config.compilerOptions = {
+      ...(config.compilerOptions ?? {}),
+      [option]: value,
+    };
+    writeFileSync(filePath, `${JSON.stringify(config, null, 2)}\n`);
+    console.log(`[setup-upstreams] Applied ${label}`);
+    return 1;
+  } catch (error) {
+    console.warn(
+      `[setup-upstreams] WARNING: ${label} failed: ${error instanceof Error ? error.message : String(error)}`,
+    );
+    return 0;
+  }
+}
+
 export function applyPluginAnthropicBunRuntimePatch(elizaRoot) {
   let patchedReplacements = 0;
   patchedReplacements += applyTextReplacements(
@@ -506,12 +566,22 @@ export function applyTypeScriptIgnoreDeprecationsCompatPatch(
       },
     );
   }
-  for (const relativePath of TSUP_IGNORE_DEPRECATIONS_COMPAT_FILES) {
+  for (const relativePath of PLUGIN_TS_IGNORE_DEPRECATIONS_COMPAT_FILES) {
     patchedReplacements += applyTextReplacements(
       path.join(elizaRoot, relativePath),
-      buildIgnoreDeprecationsCompatibilityReplacements("5.0"),
+      tsConfigReplacements,
       {
-        label: `tsup ignoreDeprecations compatibility patch (${relativePath})`,
+        label: `plugin ignoreDeprecations compatibility patch (${relativePath})`,
+      },
+    );
+  }
+  for (const relativePath of PLUGIN_TS_IGNORE_DEPRECATIONS_INSERT_FILES) {
+    patchedReplacements += applyCompilerOption(
+      path.join(elizaRoot, relativePath),
+      "ignoreDeprecations",
+      targetVersion,
+      {
+        label: `plugin ignoreDeprecations compatibility patch (${relativePath})`,
       },
     );
   }
@@ -1266,6 +1336,10 @@ export async function ensureRequiredElizaPluginBuilds(
   repoRoot = DEFAULT_REPO_ROOT,
   options = {},
 ) {
+  ensurePluginTelegramNodeTypes(getRepoPluginsRoot(repoRoot), {
+    pathExists: options.pathExists ?? existsSync,
+  });
+
   let builtAny = false;
   for (const buildConfig of ELIZA_REQUIRED_PLUGIN_BUILDS) {
     builtAny =
@@ -1326,7 +1400,31 @@ export function createPackageLink(linkPath, targetPath) {
 }
 
 function createBinLink(linkPath, targetPath) {
-  return createLink(linkPath, targetPath, "file");
+  const linked = createLink(linkPath, targetPath, "file");
+
+  if (process.platform !== "win32") {
+    return linked;
+  }
+
+  const cmdPath = `${linkPath}.cmd`;
+  const cmdContents = `@ECHO off\r\nnode "${targetPath}" %*\r\n`;
+  let wroteCmdShim = false;
+  try {
+    const currentContents = existsSync(cmdPath)
+      ? readFileSync(cmdPath, "utf8")
+      : null;
+    if (currentContents !== cmdContents) {
+      mkdirSync(path.dirname(cmdPath), { recursive: true });
+      writeFileSync(cmdPath, cmdContents);
+      wroteCmdShim = true;
+    }
+  } catch {
+    mkdirSync(path.dirname(cmdPath), { recursive: true });
+    writeFileSync(cmdPath, cmdContents);
+    wroteCmdShim = true;
+  }
+
+  return linked || wroteCmdShim;
 }
 
 function getPackageBinEntries(packageJson) {
@@ -1658,9 +1756,73 @@ async function ensureRepoLocalEliza(repoRoot) {
   return elizaRoot;
 }
 
+export function ensureElizaTypescriptDependencyLinks(
+  elizaRoot,
+  {
+    repoRoot = path.dirname(elizaRoot),
+    // Do not link @noble/hashes by default: the Milady root often resolves v1
+    // (ethers/viem), while @elizaos/core requires v2 entrypoints (sha2.js, legacy.js).
+    dependencies = ELIZA_TYPESCRIPT_BUILD_DEPENDENCIES,
+  } = {},
+) {
+  const packageDir = path.join(elizaRoot, "packages", "typescript");
+  let linkedDependencies = 0;
+
+  for (const dependency of dependencies) {
+    const target = findInstalledPackageDir(
+      repoRoot,
+      dependency,
+      undefined,
+      null,
+      {
+        searchRoots: [repoRoot, elizaRoot],
+      },
+    );
+    if (!target) {
+      continue;
+    }
+
+    const linkRoots = [packageDir];
+    if (ELIZA_TYPESCRIPT_AMBIENT_DEPENDENCIES.has(dependency)) {
+      linkRoots.push(elizaRoot);
+    }
+
+    for (const linkRoot of linkRoots) {
+      const linkPath = path.join(
+        linkRoot,
+        "node_modules",
+        ...dependency.split("/"),
+      );
+      if (
+        existsSync(linkPath) &&
+        existsSync(target) &&
+        realpathSync(linkPath) === realpathSync(target)
+      ) {
+        continue;
+      }
+      if (createPackageLink(linkPath, target)) {
+        linkedDependencies += 1;
+      }
+    }
+  }
+
+  if (linkedDependencies > 0) {
+    console.log(
+      "[setup-upstreams] Linked " +
+        linkedDependencies +
+        " @elizaos/core build " +
+        (linkedDependencies === 1 ? "dependency" : "dependencies") +
+        " into eliza/packages/typescript",
+    );
+  }
+
+  return linkedDependencies;
+}
+
 async function ensureElizaDependencies(elizaRoot) {
   if (hasInstalledElizaDependencies(elizaRoot)) {
     await bootstrapBundledBunInstall(elizaRoot);
+    ensureElizaTypescriptDependencyLinks(elizaRoot);
     return;
   }
 
@@ -1697,6 +1859,7 @@ async function ensureElizaDependencies(elizaRoot) {
     await runElizaInstallWithRetry(elizaRoot);
     await bootstrapBundledBunInstall(elizaRoot);
   });
+  ensureElizaTypescriptDependencyLinks(elizaRoot);
 }
 
 export function getElizaInstallArgs(env = process.env) {
@@ -1851,14 +2014,14 @@ export async function ensureElizaBuildOutputs(
 }
 
 /**
- * Ensure plugin-anthropic's tsconfig.build.json explicitly loads @types/bun.
+ * Ensure plugin-anthropic's tsconfig.build.json explicitly loads Bun types.
  *
  * When tsc runs `bun run build` for plugin-anthropic on fresh CI checkouts,
  * it reports TS2868 "Cannot find name 'Bun'" on init.ts / utils/claude-cli.ts
  * because the build config extends tsconfig.json but does not carry the
  * `compilerOptions.types` array forward deterministically. We force the
  * setting in-place so every CI/dev checkout sees a build config that
- * resolves @types/bun without relying on extends inheritance.
+ * resolves Bun globals without relying on extends inheritance.
  *
  * Idempotent: only writes when the desired types list is not already present.
  */
@@ -1898,13 +2061,13 @@ export function ensurePluginAnthropicBunTypes(
     ? compilerOptions.types
     : null;
 
-  if (existingTypes?.includes("bun")) {
+  if (existingTypes?.includes("bun-types")) {
     return false;
   }
 
   const nextTypes = existingTypes ? [...existingTypes] : ["node"];
-  if (!nextTypes.includes("bun")) {
-    nextTypes.push("bun");
+  if (!nextTypes.includes("bun-types")) {
+    nextTypes.push("bun-types");
   }
 
   const nextCompilerOptions = {
@@ -1922,9 +2085,162 @@ export function ensurePluginAnthropicBunTypes(
     `${JSON.stringify(nextParsed, null, indent)}\n`,
   );
   console.log(
-    `[setup-upstreams] Patched ${toDisplayPath(buildConfigPath)} to load @types/bun`,
+    `[setup-upstreams] Patched ${toDisplayPath(buildConfigPath)} to load Bun types`,
   );
   return true;
+}
+
+export function ensurePluginTelegramNodeTypes(
+  pluginsRoot,
+  { pathExists = existsSync } = {},
+) {
+  const configPaths = [
+    path.join(pluginsRoot, "plugin-telegram", "tsconfig.json"),
+    path.join(pluginsRoot, "plugin-telegram", "tsconfig.build.json"),
+  ];
+  let patchedFiles = 0;
+
+  for (const configPath of configPaths) {
+    if (!pathExists(configPath)) {
+      continue;
+    }
+
+    const raw = readFileSync(configPath, "utf8");
+    let parsed;
+    try {
+      parsed = JSON.parse(raw);
+    } catch (error) {
+      console.warn(
+        `[setup-upstreams] Could not parse ${toDisplayPath(configPath)}: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+      continue;
+    }
+
+    const compilerOptions =
+      parsed && typeof parsed === "object" && parsed.compilerOptions
+        ? parsed.compilerOptions
+        : {};
+    const existingTypes = Array.isArray(compilerOptions.types)
+      ? compilerOptions.types
+      : [];
+
+    if (existingTypes.includes("node")) {
+      continue;
+    }
+
+    const nextParsed = {
+      ...parsed,
+      compilerOptions: {
+        ...compilerOptions,
+        types: [...existingTypes, "node"],
+      },
+    };
+    const indent = raw.match(/^(\s+)"/m)?.[1] ?? "  ";
+    writeFileSync(configPath, `${JSON.stringify(nextParsed, null, indent)}\n`);
+    patchedFiles += 1;
+  }
+
+  if (patchedFiles > 0) {
+    console.log(
+      `[setup-upstreams] Patched plugin-telegram Node type config (${patchedFiles} file${patchedFiles === 1 ? "" : "s"})`,
+    );
+  }
+
+  return patchedFiles;
+}
+
+export function patchPluginBuildTscBinPaths(
+  pluginsRoot,
+  { pathExists = existsSync } = {},
+) {
+  let patchedFiles = 0;
+  for (const packageDir of discoverPluginPackageDirs(pluginsRoot)) {
+    const buildScriptPath = path.join(packageDir, "build.ts");
+    if (!pathExists(buildScriptPath)) {
+      continue;
+    }
+
+    const original = readFileSync(buildScriptPath, "utf8");
+    const patched = original
+      .replaceAll(
+        'join(rootDir, "node_modules", ".bin", "tsc")',
+        'join(rootDir, "node_modules", ".bin", process.platform === "win32" ? "tsc.cmd" : "tsc")',
+      )
+      .replaceAll(
+        'join(ROOT, "node_modules", ".bin", "tsc")',
+        'join(ROOT, "node_modules", ".bin", process.platform === "win32" ? "tsc.cmd" : "tsc")',
+      );
+
+    if (patched === original) {
+      continue;
+    }
+
+    writeFileSync(buildScriptPath, patched);
+    patchedFiles += 1;
+  }
+
+  if (patchedFiles > 0) {
+    console.log(
+      `[setup-upstreams] Patched ${patchedFiles} plugin build script ${patchedFiles === 1 ? "tsc path" : "tsc paths"} for Windows bin shims`,
+    );
+  }
+
+  return patchedFiles;
+}
+
+export function patchPluginManagerWindowsDtsBuild(
+  pluginsRoot,
+  { pathExists = existsSync } = {},
+) {
+  const packageDir = path.join(
+    pluginsRoot,
+    "plugin-plugin-manager",
+    "typescript",
+  );
+  const packageJsonPath = path.join(packageDir, "package.json");
+  const tsupConfigPath = path.join(packageDir, "tsup.config.ts");
+
+  if (!pathExists(packageJsonPath) || !pathExists(tsupConfigPath)) {
+    return 0;
+  }
+
+  let patchedFiles = 0;
+  const packageJsonRaw = readFileSync(packageJsonPath, "utf8");
+  const packageJson = JSON.parse(packageJsonRaw);
+  const scripts =
+    packageJson && typeof packageJson === "object" ? packageJson.scripts : null;
+
+  if (scripts?.build === "tsup && tsc --noEmit") {
+    scripts.build =
+      "tsup && tsc --emitDeclarationOnly -p tsconfig.build.json && tsc --noEmit";
+    const indent = packageJsonRaw.match(/^(\s+)"/m)?.[1] ?? "  ";
+    writeFileSync(
+      packageJsonPath,
+      `${JSON.stringify(packageJson, null, indent)}\n`,
+    );
+    patchedFiles += 1;
+  }
+
+  const tsupConfig = readFileSync(tsupConfigPath, "utf8");
+  const patchedTsupConfig = tsupConfig.replace(
+    "dts: true, // require DTS so we get d.ts in the dist folder on npm",
+    'dts: process.platform === "win32" ? false : true, // Windows tsup DTS is flaky; tsc emits declarations below.',
+  );
+
+  if (patchedTsupConfig !== tsupConfig) {
+    writeFileSync(tsupConfigPath, patchedTsupConfig);
+    patchedFiles += 1;
+  }
+
+  if (patchedFiles > 0) {
+    console.log(
+      `[setup-upstreams] Patched plugin-plugin-manager Windows DTS build (${patchedFiles} file${patchedFiles === 1 ? "" : "s"})`,
+    );
+  }
+
+  return patchedFiles;
 }
 
 export async function ensurePluginBuildOutputs(
@@ -1932,6 +2248,9 @@ export async function ensurePluginBuildOutputs(
   { pathExists = existsSync, runCommandImpl = runCommand } = {},
 ) {
   ensurePluginAnthropicBunTypes(pluginsRoot, { pathExists });
+  ensurePluginTelegramNodeTypes(pluginsRoot, { pathExists });
+  patchPluginBuildTscBinPaths(pluginsRoot, { pathExists });
+  patchPluginManagerWindowsDtsBuild(pluginsRoot, { pathExists });
   for (const packageDir of discoverPluginPackageDirs(pluginsRoot)) {
     const packageJson = readPackageJson(packageDir);
     if (!packageJson?.name?.startsWith("@elizaos/")) {
@@ -2029,13 +2348,14 @@ export async function setupUpstreams(repoRoot = DEFAULT_REPO_ROOT) {
   }
 
   const elizaRoot = await ensureRepoLocalEliza(repoRoot);
+  const pluginsRoot = getRepoPluginsRoot(repoRoot);
   applyMiladyCopyPatches(elizaRoot);
   applyTypeScriptIgnoreDeprecationsCompatPatch(elizaRoot);
   applyLifeOpsLucideCompatPatch(elizaRoot);
+  ensurePluginTelegramNodeTypes(pluginsRoot);
   await ensureElizaDependencies(elizaRoot);
   await ensureElizaBuildOutputs(elizaRoot);
 
-  const pluginsRoot = getRepoPluginsRoot(repoRoot);
   ensurePluginDependencyLinks(repoRoot, pluginsRoot);
   applyPluginAnthropicBunRuntimePatch(elizaRoot);
   applyPluginAnthropicCliUsagePatch(elizaRoot);

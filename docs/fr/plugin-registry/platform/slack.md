@@ -13,7 +13,7 @@ Le plugin Slack connecte les agents Milady aux espaces de travail Slack en tant 
 </div>
 
 ```bash
-milady plugins install slack
+milady plugins install @elizaos/plugin-slack
 ```
 
 <div id="setup">

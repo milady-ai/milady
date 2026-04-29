@@ -1,29 +1,35 @@
 ---
 title: "Configuration Templates"
 sidebarTitle: "Config Templates"
-description: "Ready-to-use configuration templates for common Milady deployment scenarios"
+description: "Ready-to-use milady.json templates for common deployment scenarios"
 ---
 
 ## Overview
 
-This guide provides 8 production-ready configuration templates for different use cases. Each template is a complete, copy-paste configuration that you can customize for your specific needs.
+<Warning>
+**These templates use a simplified, illustrative configuration format for readability.** The actual Milady configuration file (`~/.milady/milady.json`) uses a different schema. In particular:
+- Model providers are configured via the `env` section (e.g., `"OPENAI_API_KEY": "..."`) or environment variables, not a `modelProvider` object.
+- Connectors are configured under `connectors.<name>` as objects (not arrays).
+- There is no `system`, `handlers`, `monitoring`, `scaling`, `cache`, `backup`, or `security` top-level section in the actual config schema.
+- Use `milady configure` or the dashboard Settings page to configure your agent correctly.
+
+See the [Configuration Reference](/configuration) and [Config Schema](/config-schema) for the actual config format.
+</Warning>
+
+This guide provides 8 illustrative configuration templates for different use cases. Each template shows the general shape of a deployment scenario.
 
 <Warning>
-**Important**: Always replace placeholder values before deploying:
-- `YOUR_API_KEY` - Replace with your actual API keys
-- `your-model-name` - Replace with your chosen model
-- `YOUR_DISCORD_TOKEN` - Replace with your Discord bot token
-- Database connection strings and credentials
-- Wallet addresses and private keys (store in environment variables!)
-- URLs and domain names specific to your deployment
-- Memory database paths and backup locations
+**Important**: Replace all placeholder values before running:
+- `<YOUR_API_KEY>` placeholders with your actual API keys
+- Bot tokens and credentials with your real values
+- Keep secrets in the `env` section or in `~/.milady/.env` — the config file is written with mode `0o600` for safety
 
-Never commit real API keys or credentials to version control. Use environment variables instead.
+Never commit real API keys to version control. Use `~/.milady/.env` for secrets when possible.
 </Warning>
 
 ## 1. Minimal Setup
 
-The simplest configuration for getting started with a single model provider.
+The simplest configuration — one provider, one agent, no connectors.
 
 ```json5
 {
@@ -33,36 +39,40 @@ The simplest configuration for getting started with a single model provider.
   modelProvider: {
     type: "openai",
     apiKey: process.env.OPENAI_API_KEY,
-    model: "gpt-4-turbo",
+    model: "gpt-5",
     temperature: 0.7,
     maxTokens: 2000
   },
 
-  // Basic system context
-  system: {
-    name: "Assistant",
-    instructions: "You are a helpful AI assistant."
+  agents: {
+    defaults: {
+      model: { primary: "anthropic/claude-sonnet-4-6" },
+    },
+    list: [
+      {
+        id: "mila",
+        default: true,
+        name: "Mila",
+        bio: ["A helpful AI assistant"],
+        system: "You are Mila, a thoughtful and helpful assistant.",
+      },
+    ],
   },
 
-  // Optional: basic logging
-  logging: {
-    level: "info",
-    format: "json"
-  }
+  logging: { level: "error" },
 }
 ```
 
 **Use this template if you:**
 - Are just getting started with Milady
-- Want to test a single model provider
-- Don't need persistence or multiple connectors
-- Are prototyping a simple use case
+- Want to test a single provider via the web dashboard
+- Don't need connectors or advanced features
 
 ---
 
 ## 2. Personal Assistant
 
-A fully-featured personal assistant with memory, system instructions, and structured output.
+A fully-featured personal assistant with Ollama fallback, voice, and browser tools.
 
 ```json5
 {
@@ -72,75 +82,65 @@ A fully-featured personal assistant with memory, system instructions, and struct
   modelProvider: {
     type: "openai",
     apiKey: process.env.OPENAI_API_KEY,
-    model: "gpt-4-turbo",
+    model: "gpt-5",
     temperature: 0.7,
     maxTokens: 4000
   },
 
-  system: {
-    name: "Personal Assistant",
-    instructions: `You are a personal AI assistant designed to help with productivity, 
-    learning, and decision-making. You have access to the user's calendar, notes, 
-    and previous conversations. Be concise, helpful, and proactive in offering insights.`,
-    
-    personality: {
-      tone: "friendly and professional",
-      responseStyle: "conversational but structured",
-      proactiveHelp: true
-    }
-  },
-
-  memory: {
-    enabled: true,
-    type: "sqlite",
-    path: "./data/assistant_memory.db",
-    maxConversations: 100,
-    retentionDays: 90,
-    embeddings: {
-      enabled: true,
-      provider: "openai",
-      dimension: 1536
-    }
-  },
-
-  plugins: [
-    {
-      name: "calendar",
-      enabled: true,
-      config: {
-        provider: "google-calendar",
-        syncInterval: "5m"
-      }
+  agents: {
+    defaults: {
+      model: {
+        primary: "anthropic/claude-sonnet-4-6",
+        fallbacks: ["ollama/llama3.3"],
+      },
+      thinkingDefault: "medium",
+      userTimezone: "America/New_York",
     },
-    {
-      name: "notes",
-      enabled: true,
-      config: {
-        path: "./data/notes",
-        format: "markdown"
-      }
-    }
-  ],
+    list: [
+      {
+        id: "mila",
+        default: true,
+        name: "Mila",
+        bio: [
+          "A personal AI assistant focused on productivity and knowledge management",
+        ],
+        system: "You are Mila, a thoughtful assistant. Help with tasks, learning, and decision-making. Be concise and proactive.",
+        style: { all: ["concise", "friendly", "proactive"] },
+      },
+    ],
+  },
 
-  logging: {
-    level: "info",
-    format: "json",
-    file: "./logs/assistant.log"
-  }
+  features: {
+    browser: true,
+    cron: true,
+  },
+
+  tools: {
+    web: {
+      search: { enabled: true, provider: "brave" },
+      fetch: { enabled: true },
+    },
+  },
+
+  talk: {
+    voiceId: "21m00Tcm4TlvDq8ikWAM",
+    modelId: "eleven_turbo_v2_5",
+  },
+
+  logging: { level: "error" },
 }
 ```
 
 **Use this template if you:**
-- Need persistent memory across conversations
-- Want to build a personal knowledge base
-- Require integration with productivity tools
-- Need conversation history and recall
+- Want a personal assistant with web search and voice
+- Need a fallback model for when the primary is unavailable
+- Want browser automation for web tasks
 
 ---
 
 ## 3. Discord Bot
 
-Complete Discord bot configuration with event handling, commands, and permissions.
+A Discord community bot with per-guild configuration.
 
 ```json5
 {
@@ -150,84 +150,63 @@ Complete Discord bot configuration with event handling, commands, and permission
   modelProvider: {
     type: "openai",
     apiKey: process.env.OPENAI_API_KEY,
-    model: "gpt-3.5-turbo",
+    model: "gpt-5-mini",
     temperature: 0.6,
     maxTokens: 1024
   },
 
-  system: {
-    name: "Discord Assistant",
-    instructions: `You are a Discord bot that helps server members with questions, 
-    provides information, and facilitates discussions. Keep responses concise and 
-    appropriate for Discord's chat format. Use Discord formatting when helpful.`
-  },
-
-  connectors: [
-    {
-      type: "discord",
-      enabled: true,
-      config: {
-        token: process.env.DISCORD_TOKEN,
-        intents: [
-          "GUILDS",
-          "GUILD_MESSAGES",
-          "DIRECT_MESSAGES",
-          "MESSAGE_CONTENT"
-        ],
-        prefix: "!",
-        allowedRoles: ["member", "moderator", "admin"],
-        rateLimit: {
-          messagesPerSecond: 2,
-          cooldownSeconds: 1
-        }
-      }
-    }
-  ],
-
-  memory: {
-    enabled: true,
-    type: "sqlite",
-    path: "./data/discord_memory.db",
-    perGuild: true,
-    maxMemoryPerGuild: 10000
-  },
-
-  handlers: {
-    messageCreate: {
-      enabled: true,
-      respondToMentions: true,
-      respondToReplies: true,
-      includeThreads: true
+  agents: {
+    defaults: {
+      model: { primary: "anthropic/claude-sonnet-4-6" },
     },
-    commandHandler: {
-      enabled: true,
-      commands: [
-        { name: "help", description: "Show available commands" },
-        { name: "ping", description: "Check bot latency" },
-        { name: "ask", description: "Ask the AI a question" }
-      ]
-    }
+    list: [
+      {
+        id: "discord-bot",
+        default: true,
+        name: "Mila",
+        bio: ["A Discord community assistant"],
+        system: "You are Mila, a helpful bot in a Discord server. Keep responses concise and use Discord formatting when appropriate.",
+        style: { all: ["concise", "casual"] },
+      },
+    ],
   },
 
-  logging: {
-    level: "info",
-    format: "json",
-    file: "./logs/discord_bot.log"
-  }
+  connectors: {
+    discord: {
+      token: "<YOUR_DISCORD_BOT_TOKEN>",
+      groupPolicy: "allowlist",
+      guilds: {
+        "<YOUR_SERVER_ID>": {
+          requireMention: true,
+          channels: {
+            "<YOUR_CHANNEL_ID>": {
+              allow: true,
+              requireMention: false,
+            },
+          },
+        },
+      },
+      dm: {
+        enabled: true,
+        policy: "pairing",
+      },
+    },
+  },
+
+  logging: { level: "error" },
 }
 ```
 
 **Use this template if you:**
-- Want to deploy a Discord community bot
-- Need message handling and command parsing
-- Require per-guild memory and configuration
-- Want rate limiting and permission controls
+- Want a Discord community bot
+- Need per-guild and per-channel configuration
+- Want DM support with pairing flow
 
 ---
 
 ## 4. Telegram Bot
 
-Telegram bot configuration with inline keyboards, message handling, and user management.
+A Telegram bot with group support and inline buttons.
 
 ```json5
 {
@@ -237,89 +216,54 @@ Telegram bot configuration with inline keyboards, message handling, and user man
   modelProvider: {
     type: "openai",
     apiKey: process.env.OPENAI_API_KEY,
-    model: "gpt-3.5-turbo",
+    model: "gpt-5-mini",
     temperature: 0.5,
     maxTokens: 1024
   },
 
-  system: {
-    name: "Telegram Assistant",
-    instructions: `You are a Telegram bot assistant. Keep responses short and mobile-friendly. 
-    Use Telegram formatting (bold, italic, code blocks) appropriately. Be helpful and respectful.`
+  agents: {
+    defaults: {
+      model: { primary: "anthropic/claude-sonnet-4-6" },
+    },
+    list: [
+      {
+        id: "tg-bot",
+        default: true,
+        name: "Mila",
+        bio: ["A Telegram assistant"],
+        system: "You are Mila on Telegram. Keep responses short and mobile-friendly.",
+        style: { all: ["concise", "friendly"] },
+      },
+    ],
   },
 
-  connectors: [
-    {
-      type: "telegram",
-      enabled: true,
-      config: {
-        botToken: process.env.TELEGRAM_BOT_TOKEN,
-        webhookUrl: process.env.TELEGRAM_WEBHOOK_URL,
-        polling: {
-          enabled: false,
-          timeout: 30
+  connectors: {
+    telegram: {
+      botToken: "<YOUR_TELEGRAM_BOT_TOKEN>",
+      dmPolicy: "pairing",
+      groupPolicy: "allowlist",
+      groups: {
+        "<YOUR_GROUP_ID>": {
+          requireMention: true,
         },
-        maxMessageLength: 4096,
-        supportGroups: true,
-        supportPrivateChats: true
-      }
-    }
-  ],
-
-  memory: {
-    enabled: true,
-    type: "sqlite",
-    path: "./data/telegram_memory.db",
-    perUser: true,
-    maxMemoryPerUser: 5000
-  },
-
-  handlers: {
-    messageHandler: {
-      enabled: true,
-      supportMarkdown: true,
-      supportHTML: true,
-      replyToMessages: true
+      },
     },
-    commandHandler: {
-      enabled: true,
-      commands: [
-        { name: "start", description: "Start the bot" },
-        { name: "help", description: "Show help" },
-        { name: "settings", description: "Manage settings" },
-        { name: "clear", description: "Clear conversation history" }
-      ]
-    },
-    inlineKeyboards: {
-      enabled: true,
-      maxButtonsPerRow: 2
-    }
   },
 
-  rateLimit: {
-    messagesPerSecond: 30,
-    perUserCooldown: 0
-  },
-
-  logging: {
-    level: "info",
-    format: "json",
-    file: "./logs/telegram_bot.log"
-  }
+  logging: { level: "error" },
 }
 ```
 
 **Use this template if you:**
 - Want a Telegram bot for instant messaging
-- Need mobile-first interactions
-- Require per-user conversation memory
-- Want webhook or polling-based updates
+- Need group chat support with mention filtering
+- Want the pairing onboarding flow for new DMs
 
 ---
 
-## 5. Trading Bot
+## 5. Multi-Connector Setup
 
-Advanced configuration for autonomous trading with market triggers, wallet integration, and risk management.
+Multiple platforms from a single agent — Discord, Telegram, and Slack.
 
 ```json5
 {
@@ -330,120 +274,64 @@ Advanced configuration for autonomous trading with market triggers, wallet integ
   modelProvider: {
     type: "openai",
     apiKey: process.env.OPENAI_API_KEY,
-    model: "gpt-4-turbo",
+    model: "gpt-5",
     temperature: 0.3,
     maxTokens: 2000
   },
 
-  system: {
-    name: "Trading Assistant",
-    instructions: `You are an autonomous trading agent. Analyze market data, identify opportunities,
-    and execute trades based on technical analysis and risk management rules. Always prioritize 
-    safety and position size limits. Log all decisions and market data.`
-  },
-
-  autonomousMode: {
-    enabled: true,
-    approvalRequired: false,
-    maxExecutionPerHour: 10,
-    maxPositionSize: "10%",
-    stopLossPercent: 5,
-    takeProfitPercent: 15,
-    riskPerTrade: 2
-  },
-
-  plugins: [
-    {
-      name: "market-data",
-      enabled: true,
-      config: {
-        provider: "coinbase",
-        apiKey: process.env.COINBASE_API_KEY,
-        refreshInterval: "1m",
-        symbols: ["BTC", "ETH", "SOL"]
-      }
+  agents: {
+    defaults: {
+      model: {
+        primary: "anthropic/claude-sonnet-4-6",
+        fallbacks: ["openai/gpt-4o"],
+      },
     },
-    {
-      name: "technical-analysis",
-      enabled: true,
-      config: {
-        indicators: ["RSI", "MACD", "Bollinger Bands", "EMA"],
-        timeframes: ["1m", "5m", "15m", "1h", "4h", "1d"]
-      }
-    },
-    {
-      name: "portfolio",
-      enabled: true,
-      config: {
-        trackingEnabled: true,
-        performanceMetrics: true,
-        rebalanceInterval: "1w"
-      }
-    }
-  ],
-
-  wallet: {
-    enabled: true,
-    type: "ethereum",
-    network: "mainnet",
-    address: process.env.WALLET_ADDRESS,
-    privateKey: process.env.WALLET_PRIVATE_KEY,
-    maxAllocation: "0.5",
-    gasStrategy: "adaptive",
-    slippage: 0.5
+    list: [
+      {
+        id: "mila",
+        default: true,
+        name: "Mila",
+        bio: ["A multi-platform AI assistant"],
+        system: "You are Mila. Adapt your tone to the platform — casual on Discord, professional on Slack, concise on Telegram.",
+      },
+    ],
   },
 
-  triggers: [
-    {
-      name: "oversold-buy",
-      condition: "RSI < 30 AND price > SMA(50)",
-      action: "BUY",
-      size: "2%",
-      enabled: true
+  connectors: {
+    discord: {
+      token: "<YOUR_DISCORD_BOT_TOKEN>",
+      groupPolicy: "allowlist",
+      guilds: {
+        "<SERVER_ID>": { requireMention: true },
+      },
     },
-    {
-      name: "overbought-sell",
-      condition: "RSI > 70 AND price < SMA(50)",
-      action: "SELL",
-      size: "50%",
-      enabled: true
-    }
-  ],
-
-  memory: {
-    enabled: true,
-    type: "postgresql",
-    connectionString: process.env.DATABASE_URL,
-    trackTrades: true,
-    trackAnalysis: true,
-    retentionDays: 365
+    telegram: {
+      botToken: "<YOUR_TELEGRAM_BOT_TOKEN>",
+      dmPolicy: "pairing",
+      groupPolicy: "allowlist",
+    },
+    slack: {
+      mode: "socket",
+      botToken: "<YOUR_SLACK_BOT_TOKEN>",
+      appToken: "<YOUR_SLACK_APP_TOKEN>",
+      groupPolicy: "allowlist",
+    },
   },
 
-  logging: {
-    level: "debug",
-    format: "json",
-    file: "./logs/trading_bot.log",
-    tradeLog: "./logs/trades.log",
-    alerting: {
-      enabled: true,
-      channels: ["email", "telegram"]
-    }
-  }
+  logging: { level: "error" },
 }
 ```
 
 **Use this template if you:**
-- Want to build an autonomous trading agent
-- Need market data integration and technical analysis
-- Require wallet and transaction management
-- Want detailed trading history and audit logs
-- Have significant experience with smart contracts and trading
+- Want a single agent across Discord, Telegram, and Slack
+- Need per-platform behavior via channel profiles
+- Want a fallback model chain
 
 ---
 
-## 6. Research Agent
+## 6. BSC Trading Bot
 
-Configuration for an autonomous research agent with knowledge bases, web browsing, and document analysis.
+Autonomous trading on BNB Smart Chain with PancakeSwap.
 
 ```json5
 {
@@ -453,208 +341,112 @@ Configuration for an autonomous research agent with knowledge bases, web browsin
   modelProvider: {
     type: "openai",
     apiKey: process.env.OPENAI_API_KEY,
-    model: "gpt-4-turbo",
+    model: "gpt-5",
     temperature: 0.2,
     maxTokens: 4000
   },
 
-  system: {
-    name: "Research Agent",
-    instructions: `You are an autonomous research agent. Your goal is to thoroughly investigate topics,
-    synthesize information from multiple sources, identify patterns, and provide comprehensive analysis.
-    Always cite sources, question assumptions, and present both supporting and contradicting evidence.
-    Be rigorous, skeptical, and thorough.`
-  },
-
-  autonomousMode: {
-    enabled: true,
-    maxSearchesPerQuery: 10,
-    maxDocsToAnalyze: 50,
-    researchDepth: "thorough"
-  },
-
-  plugins: [
-    {
-      name: "web-browser",
-      enabled: true,
-      config: {
-        maxPagesPerSearch: 5,
-        timeout: 30000,
-        userAgent: "Milady-Research-Agent/1.0"
-      }
+  agents: {
+    defaults: {
+      model: { primary: "anthropic/claude-sonnet-4-6" },
+      thinkingDefault: "high",
     },
-    {
-      name: "document-analyzer",
-      enabled: true,
-      config: {
-        supportedFormats: ["pdf", "docx", "txt", "md", "html"],
-        maxFileSize: "50mb",
-        extractMetadata: true
-      }
-    },
-    {
-      name: "knowledge-base",
-      enabled: true,
-      config: {
-        type: "postgresql",
-        connectionString: process.env.KNOWLEDGE_DB_URL,
-        embeddingModel: "openai",
-        vectorDimension: 1536,
-        similarityThreshold: 0.7
-      }
-    },
-    {
-      name: "academic-search",
-      enabled: true,
-      config: {
-        provider: "semanticscholar",
-        maxResults: 20,
-        focusOnPeerReviewed: true
-      }
-    }
-  ],
-
-  memory: {
-    enabled: true,
-    type: "postgresql",
-    connectionString: process.env.DATABASE_URL,
-    trackResearchTrails: true,
-    deduplicateFindings: true,
-    retentionDays: 180
+    list: [
+      {
+        id: "trader",
+        default: true,
+        name: "Mila",
+        bio: ["An autonomous trading agent on BSC"],
+        system: "You are a trading assistant. Analyze market data, identify opportunities, and execute trades via PancakeSwap. Always confirm trade parameters before execution. Prioritize safety and position size limits.",
+      },
+    ],
   },
 
-  outputFormats: {
-    markdown: true,
-    json: true,
-    summaryLength: "medium",
-    citationStyle: "chicago"
+  features: {
+    browser: true,
   },
 
-  logging: {
-    level: "info",
-    format: "json",
-    file: "./logs/research_agent.log",
-    researchLog: "./logs/research_trails.log"
-  }
+  tools: {
+    web: {
+      search: { enabled: true, provider: "brave" },
+      fetch: { enabled: true },
+    },
+  },
+
+  logging: { level: "info" },
 }
 ```
 
+<Warning>
+Only use with real funds after extensive testing. Start with `ELIZA_TRADE_PERMISSION_MODE: "user"` to require manual confirmation for each trade.
+</Warning>
+
 **Use this template if you:**
-- Want to build a research or information synthesis agent
-- Need web browsing and document analysis capabilities
-- Require a knowledge base with semantic search
-- Want structured, well-cited research outputs
-- Are doing competitive analysis, market research, or academic work
+- Want autonomous BSC trading via PancakeSwap
+- Need market analysis and trade execution
+- Have experience with DeFi and smart contracts
 
 ---
 
 ## 7. Privacy-First / Ollama (Fully Local)
 
-Complete privacy configuration using Ollama for local LLM inference with no external API calls.
+Complete privacy — Ollama for local inference, no external API calls.
 
 ```json5
 {
-  // Privacy-First Configuration with Ollama
-  // Perfect for: Privacy-sensitive applications, offline environments, no API key exposure
-  
-  modelProvider: {
-    type: "ollama",
-    baseUrl: "http://localhost:11434",
-    model: "mistral",
-    temperature: 0.7,
-    maxTokens: 2048,
-    topP: 0.9,
-    topK: 40
+  // Fully local — no API keys, no cloud, no phone home
+  env: {
+    OLLAMA_BASE_URL: "http://127.0.0.1:11434",
   },
 
-  system: {
-    name: "Local Assistant",
-    instructions: "You are a helpful AI assistant running locally on this machine. All data stays local."
-  },
-
-  // All components run locally - no external services
-  connectors: [
-    {
-      type: "cli",
-      enabled: true,
-      config: {
-        prompt: "local> "
-      }
-    }
-  ],
-
-  memory: {
-    enabled: true,
-    type: "sqlite",
-    path: "./data/local_memory.db",
-    encrypted: true,
-    encryptionKey: process.env.ENCRYPTION_KEY,
-    maxSize: "1gb",
-    localOnly: true
-  },
-
-  security: {
-    encryptionAtRest: true,
-    encryptionInTransit: true,
-    noExternalCalls: true,
-    noDataCollection: true,
-    privacyMode: "strict",
-    clearCacheOnExit: true
-  },
-
-  embeddingProvider: {
-    type: "ollama",
-    model: "nomic-embed-text",
-    baseUrl: "http://localhost:11434"
-  },
-
-  plugins: [
-    {
-      name: "local-search",
-      enabled: true,
-      config: {
-        indexPath: "./data/search_index",
-        fullTextSearch: true
-      }
+  agents: {
+    defaults: {
+      model: { primary: "ollama/llama3.3" },
     },
-    {
-      name: "file-processing",
-      enabled: true,
-      config: {
-        allowedPaths: ["./data/documents"],
-        supportedFormats: ["txt", "md", "pdf"]
-      }
-    }
-  ],
-
-  logging: {
-    level: "info",
-    format: "json",
-    file: "./logs/local_assistant.log",
-    logToConsole: false,
-    encryptLogs: true
+    list: [
+      {
+        id: "local",
+        default: true,
+        name: "Mila",
+        bio: ["A fully local AI assistant — all data stays on this machine"],
+        system: "You are Mila, running locally with full privacy. All data stays on this machine.",
+        style: { all: ["concise", "helpful"] },
+      },
+    ],
   },
 
-  resourceLimits: {
-    maxMemoryMb: 4096,
-    maxCpuPercent: 80,
-    gpuAcceleration: true
-  }
+  // Local embedding model (no OpenAI calls)
+  embedding: {
+    model: "nomic-embed-text-v1.5.Q5_K_M.gguf",
+    dimensions: 768,
+    gpuLayers: "auto",
+  },
+
+  database: {
+    provider: "pglite",
+  },
+
+  logging: { level: "error" },
 }
 ```
 
+Before running, install Ollama and pull a model:
+
+```bash
+curl -fsSL https://ollama.com/install.sh | sh
+ollama pull llama3.3
+```
+
 **Use this template if you:**
-- Need maximum privacy and data protection
-- Want zero external API calls or cloud dependencies
-- Are running in isolated/offline environments
-- Have sensitive data that can't leave your infrastructure
-- Want complete control over the model
+- Need maximum privacy — zero external API calls
+- Want to run in offline or air-gapped environments
+- Have a machine with enough RAM for local models (8GB+ recommended)
 
 ---
 
 ## 8. Production Server
 
-Enterprise-grade configuration with PostgreSQL, monitoring, multiple connectors, and high availability.
+Production deployment with PostgreSQL, monitoring, multiple connectors, and cloud integration.
 
 ```json5
 {
@@ -664,7 +456,7 @@ Enterprise-grade configuration with PostgreSQL, monitoring, multiple connectors,
   modelProvider: {
     type: "openai",
     apiKey: process.env.OPENAI_API_KEY,
-    model: "gpt-4-turbo",
+    model: "gpt-5",
     temperature: 0.7,
     maxTokens: 2000,
     retryPolicy: {
@@ -674,221 +466,151 @@ Enterprise-grade configuration with PostgreSQL, monitoring, multiple connectors,
     }
   },
 
-  system: {
-    name: "Production Assistant",
-    instructions: "You are a production AI system supporting multiple users and services."
+  agents: {
+    defaults: {
+      model: {
+        primary: "anthropic/claude-sonnet-4-6",
+        fallbacks: ["openai/gpt-4o"],
+      },
+      thinkingDefault: "medium",
+      timeoutSeconds: 120,
+    },
+    list: [
+      {
+        id: "prod",
+        default: true,
+        name: "Mila",
+        bio: ["A production AI assistant"],
+        system: "You are Mila, a production assistant.",
+      },
+    ],
   },
 
+  // PostgreSQL for production
   database: {
-    type: "postgresql",
-    connectionString: process.env.DATABASE_URL,
-    pool: {
-      min: 10,
-      max: 100,
-      idleTimeoutMs: 30000
+    provider: "postgres",
+    postgres: {
+      connectionString: "<YOUR_POSTGRES_URL>",
+      ssl: true,
     },
-    ssl: true,
-    replication: {
-      enabled: true,
-      replicas: 2
-    }
   },
 
-  cache: {
-    type: "redis",
-    connectionString: process.env.REDIS_URL,
-    ttl: 3600,
-    maxSize: "1gb"
+  // Gateway with auth
+  gateway: {
+    port: 18789,
+    bind: "lan",
+    auth: {
+      mode: "token",
+      token: "<YOUR_API_TOKEN>",
+    },
+    controlUi: {
+      enabled: true,
+    },
   },
 
-  connectors: [
-    {
-      type: "http",
-      enabled: true,
-      config: {
-        port: 3000,
-        host: "0.0.0.0",
-        basePath: "/api/v1",
-        timeout: 30000,
-        maxRequestSize: "10mb"
-      }
+  // Multi-connector
+  connectors: {
+    discord: {
+      token: "<YOUR_DISCORD_BOT_TOKEN>",
+      groupPolicy: "allowlist",
     },
-    {
-      type: "discord",
-      enabled: true,
-      config: {
-        token: process.env.DISCORD_TOKEN,
-        intents: ["GUILDS", "GUILD_MESSAGES", "DIRECT_MESSAGES"]
-      }
+    telegram: {
+      botToken: "<YOUR_TELEGRAM_BOT_TOKEN>",
+      dmPolicy: "pairing",
     },
-    {
-      type: "telegram",
-      enabled: true,
-      config: {
-        botToken: process.env.TELEGRAM_BOT_TOKEN,
-        polling: { enabled: false }
-      }
+    slack: {
+      mode: "socket",
+      botToken: "<YOUR_SLACK_BOT_TOKEN>",
+      appToken: "<YOUR_SLACK_APP_TOKEN>",
     },
-    {
-      type: "slack",
-      enabled: true,
-      config: {
-        token: process.env.SLACK_TOKEN,
-        signingSecret: process.env.SLACK_SIGNING_SECRET
-      }
-    }
-  ],
-
-  memory: {
-    enabled: true,
-    type: "postgresql",
-    connectionString: process.env.DATABASE_URL,
-    maxConversations: 1000000,
-    archiveAfterDays: 180,
-    embeddings: {
-      enabled: true,
-      provider: "openai",
-      dimension: 1536,
-      batchSize: 100
-    }
   },
 
-  monitoring: {
-    enabled: true,
-    prometheus: {
+  // OpenTelemetry
+  diagnostics: {
+    otel: {
       enabled: true,
-      port: 9090,
-      metricsPath: "/metrics"
+      endpoint: "<YOUR_OTEL_ENDPOINT>",
+      serviceName: "milady-prod",
+      traces: true,
+      metrics: true,
     },
-    datadog: {
-      enabled: true,
-      apiKey: process.env.DATADOG_API_KEY,
-      trackPerformance: true,
-      trackErrors: true
-    },
-    errorTracking: {
-      enabled: true,
-      provider: "sentry",
-      dsn: process.env.SENTRY_DSN,
-      sampleRate: 0.1
-    }
   },
 
-  security: {
-    authentication: {
-      enabled: true,
-      type: "jwt",
-      secret: process.env.JWT_SECRET,
-      expiresIn: "24h"
-    },
-    rateLimiting: {
-      enabled: true,
-      requestsPerMinute: 600,
-      perUserLimit: 100
-    },
-    encryption: {
-      atRest: true,
-      inTransit: true,
-      tlsCert: process.env.TLS_CERT,
-      tlsKey: process.env.TLS_KEY
-    },
-    cors: {
-      enabled: true,
-      allowedOrigins: process.env.ALLOWED_ORIGINS.split(",")
-    }
+  // Feature flags
+  features: {
+    browser: true,
+    cron: true,
+    webhooks: true,
   },
 
-  scaling: {
-    autoscaling: {
-      enabled: true,
-      minInstances: 2,
-      maxInstances: 20,
-      targetCpuPercent: 70
+  tools: {
+    exec: { security: "allowlist" },
+    web: {
+      search: { enabled: true, provider: "brave" },
+      fetch: { enabled: true },
     },
-    loadBalancing: {
-      enabled: true,
-      strategy: "round-robin",
-      healthCheckInterval: 10000
-    }
   },
 
-  backup: {
-    enabled: true,
-    type: "daily",
-    destination: process.env.BACKUP_BUCKET,
-    retention: 30,
-    encryption: true
-  },
+  // Update channel
+  update: { channel: "stable" },
 
   logging: {
     level: "info",
-    format: "json",
-    file: "./logs/production.log",
-    maxFileSize: "100mb",
-    maxFiles: 10,
-    cloudLogging: {
-      enabled: true,
-      provider: "datadog",
-      apiKey: process.env.DATADOG_API_KEY
-    }
-  }
+    consoleStyle: "json",
+  },
 }
 ```
 
 **Use this template if you:**
-- Are deploying to production with high availability requirements
-- Need multi-connector support (Discord, Telegram, Slack, HTTP)
-- Require database replication and backups
-- Need monitoring, error tracking, and performance metrics
-- Want enterprise-grade security and scaling
-- Are managing multiple concurrent users/requests
+- Are deploying to production with multiple connectors
+- Need PostgreSQL and observability
+- Want gateway auth for secure remote access
+- Need reliable fallback models
 
 ---
 
 ## Customizing Templates
 
-### Common Customization Points
+### Choosing a Model
 
-All templates expose these key areas for customization:
+Set the model in `agents.defaults.model.primary` using `provider/model-name` format:
 
-**Model Provider**
 ```json5
-modelProvider: {
-  type: "openai" | "anthropic" | "ollama" | "cohere" | "mistral",
-  model: "model-name",
-  temperature: 0.1, // 0 = deterministic, 1 = creative
-  maxTokens: 2000   // Adjust based on needs
-}
+agents: {
+  defaults: {
+    model: {
+      primary: "anthropic/claude-sonnet-4-6",
+      fallbacks: ["openai/gpt-4o", "groq/llama-3.3-70b-versatile"],
+    },
+  },
+},
 ```
 
-**System Prompt**
-Replace the `instructions` string with custom behavior:
+See [Model Providers](/model-providers) for the full list of 18 supported providers.
+
+### Adding Connectors
+
+Add platforms under `connectors`. Each auto-enables when credentials are present:
+
 ```json5
-system: {
-  instructions: "Your custom instructions here"
-}
+connectors: {
+  telegram: { botToken: "<TOKEN>" },
+  discord: { token: "<TOKEN>" },
+  slack: { botToken: "<TOKEN>", appToken: "<TOKEN>" },
+},
 ```
 
-**Connectors**
-Add or remove connectors (discord, telegram, http, etc.) in the `connectors` array.
+See [Platform Connectors](/guides/connectors) for all 28 supported platforms.
 
-**Memory**
-Switch between `sqlite` (local), `postgresql` (persistent), or `none` (stateless).
+### API Keys
 
-**Plugins**
-Add functionality with plugins like web-browser, document-analyzer, market-data, etc.
-
-### Environment Variables
-
-Always use environment variables for sensitive values:
+Use `~/.milady/.env` for secrets (recommended) or the `env` section in `milady.json`:
 
 ```bash
-# .env file
+# ~/.milady/.env
+ANTHROPIC_API_KEY=sk-ant-...
 OPENAI_API_KEY=sk-...
-DISCORD_TOKEN=MTA...
-TELEGRAM_BOT_TOKEN=123456:ABC...
-DATABASE_URL=postgresql://user:pass@host/db
-WALLET_PRIVATE_KEY=0x...
+BRAVE_API_KEY=BSA...
 ```
 
 Load with:
@@ -902,67 +624,37 @@ modelProvider: {
 
 ## Validation & Testing
 
-### Validate Configuration Syntax
+### Test Your Setup
 
-Use Bun to validate your config file:
+After editing `~/.milady/milady.json`, verify your configuration:
 
 ```bash
-# Check if config is valid YAML/JSON5
-bun run --eval "console.log(require('./config.json5'))"
+# Start Milady and check for startup errors
+milady
 
-# Or use the Milady config validator
-bun run validate-config config.json5
+# Check model provider status
+milady models
+
+# Check installed plugins
+milady plugins installed
+
+# Run the built-in diagnostics
+milady doctor
 ```
 
-### Test Configuration Locally
+### Development Mode
 
-Test your configuration before deploying:
-
-```bash
-# Start Milady with your config in test mode
-bun run milady --config ./config.json5 --test
-
-# Test a specific connector
-bun run milady --config ./config.json5 --test-connector discord
-
-# Validate all API keys are accessible
-bun run milady --config ./config.json5 --check-keys
-```
-
-### Dry Run Before Production
-
-Perform a dry run to catch errors early:
+For development and testing:
 
 ```bash
-# Load config and simulate initialization without running
-bun run milady --config ./config.json5 --dry-run
+# Start with hot reload (API + UI)
+bun run dev
 
-# Test with sample input
-bun run milady --config ./config.json5 --test-input "Hello, assistant"
-```
+# Run the test suite
+bun run test
 
-### Full Integration Test
-
-Run a complete test before production deployment:
-
-```bash
-# Initialize database, load config, and test all systems
-bun run test:integration --config ./config.json5
-
-# Run with detailed logging
-bun run milady --config ./config.json5 --log-level debug
-```
-
-### Monitor During Startup
-
-Watch logs as the system starts:
-
-```bash
-# Follow logs in real-time
-bun run milady --config ./config.json5 | grep -i "error\|warning\|initialized"
-
-# Save startup logs for debugging
-bun run milady --config ./config.json5 > startup.log 2>&1
+# Type-check and lint
+bun run check
 ```
 
 ---
@@ -970,10 +662,9 @@ bun run milady --config ./config.json5 > startup.log 2>&1
 ## Next Steps
 
 1. **Choose a template** that matches your use case
-2. **Copy the template** and save it as `config.json5`
-3. **Replace all placeholder values** with your actual configuration
-4. **Run validation** with `bun run validate-config config.json5`
-5. **Test locally** before deploying to production
-6. **Deploy** using your hosting platform's deployment process
+2. **Adapt the concepts** to the actual `milady.json` config format (see [Configuration](/configuration) and [Config Schema](/config-schema))
+3. **Replace all placeholder values** with your actual credentials
+4. **Test locally** with `milady` and `milady models`
+5. **Deploy** using your hosting platform's deployment process
 
-See the [Configuration Reference](/docs/reference/config-reference) for complete option documentation.
+See the [Configuration Reference](/configuration) for complete option documentation.

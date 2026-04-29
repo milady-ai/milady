@@ -42,18 +42,44 @@ const FORBIDDEN_STOCK_PACKAGES = [
   "com.android.email",
   "com.android.gallery3d",
   "com.android.launcher3",
+  "com.android.managedprovisioning",
   "com.android.messaging",
   "com.android.music",
+  "com.android.provision",
   "com.google.android.apps.messaging",
   "com.google.android.apps.nexuslauncher",
   "com.google.android.dialer",
+  "com.google.android.setupwizard",
   "org.lineageos.trebuchet",
 ];
 
-const LOGCAT_FAILURE_PATTERNS = [
-  /FATAL EXCEPTION/i,
-  /SecurityException/i,
-  /avc:\s+denied/i,
+const REQUIRED_BOOT_PROPERTIES = {
+  "ro.setupwizard.mode": "DISABLED",
+  // miladyos.boot_phase is intentionally non-ro so init.milady.rc can
+  // re-set it at each phase. ro.* is immutable after first set.
+  "miladyos.boot_phase": "completed",
+};
+
+// Failures the validator should treat as Milady-introduced regressions.
+// Stock AOSP cuttlefish has its own boot noise (a known SystemUI keyguard
+// NPE in LockPatternUtils$StrongAuthTracker, statsbootstrap avc denials
+// from HAL processes, generic REGISTER_STATS_PULL_ATOM warnings) that does
+// not indicate a problem with MiladyOS — broad pattern matching there
+// just creates false positives. We scope each pattern to Milady's blast
+// radius:
+//   - FATAL EXCEPTION:    only the Milady process itself.
+//   - SecurityException:  only stack frames mentioning Milady code.
+//   - avc denied:         only entries whose source or target context
+//                         names a `milady`-owned sepolicy domain.
+//   - privapp-permissions: any package — these are immediate boot-time
+//                         whitelist failures we want to catch even if
+//                         the package name is masked in the message.
+export const LOGCAT_FAILURE_PATTERNS = [
+  /FATAL EXCEPTION[^\n]*com\.miladyai\.milady/i,
+  /Process: com\.miladyai\.milady/i,
+  /SecurityException[^\n]*(Milady|com\.miladyai\.milady)/i,
+  /Milady[A-Za-z]*Receiver[^\n]*SecurityException/i,
+  /avc:\s+denied[^\n]*(scontext|tcontext)=u:[a-z_]*:milady/i,
   /privapp-permissions/i,
   /Privileged permission.*not in privapp-permissions/i,
 ];
@@ -212,6 +238,20 @@ function validateProductProperty(adb, serial) {
   return product;
 }
 
+function validateBootProperties(adb, serial) {
+  const properties = {};
+  for (const [name, expected] of Object.entries(REQUIRED_BOOT_PROPERTIES)) {
+    const actual = shell(adb, serial, `getprop ${name}`).trim();
+    if (actual !== expected) {
+      throw new Error(
+        `${name} must be ${expected}; found ${actual || "<empty>"}`,
+      );
+    }
+    properties[name] = actual;
+  }
+  return properties;
+}
+
 function validatePackagePath(adb, serial) {
   const pmPath = shell(adb, serial, `pm path ${PACKAGE_NAME}`);
   assertIncludes(pmPath, "/system/priv-app/Milady/", "Milady package path");
@@ -226,6 +266,66 @@ function validateHomeResolution(adb, serial) {
   );
   assertIncludes(resolved, PACKAGE_NAME, "HOME activity resolution");
   return resolved;
+}
+
+/**
+ * For every system intent whose default app we stripped from
+ * PRODUCT_PACKAGES, prove a Milady activity is the resolver. Without
+ * these assertions a stripped phone could pass HOME/Dialer/SMS role
+ * validation while silently failing to open URLs / set alarms / take
+ * photos — exactly the regression class this list catches.
+ */
+const REPLACEMENT_INTENT_RESOLUTIONS = [
+  {
+    label: "VIEW http",
+    args: '-a android.intent.action.VIEW -c android.intent.category.BROWSABLE -d "http://example.com"',
+  },
+  {
+    label: "VIEW https",
+    args: '-a android.intent.action.VIEW -c android.intent.category.BROWSABLE -d "https://example.com"',
+  },
+  {
+    label: "STILL_IMAGE_CAMERA",
+    args: "-a android.media.action.STILL_IMAGE_CAMERA",
+  },
+  {
+    label: "IMAGE_CAPTURE",
+    args: "-a android.media.action.IMAGE_CAPTURE",
+  },
+  {
+    label: "SET_ALARM",
+    args: "-a android.intent.action.SET_ALARM",
+  },
+  {
+    label: "SHOW_ALARMS",
+    args: "-a android.intent.action.SHOW_ALARMS",
+  },
+  {
+    label: "APP_CONTACTS launcher",
+    args: "-a android.intent.action.MAIN -c android.intent.category.APP_CONTACTS",
+  },
+  {
+    label: "APP_CALENDAR launcher",
+    args: "-a android.intent.action.MAIN -c android.intent.category.APP_CALENDAR",
+  },
+];
+
+function validateReplacementIntents(adb, serial) {
+  const resolutions = {};
+  for (const { label, args } of REPLACEMENT_INTENT_RESOLUTIONS) {
+    const resolved = shell(
+      adb,
+      serial,
+      `cmd package resolve-activity --brief ${args}`,
+    );
+    if (!resolved.includes(PACKAGE_NAME)) {
+      throw new Error(
+        `Intent "${label}" did not resolve to ${PACKAGE_NAME}; got:\n${resolved}`,
+      );
+    }
+    resolutions[label] = resolved;
+  }
+  return resolutions;
 }
 
 function validateRoles(adb, serial) {
@@ -270,9 +370,20 @@ function validateAppOps(adb, serial) {
 }
 
 function validateForbiddenPackages(adb, serial) {
-  const packages = shell(adb, serial, "pm list packages");
+  // pm list packages prints one `package:<name>` per line. Use a Set of
+  // exact lines instead of substring matching: without this, looking for
+  // `com.android.contacts` matches the unrelated `com.android.contactspicker`
+  // (the system contact-picker UI), and `com.android.music` matches
+  // `com.android.musicfx` (the equalizer service).
+  const installed = new Set(
+    shell(adb, serial, "pm list packages")
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => line.startsWith("package:"))
+      .map((line) => line.slice("package:".length)),
+  );
   const installedForbidden = FORBIDDEN_STOCK_PACKAGES.filter((pkg) =>
-    packages.includes(`package:${pkg}`),
+    installed.has(pkg),
   );
   if (installedForbidden.length > 0) {
     throw new Error(
@@ -308,8 +419,10 @@ export async function validateBootedDevice(options) {
     adb,
     serial,
     product: validateProductProperty(adb, serial),
+    bootProperties: validateBootProperties(adb, serial),
     packagePath: validatePackagePath(adb, serial),
     homeResolution: validateHomeResolution(adb, serial),
+    replacementIntents: validateReplacementIntents(adb, serial),
     roles: validateRoles(adb, serial),
     appOps: validateAppOps(adb, serial),
     forbiddenPackages: validateForbiddenPackages(adb, serial),

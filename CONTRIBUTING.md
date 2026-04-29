@@ -36,6 +36,20 @@ Use Milady. Talk to it. Push its limits. Request changes *through the app itself
 
 If you're an agent or operating on behalf of an agent: welcome. Open your PR and the review pipeline will handle it.
 
+## Local clone and eliza submodule maintenance
+
+Milady vendors [eliza](https://github.com/elizaOS/eliza) as a git submodule with nested plugin submodules. Bun resolves `workspace:*` **before** `preinstall`, so use **`./install`** (Unix / macOS) or **`install.cmd`** (Windows) on a fresh clone. Plain `bun install` works for updates once the submodules are on disk.
+
+To **fast-forward `eliza` to `submodule.eliza.branch` (from Milady’s `.gitmodules`, usually `develop`)** and set **every nested submodule** to the tip of its configured remote branch (`eliza/.gitmodules`):
+
+```bash
+bun run workspace:bump-eliza-submodules
+```
+
+Only refresh nested repos, not `eliza` itself: `bun run workspace:bump-eliza-submodules -- --skip-eliza-pull`.
+
+If you keep the new SHAs: **commit inside `eliza/`** (`git add -u`, commit), then **`git add eliza`** and commit at the Milady root.
+
 ## What Gets Accepted
 
 ### Always Welcome
@@ -76,35 +90,28 @@ If you are a coding agent submitting work:
 - **Tests required.** Bug fixes need regression tests. Features need unit tests.
 - **Onboarding UX stability checks.** Any onboarding-affecting PR must verify viewport lock/no scroll drift in both `bun run dev` and desktop (`bun run start:desktop`) before merge.
 - **Database changes:** Run `bun run db:check` after any database-related work. Migrations are auto-applied by `@elizaos/plugin-sql` — there are no manual migration files.
-- **Coverage floor:** 25% for lines, functions, and statements, and 15% for branches (canonical policy in `scripts/coverage-policy.mjs`).
+- **Coverage floor:** 25% for lines, functions, and statements, and 15% for branches (canonical policy in `eliza/packages/app-core/scripts/coverage-policy.mjs`).
 - **Files under ~500 LOC.** Split when it improves clarity.
 - **No secrets.** No real credentials, phone numbers, or live config in code.
 - **Minimal dependencies.** Don't add packages unless `src/` directly imports them.
 - **Commit messages:** concise, action-oriented (e.g., `milady: fix telegram reconnect on rate limit`)
 - **Desktop agent startup:** Do not remove try/catch or `.catch()` in `eliza/packages/app-core/platforms/electrobun/src/native/agent.ts` as "excess" exception handling. Those guards keep the desktop app window usable when the runtime fails to load; see `docs/electrobun-startup.md`.
-- **NODE_PATH setup:** Do not remove the `NODE_PATH` code in `packages/agent/src/runtime/eliza.ts`, `eliza/packages/app-core/scripts/run-node.mjs`, or `eliza/packages/app-core/platforms/electrobun/src/native/agent.ts`. It ensures dynamic plugin imports resolve correctly; see `docs/plugin-resolution-and-node-path.md`.
-- **Bun exports patch:** Do not remove the `patchBunExports` logic in `scripts/patch-deps.mjs`. It fixes plugin load failures under Bun when a published package's `exports["."].bun` points to a missing `src/` path; see "Bun and published package exports" in `docs/plugin-resolution-and-node-path.md`.
+- **NODE_PATH setup:** Do not remove the `NODE_PATH` code in `eliza/packages/agent/src/runtime/eliza.ts`, `eliza/packages/app-core/scripts/run-node.mjs`, or `eliza/packages/app-core/platforms/electrobun/src/native/agent.ts`. It ensures dynamic plugin imports resolve correctly; see `docs/plugin-resolution-and-node-path.md`.
+- **Bun exports patch:** Do not remove the `patchBunExports` logic in `eliza/packages/app-core/scripts/patch-deps.mjs`. It fixes plugin load failures under Bun when a published package's `exports["."].bun` points to a missing `src/` path; see "Bun and published package exports" in `docs/plugin-resolution-and-node-path.md`.
 
-### Local Git Gates (Required)
+### Local Review Script
 
-Milady uses repo-managed hooks (`git config core.hooksPath git-hooks`) to enforce review hygiene before code leaves your machine:
+Run the local pre-review check before pushing:
 
-- **pre-commit** runs `bun run pre-commit:local` and blocks commits when:
-  - behavioral source files are staged without staged tests.
-  - (it also warns when your branch is behind `origin/develop` and asks you to rebase before push)
-- **pre-push** runs `bun run review:local` and blocks unsafe pushes.
-  - This script prints the same 6-line review contract used by the GitHub agent review workflow:
-    - Classification
-    - Scope verdict
-    - Code quality
-    - Security
-    - Tests
-    - Decision
+```bash
+bun run pre-review:local
+```
 
-Bypass is available for emergencies only:
+This prints the same 6-line review contract used by the GitHub agent review workflow (classification, scope, code quality, security, tests, decision).
 
-- `MILADY_SKIP_PRE_COMMIT_REVIEW=1` (pre-commit)
-- `MILADY_SKIP_PRE_REVIEW=1` (pre-push)
+The `git-hooks/` directory contains Git LFS hooks and post-checkout/post-commit/post-merge helpers. The `pre-push` hook enforces Git LFS — it does not run the review script automatically. Run `bun run pre-review:local` manually before pushing.
+
+Bypass for emergencies: `MILADY_SKIP_PRE_REVIEW=1`.
 
 ## Security
 

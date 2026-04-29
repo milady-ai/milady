@@ -86,7 +86,11 @@ jobs:
             globs: "test/scenarios/browser.*/**/*.scenario.ts test/scenarios/social.*/**/*.scenario.ts"
           - name: cross-cutting-gateway
             runs-on: ubuntu-24.04
-            globs: "test/scenarios/cross-cutting/**/*.scenario.ts test/scenarios/gateway/**/*.scenario.ts test/scenarios/remote/**/*.scenario.ts test/scenarios/lifeops/**/*.scenario.ts test/scenarios/lifeops.*/**/*.scenario.ts test/scenarios/goals/**/*.scenario.ts test/scenarios/convo/**/*.scenario.ts"
+            globs: "test/scenarios/cross-cutting/**/*.scenario.ts test/scenarios/gateway/**/*.scenario.ts test/scenarios/remote/**/*.scenario.ts test/scenarios/lifeops.*/**/*.scenario.ts test/scenarios/goals/**/*.scenario.ts test/scenarios/convo/**/*.scenario.ts"
+          - name: lifeops-app
+            runs-on: ubuntu-24.04
+            root: eliza/apps/app-lifeops/test/scenarios
+            globs: "**/*.scenario.ts"
     runs-on: ${{ matrix.shard.runs-on }}
     timeout-minutes: 60
 
@@ -212,7 +216,7 @@ jobs:
         run: |
           set -f
           bun run milady-scenarios run \
-            test/scenarios \
+            ${{ matrix.shard.root || 'test/scenarios' }} \
             --report-dir reports/scenarios/${{ github.run_id }}-${{ matrix.shard.name }} \
             --runId "${{ github.run_id }}-${{ matrix.shard.name }}" \
             ${{ matrix.shard.globs }}

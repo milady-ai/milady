@@ -11,7 +11,7 @@ The Microsoft Teams plugin connects Milady agents to Teams as an Azure Bot, supp
 ## Installation
 
 ```bash
-milady plugins install msteams
+milady plugins install @elizaos/plugin-msteams
 ```
 
 ## Setup
@@ -81,6 +81,20 @@ export MSTEAMS_TENANT_ID=YOUR_TENANT_ID
 - **Media support** — Upload files up to 100MB via OneDrive integration
 - **SharePoint integration** — File uploads in group chats via SharePoint site
 - **Media host allowlists** — Control which hosts can serve downloadable media
+
+## Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `MSTEAMS_APP_ID` | No | Azure Bot App ID |
+| `MSTEAMS_ENABLED` | No | Enable or disable the connector |
+| `MSTEAMS_TENANT_ID` | No | Azure AD Tenant ID |
+| `MSTEAMS_APP_PASSWORD` | Yes | Azure Bot App Password (client secret) |
+| `MSTEAMS_MEDIA_MAX_MB` | No | Maximum media upload size in MB |
+| `MSTEAMS_WEBHOOK_PATH` | No | Webhook endpoint path |
+| `MSTEAMS_WEBHOOK_PORT` | No | Webhook listener port |
+| `MSTEAMS_ALLOWED_TENANTS` | No | Comma-separated allowed tenant IDs |
+| `MSTEAMS_SHAREPOINT_SITE_ID` | No | SharePoint site ID for file uploads |
 
 ## Auto-Enable
 

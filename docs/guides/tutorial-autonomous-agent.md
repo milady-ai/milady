@@ -61,43 +61,39 @@ Enabling autonomous mode for an agent is straightforward through the Milady dash
 
 ### Via API
 
-You can also enable and configure autonomous mode programmatically using the Milady API:
+You can also enable autonomous mode programmatically using the local Milady API:
 
 <CodeGroup>
 ```bash curl
 # Enable autonomy
-curl -X POST http://localhost:2138/api/agent/autonomy \
+curl -X POST http://localhost:31337/api/agent/autonomy \
   -H "Content-Type: application/json" \
   -d '{"enabled": true}'
 
 # Create a trigger for scheduled execution
-curl -X POST http://localhost:2138/api/triggers \
+curl -X POST http://localhost:31337/api/triggers \
   -H "Content-Type: application/json" \
   -d '{
-    "displayName": "Hourly Check",
-    "instructions": "Check system health and report anomalies",
-    "triggerType": "interval",
-    "intervalMs": 3600000,
-    "wakeMode": "inject_now",
     "enabled": true
   }'
 ```
 
 ```json JSON Response
 {
-  "trigger": {
-    "id": "uuid",
-    "taskId": "uuid",
-    "displayName": "Hourly Check",
-    "triggerType": "interval",
-    "intervalMs": 3600000,
-    "enabled": true,
-    "wakeMode": "inject_now",
-    "runCount": 0
-  }
+  "ok": true,
+  "autonomy": true,
+  "thinking": false
 }
 ```
 </CodeGroup>
+
+To check the current autonomy state:
+
+```bash
+curl http://localhost:31337/api/agent/autonomy
+```
+
+See the [Autonomy API reference](/rest/autonomy) for full endpoint documentation.
 
 <Warning>
 Store sensitive configuration in `~/.milady/milady.json` or environment variables. Never hardcode credentials in your code.
@@ -276,9 +272,11 @@ You can disable autonomous mode at any time through the dashboard or API:
 
 <CodeGroup>
 ```bash curl
-curl -X POST http://localhost:2138/api/agent/autonomy \
+curl -X POST http://localhost:31337/api/agent/autonomy \
   -H "Content-Type: application/json" \
-  -d '{"enabled": false}'
+  -d '{
+    "enabled": false
+  }'
 ```
 
 ```json JSON Response
@@ -338,5 +336,5 @@ Disabling autonomy will prevent any scheduled executions from running. The agent
 
 - Learn more about [configuring advanced autonomous mode options](/guides/autonomous-mode)
 - Explore [trigger type details and edge cases](/guides/triggers)
-- Review the [sandbox and security guide](/guides/sandbox) for production deployments
-- See the [coding swarms guide](/guides/coding-swarms) for multi-agent orchestration
+- Set up [diagnostics](/guides/developer-diagnostics-and-workspace) for your agents
+- Review [security architecture](/security) for production deployments

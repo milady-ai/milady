@@ -1,13 +1,11 @@
 import { ErrorBoundary } from "@elizaos/app-core";
 import "@elizaos/app-core/styles/styles.css";
 import "@elizaos/app-core/styles/brand-gold.css";
-import "@elizaos/app-core/platform/native-plugin-entrypoints";
 
 import { App as CapacitorApp } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";
 import { Keyboard } from "@capacitor/keyboard";
 import { Preferences } from "@capacitor/preferences";
-import { App } from "@elizaos/app-core";
 import { client } from "@elizaos/app-core";
 import {
   initializeCapacitorBridge,
@@ -15,7 +13,6 @@ import {
   initializeStorageBridge,
   isElectrobunRuntime,
 } from "@elizaos/app-core";
-import { CharacterEditor } from "@elizaos/app-core";
 import { PhoneCompanionApp } from "@elizaos/app-core";
 import type { BrandingConfig } from "@elizaos/app-core";
 import {
@@ -43,11 +40,14 @@ import {
   installDesktopPermissionsClientPatch,
   installForceFreshOnboardingClientPatch,
   installLocalProviderCloudPreferencePatch,
+  isAppWindowRoute,
   isDetachedWindowShell,
+  getWindowNavigationPath,
   resolveWindowShellRoute,
   shouldInstallMainWindowOnboardingPatches,
   syncDetachedShellLocation,
 } from "@elizaos/app-core";
+import { AppWindowRenderer } from "@elizaos/app-core";
 import { dispatchQueuedLifeOpsGithubCallbackFromUrl } from "@elizaos/app-lifeops/platform";
 import type { ShareTargetPayload } from "@elizaos/app-core/platform";
 import {
@@ -61,7 +61,10 @@ import { AppProvider } from "@elizaos/app-core";
 import { applyUiTheme, loadUiTheme } from "@elizaos/app-core";
 import { Agent } from "@elizaos/capacitor-agent";
 import { Desktop } from "@elizaos/capacitor-desktop";
-import type { DeviceBridgeClient } from "@elizaos/capacitor-llama";
+import {
+  startDeviceBridgeClient,
+  type DeviceBridgeClient,
+} from "@elizaos/capacitor-llama";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { CompanionShell } from "@elizaos/app-companion/ui";
@@ -87,6 +90,8 @@ import "@elizaos/app-scape/ui";
 import "@elizaos/app-hyperscape/ui";
 import "@elizaos/app-2004scape/ui";
 import "@elizaos/app-defense-of-the-agents/ui";
+import "@elizaos/app-screenshare/ui";
+import "@clawville/app-clawville/ui";
 import {
   AppBlockerSettingsCard,
   LifeOpsBrowserSetupPanel as BrowserBridgeSetupPanel,
@@ -113,17 +118,24 @@ import "@elizaos/app-vincent/register";
 import { shouldUseCloudOnlyBranding } from "@elizaos/app-core";
 import {
   APP_BRANDING_BASE,
+  APP_CONFIG,
   APP_LOG_PREFIX,
   APP_NAMESPACE,
   APP_URL_SCHEME,
 } from "./app-config";
 import { APP_ENV_ALIASES, APP_ENV_PREFIX } from "./brand-env";
 import { APP_CHARACTER_CATALOG } from "./character-catalog";
+import { App } from "../../../eliza/packages/app-core/src/App";
 import {
   apiBaseToDeviceBridgeUrl,
   type IosRuntimeConfig,
   resolveIosRuntimeConfig,
 } from "./ios-runtime";
+
+// CharacterEditor is statically re-exported by `@elizaos/app-core/browser`,
+// so the previous `lazy()` wrapper here was eagerly merged back into the
+// main chunk by Rollup. Static import keeps the load path honest.
+import { CharacterEditor } from "@elizaos/app-core/components/character/CharacterEditor";
 
 declare global {
   interface Window {
@@ -232,6 +244,7 @@ const APP_VRM_ASSETS = APP_STYLE_PRESETS.slice()
 
 const appBootConfig: AppBootConfig = {
   branding: APP_BRANDING,
+  defaultApps: APP_CONFIG.defaultApps,
   assetBaseUrl:
     (import.meta.env.VITE_ASSET_BASE_URL as string | undefined)?.trim() ||
     undefined,
@@ -322,6 +335,7 @@ async function initializePlatform(): Promise<void> {
   initializeCapacitorBridge();
 
   if (isIOS || isAndroid) {
+    await import("@elizaos/app-core/platform/native-plugin-entrypoints");
     await initializeKeyboard();
     initializeAppLifecycle();
     initializeMobileRuntimeModeListener();
@@ -581,11 +595,27 @@ function isPhoneCompanionMode(): boolean {
   return params.get("mode") === "companion";
 }
 
+function resolveAppWindowSlug(): string | null {
+  if (!isAppWindowRoute()) return null;
+  const path = getWindowNavigationPath();
+  if (!path.startsWith("/apps/")) return null;
+  // Take only the first path segment after /apps/. URLs like
+  // `/apps/plugins/extra` would otherwise yield a malformed slug
+  // ("plugins/extra") that no descriptor can match.
+  const slug = path
+    .slice("/apps/".length)
+    .replace(/[?#].*$/, "")
+    .split("/")[0];
+  return slug.length > 0 ? slug : null;
+}
+
 function mountReactApp(): void {
   const rootEl = document.getElementById("root");
   if (!rootEl) throw new Error("Root element #root not found");
 
   const phoneCompanion = isPhoneCompanionMode();
+  const detachedShell = isDetachedWindowShell(windowShellRoute);
+  const appWindowSlug = detachedShell ? null : resolveAppWindowSlug();
 
   createRoot(rootEl).render(
     <ErrorBoundary>
@@ -593,9 +623,13 @@ function mountReactApp(): void {
         <AppProvider branding={APP_BRANDING}>
           {phoneCompanion ? (
             <PhoneCompanionApp />
-          ) : isDetachedWindowShell(windowShellRoute) ? (
+          ) : detachedShell ? (
             <div className="flex h-screen min-h-0 w-screen flex-col overflow-hidden">
               <DetachedShellRoot route={windowShellRoute} />
+            </div>
+          ) : appWindowSlug ? (
+            <div className="flex h-screen min-h-0 w-screen flex-col overflow-hidden">
+              <AppWindowRenderer slug={appWindowSlug} />
             </div>
           ) : (
             <>
@@ -738,10 +772,7 @@ async function initializeMobileDeviceBridge(): Promise<void> {
   if (!agentUrl) return;
 
   try {
-    const [{ startDeviceBridgeClient }, deviceId] = await Promise.all([
-      import("@elizaos/capacitor-llama"),
-      getOrCreateDeviceBridgeId(),
-    ]);
+    const deviceId = await getOrCreateDeviceBridgeId();
     mobileDeviceBridgeClient = startDeviceBridgeClient({
       agentUrl,
       ...(runtimeConfig.deviceBridgeToken

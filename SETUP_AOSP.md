@@ -2,7 +2,7 @@
 
 This is the migration runbook for taking the current `develop` branch onto a Linux builder and validating the hard-path MiladyOS build: a real AOSP/Cuttlefish product image where Milady is installed as a privileged system app and owns the phone UI surface.
 
-This is not kiosk mode, managed-device mode, or an emulator-only wrapper. The target is an AOSP product build named `milady_cf_x86_64_phone-userdebug`.
+This is not kiosk mode, managed-device mode, or an emulator-only wrapper. The target is an AOSP product build named `milady_cf_x86_64_phone-trunk_staging-userdebug`.
 
 ## Current Repository State
 
@@ -36,7 +36,7 @@ Expected clean checkout shape:
 
 ## Builder Requirements
 
-Use a Linux x86_64 machine with KVM. The MiladyOS build script enforces this because the current Cuttlefish target is `milady_cf_x86_64_phone-userdebug`.
+Use a Linux x86_64 machine with KVM. The MiladyOS build script enforces this because the current Cuttlefish target is `milady_cf_x86_64_phone-trunk_staging-userdebug`.
 
 Recommended machine:
 
@@ -156,7 +156,7 @@ repo sync -c -j8
 
 Notes:
 
-- Google now recommends `android-latest-release` for platform work.
+- `android-latest-release` is a moving target. The product makefile inherits `device/google/cuttlefish/vsoc_x86_64_only/phone/aosp_cf.mk`, and Google has renamed the Cuttlefish device tree twice in the last 18 months. If `lunch milady_cf_x86_64_phone-trunk_staging-userdebug` ever errors with `Cannot locate config for milady_cf_x86_64_phone`, the inherit-product path in `os/android/vendor/milady/products/milady_cf_x86_64_phone.mk` likely needs an update — bisect by `repo init -b <tag>` against an older release tag (e.g. `android-15.0.0_r10`) until the inherit-product path resolves, then update the makefile + `validate.mjs` reference together.
 - `repo sync` can take more than an hour and can fail on flaky networks. Re-run the same command if it fails.
 - Do not put AOSP under the Milady checkout.
 
@@ -182,7 +182,7 @@ What this command does:
 
    ```bash
    source build/envsetup.sh
-   lunch milady_cf_x86_64_phone-userdebug
+   lunch milady_cf_x86_64_phone-trunk_staging-userdebug
    m -j$(nproc)
    ```
 
@@ -228,7 +228,7 @@ bun run miladyos:validate -- --aosp-root ~/aosp
 ```bash
 cd ~/aosp
 source build/envsetup.sh
-lunch milady_cf_x86_64_phone-userdebug
+lunch milady_cf_x86_64_phone-trunk_staging-userdebug
 m -j"$(nproc)"
 ```
 
@@ -237,7 +237,7 @@ m -j"$(nproc)"
 ```bash
 cd ~/aosp
 source build/envsetup.sh
-lunch milady_cf_x86_64_phone-userdebug
+lunch milady_cf_x86_64_phone-trunk_staging-userdebug
 launch_cvd --daemon
 ```
 
@@ -366,14 +366,75 @@ cd ~/milady
 node scripts/miladyos/build-aosp.mjs --aosp-root ~/aosp
 ```
 
+### One-shot Cuttlefish runner
+
+Once `m` finishes (or while it's still running, with `--wait-for-build`):
+
+```bash
+# Wait for system.img, start cvd, validate, capture screenshots — one command
+bun run miladyos:sim -- --wait-for-build --out reports/aosp-sim
+
+# Already booted manually? Skip the launch step
+bun run miladyos:sim -- --no-launch --out reports/aosp-sim
+
+# Tear down cvd cleanly when done
+bun run miladyos:sim -- --stop-after
+```
+
+The runner:
+1. Waits for `out/target/product/<device>/system.img` to appear (`--wait-for-build` polls).
+2. Stops any running cvd instance for a clean boot.
+3. `lunch milady_cf_x86_64_phone-trunk_staging-userdebug && cvd start --daemon` (falls back to `launch_cvd --daemon` on Cuttlefish 0.x).
+4. Spawns `miladyos:e2e` which boot-validates and captures HOME / Dialer / SMS / Assist / launcher screenshots.
+5. Optionally tears down cvd at the end (`--stop-after`).
+
+### Visual / e2e validation (Cuttlefish or AVD)
+
+After Cuttlefish boots (or against a stock AVD), capture role-ownership proof and a PNG gallery of the Milady surfaces:
+
+```bash
+# Cuttlefish — full role/permission/appop checks + Dialer/SMS/Assist screenshots
+bun run miladyos:e2e -- --out reports/aosp-cuttlefish
+
+# AVD short loop — install the Capacitor APK on an existing emulator
+bun run miladyos:avd -- --avd JejuWallet_Pixel6 --capture reports/avd
+
+# Just grab screenshots without driving steps
+bun run miladyos:capture -- --out reports/manual --no-launch
+```
+
+`miladyos:e2e` writes `report.json` next to the PNGs with the boot-validate results and step list. `miladyos:avd` is the short app-only iteration loop — it does **not** prove role ownership (only Cuttlefish + a real AOSP build can do that), but it does verify the WebView, gateway service, and deep-link routing without paying for a system rebuild.
+
+### `dev:android` is not the AOSP loop
+
+`bun run dev:android` opens **Android Studio against the Capacitor app**, not against AOSP. It builds a debug APK and installs it on a connected handset/emulator using the standard Capacitor flow. This is for app-only iteration without the system image.
+
+The actual AOSP iteration loop is:
+
+1. Edit Capacitor app sources or `os/android/vendor/milady/`.
+2. `bun run build:android:system` (rebuilds the privileged APK).
+3. `node scripts/miladyos/build-aosp.mjs --aosp-root ~/aosp` (sync + `m`).
+4. If only product XML/makefiles changed, add `--skip-build` to skip the APK rebuild.
+5. `node scripts/miladyos/build-aosp.mjs --aosp-root ~/aosp --launch --boot-validate` to relaunch Cuttlefish from a clean state.
+
 ## Known Limits Of This Stage
 
 Validated locally on macOS:
 
-- Android system APK builds.
-- Static MiladyOS product validation passes.
+- Android system APK builds (requires Android SDK with `build-tools` and JDK 21).
+- Static MiladyOS product validation passes (requires `xmllint` and `aapt` — see below).
 - MiladyOS script and workflow contract tests pass.
 - App-core typecheck passes.
+
+`bun run miladyos:validate` shells out to two binaries that aren't on a stock macOS:
+
+```bash
+brew install libxml2     # for xmllint
+# aapt comes with the Android SDK build-tools — install via Android Studio
+#   or `sdkmanager "build-tools;36.0.0"` and ensure ANDROID_HOME is set.
+```
+
+On Linux these come from `apt install libxml2-utils` and the SDK / `setup-android` action respectively.
 
 Requires Linux/KVM validation:
 
@@ -437,6 +498,26 @@ If it repeatedly fails, lower parallelism:
 ```bash
 repo sync -c -j4
 ```
+
+### `nsjail: mount('/', '/', ...): Permission denied` partway through `m`
+
+Ubuntu 24.04 restricts unprivileged user namespaces via AppArmor by default. AOSP's Soong uses `nsjail` to sandbox parts of the build (Trusty TEE VM and a few others) and nsjail can't set up its sandbox root without those namespaces. Symptom:
+
+```
+FAILED: out/soong/.intermediates/trusty/.../trusty_security_vm_*.elf
+[E] initCloneNs(): mount('/', '/', NULL, MS_REC|MS_PRIVATE, NULL): Permission denied
+ninja: build stopped: subcommand failed.
+```
+
+Fix (one-time, persistent across reboots):
+
+```bash
+echo "kernel.apparmor_restrict_unprivileged_userns = 0" | \
+  sudo tee /etc/sysctl.d/99-miladyos-aosp.conf
+sudo sysctl --system
+```
+
+`scripts/aosp-host-root-setup.sh` writes this file already; only relevant if you set up the host before this fix landed or used a different setup path.
 
 ### AOSP build runs out of memory
 

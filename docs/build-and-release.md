@@ -36,7 +36,7 @@ We do **not** try to exclude deps that might already be inlined by tsdown into p
 
 ## Release workflow: design and WHYs
 
-The release workflow (`.github/workflows/release.yml`) is designed for **reproducible, fail-fast builds** and **diagnosable failures**. Key choices and their reasons:
+The release workflow (`.github/workflows/release-electrobun.yml`) is designed for **reproducible, fail-fast builds** and **diagnosable failures**. Key choices and their reasons:
 
 - **Strict shell (`bash -euo pipefail`)** — Applied at job default for `build-desktop` so every step exits on first error, undefined variable, or pipe failure. **Why:** Without it, a failing command in the middle of a script can be ignored and the step still "succeeds", producing broken artifacts or confusing later failures.
 - **Retry loops with final assertion** — `bun install` steps retry up to 3 times, then run the same install command once more after the loop. **Why:** If all retries failed, the loop exits without failing the step; the final run ensures the step fails with a clear install error instead of silently continuing.
@@ -55,7 +55,7 @@ CI workflows that need Node (for node-gyp / native modules or npm registry) were
 
 - **`actions/setup-node@v4` on all runners** — Every workflow uses the standard `actions/setup-node@v4` on GitHub-hosted `ubuntu-24.04` / `windows-2025` runners.
 - **`check-latest: false`** — We set this explicitly on every `actions/setup-node` step. **Why:** With the default, the action can hit nodejs.org to check for a newer patch; that adds latency and can timeout. We want a fixed, cached Node version for reproducible CI.
-- **Bun global cache (`~/.bun/install/cache`)** — test.yml, release.yml, benchmark-tests.yml, publish-npm.yml, and nightly.yml all cache this path with `actions/cache@v4` keyed by `bun.lock`. **Why:** Bun install is fast, but re-downloading every package every run was still a major cost; caching the global cache avoids re-downloading tarballs while letting `bun install` do its fast hardlink/clonefile into `node_modules`. We do not cache `node_modules` itself — compression/upload cost exceeds the gain.
+- **Bun global cache (`~/.bun/install/cache`)** — test.yml, release-electrobun.yml, benchmark-tests.yml, publish-npm.yml, and nightly.yml all cache this path with `actions/cache@v4` keyed by `bun.lock`. **Why:** Bun install is fast, but re-downloading every package every run was still a major cost; caching the global cache avoids re-downloading tarballs while letting `bun install` do its fast hardlink/clonefile into `node_modules`. We do not cache `node_modules` itself — compression/upload cost exceeds the gain.
 - **`timeout-minutes` on jobs** — We set explicit timeouts (e.g. 20–30 min for test jobs, 45 for release build-desktop). **Why:** So a hung or extremely slow run fails in a bounded time instead of burning runner hours; also makes flakiness visible.
 
 ## Where this runs
@@ -137,6 +137,6 @@ Why: the previous smoke test could pass while the launcher stayed open but the e
 
 ## See also
 
-- [Electrobun startup and exception handling](./electrobun-startup.md) — why the agent keeps the API server up on load failure.
-- [Plugin resolution and NODE_PATH](./plugin-resolution-and-node-path.md) — why dynamic plugin imports need `NODE_PATH` in dev/CLI/Electrobun.
+- [Electrobun startup and exception handling](/electrobun-startup) — why the agent keeps the API server up on load failure.
+- [Plugin resolution and NODE_PATH](/plugin-resolution-and-node-path) — why dynamic plugin imports need `NODE_PATH` in dev/CLI/Electrobun.
 - [CHANGELOG](../CHANGELOG.md) — concrete changes and WHYs per release.

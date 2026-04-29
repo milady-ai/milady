@@ -1,0 +1,48 @@
+{
+  "startedAt": "2026-04-28T05:29:13.637Z",
+  "skipBootValidate": false,
+  "serial": null,
+  "adb": "/home/shaw/Android/Sdk/platform-tools/adb",
+  "bootValidate": {
+    "adb": "/home/shaw/Android/Sdk/platform-tools/adb",
+    "serial": null,
+    "product": "milady_cf_x86_64_phone",
+    "bootProperties": {
+      "ro.setupwizard.mode": "DISABLED",
+      "miladyos.boot_phase": "completed"
+    },
+    "packagePath": "package:/system/priv-app/Milady/Milady.apk",
+    "homeResolution": "priority=0 preferredOrder=0 match=0x108000 specificIndex=-1 isDefault=true\ncom.miladyai.milady/.MainActivity",
+    "replacementIntents": {
+      "VIEW http": "priority=0 preferredOrder=0 match=0x208000 specificIndex=-1 isDefault=true\ncom.miladyai.milady/.MiladyBrowserActivity",
+      "VIEW https": "priority=0 preferredOrder=0 match=0x208000 specificIndex=-1 isDefault=true\ncom.miladyai.milady/.MiladyBrowserActivity",
+      "STILL_IMAGE_CAMERA": "priority=0 preferredOrder=0 match=0x108000 specificIndex=-1 isDefault=true\ncom.miladyai.milady/.MiladyCameraActivity",
+      "IMAGE_CAPTURE": "priority=0 preferredOrder=0 match=0x108000 specificIndex=-1 isDefault=true\ncom.miladyai.milady/.MiladyCameraActivity",
+      "SET_ALARM": "priority=0 preferredOrder=0 match=0x108000 specificIndex=-1 isDefault=true\ncom.miladyai.milady/.MiladyClockActivity",
+      "SHOW_ALARMS": "priority=0 preferredOrder=0 match=0x108000 specificIndex=-1 isDefault=true\ncom.miladyai.milady/.MiladyClockActivity",
+      "APP_CONTACTS launcher": "priority=0 preferredOrder=0 match=0x108000 specificIndex=-1 isDefault=false\ncom.miladyai.milady/.MiladyContactsActivity",
+      "APP_CALENDAR launcher": "priority=0 preferredOrder=0 match=0x108000 specificIndex=-1 isDefault=false\ncom.miladyai.milady/.MiladyCalendarActivity"
+    },
+    "roles": {
+      "android.app.role.HOME": "com.miladyai.milady",
+      "android.app.role.DIALER": "com.miladyai.milady",
+      "android.app.role.SMS": "com.miladyai.milady",
+      "android.app.role.ASSISTANT": "com.miladyai.milady"
+    },
+    "appOps": {
+      "GET_USAGE_STATS": "GET_USAGE_STATS: allow"
+    },
+    "forbiddenPackages": [],
+    "logcat": "clean"
+  },
+  "screenshots": [
+    "/home/shaw/milady/reports/aosp-cuttlefish-clean/20260427-222914__00_home.png",
+    "/home/shaw/milady/reports/aosp-cuttlefish-clean/20260427-222914__01_dialer.png",
+    "/home/shaw/milady/reports/aosp-cuttlefish-clean/20260427-222914__02_sms.png",
+    "/home/shaw/milady/reports/aosp-cuttlefish-clean/20260427-222914__03_assist.png",
+    "/home/shaw/milady/reports/aosp-cuttlefish-clean/20260427-222914__04_recents.png",
+    "/home/shaw/milady/reports/aosp-cuttlefish-clean/20260427-222914__05_launcher.png"
+  ],
+  "errors": [],
+  "finishedAt": "2026-04-28T05:29:32.783Z"
+}

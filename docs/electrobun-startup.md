@@ -15,7 +15,7 @@ If the child fails to start or never becomes healthy:
 - The **Electrobun window stays up** so the user is not left with a blank shell.
 - **Status** is set to `state: "error"` with an error message so the UI can show **Agent unavailable: …** instead of a generic **Failed to fetch**.
 
-For **dev orchestration** (Vite + API + Electrobun in separate processes), see [Desktop local development](./apps/desktop-local-development.md).
+For **dev orchestration** (Vite + API + Electrobun in separate processes), see [Desktop local development](/apps/desktop-local-development).
 
 ## Why the guards exist
 
@@ -50,5 +50,5 @@ Use it to debug load failures (missing modules, native binary path, etc.).
 
 ## See also
 
-- [Plugin resolution and NODE_PATH](./plugin-resolution-and-node-path.md) — why dynamic plugin imports need `NODE_PATH` and where it's set.
-- [Build and release](./build-and-release.md) — CI pipeline, Rosetta builds, plugin/dep copying.
+- [Plugin resolution and NODE_PATH](/plugin-resolution-and-node-path) — why dynamic plugin imports need `NODE_PATH` and where it's set.
+- [Build and release](/build-and-release) — CI pipeline, Rosetta builds, plugin/dep copying.

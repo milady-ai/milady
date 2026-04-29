@@ -4,7 +4,7 @@ sidebarTitle: "Skills"
 description: "REST API endpoints for managing local skills, the skills catalog, and the skills marketplace."
 ---
 
-The skills API covers three areas: **local skills** (agent-specific TypeScript action files), the **skills catalog** (curated registry of community skills), and the **skills marketplace** (npm-based skill packages). Skills extend the agent with new actions, providers, or evaluators.
+The skills API covers three areas: **local skills** (markdown-based SKILL.md extensions that teach the agent task-specific procedures), the **skills catalog** (curated registry of community skills), and the **skills marketplace** (git-based skill packages). Skills are injected into the agent's context at runtime to guide its behavior.
 
 When `MILADY_API_TOKEN` is set, include it as a `Bearer` token in the `Authorization` header.
 
@@ -21,8 +21,11 @@ When `MILADY_API_TOKEN` is set, include it as a `Bearer` token in the `Authoriza
 | POST | `/api/skills/:id/open` | Open a skill file in the default editor |
 | GET | `/api/skills/:id/source` | Read the source code of a skill |
 | PUT | `/api/skills/:id/source` | Write updated source code for a skill |
+| POST | `/api/skills/:id/acknowledge` | Acknowledge a skill security scan |
 | POST | `/api/skills/:id/enable` | Enable a skill (honors scan acknowledgments) |
 | POST | `/api/skills/:id/disable` | Disable a skill |
+| POST | `/api/skills/:id/acknowledge` | Acknowledge a skill security scan |
+| DELETE | `/api/skills/:id` | Delete a skill |
 
 ### Skills Catalog
 
@@ -66,7 +69,8 @@ List all local skills found in the agent's skills directory. Each entry includes
       "filePath": "/path/to/skills/my-custom-action.ts",
       "enabled": true,
       "priority": 0,
-      "valid": true
+      "valid": true,
+      "scanStatus": "clean"
     }
   ]
 }
@@ -82,8 +86,15 @@ Re-scan the skills directory and reload all skill metadata. Useful after manuall
 
 ```json
 {
-  "ok": true,
-  "count": 5
+  "skills": [
+    {
+      "id": "my-custom-action",
+      "name": "MY_CUSTOM_ACTION",
+      "description": "Does something useful",
+      "enabled": true,
+      "scanStatus": "clean"
+    }
+  ]
 }
 ```
 
@@ -222,6 +233,22 @@ Disable an installed skill.
   "scanStatus": null
 }
 ```
+
+---
+
+### DELETE /api/skills/:id
+
+Delete a skill and remove its files from the skills directory.
+
+**Response**
+
+```json
+{
+  "ok": true
+}
+```
+
+**Errors:** `404` skill not found.
 
 ---
 

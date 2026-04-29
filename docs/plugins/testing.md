@@ -168,7 +168,7 @@ describe('pluginStatusProvider', () => {
     const runtime = createMockRuntime();
     const message = createMockMessage('hello');
 
-    const result = await pluginStatusProvider.get(runtime, message);
+    const result = await pluginStatusProvider.get(runtime, message, {} as any);
 
     expect(result).toBeDefined();
     expect(typeof result.text).toBe('string');
@@ -182,7 +182,7 @@ describe('pluginStatusProvider', () => {
     const runtime = createMockRuntime();
     const message = createMockMessage('hello');
 
-    const result = await pluginStatusProvider.get(runtime, message);
+    const result = await pluginStatusProvider.get(runtime, message, {} as any);
 
     expect(result.text).toContain('missing');
   });
@@ -327,6 +327,7 @@ Plugins can embed tests via the `tests` field. These run when users execute `mil
 ```typescript
 import type { Plugin, TestSuite, Memory } from '@elizaos/core';
 import { checkWeatherAction } from './actions/weather';
+import { pluginStatusProvider } from './providers/status';
 
 const weatherTests: TestSuite = {
   name: 'weather-plugin-tests',
@@ -343,7 +344,7 @@ const weatherTests: TestSuite = {
       name: 'provider returns context',
       fn: async (runtime) => {
         const msg = { content: { text: 'status' } } as Memory;
-        const result = await pluginStatusProvider.get(runtime, msg);
+        const result = await pluginStatusProvider.get(runtime, msg, {} as any);
         if (!result.text) throw new Error('Expected non-empty text');
       },
     },
@@ -438,4 +439,4 @@ describe('Weather Plugin E2E', () => {
 - [Create a Plugin](/plugins/create-a-plugin) — Build a plugin from scratch
 - [Plugin Patterns](/plugins/patterns) — Common implementation patterns
 - [Plugin Schemas](/plugins/schemas) — Full type reference
-- [Contributing Guide](/guides/contribution-guide) — Test conventions for the monorepo
+- [Contributing Guide](/guides/contributing) — Test conventions for the monorepo

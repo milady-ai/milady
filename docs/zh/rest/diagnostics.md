@@ -39,7 +39,7 @@ description: "用于日志检索、代理事件、安全审计日志和浏览器
       "level": "info",
       "source": "milady-api",
       "tags": ["startup"],
-      "message": "API server started on port 2138"
+      "message": "API server started on port 31337"
     }
   ],
   "sources": ["milady-api", "runtime", "plugin-anthropic"],

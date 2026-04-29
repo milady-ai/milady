@@ -163,7 +163,7 @@ Parameters: { "widgetType": "branding", "action": "disable", "destinationId": "t
 To check if the stream is running, use the HTTP API directly:
 
 ```
-GET http://127.0.0.1:2138/api/stream/status
+GET http://127.0.0.1:31337/api/stream/status
 ```
 
 Response fields:

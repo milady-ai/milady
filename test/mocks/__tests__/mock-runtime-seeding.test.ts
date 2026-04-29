@@ -95,7 +95,7 @@ describe("mock runtime seeding", () => {
     expect(calendarResponse.items ?? []).toEqual([]);
   });
 
-  it("seeds an X connector grant when the X mock is enabled", async () => {
+  it("seeds side-specific X connector grants when the X mock is enabled", async () => {
     const mocked = await createMockedTestRuntime({
       envs: ["x-twitter"],
       seedGoogle: false,
@@ -103,9 +103,16 @@ describe("mock runtime seeding", () => {
     cleanups.push(mocked.cleanup);
 
     const service = new LifeOpsService(mocked.runtime);
-    const status = await service.getXConnectorStatus();
-    expect(status.connected).toBe(true);
-    expect(status.grantedCapabilities).toEqual(
+    const ownerStatus = await service.getXConnectorStatus("local", "owner");
+    expect(ownerStatus.connected).toBe(true);
+    expect(ownerStatus.grantedCapabilities).toEqual(
+      expect.arrayContaining(["x.read", "x.dm.read", "x.dm.write"]),
+    );
+    expect(ownerStatus.grantedCapabilities).not.toContain("x.write");
+
+    const agentStatus = await service.getXConnectorStatus("local", "agent");
+    expect(agentStatus.connected).toBe(true);
+    expect(agentStatus.grantedCapabilities).toEqual(
       expect.arrayContaining(["x.read", "x.write"]),
     );
   });

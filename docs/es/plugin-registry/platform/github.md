@@ -15,7 +15,7 @@ El plugin de GitHub conecta agentes de Milady a GitHub, permitiendo interaccione
 </div>
 
 ```bash
-milady plugins install github
+milady plugins install @elizaos/plugin-github
 ```
 
 <div id="setup">

@@ -69,7 +69,7 @@ Create a new custom action and hot-register it into the running agent.
 | `parameters` | array | No | `[{ name, description, required }]` |
 | `handler` | object | Yes | Handler definition (see below) |
 | `enabled` | boolean | No | Whether to register immediately (default `true`) |
-| `terminalToken` | string | Conditional | Required for `shell` and `code` handlers when `MILADY_TERMINAL_RUN_TOKEN` is set |
+| `terminalToken` | string | Conditional | Required for `shell` and `code` handlers when `ELIZA_TERMINAL_RUN_TOKEN` is set |
 
 **Handler Types**
 
@@ -103,7 +103,7 @@ Code handler:
 Use `{{paramName}}` placeholders in URLs, body templates, and shell commands. For code handlers, parameters are available via `params.paramName` and `fetch()` is available.
 
 <Warning>
-Creating, updating, or testing actions with `shell` or `code` handler types requires terminal authorization when `MILADY_TERMINAL_RUN_TOKEN` is configured. Include the token in the request body as `terminalToken` or via the standard authorization mechanism. Requests without a valid token receive a `403` response.
+Creating, updating, or testing actions with `shell` or `code` handler types requires terminal authorization when `ELIZA_TERMINAL_RUN_TOKEN` is configured. Include the token in the request body as `terminalToken` or via the standard authorization mechanism. Requests without a valid token receive a `403` response.
 </Warning>
 
 **Response**
@@ -194,7 +194,7 @@ All fields are optional — only provided fields are updated.
 | `parameters` | array | Updated parameters |
 | `handler` | object | Updated handler (must include valid `type`) |
 | `enabled` | boolean | Enable or disable the action |
-| `terminalToken` | string | Required when updating to a `shell` or `code` handler and `MILADY_TERMINAL_RUN_TOKEN` is set |
+| `terminalToken` | string | Required when updating to a `shell` or `code` handler and `ELIZA_TERMINAL_RUN_TOKEN` is set |
 
 **Response**
 
@@ -240,7 +240,7 @@ Execute a custom action with test parameters and return the result. This does no
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `params` | object | No | Map of parameter names to test values |
-| `terminalToken` | string | Conditional | Required for `shell`/`code` actions when `MILADY_TERMINAL_RUN_TOKEN` is set |
+| `terminalToken` | string | Conditional | Required for `shell`/`code` actions when `ELIZA_TERMINAL_RUN_TOKEN` is set |
 
 ```json
 {

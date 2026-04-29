@@ -63,14 +63,14 @@ Start simple:
 ### macOS / Linux / WSL (recommended)
 
 ```bash
-curl -fsSL https://milady-ai.github.io/milady/install.sh | bash
+curl -fsSL https://get.milady.ai | bash
 milady setup
 ```
 
 ### Windows (PowerShell)
 
 ```powershell
-irm https://milady-ai.github.io/milady/install.ps1 | iex
+irm https://get.milady.ai/install.ps1 | iex
 milady setup
 ```
 
@@ -188,14 +188,15 @@ This is essential for backup, troubleshooting, and migration to another machine.
 
 ### Keep API local by default
 
-Milady binds to loopback by default (`127.0.0.1`), meaning only your machine can access it.
+Milady binds to loopback by default (`127.0.0.1`) on port `2138`, meaning only your machine can access it. Open your dashboard at `http://localhost:2138`.
 
 ### If exposing to network, set a token
 
 If you bind to `0.0.0.0` or expose ports publicly, set an API token first:
 
 ```bash
-echo "MILADY_API_TOKEN=$(openssl rand -hex 32)" >> .env
+# Add to your project root .env or ~/.milady/.env
+echo "MILADY_API_TOKEN=$(openssl rand -hex 32)" >> ~/.milady/.env
 ```
 
 ### Protect secrets
@@ -326,7 +327,6 @@ Use this staged path so you do not get overwhelmed.
    - `/guides/connectors`
    - `/connectors/discord`
    - `/connectors/telegram`
-   - `/connectors/twitter`
    - `/connectors/slack`
 4. **Wallet and autonomous workflows**
    - `/guides/wallet`

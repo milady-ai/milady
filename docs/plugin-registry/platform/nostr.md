@@ -11,7 +11,7 @@ The Nostr plugin connects Milady agents to the Nostr network, enabling note publ
 ## Installation
 
 ```bash
-milady plugins install nostr
+milady plugins install @elizaos/plugin-nostr
 ```
 
 ## Setup

@@ -62,6 +62,7 @@ jobs:
             /.github/actions/setup-bun-workspace/**
             apps/
             packages/
+            patches/
             scripts/
             eliza/apps/
             eliza/packages/app-core/

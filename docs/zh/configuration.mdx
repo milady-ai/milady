@@ -514,12 +514,12 @@ Milady 根据你的配置自动启用插件。大多数情况下，你不需要�
 | 连接器 | 插件 | 自动启用触发条件 |
 |-----------|--------|---------------------|
 | `telegram` | `@elizaos/plugin-telegram` | `connectors.telegram.botToken` |
-| `discord` | `@elizaos/plugin-discord` | `connectors.discord.botToken` |
+| `discord` | `@elizaos/plugin-discord` | `connectors.discord.token`（或 `botToken`、`apiKey`） |
 | `slack` | `@elizaos/plugin-slack` | `connectors.slack.botToken` |
 | `twitter` | `@elizaos/plugin-twitter` | `connectors.twitter.apiKey` |
 | `whatsapp` | `@elizaos/plugin-whatsapp` | `connectors.whatsapp.authDir`（或 `authState`、`sessionPath`，或带 `authDir` 的 `accounts`） |
 | `signal` | `@elizaos/plugin-signal` | `connectors.signal.account`（或 `httpUrl`、`httpHost`、`httpPort`、`cliPath`，或带有已启用条目的 `accounts`） |
-| `farcaster` | `@elizaos/plugin-farcaster` | `connectors.farcaster.token` |
+| `farcaster` | `@elizaos/plugin-farcaster` | `connectors.farcaster.apiKey` |
 | `matrix` | `@elizaos/plugin-matrix` | `connectors.matrix.token` |
 | `nostr` | `@elizaos/plugin-nostr` | `connectors.nostr.token` |
 | `msteams` | `@elizaos/plugin-msteams` | `connectors.msteams.token` |
@@ -528,8 +528,10 @@ Milady 根据你的配置自动启用插件。大多数情况下，你不需要�
 | `lens` | `@elizaos/plugin-lens` | `connectors.lens.token` |
 | `mattermost` | `@elizaos/plugin-mattermost` | `connectors.mattermost.token` |
 | `feishu` | `@elizaos/plugin-feishu` | `connectors.feishu.token` |
-| `blooio` | `@elizaos/plugin-blooio` | `connectors.blooio.token` |
+| `blooio` | `@elizaos/plugin-blooio` | `connectors.blooio.apiKey` |
+| `wechat` | `@elizaos/plugin-wechat` | `connectors.wechat.apiKey`（或带 `apiKey` 的 `accounts`） |
 | `twitch` | `@elizaos/plugin-twitch` | `connectors.twitch.accessToken` 或 `clientId` 或 `enabled: true` |
+| `wechat` | `@elizaos/plugin-wechat` | `connectors.wechat.apiKey`（顶层或在 `accounts` 条目中） |
 
 **提供商插件**在设置了对应的 API 密钥环境变量后会自动启用：
 
@@ -588,7 +590,7 @@ Milady 根据你的配置自动启用插件。大多数情况下，你不需要�
 | `webhooks` | `@elizaos/plugin-webhooks` |
 | `gmailWatch` | `@elizaos/plugin-gmail-watch` |
 | `personality` | `@elizaos/plugin-personality` |
-| `experience` | `@elizaos/plugin-experience` |
+| `experience` | 内建高级能力 |
 | `form` | `@elizaos/plugin-form` |
 | `x402` | `@elizaos/plugin-x402` |
 | `fal` | `@elizaos/plugin-fal` |
@@ -624,12 +626,12 @@ Milady 根据你的配置自动启用插件。大多数情况下，你不需要�
     },
     discord: {
       enabled: true,
-      botToken: "<DISCORD_BOT_TOKEN>",
+      token: "<DISCORD_BOT_TOKEN>",
     },
     slack: {
       enabled: true,
       botToken: "<SLACK_BOT_TOKEN>",
-      apiKey: "<SLACK_APP_TOKEN>",
+      appToken: "<SLACK_APP_TOKEN>",
     },
     whatsapp: {
       enabled: true,

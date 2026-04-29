@@ -4,7 +4,7 @@ sidebarTitle: Referencia de la API
 description: Referencia completa de todos los endpoints de la API REST de Milady, organizados por grupo de recursos.
 ---
 
-El servidor de la API de Milady se ejecuta en el puerto **2138** por defecto. Todos los endpoints tienen el prefijo `/api/`. La autenticación es obligatoria cuando se establece `MILADY_API_TOKEN`.
+El servidor de la API de Milady se ejecuta en el puerto **31337** por defecto (`MILADY_API_PORT`). Todos los endpoints tienen el prefijo `/api/`. La autenticación es obligatoria cuando se establece `MILADY_API_TOKEN`.
 
 <Warning>
 Cuando `MILADY_API_TOKEN` está configurado, incluya el token como token `Bearer` en el encabezado `Authorization`, o utilice el flujo de emparejamiento para obtenerlo.
@@ -14,14 +14,14 @@ Cuando `MILADY_API_TOKEN` está configurado, incluya el token como token `Bearer
 ## Inicio rápido
 </div>
 
-Estos ejemplos asumen que la API se ejecuta en `localhost:2138`. Reemplace `YOUR_TOKEN` con el valor de `MILADY_API_TOKEN` o el token recibido del flujo de emparejamiento.
+Estos ejemplos asumen que la API se ejecuta en `localhost:31337`. Reemplace `YOUR_TOKEN` con el valor de `MILADY_API_TOKEN` o el token recibido del flujo de emparejamiento.
 
 <div id="check-agent-status">
 ### Verificar el estado del agente
 </div>
 
 ```bash
-curl http://localhost:2138/api/status
+curl http://localhost:31337/api/status
 ```
 
 ```json
@@ -40,7 +40,7 @@ curl http://localhost:2138/api/status
 Cuando el emparejamiento está habilitado, el agente muestra un código en su terminal. Envíelo para recibir un token:
 
 ```bash
-curl -X POST http://localhost:2138/api/auth/pair \
+curl -X POST http://localhost:31337/api/auth/pair \
   -H "Content-Type: application/json" \
   -d '{"code": "ABCD-EFGH"}'
 ```
@@ -56,7 +56,7 @@ curl -X POST http://localhost:2138/api/auth/pair \
 </div>
 
 ```bash
-curl http://localhost:2138/api/character \
+curl http://localhost:31337/api/character \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -65,7 +65,7 @@ curl http://localhost:2138/api/character \
 </div>
 
 ```bash
-curl -X POST http://localhost:2138/api/conversations/YOUR_CONVERSATION_ID/messages \
+curl -X POST http://localhost:31337/api/conversations/YOUR_CONVERSATION_ID/messages \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"text": "Hello, what can you do?"}'
@@ -76,7 +76,7 @@ curl -X POST http://localhost:2138/api/conversations/YOUR_CONVERSATION_ID/messag
 </div>
 
 ```bash
-curl -N -X POST http://localhost:2138/api/conversations/YOUR_CONVERSATION_ID/messages/stream \
+curl -N -X POST http://localhost:31337/api/conversations/YOUR_CONVERSATION_ID/messages/stream \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"text": "Tell me about yourself"}'
@@ -89,7 +89,7 @@ La respuesta es un flujo de Server-Sent Events. Cada evento contiene un campo `d
 </div>
 
 ```bash
-curl http://localhost:2138/api/conversations \
+curl http://localhost:31337/api/conversations \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -98,7 +98,7 @@ curl http://localhost:2138/api/conversations \
 </div>
 
 ```bash
-curl -X POST http://localhost:2138/api/knowledge/documents \
+curl -X POST http://localhost:31337/api/knowledge/documents \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -112,7 +112,7 @@ curl -X POST http://localhost:2138/api/knowledge/documents \
 </div>
 
 ```bash
-curl "http://localhost:2138/api/knowledge/search?q=what+is+milady&limit=5" \
+curl "http://localhost:31337/api/knowledge/search?q=what+is+milady&limit=5" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -121,7 +121,7 @@ curl "http://localhost:2138/api/knowledge/search?q=what+is+milady&limit=5" \
 </div>
 
 ```bash
-curl http://localhost:2138/api/plugins \
+curl http://localhost:31337/api/plugins \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -130,7 +130,7 @@ curl http://localhost:2138/api/plugins \
 </div>
 
 ```bash
-curl http://localhost:2138/api/agent/autonomy \
+curl http://localhost:31337/api/agent/autonomy \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -146,7 +146,7 @@ curl http://localhost:2138/api/agent/autonomy \
 </div>
 
 ```bash
-curl -X POST http://localhost:2138/api/agent/autonomy \
+curl -X POST http://localhost:31337/api/agent/autonomy \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"enabled": true}'

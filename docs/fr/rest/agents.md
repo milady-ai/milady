@@ -4,7 +4,7 @@ sidebarTitle: "Agents"
 description: "Points de terminaison de l'API REST pour le cycle de vie des agents, l'administration et le transfert (export/import)."
 ---
 
-Tous les points de terminaison des agents nécessitent que le runtime de l'agent soit initialisé. Le serveur API s'exécute sur le port **2138** par défaut et tous les chemins sont préfixés par `/api/`. Lorsque `MILADY_API_TOKEN` est défini, incluez-le comme jeton `Bearer` dans l'en-tête `Authorization`.
+Tous les points de terminaison des agents nécessitent que le runtime de l'agent soit initialisé. Le serveur API s'exécute sur le port **31337** par défaut et tous les chemins sont préfixés par `/api/`. Lorsque `MILADY_API_TOKEN` est défini, incluez-le comme jeton `Bearer` dans l'en-tête `Authorization`.
 
 <div id="endpoints">
 

@@ -15,7 +15,7 @@ El plugin de Zalo conecta agentes de Milady a Zalo, permitiendo el manejo de men
 </div>
 
 ```bash
-milady plugins install zalo
+milady plugins install @elizaos/plugin-zalo
 ```
 
 <div id="setup">

@@ -68,6 +68,8 @@ describe("real test config contract", () => {
     };
     const rootTestScript = packageJson.scripts?.test;
     const deterministicE2E = packageJson.scripts?.["test:e2e"];
+    const runnerE2E = packageJson.scripts?.["test:e2e:all"];
+    const fullLiveE2E = packageJson.scripts?.["test:e2e:live:all"];
     const heavyE2E = packageJson.scripts?.["test:e2e:heavy"];
     const runnerSource = fs.readFileSync(rootTestRunnerPath, "utf8");
 
@@ -75,8 +77,12 @@ describe("real test config contract", () => {
       "eliza/packages/app-core/test/scripts/test-runner.mjs",
     );
     expect(deterministicE2E).not.toContain("MILADY_LIVE_BROWSER_SUITE=1");
+    expect(runnerE2E).toBe("bun run test:e2e");
+    expect(fullLiveE2E).toContain("MILADY_LIVE_BROWSER_SUITE=1");
+    expect(fullLiveE2E).toContain("test/vitest/live-e2e.config.ts");
     expect(heavyE2E).toContain("MILADY_LIVE_BROWSER_SUITE=1");
     expect(runnerSource).toContain('args: ["run", "test:e2e"]');
     expect(runnerSource).not.toContain('args: ["run", "test:e2e:all"]');
+    expect(runnerSource).not.toContain('args: ["run", "scenarios:lifeops"]');
   });
 });

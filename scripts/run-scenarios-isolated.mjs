@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Per-scenario-isolation wrapper around the unified scenario-runner CLI.
+ * Per-scenario-isolation wrapper around the scenario-runner CLI.
  *
  * Why this exists:
  *   The in-process CLI runs all scenarios against a single shared runtime

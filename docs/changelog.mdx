@@ -3,6 +3,181 @@ title: Changelog
 description: What's new in Milady — features, improvements, and fixes.
 ---
 
+<Update label="2026-04-29" description="Week of April 29; verification verdicts return to chat, first-party app protection, MiladyOS local agent on Android, open-in-cloud from the homepage" tags={["Feature", "Update", "Fix"]}>
+
+## Verification verdicts return to chat
+
+When your agent spawns a [coding agent](/guides/coding-swarms) to build a new app or plugin (`APP.create`, `PLUGIN.create`), the verification verdict — pass or fail — is now posted back into the originating chat room when the run completes. Previously the verdict was visible to ops via SSE/WS but silently dropped from the conversation, leaving you without confirmation that your request had landed. Verdicts are deduped and the bridge cleans up its subscriptions correctly when sessions end.
+
+## First-party app protection
+
+The runtime now protects first-party [apps](/dashboard/apps) — Companion, Wallet, LifeOps, Browser Bridge, and others — from being clobbered at load time by a third-party package that happens to share a name. A new protected-apps resolver unions your `MILADY_PROTECTED_APPS` environment list with first-party app names from the workspace and rejects clobber attempts in the loader. Scope-aware lookups also catch attempts like `@evil/app-companion` masquerading as the first-party `app-companion`.
+
+## Browser verification fails closed
+
+The [app verification](/dashboard/apps) browser-check now fails closed if `puppeteer-core` isn't available, so missing dependencies can't quietly skip the check. If you intentionally run without browser verification, opt out explicitly by setting `MILADY_BROWSER_VERIFY_OPTIONAL=1`.
+
+## MiladyOS local agent on Android
+
+[MiladyOS](/architecture) builds now run the agent as its own SELinux-confined process. A dedicated `milady_agent` domain transitions the runtime out of the priv-app sandbox into a tighter policy scoped to the agent's exec/data directories and loopback networking. Phase B of the same landing also relabels the on-disk agent tree after extraction so the policy actually sticks. Net effect: the agent runs with only the kernel-enforced capabilities it needs, not full priv-app reach.
+
+## Open in cloud from the homepage
+
+A new **Open in cloud** button on the Milady homepage takes you from a marketing page to a running [cloud agent](/guides/cloud) in one flow. Click it and a popup opens, signs you in, provisions (or reuses) a cloud agent, polls the provision job, and redirects the popup to your agent UI when it's ready — no manual dashboard hop. The button shows idle, preparing, and cancellable states throughout, and cleanly handles popup-closed and timeout cases.
+
+## Updates
+
+- **Coding-agent model preferences propagate to spawned sessions** — When you set Anthropic or OpenAI model preferences in [coding agent settings](/guides/coding-swarms), those choices now flow correctly into the environment of every spawned coding session through the orchestrator's PTY layer. Previously a stale default could leak into long-running sessions.
+- **Computer-use action routing fix** — The action planner now routes computer-use requests (browser navigation, screenshot, click) to the correct handler more reliably, eliminating misroutes that previously sent these requests through generic chat replies.
+- **Gmail email-draft-reply graceful 404** — When your agent tries to draft a reply to a [Gmail](/rest/lifeops) thread that's been deleted or moved, the action now degrades gracefully with a clear message instead of surfacing a Google API 404.
+- **LIFE explicit-intent routing** — LIFE actions now require explicit life-tracking intent in the prompt before routing, so casual phrases like "remember to call mom" no longer trigger the LIFE handler when you meant a simple todo.
+- **Strict execution gaps closed** — Three remaining strict-execution gaps in the action loop have been closed, so multi-step agent runs honor the strict-mode contract end to end.
+- **MANAGE_APP_OPS_MODES action available on mobile** — Mobile builds now declare `MANAGE_APP_OPS_MODES` in their action manifest, exposing app-ops management to your agent on Android and iOS.
+
+## Bug fixes
+
+- Fixed [MiladyOS](/architecture) AOSP cuttlefish builds failing during boot validation — the build pipeline now completes end to end and the boot path is validated automatically
+- Fixed a dependency conflict where `@elizaos/plugin-openai` could pull in a duplicate `@ai-sdk/provider` version on fresh installs — the plugin is now pinned to the workspace
+- Fixed scheduling and activity column repair throwing on databases where the underlying table didn't yet exist — the migration now guards on table existence first
+- Fixed the static asset manifest going out of sync after new hero artwork was added, which could cause missing-image fallbacks in the [apps view](/dashboard/apps)
+
+</Update>
+
+<Update label="2026-04-28" description="Week of April 28; refreshed app heroes, self-correcting action params, LifeOps connector quiet-by-default, MiladyOS role auto-assignment" tags={["Feature", "Update", "Fix"]}>
+
+## Refreshed app catalog artwork
+
+The [apps view](/dashboard/apps) ships with new hero artwork across the catalog, including dedicated Defense of the Agents and ClawVille tiles. The desktop splash screen has also been updated so first-run feels fresher before your agent finishes booting.
+
+## Self-correcting action parameters
+
+When your agent picks an action but a required field is missing or malformed, it now fills the gap automatically with a small targeted LLM call scoped to that action's schema and recent conversation — instead of failing the request. Twenty-two LifeOps and agent actions are wired in, including calendar, inbox, send-message, relationships, password manager, autofill, and Twilio calling, so natural-language requests succeed more reliably the first time.
+
+## Unified PLUGIN action
+
+Plugin install, eject, sync, list, search, and create are now driven through a single unified PLUGIN action with nine sub-modes instead of separate actions. Talk to your agent the same way you always have — "install the Shopify plugin," "show me my plugins," "create a new plugin scaffold" — and the runtime routes to the right behavior. Existing wording continues to work via legacy aliases.
+
+## MiladyOS auto-assigns Milady as default phone roles
+
+On [MiladyOS](/architecture) builds, Milady is now auto-assigned as the default Phone, SMS, and Assistant app on first boot. Previously these roles required manual assignment via shell command after flashing — on a fresh boot they're now wired automatically through a system-level overlay, alongside the existing default-launcher behavior.
+
+## Updates
+
+- **Personal connectors quiet by default** — Signal, Discord, Telegram, iMessage, and WhatsApp [LifeOps connectors](/rest/lifeops) no longer auto-reply to inbound messages on your personal accounts. Your agent still reads incoming messages into the [unified inbox](/rest/inbox) and sends outbound on demand, but it won't talk back unless you explicitly opt in per platform.
+- **Discord DMs route through the desktop bridge** — When your agent runs in local-execution mode, [LifeOps](/rest/lifeops) Discord sends now go through the desktop CDP path so DMs land reliably even when the bot account isn't in the conversation. Previously these sends failed with a "Missing Access" error for most personal DMs.
+- **Companion performance moved into the Companion app** — VRM performance controls (FPS cap, render scale, animation budget) have moved from the main settings sidebar into the [Companion](/dashboard/apps) app's own settings panel, so performance tuning lives next to the avatar it affects.
+- **OWNER_RELATIONSHIP explicit-intent routing** — Relationship lookups now require explicit relationship intent in the prompt before routing to OWNER_RELATIONSHIP, reducing accidental triggers from passing mentions of names in unrelated requests.
+- **Quieter agent logs** — Debug-level logs from the OWNER_RELATIONSHIP path have been dropped, cleaning up the runtime log stream during normal use.
+- **Confirmation gating** — Multi-step action loops now break cleanly on a canonical "requires confirmation" signal, so your agent stops and waits for approval on sensitive operations like wallet transactions instead of looping past the prompt.
+- **Sharper LifeOps benchmarks** — The internal benchmark suite that gates LifeOps changes now seeds Google OAuth and lifeops schema fixtures up front, so quality regressions are caught before reaching your agent.
+
+## Bug fixes
+
+- Fixed the Windows postinstall step failing on PowerShell setups where the `HOME` environment variable wasn't set, which prevented type packages from materializing on a fresh clone
+- Fixed the Telegram plugin postinstall step erroring on missing Node type declarations
+- Fixed the dashboard splash background occasionally failing to load due to an asset format mismatch
+- Fixed account-pool error and status messages missing translations in non-English locales
+
+</Update>
+
+<Update label="2026-04-26" description="Week of April 26; native app windows, screenshare app, plugin role gating, lifeops polish, n8n empty-state translations" tags={["Feature", "Update", "Fix"]}>
+
+## Apps open in dedicated native windows
+
+On the desktop app, [dashboard apps](/dashboard/apps) now launch in their own native windows instead of taking over the main shell. Open a game, the wallet, life-ops, or any other app and it lives in its own resizable window so you can run multiple agent surfaces side by side. A new **App Details** page accompanies apps that need configuration before launch, walking you through any required setup before the app opens.
+
+## Screenshare app
+
+A new screenshare app is wired into the [apps view](/dashboard/apps), letting your agent observe a remote screen alongside its other workspace surfaces. Use it when you want your agent to follow along with what you're doing on another device or session without switching tools.
+
+## Plugin role gating with boot auto-enable
+
+The runtime now respects per-plugin role declarations on startup. Plugins that declare a required role — for example, owner-only or admin-only capabilities — only auto-enable when the active user matches, so the action surface stays focused on what's relevant to you. Boot-time auto-enable runs through the same gate, eliminating cases where role-restricted plugins loaded for the wrong user.
+
+## Updates
+
+- **Direct life-ops launch** — Opening [life-ops](/rest/lifeops) from the dashboard now goes straight to the section you tapped instead of routing through an intermediate landing screen.
+- **n8n empty-state translations** — The [automations](/guides/cloud) empty state for n8n workflows is now fully localized (Spanish, French, and Chinese) so first-time setup reads cleanly in every supported language.
+- **Eliza Cloud TTS polish** — Cloud-hosted text-to-speech has been refreshed for cleaner audio output and more reliable streaming when your agent speaks back through Discord or the desktop voice surface.
+- **Default assistant name sync** — The assistant name shown across the desktop app, chat, and connector greetings now stays in sync with your agent configuration on first run, so renaming your agent applies everywhere immediately.
+- **Inbox routing reliability** — Inbox route handling has been hardened with deeper test coverage, so cross-channel messages land in the [unified inbox](/rest/inbox) consistently across Gmail, Discord, Telegram, Signal, and iMessage.
+- **Cloud app surface stability** — Cloud-deployed agents now ship with the full apps catalog — wallet, life-ops, companion, browser bridge, and screenshare — running reliably in cloud containers without the runtime import gaps that previously forced fallbacks.
+
+## Bug fixes
+
+- Fixed a desktop blank-screen regression caused by a workspace bundling order issue — the desktop app now boots cleanly on first launch
+- Fixed a malformed Anthropic Haiku model ID in the plugin catalog that prevented the model from being selectable in [model settings](/model-providers)
+- Fixed Discord connector status not reflecting the desktop app's foreground state, which could leave your agent showing as offline when the app was active
+- Fixed a Discord channel cache hydration issue that occasionally caused stale channel lists in large servers
+
+</Update>
+
+<Update label="2026-04-25" description="Week of April 25; game app UX overhaul, automations sidebar, mobile pane navigation, lifeops and wallet polish" tags={["Feature", "Update", "Fix"]}>
+
+## Game app UX overhaul
+
+The [game apps](/dashboard/apps) — Defense of the Agents and ClawVille — have been redesigned around a chat-native experience. Each game now leads with a clearer header, a focused operator panel with suggested commands, and an in-game event timeline so you can see what your agent is doing, what changed, and what to try next without parsing engineering states. Implementation details are tucked away while gameplay context, objectives, and outcomes take the front seat.
+
+## Automations sidebar and chat polish
+
+The [automations](/guides/cloud) view has a refreshed sidebar layout and a smoother chat-driven authoring flow. Drafting and iterating on workflows from chat now feels more responsive, and recent automation chat fixes resolve cases where messages could fall out of sync with the active workflow.
+
+## Mobile pane navigation
+
+Mobile-pane navigation and controls in the dashboard have been reworked so switching between chat, agent, and tool panes on phone-sized viewports is faster and more predictable. Active-pane state and back navigation now behave consistently across the app.
+
+## Updates
+
+- **Experience extraction validation** — The [training system](/guides/training) now validates extracted experience against a broader scenario set, improving the quality of patterns your agent learns from real conversations.
+- **Lifeops settings cleanup** — The [life-ops](/rest/lifeops) settings panel has been streamlined with cleaner access visuals and tighter layout, making it easier to review which connectors and capabilities are active.
+- **Lifeops interaction polish** — Small interaction details across the life-ops surface — selection states, hover feedback, and transitions — have been tightened for a more cohesive feel.
+- **Wallet market card sizing** — The [wallet](/guides/wallet) market cards have been resized for better density on the wallet dashboard, so more of your portfolio fits without scrolling.
+- **Chat composer fix** — The chat composer no longer drops focus or input in edge cases that previously required clicking back into the field.
+- **Relationships workspace** — The [contacts view](/rest/inbox) has been updated with workspace improvements for browsing your agent's relationship graph.
+
+## Bug fixes
+
+- Fixed the [life-ops](/rest/lifeops) calendar feed surfacing errors outside its own scope, which could cause unrelated panels to display error states
+- Fixed a payments typecheck regression that affected billing-related flows in the dashboard
+
+</Update>
+
+<Update label="2026-04-24" description="Week of April 24; MiladyOS Android, fine-tuning app, streamlined onboarding, wallet dashboard polish" tags={["Feature", "Update", "Fix"]}>
+
+## MiladyOS Android
+
+Milady now ships as a full Android system image. MiladyOS bakes the agent directly into an AOSP build so your agent runs as a privileged system app on supported devices, with the permissions it needs for messaging, calendar, and background operation pre-granted. A validated boot path and cuttlefish emulator target are available for testing, and the system-level integration lays the groundwork for a first-class Milady phone experience.
+
+## Fine-tuning app
+
+A new **Fine-tuning** tile is available in the [apps view](/dashboard/apps). Use it to run and review fine-tuning jobs against your agent alongside the existing training tools, without leaving the dashboard.
+
+## Streamlined onboarding with RuntimeGate
+
+The legacy three-step onboarding wizard and its connection subflow have been replaced with **RuntimeGate** — a minimal pre-chat gate that gets you to your agent faster. If your backend is already configured, you land directly in chat. Cloud OAuth redirects also now carry the correct `redirect_uri`, so cloud sign-in from the desktop app completes reliably on the first try.
+
+## Wallet dashboard polish
+
+The [wallet](/guides/wallet) dashboard has been refreshed with a cleaner rail header, updated chain badges, live prediction data, and a tighter overall layout. Balance lookups on Eliza Cloud now detect the correct EVM RPC endpoint automatically, so cloud wallets resolve balances without manual RPC configuration.
+
+## Updates
+
+- **Land on chat after setup** — After completing onboarding, the app now lands directly on the chat view instead of an intermediate screen, so you can start talking to your agent immediately.
+- **Compact page chat** — The page-scoped chat input and sidebar have been tightened up for a more compact, consistent layout across dashboard pages.
+- **Refreshed app hero artwork** — Hero images for the Database Viewer, LifeOps, Log Viewer, Memory Viewer, Plugin Viewer, Relationship Viewer, Runtime Debugger, Skills Viewer, and Trajectory Viewer have been updated with higher-resolution artwork.
+- **Mobile shell layout** — The mobile shell layout has been refined for better density on phone-sized viewports.
+- **iMessage startup logging** — The [iMessage connector](/connectors/imessage) now emits clearer startup logs and recovers more reliably when the Messages database is temporarily unavailable.
+- **Faster fresh-clone setup** — A new `./install` / `install.cmd` entry point replaces the previous `bootstrap` alias, giving you a single reliable way to set up the repo after a fresh clone. See [CONTRIBUTING](/guides/contributing) for details.
+
+## Bug fixes
+
+- Fixed web and Android builds emitting spurious warnings during production bundling
+- Fixed Vite bundle chunking and submodule build configuration causing intermittent build failures
+- Fixed the cloud OAuth flow occasionally failing due to an incorrect `redirect_uri` when signing in from the desktop app
+- Fixed the BlueBubbles connector documentation incorrectly claiming auto-enable behavior — the [BlueBubbles connector](/connectors/bluebubbles) must be explicitly enabled in your configuration
+
+</Update>
+
 <Update label="2026-04-23" description="Week of April 23; dual-wallet and cloud wallet provisioning, Agent Browser Bridge, automation drafts, cloud agent provisioning UX, BlueBubbles connector" tags={["Feature", "Update", "Fix"]}>
 
 ## Dual-wallet with cloud wallet provisioning

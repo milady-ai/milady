@@ -77,7 +77,7 @@ A guard treated **`cloud.enabled === false`** as “user disconnected; ignore st
 
 ### What we do (and why)
 
-- **`packages/app-core/src/api/cloud-routes.ts`**: A module-level **`cloudDisconnectEpoch`** increments on **`POST /api/cloud/disconnect`**. The login **poll** snapshots the epoch **before** `fetch`; **`persistCloudLoginStatus`** compares snapshot to current epoch. If they differ, a disconnect happened **during** the poll → skip persist. Otherwise **persist**, even when cloud started as disabled.
+- **`eliza/packages/app-core/src/api/cloud-routes.ts`**: A module-level **`cloudDisconnectEpoch`** increments on **`POST /api/cloud/disconnect`**. The login **poll** snapshots the epoch **before** `fetch`; **`persistCloudLoginStatus`** compares snapshot to current epoch. If they differ, a disconnect happened **during** the poll → skip persist. Otherwise **persist**, even when cloud started as disabled.
 
 **Why not drop the guard entirely:** we still need to avoid **re-enabling** cloud from a **stale** authenticated response after the user explicitly disconnected mid-flight.
 
@@ -85,14 +85,14 @@ A guard treated **`cloud.enabled === false`** as “user disconnected; ignore st
 
 1. **Desktop / Electrobun:** Run **`bun run dev:desktop:watch`** (or production build), open companion/chat with VRM + optional splat world. Confirm **no** `Multiple instances of Three.js` and **no** `splatDefines` shader error in the webview console.
 2. **Cloud:** With **`cloud.enabled: false`** in config, complete **Eliza Cloud** login from the UI; confirm **`cloud.enabled`** becomes **true** and the key is saved (and no spurious “explicitly disabled” skip log).
-3. **Automated:** **`bun run check`**; tests under **`apps/app/test/app/vite-config.test.ts`**, **`packages/app-core/test/avatar/`** as applicable.
+3. **Automated:** **`bun run check`**; tests under **`apps/app/test/app/vite-config.test.ts`**, **`eliza/packages/app-core/test/avatar/`** as applicable.
 
 ## Code map
 
 | Area | Files |
 |------|--------|
 | Vite Three / Spark | `apps/app/vite.config.ts` (`sparkPatchPlugin`, `optimizeDeps`, `resolve.dedupe`) |
-| VRM URLs / roster | `packages/app-core/src/state/vrm.ts` |
-| Viewer load order / isolation | `packages/app-core/src/components/avatar/VrmViewer.tsx` |
-| Spark + world + DRACO | `packages/app-core/src/components/avatar/VrmEngine.ts` |
-| Cloud login persist | `packages/app-core/src/api/cloud-routes.ts` |
+| VRM URLs / roster | `eliza/packages/app-core/src/state/vrm.ts` |
+| Viewer load order / isolation | `eliza/packages/app-core/src/components/avatar/VrmViewer.tsx` |
+| Spark + world + DRACO | `eliza/packages/app-core/src/components/avatar/VrmEngine.ts` |
+| Cloud login persist | `eliza/packages/app-core/src/api/cloud-routes.ts` |

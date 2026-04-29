@@ -61,7 +61,7 @@ The same **depth** (in points) is used for:
 | **Dylib build** | `apps/app/electrobun/scripts/build-macos-effects.sh` → `libMacWindowEffects.dylib` | Ships native code consumed via Bun FFI | Keeps Objective-C++ out of the main TS bundle; rebuild after changing `.mm`. |
 | **FFI + types** | `apps/app/electrobun/src/native/mac-window-effects.ts` | `setNativeDragRegion`, `enableVibrancy`, etc. | Thin typed bridge; JSDoc describes `height` semantics (`0` = auto from screen). |
 | **Electrobun main** | `apps/app/electrobun/src/index.ts` | `applyMacOSWindowEffects`, `alignChrome` on resize/move/dom-ready | **Re-entrants** native layout whenever the web view or window geometry changes. |
-| **CSS** | `packages/app-core/src/styles/electrobun-mac-window-drag.css` | `-webkit-app-region: drag` / `no-drag` when `html.milady-electrobun-frameless` | Helps **Chromium** and documents intent; **not** the source of truth for WKWebView resize cursors. |
+| **CSS** | `eliza/packages/app-core/src/styles/electrobun-mac-window-drag.css` | `-webkit-app-region: drag` / `no-drag` when `html.milady-electrobun-frameless` | Helps **Chromium** and documents intent; **not** the source of truth for WKWebView resize cursors. |
 | **Class toggle** | `apps/app/src/main.tsx` | Adds `milady-electrobun-frameless` on macOS Electrobun main shell | Gates CSS; skipped for **detached** shells where a normal window chrome may apply. |
 
 ## Related window flags

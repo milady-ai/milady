@@ -106,7 +106,7 @@ Update character fields. The body is validated against the `CharacterSchema`. On
 
 ---
 
-### GET /api/character/random-name
+### POST /api/character/random-name
 
 Generate a random agent name. Useful for the onboarding flow.
 

@@ -54,7 +54,7 @@ Provider results are concatenated in registration order.
 
 ## Built-in Milady Providers
 
-The Milady plugin (`createMiladyPlugin()`) registers the following providers:
+The Eliza plugin (`createElizaPlugin()`) registers the following providers:
 
 ### Channel Profile Provider
 
@@ -62,7 +62,7 @@ The Milady plugin (`createMiladyPlugin()`) registers the following providers:
 
 Injects channel-specific behavior rules. Adapts the agent's tone for DMs vs. group conversations vs. channels.
 
-**Source:** `src/providers/simple-mode.ts`
+**Source:** `eliza/packages/agent/src/providers/simple-mode.ts`
 
 ### Workspace Provider
 
@@ -80,7 +80,7 @@ The `workspaceProvider` uses the agent's workspace directory to inject a summary
 
 Files that still contain the default placeholder content (the boilerplate generated on first run) are automatically skipped. Only workspace files you have customized are injected into the prompt.
 
-**Source:** `src/providers/workspace-provider.ts`
+**Source:** `eliza/packages/agent/src/providers/workspace-provider.ts`
 
 ### Admin Trust Provider
 
@@ -93,7 +93,7 @@ Injects a trust context block indicating whether the current conversation partic
 This conversation is with a trusted admin. Elevated permissions are active.
 ```
 
-**Source:** `src/providers/admin-trust.ts`
+**Source:** `eliza/packages/agent/src/providers/admin-trust.ts`
 
 ### Autonomous State Provider
 
@@ -106,7 +106,7 @@ Injects the current autonomous mode status so the agent knows whether it is in i
 Status: active
 ```
 
-**Source:** `src/providers/autonomous-state.ts`
+**Source:** `eliza/packages/agent/src/runtime/eliza-plugin.ts` (registered inline)
 
 ### Session Key Provider
 
@@ -118,13 +118,13 @@ Injects the cryptographic session key for the current session, enabling authenti
 createSessionKeyProvider({ defaultAgentId: "main" })
 ```
 
-**Source:** `src/providers/session-bridge.ts`
+**Source:** `eliza/packages/agent/src/providers/session-bridge.ts`
 
 ### Session Providers
 
 From `getSessionProviders()` — a set of providers for session-level context (current session metadata, active participants, etc.).
 
-**Source:** `src/providers/session-utils.ts`
+**Source:** `eliza/packages/agent/src/providers/session-utils.ts`
 
 ### UI Catalog Provider
 
@@ -132,7 +132,7 @@ From `getSessionProviders()` — a set of providers for session-level context (c
 
 Injects the Milady UI component catalog, allowing the agent to compose structured UI elements in its responses.
 
-**Source:** `src/providers/ui-catalog.ts` (`uiCatalogProvider`)
+**Source:** `eliza/packages/agent/src/providers/ui-catalog.ts` (`uiCatalogProvider`)
 
 ### Emote Provider (deprecated)
 

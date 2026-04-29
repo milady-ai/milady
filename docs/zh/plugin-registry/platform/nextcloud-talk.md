@@ -15,7 +15,7 @@ Nextcloud Talk 插件将 Milady 代理连接到 Nextcloud Talk，实现 Nextclou
 </div>
 
 ```bash
-milady plugins install nextcloud-talk
+milady plugins install @elizaos/plugin-nextcloud-talk
 ```
 
 <div id="setup">

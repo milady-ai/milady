@@ -137,6 +137,11 @@ jobs:
         with:
           node-version: 22
 
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: "platform-tools platforms;android-34 build-tools;34.0.0"
+
       - name: Setup workspace dependencies
         uses: ./.github/actions/setup-bun-workspace
         with:
@@ -165,7 +170,7 @@ jobs:
           fi
 
       - name: Accept Android SDK licenses
-        run: yes | sdkmanager --licenses >/dev/null
+        run: yes | sdkmanager --licenses >/dev/null 2>&1 || true
 
       - name: Build Android debug app
         run: node --max-old-space-size=8192 eliza/packages/app-core/scripts/run-mobile-build.mjs android

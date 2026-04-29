@@ -15,7 +15,7 @@ Le plugin OpenAI connecte les agents Milady à l'API d'OpenAI, fournissant l'acc
 </div>
 
 ```bash
-milady plugins install openai
+milady plugins install @elizaos/plugin-openai
 ```
 
 Ou ajoutez dans `milady.json` :
@@ -86,10 +86,11 @@ export OPENAI_API_KEY=sk-...
 
 | Modèle | Contexte | Idéal pour |
 |--------|----------|------------|
-| `gpt-4o` | 128k | Raisonnement multimodal, par défaut |
-| `gpt-4o-mini` | 128k | Tâches rapides et économiques |
-| `gpt-4-turbo` | 128k | Génération de haute qualité |
-| `gpt-3.5-turbo` | 16k | Tâches simples à faible coût |
+| `gpt-4.1` | 1M | Dernier modèle phare |
+| `gpt-4.1-mini` | 1M | Tâches rapides et économiques |
+| `gpt-4.1-nano` | 1M | Ultra-rapide, coût minimal |
+| `gpt-4o` | 128k | Raisonnement multimodal |
+| `gpt-4o-mini` | 128k | Tâches multimodales rapides |
 
 <div id="reasoning-models">
 

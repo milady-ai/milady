@@ -73,7 +73,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  BUN_VERSION: "1.3.10"
+  BUN_VERSION: "1.3.13"
   NODE_VERSION: "22"
   LANG: en_US.UTF-8
   LC_ALL: en_US.UTF-8
@@ -194,13 +194,9 @@ jobs:
             exit 1
           fi
 
-          # Upload-only secret. When missing we still produce and upload the
-          # IPA artifact, but the TestFlight delivery step becomes a no-op
-          # with a clear warning. Surfaced here so the log line stays
-          # prominent rather than hidden inside a Fastlane run.
           if [[ -z "$APP_STORE_APP_ID" ]]; then
-            echo "::warning::APP_STORE_APP_ID is not set; TestFlight upload will be skipped."
-            echo "Set APP_STORE_APP_ID to your App Store Connect numeric app id to enable TestFlight delivery."
+            echo "::error::APP_STORE_APP_ID is required for TestFlight/App Store delivery."
+            exit 1
           fi
 
       - name: Prepare CocoaPods trunk repo
@@ -279,7 +275,7 @@ jobs:
           name: ios-ipa
           path: apps/app/ios/build/Milady.ipa
           retention-days: 90
-          if-no-files-found: warn
+          if-no-files-found: error
 
   # ── Mac App Store ────────────────────────────────────────────────────
   build-macos:
@@ -296,6 +292,8 @@ jobs:
       CSC_KEY_PASSWORD: ${{ secrets.MAS_CSC_KEY_PASSWORD }}
       MAS_INSTALLER_CERT: ${{ secrets.MAS_INSTALLER_CERT }}
       MAS_INSTALLER_KEY_PASSWORD: ${{ secrets.MAS_INSTALLER_KEY_PASSWORD }}
+      APP_STORE_API_KEY_ID: ${{ secrets.APP_STORE_API_KEY_ID }}
+      APP_STORE_API_ISSUER_ID: ${{ secrets.APP_STORE_API_ISSUER_ID }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -342,7 +340,7 @@ jobs:
 
       - name: Build core dist
         run: |
-          bunx tsdown || true
+          bunx tsdown
           echo '{"type":"module"}' > dist/package.json
           node --import tsx scripts/write-build-info.ts
 
@@ -350,7 +348,7 @@ jobs:
         working-directory: apps/app
         run: |
           bun install --ignore-scripts
-          npx vite build
+          bun run build:web
 
       - name: Stage renderer
         run: |
@@ -372,6 +370,8 @@ jobs:
           [[ -z "$CSC_KEY_PASSWORD" ]] && missing+=("MAS_CSC_KEY_PASSWORD")
           [[ -z "$MAS_INSTALLER_CERT" ]] && missing+=("MAS_INSTALLER_CERT")
           [[ -z "$MAS_INSTALLER_KEY_PASSWORD" ]] && missing+=("MAS_INSTALLER_KEY_PASSWORD")
+          [[ -z "$APP_STORE_API_KEY_ID" ]] && missing+=("APP_STORE_API_KEY_ID")
+          [[ -z "$APP_STORE_API_ISSUER_ID" ]] && missing+=("APP_STORE_API_ISSUER_ID")
           if [[ ${#missing[@]} -gt 0 ]]; then
             echo "::error::Missing required signing secrets: ${missing[*]}"
             echo "Configure these secrets in the repo settings to enable Mac App Store builds."
@@ -463,7 +463,7 @@ jobs:
           name: macos-mas-pkg
           path: ${{ env.PKG_PATH }}
           retention-days: 90
-          if-no-files-found: warn
+          if-no-files-found: error
 
   # ── Summary ──────────────────────────────────────────────────────────
   summary:
@@ -474,12 +474,27 @@ jobs:
     steps:
       - name: Summary
         run: |
-          echo "## Apple Store Release Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Version:** ${{ needs.prepare.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Build:** ${{ needs.prepare.outputs.build_number }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Platform | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|----------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| iOS App Store | ${{ needs.build-ios.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Mac App Store | ${{ needs.build-macos.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## Apple Store Release Summary"
+            echo ""
+            echo "**Version:** ${{ needs.prepare.outputs.version }}"
+            echo "**Build:** ${{ needs.prepare.outputs.build_number }}"
+            echo ""
+            echo "| Platform | Status |"
+            echo "|----------|--------|"
+            echo "| iOS App Store | ${{ needs.build-ios.result || 'skipped' }} |"
+            echo "| Mac App Store | ${{ needs.build-macos.result || 'skipped' }} |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Require enabled Apple releases succeeded
+        run: |
+          failed=0
+          if [[ "${{ needs.prepare.outputs.build_ios }}" == "true" && "${{ needs.build-ios.result }}" != "success" ]]; then
+            echo "::error::iOS release result was '${{ needs.build-ios.result }}', expected success"
+            failed=1
+          fi
+          if [[ "${{ needs.prepare.outputs.build_macos }}" == "true" && "${{ needs.build-macos.result }}" != "success" ]]; then
+            echo "::error::Mac App Store release result was '${{ needs.build-macos.result }}', expected success"
+            failed=1
+          fi
+          exit "$failed"

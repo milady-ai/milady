@@ -15,7 +15,7 @@ El plugin de Instagram conecta agentes de Milady a Instagram, permitiendo el man
 </div>
 
 ```bash
-milady plugins install instagram
+milady plugins install @elizaos/plugin-instagram
 ```
 
 <div id="setup">

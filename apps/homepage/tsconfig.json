@@ -11,7 +11,12 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "types": ["vite/client", "bun-types"],
+    "types": [
+      "vite/client",
+      "bun-types",
+      "vitest/globals",
+      "@testing-library/jest-dom"
+    ],
     "typeRoots": [
       "./node_modules/@types",
       "../../node_modules/@types",
@@ -37,6 +42,8 @@
       "@elizaos/app-shopify/*": ["./eliza/apps/app-shopify/src/*"],
       "@elizaos/app-steward": ["./eliza/apps/app-steward/src/index.ts"],
       "@elizaos/app-steward/*": ["./eliza/apps/app-steward/src/*"],
+      "@elizaos/app-screenshare": ["./eliza/apps/app-screenshare/src/index.ts"],
+      "@elizaos/app-screenshare/*": ["./eliza/apps/app-screenshare/src/*"],
       "@elizaos/app-training": ["./eliza/apps/app-training/src/index.ts"],
       "@elizaos/app-training/*": ["./eliza/apps/app-training/src/*"],
       "@elizaos/app-vincent": ["./eliza/apps/app-vincent/src/index.ts"],
@@ -47,6 +54,9 @@
       "@elizaos/core/*": ["./eliza/packages/typescript/src/*"],
       "@elizaos/shared": ["./eliza/packages/shared/src/index.ts"],
       "@elizaos/shared/*": ["./eliza/packages/shared/src/*"],
+      "@elizaos/capacitor-mobile-signals": [
+        "./eliza/packages/native-plugins/mobile-signals/src/index.ts"
+      ],
       "@elizaos/ui": ["./eliza/packages/ui/src/index.ts"],
       "@elizaos/ui/*": ["./eliza/packages/ui/src/*"],
       "react": ["./eliza/node_modules/@types/react/index.d.ts"],
@@ -63,7 +73,8 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "ignoreDeprecations": "6.0"
   },
   "include": [
     "src/**/*.ts",

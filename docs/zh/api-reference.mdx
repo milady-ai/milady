@@ -4,7 +4,7 @@ sidebarTitle: API 参考
 description: Milady REST API 所有端点的完整参考，按资源分组整理。
 ---
 
-Milady API 服务器默认运行在端口 **2138**。所有端点均以 `/api/` 为前缀。当设置了 `MILADY_API_TOKEN` 时，需要进行身份验证。
+Milady API 服务器默认运行在端口 **31337**（`MILADY_API_PORT`）。所有端点均以 `/api/` 为前缀。当设置了 `MILADY_API_TOKEN` 时，需要进行身份验证。
 
 <Warning>
 当配置了 `MILADY_API_TOKEN` 时，请在 `Authorization` 头中以 `Bearer` 令牌的形式包含该令牌，或使用配对流程获取令牌。
@@ -14,14 +14,14 @@ Milady API 服务器默认运行在端口 **2138**。所有端点均以 `/api/` 
 ## 快速开始
 </div>
 
-以下示例假设 API 运行在 `localhost:2138`。请将 `YOUR_TOKEN` 替换为 `MILADY_API_TOKEN` 的值或通过配对流程获取的令牌。
+以下示例假设 API 运行在 `localhost:31337`。请将 `YOUR_TOKEN` 替换为 `MILADY_API_TOKEN` 的值或通过配对流程获取的令牌。
 
 <div id="check-agent-status">
 ### 检查代理状态
 </div>
 
 ```bash
-curl http://localhost:2138/api/status
+curl http://localhost:31337/api/status
 ```
 
 ```json
@@ -40,7 +40,7 @@ curl http://localhost:2138/api/status
 当启用配对功能时，代理会在其终端中显示一个代码。提交该代码即可获取令牌：
 
 ```bash
-curl -X POST http://localhost:2138/api/auth/pair \
+curl -X POST http://localhost:31337/api/auth/pair \
   -H "Content-Type: application/json" \
   -d '{"code": "ABCD-EFGH"}'
 ```
@@ -56,7 +56,7 @@ curl -X POST http://localhost:2138/api/auth/pair \
 </div>
 
 ```bash
-curl http://localhost:2138/api/character \
+curl http://localhost:31337/api/character \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -65,7 +65,7 @@ curl http://localhost:2138/api/character \
 </div>
 
 ```bash
-curl -X POST http://localhost:2138/api/conversations/YOUR_CONVERSATION_ID/messages \
+curl -X POST http://localhost:31337/api/conversations/YOUR_CONVERSATION_ID/messages \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"text": "Hello, what can you do?"}'
@@ -76,7 +76,7 @@ curl -X POST http://localhost:2138/api/conversations/YOUR_CONVERSATION_ID/messag
 </div>
 
 ```bash
-curl -N -X POST http://localhost:2138/api/conversations/YOUR_CONVERSATION_ID/messages/stream \
+curl -N -X POST http://localhost:31337/api/conversations/YOUR_CONVERSATION_ID/messages/stream \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"text": "Tell me about yourself"}'
@@ -89,7 +89,7 @@ curl -N -X POST http://localhost:2138/api/conversations/YOUR_CONVERSATION_ID/mes
 </div>
 
 ```bash
-curl http://localhost:2138/api/conversations \
+curl http://localhost:31337/api/conversations \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -98,7 +98,7 @@ curl http://localhost:2138/api/conversations \
 </div>
 
 ```bash
-curl -X POST http://localhost:2138/api/knowledge/documents \
+curl -X POST http://localhost:31337/api/knowledge/documents \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -112,7 +112,7 @@ curl -X POST http://localhost:2138/api/knowledge/documents \
 </div>
 
 ```bash
-curl "http://localhost:2138/api/knowledge/search?q=what+is+milady&limit=5" \
+curl "http://localhost:31337/api/knowledge/search?q=what+is+milady&limit=5" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -121,7 +121,7 @@ curl "http://localhost:2138/api/knowledge/search?q=what+is+milady&limit=5" \
 </div>
 
 ```bash
-curl http://localhost:2138/api/plugins \
+curl http://localhost:31337/api/plugins \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -130,7 +130,7 @@ curl http://localhost:2138/api/plugins \
 </div>
 
 ```bash
-curl http://localhost:2138/api/agent/autonomy \
+curl http://localhost:31337/api/agent/autonomy \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -146,7 +146,7 @@ curl http://localhost:2138/api/agent/autonomy \
 </div>
 
 ```bash
-curl -X POST http://localhost:2138/api/agent/autonomy \
+curl -X POST http://localhost:31337/api/agent/autonomy \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"enabled": true}'

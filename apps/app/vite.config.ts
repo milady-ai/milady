@@ -4,7 +4,13 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react-swc";
-import { defineConfig, type Plugin, transformWithEsbuild } from "vite";
+import {
+  type Alias,
+  createLogger,
+  defineConfig,
+  type Plugin,
+  transformWithEsbuild,
+} from "vite";
 import { resolveAppBranding } from "../../eliza/packages/app-core/src/config/app-config.ts";
 // Keep workspace-relative TS imports in this config so Vite transpiles them
 // while bundling the config instead of asking Node to load package-exported
@@ -55,6 +61,34 @@ function tryResolve(id: string): string | undefined {
 const capacitorKeyboardEntry = tryResolve("@capacitor/keyboard");
 const capacitorPreferencesEntry = tryResolve("@capacitor/preferences");
 const capacitorAppEntry = tryResolve("@capacitor/app");
+
+function isExpectedWsProxySocketError(
+  message: unknown,
+  error: unknown,
+): boolean {
+  const text = typeof message === "string" ? message : String(message ?? "");
+  if (!text.includes("ws proxy socket error")) {
+    return false;
+  }
+
+  const errorLike =
+    error && typeof error === "object"
+      ? (error as { code?: unknown; message?: unknown })
+      : null;
+  return (
+    errorLike?.code === "ECONNRESET" ||
+    String(errorLike?.message ?? "").includes("read ECONNRESET")
+  );
+}
+
+const viteLogger = createLogger();
+const viteLoggerError = viteLogger.error;
+viteLogger.error = (message, options) => {
+  if (isExpectedWsProxySocketError(message, options?.error)) {
+    return;
+  }
+  viteLoggerError(message, options);
+};
 
 function ensureTrailingSlash(value: string): string {
   return value.endsWith("/") ? value : `${value}/`;
@@ -428,9 +462,41 @@ const enableAppSourceMaps = process.env[BRANDED_ENV.appSourcemap] === "1";
 /** Set by eliza/packages/app-core/scripts/dev-platform.mjs for `vite build --watch` (Electrobun desktop). */
 const desktopFastDist = process.env[BRANDED_ENV.desktopFastDist] === "1";
 
-function pathIncludesAny(id: string, markers: string[]): boolean {
+function pathIncludesAny(id: string, markers: ReadonlyArray<string>): boolean {
   return markers.some((marker) => id.includes(marker));
 }
+
+/**
+ * 2026 chunking policy: keep only **vendor splits that pay for themselves
+ * via long-term browser caching** (large, stable, change-rarely deps).
+ * Workspace code is intentionally NOT manually chunked — Vite's automatic
+ * splitting follows the actual import graph and avoids the circular-chunk
+ * + empty-chunk + dynamic↔static-collision warnings that plagued the older
+ * "one chunk per workspace package" approach. Code splitting that genuinely
+ * matters happens at React.lazy() route boundaries, not at the bundler config.
+ *
+ * Rules of thumb for adding a NODE_MODULE_CHUNK_GROUPS entry:
+ *   1. > 100 KB minified, AND
+ *   2. Stable across releases (helps long-term caching), AND
+ *   3. Loaded on the critical path (or you don't care if it's split out).
+ *
+ * Don't add a workspace marker. If you need to split a workspace surface
+ * out of the main chunk, do it at the call site with React.lazy() — that
+ * gives you a real lazy boundary instead of a fake manual chunk that
+ * Rollup ends up eagerly merging anyway.
+ */
+const NODE_MODULE_CHUNK_GROUPS = [
+  {
+    name: "vendor-langchain",
+    markers: ["/@langchain/", "/langsmith/"],
+  },
+  {
+    name: "vendor-zod",
+    markers: ["/zod/"],
+  },
+] as const;
+
+const WORKSPACE_CHUNK_GROUPS = [] as const;
 
 function resolveManualChunk(id: string): string | undefined {
   const normalizedId = id.split(path.sep).join("/");
@@ -456,6 +522,18 @@ function resolveManualChunk(id: string): string | undefined {
     // init ordering bugs with WebGPU/TSL enums (see fix/three-chunk-tdz).
     if (normalizedId.includes("/three/")) {
       return "vendor-three";
+    }
+
+    for (const group of NODE_MODULE_CHUNK_GROUPS) {
+      if (pathIncludesAny(normalizedId, group.markers)) {
+        return group.name;
+      }
+    }
+  }
+
+  for (const group of WORKSPACE_CHUNK_GROUPS) {
+    if (pathIncludesAny(normalizedId, group.markers)) {
+      return group.name;
     }
   }
 
@@ -770,6 +848,10 @@ function nativeModuleStubPlugin(): Plugin {
     // prebundle proxy-agent and other Node-only HTTP deps for the browser.
     "puppeteer-core",
     "@puppeteer/browsers",
+    // GramJS / SOCKS networking is Node-only. If Telegram account auth leaks
+    // into the renderer graph, stub it before socksclient extends node:net.
+    "telegram",
+    "socks",
     // Server-only plugins statically imported from the @elizaos/agent runtime.
     // Their exports maps nest browser/node conditional exports that Vite 6's
     // commonjs--resolver cannot walk. Stubbing returns an empty Proxy virtual
@@ -919,6 +1001,27 @@ function nativeModuleStubPlugin(): Plugin {
         ].join("\n");
       }
 
+      // Telegram's MTProto client is server-only. If it reaches this virtual
+      // native stub path, preserve the static exports used by account auth.
+      if (modName === "telegram") {
+        if (strippedId.startsWith("telegram/sessions")) {
+          return [
+            "export class StringSession { constructor(value = '') { this.value = value; } }",
+            "export default { StringSession };",
+          ].join("\n");
+        }
+
+        return [
+          "const noop = () => {};",
+          "class SignIn { constructor(input = {}) { Object.assign(this, input); } }",
+          "class Authorization { constructor(input = {}) { Object.assign(this, input); } }",
+          "const Api = Object.freeze({ auth: Object.freeze({ SignIn, Authorization }) });",
+          "class TelegramClient {}",
+          "export { Api, TelegramClient };",
+          "export default { Api, TelegramClient, noop };",
+        ].join("\n");
+      }
+
       // events: CJS module, consumers use `import { EventEmitter } from "events"`
       if (modName === "events") {
         return [
@@ -1005,6 +1108,98 @@ function nativeModuleStubPlugin(): Plugin {
           "  return c;",
           "}",
           "export default function sharp() { return mk(); }",
+        ].join("\n");
+      }
+
+      if (strippedId === "@elizaos/plugin-sql/schema") {
+        return [
+          "const handler = { get: () => table, apply: () => table };",
+          "const table = new Proxy(function table() {}, handler);",
+          ...[
+            "agentTable",
+            "approvalRequestTable",
+            "authAuditEventTable",
+            "authBootstrapJtiSeenTable",
+            "authIdentityCreatedAtDefault",
+            "authIdentityTable",
+            "authOwnerBindingTable",
+            "authOwnerLoginTokenTable",
+            "authSessionTable",
+            "cacheTable",
+            "channelTable",
+            "channelParticipantsTable",
+            "componentTable",
+            "embeddingTable",
+            "entityTable",
+            "entityIdentityTable",
+            "entityMergeCandidateTable",
+            "factCandidateTable",
+            "logTable",
+            "longTermMemories",
+            "memoryTable",
+            "memoryAccessLogs",
+            "messageTable",
+            "messageServerTable",
+            "messageServerAgentsTable",
+            "pairingAllowlistTable",
+            "pairingRequestTable",
+            "participantTable",
+            "relationshipTable",
+            "roomTable",
+            "serverTable",
+            "sessionSummaries",
+            "taskTable",
+            "worldTable",
+          ].map((name) => `export const ${name} = table;`),
+          "export default table;",
+        ].join("\n");
+      }
+
+      if (strippedId === "@elizaos/plugin-sql") {
+        return [
+          "const handler = { get: () => table, apply: () => table };",
+          "const table = new Proxy(function table() {}, handler);",
+          ...[
+            "agentTable",
+            "approvalRequestTable",
+            "authAuditEventTable",
+            "authBootstrapJtiSeenTable",
+            "authIdentityCreatedAtDefault",
+            "authIdentityTable",
+            "authOwnerBindingTable",
+            "authOwnerLoginTokenTable",
+            "authSessionTable",
+            "cacheTable",
+            "channelTable",
+            "channelParticipantsTable",
+            "componentTable",
+            "embeddingTable",
+            "entityTable",
+            "entityIdentityTable",
+            "entityMergeCandidateTable",
+            "factCandidateTable",
+            "logTable",
+            "longTermMemories",
+            "memoryTable",
+            "memoryAccessLogs",
+            "messageTable",
+            "messageServerTable",
+            "messageServerAgentsTable",
+            "pairingAllowlistTable",
+            "pairingRequestTable",
+            "participantTable",
+            "relationshipTable",
+            "roomTable",
+            "serverTable",
+            "sessionSummaries",
+            "taskTable",
+            "worldTable",
+          ].map((name) => `export const ${name} = table;`),
+          "export const PGLITE_ERROR_CODES = Object.freeze({ ACTIVE_LOCK: 'ACTIVE_LOCK', CORRUPT_DATA: 'CORRUPT_DATA', MANUAL_RESET_REQUIRED: 'MANUAL_RESET_REQUIRED' });",
+          "export const getPgliteErrorCode = () => null;",
+          "export const createPgliteInitError = (_code, message) => new Error(message);",
+          "export const plugin = table;",
+          "export default table;",
         ].join("\n");
       }
 
@@ -1237,6 +1432,7 @@ function workspaceJsxInJsPlugin(): Plugin {
 
 export default defineConfig({
   root: here,
+  customLogger: viteLogger,
   base: "./",
   // Keep pre-bundle cache under the app dir (not node_modules/.vite) so Bun
   // installs don't fight Vite, and `bun run clean` / docs can target one path.
@@ -1342,6 +1538,10 @@ export default defineConfig({
           ),
         },
       ]),
+      {
+        find: /^telegram(\/.*)?$/,
+        replacement: path.join(appCoreSrcRoot, "platform/empty-node-module.ts"),
+      },
       // Capacitor plugins — resolve to local plugin sources
       ...NATIVE_PLUGIN_ALIAS_ENTRIES,
       // Force local @elizaos/ui source paths when the app bundles linked
@@ -1396,7 +1596,7 @@ export default defineConfig({
       // Dynamic aliases for all eliza/apps/* packages
       ...(() => {
         const appsDir = path.resolve(miladyRoot, "eliza/apps");
-        const aliases = [];
+        const aliases: Alias[] = [];
         for (const entry of fs.readdirSync(appsDir, { withFileTypes: true })) {
           if (!entry.isDirectory()) continue;
           const pkgPath = path.join(appsDir, entry.name, "package.json");
@@ -1434,7 +1634,7 @@ export default defineConfig({
         );
         const sharedPkgDir = path.dirname(sharedPkgPath);
         const sharedPkg = JSON.parse(fs.readFileSync(sharedPkgPath, "utf8"));
-        const aliases = [];
+        const aliases: Alias[] = [];
         for (const [key, value] of Object.entries(sharedPkg.exports || {})) {
           if (typeof value === "string") {
             const aliasKey =
@@ -1465,7 +1665,7 @@ export default defineConfig({
         );
         const appCorePkg = JSON.parse(fs.readFileSync(appCorePkgPath, "utf8"));
 
-        const generatedAliases = [];
+        const generatedAliases: Alias[] = [];
 
         for (const [key, value] of Object.entries(appCorePkg.exports || {})) {
           if (typeof value === "string") {
@@ -1648,6 +1848,9 @@ export default defineConfig({
       // Browser automation is server-only and pulls in proxy-agent/httpUtil.
       "puppeteer-core",
       "@puppeteer/browsers",
+      // Telegram account auth is server-only and pulls in GramJS + socks.
+      "telegram",
+      "socks",
       // Native LLM embedding — uses node-llama-cpp, never runs in browser
       "@elizaos/plugin-local-embedding",
     ],
@@ -1658,9 +1861,19 @@ export default defineConfig({
     emptyOutDir: !desktopFastDist,
     sourcemap: desktopFastDist ? false : enableAppSourceMaps,
     target: "es2022",
-    // The desktop/web shell intentionally ships a large eagerly-loaded main
-    // chunk; warn only when it grows beyond the current known baseline.
-    chunkSizeWarningLimit: 3800,
+    // Keep warnings tight enough to catch regressions while allowing the
+    // current largest workspace chunks to build without noise.
+    // Electrobun ships the bundle with the desktop app — there is no
+    // first-paint network cost for the user. The remaining ~4MB main
+    // chunk is the merged workspace surface (app-core + companion +
+    // steward + task-coordinator + vincent + screenshare); splitting
+    // them via manual chunks reintroduces circular-chunk + empty-chunk
+    // warnings without measurable benefit. If a true cold-start budget
+    // matters later, lift owner-of-route lazy() boundaries at the call
+    // sites that own a single import path (route-level splits land in
+    // their own chunks naturally — see AppsPageView / AutomationsView /
+    // SettingsView / StreamView / etc. above).
+    chunkSizeWarningLimit: 5000,
     minify: desktopFastDist ? false : undefined,
     cssMinify: desktopFastDist ? false : undefined,
     reportCompressedSize: !desktopFastDist,
@@ -1679,6 +1892,11 @@ export default defineConfig({
             "electron",
             "node-llama-cpp",
             "pty-manager",
+            // `@stwd/sdk/auth` dynamic-imports `@simplewebauthn/browser`, but
+            // Milady's main app never loads the auth surface (it's used only by
+            // eliza/cloud). Externalize so Rollup doesn't traverse the dynamic
+            // import chain looking for the missing peer dep.
+            "@simplewebauthn/browser",
           ].includes(id)
         )
           return true;

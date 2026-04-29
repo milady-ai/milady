@@ -32,10 +32,10 @@ You are Luna, an autonomous AI agent powered by elizaOS.
 
 ### Onboarding-Generated Prompts
 
-When a user completes onboarding, Milady writes a full agent configuration into `milady.json`. The onboarding flow (in `src/runtime/eliza.ts`) walks through several steps:
+When a user completes onboarding, Milady writes a full agent configuration into `milady.json`. The onboarding flow (in `eliza/packages/agent/src/runtime/eliza.ts`) walks through several steps:
 
 1. **Agent name** — pick from random suggestions or enter a custom name.
-2. **Style preset** — select a personality template from `STYLE_PRESETS` (defined in `src/onboarding-presets.ts`). The chosen template supplies `bio`, `system`, `style`, `adjectives`, `topics`, `postExamples`, and `messageExamples` in a single operation.
+2. **Style preset** — select a personality template from `STYLE_PRESETS` (defined in `eliza/packages/shared/src/onboarding-presets.ts`). The chosen template supplies `bio`, `system`, `style`, `adjectives`, `topics`, `postExamples`, and `messageExamples` in a single operation.
 3. **Model provider** — select an LLM provider (Anthropic, OpenAI, OpenRouter, Gemini, Groq, etc.) and enter an API key. The key is persisted into `config.env` and set in `process.env` for the current run. Skipped if an existing key is detected in the environment.
 4. **Wallet setup** — optionally generate fresh EVM + Solana keypairs or import existing private keys. Keys are stored in `config.env` (`EVM_PRIVATE_KEY`, `SOLANA_PRIVATE_KEY`).
 5. **Skills registry** — if no `SKILLS_REGISTRY` or `CLAWHUB_REGISTRY` URL is set, defaults to `https://clawhub.ai`. The `SKILLSMP_API_KEY` is also persisted if present.
@@ -94,7 +94,7 @@ At every conversation turn, providers registered with the runtime inject additio
 
 ### Channel Profile Provider
 
-`createChannelProfileProvider()` injects channel-specific behavior rules based on the current message channel (DM, group, etc.). Created in `src/providers/simple-mode.ts`.
+`createChannelProfileProvider()` injects channel-specific behavior rules based on the current message channel (DM, group, etc.). Created in `eliza/packages/agent/src/providers/simple-mode.ts`.
 
 ### Workspace Provider
 
@@ -106,11 +106,11 @@ const provider = createWorkspaceProvider({
 });
 ```
 
-Here `config` is the `MiladyPluginConfig` object passed to `createMiladyPlugin()`, not the top-level `MiladyConfig`.
+Here `config` is the `ElizaPluginConfig` object passed to `createElizaPlugin()`, not the top-level `ElizaConfig`.
 
 ### Admin Trust Provider
 
-`adminTrustProvider` from `src/providers/admin-trust.ts` injects information about whether the current user has admin privileges, enabling the agent to make trust-appropriate decisions.
+`adminTrustProvider` from `eliza/packages/agent/src/providers/admin-trust.ts` injects information about whether the current user has admin privileges, enabling the agent to make trust-appropriate decisions.
 
 ### Autonomous State Provider
 
@@ -138,7 +138,7 @@ When no custom actions are configured, the provider returns empty text (no token
 
 ### UI Catalog Provider
 
-`uiCatalogProvider` from `src/providers/ui-catalog.ts` injects the Milady UI component catalog, allowing the agent to compose structured UI responses.
+`uiCatalogProvider` from `eliza/packages/agent/src/providers/ui-catalog.ts` injects the Milady UI component catalog, allowing the agent to compose structured UI responses.
 
 ## Session Key Provider
 

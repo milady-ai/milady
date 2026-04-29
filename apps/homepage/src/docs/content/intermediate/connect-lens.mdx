@@ -1,0 +1,45 @@
+# Connect to Lens Protocol
+
+Lens Protocol is a decentralized social graph built on blockchain. Your Milady agent can publish content and interact with the Lens ecosystem using an API key from the Lens developer portal.
+
+**What you'll learn:** get a Lens API key, configure Milady, and confirm the connection works. About five minutes.
+
+## What you need before you start
+
+- **A Lens Protocol account** with developer API access from [lens.xyz](https://www.lens.xyz/).
+- **Milady running** with a working provider.
+
+## Step 1 — Get API credentials
+
+<Steps>
+  <li>Go to the <a href="https://www.lens.xyz/">Lens Protocol</a> developer portal.</li>
+  <li>Create or sign into your developer account.</li>
+  <li>Generate an API key for your application.</li>
+  <li>Copy the API key.</li>
+</Steps>
+
+## Step 2 — Hand the credentials to Milady
+
+<Steps>
+  <li>Open Milady. Go to <strong>Settings → Plugins → Lens → Configure</strong>.</li>
+  <li>Paste your <strong>API key</strong> into the API key field.</li>
+  <li>Click <strong>Save</strong>.</li>
+</Steps>
+
+The Lens connector auto-enables when an API key is present in the config.
+
+## Step 3 — Test it
+
+After saving, confirm the connector shows as active in Settings. Try posting a test interaction through Milady to verify connectivity with the Lens network.
+
+## Troubleshooting
+
+**"Authentication failed" when saving.**
+Double-check that your API key is correct and has not expired. Regenerate from the Lens developer portal if needed.
+
+**Connector not loading.**
+Make sure the plugin is installed: run `milady plugins install lens` if it isn't listed under installed plugins.
+
+## What's next
+
+[Running multiple connectors](/docs/advanced/multi-connector-setup) — Lens pairs well with Farcaster and Bluesky for decentralized social coverage.

@@ -4,6 +4,7 @@ import { execSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { applyCiOnlyOverrides } from "./disable-local-eliza-workspace.mjs";
 import { applyUnpublishedPluginStubOverrides } from "./setup-upstreams.mjs";
 
 const NESTED_ELIZA_SUBMODULE_SKIP_ARGS = [
@@ -111,6 +112,37 @@ function restoreRootPackageJson(repoRoot, { log, errorLog }) {
   }
 }
 
+function restoreRootCiOverrides(repoRoot, { log, errorLog }) {
+  const packageJsonPath = path.join(repoRoot, "package.json");
+  if (!fs.existsSync(packageJsonPath)) {
+    return 0;
+  }
+
+  try {
+    const raw = fs.readFileSync(packageJsonPath, "utf8");
+    const pkg = JSON.parse(raw);
+    const changed = applyCiOnlyOverrides(pkg, { log, repoRoot });
+    if (changed > 0) {
+      const indent = raw.match(/^(\s+)"/m)?.[1] ?? "  ";
+      fs.writeFileSync(
+        packageJsonPath,
+        `${JSON.stringify(pkg, null, indent)}\n`,
+      );
+      log(
+        "restore-local-eliza-workspace: restored CI-only root package overrides.",
+      );
+    }
+    return changed;
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    const message =
+      "restore-local-eliza-workspace: failed to restore CI-only root package overrides: " +
+      detail;
+    errorLog(message);
+    throw new Error(message, { cause: error });
+  }
+}
+
 function restoreElizaPackageOverrides(repoRoot, { log, errorLog }) {
   const elizaRoot = path.join(repoRoot, "eliza");
   if (!fs.existsSync(path.join(elizaRoot, "package.json"))) {
@@ -135,6 +167,44 @@ function restoreElizaPackageOverrides(repoRoot, { log, errorLog }) {
   }
 }
 
+function restoreAppPackageOverrides(repoRoot, { log, errorLog }) {
+  const packageJsonPath = path.join(repoRoot, "apps", "app", "package.json");
+  if (!fs.existsSync(packageJsonPath)) {
+    return 0;
+  }
+
+  try {
+    const raw = fs.readFileSync(packageJsonPath, "utf8");
+    const pkg = JSON.parse(raw);
+    const overrides =
+      typeof pkg.overrides === "object" && pkg.overrides !== null
+        ? pkg.overrides
+        : {};
+    const specifier = "file:../../scripts/ci-stubs/elizaos-plugin-app-control";
+
+    if (overrides["@elizaos/plugin-app-control"] === specifier) {
+      return 0;
+    }
+
+    overrides["@elizaos/plugin-app-control"] = specifier;
+    pkg.overrides = overrides;
+
+    const indent = raw.match(/^(\s+)"/m)?.[1] ?? "  ";
+    fs.writeFileSync(packageJsonPath, `${JSON.stringify(pkg, null, indent)}\n`);
+    log(
+      "restore-local-eliza-workspace: restored unpublished plugin stub override in apps/app/package.json.",
+    );
+    return 1;
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    const message =
+      "restore-local-eliza-workspace: failed to restore app package overrides: " +
+      detail;
+    errorLog(message);
+    throw new Error(message, { cause: error });
+  }
+}
+
 export function restoreLocalElizaWorkspace(
   repoRoot = process.cwd(),
   { log = console.log, errorLog = console.error } = {},
@@ -152,7 +222,9 @@ export function restoreLocalElizaWorkspace(
     }
     ensureNestedElizaSubmodules(repoRoot, { log, errorLog });
     restoreRootPackageJson(repoRoot, { log, errorLog });
+    restoreRootCiOverrides(repoRoot, { log, errorLog });
     restoreElizaPackageOverrides(repoRoot, { log, errorLog });
+    restoreAppPackageOverrides(repoRoot, { log, errorLog });
     log(
       "restore-local-eliza-workspace: eliza/ already present; nothing to restore.",
     );
@@ -162,7 +234,9 @@ export function restoreLocalElizaWorkspace(
   if (fs.existsSync(elizaRoot)) {
     ensureNestedElizaSubmodules(repoRoot, { log, errorLog });
     restoreRootPackageJson(repoRoot, { log, errorLog });
+    restoreRootCiOverrides(repoRoot, { log, errorLog });
     restoreElizaPackageOverrides(repoRoot, { log, errorLog });
+    restoreAppPackageOverrides(repoRoot, { log, errorLog });
     log("restore-local-eliza-workspace: eliza/ already present; skipping.");
     return false;
   }
@@ -171,7 +245,9 @@ export function restoreLocalElizaWorkspace(
     fs.renameSync(disabledElizaRoot, elizaRoot);
     ensureNestedElizaSubmodules(repoRoot, { log, errorLog });
     restoreRootPackageJson(repoRoot, { log, errorLog });
+    restoreRootCiOverrides(repoRoot, { log, errorLog });
     restoreElizaPackageOverrides(repoRoot, { log, errorLog });
+    restoreAppPackageOverrides(repoRoot, { log, errorLog });
     log(
       "restore-local-eliza-workspace: restored eliza/ from .eliza.ci-disabled/.",
     );

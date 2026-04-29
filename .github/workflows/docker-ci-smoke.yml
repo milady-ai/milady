@@ -47,6 +47,13 @@ jobs:
           restore-keys: |
             bun-${{ runner.os }}-
 
+      - name: Free disk space for Docker smoke
+        run: |
+          df -h
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /opt/hostedtoolcache/CodeQL
+          docker system prune -af --volumes || true
+          df -h
+
       - name: Run Docker CI smoke path
         timeout-minutes: 45
         # Run the smoke script in its own process group so a wedged docker

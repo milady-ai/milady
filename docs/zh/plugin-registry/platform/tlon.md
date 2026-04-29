@@ -15,7 +15,7 @@ Tlon 插件将 Milady 代理连接到 Tlon (Urbit)，实现通过连接的 Urbit
 </div>
 
 ```bash
-milady plugins install tlon
+milady plugins install @elizaos/plugin-tlon
 ```
 
 <div id="setup">

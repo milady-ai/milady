@@ -8,7 +8,7 @@ Milady provides an event-driven hooks system that lets external code react to ag
 
 ## Event System Architecture
 
-The hooks system lives in `src/hooks/` and follows a three-stage pipeline:
+The hooks system lives in `eliza/packages/agent/src/hooks/` and follows a three-stage pipeline:
 
 ```
 Discovery → Eligibility → Registration → Dispatch
@@ -59,7 +59,7 @@ Event keys use the format `"type:action"` for specific events or just `"type"` f
 Dispatch calls specific handlers first, then general category handlers:
 
 ```typescript
-// In registry.ts
+// In eliza/packages/agent/src/hooks/registry.ts
 const specificKey = `${event.type}:${event.action}`;
 const generalKey = event.type;
 // specificKey handlers run before generalKey handlers
@@ -131,7 +131,7 @@ const result = await loadHooks({
   bundledDir: "/path/to/bundled-hooks",
   extraDirs: [],
   internalConfig: config.hooks?.internal,
-  miladyConfig: config,
+  elizaConfig: config,
 });
 
 console.log(`Registered: ${result.registered}/${result.discovered}`);

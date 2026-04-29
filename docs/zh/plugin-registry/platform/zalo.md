@@ -15,7 +15,7 @@ Zalo 插件将 Milady 代理连接到 Zalo，实现通过 Zalo 官方账号 API 
 </div>
 
 ```bash
-milady plugins install zalo
+milady plugins install @elizaos/plugin-zalo
 ```
 
 <div id="setup">

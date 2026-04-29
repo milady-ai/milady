@@ -47,6 +47,10 @@ import { execSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  asElizaOverridesSpecifiers,
+  asRootOverridesSpecifiers,
+} from "./lib/ci-stubs.mjs";
 
 export const ELIZA_WORKSPACE_GLOB = "eliza/packages/*";
 export const PLUGIN_ROOT_WORKSPACE_GLOB = "eliza/plugins/*";
@@ -62,32 +66,36 @@ export const LOCAL_ONLY_WORKSPACE_GLOBS = [
   "eliza/apps/*",
 ];
 export const LOCAL_ONLY_ELIZA_PACKAGE_PATHS = {
-  "@elizaos/plugin-browser-bridge": "packages/plugin-browser-bridge",
+  "@elizaos/plugin-browser-bridge": "plugins/plugin-browser-bridge",
+  "@elizaos/plugin-signal": "plugins/plugin-signal/typescript",
+  "@elizaos/skills": "packages/skills",
 };
 export const LOCAL_ONLY_WORKSPACE_PATHS = [
   "eliza/packages/shared",
-  `eliza/${LOCAL_ONLY_ELIZA_PACKAGE_PATHS["@elizaos/plugin-browser-bridge"]}`,
+  ...Object.values(LOCAL_ONLY_ELIZA_PACKAGE_PATHS).map(
+    (packagePath) => `eliza/${packagePath}`,
+  ),
 ];
 export const NESTED_INSTALLABLE_PACKAGE_GLOBS = [
   // These package.json files are installed directly by CI/build scripts even
   // though they do not participate in the root workspace graph.
   "eliza/packages/app-core/platforms/*",
 ];
+// The @elizaos/plugin-app-control and @elizaos/plugin-wechat entries below
+// are derived from the single source of truth at scripts/lib/ci-stubs.mjs.
+// Other entries point to real packages inside eliza/ and exist here because
+// published-only CI still runs source paths that import their local builds.
 export const CI_OVERRIDE_SPECIFIERS = {
   "@elizaos/shared": "file:./eliza/packages/shared",
-  "@elizaos/plugin-app-control":
-    "file:./scripts/ci-stubs/elizaos-plugin-app-control",
-  "@elizaos/plugin-browser-bridge":
-    "file:./eliza/packages/plugin-browser-bridge",
-  "@elizaos/plugin-wechat": "file:./scripts/ci-stubs/elizaos-plugin-wechat",
   "@elizaos/ui": "file:./eliza/packages/ui",
+  ...asRootOverridesSpecifiers(),
 };
 export const ELIZA_RUNTIME_CI_OVERRIDE_SPECIFIERS = {
-  "@elizaos/plugin-app-control":
-    "file:../scripts/ci-stubs/elizaos-plugin-app-control",
-  "@elizaos/plugin-browser-bridge": "file:./packages/plugin-browser-bridge",
-  "@elizaos/plugin-wechat": "file:../scripts/ci-stubs/elizaos-plugin-wechat",
   "@elizaos/ui": "file:./packages/ui",
+  "@elizaos/plugin-browser-bridge": "file:./plugins/plugin-browser-bridge",
+  "@elizaos/plugin-signal": "file:./plugins/plugin-signal/typescript",
+  "@elizaos/skills": "file:./packages/skills",
+  ...asElizaOverridesSpecifiers(),
 };
 export const DEPENDENCY_FIELDS = [
   "dependencies",
@@ -99,6 +107,13 @@ export const CI_LOCKFILES = ["bun.lock", "bun.lockb"];
 export const PINNED_VERSION_SOURCE_OVERRIDE = "override";
 export const PINNED_VERSION_SOURCE_TEMPLATE = "template";
 export const PINNED_VERSION_SOURCE_WORKSPACE = "workspace";
+export const LLAMA_CPP_CAPACITOR_PATCH_PATH = path.join(
+  "eliza",
+  "packages",
+  "app-core",
+  "patches",
+  "llama-cpp-capacitor@0.1.5.patch",
+);
 
 const ELIZAOS_CORE_NAME = "@elizaos/core";
 const SCRIPT_PATH = fileURLToPath(import.meta.url);
@@ -139,12 +154,22 @@ export function resolveRootElizaPackageOverrideSpecifier(
 }
 
 export function resolveCiOverrideSpecifiers(repoRoot = DEFAULT_REPO_ROOT) {
+  const localOnlyOverrides = Object.fromEntries(
+    Object.entries(LOCAL_ONLY_ELIZA_PACKAGE_PATHS).map(
+      ([packageName, packagePath]) => [
+        packageName,
+        resolveRootElizaPackageOverrideSpecifier(packagePath, repoRoot),
+      ],
+    ),
+  );
+
   return {
     ...CI_OVERRIDE_SPECIFIERS,
-    "@elizaos/plugin-browser-bridge": resolveRootElizaPackageOverrideSpecifier(
-      LOCAL_ONLY_ELIZA_PACKAGE_PATHS["@elizaos/plugin-browser-bridge"],
+    "@elizaos/app-core": resolveRootElizaPackageOverrideSpecifier(
+      "packages/app-core",
       repoRoot,
     ),
+    ...localOnlyOverrides,
     "@elizaos/ui": resolveRootUiOverrideSpecifier(repoRoot),
   };
 }
@@ -585,6 +610,7 @@ export function resolvePublishSafePinnedVersions(
   {
     dependencyNames = undefined,
     versionSources = new Map(),
+    fileOverrideNames = undefined,
     readRegistryInfo = readRegistryPackageInfo,
     log = console.log,
     warn = console.warn,
@@ -594,8 +620,20 @@ export function resolvePublishSafePinnedVersions(
   const registryInfoCache = new Map();
   const relevantNames =
     dependencyNames instanceof Set ? dependencyNames : undefined;
+  const overriddenNames =
+    fileOverrideNames instanceof Set ? fileOverrideNames : undefined;
 
   for (const [dependencyName, preferredVersion] of pinnedVersions) {
+    // Packages with a file:./... override resolve from the local path, never
+    // from the registry. Skipping the npm view here avoids 404 noise for
+    // unpublished CI stubs (e.g. @elizaos/plugin-app-control,
+    // @elizaos/plugin-wechat) and unpublished plugin packages mirrored as
+    // workspace overrides (e.g. @elizaos/plugin-music-library).
+    if (overriddenNames?.has(dependencyName)) {
+      resolvedVersions.set(dependencyName, preferredVersion);
+      continue;
+    }
+
     const versionSource = versionSources.get(dependencyName);
     const shouldResolveFromRegistry =
       (versionSource === PINNED_VERSION_SOURCE_WORKSPACE ||
@@ -613,9 +651,23 @@ export function resolvePublishSafePinnedVersions(
       try {
         registryInfo = readRegistryInfo(dependencyName);
       } catch (error) {
-        warn(
-          `[disable-local-eliza-workspace] Could not read registry metadata for ${dependencyName}: ${error instanceof Error ? error.message : String(error)}`,
-        );
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        // npm view emits E404 when the package isn't published. That's an
+        // expected miss for unpublished workspace packages — log a single
+        // tidy line instead of dumping the multi-line npm stderr blob.
+        if (
+          /\bE404\b/.test(errorMessage) ||
+          /404 Not Found/.test(errorMessage)
+        ) {
+          log(
+            `[disable-local-eliza-workspace] ${dependencyName} is not published to npm; keeping workspace-pinned version`,
+          );
+        } else {
+          warn(
+            `[disable-local-eliza-workspace] Could not read registry metadata for ${dependencyName}: ${errorMessage}`,
+          );
+        }
         registryInfo = null;
       }
       registryInfoCache.set(dependencyName, registryInfo);
@@ -833,6 +885,31 @@ export function applyCiOnlyOverrides(
   });
 }
 
+export function repairKnownElizaPatchFiles(
+  repoRoot = DEFAULT_REPO_ROOT,
+  { log = console.log } = {},
+) {
+  const patchPath = path.join(repoRoot, LLAMA_CPP_CAPACITOR_PATCH_PATH);
+  if (!fs.existsSync(patchPath)) {
+    return false;
+  }
+
+  const source = fs.readFileSync(patchPath, "utf8");
+  const repaired = source.replace(
+    "@@ -18,7 +18,7 @@ apply plugin: 'com.android.library'",
+    "@@ -18,6 +18,6 @@ apply plugin: 'com.android.library'",
+  );
+  if (repaired === source) {
+    return false;
+  }
+
+  fs.writeFileSync(patchPath, repaired);
+  log(
+    `[disable-local-eliza-workspace] Repaired malformed patch hunk in ${LLAMA_CPP_CAPACITOR_PATCH_PATH}`,
+  );
+  return true;
+}
+
 export function disableLocalElizaWorkspace(
   repoRoot = DEFAULT_REPO_ROOT,
   { log = console.log, warn = console.warn, errorLog = console.error } = {},
@@ -873,6 +950,8 @@ export function disableLocalElizaWorkspace(
       );
     }
   }
+
+  repairKnownElizaPatchFiles(repoRoot, { log });
 
   const localOnlyPackagePaths = resolveLocalOnlyWorkspacePackagePaths(repoRoot);
   const localOnlyPackages = new Set(localOnlyPackagePaths.keys());
@@ -1172,11 +1251,15 @@ export function disableLocalElizaWorkspace(
     }
   }
 
+  const ciOverrideNames = new Set(
+    Object.keys(resolveCiOverrideSpecifiers(repoRoot)),
+  );
   const publishSafePinnedWorkspaceVersions = resolvePublishSafePinnedVersions(
     pinnedWorkspaceVersions,
     {
       dependencyNames: workspaceProtocolDependencyNames,
       versionSources: pinnedVersionSources,
+      fileOverrideNames: ciOverrideNames,
       log,
       warn,
     },

@@ -27,7 +27,7 @@ After upstream publishes a fixed version, verify `dist/node/index.node.js` conta
 ## Installation
 
 ```bash
-milady plugins install openrouter
+milady plugins install @elizaos/plugin-openrouter
 ```
 
 ## Auto-Enable
@@ -44,10 +44,21 @@ export OPENROUTER_API_KEY=sk-or-...
 |---------------------|----------|-------------|
 | `OPENROUTER_API_KEY` | Yes | OpenRouter API key from [openrouter.ai](https://openrouter.ai) |
 | `OPENROUTER_BASE_URL` | No | Custom base URL for the OpenRouter API |
+| `OPENROUTER_BROWSER_BASE_URL` | No | Browser-only proxy endpoint base URL |
 | `OPENROUTER_SMALL_MODEL` | No | Override the small model identifier |
 | `OPENROUTER_LARGE_MODEL` | No | Override the large model identifier |
+| `SMALL_MODEL` | No | Global alias to override the small model |
+| `LARGE_MODEL` | No | Global alias to override the large model |
 | `OPENROUTER_EMBEDDING_MODEL` | No | Override the embedding model identifier |
+| `EMBEDDING_MODEL` | No | Global alias to override the embedding model |
+| `OPENROUTER_EMBEDDING_DIMENSIONS` | No | Override embedding vector dimensions |
+| `EMBEDDING_DIMENSIONS` | No | Global alias for embedding dimensions |
+| `OPENROUTER_IMAGE_MODEL` | No | Override the image model identifier |
+| `IMAGE_MODEL` | No | Global alias for the image model |
 | `OPENROUTER_IMAGE_GENERATION_MODEL` | No | Override the image generation model |
+| `IMAGE_GENERATION_MODEL` | No | Global alias for the image generation model |
+| `OPENROUTER_AUTO_CLEANUP_IMAGES` | No | Automatically clean up generated images |
+| `OPENROUTER_TOOL_EXECUTION_MAX_STEPS` | No | Maximum tool execution steps |
 
 ### milady.json Example
 
@@ -72,9 +83,9 @@ OpenRouter provides access to models from all major providers. Use the full prov
 
 | Model ID | Description |
 |---------|-------------|
+| `openai/gpt-5` | GPT-5 flagship multimodal |
+| `openai/gpt-5-mini` | Fast and efficient |
 | `openai/gpt-4o` | GPT-4o multimodal |
-| `openai/gpt-4o-mini` | Fast and efficient |
-| `openai/o1` | Reasoning model |
 | `openai/o3-mini` | Fast reasoning |
 
 ### Anthropic via OpenRouter
@@ -105,8 +116,11 @@ Browse all models at [openrouter.ai/models](https://openrouter.ai/models).
 
 | elizaOS Model Type | Default OpenRouter Model |
 |-------------------|------------------------|
-| `TEXT_SMALL` | `anthropic/claude-haiku-4.5` |
-| `TEXT_LARGE` | `anthropic/claude-sonnet-4.6` |
+| `TEXT_SMALL` | `google/gemini-2.0-flash-001` |
+| `TEXT_LARGE` | `google/gemini-2.5-flash` |
+| `IMAGE` | `x-ai/grok-2-vision-1212` |
+| `IMAGE_GENERATION` | `google/gemini-2.5-flash-image-preview` |
+| `TEXT_EMBEDDING` | `openai/text-embedding-3-small` |
 
 ## Features
 

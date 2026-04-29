@@ -38,7 +38,7 @@ Eso es correcto para **deltas de tokens** que extienden la misma respuesta, pero
 ## El comportamiento de Milady
 </div>
 
-Dentro de `generateChatResponse` (`packages/agent/src/api/chat-routes.ts`):
+Dentro de `generateChatResponse` (`eliza/packages/agent/src/api/chat-routes.ts`):
 
 - Los **fragmentos del LLM** siguen usando semántica de **adición** vía `appendIncomingText` → `resolveStreamingUpdate` → `onChunk`.
 - Los **callbacks de acción** usan **`replaceCallbackText`**:
@@ -93,7 +93,7 @@ Sin campos adicionales, sin APIs específicas de Milady, sin adjuntos al runtime
 ## Código y documentación relacionados
 </div>
 
-- **Implementación:** `packages/agent/src/api/chat-routes.ts` — `replaceCallbackText`, `preCallbackText`.
+- **Implementación:** `eliza/packages/agent/src/api/chat-routes.ts` — `replaceCallbackText`, `preCallbackText`.
 - **Helper de ejemplo:** `plugins/plugin-music-player/src/utils/progressiveMessage.ts`.
 - **Transmisión en UI:** [Panel — Chat](/es/dashboard/chat) (SSE / indicador de escritura).
 - **Registro de cambios:** [Registro de cambios](/es/changelog) — busca "action callback" o la fecha de publicación.

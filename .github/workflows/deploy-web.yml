@@ -29,7 +29,7 @@ permissions:
   contents: write
 
 env:
-  BUN_VERSION: "1.3.10"
+  BUN_VERSION: "1.3.11"
   CI: "true"
 
 jobs:

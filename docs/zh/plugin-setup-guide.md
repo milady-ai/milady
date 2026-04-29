@@ -160,117 +160,6 @@ description: Milady 连接器、AI 提供者和直播推流插件的完整设置
 - `AI_GATEWAY_TIMEOUT_MS` — 请求超时时间，默认 30000ms
 **提示：** 通过 Vercel 的 AI 网关路由模型调用，实现缓存、速率限制和可观测性。如果您已在使用 Vercel，非常有用。
 
-<div id="deepseek">
-
-### DeepSeek
-</div>
-
-**获取凭据：** https://platform.deepseek.com/api_keys
-**最少必填：** `DEEPSEEK_API_KEY`
-**变量：**
-- `DEEPSEEK_API_KEY` — 来自 platform.deepseek.com 的 API 密钥
-- `DEEPSEEK_SMALL_MODEL` — 例如 `deepseek-chat`
-- `DEEPSEEK_LARGE_MODEL` — 例如 `deepseek-reasoner`
-**提示：** DeepSeek 提供有竞争力的定价和强大的推理模型。`deepseek-reasoner` 模型支持思维链推理。
-
-<div id="together-ai">
-
-### Together AI
-</div>
-
-**获取凭据：** https://api.together.xyz/settings/api-keys
-**最少必填：** `TOGETHER_API_KEY`
-**变量：**
-- `TOGETHER_API_KEY` — 来自 api.together.xyz
-- `TOGETHER_SMALL_MODEL` — 例如 `meta-llama/Llama-3.2-3B-Instruct-Turbo`
-- `TOGETHER_LARGE_MODEL` — 例如 `meta-llama/Llama-3.3-70B-Instruct-Turbo`
-- `TOGETHER_EMBEDDING_MODEL` — 例如 `togethercomputer/m2-bert-80M-8k-retrieval`
-- `TOGETHER_IMAGE_MODEL` — 例如 `black-forest-labs/FLUX.1-schnell`
-**提示：** Together AI 托管了大量开源模型。非常适合通过 API 访问 Llama、Mixtral 和其他开源模型。
-
-<div id="mistral">
-
-### Mistral
-</div>
-
-**获取凭据：** https://console.mistral.ai/api-keys
-**最少必填：** `MISTRAL_API_KEY`
-**变量：**
-- `MISTRAL_API_KEY` — 来自 console.mistral.ai
-- `MISTRAL_SMALL_MODEL` — 例如 `mistral-small-latest`
-- `MISTRAL_LARGE_MODEL` — 例如 `mistral-large-latest`
-- `MISTRAL_EMBEDDING_MODEL` — 例如 `mistral-embed`
-**提示：** Mistral 模型速度快且性价比高。适合欧洲数据驻留要求。
-
-<div id="cohere">
-
-### Cohere
-</div>
-
-**获取凭据：** https://dashboard.cohere.com/api-keys
-**最少必填：** `COHERE_API_KEY`
-**变量：**
-- `COHERE_API_KEY` — 来自 dashboard.cohere.com
-- `COHERE_SMALL_MODEL` — 例如 `command-r`
-- `COHERE_LARGE_MODEL` — 例如 `command-r-plus`
-- `COHERE_EMBEDDING_MODEL` — 例如 `embed-english-v3.0`
-**提示：** Cohere 擅长 RAG（检索增强生成）和多语言任务。其嵌入模型达到生产级别。
-
-<div id="perplexity">
-
-### Perplexity
-</div>
-
-**获取凭据：** https://www.perplexity.ai/settings/api
-**最少必填：** `PERPLEXITY_API_KEY`
-**变量：**
-- `PERPLEXITY_API_KEY` — 来自 perplexity.ai 设置
-- `PERPLEXITY_SMALL_MODEL` — 例如 `llama-3.1-sonar-small-128k-online`
-- `PERPLEXITY_LARGE_MODEL` — 例如 `llama-3.1-sonar-large-128k-online`
-**提示：** Perplexity 模型内置网络搜索功能——非常适合需要最新信息的任务。
-
-<div id="google-antigravity">
-
-### Google Antigravity
-</div>
-
-**获取凭据：** 具有 Antigravity 访问权限的 Google Cloud API 密钥
-**最少必填：** `GOOGLE_CLOUD_API_KEY`
-**变量：**
-- `GOOGLE_CLOUD_API_KEY` — Google Cloud API 密钥
-**提示：** Google Antigravity 是一个专门的 Google 模型提供者。需要与 Google Gemini 不同的 Google Cloud 凭据。
-
-<div id="qwen">
-
-### Qwen
-</div>
-
-**最少必填：** 在 `milady.json` 的 provider plugins 配置中进行设置
-**变量：**
-- 在 `milady.json` 的 `providers.qwen` 配置块中设置模型 ID
-**提示：** 来自阿里云的 Qwen 模型。通过配置文件的 providers 部分进行设置。
-
-<div id="minimax">
-
-### Minimax
-</div>
-
-**最少必填：** 在 `milady.json` 的 provider plugins 配置中进行设置
-**变量：**
-- 在 `milady.json` 的 `providers.minimax` 配置块中设置模型 ID
-**提示：** Minimax 提供中文和多语言 AI 模型。
-
-<div id="zai">
-
-### Zai
-</div>
-
-**获取凭据：** 来自 Homunculus Labs
-**最少必填：** `ZAI_API_KEY`
-**变量：**
-- `ZAI_API_KEY` — 来自 Homunculus Labs 的 Zai API 密钥
-**提示：** Zai 是来自 Homunculus Labs 的模型提供者。插件包：`@homunculuslabs/plugin-zai`。
-
 <div id="eliza-cloud">
 
 ### Eliza Cloud
@@ -699,9 +588,9 @@ description: Milady 连接器、AI 提供者和直播推流插件的完整设置
 </div>
 
 **获取凭据：** 您的 Mattermost 实例 → 系统控制台 → 集成 → Bot 账户
-**最少必填：** `MATTERMOST_BASE_URL` + `MATTERMOST_BOT_TOKEN`
+**最少必填：** `MATTERMOST_SERVER_URL` + `MATTERMOST_BOT_TOKEN`
 **变量：**
-- `MATTERMOST_BASE_URL` — 例如 `https://mattermost.yourcompany.com`
+- `MATTERMOST_SERVER_URL` — 例如 `https://mattermost.yourcompany.com`
 - `MATTERMOST_BOT_TOKEN` — 来自系统控制台 → Bot 账户 → 添加 Bot 账户
 - `MATTERMOST_TEAM_ID` — 您的团队 ID（来自团队 URL 或 API）
 - `MATTERMOST_DM_POLICY` / `MATTERMOST_GROUP_POLICY` — `allow-all` 或 `allow-from`

@@ -43,7 +43,7 @@ The following walkthrough covers the full lifecycle of connecting to Eliza Cloud
 ### Step 1: Start the Login Flow
 
 ```bash
-curl -X POST http://localhost:2138/api/cloud/login \
+curl -X POST http://localhost:31337/api/cloud/login \
   -H "Authorization: Bearer your-token"
 ```
 
@@ -61,7 +61,7 @@ Open the `browserUrl` in your browser to authenticate.
 ### Step 2: Poll for Authentication
 
 ```bash
-curl "http://localhost:2138/api/cloud/login/status?sessionId=a1b2c3d4-..."
+curl "http://localhost:31337/api/cloud/login/status?sessionId=a1b2c3d4-..."
 ```
 
 Responses:
@@ -74,7 +74,7 @@ On success, the API key is automatically saved to `milady.json` and `process.env
 ### Step 3: Check Connection Status
 
 ```bash
-curl http://localhost:2138/api/cloud/status
+curl http://localhost:31337/api/cloud/status
 ```
 
 Response:
@@ -92,7 +92,7 @@ Response:
 ### Step 4: Create a Cloud Agent
 
 ```bash
-curl -X POST http://localhost:2138/api/cloud/agents \
+curl -X POST http://localhost:31337/api/cloud/agents \
   -H "Authorization: Bearer your-token" \
   -H "Content-Type: application/json" \
   -d '{
@@ -105,14 +105,14 @@ curl -X POST http://localhost:2138/api/cloud/agents \
 ### Step 5: Connect to the Agent
 
 ```bash
-curl -X POST http://localhost:2138/api/cloud/agents/agent-id/connect \
+curl -X POST http://localhost:31337/api/cloud/agents/agent-id/connect \
   -H "Authorization: Bearer your-token"
 ```
 
 ### Disconnecting
 
 ```bash
-curl -X POST http://localhost:2138/api/cloud/disconnect \
+curl -X POST http://localhost:31337/api/cloud/disconnect \
   -H "Authorization: Bearer your-token"
 ```
 
@@ -318,7 +318,7 @@ Balance thresholds: `low` is true when balance < $2.00, `critical` when < $0.50.
 Monitor your Eliza Cloud balance before and during agent operation to avoid service interruption.
 
 ```bash
-curl http://localhost:2138/api/cloud/credits \
+curl http://localhost:31337/api/cloud/credits \
   -H "Authorization: Bearer your-token"
 ```
 

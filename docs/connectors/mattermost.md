@@ -1,26 +1,30 @@
----
-title: Mattermost Connector
-sidebarTitle: Mattermost
-description: Connect your agent to Mattermost using the @elizaos/plugin-mattermost package.
----
+# Mattermost Connector
 
-Connect your agent to a self-hosted Mattermost server for channel and DM conversations.
+Connect your agent to a self-hosted Mattermost server for channel and DM conversations using the `@elizaos/plugin-mattermost` package.
 
-## Overview
+## Prerequisites
 
-The Mattermost connector is an external elizaOS plugin that bridges your agent to a Mattermost server as a bot. It is auto-enabled by the runtime when a valid bot token is detected in your connector configuration.
+- A Mattermost server with bot account support enabled
+- A bot token from the Mattermost System Console
 
-## Package Info
+## Configuration
 
-| Field | Value |
-|-------|-------|
-| Package | `@elizaos/plugin-mattermost` |
-| Config key | `connectors.mattermost` |
-| Auto-enable trigger | `botToken` is truthy in connector config |
+| Name | Required | Description |
+|------|----------|-------------|
+| `MATTERMOST_BOT_TOKEN` | Yes | Bot token from Mattermost System Console |
+| `MATTERMOST_SERVER_URL` | No | Server URL for the Mattermost instance |
+| `MATTERMOST_ENABLED` | No | Enable or disable the connector |
+| `MATTERMOST_TEAM_ID` | No | Team/tenant ID to restrict the bot to |
+| `MATTERMOST_DM_POLICY` | No | DM policy (e.g., `allow`, `deny`, `allowlist`) |
+| `MATTERMOST_GROUP_POLICY` | No | Group message policy (e.g., `allow`, `deny`) |
+| `MATTERMOST_ALLOWED_USERS` | No | Comma-separated allowed user list |
+| `MATTERMOST_ALLOWED_CHANNELS` | No | Comma-separated allowed channel list |
+| `MATTERMOST_REQUIRE_MENTION` | No | Only respond when @mentioned |
+| `MATTERMOST_IGNORE_BOT_MESSAGES` | No | Ignore messages from other bots |
 
-## Minimal Configuration
+The connector auto-enables when `botToken` is truthy in the connector config and `enabled` is not explicitly `false`.
 
-In `~/.milady/milady.json`:
+Configure in `~/.milady/milady.json`:
 
 ```json
 {
@@ -33,9 +37,7 @@ In `~/.milady/milady.json`:
 }
 ```
 
-## Disabling
-
-To explicitly disable the connector even when a token is present:
+To disable:
 
 ```json
 {
@@ -49,20 +51,30 @@ To explicitly disable the connector even when a token is present:
 }
 ```
 
-## Auto-Enable Mechanism
+## Setup
 
-The `plugin-auto-enable.ts` module checks `connectors.mattermost` in your config. If the `botToken` field is truthy (and `enabled` is not explicitly `false`), the runtime automatically loads `@elizaos/plugin-mattermost`.
+1. In Mattermost System Console, create a bot account and note the bot token.
+2. Add the bot token and server URL to `connectors.mattermost` in your config.
+3. Start your agent -- the Mattermost connector will auto-enable.
 
-No environment variable is required to trigger auto-enable — it is driven entirely by the connector config object.
+## Features
 
 ## Environment Variables
 
 When the connector is loaded, the runtime pushes the following secrets from your config into `process.env` for the plugin to consume:
 
-| Variable | Source | Description |
-|----------|--------|-------------|
-| `MATTERMOST_BOT_TOKEN` | `botToken` | Bot token from Mattermost System Console |
-| `MATTERMOST_SERVER_URL` | `baseUrl` | Server URL for the Mattermost server |
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `MATTERMOST_BOT_TOKEN` | Yes | Bot token from Mattermost System Console |
+| `MATTERMOST_SERVER_URL` | No | Server URL for the Mattermost server |
+| `MATTERMOST_ENABLED` | No | Enable or disable the connector |
+| `MATTERMOST_TEAM_ID` | No | Team ID to restrict the bot to |
+| `MATTERMOST_DM_POLICY` | No | DM policy (e.g., `allow`, `deny`, `allowlist`) |
+| `MATTERMOST_GROUP_POLICY` | No | Group message policy |
+| `MATTERMOST_ALLOWED_USERS` | No | Comma-separated allowed user list |
+| `MATTERMOST_ALLOWED_CHANNELS` | No | Comma-separated channel list to restrict the bot to |
+| `MATTERMOST_REQUIRE_MENTION` | No | Only respond when @mentioned |
+| `MATTERMOST_IGNORE_BOT_MESSAGES` | No | Ignore messages from other bots |
 
 ## Full Configuration Reference
 
@@ -114,6 +126,5 @@ Mattermost does not support multi-account configuration. Each agent runs a singl
 
 ## Related
 
-- [Mattermost plugin reference](/plugin-registry/platform/mattermost)
 - [Connectors overview](/guides/connectors)
 - [Configuration reference](/configuration)
