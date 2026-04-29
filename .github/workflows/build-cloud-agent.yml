@@ -21,7 +21,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Cloud version tag (e.g. 2.1.0). Defaults to 2.1.0 on staging, run number elsewhere."
+        description: "Cloud version tag (e.g. 2.2.0). Defaults to 2.2.0 on staging, run number elsewhere."
         required: false
         type: string
       push_image:
@@ -82,7 +82,7 @@ jobs:
           if [ "${SOURCE_REF}" = "cloud/staging" ]; then
             VERSION_PREFIX="cloud-staging-v"
             BUILD_ENVIRONMENT="staging"
-            DEFAULT_VERSION="2.1.0"
+            DEFAULT_VERSION="2.2.0"
           else
             VERSION_PREFIX="cloud-v"
             BUILD_ENVIRONMENT="production"

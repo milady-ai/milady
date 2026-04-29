@@ -33,7 +33,7 @@ describe("homepage", () => {
   });
 
   it("imports shared package utilities", async () => {
-    const shared = await import("@elizaos/shared");
+    const shared = await import("@elizaos/shared/connectors");
     expect(shared).toBeDefined();
     expect(typeof shared.normalizeConnectorSource).toBe("function");
   });

@@ -2,6 +2,7 @@
   "_comment": "Keys/prefixes referenced via dynamic t(expr) or t(`prefix.${x}`) calls. The i18n linter (scripts/check-i18n.mjs) treats these as 'used' when reporting orphaned locale keys. Add a literal key to 'keys' or a string prefix to 'prefixes' for each runtime-resolved translation.",
   "keys": [],
   "prefixes": [
+    "accounts.",
     "advancedpageview.",
     "agent.",
     "agentactivitybox.",

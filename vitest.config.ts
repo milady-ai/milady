@@ -1,1 +1,1 @@
-export { default } from "./test/vitest/default.config";
+export { default } from "./eliza/test/vitest/default.config";

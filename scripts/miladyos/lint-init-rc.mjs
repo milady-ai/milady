@@ -16,12 +16,7 @@ import { fileURLToPath } from "node:url";
 
 // init.cpp recognises specific top-level section keywords. Any other
 // keyword at column zero is a syntax error at boot.
-const TOP_LEVEL_KEYWORDS = new Set([
-  "on",
-  "service",
-  "import",
-  "subsystem",
-]);
+const TOP_LEVEL_KEYWORDS = new Set(["on", "service", "import", "subsystem"]);
 
 // `on <event>` event names. Not exhaustive — init also supports
 // property triggers (`on property:foo=bar`) and AND-combined triggers
@@ -137,7 +132,7 @@ export function lintInitRc(filePath) {
         if (rest.length === 0) {
           issues.push({
             line: lineNumber,
-            message: '`on` requires a trigger expression',
+            message: "`on` requires a trigger expression",
           });
           return;
         }
@@ -222,7 +217,9 @@ function formatIssue(issue, filePath) {
 
 async function main(argv = process.argv.slice(2)) {
   if (argv.length === 0 || argv[0] === "-h" || argv[0] === "--help") {
-    console.log("Usage: node scripts/miladyos/lint-init-rc.mjs <FILE> [<FILE> ...]");
+    console.log(
+      "Usage: node scripts/miladyos/lint-init-rc.mjs <FILE> [<FILE> ...]",
+    );
     process.exit(argv.length === 0 ? 1 : 0);
   }
   let hardErrors = 0;

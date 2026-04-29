@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import {
   assertReadyChecks,
+  installDefaultAppRoutes,
   openAppPath,
   openSettingsSection,
   seedAppStorage,
@@ -8,6 +9,7 @@ import {
 
 test.beforeEach(async ({ page }) => {
   await seedAppStorage(page);
+  await installDefaultAppRoutes(page);
 });
 
 test("chat, apps, and settings routes render through the real shell", async ({
@@ -33,17 +35,17 @@ test("chat, apps, and settings routes render through the real shell", async ({
   await expect(page).toHaveURL(/\/settings$/);
   await expect(page.getByTestId("settings-shell")).toBeVisible();
   await openSettingsSection(page, /^Capabilities\b/);
-  await expect(page.locator("#capabilities")).toBeVisible();
+  const capabilitiesSection = page.locator("#capabilities");
+  await capabilitiesSection.scrollIntoViewIfNeeded();
+  await expect(capabilitiesSection).toBeVisible();
   await expect(
-    page.locator("#capabilities").getByText("Capabilities", { exact: true }),
+    capabilitiesSection.getByText("Capabilities", { exact: true }),
   ).toBeVisible();
   await expect(page.locator("#permissions")).toBeVisible();
   await expect(
     page.locator("#permissions").getByText("Permissions", { exact: true }),
   ).toBeVisible();
   await expect(
-    page
-      .locator("#capabilities")
-      .getByRole("switch", { name: "Enable Computer Use" }),
+    capabilitiesSection.getByRole("switch", { name: "Enable Computer Use" }),
   ).toBeVisible();
 });

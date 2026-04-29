@@ -149,6 +149,8 @@ const BRANDED_ENV = {
   viteSettingsDebug: `VITE_${APP_ENV_PREFIX}_SETTINGS_DEBUG`,
 };
 const DEFAULT_APP_ROUTE_PLUGIN_MODULES = [
+  "@elizaos/app-hyperliquid/register-routes",
+  "@elizaos/app-polymarket/register-routes",
   "@elizaos/app-vincent/register-routes",
   "@elizaos/app-shopify/register-routes",
   "@elizaos/app-steward/register-routes",
@@ -601,6 +603,25 @@ function pathIncludesAny(id: string, markers: ReadonlyArray<string>): boolean {
   return markers.some((marker) => id.includes(marker));
 }
 
+/**
+ * 2026 chunking policy: keep only **vendor splits that pay for themselves
+ * via long-term browser caching** (large, stable, change-rarely deps).
+ * Workspace code is intentionally NOT manually chunked — Vite's automatic
+ * splitting follows the actual import graph and avoids the circular-chunk
+ * + empty-chunk + dynamic↔static-collision warnings that plagued the older
+ * "one chunk per workspace package" approach. Code splitting that genuinely
+ * matters happens at React.lazy() route boundaries, not at the bundler config.
+ *
+ * Rules of thumb for adding a NODE_MODULE_CHUNK_GROUPS entry:
+ *   1. > 100 KB minified, AND
+ *   2. Stable across releases (helps long-term caching), AND
+ *   3. Loaded on the critical path (or you don't care if it's split out).
+ *
+ * Don't add a workspace marker. If you need to split a workspace surface
+ * out of the main chunk, do it at the call site with React.lazy() — that
+ * gives you a real lazy boundary instead of a fake manual chunk that
+ * Rollup ends up eagerly merging anyway.
+ */
 const NODE_MODULE_CHUNK_GROUPS = [
   {
     name: "vendor-langchain",
@@ -610,56 +631,9 @@ const NODE_MODULE_CHUNK_GROUPS = [
     name: "vendor-zod",
     markers: ["/zod/"],
   },
-  {
-    name: "vendor-utils",
-    markers: ["/dingbat-to-unicode/"],
-  },
 ] as const;
 
-const WORKSPACE_CHUNK_GROUPS = [
-  {
-    name: "workspace-app-core",
-    markers: [
-      "/eliza/packages/app-core/",
-      "/eliza/apps/app-companion/",
-      "/eliza/apps/app-steward/",
-      "/eliza/apps/app-task-coordinator/",
-      "/eliza/apps/app-vincent/",
-    ],
-  },
-  {
-    name: "app-training",
-    markers: ["/eliza/apps/app-training/"],
-  },
-  {
-    name: "app-shopify",
-    markers: ["/eliza/apps/app-shopify/"],
-  },
-  {
-    name: "app-games",
-    markers: [
-      "/eliza/apps/app-babylon/",
-      "/eliza/apps/app-scape/",
-      "/eliza/apps/app-hyperscape/",
-      "/eliza/apps/app-2004scape/",
-      "/eliza/apps/app-defense-of-the-agents/",
-    ],
-  },
-  {
-    name: "app-lifeops",
-    markers: ["/eliza/apps/app-lifeops/"],
-  },
-  {
-    name: "workspace-ui",
-    markers: ["/eliza/packages/ui/"],
-  },
-  // NOTE: `workspace-typescript` (eliza/packages/typescript) is intentionally
-  // NOT split into its own chunk. Splitting it produced a TDZ error
-  // ("Cannot access 'Oi' before initialization") in clipboardService's
-  // default-config top-level const, which blanked the whole renderer. Same
-  // class of bug as the `vendor-three` comment above. Keep it inlined until
-  // the upstream circular import is resolved.
-] as const;
+const WORKSPACE_CHUNK_GROUPS = [] as const;
 
 function resolveManualChunk(id: string): string | undefined {
   const normalizedId = id.split(path.sep).join("/");
@@ -1011,6 +985,10 @@ function nativeModuleStubPlugin(): Plugin {
     // prebundle proxy-agent and other Node-only HTTP deps for the browser.
     "puppeteer-core",
     "@puppeteer/browsers",
+    // GramJS / SOCKS networking is Node-only. If Telegram account auth leaks
+    // into the renderer graph, stub it before socksclient extends node:net.
+    "telegram",
+    "socks",
     // Server-only plugins statically imported from the @elizaos/agent runtime.
     // Their exports maps nest browser/node conditional exports that Vite 6's
     // commonjs--resolver cannot walk. Stubbing returns an empty Proxy virtual
@@ -1160,6 +1138,27 @@ function nativeModuleStubPlugin(): Plugin {
         ].join("\n");
       }
 
+      // Telegram's MTProto client is server-only. If it reaches this virtual
+      // native stub path, preserve the static exports used by account auth.
+      if (modName === "telegram") {
+        if (strippedId.startsWith("telegram/sessions")) {
+          return [
+            "export class StringSession { constructor(value = '') { this.value = value; } }",
+            "export default { StringSession };",
+          ].join("\n");
+        }
+
+        return [
+          "const noop = () => {};",
+          "class SignIn { constructor(input = {}) { Object.assign(this, input); } }",
+          "class Authorization { constructor(input = {}) { Object.assign(this, input); } }",
+          "const Api = Object.freeze({ auth: Object.freeze({ SignIn, Authorization }) });",
+          "class TelegramClient {}",
+          "export { Api, TelegramClient };",
+          "export default { Api, TelegramClient, noop };",
+        ].join("\n");
+      }
+
       // events: CJS module, consumers use `import { EventEmitter } from "events"`
       if (modName === "events") {
         return [
@@ -1296,6 +1295,54 @@ function nativeModuleStubPlugin(): Plugin {
         ].join("\n");
       }
 
+      if (strippedId === "@elizaos/plugin-sql") {
+        return [
+          "const handler = { get: () => table, apply: () => table };",
+          "const table = new Proxy(function table() {}, handler);",
+          ...[
+            "agentTable",
+            "approvalRequestTable",
+            "authAuditEventTable",
+            "authBootstrapJtiSeenTable",
+            "authIdentityCreatedAtDefault",
+            "authIdentityTable",
+            "authOwnerBindingTable",
+            "authOwnerLoginTokenTable",
+            "authSessionTable",
+            "cacheTable",
+            "channelTable",
+            "channelParticipantsTable",
+            "componentTable",
+            "embeddingTable",
+            "entityTable",
+            "entityIdentityTable",
+            "entityMergeCandidateTable",
+            "factCandidateTable",
+            "logTable",
+            "longTermMemories",
+            "memoryTable",
+            "memoryAccessLogs",
+            "messageTable",
+            "messageServerTable",
+            "messageServerAgentsTable",
+            "pairingAllowlistTable",
+            "pairingRequestTable",
+            "participantTable",
+            "relationshipTable",
+            "roomTable",
+            "serverTable",
+            "sessionSummaries",
+            "taskTable",
+            "worldTable",
+          ].map((name) => `export const ${name} = table;`),
+          "export const PGLITE_ERROR_CODES = Object.freeze({ ACTIVE_LOCK: 'ACTIVE_LOCK', CORRUPT_DATA: 'CORRUPT_DATA', MANUAL_RESET_REQUIRED: 'MANUAL_RESET_REQUIRED' });",
+          "export const getPgliteErrorCode = () => null;",
+          "export const createPgliteInitError = (_code, message) => new Error(message);",
+          "export const plugin = table;",
+          "export default table;",
+        ].join("\n");
+      }
+
       // Capacitor native plugins — mobile-only, cloud builds stub them.
       // Must export the exact named identifiers used in app-core sources.
       if (capacitorNativeScopeRe.test(strippedId)) {
@@ -1374,7 +1421,7 @@ function nativeModuleStubPlugin(): Plugin {
         /\(\(\)\s*=>\s*\{\s*throw\s+new\s+Error\(\s*"Cannot require module "\s*\+\s*"node:async_hooks"\s*\)\s*;\s*\}\)\(\)/g,
         "(function(){function A(){} A.prototype.getStore=function(){return undefined};A.prototype.run=function(s,fn){return fn.apply(void 0,[].slice.call(arguments,2))};A.prototype.enterWith=function(){};A.prototype.disable=function(){};return{AsyncLocalStorage:A}})()",
       );
-      // Names that downstream plugins (plugin-secrets-manager, agent runtime)
+      // Names that downstream plugins and the agent runtime
       // import from @elizaos/core but that are missing from the browser entry.
       const missingExports: Record<string, string> = {
         resolveSecretKeyAlias: "function(k){return k}",
@@ -1834,7 +1881,7 @@ export default defineConfig({
             ),
           },
           // @elizaos/core — force ALL copies (including nested ones in plugins
-          // like plugin-secrets-manager that ship their own older core) to the
+          // that bundle their own older core) to the
           // main workspace copy's browser entry.  The browser entry has all
           // needed exports and avoids pulling in createRequire/node:fs/etc.
           {
@@ -1935,12 +1982,15 @@ export default defineConfig({
       // Contains native-only pty-state-capture / pty-console imports; skip pre-bundling.
       "@elizaos/plugin-agent-orchestrator",
       "pty-console",
-      // @elizaos/plugin-secrets-manager is now built into @elizaos/core features
+      // Built-in secrets live in @elizaos/core features; Vite must not externalize them as a separate package.
       // Node-only HTTP client — crashes in browser, stub via nativeModuleStubPlugin
       "undici",
       // Browser automation is server-only and pulls in proxy-agent/httpUtil.
       "puppeteer-core",
       "@puppeteer/browsers",
+      // Telegram account auth is server-only and pulls in GramJS + socks.
+      "telegram",
+      "socks",
       // Native LLM embedding — uses node-llama-cpp, never runs in browser
       "@elizaos/plugin-local-embedding",
     ],
@@ -1953,7 +2003,17 @@ export default defineConfig({
     target: "es2022",
     // Keep warnings tight enough to catch regressions while allowing the
     // current largest workspace chunks to build without noise.
-    chunkSizeWarningLimit: 3500,
+    // Electrobun ships the bundle with the desktop app — there is no
+    // first-paint network cost for the user. The remaining ~4MB main
+    // chunk is the merged workspace surface (app-core + companion +
+    // steward + task-coordinator + vincent + screenshare); splitting
+    // them via manual chunks reintroduces circular-chunk + empty-chunk
+    // warnings without measurable benefit. If a true cold-start budget
+    // matters later, lift owner-of-route lazy() boundaries at the call
+    // sites that own a single import path (route-level splits land in
+    // their own chunks naturally — see AppsPageView / AutomationsView /
+    // SettingsView / StreamView / etc. above).
+    chunkSizeWarningLimit: 5000,
     minify: desktopFastDist ? false : undefined,
     cssMinify: desktopFastDist ? false : undefined,
     reportCompressedSize: !desktopFastDist,
@@ -1972,6 +2032,11 @@ export default defineConfig({
             "electron",
             "node-llama-cpp",
             "pty-manager",
+            // `@stwd/sdk/auth` dynamic-imports `@simplewebauthn/browser`, but
+            // Milady's main app never loads the auth surface (it's used only by
+            // eliza/cloud). Externalize so Rollup doesn't traverse the dynamic
+            // import chain looking for the missing peer dep.
+            "@simplewebauthn/browser",
           ].includes(id)
         )
           return true;

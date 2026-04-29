@@ -1,0 +1,16 @@
+{
+  "brand": "milady",
+  "appName": "Milady",
+  "distroName": "MiladyOS",
+  "packageName": "com.miladyai.milady",
+  "classPrefix": "Milady",
+  "productName": "milady_cf_x86_64_phone",
+  "lunchTarget": "milady_cf_x86_64_phone-trunk_staging-userdebug",
+  "envPrefix": "MILADY",
+  "propertyPrefix": "miladyos",
+  "vendorDir": "os/android/vendor/milady",
+  "initRcName": "init.milady.rc",
+  "commonMakefile": "milady_common.mk",
+  "cuttlefishMakefile": "milady_cf_x86_64_phone.mk",
+  "buildAndroidSystemCmd": ["bun", "run", "build:android:system"]
+}

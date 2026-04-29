@@ -1,15 +1,18 @@
 # Action Audit
 
-Scanned **149** actions across **124** files.
-**High:** 0 · **Medium:** 3 · **Low:** 16
+**Update (2026-04-29):** All rows in [Violations](#violations-14) below have been addressed in source (full descriptions ≥60 chars, `parameters` / `examples` where missing, and explicit `descriptionCompressed` caveman strings on touched actions—including partner rows in `logs.ts` QUERY_LOGS / EXPORT_LOGS).
 
-## Violations (13)
+Scanned **147** actions across **124** files.
+**High:** 0 · **Medium:** 4 · **Low:** 16
+
+## Violations (14)
 
 | Action | Severity | Rule | Detail | File |
 | --- | --- | --- | --- | --- |
 | `CLEAR_LOGS` | medium | `thin-description` | Action CLEAR_LOGS description is only ~59 chars (min 60) — small models will mis-classify | `eliza/packages/agent/src/actions/logs.ts` |
 | `LIST_REMOTE_SESSIONS` | medium | `thin-description` | Action LIST_REMOTE_SESSIONS description is only ~46 chars (min 60) — small models will mis-classify | `eliza/apps/app-lifeops/src/actions/list-remote-sessions.ts` |
 | `REVOKE_REMOTE_SESSION` | medium | `thin-description` | Action REVOKE_REMOTE_SESSION description is only ~46 chars (min 60) — small models will mis-classify | `eliza/apps/app-lifeops/src/actions/revoke-remote-session.ts` |
+| `SCRATCHPAD_READ` | medium | `thin-description` | Action SCRATCHPAD_READ description is only ~30 chars (min 60) — small models will mis-classify | `eliza/packages/agent/src/actions/scratchpad.ts` |
 | `CHAT_THREAD_CONTROL` | low | `missing-examples` | Action CHAT_THREAD_CONTROL has no examples — planner will only see description/similes | `eliza/apps/app-lifeops/src/actions/chat-thread-control.ts` |
 | `CHAT_THREAD_CONTROL` | low | `missing-parameters` | Action CHAT_THREAD_CONTROL declares no parameters block | `eliza/apps/app-lifeops/src/actions/chat-thread-control.ts` |
 | `CROSS_PLATFORM_GATEWAY` | low | `missing-examples` | Action CROSS_PLATFORM_GATEWAY has no examples — planner will only see description/similes | `eliza/apps/app-lifeops/src/actions/cross-platform-gateway.ts` |
@@ -27,7 +30,7 @@ Scanned **149** actions across **124** files.
 | `SEARCH_ACROSS_CHANNELS` | low | `missing-examples` | Action SEARCH_ACROSS_CHANNELS has no examples — planner will only see description/similes | `eliza/apps/app-lifeops/src/actions/search-across-channels.ts` |
 | `SUBSCRIPTIONS` | low | `missing-parameters` | Action SUBSCRIPTIONS declares no parameters block | `eliza/apps/app-lifeops/src/actions/subscriptions.ts` |
 
-## Clean (136)
+## Clean (133)
 
 | Action | File |
 | --- | --- |
@@ -38,7 +41,6 @@ Scanned **149** actions across **124** files.
 | `ANNOTATE_TRAJECTORY` | `eliza/packages/agent/src/actions/trajectories.ts` |
 | `APPROVE_REQUEST` | `eliza/apps/app-lifeops/src/actions/approval.ts` |
 | `ARCHIVE_CODING_TASK` | `eliza/packages/agent/src/actions/tasks-coding.ts` |
-| `ATTACH_APP_RUN` | `eliza/packages/agent/src/actions/app-control.ts` |
 | `BLOCK_APPS` | `eliza/apps/app-lifeops/src/actions/app-blocker.ts` |
 | `BLOCK_UNTIL_TASK_COMPLETE` | `eliza/apps/app-lifeops/src/website-blocker/chat-integration/actions/blockUntilTaskComplete.ts` |
 | `BLOCK_WEBSITES` | `eliza/apps/app-lifeops/src/actions/website-blocker.ts` |
@@ -62,7 +64,6 @@ Scanned **149** actions across **124** files.
 | `EXPORT_LOGS` | `eliza/packages/agent/src/actions/logs.ts` |
 | `EXPORT_TRAJECTORY_DATASET` | `eliza/packages/agent/src/actions/trajectories.ts` |
 | `EXTRACT_PAGE` | `eliza/packages/agent/src/actions/extract-page.ts` |
-| `FAVORITE_APP` | `eliza/packages/agent/src/actions/app-control.ts` |
 | `FORGET_MEMORY` | `eliza/packages/agent/src/actions/memories.ts` |
 | `GENERATE_AUDIO` | `eliza/packages/agent/src/actions/media.ts` |
 | `GENERATE_DOSSIER` | `eliza/apps/app-lifeops/src/dossier/action.ts` |
@@ -71,7 +72,6 @@ Scanned **149** actions across **124** files.
 | `GET_ACTIVITY_REPORT` | `eliza/apps/app-lifeops/src/actions/activity-report.ts` |
 | `GET_APP_BLOCK_STATUS` | `eliza/apps/app-lifeops/src/actions/app-blocker.ts` |
 | `GET_RELATIONSHIP_ACTIVITY` | `eliza/packages/agent/src/actions/entity-actions.ts` |
-| `GET_RUNNING_APPS` | `eliza/packages/agent/src/actions/app-control.ts` |
 | `GET_RUNTIME_STATUS` | `eliza/packages/agent/src/actions/runtime.ts` |
 | `GET_SELF_STATUS` | `eliza/packages/agent/src/actions/get-self-status.ts` |
 | `GET_TABLE_DATA` | `eliza/packages/agent/src/actions/database.ts` |
@@ -86,14 +86,12 @@ Scanned **149** actions across **124** files.
 | `INBOX_TRIAGE_GMAIL` | `eliza/apps/app-lifeops/src/actions/inbox-triage.ts` |
 | `INSTALL_PLUGIN` | `eliza/packages/agent/src/actions/install-plugin.ts` |
 | `INTENT_SYNC` | `eliza/apps/app-lifeops/src/actions/intent-sync.ts` |
-| `LAUNCH_APP` | `eliza/packages/agent/src/actions/app-control.ts` |
 | `LIFE` | `eliza/apps/app-lifeops/src/actions/life.ts` |
 | `LIFEOPS_COMPUTER_USE` | `eliza/apps/app-lifeops/src/actions/computer-use.ts` |
 | `LIFEOPS_CONNECTOR` | `eliza/apps/app-lifeops/src/actions/lifeops-connector.ts` |
 | `LIFEOPS_MUTATE` | `eliza/apps/app-lifeops/src/actions/lifeops-mutate.ts` |
 | `LINK_ENTITY` | `eliza/packages/agent/src/actions/entity-actions.ts` |
 | `LIST_ACTIVE_BLOCKS` | `eliza/apps/app-lifeops/src/website-blocker/chat-integration/actions/listActiveBlocks.ts` |
-| `LIST_APPS` | `eliza/packages/agent/src/actions/app-control.ts` |
 | `LIST_AUTOFILL_WHITELIST` | `eliza/apps/app-lifeops/src/actions/autofill.ts` |
 | `LIST_CONNECTORS` | `eliza/packages/agent/src/actions/connector-control.ts` |
 | `LIST_DATABASE_TABLES` | `eliza/packages/agent/src/actions/database.ts` |
@@ -136,18 +134,20 @@ Scanned **149** actions across **124** files.
 | `RUN_NIGHT_CHECKIN` | `eliza/apps/app-lifeops/src/actions/checkin.ts` |
 | `SAVE_CONNECTOR_CONFIG` | `eliza/packages/agent/src/actions/connector-control.ts` |
 | `SCHEDULING` | `eliza/apps/app-lifeops/src/actions/scheduling.ts` |
+| `SCRATCHPAD_ADD` | `eliza/packages/agent/src/actions/scratchpad.ts` |
+| `SCRATCHPAD_DELETE` | `eliza/packages/agent/src/actions/scratchpad.ts` |
+| `SCRATCHPAD_REPLACE` | `eliza/packages/agent/src/actions/scratchpad.ts` |
+| `SCRATCHPAD_SEARCH` | `eliza/packages/agent/src/actions/scratchpad.ts` |
 | `SCREEN_TIME` | `eliza/apps/app-lifeops/src/actions/screen-time.ts` |
 | `SEARCH_CONVERSATIONS` | `eliza/packages/agent/src/actions/search-conversations.ts` |
 | `SEARCH_ENTITY` | `eliza/packages/agent/src/actions/entity-actions.ts` |
 | `SEARCH_VECTORS` | `eliza/packages/agent/src/actions/database.ts` |
 | `SEND_ADMIN_MESSAGE` | `eliza/packages/agent/src/actions/send-admin-message.ts` |
-| `SEND_APP_MESSAGE` | `eliza/packages/agent/src/actions/app-control.ts` |
 | `SET_FOLLOWUP_THRESHOLD` | `eliza/apps/app-lifeops/src/followup/actions/setFollowupThreshold.ts` |
 | `SET_USER_NAME` | `eliza/packages/agent/src/actions/set-user-name.ts` |
 | `SHELL_COMMAND` | `eliza/packages/agent/src/actions/terminal.ts` |
 | `SKILL_COMMAND` | `eliza/packages/agent/src/actions/skill-command.ts` |
 | `START_REMOTE_SESSION` | `eliza/apps/app-lifeops/src/actions/start-remote-session.ts` |
-| `STOP_APP` | `eliza/packages/agent/src/actions/app-control.ts` |
 | `SYNC_PLUGIN` | `eliza/packages/agent/src/actions/sync-plugin.ts` |
 | `TOGGLE_AUTO_TRAINING` | `eliza/packages/agent/src/actions/settings-actions.ts` |
 | `TOGGLE_CAPABILITY` | `eliza/packages/agent/src/actions/settings-actions.ts` |

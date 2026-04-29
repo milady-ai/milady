@@ -5,7 +5,7 @@
 
 > *your schizo AI waifu that actually respects your privacy*
 
-**Milady** is a personal AI assistant that is **local-first by default** and can also connect to **Eliza Cloud** or a **remote self-hosted backend** when you want hosted runtime access. Built on [elizaOS](https://github.com/elizaOS)
+**Milady** is a personal AI assistant that is **local-first by default** and can also connect to **Eliza Cloud** or a **remote self-hosted backend** when you want hosted runtime access. Built on [elizaOS](https://github.com/elizaOS).
 
 Manages your sessions, tools, and vibes through a Gateway control plane. Connects to Telegram, Discord, whatever normie platform you use. Has a cute WebChat UI too.
 

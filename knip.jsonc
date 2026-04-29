@@ -116,7 +116,7 @@
         "**/*.e2e.test.ts"
       ]
     },
-    "apps/browser-bridge": {
+    "eliza/apps/browser-bridge": {
       "entry": [
         "entrypoints/*.ts",
         "scripts/*.mjs",

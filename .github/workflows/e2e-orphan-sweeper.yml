@@ -2,8 +2,8 @@ name: E2E Orphan Sweeper
 
 # Nightly cleanup of scenario-matrix artifacts left behind by crashed or
 # force-terminated scenario runs. Each integration gets its own sweeper
-# script under `scripts/sweeper/<service>.ts`; this workflow runs them all
-# sequentially and reports counts to the GitHub Step Summary.
+# script under `eliza/scripts/sweeper/<service>.mjs`; this workflow runs
+# them all sequentially and reports counts to the GitHub Step Summary.
 #
 # Fails (exits non-zero) if ANY individual sweeper fails — this produces a
 # real alert via the standard GitHub notification chain so operators know
@@ -109,4 +109,4 @@ jobs:
           install-command: bun install --ignore-scripts --no-frozen-lockfile
 
       - name: Run sweeper
-        run: bun run scripts/sweeper/run.mjs --service ${{ matrix.service }} --max-age-hours 24 >> "$GITHUB_STEP_SUMMARY"
+        run: bun run eliza/scripts/sweeper/run.mjs --service ${{ matrix.service }} --max-age-hours 24 >> "$GITHUB_STEP_SUMMARY"

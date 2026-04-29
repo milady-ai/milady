@@ -519,10 +519,27 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: ${{ env.BUN_VERSION }}
+      - name: Generate eliza i18n keyword data
+        # eliza/packages/shared/src/i18n/keyword-matching.ts imports from
+        # ./generated/validation-keyword-data.js, which is gitignored and
+        # produced by packages/shared/scripts/generate-keywords.mjs. The
+        # Debian build runs a Vite/Rolldown production build via
+        # debian/rules and will fail to resolve the generated module on a
+        # fresh checkout unless this step runs first.
+        run: node eliza/packages/app-core/scripts/ensure-shared-i18n-data.mjs
       - name: Stage Debian packaging
         run: |
           rm -rf debian
           cp -R eliza/packages/app-core/packaging/debian debian
+          # Eliza's debian packaging hardcodes the legacy entry name
+          # "elizaos-app.mjs" from before the upstream rename. Milady's
+          # actual entry script is milady.mjs, so rewrite the install
+          # manifest and rules to point at it. The package itself stays
+          # named elizaos-app for now (binary path /usr/bin/elizaos-app)
+          # since renaming the deb package is its own task.
+          if [ -f milady.mjs ] && [ ! -f elizaos-app.mjs ]; then
+            sed -i 's/elizaos-app\.mjs/milady.mjs/g' debian/install debian/rules
+          fi
           test -f debian/changelog
           test -x debian/rules
           dpkg-checkbuilddeps debian/control
@@ -643,10 +660,10 @@ jobs:
         with:
           node-version: 22
       - name: Validate docs config
-        run: node -e "const c = require('./docs/docs.json'); console.log('Docs config valid:', c.name)"
+        run: node -e "const c = require('./eliza/docs/docs.json'); console.log('Docs config valid:', c.name)"
       - name: Check for broken internal links
         run: |
-          find docs -name '*.md' -o -name '*.mdx' | head -5 | while read -r f; do
+          find eliza/docs -name '*.md' -o -name '*.mdx' | head -5 | while read -r f; do
             grep -oE '\]\([^)]+\)' "$f" | grep -v 'http' | head -3
           done
           echo "Docs link check complete"

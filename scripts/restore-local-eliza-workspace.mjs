@@ -5,7 +5,6 @@ import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { applyCiOnlyOverrides } from "./disable-local-eliza-workspace.mjs";
-import { applyUnpublishedPluginStubOverrides } from "./setup-upstreams.mjs";
 
 const NESTED_ELIZA_SUBMODULE_SKIP_ARGS = [
   "-c",
@@ -143,68 +142,6 @@ function restoreRootCiOverrides(repoRoot, { log, errorLog }) {
   }
 }
 
-function restoreElizaPackageOverrides(repoRoot, { log, errorLog }) {
-  const elizaRoot = path.join(repoRoot, "eliza");
-  if (!fs.existsSync(path.join(elizaRoot, "package.json"))) {
-    return 0;
-  }
-
-  try {
-    const changed = applyUnpublishedPluginStubOverrides(elizaRoot);
-    if (changed > 0) {
-      log(
-        "restore-local-eliza-workspace: restored unpublished plugin stub overrides in eliza/package.json.",
-      );
-    }
-    return changed;
-  } catch (error) {
-    const detail = error instanceof Error ? error.message : String(error);
-    const message =
-      "restore-local-eliza-workspace: failed to restore unpublished plugin stub overrides: " +
-      detail;
-    errorLog(message);
-    throw new Error(message, { cause: error });
-  }
-}
-
-function restoreAppPackageOverrides(repoRoot, { log, errorLog }) {
-  const packageJsonPath = path.join(repoRoot, "apps", "app", "package.json");
-  if (!fs.existsSync(packageJsonPath)) {
-    return 0;
-  }
-
-  try {
-    const raw = fs.readFileSync(packageJsonPath, "utf8");
-    const pkg = JSON.parse(raw);
-    const overrides =
-      typeof pkg.overrides === "object" && pkg.overrides !== null
-        ? pkg.overrides
-        : {};
-    const specifier = "file:../../scripts/ci-stubs/elizaos-plugin-app-control";
-
-    if (overrides["@elizaos/plugin-app-control"] === specifier) {
-      return 0;
-    }
-
-    overrides["@elizaos/plugin-app-control"] = specifier;
-    pkg.overrides = overrides;
-
-    const indent = raw.match(/^(\s+)"/m)?.[1] ?? "  ";
-    fs.writeFileSync(packageJsonPath, `${JSON.stringify(pkg, null, indent)}\n`);
-    log(
-      "restore-local-eliza-workspace: restored unpublished plugin stub override in apps/app/package.json.",
-    );
-    return 1;
-  } catch (error) {
-    const detail = error instanceof Error ? error.message : String(error);
-    const message =
-      "restore-local-eliza-workspace: failed to restore app package overrides: " +
-      detail;
-    errorLog(message);
-    throw new Error(message, { cause: error });
-  }
-}
-
 export function restoreLocalElizaWorkspace(
   repoRoot = process.cwd(),
   { log = console.log, errorLog = console.error } = {},
@@ -223,8 +160,6 @@ export function restoreLocalElizaWorkspace(
     ensureNestedElizaSubmodules(repoRoot, { log, errorLog });
     restoreRootPackageJson(repoRoot, { log, errorLog });
     restoreRootCiOverrides(repoRoot, { log, errorLog });
-    restoreElizaPackageOverrides(repoRoot, { log, errorLog });
-    restoreAppPackageOverrides(repoRoot, { log, errorLog });
     log(
       "restore-local-eliza-workspace: eliza/ already present; nothing to restore.",
     );
@@ -235,8 +170,6 @@ export function restoreLocalElizaWorkspace(
     ensureNestedElizaSubmodules(repoRoot, { log, errorLog });
     restoreRootPackageJson(repoRoot, { log, errorLog });
     restoreRootCiOverrides(repoRoot, { log, errorLog });
-    restoreElizaPackageOverrides(repoRoot, { log, errorLog });
-    restoreAppPackageOverrides(repoRoot, { log, errorLog });
     log("restore-local-eliza-workspace: eliza/ already present; skipping.");
     return false;
   }
@@ -246,8 +179,6 @@ export function restoreLocalElizaWorkspace(
     ensureNestedElizaSubmodules(repoRoot, { log, errorLog });
     restoreRootPackageJson(repoRoot, { log, errorLog });
     restoreRootCiOverrides(repoRoot, { log, errorLog });
-    restoreElizaPackageOverrides(repoRoot, { log, errorLog });
-    restoreAppPackageOverrides(repoRoot, { log, errorLog });
     log(
       "restore-local-eliza-workspace: restored eliza/ from .eliza.ci-disabled/.",
     );

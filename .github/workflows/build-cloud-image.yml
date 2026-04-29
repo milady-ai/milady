@@ -200,7 +200,7 @@ jobs:
       - name: Build UI (vite)
         run: |
           cd apps/app
-          npx vite build
+          bun run build:web
         env:
           NODE_ENV: production
 

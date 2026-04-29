@@ -5,7 +5,7 @@ on:
     branches: [main, develop]
     paths-ignore:
       - "**/*.md"
-      - "docs/**"
+      - "eliza/docs/**"
       - "AGENTS.md"
       - "CHANGELOG.md"
       - "LICENSE"
@@ -15,7 +15,7 @@ on:
     branches: [main, develop, "codex/**"]
     paths-ignore:
       - "**/*.md"
-      - "docs/**"
+      - "eliza/docs/**"
       - "AGENTS.md"
       - "CHANGELOG.md"
       - "LICENSE"

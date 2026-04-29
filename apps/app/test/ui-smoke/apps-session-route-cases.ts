@@ -83,8 +83,27 @@ export const DIRECT_ROUTE_CASES = [
     path: "/apps/vincent",
     readyChecks: [
       { selector: '[data-testid="vincent-shell"]' },
+      { selector: '[data-testid="vincent-status-card"]' },
       { text: "Connect your Vincent account to get started" },
       { text: "Vincent" },
+    ],
+    timeoutMs: 90_000,
+  },
+  {
+    name: "hyperliquid",
+    path: "/apps/hyperliquid",
+    readyChecks: [
+      { selector: '[data-testid="hyperliquid-shell"]' },
+      { text: "Native read/status surface for Hyperliquid" },
+    ],
+    timeoutMs: 90_000,
+  },
+  {
+    name: "polymarket",
+    path: "/apps/polymarket",
+    readyChecks: [
+      { selector: '[data-testid="polymarket-shell"]' },
+      { text: "Native market discovery and trading readiness" },
     ],
     timeoutMs: 90_000,
   },

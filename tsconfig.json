@@ -20,10 +20,16 @@
     "paths": {
       "@elizaos/app-lifeops": ["./eliza/apps/app-lifeops/src/index.ts"],
       "@elizaos/app-lifeops/*": ["./eliza/apps/app-lifeops/src/*"],
+      "@elizaos/app-screenshare": ["./eliza/apps/app-screenshare/src/index.ts"],
+      "@elizaos/app-screenshare/*": ["./eliza/apps/app-screenshare/src/*"],
       "@elizaos/app-companion": ["./eliza/apps/app-companion/src/index.ts"],
       "@elizaos/app-companion/*": ["./eliza/apps/app-companion/src/*"],
       "@elizaos/app-shopify": ["./eliza/apps/app-shopify/src/index.ts"],
       "@elizaos/app-shopify/*": ["./eliza/apps/app-shopify/src/*"],
+      "@elizaos/app-hyperliquid": ["./eliza/apps/app-hyperliquid/src/index.ts"],
+      "@elizaos/app-hyperliquid/*": ["./eliza/apps/app-hyperliquid/src/*"],
+      "@elizaos/app-polymarket": ["./eliza/apps/app-polymarket/src/index.ts"],
+      "@elizaos/app-polymarket/*": ["./eliza/apps/app-polymarket/src/*"],
       "@elizaos/app-vincent": ["./eliza/apps/app-vincent/src/index.ts"],
       "@elizaos/app-vincent/*": ["./eliza/apps/app-vincent/src/*"],
       "@elizaos/app-elizamaker": ["./eliza/apps/app-elizamaker/src/index.ts"],
@@ -36,13 +42,28 @@
       "@elizaos/core/*": ["./eliza/packages/typescript/src/*"],
       "@elizaos/agent": ["./eliza/packages/agent/src/index.ts"],
       "@elizaos/agent/*": ["./eliza/packages/agent/src/*"],
+      "@elizaos/plugin-browser-bridge": [
+        "./eliza/plugins/plugin-browser-bridge/src/index.ts"
+      ],
+      "@elizaos/plugin-browser-bridge/*": [
+        "./eliza/plugins/plugin-browser-bridge/src/*"
+      ],
       "@elizaos/ui": ["./eliza/packages/ui/src/index.ts"],
       "@elizaos/ui/*": ["./eliza/packages/ui/src/*"],
+      "@elizaos/capacitor-mobile-signals": [
+        "./eliza/packages/native-plugins/mobile-signals/src/index.ts"
+      ],
       "@elizaos/app-steward": ["./eliza/apps/app-steward/src/index.ts"],
       "@elizaos/app-steward/*": ["./eliza/apps/app-steward/src/*"]
     }
   },
-  "include": ["eliza/packages/app-core/src/**/*"],
+  "include": [
+    "vitest.config.ts",
+    "eliza/test/vitest/**/*.ts",
+    "eliza/test/eliza-package-paths.ts",
+    "scripts/lib/repo-root.d.mts",
+    "eliza/packages/app-core/src/**/*"
+  ],
   "exclude": [
     "node_modules",
     "dist",

@@ -6,6 +6,7 @@ import { repoRoot } from "./repo-root";
 import {
   getElizaCoreRolesEntry,
   getOptionalResolvedAliases,
+  getWorkspacePluginAliases,
 } from "./workspace-aliases";
 
 const elizaCoreEntry = getElizaCoreEntry(repoRoot);
@@ -31,6 +32,42 @@ const localElizaCoreReplacement = useLocalElizaCore
   ? elizaCoreSource
   : elizaCoreEntry;
 const unitAliasEntries = [
+  ...getOptionalResolvedAliases([
+    {
+      find: "@elizaos/plugin-telegram/account-auth-service",
+      replacement: path.join(
+        repoRoot,
+        "eliza",
+        "plugins",
+        "plugin-telegram",
+        "src",
+        "account-auth-service.ts",
+      ),
+    },
+    {
+      find: "@elizaos/plugin-anthropic",
+      replacement: path.join(
+        repoRoot,
+        "eliza",
+        "plugins",
+        "plugin-anthropic",
+        "typescript",
+        "index.ts",
+      ),
+    },
+    {
+      find: "@elizaos/plugin-cli",
+      replacement: path.join(
+        repoRoot,
+        "eliza",
+        "plugins",
+        "plugin-cli",
+        "typescript",
+        "src",
+        "index.ts",
+      ),
+    },
+  ]),
   ...getOptionalResolvedAliases([
     {
       // Always applied — the shim fallback is always present even when the local eliza checkout is disabled.
@@ -67,6 +104,7 @@ const unitAliasEntries = [
         ]
       : [],
   ),
+  ...getWorkspacePluginAliases(repoRoot, ["plugin-browser-bridge"]),
 ];
 
 export default {

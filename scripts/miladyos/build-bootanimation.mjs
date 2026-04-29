@@ -58,7 +58,10 @@ export function inspectBootAnimationDir(framesDir) {
     throw new Error(`Missing desc.txt at ${descPath}`);
   }
   const desc = fs.readFileSync(descPath, "utf8");
-  const lines = desc.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+  const lines = desc
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
   const partLines = lines.filter((line) => line.startsWith("p "));
   if (partLines.length === 0) {
     throw new Error(
@@ -94,13 +97,7 @@ export function buildBootAnimationZip({ framesDir, outPath }) {
   // bootanimation.zip MUST be stored with no compression so the daemon
   // can mmap frames directly. `zip -0` enforces store mode.
   fs.rmSync(outPath, { force: true });
-  const zipArgs = [
-    "-0",
-    "-r",
-    outPath,
-    "desc.txt",
-    ...parts,
-  ];
+  const zipArgs = ["-0", "-r", outPath, "desc.txt", ...parts];
   const result = spawnSync("zip", zipArgs, {
     cwd: framesDir,
     stdio: "inherit",
@@ -123,9 +120,7 @@ async function main(argv = process.argv.slice(2)) {
   if (args.check) {
     const { issues } = inspectBootAnimationDir(args.framesDir);
     if (issues.length > 0) {
-      console.error(
-        `[bootanimation:check] FAIL\n - ${issues.join("\n - ")}`,
-      );
+      console.error(`[bootanimation:check] FAIL\n - ${issues.join("\n - ")}`);
       process.exit(1);
     }
     console.log(`[bootanimation:check] ${args.framesDir} is well-formed.`);

@@ -50,9 +50,9 @@ jobs:
             const allPathsMatch = (regex) => hasFiles && paths.every((path) => regex.test(path));
             const anyPathMatch = (regex) => paths.some((path) => regex.test(path));
 
-            const isDocsOnly = allPathsMatch(/(^docs\/)|(^|\/)readme\.md$|\.mdx?$/);
+            const isDocsOnly = allPathsMatch(/(^docs\/)|(^eliza\/docs\/)|(^|\/)readme\.md$|\.mdx?$/);
             const isCiOnly = allPathsMatch(/^\.github\/(workflows|actions)\//);
-            const isTestsOnly = allPathsMatch(/(^test\/)|(\.test\.[tj]sx?$)|(\.spec\.[tj]sx?$)|vitest.*config/);
+            const isTestsOnly = allPathsMatch(/(^test\/)|(^eliza\/test\/)|(\.test\.[tj]sx?$)|(\.spec\.[tj]sx?$)|vitest.*config/);
 
             const securityPatterns = ['security', 'vulnerability', 'cve', 'injection', 'xss', 'csrf', 'sqli', 'auth bypass'];
             const docsPatterns = ['docs:', 'documentation', 'readme', 'changelog'];
@@ -699,12 +699,22 @@ jobs:
               }
             }
 
+            // When both AI reviewers fail (billing exhaustion, API outage),
+            // the post-step posts a "Service Unavailable" comment that parses
+            // as REQUEST CHANGES. Treat that as a soft-skip rather than a
+            // hard reject so transient infra problems don't block PRs.
+            const serviceUnavailablePattern = /Agent Review\s+[—-]+\s+Service Unavailable|automated review unavailable|insufficient[_ -]?(quota|balance|funds|credits?)|credit balance is too low|quota exceeded|please add credits|top[_ -]?up your credits/i;
+
             if (latest) {
               const normalized = extractDecision(latest.body);
               decision = normalized || decision;
               decisionCommentUrl = latest.html_url || '';
 
-              if (normalized === 'APPROVE') {
+              if (serviceUnavailablePattern.test(latest.body || '')) {
+                verdict = 'service-unavailable';
+                decision = 'SKIPPED (service unavailable)';
+                core.warning('Agent review skipped because both AI reviewers reported service unavailability (likely billing or transient outage). Verdict will be reported as neutral.');
+              } else if (normalized === 'APPROVE') {
                 verdict = 'approve';
               } else if (normalized === 'CLOSE') {
                 verdict = 'close';
@@ -767,12 +777,14 @@ jobs:
               approve: 'success',
               reject: 'failure',
               close: 'action_required',
+              'service-unavailable': 'neutral',
             };
 
             const titleMap = {
               approve: '✅ APPROVED — ready to merge',
               reject: '🔄 REQUEST CHANGES — issues found',
               close: '🚫 CLOSE — out of scope',
+              'service-unavailable': '⏭️ SKIPPED — AI reviewer service unavailable',
             };
 
             const summaryLines = [

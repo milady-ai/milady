@@ -8,12 +8,12 @@ import {
   getAppCoreSourceRoot,
   getAutonomousSourceRoot,
   getUiSourceRoot,
-} from "../../test/eliza-package-paths";
+} from "../../eliza/test/eliza-package-paths";
 import {
   getAppCoreBridgeStubPath,
   getUiSourceAliases,
   getWorkspaceAppAliases,
-} from "../../test/vitest/workspace-aliases";
+} from "../../eliza/test/vitest/workspace-aliases";
 import { CAPACITOR_PLUGIN_NAMES } from "./scripts/capacitor-plugin-names.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));

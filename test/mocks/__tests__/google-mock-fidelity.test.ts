@@ -17,6 +17,13 @@ type MessagesResponse = {
   resultSizeEstimate?: number;
 };
 
+type ProfileResponse = {
+  emailAddress?: string;
+  messagesTotal?: number;
+  threadsTotal?: number;
+  historyId?: string;
+};
+
 type DraftResponse = {
   id?: string;
   message?: MessageResponse;
@@ -72,9 +79,14 @@ function rawEmail(
   ).toString("base64url");
 }
 
-async function messageIds(baseUrl: string, query: string): Promise<string[]> {
+async function messageIds(
+  baseUrl: string,
+  query: string,
+  init?: RequestInit,
+): Promise<string[]> {
   const response = await fetch(
     `${baseUrl}/gmail/v1/users/me/messages?${query}`,
+    init,
   );
   expect(response.status).toBe(200);
   const body = await readJson<MessagesResponse>(response);
@@ -150,7 +162,7 @@ describe("Google mock Gmail fidelity surface", () => {
     const threads = await fetch(`${baseUrl}/gmail/v1/users/me/threads`);
     expect(threads.status).toBe(200);
     expect((await readJson<ThreadsResponse>(threads)).resultSizeEstimate).toBe(
-      6,
+      9,
     );
 
     const thread = await fetch(
@@ -165,6 +177,123 @@ describe("Google mock Gmail fidelity surface", () => {
         "msg-unresponded-sent",
       ]),
     );
+  });
+
+  it("supports work, home, all-account, vague, multi-search, and priority Gmail queries", async () => {
+    mocks = await startMocks({ envs: ["google"] });
+    const baseUrl = mocks.baseUrls.google;
+
+    expect(
+      await messageIds(
+        baseUrl,
+        new URLSearchParams({ account: "work", q: "invoice" }).toString(),
+      ),
+    ).toEqual(["msg-finance"]);
+    expect(
+      await messageIds(
+        baseUrl,
+        new URLSearchParams({ account: "home", q: "lease" }).toString(),
+      ),
+    ).toEqual(["msg-home-lease"]);
+    expect(
+      await messageIds(
+        baseUrl,
+        new URLSearchParams({
+          account: "all",
+          q: "lease OR invoice",
+        }).toString(),
+      ),
+    ).toEqual(expect.arrayContaining(["msg-home-lease", "msg-finance"]));
+
+    expect(
+      await messageIds(
+        baseUrl,
+        new URLSearchParams({ account: "all", q: "review" }).toString(),
+      ),
+    ).toEqual(expect.arrayContaining(["msg-sarah", "msg-newsletter"]));
+    expect(
+      await messageIds(
+        baseUrl,
+        new URLSearchParams({
+          account: "all",
+          q: "{dentist invoice}",
+        }).toString(),
+      ),
+    ).toEqual(expect.arrayContaining(["msg-home-dentist", "msg-finance"]));
+
+    expect(
+      await messageIds(
+        baseUrl,
+        new URLSearchParams({ account: "all", q: "priority" }).toString(),
+      ),
+    ).toEqual(expect.arrayContaining(["msg-finance", "msg-home-lease"]));
+    expect(
+      await messageIds(
+        baseUrl,
+        new URLSearchParams({ account: "all", q: "is:important" }).toString(),
+      ),
+    ).toEqual(expect.arrayContaining(["msg-finance", "msg-home-lease"]));
+    expect(
+      await messageIds(
+        baseUrl,
+        new URLSearchParams({ account: "all", q: "unread" }).toString(),
+      ),
+    ).toEqual(
+      expect.arrayContaining([
+        "msg-finance",
+        "msg-sarah",
+        "msg-home-lease",
+        "msg-home-dentist",
+      ]),
+    );
+
+    const needsResponse = await messageIds(
+      baseUrl,
+      new URLSearchParams({ account: "all", q: "needs-response" }).toString(),
+    );
+    expect(needsResponse).toEqual(
+      expect.arrayContaining(["msg-finance", "msg-sarah", "msg-home-lease"]),
+    );
+    expect(needsResponse).not.toContain("msg-home-dentist");
+
+    const tokenResponse = await fetch(`${baseUrl}/token`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        scope:
+          "https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/calendar.readonly",
+        grantId: "mock-google-home-grant",
+      }),
+    });
+    const token = (await readJson<{ access_token?: string }>(tokenResponse))
+      .access_token;
+    const auth = { headers: { Authorization: `Bearer ${token}` } };
+
+    const profile = await fetch(`${baseUrl}/gmail/v1/users/me/profile`, auth);
+    expect(profile.status).toBe(200);
+    expect((await readJson<ProfileResponse>(profile)).emailAddress).toBe(
+      "owner.home@example.test",
+    );
+    expect(
+      await messageIds(
+        baseUrl,
+        new URLSearchParams({ q: "lease" }).toString(),
+        auth,
+      ),
+    ).toEqual(["msg-home-lease"]);
+    expect(
+      await messageIds(
+        baseUrl,
+        new URLSearchParams({ q: "invoice" }).toString(),
+        auth,
+      ),
+    ).toEqual([]);
+
+    const calendar = await fetch(
+      `${baseUrl}/calendar/v3/users/me/calendarList`,
+      auth,
+    );
+    expect(calendar.status).toBe(200);
   });
 
   it("persists archive, unarchive, read, unread, and spam label writes", async () => {
@@ -541,7 +670,7 @@ describe("Google mock Gmail fidelity surface", () => {
     const startHistoryId = (await readJson<WatchResponse>(watch)).historyId;
 
     const firstPage = await fetch(
-      `${baseUrl}/gmail/v1/users/me/messages?labelIds=INBOX&maxResults=2`,
+      `${baseUrl}/gmail/v1/users/me/messages?account=work&labelIds=INBOX&maxResults=2`,
     );
     expect((await readJson<MessagesResponse>(firstPage)).nextPageToken).toBe(
       "2",
@@ -561,7 +690,7 @@ describe("Google mock Gmail fidelity surface", () => {
     expect(archiveTwo.status).toBe(200);
 
     const pageAfterMutation = await fetch(
-      `${baseUrl}/gmail/v1/users/me/messages?labelIds=INBOX&maxResults=2`,
+      `${baseUrl}/gmail/v1/users/me/messages?account=work&labelIds=INBOX&maxResults=2`,
     );
     const pageAfterMutationBody =
       await readJson<MessagesResponse>(pageAfterMutation);

@@ -4,8 +4,8 @@
  * Weekly benchmark harness for the 22 executive-assistant scenarios and 15
  * connector certification scenarios.
  *
- * Loads scenario ids from the filesystem (test/scenarios/executive-assistant/
- * and test/scenarios/connector-certification/), invokes the
+ * Loads scenario ids from the filesystem (`eliza/test/scenarios/executive-assistant/`
+ * and `eliza/test/scenarios/connector-certification/`), invokes the
  * `@elizaos/scenario-runner` CLI through scripts/run-live-scenarios.mjs (which
  * enforces SKIP_REASON + judge thresholds), and emits a markdown report to
  * artifacts/benchmark-report.md plus the raw JSON at
@@ -27,9 +27,16 @@ const REPO_ROOT = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "..",
 );
-const EA_DIR = path.join(REPO_ROOT, "test", "scenarios", "executive-assistant");
+const EA_DIR = path.join(
+  REPO_ROOT,
+  "eliza",
+  "test",
+  "scenarios",
+  "executive-assistant",
+);
 const CONNECTOR_DIR = path.join(
   REPO_ROOT,
+  "eliza",
   "test",
   "scenarios",
   "connector-certification",

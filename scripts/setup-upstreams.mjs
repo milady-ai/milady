@@ -67,6 +67,14 @@ export const ELIZA_BUILD_STEPS = [
     label: "@elizaos/skills",
   },
 ];
+export const ELIZA_TYPESCRIPT_BUILD_DEPENDENCIES = [
+  "@types/node",
+  "@types/bun",
+  "bun-types",
+];
+const ELIZA_TYPESCRIPT_AMBIENT_DEPENDENCIES = new Set(
+  ELIZA_TYPESCRIPT_BUILD_DEPENDENCIES,
+);
 
 const OPTIONAL_ELIZA_PLUGIN_FALLBACK_TAG = "alpha";
 const ELIZA_INSTALL_RETRY_DELAY_MS = 3_000;
@@ -1365,6 +1373,10 @@ export async function ensureRequiredElizaPluginBuilds(
   repoRoot = DEFAULT_REPO_ROOT,
   options = {},
 ) {
+  ensurePluginTelegramNodeTypes(getRepoPluginsRoot(repoRoot), {
+    pathExists: options.pathExists ?? existsSync,
+  });
+
   let builtAny = false;
   for (const buildConfig of ELIZA_REQUIRED_PLUGIN_BUILDS) {
     builtAny =
@@ -1787,7 +1799,7 @@ export function ensureElizaTypescriptDependencyLinks(
     repoRoot = path.dirname(elizaRoot),
     // Do not link @noble/hashes by default: the Milady root often resolves v1
     // (ethers/viem), while @elizaos/core requires v2 entrypoints (sha2.js, legacy.js).
-    dependencies = [],
+    dependencies = ELIZA_TYPESCRIPT_BUILD_DEPENDENCIES,
   } = {},
 ) {
   const packageDir = path.join(elizaRoot, "packages", "typescript");
@@ -1807,13 +1819,27 @@ export function ensureElizaTypescriptDependencyLinks(
       continue;
     }
 
-    const linkPath = path.join(
-      packageDir,
-      "node_modules",
-      ...dependency.split("/"),
-    );
-    if (createPackageLink(linkPath, target)) {
-      linkedDependencies += 1;
+    const linkRoots = [packageDir];
+    if (ELIZA_TYPESCRIPT_AMBIENT_DEPENDENCIES.has(dependency)) {
+      linkRoots.push(elizaRoot);
+    }
+
+    for (const linkRoot of linkRoots) {
+      const linkPath = path.join(
+        linkRoot,
+        "node_modules",
+        ...dependency.split("/"),
+      );
+      if (
+        existsSync(linkPath) &&
+        existsSync(target) &&
+        realpathSync(linkPath) === realpathSync(target)
+      ) {
+        continue;
+      }
+      if (createPackageLink(linkPath, target)) {
+        linkedDependencies += 1;
+      }
     }
   }
 
@@ -1833,6 +1859,7 @@ export function ensureElizaTypescriptDependencyLinks(
 async function ensureElizaDependencies(elizaRoot) {
   if (hasInstalledElizaDependencies(elizaRoot)) {
     await bootstrapBundledBunInstall(elizaRoot);
+    ensureElizaTypescriptDependencyLinks(elizaRoot);
     return;
   }
 
@@ -2100,6 +2127,68 @@ export function ensurePluginAnthropicBunTypes(
   return true;
 }
 
+export function ensurePluginTelegramNodeTypes(
+  pluginsRoot,
+  { pathExists = existsSync } = {},
+) {
+  const configPaths = [
+    path.join(pluginsRoot, "plugin-telegram", "tsconfig.json"),
+    path.join(pluginsRoot, "plugin-telegram", "tsconfig.build.json"),
+  ];
+  let patchedFiles = 0;
+
+  for (const configPath of configPaths) {
+    if (!pathExists(configPath)) {
+      continue;
+    }
+
+    const raw = readFileSync(configPath, "utf8");
+    let parsed;
+    try {
+      parsed = JSON.parse(raw);
+    } catch (error) {
+      console.warn(
+        `[setup-upstreams] Could not parse ${toDisplayPath(configPath)}: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+      continue;
+    }
+
+    const compilerOptions =
+      parsed && typeof parsed === "object" && parsed.compilerOptions
+        ? parsed.compilerOptions
+        : {};
+    const existingTypes = Array.isArray(compilerOptions.types)
+      ? compilerOptions.types
+      : [];
+
+    if (existingTypes.includes("node")) {
+      continue;
+    }
+
+    const nextParsed = {
+      ...parsed,
+      compilerOptions: {
+        ...compilerOptions,
+        types: [...existingTypes, "node"],
+      },
+    };
+    const indent = raw.match(/^(\s+)"/m)?.[1] ?? "  ";
+    writeFileSync(configPath, `${JSON.stringify(nextParsed, null, indent)}\n`);
+    patchedFiles += 1;
+  }
+
+  if (patchedFiles > 0) {
+    console.log(
+      `[setup-upstreams] Patched plugin-telegram Node type config (${patchedFiles} file${patchedFiles === 1 ? "" : "s"})`,
+    );
+  }
+
+  return patchedFiles;
+}
+
+
 export function patchPluginTsupDeclarationFlags(
   pluginsRoot,
   { pathExists = existsSync } = {},
@@ -2222,6 +2311,7 @@ export async function ensurePluginBuildOutputs(
   { pathExists = existsSync, runCommandImpl = runCommand } = {},
 ) {
   ensurePluginAnthropicBunTypes(pluginsRoot, { pathExists });
+  ensurePluginTelegramNodeTypes(pluginsRoot, { pathExists });
   patchPluginTsupDeclarationFlags(pluginsRoot, { pathExists });
   patchPluginBuildTscBinPaths(pluginsRoot, { pathExists });
   for (const packageDir of discoverPluginPackageDirs(pluginsRoot)) {
@@ -2330,13 +2420,14 @@ export async function setupUpstreams(repoRoot = DEFAULT_REPO_ROOT) {
   }
 
   const elizaRoot = await ensureRepoLocalEliza(repoRoot);
+  const pluginsRoot = getRepoPluginsRoot(repoRoot);
   applyMiladyCopyPatches(elizaRoot);
   applyTypeScriptIgnoreDeprecationsCompatPatch(elizaRoot);
   applyLifeOpsLucideCompatPatch(elizaRoot);
+  ensurePluginTelegramNodeTypes(pluginsRoot);
   await ensureElizaDependencies(elizaRoot);
   await ensureElizaBuildOutputs(elizaRoot);
 
-  const pluginsRoot = getRepoPluginsRoot(repoRoot);
   ensurePluginDependencyLinks(repoRoot, pluginsRoot);
   applyPluginAnthropicBunRuntimePatch(elizaRoot);
   applyPluginAnthropicCliUsagePatch(elizaRoot);

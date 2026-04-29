@@ -5,15 +5,13 @@ const env = {
 // Native .node packages must stay external; rolldown cannot bundle shared libraries.
 const nativeExternals = [
   "node-llama-cpp",
-  "@node-rs/argon2",
-  /^@node-rs\/argon2-/,
   "@reflink/reflink",
   "@reflink/reflink-darwin-arm64",
   "@reflink/reflink-darwin-x64",
   "@reflink/reflink-linux-arm64-gnu",
   "@reflink/reflink-linux-x64-gnu",
   "fsevents",
-  /^@node-rs\/argon2(?:-|$)/,
+  "jose",
   // Keep React external for Node server builds; bundling it introduces incompatible wrappers.
   "react",
   "react-dom",
@@ -22,7 +20,16 @@ const nativeExternals = [
 // Runtime-loaded @elizaos/plugin-* packages must stay external.
 const pluginExternal = /^@elizaos\/plugin-/;
 const optionalAppExternal = /^@elizaos\/app-/;
-const allExternals = [...nativeExternals, pluginExternal, optionalAppExternal];
+// @node-rs/* ships native .node bindings per platform (argon2 + arch
+// variants like @node-rs/argon2-darwin-arm64). Single regex covers all
+// of them — always external; rolldown can't bundle the .node binary.
+const nodeRsExternal = /^@node-rs\//;
+const allExternals = [
+  ...nativeExternals,
+  pluginExternal,
+  optionalAppExternal,
+  nodeRsExternal,
+];
 
 export default [
   {

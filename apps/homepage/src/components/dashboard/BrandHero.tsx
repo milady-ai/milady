@@ -1,16 +1,25 @@
+export type CloudOpenState = "idle" | "preparing";
+
 export interface BrandHeroProps {
   isLocalReady: boolean;
   isLocalProbing: boolean;
+  cloudState: CloudOpenState;
   onOpenLocal: () => void;
+  onOpenCloud: () => void;
+  onCancelCloud: () => void;
   onAttachRemote: () => void;
 }
 
 export function BrandHero({
   isLocalReady,
   isLocalProbing,
+  cloudState,
   onOpenLocal,
+  onOpenCloud,
+  onCancelCloud,
   onAttachRemote,
 }: BrandHeroProps) {
+  const cloudPreparing = cloudState === "preparing";
   const primaryLabel = isLocalReady
     ? "open local"
     : isLocalProbing
@@ -81,6 +90,48 @@ export function BrandHero({
               </span>
             </button>
           )}
+          <button
+            type="button"
+            onClick={cloudPreparing ? onCancelCloud : onOpenCloud}
+            aria-label={
+              cloudPreparing
+                ? "Cancel opening Milady in the cloud"
+                : "Open Milady in the cloud"
+            }
+            className={
+              cloudPreparing
+                ? "group/cloud inline-flex min-h-[44px] items-center gap-2 rounded-md border border-brand/35 bg-brand/[0.04] px-4 py-2.5 text-[13px] font-semibold text-brand/75 transition duration-200 hover:border-brand/55 hover:bg-brand/[0.08] hover:text-brand active:translate-y-0 active:scale-[0.98] sm:px-5 sm:py-3 [@media(hover:hover)]:hover:-translate-y-0.5"
+                : "group/cloud inline-flex min-h-[44px] items-center gap-2 rounded-md border border-brand/35 bg-brand/[0.08] px-4 py-2.5 text-[13px] font-semibold text-brand transition duration-200 hover:border-brand/60 hover:bg-brand/[0.12] active:translate-y-0 active:scale-[0.98] sm:px-5 sm:py-3 [@media(hover:hover)]:hover:-translate-y-0.5"
+            }
+          >
+            {cloudPreparing ? (
+              <span
+                aria-hidden="true"
+                className="h-2 w-2 animate-pulse rounded-full bg-brand"
+              />
+            ) : (
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                width="14"
+                height="14"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M17.5 19a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.6-1.6A4 4 0 0 0 6 18h11.5z" />
+              </svg>
+            )}
+            <span>{cloudPreparing ? "cancel opening" : "open in cloud"}</span>
+            <span
+              aria-hidden="true"
+              className="transition group-hover/cloud:translate-x-0.5"
+            >
+              {cloudPreparing ? "×" : "↗"}
+            </span>
+          </button>
           <button
             type="button"
             onClick={onAttachRemote}

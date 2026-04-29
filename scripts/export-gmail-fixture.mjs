@@ -157,7 +157,10 @@ async function main() {
       "GOOGLE_ACCESS_TOKEN is required for read-only Gmail export.",
     );
   }
-  const out = readFlag("--out", "test/mocks/fixtures/gmail.scrubbed.json");
+  const out = readFlag(
+    "--out",
+    "eliza/test/mocks/fixtures/gmail.scrubbed.json",
+  );
   const rawOut = readFlag("--raw-out");
   const query = readFlag("--query", "newer_than:30d") ?? "newer_than:30d";
   const maxResults = Math.min(readNumberFlag("--max", 25), 50);

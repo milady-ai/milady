@@ -19,7 +19,8 @@ const files = {
   disableScript: "scripts/disable-local-eliza-workspace.mjs",
   restoreScript: "scripts/restore-local-eliza-workspace.mjs",
   elizaCiPatchScript: "scripts/apply-eliza-ci-patches.mjs",
-  elizaCiPatch: "patches/eliza/ci-release-contracts.patch",
+  elizaCiPatch:
+    "eliza/patches/milady/eliza-ci-bootstrap/ci-release-contracts.patch",
   localElizaCiOverridesScript: "scripts/build-local-eliza-ci-overrides.mjs",
   publishedFallbackScript:
     "scripts/install-published-workspace-fallback-deps.sh",
@@ -44,7 +45,6 @@ const requiredWorkflowSnippets = [
   "name: Regression Matrix Contract",
   "run: node scripts/validate-ci-bootstrap-contract.mjs",
   "uses: ./.github/actions/setup-bun-workspace",
-  'disable-local-eliza-workspace: "true"',
   "install-command: bun install --ignore-scripts --no-frozen-lockfile",
   "run: node scripts/restore-local-eliza-workspace.mjs",
   "run: bun run test:regression-matrix:pr",

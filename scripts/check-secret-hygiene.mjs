@@ -63,8 +63,10 @@ function discoverTrackedRepos(rootDir) {
   const queue = [rootDir];
   const seen = new Set();
   const ignoredDirs = new Set([
+    ".claude",
     ".git",
     ".next",
+    ".tmp",
     ".turbo",
     ".vite",
     "build",
@@ -154,8 +156,10 @@ function findLocalEnvFiles(rootDir) {
   const files = [];
   const queue = [rootDir];
   const ignoredDirs = new Set([
+    ".claude",
     ".git",
     ".next",
+    ".tmp",
     ".turbo",
     ".vite",
     "build",

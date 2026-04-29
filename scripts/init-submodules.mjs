@@ -523,5 +523,8 @@ const isDirectRun =
   process.argv[1] && resolve(process.argv[1]) === resolve(scriptFile);
 
 if (isDirectRun) {
-  runInitSubmodules();
+  const result = runInitSubmodules();
+  if (process.env.CI === "true" && result.failed > 0) {
+    process.exit(1);
+  }
 }

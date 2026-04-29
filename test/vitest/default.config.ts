@@ -41,6 +41,7 @@ import {
   getSharedSourceAliases,
   getUiSourceAliases,
   getWorkspaceAppAliases,
+  getWorkspacePluginAliases,
 } from "./workspace-aliases";
 
 interface RootPackageManifest {
@@ -210,6 +211,26 @@ export default defineConfig({
         ),
       },
       {
+        // `@elizaos/plugin-sql/schema` etc. resolve to TS source via the
+        // package's `exports` field. Vitest's Node-style resolver inside
+        // this config doesn't honour those, so map sub-paths explicitly to
+        // the actual source dir. Without this, anything that transitively
+        // imports `@elizaos/plugin-sql/schema` (auth-store, etc.) fails to
+        // load with "Cannot find package".
+        find: /^@elizaos\/plugin-sql$/,
+        replacement: path.join(
+          repoRoot,
+          "eliza/plugins/plugin-sql/typescript/index.node.ts",
+        ),
+      },
+      {
+        find: /^@elizaos\/plugin-sql\/(.+)$/,
+        replacement: path.join(
+          repoRoot,
+          "eliza/plugins/plugin-sql/typescript/$1",
+        ),
+      },
+      {
         // App-core tests mock this plugin, but Vitest still has to resolve the specifier.
         find: "@elizaos/capacitor-agent",
         replacement: appCoreModuleFallbackPath,
@@ -236,6 +257,18 @@ export default defineConfig({
           "plugin-telegram",
           "src",
           "account-auth-service.ts",
+        ),
+      },
+      {
+        find: "@elizaos/plugin-sql/schema",
+        replacement: path.join(
+          repoRoot,
+          "eliza",
+          "plugins",
+          "plugin-sql",
+          "typescript",
+          "schema",
+          "index.ts",
         ),
       },
       {
@@ -303,6 +336,7 @@ export default defineConfig({
         "app-lifeops",
         "app-knowledge",
       ]),
+      ...getWorkspacePluginAliases(repoRoot, ["plugin-browser-bridge"]),
       ...getSharedSourceAliases(sharedSourceRoot, {
         includeMiladyAlias: true,
       }),
@@ -335,6 +369,7 @@ export default defineConfig({
       "eliza/packages/app-core/test/live-agent/**/*.test.ts",
       "eliza/packages/app-core/test/live-agent/**/*.test.tsx",
       "eliza/packages/app-core/test/helpers/**/*.test.ts",
+      "eliza/test/mocks/__tests__/**/*.test.ts",
       // app-core src-colocated tests run here; test/ harness suites run in
       // the app-unit config (apps/app/vitest.config.ts) which provides the
       // correct @elizaos/app-core alias resolution. Running both in parallel
@@ -351,7 +386,7 @@ export default defineConfig({
       "eliza/packages/app-core/scripts/**/*.test.ts",
       "eliza/packages/native-plugins/llama/src/**/*.test.ts",
       "eliza/packages/shared/src/**/*.test.ts",
-      "eliza/packages/plugin-browser-bridge/src/**/*.test.ts",
+      "eliza/plugins/plugin-browser-bridge/src/**/*.test.ts",
       "eliza/packages/app-core/src/**/*.test.tsx",
       "eliza/packages/agent/src/runtime/roles/test/**/*.test.ts",
       "eliza/apps/app-lifeops/src/selfcontrol/**/*.test.ts",

@@ -484,3 +484,72 @@ This is a cleanup for correctness, maintainability, and architectural integrity.
 - **Push proactively when work is meaningful.** A branch that exists only on the local machine is one disk failure away from gone. If a chunk of work is worth keeping, it's worth pushing.
 
 The principle: **every change must end up as a commit on the current branch in the current worktree, and ideally pushed.** No stashes, no branch hopping, no work that exists only in the working tree or in `git stash list`.
+
+---
+
+## App and Plugin primitives
+
+The runtime exposes two unified action surfaces — `APP` and `PLUGIN` — that replace the older single-purpose actions. New code MUST call `APP` / `PLUGIN`. The legacy actions (`LAUNCH_APP`, `RELAUNCH_APP`, `LIST_APPS`, `INSTALL_PLUGIN`, `UNINSTALL_PLUGIN`, `EJECT_PLUGIN`, `SYNC_PLUGINS`, `REINJECT_PLUGINS`, `LIST_PLUGINS`, `SEARCH_PLUGINS`, `CORE_STATUS`, etc.) remain registered as **similes** on the unified actions so older inbound callers and prompt patterns still resolve, but they are no longer canonical entry points.
+
+### `APP` action
+
+Sub-modes (the action takes a structured `{ mode, ... }` payload):
+
+- `launch` — start an app session for a registered app (reuse if one is already running for the user).
+- `relaunch` — terminate any running session and start a new one (used after configuration changes or crash recovery).
+- `load_from_directory` — register a new app source from a local directory (path validated, scoped to allowed roots, audited to `MILADY_APP_LOAD_AUDIT_LOG`).
+- `list` — return registered apps and their session state for the dashboard / planner.
+- `create` — scaffold a new app from `eliza/templates/min-app` and hand it to a coding sub-agent for customization. The orchestrator runs verification (see below) before reporting success.
+
+### `PLUGIN` action
+
+Sub-modes:
+
+- `install` — add a plugin from the registry (or a local path) and enable it.
+- `eject` — remove a plugin and clean up its config.
+- `sync` — reconcile installed plugins against the manifest (idempotent).
+- `reinject` — re-load already-installed plugins after a runtime reset.
+- `list` — list installed + enabled plugins.
+- `search` — query the registry by name / tag / category.
+- `core_status` — health check on the core / runtime plugin set.
+- `create` — scaffold a new plugin from `eliza/templates/min-plugin` and hand it to a coding sub-agent. Runs the same verification loop as `APP create`.
+
+### Sub-agent invocation via the `USE_SKILL` bridge
+
+Coding sub-agents spawned by the orchestrator (Claude Code, Codex, etc.) talk back to the parent runtime by emitting `USE_SKILL <slug> <json>` lines on PTY stdout. The parent watches for those lines and dispatches the matching skill in the parent runtime. This is the mechanism a child uses to invoke `APP` or `PLUGIN` — there is no separate child→parent RPC channel.
+
+The bridge is enabled by default. Set `MILADY_ENABLE_CHILD_SKILL_CALLBACK=0` to disable it (useful for sandboxed runs).
+
+### Verification loop (mandatory for `create` modes)
+
+Any sub-agent writing an app or plugin MUST run, in order, before signaling completion:
+
+1. `bun run typecheck`
+2. `bun run lint`
+3. `bun run test`
+
+After all three succeed, the sub-agent emits exactly one structured completion line on stdout:
+
+```
+APP_CREATE_DONE {"appName":"...","files":[...],"tests":{"passed":N,"failed":0},"lint":"ok","typecheck":"ok"}
+```
+
+(or `PLUGIN_CREATE_DONE {...}` for plugins).
+
+The parent **does not trust the line**. It cross-checks every claim against disk and the verification log:
+
+- Every file in `files` must exist and be non-empty.
+- The `tests.passed` count must match the parsed vitest report.
+- `lint` and `typecheck` claims are verified against the recorded exit codes.
+- No remaining `__APP_NAME__` / `__PLUGIN_NAME__` / `__APP_DISPLAY_NAME__` / `__PLUGIN_DISPLAY_NAME__` placeholders are allowed.
+
+If any claim fails verification, the parent issues a follow-up prompt to the same sub-agent with a structured failure report (which checks failed, exact error output, what to fix). The sub-agent fixes and re-emits the completion line. The retry cap is `MILADY_APP_VERIFICATION_MAX_RETRIES` (default `3`). After the cap, the parent surfaces the failure to the user verbatim — no silent fallback, no "best effort" success.
+
+### Templates
+
+The canonical scaffold sources live in the `eliza/` submodule:
+
+- `eliza/templates/min-app/` — minimal Eliza app (Vite + React UI + `Plugin` with one action, `package.json` with `elizaos.app` metadata, vitest smoke test, hero image placeholder, `SCAFFOLD.md` with the agent contract).
+- `eliza/templates/min-plugin/` — minimal Eliza runtime plugin (one action, one provider, `package.json` with `elizaos.plugin` metadata, vitest smoke test, `SCAFFOLD.md` with the agent contract).
+
+Both templates use the placeholders `__APP_NAME__` / `__APP_DISPLAY_NAME__` and `__PLUGIN_NAME__` / `__PLUGIN_DISPLAY_NAME__` that the scaffold copy step replaces. Read each template's `SCAFFOLD.md` before customizing.

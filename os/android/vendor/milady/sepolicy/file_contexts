@@ -1,8 +1,27 @@
-# MiladyOS file_contexts.
-#
-# Each line: <regex> <selinux_context>. Matched against absolute paths
-# during fs label assignment. AOSP applies the broader system_file label
-# to /system/priv-app/Milady/ by default — extend here if Milady ever
-# ships data files outside the APK that need their own type.
+###
+### file_contexts — labels for paths the Milady on-device agent owns.
+###
+### NOTE: Android's installd does NOT consult this file when labeling
+### files inside /data/data/<pkg>/. installd assigns
+### `app_data_file` (or `privapp_data_file` for privileged apps) based
+### on seapp_contexts, regardless of what we say here.
+###
+### These entries become load-bearing if a future build re-introduces
+### a custom seinfo + domain transition (see milady_agent.te). At that
+### point MiladyAgentService.relabelAgentTree() can call
+### `SELinux.restoreconRecursive("/data/data/.../files/agent")` and
+### the kernel will use the patterns below to apply the agent-specific
+### types declared in milady_agent.te.
+###
+### Until then, installd's `app_data_file` label is the effective one
+### and the `allow platform_app app_data_file:file execute` rule in
+### milady_agent.te is what makes the bun execve actually work.
+###
 
-/data/milady(/.*)?            u:object_r:milady_data_file:s0
+# Bundled binary tree (bun + musl loader + libstdc++ + libgcc + libllama).
+/data/data/com\.miladyai\.milady/files/agent/x86_64(/.*)?      u:object_r:milady_agent_exec:s0
+/data/data/com\.miladyai\.milady/files/agent/arm64-v8a(/.*)?   u:object_r:milady_agent_exec:s0
+
+# Agent state + bundle (anything else under files/agent/ that isn't a binary).
+/data/data/com\.miladyai\.milady/files/agent(/.*)?             u:object_r:milady_agent_data:s0
+/data/data/com\.miladyai\.milady/files/\.milady(/.*)?          u:object_r:milady_agent_data:s0

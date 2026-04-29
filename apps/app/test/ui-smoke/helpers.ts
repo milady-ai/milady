@@ -76,7 +76,20 @@ async function locatorVisible(
   timeoutMs: number = READY_CHECK_TIMEOUT_MS,
 ): Promise<boolean> {
   try {
-    await locator.first().waitFor({ state: "visible", timeout: timeoutMs });
+    await expect
+      .poll(
+        async () => {
+          const count = await locator.count();
+          for (let index = 0; index < count; index += 1) {
+            if (await locator.nth(index).isVisible()) {
+              return true;
+            }
+          }
+          return false;
+        },
+        { timeout: timeoutMs },
+      )
+      .toBe(true);
     return true;
   } catch {
     return false;
@@ -207,6 +220,62 @@ function emptyWalletTradingProfile(url: URL) {
   };
 }
 
+function smokePermission(id: string, status = "not-determined") {
+  return {
+    id,
+    status,
+    canRequest: status === "not-determined",
+    lastChecked: Date.parse(SMOKE_GENERATED_AT),
+  };
+}
+
+function smokePermissionsState() {
+  return {
+    accessibility: smokePermission("accessibility"),
+    "screen-recording": smokePermission("screen-recording"),
+    microphone: smokePermission("microphone"),
+    camera: smokePermission("camera"),
+    shell: smokePermission("shell", "granted"),
+    "website-blocking": smokePermission("website-blocking"),
+  };
+}
+
+function catalogApp({
+  name,
+  displayName,
+  description,
+  category,
+  launchType = "local",
+}: {
+  name: string;
+  displayName: string;
+  description: string;
+  category: string;
+  launchType?: string;
+}) {
+  return {
+    name,
+    displayName,
+    description,
+    category,
+    launchType,
+    launchUrl: null,
+    icon: null,
+    heroImage: null,
+    capabilities: [],
+    stars: 0,
+    repository: "",
+    latestVersion: null,
+    supports: { v0: false, v1: false, v2: true },
+    npm: {
+      package: name,
+      v0Version: null,
+      v1Version: null,
+      v2Version: null,
+    },
+  };
+}
+
 /** Installs baseline API routes for smoke tests before flow-specific overrides. */
 export async function installDefaultAppRoutes(page: Page): Promise<void> {
   await page.route("**/api/health", async (route) => {
@@ -214,6 +283,85 @@ export async function installDefaultAppRoutes(page: Page): Promise<void> {
       status: 200,
       contentType: "application/json",
       body: JSON.stringify({ ok: true }),
+    });
+  });
+
+  await page.route("**/api/auth/me", async (route) => {
+    if (route.request().method() !== "GET") {
+      await route.fallback();
+      return;
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        identity: {
+          id: "playwright-smoke-owner",
+          displayName: "Playwright Smoke",
+          kind: "owner",
+        },
+        session: {
+          id: "playwright-smoke-session",
+          kind: "local",
+          expiresAt: null,
+        },
+        access: {
+          mode: "local",
+          passwordConfigured: false,
+          ownerConfigured: true,
+        },
+      }),
+    });
+  });
+
+  await page.route("**/api/auth/sessions", async (route) => {
+    if (route.request().method() !== "GET") {
+      await route.fallback();
+      return;
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ sessions: [] }),
+    });
+  });
+
+  await page.route("**/api/catalog/apps", async (route) => {
+    if (route.request().method() !== "GET") {
+      await route.fallback();
+      return;
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify([
+        catalogApp({
+          name: "@elizaos/app-companion",
+          displayName: "Companion",
+          description:
+            "The companion overlay shell for ambient agent presence.",
+          category: "shell",
+          launchType: "overlay",
+        }),
+      ]),
+    });
+  });
+
+  await page.route("**/api/lifeops/app-state", async (route) => {
+    if (!["GET", "PUT"].includes(route.request().method())) {
+      await route.fallback();
+      return;
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        enabled: true,
+        priorityScoring: {
+          enabled: true,
+          model: null,
+        },
+      }),
     });
   });
 
@@ -243,6 +391,102 @@ export async function installDefaultAppRoutes(page: Page): Promise<void> {
         cloudVoiceProxyAvailable: false,
         hasApiKey: false,
       }),
+    });
+  });
+
+  await page.route("**/api/permissions", async (route) => {
+    if (route.request().method() !== "GET") {
+      await route.fallback();
+      return;
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(smokePermissionsState()),
+    });
+  });
+
+  await page.route("**/api/permissions/refresh", async (route) => {
+    if (route.request().method() !== "POST") {
+      await route.fallback();
+      return;
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(smokePermissionsState()),
+    });
+  });
+
+  await page.route("**/api/permissions/shell", async (route) => {
+    const method = route.request().method();
+    if (method === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ enabled: true }),
+      });
+      return;
+    }
+    if (method === "PUT") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(smokePermissionsState().shell),
+      });
+      return;
+    }
+    await route.fallback();
+  });
+
+  await page.route("**/api/permissions/*", async (route) => {
+    const request = route.request();
+    const url = new URL(request.url());
+    const id = decodeURIComponent(url.pathname.split("/").pop() ?? "");
+    const permission =
+      smokePermissionsState()[
+        id as keyof ReturnType<typeof smokePermissionsState>
+      ];
+
+    if (!permission || request.method() !== "GET") {
+      await route.fallback();
+      return;
+    }
+
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(permission),
+    });
+  });
+
+  await page.route("**/api/permissions/*/request", async (route) => {
+    if (route.request().method() !== "POST") {
+      await route.fallback();
+      return;
+    }
+    const url = new URL(route.request().url());
+    const id = decodeURIComponent(url.pathname.split("/").at(-2) ?? "");
+    const permission =
+      smokePermissionsState()[
+        id as keyof ReturnType<typeof smokePermissionsState>
+      ];
+    await route.fulfill({
+      status: permission ? 200 : 404,
+      contentType: "application/json",
+      body: JSON.stringify(permission ?? { error: "Unknown permission" }),
+    });
+  });
+
+  await page.route("**/api/permissions/*/open-settings", async (route) => {
+    if (route.request().method() !== "POST") {
+      await route.fallback();
+      return;
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ ok: true }),
     });
   });
 

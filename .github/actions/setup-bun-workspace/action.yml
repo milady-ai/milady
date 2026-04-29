@@ -42,6 +42,17 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Free disk space (Linux)
+      if: runner.os == 'Linux'
+      shell: bash
+      # ~/.bun/install/cache has grown past 2.9 GB; combined with apt-installed
+      # native deps the default ubuntu-latest runner exhausts disk during cache
+      # extraction. Drop unused preinstalled toolchains to reclaim ~25 GB.
+      run: |
+        df -h /
+        sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /opt/hostedtoolcache/CodeQL
+        df -h /
+
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
@@ -143,9 +154,28 @@ runs:
         repairKnownElizaPatchFiles();
         NODE
 
+    - name: Ensure nested cloud workspace is hydrated
+      if: ${{ inputs.disable-local-eliza-workspace != 'true' }}
+      shell: bash
+      run: |
+        git -C eliza submodule update --init cloud
+        test -d eliza/cloud/packages/sdk
+        test -d eliza/cloud/packages/billing
+
     - name: Install dependencies
       shell: bash
-      run: ${{ inputs.install-command }}
+      run: |
+        for attempt in 1 2; do
+          if ${{ inputs.install-command }}; then
+            exit 0
+          fi
+          if [ "$attempt" -eq 2 ]; then
+            exit 1
+          fi
+          echo "Dependency install failed; retrying once after cleaning Bun's install cache."
+          rm -rf ~/.bun/install/cache
+          sleep 5
+        done
       env:
         npm_config_python: ${{ env.pythonLocation }}/bin/python3
 

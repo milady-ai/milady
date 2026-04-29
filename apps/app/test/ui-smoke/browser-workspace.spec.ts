@@ -1,5 +1,9 @@
 import { type APIRequestContext, expect, test } from "@playwright/test";
-import { openAppPath, seedAppStorage } from "./helpers";
+import {
+  installDefaultAppRoutes,
+  openAppPath,
+  seedAppStorage,
+} from "./helpers";
 
 type BrowserWorkspaceSmokeSnapshot = {
   tabs: { id: string }[];
@@ -40,6 +44,7 @@ async function resetBrowserWorkspaceTabs(
 
 test.beforeEach(async ({ page }) => {
   await seedAppStorage(page);
+  await installDefaultAppRoutes(page);
 });
 
 test("browser workspace can create live tabs and switch selection", async ({
@@ -78,7 +83,9 @@ test("browser workspace can create live tabs and switch selection", async ({
   ).toBeVisible({
     timeout: 120_000,
   });
-  const addressInput = browserWorkspaceView.locator("input").first();
+  const addressInput = browserWorkspaceView.getByTestId(
+    "browser-workspace-address-input",
+  );
   await expect(addressInput).toBeVisible({ timeout: 120_000 });
   const goButton = browserWorkspaceView.getByRole("button", { name: "Go" });
   await expect(goButton).toBeVisible({ timeout: 120_000 });
@@ -93,13 +100,13 @@ test("browser workspace can create live tabs and switch selection", async ({
   }
   expect(chatSidebarBox.y).toBeLessThan(addressInputBox.y);
 
-  const initialHomeTabButtons = tabsSidebar.locator(
-    '[role="tab"][title="https://milady.ai/"]',
-  );
-  await expect(initialHomeTabButtons.first()).toBeVisible({
+  await expect(
+    browserWorkspaceView.getByText("No browser tabs yet"),
+  ).toBeVisible({
     timeout: 120_000,
   });
-  await expect(addressInput).toHaveValue("https://milady.ai/");
+  await expect(addressInput).toHaveValue("");
+  await expect(goButton).toBeDisabled();
   await expect(newTabButton).toBeEnabled();
 
   await addressInput.fill("");
@@ -138,4 +145,13 @@ test("browser workspace can create live tabs and switch selection", async ({
   await addressInput.fill("example.org");
   await goButton.click();
   await expect(addressInput).toHaveValue("https://example.org/");
+
+  const exampleOrgTabButton = tabsSidebar.locator(
+    '[role="tab"][title="https://example.org/"]',
+  );
+  await expect(exampleOrgTabButton).toBeVisible();
+  await tabsSidebar
+    .getByRole("button", { name: /Close tab example\.org/i })
+    .click();
+  await expect(exampleOrgTabButton).toHaveCount(0);
 });

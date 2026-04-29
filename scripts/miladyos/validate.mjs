@@ -43,9 +43,13 @@ const requiredApkPermissions = [
   "android.permission.RECEIVE_BOOT_COMPLETED",
   "android.permission.PACKAGE_USAGE_STATS",
   "android.permission.SYSTEM_ALERT_WINDOW",
+  "android.permission.MANAGE_APP_OPS_MODES",
 ];
 
-const privilegedPermissions = ["android.permission.PACKAGE_USAGE_STATS"];
+const privilegedPermissions = [
+  "android.permission.PACKAGE_USAGE_STATS",
+  "android.permission.MANAGE_APP_OPS_MODES",
+];
 
 export function parseArgs(argv) {
   const args = {
@@ -262,14 +266,43 @@ export function validateProductLayer(vendorDir) {
     "privapp-permissions-com.miladyai.milady.xml",
     "milady_common.mk",
   );
-  assertIncludes(common, "vendor/milady/overlays/framework-res", "milady_common.mk");
+  // PRODUCT_PACKAGE_OVERLAYS root must mirror the AOSP source tree from
+  // there: e.g. <root>/frameworks/base/core/res/res/values/config.xml
+  // overlays the framework-res package's config_default* strings. The
+  // older path "vendor/milady/overlays/framework-res" never merged
+  // because Soong looks under the overlay root for `LOCAL_RESOURCE_DIR`
+  // (frameworks/base/core/res/res), not for a directory called
+  // "framework-res".
+  assertIncludes(common, "vendor/milady/overlays", "milady_common.mk");
+  assertFile(
+    path.join(
+      vendorDir,
+      "overlays",
+      "frameworks",
+      "base",
+      "core",
+      "res",
+      "res",
+      "values",
+      "config.xml",
+    ),
+    "framework-res overlay (must mirror frameworks/base/core/res/res/...)",
+  );
   // Ensure no first-boot UX leaks through.
   for (const marker of ["Provision", "SetupWizard", "ManagedProvisioning"]) {
-    assertIncludes(common, marker, "milady_common.mk PRODUCT_PACKAGES -= strip list");
+    assertIncludes(
+      common,
+      marker,
+      "milady_common.mk PRODUCT_PACKAGES -= strip list",
+    );
   }
   assertIncludes(common, "ro.setupwizard.mode=DISABLED", "milady_common.mk");
   // Boot-time scaffolds.
-  assertIncludes(common, "init.milady.rc", "milady_common.mk PRODUCT_COPY_FILES");
+  assertIncludes(
+    common,
+    "init.milady.rc",
+    "milady_common.mk PRODUCT_COPY_FILES",
+  );
   assertIncludes(common, "BOARD_VENDOR_SEPOLICY_DIRS", "milady_common.mk");
   assertIncludes(common, "vendor/milady/sepolicy", "milady_common.mk");
   if (common.includes("PermissionController")) {
@@ -282,7 +315,11 @@ export function validateProductLayer(vendorDir) {
   const pixelTemplate = read(
     path.join(vendorDir, "products", "milady_pixel_phone.mk"),
   );
-  assertIncludes(pixelTemplate, "MILADY_PIXEL_CODENAME", "milady_pixel_phone.mk");
+  assertIncludes(
+    pixelTemplate,
+    "MILADY_PIXEL_CODENAME",
+    "milady_pixel_phone.mk",
+  );
   assertIncludes(
     pixelTemplate,
     "vendor/milady/milady_common.mk",
@@ -292,9 +329,7 @@ export function validateProductLayer(vendorDir) {
   const androidProducts = read(path.join(vendorDir, "AndroidProducts.mk"));
   assertMatches(
     androidProducts,
-    new RegExp(
-      `\\$\\(LOCAL_DIR\\)/products/${PRODUCT_NAME}\\.mk`,
-    ),
+    new RegExp(`\\$\\(LOCAL_DIR\\)/products/${PRODUCT_NAME}\\.mk`),
     "AndroidProducts.mk",
     `PRODUCT_MAKEFILES entry for ${PRODUCT_NAME}`,
   );
@@ -337,6 +372,11 @@ export function validateProductLayer(vendorDir) {
     '"Launcher3"',
     '"Launcher3QuickStep"',
     '"Dialer"',
+    // Both "messaging" (lowercase, the actual Soong module name from
+    // packages/apps/Messaging/Android.bp) and "Messaging" (legacy
+    // / lineage variants) — the lowercase one is the load-bearing
+    // entry; the capital is kept for non-AOSP forks that diverge.
+    '"messaging"',
     '"Messaging"',
     '"Contacts"',
     '"Trebuchet"',
@@ -348,7 +388,10 @@ export function validateProductLayer(vendorDir) {
     path.join(
       vendorDir,
       "overlays",
-      "framework-res",
+      "frameworks",
+      "base",
+      "core",
+      "res",
       "res",
       "values",
       "config.xml",
@@ -358,6 +401,7 @@ export function validateProductLayer(vendorDir) {
     "config_defaultDialer",
     "config_defaultSms",
     "config_defaultAssistant",
+    "config_defaultBrowser",
   ]) {
     const value = xmlStringValue(
       frameworkConfig,
@@ -449,6 +493,210 @@ export function validateDefaultPermissions(vendorDir) {
   );
 
   console.log("[miladyos:validate] Permission XML checks passed.");
+}
+
+/**
+ * Vendor sepolicy files exist on the AOSP build path (`BOARD_VENDOR_
+ * SEPOLICY_DIRS += vendor/milady/sepolicy`). For the local-agent-on-
+ * Android landing we currently rely on the on-device agent running in
+ * the platform_app domain (assigned to the Milady APK by AOSP's seapp_
+ * contexts because the APK is platform-signed). A custom `milady_agent`
+ * domain was attempted but tripped AOSP's neverallow envelope
+ * (platform_app cannot transition to arbitrary domains, app domains
+ * cannot have file_contexts targeting /data/data paths, etc.) —
+ * landing the full domain transition requires a custom seinfo entry
+ * tied to a different signing certificate.
+ *
+ * The validator pins:
+ *   - file_contexts exists (BOARD_VENDOR_SEPOLICY_DIRS chokes if the
+ *     listed dir has no policy files at all)
+ *   - the primary `allow platform_app app_data_file:file { execute
+ *     execute_no_trans };` rule that lets bun start
+ *   - milady_agent_exec and milady_agent_data type declarations so a
+ *     future custom-seinfo build can land its restorecon hooks
+ *     without a churn rename
+ *   - the documented-intent seccomp syscall list, so the runtime
+ *     mitigation in MiladyAgentService.startAgentProcess()
+ *     (BUN_FEATURE_FLAG_*) cannot drift away from the .te comment
+ *     block silently
+ *
+ * SELinux cannot relax seccomp filters — those are installed at
+ * zygote fork via `prctl(PR_SET_NO_NEW_PRIVS, 1)` from the per-arch
+ * allowlists in `bionic/libc/seccomp/{x86_64,arm64}_app_policy.cpp`.
+ * The bun feature flags are the runtime workaround; the .te comment
+ * block is the audit trail; the second-line "kernel exemption" path
+ * (which the spec asked about) lives in bionic itself, not here.
+ *
+ * See os/android/vendor/milady/sepolicy/README.md for the design.
+ */
+export function validateSepolicy(vendorDir) {
+  // file_contexts must exist for `BOARD_VENDOR_SEPOLICY_DIRS` to point at
+  // a non-empty directory; AOSP's sepolicy build chokes if the listed
+  // dir has no policy files at all. An empty file is fine.
+  const fileContextsPath = path.join(vendorDir, "sepolicy", "file_contexts");
+  assertFile(fileContextsPath, "vendor/milady sepolicy/file_contexts");
+  const fileContexts = read(fileContextsPath);
+  // file_contexts entries are advisory until a custom-seinfo build
+  // re-introduces the domain transition, but the patterns must be
+  // present so MiladyAgentService.relabelAgentTree()'s restorecon
+  // call has labels to apply.
+  assertMatches(
+    fileContexts,
+    /\/data\/data\/com\\\.miladyai\\\.milady\/files\/agent\/x86_64.*milady_agent_exec/,
+    "vendor/milady sepolicy/file_contexts",
+    "x86_64 binary tree label entry",
+  );
+  assertMatches(
+    fileContexts,
+    /\/data\/data\/com\\\.miladyai\\\.milady\/files\/agent\/arm64-v8a.*milady_agent_exec/,
+    "vendor/milady sepolicy/file_contexts",
+    "arm64-v8a binary tree label entry",
+  );
+  assertMatches(
+    fileContexts,
+    /\/data\/data\/com\\\.miladyai\\\.milady\/files\/agent.*milady_agent_data/,
+    "vendor/milady sepolicy/file_contexts",
+    "agent state dir label entry",
+  );
+
+  // The agent runs as platform_app and must be able to execve the bundled
+  // bun runtime out of /data/data/<pkg>/files/agent/. AOSP's stock
+  // platform_app.te has no such allow rule (only priv_app does), so we
+  // add it here.
+  const tePath = path.join(vendorDir, "sepolicy", "milady_agent.te");
+  assertFile(tePath, "vendor/milady sepolicy/milady_agent.te");
+  const te = read(tePath);
+  assertMatches(
+    te,
+    /allow\s+platform_app\s+app_data_file\s*:\s*file\b[^;]*\bexecute_no_trans\b[^;]*;/,
+    "milady_agent.te",
+    "allow platform_app app_data_file:file { execute execute_no_trans } (on-device agent exec)",
+  );
+
+  // Type declarations land the future-proofing seam. The custom
+  // domain itself is not declared (it tripped neverallow checks
+  // without a custom seinfo entry), but the file types are needed
+  // by file_contexts and a future restorecon path.
+  for (const typeName of ["milady_agent_exec", "milady_agent_data"]) {
+    assertMatches(
+      te,
+      new RegExp(`\\btype\\s+${typeName}\\b`),
+      "milady_agent.te",
+      `type declaration for ${typeName}`,
+    );
+  }
+
+  // The .te file documents the seccomp-blocked syscall list as a
+  // comment block. MiladyAgentService.startAgentProcess() must
+  // export the matching BUN_FEATURE_FLAG_* env vars at runtime.
+  // Pin both ends so the docs and the mitigation can't drift.
+  const documentedSyscalls = [
+    "io_uring_setup",
+    "io_uring_enter",
+    "io_uring_register",
+    "pidfd_open",
+    "pidfd_send_signal",
+    "pidfd_getfd",
+    "clone3",
+    "preadv2",
+    "pwritev2",
+  ];
+  for (const syscall of documentedSyscalls) {
+    assertIncludes(
+      te,
+      syscall,
+      "milady_agent.te (seccomp documented-intent block)",
+    );
+  }
+
+  validateBunFeatureFlagsParity(te);
+
+  console.log("[miladyos:validate] Sepolicy checks passed.");
+}
+
+/**
+ * Pin the BUN_FEATURE_FLAG_* names that show up in the .te comment
+ * block to the names MiladyAgentService.startAgentProcess() actually
+ * exports. The Java service is the runtime mitigation; the comment
+ * block is the audit trail; if the two drift a future bun upgrade
+ * could quietly re-introduce a SIGSYS without anyone noticing.
+ *
+ * MiladyAgentService.java lives in two places:
+ *   - apps/app/android/app/src/main/java/com/miladyai/milady/ (parent
+ *     repo, generated by run-mobile-build.mjs / overlayAndroid())
+ *   - eliza/packages/app-core/platforms/android/app/src/main/java/
+ *     ai/elizaos/app/ (eliza submodule, source of truth for the
+ *     overlay)
+ *
+ * We check whichever is on disk; on a fresh checkout only the eliza
+ * submodule path is guaranteed.
+ */
+function validateBunFeatureFlagsParity(teContent) {
+  const expected = [
+    "BUN_FEATURE_FLAG_DISABLE_IO_POOL",
+    "BUN_FEATURE_FLAG_FORCE_WAITER_THREAD",
+    "BUN_FEATURE_FLAG_DISABLE_RWF_NONBLOCK",
+    "BUN_FEATURE_FLAG_DISABLE_SPAWNSYNC_FAST_PATH",
+  ];
+  for (const flag of expected) {
+    if (!teContent.includes(flag)) {
+      fail(
+        `milady_agent.te seccomp comment block is missing documented flag ${flag}`,
+      );
+    }
+  }
+
+  const candidatePaths = [
+    path.join(
+      repoRoot,
+      "apps",
+      "app",
+      "android",
+      "app",
+      "src",
+      "main",
+      "java",
+      "com",
+      "miladyai",
+      "milady",
+      "MiladyAgentService.java",
+    ),
+    path.join(
+      repoRoot,
+      "eliza",
+      "packages",
+      "app-core",
+      "platforms",
+      "android",
+      "app",
+      "src",
+      "main",
+      "java",
+      "ai",
+      "elizaos",
+      "app",
+      "MiladyAgentService.java",
+    ),
+  ];
+  const javaPath = candidatePaths.find((p) => fs.existsSync(p));
+  if (!javaPath) {
+    // First-checkout state where neither overlay has been generated
+    // yet. The .te comment block is still pinned above; runtime
+    // parity gets re-checked on the next build that produces a Java
+    // file on disk.
+    console.log(
+      "[miladyos:validate] Skipping BUN_FEATURE_FLAG_* runtime parity check — no MiladyAgentService.java on disk yet.",
+    );
+    return;
+  }
+  const java = fs.readFileSync(javaPath, "utf8");
+  for (const flag of expected) {
+    if (!java.includes(flag)) {
+      fail(
+        `MiladyAgentService.java (${javaPath}) is missing seccomp mitigation flag ${flag}; documented in milady_agent.te but not exported at runtime`,
+      );
+    }
+  }
 }
 
 function manifestElementBlocks(manifest, elementName) {
@@ -862,6 +1110,7 @@ export function main(argv = process.argv.slice(2)) {
   validateXmlFiles(args.vendorDir);
   validateProductLayer(args.vendorDir);
   validateDefaultPermissions(args.vendorDir);
+  validateSepolicy(args.vendorDir);
   validateApk(args.apk);
   if (args.aospRoot) {
     validateAospRoot(args.aospRoot);

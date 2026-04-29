@@ -1,0 +1,111 @@
+###
+### Milady on-device agent SELinux policy.
+###
+### The Milady APK is platform-signed (see vendor/milady/apps/Milady/
+### Android.bp), so seapp_contexts assigns its process to the
+### `platform_app` SELinux domain. AOSP's stock platform_app.te does
+### not include `allow platform_app app_data_file:file execute` — that
+### rule lives only on `priv_app`. Without it MiladyAgentService cannot
+### execve the bundled bun runtime out of /data/data/<pkg>/files/agent/
+### and the on-device agent crashloops with avc:denied { execute }.
+###
+### A previous attempt added a custom `milady_agent` domain with a full
+### domain transition to scope this allow narrowly; that approach
+### tripped roughly 30 AOSP neverallow checks (priv_app cannot
+### auto_trans to a vendor domain, app domains cannot label files
+### under /data/data, etc.). Per-domain custom labels for /data/data
+### paths are supposed to be done at the seapp_contexts level, which
+### would require a custom seinfo entry tied to a different signing
+### certificate.
+###
+### For now the execute allow is broad: any platform_app can execve any
+### file labeled app_data_file. The neverallow envelope still applies
+### (no write+execute on the same file outside narrow exemptions, no
+### entrypoint, etc.). This is acceptable on userdebug builds where
+### the only platform_app is Milady itself; for production user
+### builds the rule should be re-scoped to a custom file label set
+### via restorecon from the Java service.
+###
+### Validated by scripts/miladyos/validate.mjs::validateSepolicy().
+###
+### NOTE — SELinux is NOT seccomp. If the on-device bun process exits
+### with SIGSYS / code 159, that's a seccomp-bpf trap installed by the
+### zygote (bionic/libc/seccomp/{arch}_app_policy.cpp) — no rule in this
+### file can relax it. The seccomp mitigation is the BUN_FEATURE_FLAG_*
+### env block in MiladyAgentService.startAgentProcess(); see
+### sepolicy/README.md for the full diagnosis playbook.
+###
+### Second-line defense for the seccomp constraint is documented in
+### sepolicy/README.md ("If a future bun release introduces a brand-
+### new gated syscall...") and lives in `bionic/libc/seccomp/` inside
+### AOSP itself, not here. Vendor sepolicy cannot relax seccomp.
+###
+
+###
+### Platform-app execve allow (primary working rule).
+###
+### See above for the design rationale. This is the only rule the AOSP
+### build needs for the agent to start on userdebug Cuttlefish.
+###
+
+allow platform_app app_data_file:file { execute execute_no_trans };
+
+###
+### Type declarations for agent-owned files.
+###
+### `milady_agent_exec` and `milady_agent_data` are declared as
+### `app_data_file` aliases so installd's labeling (which can only
+### produce `app_data_file` / `privapp_data_file` for /data/data paths)
+### still works without restorecon, while giving validate.mjs concrete
+### type names to pin. If a future build re-introduces a custom seinfo
+### + custom domain (the proper end-state), these type names are the
+### restorecon targets MiladyAgentService.relabelAgentTree() should
+### invoke after copying the bun binary tree out of assets/agent/.
+###
+### Declaring with `typeattribute ... app_data_file_type;` would tie
+### them to AOSP's app_data_file_type attribute and inherit the
+### envelope; for now we keep them as plain types with comments so a
+### later platform_app.te neverallow-aware extension can promote them
+### without a churn of attribute renames.
+###
+### Both types are referenced by file_contexts so a `restorecon -R`
+### invocation targeting /data/data/com.miladyai.milady/files/agent/
+### finds them. Until the matching domain transition lands the labels
+### are advisory — installd will overwrite them with `app_data_file` —
+### but the declarations + file_contexts entries are the contract a
+### future re-introduction of the custom domain plugs into without a
+### policy rewrite.
+###
+
+type milady_agent_exec, file_type, data_file_type, core_data_file_type;
+type milady_agent_data, file_type, data_file_type, core_data_file_type;
+
+###
+### Documented intent: the syscall set that Android's per-arch seccomp
+### filter blocks for app domains (and bun's fallback flags around it).
+### These syscall numbers are NOT enforced here — vendor sepolicy
+### cannot drive seccomp. They are listed so validate.mjs has a
+### machine-readable contract to assert that the documentation +
+### MiladyAgentService.startAgentProcess() flag block stay in sync.
+### The flag block is the runtime mitigation; this comment is the
+### second-line audit trail.
+###
+### Blocked-by-app-seccomp syscalls bun routes around (see
+### bionic/libc/seccomp/{x86_64,arm64}_app_policy.cpp):
+###
+###   io_uring_setup       — BUN_FEATURE_FLAG_DISABLE_IO_POOL=1
+###   io_uring_enter       — BUN_FEATURE_FLAG_DISABLE_IO_POOL=1
+###   io_uring_register    — BUN_FEATURE_FLAG_DISABLE_IO_POOL=1
+###   pidfd_open           — BUN_FEATURE_FLAG_FORCE_WAITER_THREAD=1
+###   pidfd_send_signal    — BUN_FEATURE_FLAG_FORCE_WAITER_THREAD=1
+###   pidfd_getfd          — BUN_FEATURE_FLAG_FORCE_WAITER_THREAD=1
+###   clone3               — BUN_FEATURE_FLAG_DISABLE_SPAWNSYNC_FAST_PATH=1
+###   futex_waitv          — (no bun flag; bun avoids by libc fallback)
+###   preadv2 RWF_NONBLOCK — BUN_FEATURE_FLAG_DISABLE_RWF_NONBLOCK=1
+###   pwritev2 RWF_NONBLOCK — BUN_FEATURE_FLAG_DISABLE_RWF_NONBLOCK=1
+###
+### If a future bun release adds a new gated syscall with no fallback
+### flag, the only fixes are (a) downgrade bun, (b) patch bun, or (c)
+### extend the per-arch seccomp allowlist in `bionic/libc/seccomp/` and
+### rebuild AOSP. None of those are sepolicy work.
+###

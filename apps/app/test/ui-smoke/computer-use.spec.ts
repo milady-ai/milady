@@ -1,8 +1,14 @@
 import { expect, test } from "@playwright/test";
-import { openAppPath, openSettingsSection, seedAppStorage } from "./helpers";
+import {
+  installDefaultAppRoutes,
+  openAppPath,
+  openSettingsSection,
+  seedAppStorage,
+} from "./helpers";
 
 test("settings exposes computer use capability controls", async ({ page }) => {
   await seedAppStorage(page);
+  await installDefaultAppRoutes(page);
   await openAppPath(page, "/voice");
 
   await expect(page.getByTestId("settings-shell")).toBeVisible();

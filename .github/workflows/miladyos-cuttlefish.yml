@@ -1,5 +1,11 @@
 name: MiladyOS Cuttlefish
 
+# MiladyOS is a whitelabel of the elizaOS distro-android toolchain.
+# This workflow drives the brand-aware build pipeline in eliza
+# (`scripts/distro-android/`) with the milady brand config + vendor
+# tree, and is otherwise functionally identical to running
+# `bun run miladyos:*` locally.
+
 on:
   workflow_dispatch:
     inputs:
@@ -23,6 +29,8 @@ jobs:
     name: Build and validate MiladyOS
     runs-on: [self-hosted, linux, x64, kvm]
     timeout-minutes: 720
+    env:
+      DISTRO_ANDROID_BRAND_CONFIG: os/android/brand.milady.json
     steps:
       - uses: actions/checkout@v4
         with:
@@ -35,7 +43,7 @@ jobs:
           distribution: temurin
           java-version: "21"
 
-      # `miladyos:validate` shells out to `aapt` to inspect the staged APK,
+      # The validator shells out to `aapt` to inspect the staged APK,
       # and `build:android:system` runs Gradle which needs a full SDK.
       - uses: android-actions/setup-android@v3
         with:
@@ -48,15 +56,19 @@ jobs:
         run: bun run build:android:system
 
       - name: Static MiladyOS validation
-        run: bun run miladyos:validate
+        run: |
+          node eliza/scripts/distro-android/validate.mjs \
+            --brand-config os/android/brand.milady.json
 
       - name: Sync, build, and optionally boot MiladyOS
         run: |
           ARGS=(
+            --brand-config os/android/brand.milady.json
+            --source-vendor os/android/vendor/milady
             --aosp-root "${{ inputs.aosp-root }}"
             --jobs "${{ inputs.jobs }}"
           )
           if [ "${{ inputs.launch }}" = "true" ]; then
             ARGS+=(--launch --boot-validate)
           fi
-          node scripts/miladyos/build-aosp.mjs "${ARGS[@]}"
+          node eliza/scripts/distro-android/build-aosp.mjs "${ARGS[@]}"

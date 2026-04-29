@@ -55,13 +55,31 @@ const FORBIDDEN_STOCK_PACKAGES = [
 
 const REQUIRED_BOOT_PROPERTIES = {
   "ro.setupwizard.mode": "DISABLED",
-  "ro.miladyos.boot_phase": "completed",
+  // miladyos.boot_phase is intentionally non-ro so init.milady.rc can
+  // re-set it at each phase. ro.* is immutable after first set.
+  "miladyos.boot_phase": "completed",
 };
 
-const LOGCAT_FAILURE_PATTERNS = [
-  /FATAL EXCEPTION/i,
-  /SecurityException/i,
-  /avc:\s+denied/i,
+// Failures the validator should treat as Milady-introduced regressions.
+// Stock AOSP cuttlefish has its own boot noise (a known SystemUI keyguard
+// NPE in LockPatternUtils$StrongAuthTracker, statsbootstrap avc denials
+// from HAL processes, generic REGISTER_STATS_PULL_ATOM warnings) that does
+// not indicate a problem with MiladyOS — broad pattern matching there
+// just creates false positives. We scope each pattern to Milady's blast
+// radius:
+//   - FATAL EXCEPTION:    only the Milady process itself.
+//   - SecurityException:  only stack frames mentioning Milady code.
+//   - avc denied:         only entries whose source or target context
+//                         names a `milady`-owned sepolicy domain.
+//   - privapp-permissions: any package — these are immediate boot-time
+//                         whitelist failures we want to catch even if
+//                         the package name is masked in the message.
+export const LOGCAT_FAILURE_PATTERNS = [
+  /FATAL EXCEPTION[^\n]*com\.miladyai\.milady/i,
+  /Process: com\.miladyai\.milady/i,
+  /SecurityException[^\n]*(Milady|com\.miladyai\.milady)/i,
+  /Milady[A-Za-z]*Receiver[^\n]*SecurityException/i,
+  /avc:\s+denied[^\n]*(scontext|tcontext)=u:[a-z_]*:milady/i,
   /privapp-permissions/i,
   /Privileged permission.*not in privapp-permissions/i,
 ];
@@ -352,9 +370,20 @@ function validateAppOps(adb, serial) {
 }
 
 function validateForbiddenPackages(adb, serial) {
-  const packages = shell(adb, serial, "pm list packages");
+  // pm list packages prints one `package:<name>` per line. Use a Set of
+  // exact lines instead of substring matching: without this, looking for
+  // `com.android.contacts` matches the unrelated `com.android.contactspicker`
+  // (the system contact-picker UI), and `com.android.music` matches
+  // `com.android.musicfx` (the equalizer service).
+  const installed = new Set(
+    shell(adb, serial, "pm list packages")
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => line.startsWith("package:"))
+      .map((line) => line.slice("package:".length)),
+  );
   const installedForbidden = FORBIDDEN_STOCK_PACKAGES.filter((pkg) =>
-    packages.includes(`package:${pkg}`),
+    installed.has(pkg),
   );
   if (installedForbidden.length > 0) {
     throw new Error(

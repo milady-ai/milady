@@ -13,6 +13,7 @@ import {
   initializeStorageBridge,
   isElectrobunRuntime,
 } from "@elizaos/app-core";
+import { PhoneCompanionApp } from "@elizaos/app-core";
 import type { BrandingConfig } from "@elizaos/app-core";
 import {
   type AppBootConfig,
@@ -34,16 +35,20 @@ import {
 } from "@elizaos/app-core";
 import {
   applyForceFreshOnboardingReset,
-  applyLaunchConnection,
   applyLaunchConnectionFromUrl,
+  applyLaunchConnection,
   installDesktopPermissionsClientPatch,
   installForceFreshOnboardingClientPatch,
   installLocalProviderCloudPreferencePatch,
+  isAppWindowRoute,
   isDetachedWindowShell,
+  getWindowNavigationPath,
   resolveWindowShellRoute,
   shouldInstallMainWindowOnboardingPatches,
   syncDetachedShellLocation,
 } from "@elizaos/app-core";
+import { AppWindowRenderer } from "@elizaos/app-core";
+import { dispatchQueuedLifeOpsGithubCallbackFromUrl } from "@elizaos/app-lifeops/platform";
 import type { ShareTargetPayload } from "@elizaos/app-core/platform";
 import {
   DESKTOP_TRAY_MENU_ITEMS,
@@ -60,7 +65,7 @@ import {
   startDeviceBridgeClient,
   type DeviceBridgeClient,
 } from "@elizaos/capacitor-llama";
-import { lazy, StrictMode, Suspense, type ReactNode } from "react";
+import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import {
   CompanionShell,
@@ -85,13 +90,15 @@ import "@elizaos/app-scape/ui";
 import "@elizaos/app-hyperscape/ui";
 import "@elizaos/app-2004scape/ui";
 import "@elizaos/app-defense-of-the-agents/ui";
+import "@elizaos/app-screenshare/ui";
 import "@clawville/app-clawville/ui";
 import {
   AppBlockerSettingsCard,
-  LifeOpsBrowserSetupPanel,
+  LifeOpsBrowserSetupPanel as BrowserBridgeSetupPanel,
   LifeOpsPageView,
   WebsiteBlockerSettingsCard,
 } from "@elizaos/app-lifeops/ui";
+import { LifeOpsActivitySignalsEffect } from "@elizaos/app-lifeops/components/LifeOpsActivitySignalsEffect";
 import {
   ApprovalQueue,
   StewardLogo,
@@ -105,6 +112,10 @@ import {
 } from "@elizaos/app-task-coordinator/ui";
 import { FineTuningView } from "@elizaos/app-training/ui";
 import "@elizaos/app-shopify/register";
+import "@elizaos/app-hyperliquid/client";
+import "@elizaos/app-hyperliquid/register";
+import "@elizaos/app-polymarket/client";
+import "@elizaos/app-polymarket/register";
 import "@elizaos/app-vincent/client";
 import { useVincentState } from "@elizaos/app-vincent/useVincentState";
 import "@elizaos/app-vincent/register";
@@ -122,30 +133,14 @@ import { App } from "../../../eliza/packages/app-core/src/App";
 import {
   apiBaseToDeviceBridgeUrl,
   type IosRuntimeConfig,
+  type IosRuntimeMode,
   resolveIosRuntimeConfig,
 } from "./ios-runtime";
 
-type CharacterEditorProps = {
-  sceneOverlay?: boolean;
-  inModal?: boolean;
-  onHeaderActionsChange?: (actions: ReactNode | null) => void;
-};
-
-const LazyCharacterEditor = lazy(() =>
-  import("@elizaos/app-core/components/character/CharacterEditor").then(
-    (module) => ({
-      default: module.CharacterEditor,
-    }),
-  ),
-);
-
-function CharacterEditor(props: CharacterEditorProps) {
-  return (
-    <Suspense fallback={null}>
-      <LazyCharacterEditor {...props} />
-    </Suspense>
-  );
-}
+// CharacterEditor is statically re-exported by `@elizaos/app-core/browser`,
+// so the previous `lazy()` wrapper here was eagerly merged back into the
+// main chunk by Rollup. Static import keeps the load path honest.
+import { CharacterEditor } from "@elizaos/app-core/components/character/CharacterEditor";
 
 declare global {
   interface Window {
@@ -284,7 +279,7 @@ const appBootConfig: AppBootConfig = {
   characterCatalog: APP_CHARACTER_CATALOG,
   envAliases: APP_ENV_ALIASES,
   lifeOpsPageView: LifeOpsPageView,
-  lifeOpsBrowserSetupPanel: LifeOpsBrowserSetupPanel,
+  lifeOpsBrowserSetupPanel: BrowserBridgeSetupPanel,
   appBlockerSettingsCard: AppBlockerSettingsCard,
   websiteBlockerSettingsCard: WebsiteBlockerSettingsCard,
   clientMiddleware: {
@@ -448,9 +443,11 @@ function handleDeepLink(url: string): void {
       break;
     case "lifeops":
       window.location.hash = "#lifeops";
+      dispatchQueuedLifeOpsGithubCallbackFromUrl(url);
       break;
     case "settings":
       window.location.hash = "#settings";
+      dispatchQueuedLifeOpsGithubCallbackFromUrl(url);
       break;
     case "connect": {
       const gatewayUrl = parsed.searchParams.get("url");
@@ -595,23 +592,56 @@ function setupPlatformStyles(): void {
   root.style.setProperty("--keyboard-height", "0px");
 }
 
+function isPhoneCompanionMode(): boolean {
+  if (typeof window === "undefined") return false;
+  const params = new URLSearchParams(
+    window.location.search || window.location.hash.split("?")[1] || "",
+  );
+  return params.get("mode") === "companion";
+}
+
+function resolveAppWindowSlug(): string | null {
+  if (!isAppWindowRoute()) return null;
+  const path = getWindowNavigationPath();
+  if (!path.startsWith("/apps/")) return null;
+  // Take only the first path segment after /apps/. URLs like
+  // `/apps/plugins/extra` would otherwise yield a malformed slug
+  // ("plugins/extra") that no descriptor can match.
+  const slug = path
+    .slice("/apps/".length)
+    .replace(/[?#].*$/, "")
+    .split("/")[0];
+  return slug.length > 0 ? slug : null;
+}
+
 function mountReactApp(): void {
   const rootEl = document.getElementById("root");
   if (!rootEl) throw new Error("Root element #root not found");
+
+  const phoneCompanion = isPhoneCompanionMode();
+  const detachedShell = isDetachedWindowShell(windowShellRoute);
+  const appWindowSlug = detachedShell ? null : resolveAppWindowSlug();
 
   createRoot(rootEl).render(
     <ErrorBoundary>
       <StrictMode>
         <AppProvider branding={APP_BRANDING}>
-          {isDetachedWindowShell(windowShellRoute) ? (
+          {phoneCompanion ? (
+            <PhoneCompanionApp />
+          ) : detachedShell ? (
             <div className="flex h-screen min-h-0 w-screen flex-col overflow-hidden">
               <DetachedShellRoot route={windowShellRoute} />
+            </div>
+          ) : appWindowSlug ? (
+            <div className="flex h-screen min-h-0 w-screen flex-col overflow-hidden">
+              <AppWindowRenderer slug={appWindowSlug} />
             </div>
           ) : (
             <>
               <DesktopOnboardingRuntime />
               <DesktopSurfaceNavigationRuntime />
               <DesktopTrayRuntime />
+              <LifeOpsActivitySignalsEffect />
               <App />
             </>
           )}
@@ -682,13 +712,26 @@ function injectDetachedShellApiBase(): void {
   if (apiBase) validateAndSetApiBase(apiBase);
 }
 
+function mobileModeToIosRuntimeMode(
+  mode: ReturnType<typeof normalizeMobileRuntimeMode>,
+): IosRuntimeMode | null {
+  return mode === "remote-mac" || mode === "cloud" || mode === "cloud-hybrid"
+    ? mode
+    : null;
+}
+
 function getCurrentIosRuntimeConfig(): IosRuntimeConfig {
   if (typeof window === "undefined") return IOS_RUNTIME_ENV_CONFIG;
   try {
-    const mode = normalizeMobileRuntimeMode(
-      window.localStorage.getItem(MOBILE_RUNTIME_MODE_STORAGE_KEY),
+    const mode = mobileModeToIosRuntimeMode(
+      normalizeMobileRuntimeMode(
+        window.localStorage.getItem(MOBILE_RUNTIME_MODE_STORAGE_KEY),
+      ),
     );
-    return mode ? { ...IOS_RUNTIME_ENV_CONFIG, mode } : IOS_RUNTIME_ENV_CONFIG;
+    // MobileRuntimeMode includes "local" but IosRuntimeConfig.mode does not —
+    // the local-agent runtime is Android-only. Drop "local" before assigning.
+    if (!mode || mode === "local") return IOS_RUNTIME_ENV_CONFIG;
+    return { ...IOS_RUNTIME_ENV_CONFIG, mode };
   } catch {
     return IOS_RUNTIME_ENV_CONFIG;
   }
@@ -728,7 +771,11 @@ function resolveDeviceBridgeUrl(config: IosRuntimeConfig): string | null {
   if (config.deviceBridgeUrl) {
     return config.deviceBridgeUrl;
   }
-  if (config.mode !== "cloud-hybrid") return null;
+  // cloud-hybrid: paired phone dials a remote agent via the cloud apiBase.
+  // local: the agent runs in-process on the same device (Android foreground
+  // service, future iOS variants), so the WebView's @elizaos/capacitor-llama
+  // dials the bridge over loopback at the locally bound apiBase.
+  if (config.mode !== "cloud-hybrid" && config.mode !== "local") return null;
   const apiBase = getBootConfig().apiBase?.trim();
   if (!apiBase) return null;
   try {
@@ -740,7 +787,12 @@ function resolveDeviceBridgeUrl(config: IosRuntimeConfig): string | null {
 
 async function initializeMobileDeviceBridge(): Promise<void> {
   const runtimeConfig = getCurrentIosRuntimeConfig();
-  if (!isNative || runtimeConfig.mode !== "cloud-hybrid") return;
+  if (
+    !isNative ||
+    (runtimeConfig.mode !== "cloud-hybrid" && runtimeConfig.mode !== "local")
+  ) {
+    return;
+  }
   if (mobileDeviceBridgeClient) return;
 
   const agentUrl = resolveDeviceBridgeUrl(runtimeConfig);
@@ -772,7 +824,8 @@ function initializeMobileRuntimeModeListener(): void {
   if (!isNative || mobileRuntimeModeListenerInstalled) return;
   mobileRuntimeModeListenerInstalled = true;
   document.addEventListener(MOBILE_RUNTIME_MODE_CHANGED_EVENT, () => {
-    if (getCurrentIosRuntimeConfig().mode === "cloud-hybrid") {
+    const mode = getCurrentIosRuntimeConfig().mode;
+    if (mode === "cloud-hybrid" || mode === "local") {
       void initializeMobileDeviceBridge();
       return;
     }

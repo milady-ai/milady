@@ -250,7 +250,7 @@ jobs:
       - name: Build UI (vite)
         run: |
           cd apps/app
-          npx vite build
+          bun run build:web
         env:
           MILADY_RELEASE_TAG: ${{ steps.version.outputs.is_release == 'true' && steps.version.outputs.version || '' }}
           VITE_ASSET_BASE_URL: ${{ steps.version.outputs.is_release == 'true' && format('https://raw.githubusercontent.com/milady-ai/milady/{0}/apps/app/public/', steps.version.outputs.version) || '' }}

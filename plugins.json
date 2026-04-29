@@ -4435,59 +4435,6 @@
       "repository": "https://github.com/elizaos-plugins/plugin-pdf"
     },
     {
-      "id": "personality",
-      "dirName": "plugin-personality",
-      "name": "Personality",
-      "npmName": "@elizaos/plugin-personality",
-      "description": "ElizaOS plugin for agent self-modification and character evolution",
-      "tags": [
-        "personality",
-        "character-evolution",
-        "self-modification"
-      ],
-      "category": "feature",
-      "envKey": null,
-      "configKeys": [
-        "ADMIN_USERS"
-      ],
-      "version": "2.0.0-alpha.4",
-      "pluginParameters": {
-        "ADMIN_USERS": {
-          "type": "string",
-          "description": "Comma-separated admin user list",
-          "required": false,
-          "sensitive": false
-        }
-      },
-      "homepage": "https://elizaos.ai",
-      "repository": "https://github.com/elizaos/elizaos"
-    },
-    {
-      "id": "plugin-manager",
-      "dirName": "plugin-plugin-manager",
-      "name": "Plugin Manager",
-      "npmName": "@elizaos/plugin-plugin-manager",
-      "description": "Dynamic plugin management for agents. Load and unload plugins at runtime",
-      "tags": [
-        "plugin-manager",
-        "manager"
-      ],
-      "category": "feature",
-      "envKey": null,
-      "configKeys": [
-        "API_KEY"
-      ],
-      "version": "2.0.0-alpha.4",
-      "pluginParameters": {
-        "API_KEY": {
-          "type": "string",
-          "description": "API key for the service",
-          "required": false,
-          "sensitive": false
-        }
-      }
-    },
-    {
       "id": "polymarket",
       "dirName": "plugin-polymarket",
       "name": "Polymarket",
@@ -5019,52 +4966,6 @@
       },
       "homepage": "https://github.com/elizaos-plugins/plugin-clipboard#readme",
       "repository": "https://github.com/elizaos-plugins/plugin-clipboard"
-    },
-    {
-      "id": "secrets-manager",
-      "dirName": "plugin-secrets-manager",
-      "name": "Secrets Manager",
-      "npmName": "@elizaos/plugin-secrets-manager",
-      "description": "Plugin to enable autonomous agents to request and set runtime settings and secrets",
-      "tags": [
-        "secrets",
-        "encryption",
-        "api-keys",
-        "credentials",
-        "security",
-        "secrets-manager",
-        "manager"
-      ],
-      "category": "feature",
-      "envKey": null,
-      "configKeys": [
-        "ENCRYPTION_SALT",
-        "ENABLE_ENCRYPTION",
-        "ENABLE_ACCESS_LOGGING"
-      ],
-      "version": "2.0.0-alpha.4",
-      "pluginParameters": {
-        "ENCRYPTION_SALT": {
-          "type": "string",
-          "description": "Custom salt for encryption key derivation (optional)",
-          "required": false,
-          "sensitive": true
-        },
-        "ENABLE_ENCRYPTION": {
-          "type": "boolean",
-          "description": "Enable encryption for stored secrets (default: true)",
-          "required": false,
-          "sensitive": false
-        },
-        "ENABLE_ACCESS_LOGGING": {
-          "type": "boolean",
-          "description": "Enable access logging for audit (default: true)",
-          "required": false,
-          "sensitive": false
-        }
-      },
-      "homepage": "https://elizaos.ai",
-      "repository": "https://github.com/elizaos-plugins/plugin-auto"
     },
     {
       "id": "shell",
@@ -5714,40 +5615,6 @@
       "version": "2.0.0-alpha.4",
       "homepage": "https://elizaos.ai",
       "repository": "https://github.com/elizaos/elizaos"
-    },
-    {
-      "id": "trust",
-      "dirName": "plugin-trust",
-      "name": "Trust",
-      "npmName": "@elizaos/plugin-trust",
-      "description": "Primitives for agents to trust humans and each other",
-      "tags": [
-        "trust",
-        "permissions",
-        "security",
-        "rbac"
-      ],
-      "category": "feature",
-      "envKey": null,
-      "configKeys": [
-        "OWNER_ENTITY_ID",
-        "WORLD_ID"
-      ],
-      "version": "2.0.0-alpha.4",
-      "pluginParameters": {
-        "OWNER_ENTITY_ID": {
-          "type": "string",
-          "description": "Entity identifier",
-          "required": false,
-          "sensitive": false
-        },
-        "WORLD_ID": {
-          "type": "string",
-          "description": "World identifier",
-          "required": false,
-          "sensitive": false
-        }
-      }
     },
     {
       "id": "tts",

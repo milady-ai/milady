@@ -47,10 +47,6 @@ import { execSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import {
-  asElizaOverridesSpecifiers,
-  asRootOverridesSpecifiers,
-} from "./lib/ci-stubs.mjs";
 
 export const ELIZA_WORKSPACE_GLOB = "eliza/packages/*";
 export const PLUGIN_ROOT_WORKSPACE_GLOB = "eliza/plugins/*";
@@ -66,7 +62,7 @@ export const LOCAL_ONLY_WORKSPACE_GLOBS = [
   "eliza/apps/*",
 ];
 export const LOCAL_ONLY_ELIZA_PACKAGE_PATHS = {
-  "@elizaos/plugin-browser-bridge": "packages/plugin-browser-bridge",
+  "@elizaos/plugin-browser-bridge": "plugins/plugin-browser-bridge",
   "@elizaos/plugin-signal": "plugins/plugin-signal/typescript",
   "@elizaos/skills": "packages/skills",
 };
@@ -90,21 +86,17 @@ export const NESTED_INSTALLABLE_PACKAGE_GLOBS = [
   // though they do not participate in the root workspace graph.
   "eliza/packages/app-core/platforms/*",
 ];
-// The @elizaos/plugin-app-control and @elizaos/plugin-wechat entries below
-// are derived from the single source of truth at scripts/lib/ci-stubs.mjs.
-// Other entries point to real packages inside eliza/ and exist here because
-// published-only CI still runs source paths that import their local builds.
+// Entries point at real packages inside eliza/. Published-only CI still runs
+// source paths that import their local builds.
 export const CI_OVERRIDE_SPECIFIERS = {
   "@elizaos/shared": "file:./eliza/packages/shared",
   "@elizaos/ui": "file:./eliza/packages/ui",
-  ...asRootOverridesSpecifiers(),
 };
 export const ELIZA_RUNTIME_CI_OVERRIDE_SPECIFIERS = {
   "@elizaos/ui": "file:./packages/ui",
-  "@elizaos/plugin-browser-bridge": "file:./packages/plugin-browser-bridge",
+  "@elizaos/plugin-browser-bridge": "file:./plugins/plugin-browser-bridge",
   "@elizaos/plugin-signal": "file:./plugins/plugin-signal/typescript",
   "@elizaos/skills": "file:./packages/skills",
-  ...asElizaOverridesSpecifiers(),
 };
 export const DEPENDENCY_FIELDS = [
   "dependencies",
@@ -619,6 +611,7 @@ export function resolvePublishSafePinnedVersions(
   {
     dependencyNames = undefined,
     versionSources = new Map(),
+    fileOverrideNames = undefined,
     readRegistryInfo = readRegistryPackageInfo,
     log = console.log,
     warn = console.warn,
@@ -628,8 +621,19 @@ export function resolvePublishSafePinnedVersions(
   const registryInfoCache = new Map();
   const relevantNames =
     dependencyNames instanceof Set ? dependencyNames : undefined;
+  const overriddenNames =
+    fileOverrideNames instanceof Set ? fileOverrideNames : undefined;
 
   for (const [dependencyName, preferredVersion] of pinnedVersions) {
+    // Packages with a file:./... override resolve from the local path, never
+    // from the registry. Skipping the npm view here avoids 404 noise for
+    // unpublished plugin packages mirrored as workspace overrides (e.g.
+    // @elizaos/plugin-music-library).
+    if (overriddenNames?.has(dependencyName)) {
+      resolvedVersions.set(dependencyName, preferredVersion);
+      continue;
+    }
+
     const versionSource = versionSources.get(dependencyName);
     const shouldResolveFromRegistry =
       (versionSource === PINNED_VERSION_SOURCE_WORKSPACE ||
@@ -647,9 +651,23 @@ export function resolvePublishSafePinnedVersions(
       try {
         registryInfo = readRegistryInfo(dependencyName);
       } catch (error) {
-        warn(
-          `[disable-local-eliza-workspace] Could not read registry metadata for ${dependencyName}: ${error instanceof Error ? error.message : String(error)}`,
-        );
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        // npm view emits E404 when the package isn't published. That's an
+        // expected miss for unpublished workspace packages — log a single
+        // tidy line instead of dumping the multi-line npm stderr blob.
+        if (
+          /\bE404\b/.test(errorMessage) ||
+          /404 Not Found/.test(errorMessage)
+        ) {
+          log(
+            `[disable-local-eliza-workspace] ${dependencyName} is not published to npm; keeping workspace-pinned version`,
+          );
+        } else {
+          warn(
+            `[disable-local-eliza-workspace] Could not read registry metadata for ${dependencyName}: ${errorMessage}`,
+          );
+        }
         registryInfo = null;
       }
       registryInfoCache.set(dependencyName, registryInfo);
@@ -1233,11 +1251,15 @@ export function disableLocalElizaWorkspace(
     }
   }
 
+  const ciOverrideNames = new Set(
+    Object.keys(resolveCiOverrideSpecifiers(repoRoot)),
+  );
   const publishSafePinnedWorkspaceVersions = resolvePublishSafePinnedVersions(
     pinnedWorkspaceVersions,
     {
       dependencyNames: workspaceProtocolDependencyNames,
       versionSources: pinnedVersionSources,
+      fileOverrideNames: ciOverrideNames,
       log,
       warn,
     },

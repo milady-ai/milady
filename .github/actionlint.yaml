@@ -1,9 +1,17 @@
 # actionlint configuration
 # https://github.com/rhysd/actionlint/blob/main/docs/config.md
 
-# No custom self-hosted-runner labels: all jobs run on GitHub-hosted
-# runners (ubuntu-24.04 / ubuntu-24.04-arm / windows-2025). If self-hosted
-# runners are reintroduced later, declare their labels here.
+# Most jobs run on GitHub-hosted runners (ubuntu-24.04 / ubuntu-24.04-arm /
+# windows-2025). The labels below are self-hosted runner labels we use:
+#   kvm — Linux x86_64 host with /dev/kvm available, used for the
+#         Cuttlefish/AOSP build (.github/workflows/miladyos-cuttlefish.yml).
+#   milady-e2e-macos — macOS host with iMessage / BlueBubbles set up
+#                      for live e2e cleanup (.github/workflows/e2e-orphan-sweeper.yml).
+
+self-hosted-runner:
+  labels:
+    - kvm
+    - milady-e2e-macos
 
 paths:
   .github/workflows/release.yml:

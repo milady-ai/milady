@@ -32,7 +32,10 @@
   "dependencies": {
     "@clawville/app-clawville": "workspace:*",
     "@elizaos/app-companion": "workspace:*",
+    "@elizaos/app-hyperliquid": "workspace:*",
     "@elizaos/app-lifeops": "workspace:*",
+    "@elizaos/app-polymarket": "workspace:*",
+    "@elizaos/app-screenshare": "workspace:*",
     "@elizaos/app-shopify": "workspace:*",
     "@elizaos/app-vincent": "workspace:*",
     "@capacitor/android": "8.3.1",
