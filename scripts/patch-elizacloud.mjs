@@ -59,6 +59,12 @@ function fail(msg) {
   process.exit(1);
 }
 
+function hasAllDistEntrypoints(pluginRoot) {
+  return DIST_ENTRYPOINTS.every((relPath) =>
+    fs.existsSync(path.join(pluginRoot, relPath)),
+  );
+}
+
 function distHasMarkers(pluginRoot, markers) {
   return DIST_ENTRYPOINTS.every((relPath) => {
     const entrypointPath = path.join(pluginRoot, relPath);
@@ -99,6 +105,13 @@ export function main() {
     fail(`plugin package.json missing at ${pkgJsonPath}`);
   }
   const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, "utf8"));
+  if (!hasAllDistEntrypoints(pluginRoot)) {
+    log(
+      "built dist entrypoints missing - skipping bridge patch until plugin-elizacloud is built",
+    );
+    return;
+  }
+
   const usesLegacyAiSdkObjectGeneration =
     distUsesLegacyAiSdkObjectGeneration(pluginRoot);
   if (pkg.version !== PINNED_VERSION) {
