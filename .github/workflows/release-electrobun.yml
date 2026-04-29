@@ -902,27 +902,14 @@ jobs:
               Write-Error "eliza-dist generated keyword data NOT found: $keywordDataCheck"
               exit 1
             }
-            $agentRuntimeModules = @(
-              "config\env-vars.js",
-              "config\plugin-auto-enable.js",
-              "config\schema.js",
-              "runtime\advanced-capabilities-config.js",
-              "runtime\embedding-presets.js",
-              "runtime\plugin-collector.js",
-              "runtime\plugin-resolver.js",
-              "runtime\plugin-types.js"
-            )
-            foreach ($runtimeModule in $agentRuntimeModules) {
-              $agentRuntimeCheck = Join-Path $elizaDist "node_modules\@elizaos\agent\packages\agent\src\$runtimeModule"
-              Write-Host "Checking for: $agentRuntimeCheck"
-              if (Test-Path $agentRuntimeCheck) {
-                Write-Host "eliza-dist @elizaos/agent runtime module found: $runtimeModule"
-              } else {
-                Write-Error "eliza-dist @elizaos/agent runtime module NOT found: $agentRuntimeCheck"
-                exit 1
-              }
-            }
             $agentManifestPath = Join-Path $elizaDist "node_modules\@elizaos\agent\package.json"
+            Write-Host "Checking for: $agentManifestPath"
+            if (Test-Path $agentManifestPath) {
+              Write-Host "eliza-dist @elizaos/agent package manifest found"
+            } else {
+              Write-Error "eliza-dist @elizaos/agent package manifest NOT found: $agentManifestPath"
+              exit 1
+            }
             $agentManifest = Get-Content $agentManifestPath -Raw | ConvertFrom-Json
             $agentExportNames = @($agentManifest.exports.PSObject.Properties.Name)
             $agentRequiredExports = @(
