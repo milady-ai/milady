@@ -1278,6 +1278,43 @@ function isBuildArtifactStale(
   }
 }
 
+async function buildPluginCliFallback(packageDir, runCommandImpl = runCommand) {
+  const src = path.join(packageDir, "src", "index.ts");
+  if (!existsSync(src)) {
+    return false;
+  }
+  await runCommandImpl(
+    "bun",
+    [
+      "build",
+      "./src/index.ts",
+      "--outdir",
+      "./dist",
+      "--target",
+      "node",
+      "--format",
+      "esm",
+      "--sourcemap=linked",
+      "--external",
+      "node:*",
+      "--external",
+      "@elizaos/core",
+      "--external",
+      "commander",
+    ],
+    {
+      cwd: packageDir,
+      label: "bun build ./src/index.ts --outdir ./dist (@elizaos/plugin-cli fallback)",
+    },
+  );
+  mkdirSync(path.join(packageDir, "dist"), { recursive: true });
+  const dtsPath = path.join(packageDir, "dist", "index.d.ts");
+  if (!existsSync(dtsPath)) {
+    writeFileSync(dtsPath, "export {};\n");
+  }
+  return true;
+}
+
 async function ensureElizaPluginBuild(
   buildConfig,
   repoRoot = DEFAULT_REPO_ROOT,
@@ -2063,6 +2100,84 @@ export function ensurePluginAnthropicBunTypes(
   return true;
 }
 
+export function patchPluginTsupDeclarationFlags(
+  pluginsRoot,
+  { pathExists = existsSync } = {},
+) {
+  let patchedFiles = 0;
+  for (const packageDir of discoverPluginPackageDirs(pluginsRoot)) {
+    const packageJsonPath = path.join(packageDir, "package.json");
+    if (!pathExists(packageJsonPath)) {
+      continue;
+    }
+
+    const original = readFileSync(packageJsonPath, "utf8");
+    let parsed;
+    try {
+      parsed = JSON.parse(original);
+    } catch {
+      continue;
+    }
+
+    const scripts = parsed?.scripts;
+    const build = scripts && typeof scripts.build === "string" ? scripts.build : "";
+    if (!/\b(?:tsup|tsdown)\b/.test(build) || !/\s--dts(?:\s|$|=)/.test(build)) {
+      continue;
+    }
+
+    const nextBuild = build
+      .replace(/\s--dts(?:=true)?(?=\s|$)/g, "")
+      .replace(/\s--dts\s+true(?=\s|$)/g, "");
+    if (nextBuild === build) {
+      continue;
+    }
+
+    parsed.scripts = {
+      ...scripts,
+      build: nextBuild,
+    };
+    const indent = original.match(/^(\s+)"/m)?.[1] ?? "\t";
+    writeFileSync(packageJsonPath, `${JSON.stringify(parsed, null, indent)}\n`);
+    patchedFiles += 1;
+  }
+
+  for (const packageDir of discoverPluginPackageDirs(pluginsRoot)) {
+    for (const fileName of [
+      "tsup.config.ts",
+      "tsup.config.js",
+      "tsup.config.mts",
+      "tsup.config.mjs",
+      "tsdown.config.ts",
+      "tsdown.config.js",
+      "tsdown.config.mts",
+      "tsdown.config.mjs",
+    ]) {
+      const configPath = path.join(packageDir, fileName);
+      if (!pathExists(configPath)) {
+        continue;
+      }
+      const original = readFileSync(configPath, "utf8");
+      const patched = original.replace(
+        /(^\s*dts:\s*)(?:true|process\.platform\s*!==\s*["']win32["'])(\s*,?)(?:\s*\/\/.*)?$/gm,
+        "$1false$2",
+      );
+      if (patched === original) {
+        continue;
+      }
+      writeFileSync(configPath, patched);
+      patchedFiles += 1;
+    }
+  }
+
+  if (patchedFiles > 0) {
+    console.log(
+      `[setup-upstreams] Disabled plugin declaration bundling for ${patchedFiles} build script/config${patchedFiles === 1 ? "" : "s"} (rollup/rolldown declaration plugins are not TypeScript 6 safe under Bun yet)`, 
+    );
+  }
+
+  return patchedFiles;
+}
+
 export function patchPluginBuildTscBinPaths(
   pluginsRoot,
   { pathExists = existsSync } = {},
@@ -2107,6 +2222,7 @@ export async function ensurePluginBuildOutputs(
   { pathExists = existsSync, runCommandImpl = runCommand } = {},
 ) {
   ensurePluginAnthropicBunTypes(pluginsRoot, { pathExists });
+  patchPluginTsupDeclarationFlags(pluginsRoot, { pathExists });
   patchPluginBuildTscBinPaths(pluginsRoot, { pathExists });
   for (const packageDir of discoverPluginPackageDirs(pluginsRoot)) {
     const packageJson = readPackageJson(packageDir);
@@ -2125,6 +2241,15 @@ export async function ensurePluginBuildOutputs(
       cwd: packageDir,
       label: `bun run build (${packageJson.name})`,
     });
+    if (
+      packageJson.name === "@elizaos/plugin-cli" &&
+      !pathExists(path.join(packageDir, "dist", "index.js"))
+    ) {
+      console.log(
+        "[setup-upstreams] @elizaos/plugin-cli build script completed without dist/index.js; using Bun fallback bundler",
+      );
+      await buildPluginCliFallback(packageDir, runCommandImpl);
+    }
   }
 }
 

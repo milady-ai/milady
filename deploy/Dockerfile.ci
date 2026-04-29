@@ -108,7 +108,11 @@ RUN set -eux; \
         echo "[cloud-build] building $d"; \
         (cd "$d" && bun run build) || echo "[cloud-build] WARN: build failed after partial output: $d"; \
       fi; \
-    done
+    done; \
+  if [ ! -f eliza/plugins/plugin-cli/typescript/dist/index.js ]; then \
+    echo "[cloud-build] plugin-cli produced no dist/index.js; using Bun fallback bundler"; \
+    (cd eliza/plugins/plugin-cli/typescript && bun build ./src/index.ts --outdir ./dist --target node --format esm --sourcemap=linked --external node:* --external @elizaos/core --external commander && echo 'export {};' > dist/index.d.ts); \
+  fi
 
 # Root runtime bundle + Milady React app bundle.
 RUN set -eux; \
