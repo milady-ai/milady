@@ -35,6 +35,19 @@ export {
   resolveReference,
 } from "./password-managers.js";
 
+export {
+  createManager,
+  DEFAULT_PREFERENCES,
+} from "./manager.js";
+export type {
+  BackendId,
+  BackendStatus,
+  CreateManagerOptions,
+  ManagerPreferences,
+  ManagerSetOptions,
+  SecretsManager,
+} from "./manager.js";
+
 export type {
   AuditRecord,
   PasswordManagerReference,

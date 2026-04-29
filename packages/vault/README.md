@@ -50,6 +50,58 @@ await vault.setReference("openrouter.apiKey", {
 });
 ```
 
+## SecretsManager — pick which password managers to use
+
+The `Vault` is the storage primitive. The `SecretsManager` sits on top
+and routes writes to the right backend based on user preferences:
+
+```ts
+import { createManager } from "@milady/vault";
+
+const manager = createManager();
+
+// Probe what's available on this machine:
+const statuses = await manager.detectBackends();
+//   [
+//     { id: "in-house",   available: true,  signedIn: true,  label: "Milady (local, encrypted)" },
+//     { id: "1password",  available: true,  signedIn: true,  label: "1Password" },
+//     { id: "bitwarden",  available: true,  signedIn: false, label: "Bitwarden", detail: "...not signed in. Run `bw login`." },
+//     { id: "protonpass", available: false,                 label: "Proton Pass", detail: "...not installed (CLI in beta)." },
+//   ]
+
+// User picks their backends in Settings:
+await manager.setPreferences({
+  enabled: ["1password", "in-house"],
+  routing: { "anthropic.apiKey": "in-house" }, // optional per-key override
+});
+
+// Same call signature — the manager routes:
+await manager.set("openrouter.apiKey", "sk-or-...", {
+  sensitive: true,
+  externalPath: "Personal/OpenRouter/api-key", // required for external backends
+});
+// → stored as a 1Password reference, value lives in 1Password
+
+await manager.set("anthropic.apiKey", "sk-ant-...", { sensitive: true });
+// → in-house (per-key override above)
+
+await manager.set("ui.theme", "dark");
+// → always in-house (non-sensitive values don't go to password managers)
+```
+
+**Three modes the user can run in:**
+
+- **None** — nothing enabled but `in-house`. Default. Local-only.
+- **One** — pick 1Password OR Proton Pass OR Bitwarden. Sensitive values
+  route there if available, fall back to `in-house`.
+- **All** — all backends enabled. Per-key routing in Settings, or just
+  use the priority order.
+
+`in-house` is always available and serves as the fallback regardless of
+what's enabled. If `op` isn't installed and the user's prefs say
+"1password," sensitive writes still succeed (they go to in-house with
+a clear notice in detection).
+
 ## Storage
 
 - **Sensitive values** — AES-256-GCM encrypted at rest with the vault
