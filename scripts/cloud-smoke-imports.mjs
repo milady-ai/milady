@@ -26,6 +26,8 @@ const criticalImports = [
   '@elizaos/plugin-pdf',
   '@elizaos/plugin-agent-orchestrator',
   '@elizaos/plugin-agent-skills',
+  '@elizaos/plugin-cli',
+  '@elizaos/plugin-cron',
   '@elizaos/plugin-anthropic',
   '@elizaos/plugin-local-embedding',
   '@elizaos/plugin-ollama',
@@ -36,6 +38,7 @@ const criticalImports = [
   '@elizaos/plugin-edge-tts',
   '@elizaos/plugin-n8n-workflow',
   '@stwd/sdk',
+  '@node-rs/argon2',
 ];
 
 const repoRoot = new URL('../', import.meta.url);

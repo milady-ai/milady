@@ -88,6 +88,8 @@ RUN set -eux; \
     eliza/packages/ui \
     eliza/packages/app-core \
     eliza/cloud/packages/sdk \
+    eliza/plugins/plugin-cli/typescript \
+    eliza/plugins/plugin-cron/typescript \
     eliza/plugins/plugin-sql/typescript \
     eliza/plugins/plugin-elizacloud/typescript \
     eliza/plugins/plugin-edge-tts/typescript \
