@@ -29,15 +29,19 @@ on:
         required: false
         type: boolean
         default: true
+      source_ref:
+        description: "Branch/tag/SHA to checkout for the build (manual dispatch only). Defaults to cloud/staging when dispatched from cloud/staging, otherwise cloud/main."
+        required: false
+        type: string
 
 concurrency:
-  group: build-cloud-agent-${{ github.event_name == 'push' && github.ref_name || (github.ref_name == 'cloud/staging' && 'cloud/staging' || 'cloud/main') }}
+  group: build-cloud-agent-${{ github.event_name == 'workflow_dispatch' && inputs.source_ref || (github.event_name == 'push' && github.ref_name || (github.ref_name == 'cloud/staging' && 'cloud/staging' || 'cloud/main')) }}
   cancel-in-progress: true
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: milady-ai/agent
-  SOURCE_REF: ${{ github.event_name == 'push' && github.ref_name || (github.ref_name == 'cloud/staging' && 'cloud/staging' || 'cloud/main') }}
+  SOURCE_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.source_ref || (github.event_name == 'push' && github.ref_name || (github.ref_name == 'cloud/staging' && 'cloud/staging' || 'cloud/main')) }}
   DEPOT_PROJECT_ID: m89t0f0p08
 
 permissions:
@@ -79,7 +83,7 @@ jobs:
         id: version
         run: |
           set -euo pipefail
-          if [ "${SOURCE_REF}" = "cloud/staging" ]; then
+          if [ "${SOURCE_REF}" = "cloud/staging" ] || [[ "${SOURCE_REF}" == cloud/staging-* ]]; then
             VERSION_PREFIX="cloud-staging-v"
             BUILD_ENVIRONMENT="staging"
             DEFAULT_VERSION="2.2.0"
