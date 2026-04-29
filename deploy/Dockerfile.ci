@@ -119,6 +119,8 @@ RUN set -eux; \
 RUN set -eux; \
   npx tsdown; \
   echo '{"type":"module"}' > dist/package.json; \
+  mkdir -p dist/registry; \
+  cp -R eliza/packages/app-core/src/registry/entries dist/registry/entries; \
   node --import tsx eliza/packages/app-core/scripts/write-build-info.ts 2>/dev/null || true; \
   cd apps/app; \
   npx vite build

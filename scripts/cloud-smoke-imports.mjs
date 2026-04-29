@@ -63,4 +63,37 @@ if (failures.length > 0) {
   console.error(`[cloud-smoke] ${failures.length} import(s) failed`);
   process.exit(1);
 }
-console.log(`[cloud-smoke] all ${criticalImports.length} imports passed`);
+
+const runtimeChecks = [
+  {
+    name: 'registry entries load',
+    run: async () => {
+      const registryModule = await import(new URL('dist/registry/index.js', repoRoot).href);
+      const registry = registryModule.loadRegistry();
+      const apps = registryModule.getApps(registry);
+      const plugins = registryModule.getPlugins(registry);
+      const connectors = registryModule.getConnectors(registry);
+      if (apps.length === 0 || plugins.length === 0 || connectors.length === 0) {
+        throw new Error(`empty registry buckets apps=${apps.length} plugins=${plugins.length} connectors=${connectors.length}`);
+      }
+      return `apps=${apps.length} plugins=${plugins.length} connectors=${connectors.length}`;
+    },
+  },
+];
+
+for (const check of runtimeChecks) {
+  try {
+    const detail = await check.run();
+    console.log(`[cloud-smoke] ok ${check.name}: ${detail}`);
+  } catch (error) {
+    failures.push({ spec: check.name, error });
+    console.error(`[cloud-smoke] FAIL ${check.name}`);
+    console.error(error?.stack || error?.message || error);
+  }
+}
+
+if (failures.length > 0) {
+  console.error(`[cloud-smoke] ${failures.length} check(s) failed`);
+  process.exit(1);
+}
+console.log(`[cloud-smoke] all ${criticalImports.length} imports and ${runtimeChecks.length} runtime checks passed`);
