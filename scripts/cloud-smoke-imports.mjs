@@ -70,9 +70,9 @@ const runtimeChecks = [
     run: async () => {
       const registryModule = await import(new URL('dist/registry/index.js', repoRoot).href);
       const registry = registryModule.loadRegistry();
-      const apps = registryModule.getApps(registry);
-      const plugins = registryModule.getPlugins(registry);
-      const connectors = registryModule.getConnectors(registry);
+      const apps = registry.byKind?.get('app') ?? [];
+      const plugins = registry.byKind?.get('plugin') ?? [];
+      const connectors = registry.byKind?.get('connector') ?? [];
       if (apps.length === 0 || plugins.length === 0 || connectors.length === 0) {
         throw new Error(`empty registry buckets apps=${apps.length} plugins=${plugins.length} connectors=${connectors.length}`);
       }
