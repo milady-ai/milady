@@ -1,17 +1,14 @@
 # =============================================================================
-# build-cloud-agent.yml — Build cloud agent image with GitHub Actions Docker cache
+# build-cloud-agent.yml — Build cloud agent image (workspace-native)
 # =============================================================================
 #
-# Triggers:
-#   - Push to cloud/main or cloud/staging branch
-#   - Manual dispatch with version override
+# Dockerfile.ci now owns the install/build: it copies the full milady + eliza
+# workspace, runs bun install at the workspace root, builds runtime/UI artifacts,
+# and runs the cloud import smoke contract inside the image.
 #
 # Published to: ghcr.io/milady-ai/agent
-#   Tags (production): :cloud-v{version}         and :cloud-latest
-#   Tags (staging):    :cloud-staging-v{version} and :cloud-staging-latest
-#
-# Uses docker/build-push-action's GHA cache for fast rebuilds.
-# Typical warm build: ~2-4 min vs ~8-10 min without cache.
+#   Version tags are immutable-ish release handles. Mutable latest tags are not
+#   pushed from staging builds; bump cloud-staging-latest only after Nyx verifies.
 # =============================================================================
 
 name: Build Cloud Agent
@@ -24,7 +21,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Cloud version tag (e.g. 2.0.3). Defaults to auto-increment."
+        description: "Cloud version tag (e.g. 2.1.0). Defaults to 2.1.0 on staging, run number elsewhere."
         required: false
         type: string
       push_image:
@@ -32,11 +29,6 @@ on:
         required: false
         type: boolean
         default: true
-      skip_rollout:
-        description: "Skip auto-rollout to nodes (build + push only)"
-        required: false
-        type: boolean
-        default: false
 
 concurrency:
   group: build-cloud-agent-${{ github.event_name == 'push' && github.ref_name || (github.ref_name == 'cloud/staging' && 'cloud/staging' || 'cloud/main') }}
@@ -46,7 +38,6 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: milady-ai/agent
   SOURCE_REF: ${{ github.event_name == 'push' && github.ref_name || (github.ref_name == 'cloud/staging' && 'cloud/staging' || 'cloud/main') }}
-  CLOUD_DEPLOY_WEBHOOK_URL: http://89.167.63.246:9876/deploy
   DEPOT_PROJECT_ID: m89t0f0p08
 
 permissions:
@@ -58,10 +49,9 @@ jobs:
   build:
     name: Build cloud agent image
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 60
 
     steps:
-      # ── 1. Checkout ─────────────────────────────────────────────────────────
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -70,392 +60,39 @@ jobs:
           submodules: false
           token: ${{ secrets.GH_TOKEN || secrets.GH_PAT || secrets.GITHUB_TOKEN }}
 
-      # ── 2. Set up Node + Bun ────────────────────────────────────────────────
-      - name: Setup Node.js 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: "1.3.11"
-
-      # ── 3. Cache bun store ──────────────────────────────────────────────────
-      - name: Cache bun store
-        uses: actions/cache@v4
-        with:
-          path: ~/.bun/install/cache
-          key: bun-store-cloud-${{ runner.os }}-${{ hashFiles('bun.lock') }}
-          restore-keys: |
-            bun-store-cloud-${{ runner.os }}-
-
-      # ── 3.5. Init submodules + patch workspace for CI ──────────────
-      - name: Init submodules
+      - name: Init full workspace submodules
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN || secrets.GH_PAT || secrets.GITHUB_TOKEN }}
         run: |
-          if [ -n "$GH_TOKEN" ]; then
+          set -euxo pipefail
+          if [ -n "${GH_TOKEN:-}" ]; then
             git config --global url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf "https://github.com/"
           fi
-          # Init eliza submodule first (needed for workspace resolution)
-          # Full clone (not shallow) because eliza commit may not be in shallow history
-          git submodule update --init eliza || echo "eliza submodule init failed, continuing"
-          # Nested plugin submodules vendored into the cloud image.
-          # Keep these available before disable-local-eliza-workspace rewrites package.json.
-          git -C eliza submodule update --init plugins/plugin-sql || echo "plugin-sql submodule init failed, continuing"
-          git -C eliza submodule update --init cloud || echo "cloud submodule init failed, continuing"
-          git -C eliza submodule update --init plugins/plugin-elizacloud || echo "plugin-elizacloud submodule init failed, continuing"
-          git -C eliza submodule update --init plugins/plugin-edge-tts || echo "plugin-edge-tts submodule init failed, continuing"
-          git -C eliza submodule update --init plugins/plugin-discord || echo "plugin-discord submodule init failed, continuing"
-          git -C eliza submodule update --init plugins/plugin-openai || echo "plugin-openai submodule init failed, continuing"
-          git -C eliza submodule update --init plugins/plugin-evm || echo "plugin-evm submodule init failed, continuing"
-          git -C eliza submodule update --init plugins/plugin-pdf || echo "plugin-pdf submodule init failed, continuing"
-          git -C eliza submodule update --init plugins/plugin-agent-orchestrator || echo "plugin-agent-orchestrator submodule init failed, continuing"
-          git -C eliza submodule update --init plugins/plugin-telegram || echo "plugin-telegram submodule init failed, continuing"
-          git -C eliza submodule update --init plugins/plugin-imessage || echo "plugin-imessage submodule init failed, continuing"
-          # Apply cloud runtime patches to eliza submodule. Use a subshell so a
-          # stale patch failure cannot leave the rest of this step running from
-          # inside eliza/ and accidentally skip the root rewrite scripts.
-          if [ -f cloud/patches/cloud-runtime-patches.patch ]; then
-            echo "Applying cloud runtime patches to eliza submodule..."
-            if (cd eliza && git apply ../cloud/patches/cloud-runtime-patches.patch); then
-              echo "Cloud patches applied successfully"
-            else
-              echo "WARN: cloud runtime patches did not apply cleanly; continuing with checked-out eliza"
-            fi
-          fi
-          # AppBlockerSettingsCard alias — not in upstream eliza yet, add inline
-          # milady develop main.tsx imports it; alias to WebsiteBlockerSettingsCard until merged upstream
-          LIFEOPS_UI=eliza/apps/app-lifeops/src/ui.ts
-          if [ -f "$LIFEOPS_UI" ] && ! grep -q 'AppBlockerSettingsCard' "$LIFEOPS_UI"; then
-            if grep -q 'WebsiteBlockerSettingsCard' "$LIFEOPS_UI"; then
-              WBSC_PATH=$(grep 'WebsiteBlockerSettingsCard' "$LIFEOPS_UI" | grep 'export \*' | sed 's/export \* from "//;s/";$//')
-              echo "export { WebsiteBlockerSettingsCard as AppBlockerSettingsCard } from \"${WBSC_PATH:-./components/WebsiteBlockerSettingsCard.tsx}\";" >> "$LIFEOPS_UI"
-              echo "AppBlockerSettingsCard alias added to $LIFEOPS_UI"
-            fi
-          fi
-          ls eliza/package.json && echo "eliza submodule OK" || echo "WARN: eliza submodule missing"
-          ls eliza/plugins/plugin-sql/typescript/dist/node/index.node.js && echo "plugin-sql dist OK" || echo "WARN: plugin-sql dist missing"
-          ls eliza/cloud/packages/sdk/package.json && echo "cloud-sdk src OK" || echo "WARN: cloud-sdk src missing"
-          ls eliza/plugins/plugin-elizacloud/typescript/dist/cjs/index.node.cjs && echo "plugin-elizacloud dist OK" || echo "WARN: plugin-elizacloud dist missing"
-          ls eliza/plugins/plugin-edge-tts/typescript/package.json && echo "plugin-edge-tts src OK" || echo "WARN: plugin-edge-tts src missing"
-          ls eliza/plugins/plugin-discord/typescript/dist/index.js && echo "plugin-discord dist OK" || echo "WARN: plugin-discord dist missing"
-          ls eliza/plugins/plugin-openai/typescript/dist/node/index.node.js && echo "plugin-openai dist OK" || echo "WARN: plugin-openai dist missing"
-          ls eliza/plugins/plugin-evm/typescript/dist/index.js && echo "plugin-evm dist OK" || echo "WARN: plugin-evm dist missing"
-          ls eliza/plugins/plugin-pdf/typescript/dist/node/index.node.js && echo "plugin-pdf dist OK" || echo "WARN: plugin-pdf dist missing"
-          ls eliza/plugins/plugin-agent-orchestrator/dist/index.js && echo "plugin-agent-orchestrator dist OK" || echo "WARN: plugin-agent-orchestrator dist missing"
-          ls eliza/plugins/plugin-telegram/dist/index.js && echo "plugin-telegram dist OK" || echo "WARN: plugin-telegram dist missing"
-          ls eliza/plugins/plugin-imessage/typescript/src/index.ts && echo "plugin-imessage src OK" || echo "WARN: plugin-imessage src missing"
-          # Compiled agent/dist imports from plugin-imessage/typescript/src/index.js (note .js).
-          # The submodule only ships .ts, so copy the .ts content to .js for the runtime loader.
-          if [ -f eliza/plugins/plugin-imessage/typescript/src/index.ts ]; then
-            cp eliza/plugins/plugin-imessage/typescript/src/index.ts eliza/plugins/plugin-imessage/typescript/src/index.js
-            echo "plugin-imessage .js copy OK"
-          fi
-          # Init other submodules (skip local upstreams to avoid nested plugin submodules)
-          MILADY_SKIP_LOCAL_UPSTREAMS=1 node scripts/init-submodules.mjs || echo "Some submodules failed, continuing"
-          # Disable workspace entries for missing plugin submodules
-          MILADY_SKIP_LOCAL_UPSTREAMS=1 node scripts/disable-local-eliza-workspace.mjs || echo "Disable script failed, continuing"
+          git submodule update --init eliza
+          git -C eliza submodule update --init --recursive
+          MILADY_SKIP_LOCAL_UPSTREAMS=1 node scripts/init-submodules.mjs || echo "Some non-eliza submodules failed, continuing"
+          test -f eliza/package.json
+          test -f eliza/cloud/packages/sdk/package.json
+          test -f eliza/plugins/plugin-sql/typescript/package.json
 
-      - name: Patch ignoreDeprecations for TypeScript 5 toolchain
-        run: |
-          node - <<'NODE'
-          const fs = require('fs');
-          const path = require('path');
-          const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-          const tsVersion = pkg.devDependencies?.typescript ?? pkg.dependencies?.typescript ?? '';
-          if (!/^\^?5\./.test(tsVersion)) {
-            console.log('[ts-compat] root TypeScript is not 5.x, skipping');
-            process.exit(0);
-          }
-          let patched = 0;
-          function walk(dir) {
-            for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-              if (entry.name === 'node_modules' || entry.name === '.git') continue;
-              const full = path.join(dir, entry.name);
-              if (entry.isDirectory()) {
-                walk(full);
-                continue;
-              }
-              if (!entry.isFile() || !/^tsconfig(\..+)?\.json$/.test(entry.name)) continue;
-              const raw = fs.readFileSync(full, 'utf8');
-              const next = raw.replace(/"ignoreDeprecations"\s*:\s*"6\.0"/g, '"ignoreDeprecations": "5.0"');
-              if (next !== raw) {
-                fs.writeFileSync(full, next);
-                patched += 1;
-                console.log('[ts-compat] patched', full);
-              }
-            }
-          }
-          walk('eliza');
-          console.log('[ts-compat] patched files:', patched);
-          NODE
-
-      # The disable script removes all eliza/* workspace entries and rewrites
-      # workspace:* overrides, but the vite build needs app-core, ui, shared,
-      # agent, and app packages that exist on disk. Re-add them.
-      - name: Restore build-critical workspaces
-        run: |
-          node -e '
-            const fs = require("fs");
-            const path = require("path");
-            const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
-
-            // Scan for eliza packages that exist on disk with a package.json
-            const dirs = [
-              ...fs.readdirSync("eliza/packages").map(d => "eliza/packages/" + d),
-              ...fs.readdirSync("eliza/apps").map(d => "eliza/apps/" + d),
-            ];
-            const restored = [];
-            for (const d of dirs) {
-              const p = d + "/package.json";
-              if (fs.existsSync(p)) {
-                if (!pkg.workspaces.includes(d)) {
-                  pkg.workspaces.push(d);
-                  restored.push(d);
-                }
-              }
-            }
-            // Also collect names of restored packages to fix overrides
-            const restoredNames = new Set();
-            for (const d of [...restored, ...pkg.workspaces.filter(w => !w.includes("*"))]) {
-              const p = d + "/package.json";
-              if (fs.existsSync(p)) {
-                try { restoredNames.add(JSON.parse(fs.readFileSync(p, "utf8")).name); } catch {}
-              }
-            }
-
-            // Restore workspace:* overrides for re-added packages
-            if (pkg.overrides) {
-              for (const name of restoredNames) {
-                if (pkg.overrides[name] && pkg.overrides[name] !== "workspace:*") {
-                  console.log("[restore-workspaces] Override", name, ":", pkg.overrides[name], "-> workspace:*");
-                  pkg.overrides[name] = "workspace:*";
-                }
-              }
-            }
-
-            fs.writeFileSync("package.json", JSON.stringify(pkg, null, 2) + "\n");
-            console.log("[restore-workspaces] Re-added", restored.length, "workspace entries");
-            if (restored.length > 0) console.log(restored.join("\n"));
-
-            // Rewrite workspace:* deps in restored packages that reference
-            // packages NOT in the workspace (missing plugin submodules etc.)
-            const allWsDirs = pkg.workspaces.filter(w => !w.includes("*"));
-            for (const d of allWsDirs) {
-              const p = d + "/package.json";
-              if (!fs.existsSync(p)) continue;
-              const raw = fs.readFileSync(p, "utf8");
-              const wpkg = JSON.parse(raw);
-              let changed = false;
-              for (const field of ["dependencies", "devDependencies", "peerDependencies", "optionalDependencies"]) {
-                if (!wpkg[field]) continue;
-                const toDelete = [];
-                for (const [dep, ver] of Object.entries(wpkg[field])) {
-                  if (typeof ver !== "string" || !ver.startsWith("workspace:")) continue;
-                  if (restoredNames.has(dep)) continue; // local workspace, keep
-                  // Not a workspace member, delete to prevent resolve failure
-                  toDelete.push(dep);
-                  changed = true;
-                }
-                for (const dep of toDelete) {
-                  delete wpkg[field][dep];
-                  console.log("[restore-workspaces] Removed", dep, "from", d);
-                }
-              }
-              if (changed) {
-                fs.writeFileSync(p, JSON.stringify(wpkg, null, 2) + "\n");
-              }
-            }
-          '
-
-      # ── 4. Install dependencies ─────────────────────────────────────────────
-      - name: Install dependencies
-        run: bun install --ignore-scripts
-
-      - name: Hoist missing runtime deps
-        run: |
-          # tsx resolves @elizaos/core src/ at runtime, hitting imports that aren't
-          # hoisted by bun workspace install (workspace entries get disabled for CI).
-          # Check which deps are missing and install them individually via tarball.
-          node -e '
-            const fs = require("fs");
-            const path = require("path");
-            const { execSync } = require("child_process");
-            function bunStoreCandidate(dep) {
-              const bunDir = path.join("node_modules", ".bun");
-              if (!fs.existsSync(bunDir)) return null;
-              const encoded = dep.startsWith("@") ? dep.replace("/", "+") : dep;
-              const entries = fs.readdirSync(bunDir).filter((entry) => entry.startsWith(encoded + "@"));
-              entries.sort().reverse();
-              for (const entry of entries) {
-                const candidate = path.join(bunDir, entry, "node_modules", dep);
-                if (fs.existsSync(path.join(candidate, "package.json"))) return candidate;
-              }
-              return null;
-            }
-            function linkFromBunStore(dep, target) {
-              const candidate = bunStoreCandidate(dep);
-              if (!candidate) return false;
-              fs.rmSync(target, { recursive: true, force: true });
-              fs.mkdirSync(path.dirname(target), { recursive: true });
-              fs.symlinkSync(path.relative(path.dirname(target), candidate), target, "dir");
-              console.log(`  + ${dep} (linked from ${candidate})`);
-              return true;
-            }
-            const pkgPaths = [
-              "eliza/packages/typescript/package.json",
-              "eliza/packages/agent/package.json",
-            ];
-            const missing = new Set();
-            for (const p of pkgPaths) {
-              if (!fs.existsSync(p)) continue;
-              const pkg = JSON.parse(fs.readFileSync(p, "utf8"));
-              for (const dep of Object.keys(pkg.dependencies || {})) {
-                if (!fs.existsSync("node_modules/" + dep)) missing.add(dep);
-              }
-            }
-            if (missing.size === 0) { console.log("All deps present"); process.exit(0); }
-            console.log(`Installing ${missing.size} missing deps: ${[...missing].join(", ")}`);
-            for (const dep of missing) {
-              try {
-                const url = execSync(`npm view ${dep} dist.tarball 2>/dev/null`, {encoding: "utf8"}).trim();
-                if (!url) { console.log(`  skip ${dep} (no tarball)`); continue; }
-                const dir = `/tmp/pkg-${dep.replace(/[\/\/@]/g, "_")}`;
-                fs.mkdirSync(dir, {recursive: true});
-                execSync(`curl -sL "${url}" | tar xz -C "${dir}"`, {stdio: "inherit"});
-                const target = path.join("node_modules", dep);
-                if (linkFromBunStore(dep, target)) continue;
-                fs.mkdirSync(path.dirname(target), {recursive: true});
-                fs.renameSync(path.join(dir, "package"), target);
-                console.log(`  + ${dep}`);
-              } catch (e) { console.log(`  WARN: ${dep}: ${e.message}`); }
-            }
-          '
-
-      - name: Run postinstall patches
-        run: bun run postinstall
-        env:
-          SKIP_AVATAR_CLONE: "1"
-          MILADY_NO_VISION_DEPS: "1"
-          MILADY_SKIP_LOCAL_UPSTREAMS: "1"
-
-      - name: Build vendored plugins
-        run: |
-          (
-            cd eliza/plugins/plugin-sql/typescript
-            bun run build
-            ls dist/node/index.node.js && echo "plugin-sql build OK"
-          ) || echo "plugin-sql build failed, continuing"
-          (
-            cd eliza/cloud/packages/sdk
-            bun run build
-            ls dist/index.js && echo "cloud-sdk build OK"
-          ) || echo "cloud-sdk build failed, continuing"
-          (
-            cd eliza/plugins/plugin-elizacloud/typescript
-            bun install --no-save
-            bun run build
-            ls dist/cjs/index.node.cjs && echo "plugin-elizacloud build OK"
-          ) || echo "plugin-elizacloud build failed, continuing"
-          (
-            cd eliza/plugins/plugin-edge-tts/typescript
-            bun install --no-save
-            bun run build
-            ls dist/node/index.node.js && echo "plugin-edge-tts build OK"
-          ) || echo "plugin-edge-tts build failed, continuing"
-          (
-            cd eliza/plugins/plugin-discord/typescript
-            bun run build
-            ls dist/index.js && echo "plugin-discord build OK"
-          ) || echo "plugin-discord build failed, continuing"
-          (
-            cd eliza/plugins/plugin-openai/typescript
-            bun run build
-            ls dist/node/index.node.js && echo "plugin-openai build OK"
-          ) || echo "plugin-openai build failed, continuing"
-          (
-            cd eliza/plugins/plugin-evm/typescript
-            bun run build
-            ls dist/index.js && echo "plugin-evm build OK"
-          ) || echo "plugin-evm build failed, continuing"
-          (
-            cd eliza/plugins/plugin-pdf/typescript
-            bun run build
-            ls dist/node/index.node.js && echo "plugin-pdf build OK"
-          ) || echo "plugin-pdf build failed, continuing"
-          (
-            cd eliza/plugins/plugin-agent-orchestrator
-            bun run build
-            ls dist/index.js && echo "plugin-agent-orchestrator build OK"
-          ) || echo "plugin-agent-orchestrator build failed, continuing"
-          (
-            cd eliza/plugins/plugin-telegram
-            bun run build
-            ls dist/index.js && echo "plugin-telegram build OK"
-          ) || echo "plugin-telegram build failed, continuing"
-
-      # ── 5. Build Capacitor plugins ──────────────────────────────────────────
-      - name: Build Capacitor plugins
-        run: |
-          cd apps/app
-          bun scripts/plugin-build.mjs
-
-      # ── 5.5. Build @elizaos/core + agent (needed for tsx runtime) ───────
-      - name: Install buf CLI
-        uses: bufbuild/buf-setup-action@v1
-        with:
-          version: "1.50.0"
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build @elizaos/core
-        run: |
-          # Proto generation
-          cd eliza/packages/schemas
-          buf dep update && buf generate
-          # i18n keyword generation (needs @elizaos/shared scripts)
-          cd ../typescript
-          node ../shared/scripts/generate-keywords.mjs --target ts 2>/dev/null || echo "keyword gen skipped"
-          # Build core
-          bun run build.ts 2>&1 || echo "core build had errors"
-          ls dist/node/index.node.js && echo "core dist OK" || echo "WARN: core dist missing"
-
-      - name: Build @elizaos/agent
-        run: |
-          cd eliza/packages/agent
-          bun run build:docker-dist 2>&1 || bun run build 2>&1 || echo "agent build had errors"
-
-      - name: Build @elizaos/shared
-        run: |
-          cd eliza/packages/shared
-          bun run build 2>&1 || echo "shared build had errors"
-
-      # ── 6. Build runtime (tsdown) ───────────────────────────────────────────
-      - name: Build runtime (tsdown)
-        run: |
-          npx tsdown
-          echo '{"type":"module"}' > dist/package.json
-          node --import tsx eliza/packages/app-core/scripts/write-build-info.ts 2>/dev/null || true
-
-      # ── 7. Determine version ────────────────────────────────────────────────
       - name: Determine version
         id: version
         run: |
+          set -euo pipefail
           if [ "${SOURCE_REF}" = "cloud/staging" ]; then
             VERSION_PREFIX="cloud-staging-v"
-            LATEST_TAG="cloud-staging-latest"
             BUILD_ENVIRONMENT="staging"
+            DEFAULT_VERSION="2.1.0"
           else
             VERSION_PREFIX="cloud-v"
-            LATEST_TAG="cloud-latest"
             BUILD_ENVIRONMENT="production"
+            DEFAULT_VERSION="2.1.${{ github.run_number }}"
           fi
 
           if [ -n "${{ inputs.version }}" ]; then
             VERSION="${VERSION_PREFIX}${{ inputs.version }}"
           else
-            VERSION="${VERSION_PREFIX}2.0.${{ github.run_number }}"
+            VERSION="${VERSION_PREFIX}${DEFAULT_VERSION}"
           fi
 
           if [ "${BUILD_ENVIRONMENT}" = "staging" ]; then
@@ -464,10 +101,9 @@ jobs:
             VERSION_CLEAN="${VERSION#cloud-v}"
           fi
 
-          echo "version=${VERSION}"             >> $GITHUB_OUTPUT
-          echo "version_clean=${VERSION_CLEAN}" >> $GITHUB_OUTPUT
-          echo "latest_tag=${LATEST_TAG}"       >> $GITHUB_OUTPUT
-          echo "build_environment=${BUILD_ENVIRONMENT}" >> $GITHUB_OUTPUT
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "version_clean=${VERSION_CLEAN}" >> "$GITHUB_OUTPUT"
+          echo "build_environment=${BUILD_ENVIRONMENT}" >> "$GITHUB_OUTPUT"
           echo "Cloud version: ${VERSION}"
           echo "Build environment: ${BUILD_ENVIRONMENT}"
           echo "Source branch: ${SOURCE_REF}"
@@ -496,112 +132,9 @@ jobs:
             echo "EOF"
           } >> "$GITHUB_ENV"
 
-      # ── 7b. Ensure tailwindcss is resolvable from inside the eliza submodule
-      - name: Inject tailwindcss into eliza/packages/app-core/node_modules
-        run: |
-          # @tailwindcss/vite resolves 'tailwindcss' starting from the CSS file path inside
-          # the eliza submodule (eliza/packages/app-core/src/styles/styles.css).
-          # Bun workspaces don't hoist it to root node_modules; npm install fails with
-          # EOVERRIDE due to app-core's package.json overrides. Use tarball extraction instead.
-          mkdir -p eliza/packages/app-core/node_modules
-          if [ ! -d "eliza/packages/app-core/node_modules/tailwindcss" ]; then
-            echo "Fetching tailwindcss tarball..."
-            TAILWIND_URL=$(npm view tailwindcss dist.tarball 2>/dev/null)
-            if [ -n "$TAILWIND_URL" ]; then
-              mkdir -p /tmp/tw_extract
-              rm -rf /tmp/tw_extract/package
-              curl -sL "$TAILWIND_URL" | tar xz -C /tmp/tw_extract
-              mv /tmp/tw_extract/package eliza/packages/app-core/node_modules/tailwindcss
-              echo "+ tailwindcss $(cat eliza/packages/app-core/node_modules/tailwindcss/package.json | node -e 'process.stdin.resume();let d="";process.stdin.on("data",c=>d+=c);process.stdin.on("end",()=>console.log(JSON.parse(d).version))')"
-            else
-              echo "WARN: could not resolve tailwindcss tarball URL"
-            fi
-          else
-            echo "tailwindcss already present in app-core/node_modules"
-          fi
-
-      # ── 7c. Ensure @xyflow/react is resolvable from inside the eliza submodule
-      - name: Inject @xyflow/react into eliza/packages/app-core/node_modules
-        run: |
-          # Vite resolves package CSS imports from the importing file path inside
-          # the eliza submodule (eliza/packages/app-core/src/styles/styles.css).
-          mkdir -p eliza/packages/app-core/node_modules/@xyflow
-          if [ ! -d "eliza/packages/app-core/node_modules/@xyflow/react" ]; then
-            echo "Fetching @xyflow/react tarball..."
-            XYF_URL=$(npm view @xyflow/react dist.tarball 2>/dev/null)
-            if [ -n "$XYF_URL" ]; then
-              mkdir -p /tmp/xyf_extract
-              rm -rf /tmp/xyf_extract/package
-              curl -sL "$XYF_URL" | tar xz -C /tmp/xyf_extract
-              mv /tmp/xyf_extract/package eliza/packages/app-core/node_modules/@xyflow/react
-              echo "+ @xyflow/react $(cat eliza/packages/app-core/node_modules/@xyflow/react/package.json | node -e 'process.stdin.resume();let d="";process.stdin.on("data",c=>d+=c);process.stdin.on("end",()=>console.log(JSON.parse(d).version))')"
-            else
-              echo "WARN: could not resolve @xyflow/react tarball URL"
-            fi
-          else
-            echo "@xyflow/react already present in app-core/node_modules"
-          fi
-
-      # ── 7d. Ensure cron-parser + luxon are resolvable from inside app-core
-      - name: Inject cron-parser into eliza/packages/app-core/node_modules
-        run: |
-          # Heartbeats UI imports cron-parser from app-core source, and cron-parser
-          # in turn depends on luxon at runtime.
-          mkdir -p eliza/packages/app-core/node_modules
-          if [ ! -d "eliza/packages/app-core/node_modules/cron-parser" ]; then
-            echo "Fetching cron-parser tarball..."
-            CRON_URL=$(npm view cron-parser dist.tarball 2>/dev/null)
-            if [ -n "$CRON_URL" ]; then
-              mkdir -p /tmp/cron_extract
-              rm -rf /tmp/cron_extract/package
-              curl -sL "$CRON_URL" | tar xz -C /tmp/cron_extract
-              mv /tmp/cron_extract/package eliza/packages/app-core/node_modules/cron-parser
-              echo "+ cron-parser $(cat eliza/packages/app-core/node_modules/cron-parser/package.json | node -e 'process.stdin.resume();let d="";process.stdin.on("data",c=>d+=c);process.stdin.on("end",()=>console.log(JSON.parse(d).version))')"
-            else
-              echo "WARN: could not resolve cron-parser tarball URL"
-            fi
-          else
-            echo "cron-parser already present in app-core/node_modules"
-          fi
-          if [ ! -d "eliza/packages/app-core/node_modules/luxon" ]; then
-            echo "Fetching luxon tarball..."
-            LUXON_URL=$(npm view luxon dist.tarball 2>/dev/null)
-            if [ -n "$LUXON_URL" ]; then
-              mkdir -p /tmp/luxon_extract
-              rm -rf /tmp/luxon_extract/package
-              curl -sL "$LUXON_URL" | tar xz -C /tmp/luxon_extract
-              mv /tmp/luxon_extract/package eliza/packages/app-core/node_modules/luxon
-              echo "+ luxon $(cat eliza/packages/app-core/node_modules/luxon/package.json | node -e 'process.stdin.resume();let d="";process.stdin.on("data",c=>d+=c);process.stdin.on("end",()=>console.log(JSON.parse(d).version))')"
-            else
-              echo "WARN: could not resolve luxon tarball URL"
-            fi
-          else
-            echo "luxon already present in app-core/node_modules"
-          fi
-
-      # ── 8. Build UI (vite) ──────────────────────────────────────────────────
-      - name: Build UI (vite)
-        run: |
-          cd apps/app
-          npx vite build
-        env:
-          NODE_ENV: production
-
-      # ── 9. Docker ignore (context root must have .dockerignore; source: deploy/)
       - name: Set up CI dockerignore
-        run: |
-          cp eliza/packages/app-core/deploy/.dockerignore.ci .dockerignore
-          # Whitelist runtime-required app packages (agent imports these at boot)
-          echo '!eliza/apps/app-companion' >> .dockerignore
-          echo '!eliza/apps/app-lifeops' >> .dockerignore
-          echo '!eliza/apps/app-steward' >> .dockerignore
-          echo '!eliza/apps/app-task-coordinator' >> .dockerignore
-          echo '!eliza/apps/app-training' >> .dockerignore
-          echo '!eliza/apps/app-vincent' >> .dockerignore
+        run: cp eliza/packages/app-core/deploy/.dockerignore.ci .dockerignore
 
-      # ── 10. Set up builders ────────────────────────────────────────────────
-      # Prefer Depot when available, but always provision Buildx so the fallback
-      # path is ready if Depot is disabled or the Depot build step fails.
       - name: Set up Depot CLI
         if: vars.DEPOT_ENABLED != 'false'
         uses: depot/setup-action@v1
@@ -610,7 +143,6 @@ jobs:
       - name: Set up Docker Buildx fallback
         uses: docker/setup-buildx-action@v3
 
-      # ── 11. Login to GHCR ──────────────────────────────────────────────────
       - name: Login to GHCR
         uses: docker/login-action@v3
         if: ${{ github.event_name == 'push' || inputs.push_image != false }}
@@ -619,7 +151,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # ── 12. Build and push via Depot (persistent layer cache + Depot infra) ──
       - name: Build and push Docker image with Depot
         id: depot-build
         if: vars.DEPOT_ENABLED != 'false'
@@ -630,9 +161,7 @@ jobs:
           file: deploy/Dockerfile.ci
           platforms: linux/amd64
           push: ${{ github.event_name == 'push' || inputs.push_image != false }}
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.latest_tag }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}
           build-args: |
             APP_ENTRYPOINT=${{ env.APP_ENTRYPOINT }}
             APP_CMD_START=${{ env.APP_CMD_START }}
@@ -657,9 +186,7 @@ jobs:
           file: deploy/Dockerfile.ci
           platforms: linux/amd64
           push: ${{ github.event_name == 'push' || inputs.push_image != false }}
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.latest_tag }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}
           build-args: |
             APP_ENTRYPOINT=${{ env.APP_ENTRYPOINT }}
             APP_CMD_START=${{ env.APP_CMD_START }}
@@ -674,67 +201,40 @@ jobs:
             REVISION=${{ github.sha }}
           provenance: false
 
-      # ── 13. Trigger production deploy webhook ──────────────────────────────
-      - name: Trigger cloud fleet deploy webhook
-        if: success() && steps.version.outputs.build_environment == 'production' && (github.event_name == 'push' || inputs.push_image != false) && (github.event_name == 'push' || inputs.skip_rollout != true)
-        env:
-          WEBHOOK_SECRET: ${{ secrets.CLOUD_DEPLOY_WEBHOOK_SECRET }}
-          IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}
-          IMAGE_TAG: ${{ steps.version.outputs.version }}
-          GIT_SHA: ${{ github.sha }}
-          GIT_REF: ${{ github.ref_name }}
-          DELIVERY_ID: ${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Pull and run smoke contract from pushed image
+        if: ${{ github.event_name == 'push' || inputs.push_image != false }}
         run: |
-          if [ -z "$WEBHOOK_SECRET" ]; then
-            echo "CLOUD_DEPLOY_WEBHOOK_SECRET is required" >&2
-            exit 1
-          fi
+          set -euxo pipefail
+          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}"
+          docker pull "$IMAGE"
+          docker run --rm "$IMAGE" node --import ./node_modules/tsx/dist/loader.mjs scripts/cloud-smoke-imports.mjs
+          docker image inspect "$IMAGE" --format '{{index .RepoDigests 0}}' | tee /tmp/image-digest.txt
 
-          PAYLOAD=$(python3 -c 'import json, os; print(json.dumps({"image": os.environ["IMAGE"], "tag": os.environ["IMAGE_TAG"], "sha": os.environ["GIT_SHA"], "ref": os.environ["GIT_REF"], "run_id": os.environ["DELIVERY_ID"], "skip_rollout": False}, separators=(",", ":")))')
-          SIGNATURE="sha256=$(printf '%s' "$PAYLOAD" | openssl dgst -sha256 -hmac "$WEBHOOK_SECRET" | awk '{print $2}')"
-
-          curl --fail --show-error --silent \
-            -X POST "${{ env.CLOUD_DEPLOY_WEBHOOK_URL }}" \
-            -H "Content-Type: application/json" \
-            -H "X-GitHub-Event: cloud_deploy" \
-            -H "X-GitHub-Delivery: ${DELIVERY_ID}" \
-            -H "X-Hub-Signature-256: ${SIGNATURE}" \
-            --data "$PAYLOAD"
-
-      # ── 13. Build summary ──────────────────────────────────────────────────
       - name: Build summary
         if: always()
         run: |
           if [ "${{ steps.version.outputs.build_environment }}" = "staging" ]; then
             BUILD_LABEL="Staging"
+            LATEST_NOTE="cloud-staging-latest intentionally not pushed by CI; bump after Nyx verification."
           else
             BUILD_LABEL="Production"
+            LATEST_NOTE="cloud-latest not pushed by this workflow; promote mutable tags after verification."
           fi
 
-          if [ "${SOURCE_REF}" = "cloud/main" ]; then
-            if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.skip_rollout }}" = "true" ]; then
-              ROLLOUT_STATUS="skipped (workflow_dispatch skip_rollout=true)"
-            else
-              ROLLOUT_STATUS="enabled via webhook"
-            fi
-          else
-            ROLLOUT_STATUS="not applicable (staging)"
+          echo "## ☁️ Cloud Agent Image (${BUILD_LABEL})" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Property | Value |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|----------|-------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Environment | \`${{ steps.version.outputs.build_environment }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Image | \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Version | \`${{ steps.version.outputs.version }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Branch | \`${SOURCE_REF}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Commit | \`$(git rev-parse --short HEAD)\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Mutable latest | ${LATEST_NOTE} |" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f /tmp/image-digest.txt ]; then
+            echo "| Digest | \`$(cat /tmp/image-digest.txt)\` |" >> "$GITHUB_STEP_SUMMARY"
           fi
-
-          echo "## ☁️ Cloud Agent Image (${BUILD_LABEL})" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "> ${BUILD_LABEL} build for branch \`${SOURCE_REF}\`." >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Environment | \`${{ steps.version.outputs.build_environment }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Image | \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Version | \`${{ steps.version.outputs.version }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Branch | \`${SOURCE_REF}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Commit | \`$(git rev-parse --short HEAD)\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Auto-deploy | ${ROLLOUT_STATUS} |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo '```bash' >> $GITHUB_STEP_SUMMARY
-          echo "docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-          echo "docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.latest_tag }}" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo '```bash' >> "$GITHUB_STEP_SUMMARY"
+          echo "docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"

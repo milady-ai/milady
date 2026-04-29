@@ -62,8 +62,8 @@ import {
 } from "@elizaos/capacitor-llama";
 import { lazy, StrictMode, Suspense, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
-import { CompanionShell } from "@elizaos/app-companion/ui";
 import {
+  CompanionShell,
   createVectorBrowserRenderer,
   GlobalEmoteOverlay,
   InferenceCloudAlertButton,
@@ -71,7 +71,7 @@ import {
   resolveCompanionInferenceNotice,
   THREE,
   useCompanionSceneStatus,
-} from "@elizaos/app-companion";
+} from "@elizaos/app-companion/ui";
 import "@elizaos/app-companion/register";
 // Side-effect: register LifeOps sidebar widgets + client methods on ElizaClient.
 import "@elizaos/app-lifeops/widgets";
@@ -102,11 +102,11 @@ import {
   CodingAgentSettingsSection,
   CodingAgentTasksPanel,
   PtyConsoleDrawer,
-} from "@elizaos/app-task-coordinator";
+} from "@elizaos/app-task-coordinator/ui";
 import { FineTuningView } from "@elizaos/app-training/ui";
 import "@elizaos/app-shopify/register";
 import "@elizaos/app-vincent/client";
-import { useVincentState } from "@elizaos/app-vincent";
+import { useVincentState } from "@elizaos/app-vincent/useVincentState";
 import "@elizaos/app-vincent/register";
 import { shouldUseCloudOnlyBranding } from "@elizaos/app-core";
 import {
