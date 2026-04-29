@@ -121,6 +121,18 @@ RUN set -eux; \
   echo '{"type":"module"}' > dist/package.json; \
   mkdir -p dist/registry; \
   cp -R eliza/packages/app-core/src/registry/entries dist/registry/entries; \
+  node - <<'__REGISTRY_RUNTIME_PATCH__'; \
+const fs = require('fs');
+const file = 'dist/registry/entries/apps/polymarket.json';
+if (fs.existsSync(file)) {
+  const entry = JSON.parse(fs.readFileSync(file, 'utf8'));
+  if (entry.id === 'polymarket') {
+    entry.id = 'app-polymarket';
+    fs.writeFileSync(file, `${JSON.stringify(entry, null, 2)}\n`);
+    console.log('[cloud-build] renamed app registry id polymarket -> app-polymarket to avoid plugin id collision');
+  }
+}
+__REGISTRY_RUNTIME_PATCH__
   node --import tsx eliza/packages/app-core/scripts/write-build-info.ts 2>/dev/null || true; \
   cd apps/app; \
   npx vite build
