@@ -3,6 +3,60 @@ title: 更新日志
 description: Milady 的最新动态——新功能、改进和修复。
 ---
 
+<Update label="2026-04-29" description="4月29日当周；验证裁定结果回到聊天、第一方应用保护、MiladyOS 在 Android 上的本地代理、从首页打开到云端" tags={["Feature", "Update", "Fix"]}>
+
+<div id="verification-verdicts-return-to-chat">
+## 验证裁定结果回到聊天
+</div>
+
+当你的代理生成一个[编码代理](/zh/guides/coding-swarms)来构建新应用或插件（`APP.create`、`PLUGIN.create`）时，验证裁定结果——通过或失败——现在会在运行完成后被发回到原始聊天房间。以前，裁定结果对运维人员通过 SSE/WS 是可见的，但在对话中被悄无声息地丢弃，让你无法确认请求是否成功落地。裁定结果会去重，并且 bridge 在会话结束时会正确清理其订阅。
+
+<div id="first-party-app-protection">
+## 第一方应用保护
+</div>
+
+运行时现在保护第一方[应用](/zh/dashboard/apps)——Companion、Wallet、LifeOps、Browser Bridge 等——在加载时不会被恰好同名的第三方包覆盖。新的受保护应用解析器将你的 `MILADY_PROTECTED_APPS` 环境变量列表与工作区中的第一方应用名合并，并在加载器中拒绝覆盖尝试。具有作用域感知的查找还能捕获诸如 `@evil/app-companion` 冒充第一方 `app-companion` 之类的尝试。
+
+<div id="browser-verification-fails-closed">
+## 浏览器验证默认拒绝
+</div>
+
+[应用验证](/zh/dashboard/apps)的浏览器检查现在会在 `puppeteer-core` 不可用时默认拒绝，因此缺失的依赖不会悄悄跳过该检查。如果你有意在没有浏览器验证的情况下运行，请通过设置 `MILADY_BROWSER_VERIFY_OPTIONAL=1` 显式选择退出。
+
+<div id="miladyos-local-agent-on-android">
+## MiladyOS 在 Android 上的本地代理
+</div>
+
+[MiladyOS](/zh/architecture) 构建现在将代理作为其自身的 SELinux 受限进程运行。专用的 `milady_agent` 域将运行时从 priv-app 沙箱过渡到限定于代理 exec/data 目录和回环网络的更严格策略。同一发布的 B 阶段还在解压后重新标记磁盘上的代理树，使策略真正生效。最终效果：代理仅以其所需的、内核强制执行的能力运行，而不是完整的 priv-app 范围。
+
+<div id="open-in-cloud-from-the-homepage">
+## 从首页打开到云端
+</div>
+
+Milady 首页上新增的**打开到云端**按钮，让你可以一次流程从营销页面跳转到正在运行的[云代理](/zh/guides/cloud)。点击后会弹出一个窗口，登录、配置（或复用）云代理、轮询配置任务，并在准备就绪后将弹窗重定向到你的代理 UI——无需手动跳到仪表板。按钮在整个过程中会显示空闲、准备中和可取消等状态，并干净地处理弹窗关闭和超时情况。
+
+<div id="updates">
+## 更新
+</div>
+
+- **编码代理的模型偏好会传播到生成的会话** — 当你在[编码代理设置](/zh/guides/coding-swarms)中配置 Anthropic 或 OpenAI 的模型偏好时，这些选择现在会通过编排器的 PTY 层正确地流入每个生成的编码会话的环境中。以前，过期的默认值可能会泄漏到长时间运行的会话中。
+- **计算机使用的动作路由修复** — 动作规划器现在更可靠地将计算机使用请求（浏览器导航、截图、点击）路由到正确的处理器，消除了之前将这些请求通过通用聊天回复错误路由的问题。
+- **Gmail 邮件草稿回复优雅 404** — 当你的代理尝试为已被删除或移动的 [Gmail](/zh/rest/lifeops) 会话起草回复时，该动作现在会优雅地降级并给出明确消息，而不是抛出 Google API 的 404。
+- **LIFE 显式意图路由** — LIFE 动作现在要求提示中包含明确的生活追踪意图才会进行路由，因此像"记得给妈妈打电话"这样的随意短语在你只想要简单待办时不会再触发 LIFE 处理器。
+- **关闭剩余的严格执行漏洞** — 动作循环中剩余的三个严格执行漏洞已经被关闭，因此多步代理运行端到端地遵循严格模式契约。
+- **MANAGE_APP_OPS_MODES 动作在移动端可用** — 移动端构建现在在其动作清单中声明 `MANAGE_APP_OPS_MODES`，将 app-ops 管理暴露给你在 Android 和 iOS 上的代理。
+
+<div id="bug-fixes">
+## 错误修复
+</div>
+
+- 修复了 [MiladyOS](/zh/architecture) AOSP cuttlefish 构建在启动验证期间失败的问题——构建管道现在能端到端完成，并且启动路径会自动验证
+- 修复了一个依赖冲突，`@elizaos/plugin-openai` 在全新安装时可能会引入重复的 `@ai-sdk/provider` 版本——该插件现在已固定到工作区
+- 修复了在底层表尚不存在的数据库上调度和活动列修复抛出错误的问题——迁移现在首先检查表是否存在
+- 修复了在添加新的 hero 美术资源后静态资产清单不同步的问题，这可能导致[应用视图](/zh/dashboard/apps)中出现缺失图像的回退
+
+</Update>
+
 <Update label="2026-04-23" description="4月23日当周；双钱包和云钱包配置、Agent Browser Bridge、自动化草稿、云代理配置 UX、BlueBubbles 连接器" tags={["Feature", "Update", "Fix"]}>
 
 <div id="dual-wallet-with-cloud-wallet-provisioning">

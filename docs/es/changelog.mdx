@@ -3,6 +3,60 @@ title: Registro de cambios
 description: Novedades en Milady — funcionalidades, mejoras y correcciones.
 ---
 
+<Update label="2026-04-29" description="Semana del 29 de abril; los veredictos de verificación regresan al chat, protección de aplicaciones de primera parte, agente local de MiladyOS en Android, abrir en la nube" tags={["Feature", "Update", "Fix"]}>
+
+<div id="verification-verdicts-return-to-chat">
+## Los veredictos de verificación regresan al chat
+</div>
+
+Cuando tu agente genera un [agente de codificación](/es/guides/coding-swarms) para crear una nueva aplicación o plugin (`APP.create`, `PLUGIN.create`), el veredicto de verificación — aprobado o fallido — ahora se publica de vuelta en la sala de chat de origen cuando finaliza la ejecución. Anteriormente, el veredicto era visible para operaciones a través de SSE/WS, pero se perdía silenciosamente en la conversación, dejándote sin confirmación de que tu solicitud había llegado. Los veredictos se deduplican y el bridge limpia sus suscripciones correctamente cuando terminan las sesiones.
+
+<div id="first-party-app-protection">
+## Protección de aplicaciones de primera parte
+</div>
+
+El runtime ahora protege las [aplicaciones](/es/dashboard/apps) de primera parte — Companion, Wallet, LifeOps, Browser Bridge y otras — para que no sean sobrescritas en el momento de carga por un paquete de terceros que comparta el mismo nombre. Un nuevo resolver de aplicaciones protegidas une tu lista de variables de entorno `MILADY_PROTECTED_APPS` con los nombres de las aplicaciones de primera parte del workspace y rechaza los intentos de sobrescritura en el cargador. Las búsquedas con reconocimiento de scope también detectan intentos como `@evil/app-companion` haciéndose pasar por la `app-companion` de primera parte.
+
+<div id="browser-verification-fails-closed">
+## La verificación de navegador falla de forma segura
+</div>
+
+La comprobación de navegador de [verificación de aplicaciones](/es/dashboard/apps) ahora falla de forma segura si `puppeteer-core` no está disponible, por lo que las dependencias faltantes no pueden saltarse silenciosamente la verificación. Si ejecutas intencionalmente sin verificación de navegador, opta por excluirte explícitamente configurando `MILADY_BROWSER_VERIFY_OPTIONAL=1`.
+
+<div id="miladyos-local-agent-on-android">
+## Agente local de MiladyOS en Android
+</div>
+
+Las compilaciones de [MiladyOS](/es/architecture) ahora ejecutan el agente como su propio proceso confinado por SELinux. Un dominio `milady_agent` dedicado transiciona el runtime fuera del sandbox de priv-app a una política más estricta limitada a los directorios de exec/data del agente y a la red de loopback. La fase B del mismo lanzamiento también reetiqueta el árbol del agente en disco después de la extracción para que la política realmente se aplique. Efecto neto: el agente se ejecuta solo con las capacidades aplicadas por el kernel que necesita, no con el alcance completo de priv-app.
+
+<div id="open-in-cloud-from-the-homepage">
+## Abrir en la nube desde la página de inicio
+</div>
+
+Un nuevo botón **Abrir en la nube** en la página de inicio de Milady te lleva de una página de marketing a un [agente en la nube](/es/guides/cloud) en ejecución en un solo flujo. Haz clic y se abre una ventana emergente, te inicia sesión, aprovisiona (o reutiliza) un agente en la nube, sondea el trabajo de aprovisionamiento y redirige la ventana emergente a tu UI de agente cuando esté lista — sin saltos manuales al panel de control. El botón muestra estados de inactividad, preparación y cancelable durante todo el proceso, y maneja limpiamente los casos de ventana emergente cerrada y tiempo de espera agotado.
+
+<div id="updates">
+## Actualizaciones
+</div>
+
+- **Las preferencias de modelo del agente de codificación se propagan a las sesiones generadas** — Cuando configuras las preferencias de modelo de Anthropic u OpenAI en la [configuración del agente de codificación](/es/guides/coding-swarms), esas elecciones ahora fluyen correctamente al entorno de cada sesión de codificación generada a través de la capa PTY del orquestador. Anteriormente, un valor predeterminado obsoleto podía filtrarse en sesiones de larga duración.
+- **Corrección de enrutamiento de acciones de uso de computadora** — El planificador de acciones ahora enruta las solicitudes de uso de computadora (navegación de navegador, captura de pantalla, clic) al manejador correcto de manera más confiable, eliminando los enrutamientos erróneos que anteriormente enviaban estas solicitudes a través de respuestas de chat genéricas.
+- **404 elegante en draft-reply de Gmail** — Cuando tu agente intenta redactar una respuesta a un hilo de [Gmail](/es/rest/lifeops) que ha sido eliminado o movido, la acción ahora degrada elegantemente con un mensaje claro en lugar de mostrar un 404 de la API de Google.
+- **Enrutamiento de intención explícita de LIFE** — Las acciones LIFE ahora requieren intención explícita de seguimiento de vida en el prompt antes de enrutar, por lo que frases casuales como "recuerda llamar a mamá" ya no activan el manejador LIFE cuando querías un simple todo.
+- **Brechas de ejecución estricta cerradas** — Se han cerrado tres brechas restantes de ejecución estricta en el bucle de acciones, por lo que las ejecuciones de agentes de varios pasos respetan el contrato de modo estricto de extremo a extremo.
+- **Acción MANAGE_APP_OPS_MODES disponible en móvil** — Las compilaciones móviles ahora declaran `MANAGE_APP_OPS_MODES` en su manifiesto de acciones, exponiendo la gestión de app-ops a tu agente en Android e iOS.
+
+<div id="bug-fixes">
+## Correcciones de errores
+</div>
+
+- Se corrigió que las compilaciones de cuttlefish AOSP de [MiladyOS](/es/architecture) fallaran durante la validación de arranque — el pipeline de compilación ahora se completa de extremo a extremo y la ruta de arranque se valida automáticamente
+- Se corrigió un conflicto de dependencias donde `@elizaos/plugin-openai` podía traer una versión duplicada de `@ai-sdk/provider` en instalaciones nuevas — el plugin ahora está fijado al workspace
+- Se corrigió que la reparación de columnas de programación y actividad fallara en bases de datos donde la tabla subyacente aún no existía — la migración ahora protege primero contra la existencia de la tabla
+- Se corrigió que el manifiesto de activos estáticos quedara desincronizado después de añadir nueva ilustración hero, lo que podía causar fallbacks de imagen faltante en la [vista de aplicaciones](/es/dashboard/apps)
+
+</Update>
+
 <Update label="2026-04-23" description="Semana del 23 de abril; billetera dual y aprovisionamiento de billetera en la nube, Agent Browser Bridge, borradores de automatización, UX de aprovisionamiento de agentes en la nube, conector BlueBubbles" tags={["Feature", "Update", "Fix"]}>
 
 <div id="dual-wallet-with-cloud-wallet-provisioning">
