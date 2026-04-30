@@ -3,6 +3,35 @@ title: Changelog
 description: What's new in Milady — features, improvements, and fixes.
 ---
 
+<Update label="2026-04-30" description="Week of April 30; MiladyOS ships with bundled on-device models, local embeddings toggle, expanded model catalog, LifeOps connector hardening" tags={["Feature", "Update", "Fix"]}>
+
+## MiladyOS ships with bundled on-device models
+
+Fresh [MiladyOS](/architecture) installs now land directly in a working chat — no model download required. The AOSP build bundles a small chat model (SmolLM2-360M Instruct) and a small embedding model (BGE-small-en-v1.5) into the APK, and the on-device runtime registers and auto-assigns them to your agent's text and embedding slots on first launch. End-to-end local inference (chat plus embeddings) now runs entirely on-device, with no cloud round-trip.
+
+## Cloud and subscription providers still work on MiladyOS
+
+Running [MiladyOS](/architecture) no longer locks you out of cloud models. The local handler registers at low priority, so if you've configured an Anthropic or OpenAI key — or an Anthropic Pro/Max subscription — your agent routes those slots to the cloud as usual and only falls back to the on-device model when nothing else is configured. Local-only mode remains available as an explicit opt-in.
+
+## "Use local embeddings" toggle
+
+A new **Use local embeddings** toggle is available during onboarding and in [settings](/user/provider-setup). Turn it on and your agent runs embeddings on-device while keeping chat, TTS, media, and RPC on the cloud proxy — useful when you want private vector search against your knowledge and inbox without giving up cloud-quality chat.
+
+## Updates
+
+- **New models in the catalog** — [SmolLM2-360M Instruct](/model-providers) joins the catalog as a mobile-friendly default, and an experimental Bonsai 8B 1-bit (TurboQuant) entry is available for users testing aggressive on-device quantization.
+- **LifeOps connector hardening** — [LifeOps connectors](/rest/lifeops) ship with stricter passive ingest, more reliable route registration, and tighter iMessage command safety. Connector behavior across Signal, Discord, Telegram, and iMessage is more consistent under load.
+- **Local Eliza Cloud dev setup** — A new `bun run dev:cloud:local` script spins up a fully local [Eliza Cloud](/guides/cloud) stack (Postgres, Redis, seed data) for testing cloud-dependent features against localhost. Port collisions auto-remap so the script works alongside other Postgres or Redis containers you have running.
+- **Embedding warmup respects opt-out** — When cloud embeddings are disabled, the runtime now correctly skips local embedding warmup at startup, eliminating an unnecessary model load on machines configured for cloud-only embeddings.
+
+## Bug fixes
+
+- Fixed the [MiladyOS](/architecture) Local Agent tile staying hidden on a healthy fresh boot — the runtime now recognizes the on-device agent's readiness signal and auto-picks it without requiring a manual refresh
+- Fixed cloud sign-in occasionally failing on first attempt due to a stale eliza submodule reference in CI — develop now builds and ships reliably
+- Fixed a Windows installer regression where homepage end-to-end checks could intermittently fail on signed builds
+
+</Update>
+
 <Update label="2026-04-29" description="Week of April 29; verification verdicts return to chat, first-party app protection, MiladyOS local agent on Android, open-in-cloud from the homepage" tags={["Feature", "Update", "Fix"]}>
 
 ## Verification verdicts return to chat
