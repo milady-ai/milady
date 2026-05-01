@@ -24,11 +24,16 @@ const optionalAppExternal = /^@elizaos\/app-/;
 // variants like @node-rs/argon2-darwin-arm64). Single regex covers all
 // of them — always external; rolldown can't bundle the .node binary.
 const nodeRsExternal = /^@node-rs\//;
+// @napi-rs/* has the same shape (e.g. @napi-rs/keyring +
+// @napi-rs/keyring-darwin-arm64). Used by @elizaos/vault and
+// @elizaos/confidant for OS-keyring access.
+const napiRsExternal = /^@napi-rs\//;
 const allExternals = [
   ...nativeExternals,
   pluginExternal,
   optionalAppExternal,
   nodeRsExternal,
+  napiRsExternal,
 ];
 
 export default [
