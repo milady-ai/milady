@@ -188,6 +188,8 @@ const patches = [
       }
 
       let next = source;
+      const eol = next.includes("\r\n") ? "\r\n" : "\n";
+      const block = (lines) => lines.join(eol);
 
       const rootAnchor =
         '$selfExtractionRoot = Join-Path $env:LOCALAPPDATA "com.miladyai.milady"';
@@ -240,9 +242,11 @@ ${findLauncherAnchor}`,
 $selfExtractedRelaunchDone = $false`,
       );
 
-      const cleanupAnchor = `if (Test-Path $selfExtractionRoot) {
-  Remove-Item $selfExtractionRoot -Recurse -Force -ErrorAction SilentlyContinue
-}`;
+      const cleanupAnchor = block([
+        "if (Test-Path $selfExtractionRoot) {",
+        "  Remove-Item $selfExtractionRoot -Recurse -Force -ErrorAction SilentlyContinue",
+        "}",
+      ]);
       if (!next.includes(cleanupAnchor)) {
         throw new Error("could not locate self-extraction cleanup anchor");
       }
@@ -255,9 +259,11 @@ $selfExtractedRelaunchDone = $false`,
 }`,
       );
 
-      const loopAnchor = `  while ((Get-Date) -lt $deadline) {
-    $startupState = Get-StartupState
-`;
+      const loopAnchor = block([
+        "  while ((Get-Date) -lt $deadline) {",
+        "    $startupState = Get-StartupState",
+        "",
+      ]);
       if (!next.includes(loopAnchor)) {
         throw new Error("could not locate Windows smoke loop anchor");
       }
@@ -291,13 +297,15 @@ $selfExtractedRelaunchDone = $false`,
 `,
       );
 
-      const findInLoopAnchor = `    if (-not $launcher) {
-      $launcher = Find-Launcher $selfExtractionRoot
-      if ($launcher) {
-        $launcher = Write-ReusableLauncherPath -Launcher $launcher -TemporaryRoot $null
-        Write-Host "Found extracted launcher: $($launcher.FullName)"
-      }
-    }`;
+      const findInLoopAnchor = block([
+        "    if (-not $launcher) {",
+        "      $launcher = Find-Launcher $selfExtractionRoot",
+        "      if ($launcher) {",
+        "        $launcher = Write-ReusableLauncherPath -Launcher $launcher -TemporaryRoot $null",
+        '        Write-Host "Found extracted launcher: $($launcher.FullName)"',
+        "      }",
+        "    }",
+      ]);
       if (!next.includes(findInLoopAnchor)) {
         throw new Error("could not locate extracted launcher discovery anchor");
       }
@@ -312,11 +320,13 @@ $selfExtractedRelaunchDone = $false`,
     }`,
       );
 
-      const contentsAnchor = `    if (Test-Path $selfExtractionRoot) {
-      Write-Host "Self-extraction contents:"
-      Get-ChildItem -Path $selfExtractionRoot -Recurse -File -ErrorAction SilentlyContinue |
-        Select-Object -ExpandProperty FullName
-    }`;
+      const contentsAnchor = block([
+        "    if (Test-Path $selfExtractionRoot) {",
+        '      Write-Host "Self-extraction contents:"',
+        "      Get-ChildItem -Path $selfExtractionRoot -Recurse -File -ErrorAction SilentlyContinue |",
+        "        Select-Object -ExpandProperty FullName",
+        "    }",
+      ]);
       if (!next.includes(contentsAnchor)) {
         throw new Error("could not locate self-extraction diagnostics anchor");
       }
