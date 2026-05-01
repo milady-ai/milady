@@ -1,0 +1,83 @@
+# This config was automatically generated from your source code
+# Stacks detected: cicd:github-actions:.github/workflows,deps:node:.
+version: 2.1
+orbs:
+  node: circleci/node@5
+jobs:
+  test-node:
+    # Install node dependencies and run tests
+    executor: node/default
+    steps:
+      - checkout
+      - run:
+          name: Install Bun
+          command: curl -fsSL https://bun.sh/install | bash && echo 'export PATH="$HOME/.bun/bin:$PATH"' >> $BASH_ENV
+      - run:
+          name: Installing NPM packages
+          command: bun install --ignore-scripts
+      - run:
+          name: Run tests
+          command: npm test --passWithNoTests
+  build-node:
+    # Build node project
+    executor: node/default
+    steps:
+      - checkout
+      - run:
+          name: Install Bun
+          command: curl -fsSL https://bun.sh/install | bash && echo 'export PATH="$HOME/.bun/bin:$PATH"' >> $BASH_ENV
+      - run:
+          name: Installing NPM packages
+          command: bun install --ignore-scripts
+      - run:
+          command: npm run build
+      - run:
+          name: Create the ~/artifacts directory if it doesn't exist
+          command: mkdir -p ~/artifacts
+      # Copy output to artifacts dir
+      - run:
+          name: Copy artifacts
+          command: cp -R build dist public .output .next .docusaurus ~/artifacts 2>/dev/null || true
+      - store_artifacts:
+          path: ~/artifacts
+          destination: node-build
+  deploy:
+    # This is an example deploy job, not actually used by the workflow
+    docker:
+      - image: cimg/base:stable
+    steps:
+      # Replace this with steps to deploy to users
+      - run:
+          name: Plan deployment
+          command: |
+            circleci run release plan "${CIRCLE_JOB}" \
+              --environment-name="default" \
+              --component-name="${CIRCLE_PROJECT_REPONAME}" \
+              --target-version="1.0.${CIRCLE_BUILD_NUM}-${CIRCLE_SHA1:0:7}"
+      - run:
+          name: deploy
+          command: '#e.g. ./deploy.sh'
+      - run:
+          name: Update deployment status to running
+          command: circleci run release update "${CIRCLE_JOB}" --status=RUNNING
+      - run:
+          name: found github actions config
+          command: ':'
+      - run:
+          name: Update deployment status to success
+          command: circleci run release update "${CIRCLE_JOB}" --status=SUCCESS
+          when: on_success
+      - run:
+          name: Update deployment status to failed
+          command: circleci run release update "${CIRCLE_JOB}" --status=FAILED
+          when: on_fail
+workflows:
+  build-and-test:
+    jobs:
+      - test-node
+      - build-node:
+          requires:
+            - test-node
+    # - deploy:
+    #     requires:
+    #       - build-node
