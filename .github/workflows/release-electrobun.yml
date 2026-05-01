@@ -989,9 +989,9 @@ jobs:
           ELIZA_TEST_WINDOWS_INSTALL_DIR: ${{ runner.temp }}\el
           ELIZA_TEST_WINDOWS_LAUNCHER_DIR: ${{ runner.temp }}\eliza-windows-ui-launcher
           ELIZA_TEST_WINDOWS_LAUNCHER_PATH_FILE: ${{ runner.temp }}\eliza-windows-ui-launcher.txt
-          # Inno installer is built into platforms/electrobun/artifacts.
-          ELIZA_TEST_WINDOWS_ARTIFACTS_DIR: ${{ github.workspace }}\packages\app-core\platforms\electrobun\artifacts
-          ELIZA_TEST_WINDOWS_BUILD_DIR: ${{ github.workspace }}\packages\app-core\platforms\electrobun\build
+          # Inno installer is built into eliza/packages/app-core/platforms/electrobun/artifacts.
+          ELIZA_TEST_WINDOWS_ARTIFACTS_DIR: ${{ github.workspace }}\eliza\packages\app-core\platforms\electrobun\artifacts
+          ELIZA_TEST_WINDOWS_BUILD_DIR: ${{ github.workspace }}\eliza\packages\app-core\platforms\electrobun\build
         run: |
           Remove-Item $env:ELIZA_TEST_WINDOWS_INSTALL_DIR -Recurse -Force -ErrorAction SilentlyContinue
           Remove-Item $env:ELIZA_TEST_WINDOWS_LAUNCHER_DIR -Recurse -Force -ErrorAction SilentlyContinue
