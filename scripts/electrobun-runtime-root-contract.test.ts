@@ -26,6 +26,12 @@ describe("Electrobun release runtime root contract", () => {
     expect(workflow).toMatch(
       /ELIZA_TEST_WINDOWS_BUILD_DIR: \$\{\{ github\.workspace \}\}\\eliza\\packages\\app-core\\platforms\\electrobun\\build/,
     );
+    expect(workflow).toMatch(
+      /MILADY_TEST_WINDOWS_INSTALL_DIR: \$\{\{ runner\.temp \}\}\\el/,
+    );
+    expect(workflow.indexOf("ELIZA_TEST_WINDOWS_INSTALL_DIR")).toBeLessThan(
+      workflow.indexOf("MILADY_TEST_WINDOWS_INSTALL_DIR"),
+    );
   });
 
   test("Electrobun config exposes wrapper-aware repo root resolution", () => {
