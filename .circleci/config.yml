@@ -9,9 +9,12 @@ jobs:
     executor: node/default
     steps:
       - checkout
-      - node/install-packages:
-          cache-path: ~/project/node_modules
-          override-ci-command: npm install
+      - run:
+          name: Install Bun
+          command: curl -fsSL https://bun.sh/install | bash && echo 'export PATH="$HOME/.bun/bin:$PATH"' >> $BASH_ENV
+      - run:
+          name: Installing NPM packages
+          command: bun install --ignore-scripts
       - run:
           name: Run tests
           command: npm test --passWithNoTests
@@ -20,9 +23,12 @@ jobs:
     executor: node/default
     steps:
       - checkout
-      - node/install-packages:
-          cache-path: ~/project/node_modules
-          override-ci-command: npm install
+      - run:
+          name: Install Bun
+          command: curl -fsSL https://bun.sh/install | bash && echo 'export PATH="$HOME/.bun/bin:$PATH"' >> $BASH_ENV
+      - run:
+          name: Installing NPM packages
+          command: bun install --ignore-scripts
       - run:
           command: npm run build
       - run:
