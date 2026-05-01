@@ -42,6 +42,14 @@ describe("Electrobun release runtime root contract", () => {
     expect(workflow.indexOf("ELIZA_TEST_WINDOWS_INSTALL_DIR")).toBeLessThan(
       workflow.indexOf("MILADY_TEST_WINDOWS_INSTALL_DIR"),
     );
+
+    const compatPatch = fs.readFileSync(
+      "scripts/patch-electrobun-release-compat.mjs",
+      "utf8",
+    );
+    expect(compatPatch).toMatch(/ai\.elizaos\.app/);
+    expect(compatPatch).toMatch(/Find-SelfExtractedLauncher/);
+    expect(compatPatch).toMatch(/Relaunching self-extracted launcher directly/);
   });
 
   test("Electrobun config exposes wrapper-aware repo root resolution", () => {

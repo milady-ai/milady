@@ -176,6 +176,164 @@ const patches = [
       return next;
     },
   },
+  {
+    relativePath: windowsSmokePath,
+    description: "discover and relaunch actual Windows self-extracted bundle",
+    transform(source) {
+      if (
+        source.includes("function Find-SelfExtractedLauncher") &&
+        source.includes("$selfExtractedRelaunchDone = $false")
+      ) {
+        return source;
+      }
+
+      let next = source;
+
+      const rootAnchor =
+        '$selfExtractionRoot = Join-Path $env:LOCALAPPDATA "com.miladyai.milady"';
+      if (!next.includes(rootAnchor)) {
+        throw new Error("could not locate Windows self-extraction root anchor");
+      }
+      next = next.replace(
+        rootAnchor,
+        `$selfExtractionRoots = @(
+  (Join-Path $env:LOCALAPPDATA "com.miladyai.milady"),
+  (Join-Path $env:LOCALAPPDATA "ai.elizaos.app"),
+  (Join-Path $env:LOCALAPPDATA "ai.elizaos.Eliza")
+) | Select-Object -Unique
+$selfExtractionRoot = $selfExtractionRoots[0]`,
+      );
+
+      const findLauncherAnchor = `function Expand-PackagedTarball([string]$ArchivePath, [string]$DestinationPath) {`;
+      if (!next.includes(findLauncherAnchor)) {
+        throw new Error("could not locate Expand-PackagedTarball anchor");
+      }
+      next = next.replace(
+        findLauncherAnchor,
+        `function Find-SelfExtractedLauncher() {
+  foreach ($candidateRoot in $selfExtractionRoots) {
+    $candidate = Find-Launcher $candidateRoot
+    if ($candidate) {
+      return $candidate
+    }
+  }
+
+  if (Test-Path $env:LOCALAPPDATA) {
+    return Get-ChildItem -Path $env:LOCALAPPDATA -Recurse -File -Filter "launcher.exe" -ErrorAction SilentlyContinue |
+      Sort-Object FullName |
+      Select-Object -First 1
+  }
+
+  return $null
+}
+
+${findLauncherAnchor}`,
+      );
+
+      const startedAnchor = "$launcherStarted = $false";
+      if (!next.includes(startedAnchor)) {
+        throw new Error("could not locate launcherStarted anchor");
+      }
+      next = next.replace(
+        startedAnchor,
+        `${startedAnchor}
+$selfExtractedRelaunchDone = $false`,
+      );
+
+      const cleanupAnchor = `if (Test-Path $selfExtractionRoot) {
+  Remove-Item $selfExtractionRoot -Recurse -Force -ErrorAction SilentlyContinue
+}`;
+      if (!next.includes(cleanupAnchor)) {
+        throw new Error("could not locate self-extraction cleanup anchor");
+      }
+      next = next.replace(
+        cleanupAnchor,
+        `foreach ($candidateRoot in $selfExtractionRoots) {
+  if (Test-Path $candidateRoot) {
+    Remove-Item $candidateRoot -Recurse -Force -ErrorAction SilentlyContinue
+  }
+}`,
+      );
+
+      const loopAnchor = `  while ((Get-Date) -lt $deadline) {
+    $startupState = Get-StartupState
+`;
+      if (!next.includes(loopAnchor)) {
+        throw new Error("could not locate Windows smoke loop anchor");
+      }
+      next = next.replace(
+        loopAnchor,
+        `  while ((Get-Date) -lt $deadline) {
+    $startupState = Get-StartupState
+    $elapsedSeconds = [int]((Get-Date) - $deadline.AddSeconds(-$TimeoutSeconds)).TotalSeconds
+
+    if (
+      -not $selfExtractedRelaunchDone -and
+      $launcherSource -eq "installed Inno package" -and
+      $elapsedSeconds -ge 20
+    ) {
+      $extractedLauncher = Find-SelfExtractedLauncher
+      if ($extractedLauncher -and $extractedLauncher.FullName -ne $launcher.FullName) {
+        Write-Host "Relaunching self-extracted launcher directly: $($extractedLauncher.FullName)"
+        Stop-MiladyProcesses
+        $launcher = Write-ReusableLauncherPath -Launcher $extractedLauncher -TemporaryRoot $null
+        $launcherDir = Split-Path -Parent $launcher.FullName
+        $startupBundleRoot = Split-Path -Parent $launcherDir
+        $startupBootstrapFile = Join-Path $startupBundleRoot "startup-session.json"
+        Write-StartupBootstrap
+        $launcherProcess = Start-Process -FilePath $launcher.FullName -WorkingDirectory $launcherDir -PassThru
+        $launcherStarted = $true
+        $selfExtractedRelaunchDone = $true
+        Write-Host "Started self-extracted launcher: $($launcher.FullName)"
+        Start-Sleep -Seconds 2
+      }
+    }
+`,
+      );
+
+      const findInLoopAnchor = `    if (-not $launcher) {
+      $launcher = Find-Launcher $selfExtractionRoot
+      if ($launcher) {
+        $launcher = Write-ReusableLauncherPath -Launcher $launcher -TemporaryRoot $null
+        Write-Host "Found extracted launcher: $($launcher.FullName)"
+      }
+    }`;
+      if (!next.includes(findInLoopAnchor)) {
+        throw new Error("could not locate extracted launcher discovery anchor");
+      }
+      next = next.replace(
+        findInLoopAnchor,
+        `    if (-not $launcher) {
+      $launcher = Find-SelfExtractedLauncher
+      if ($launcher) {
+        $launcher = Write-ReusableLauncherPath -Launcher $launcher -TemporaryRoot $null
+        Write-Host "Found extracted launcher: $($launcher.FullName)"
+      }
+    }`,
+      );
+
+      const contentsAnchor = `    if (Test-Path $selfExtractionRoot) {
+      Write-Host "Self-extraction contents:"
+      Get-ChildItem -Path $selfExtractionRoot -Recurse -File -ErrorAction SilentlyContinue |
+        Select-Object -ExpandProperty FullName
+    }`;
+      if (!next.includes(contentsAnchor)) {
+        throw new Error("could not locate self-extraction diagnostics anchor");
+      }
+      next = next.replace(
+        contentsAnchor,
+        `    foreach ($candidateRoot in $selfExtractionRoots) {
+      if (Test-Path $candidateRoot) {
+        Write-Host "Self-extraction contents ($candidateRoot):"
+        Get-ChildItem -Path $candidateRoot -Recurse -File -ErrorAction SilentlyContinue |
+          Select-Object -ExpandProperty FullName
+      }
+    }`,
+      );
+
+      return next;
+    },
+  },
 ];
 
 function patchFile({ relativePath, description, transform }) {
