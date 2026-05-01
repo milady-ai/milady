@@ -1,4 +1,4 @@
-import { ErrorBoundary } from "@elizaos/app-core";
+import { App, ErrorBoundary } from "@elizaos/app-core";
 import "@elizaos/app-core/styles/styles.css";
 import "@elizaos/app-core/styles/brand-gold.css";
 
@@ -129,7 +129,6 @@ import {
 } from "./app-config";
 import { APP_ENV_ALIASES, APP_ENV_PREFIX } from "./brand-env";
 import { APP_CHARACTER_CATALOG } from "./character-catalog";
-import { App } from "../../../eliza/packages/app-core/src/App";
 import {
   apiBaseToDeviceBridgeUrl,
   type IosRuntimeConfig,

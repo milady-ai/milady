@@ -26,6 +26,9 @@ function isPackagedPlatform(): boolean {
   return process.platform === "darwin" || process.platform === "win32";
 }
 
+const packagedTest = isPackagedPlatform() ? test : null;
+const macosTest = process.platform === "darwin" ? test : null;
+
 function getApiBaseExpression(): string {
   return [
     "window.__ELIZAOS_API_BASE__",
@@ -937,111 +940,102 @@ async function withPackagedHarness(
   }
 }
 
-test("packaged desktop persists media, provider, and plugin state across relaunch", async (_fixtures, testInfo) => {
-  test.skip(
-    !isPackagedPlatform(),
-    "Packaged desktop regressions require a macOS or Windows launcher.",
-  );
+packagedTest?.(
+  "packaged desktop persists media, provider, and plugin state across relaunch",
+  async (_fixtures, testInfo) => {
+    await withPackagedHarness(async ({ harness }) => {
+      await openRouteAndWait(harness, SETTINGS_MEDIA_ROUTE, SETTINGS_SELECTOR);
+      await setPersistedSettingsState(harness);
+      await writeHarnessScreenshot(
+        harness,
+        testInfo,
+        "persistence-before-relaunch",
+      );
 
-  await withPackagedHarness(async ({ harness }) => {
-    await openRouteAndWait(harness, SETTINGS_MEDIA_ROUTE, SETTINGS_SELECTOR);
-    await setPersistedSettingsState(harness);
-    await writeHarnessScreenshot(
-      harness,
-      testInfo,
-      "persistence-before-relaunch",
-    );
+      await harness.relaunch();
 
-    await harness.relaunch();
+      await openRouteAndWait(harness, SETTINGS_ROUTE, SETTINGS_SELECTOR);
+      const settingsState = await readPersistedSettingsState(harness);
+      expect(settingsState.vrmPower).toBe("quality");
+      expect(settingsState.animateWhenHidden).toBe("1");
+      expect(settingsState.providerLabel).toContain("OpenAI");
+      expect(settingsState.backend).toBe("openai");
+      await writeHarnessScreenshot(
+        harness,
+        testInfo,
+        "persistence-settings-after-relaunch",
+      );
 
-    await openRouteAndWait(harness, SETTINGS_ROUTE, SETTINGS_SELECTOR);
-    const settingsState = await readPersistedSettingsState(harness);
-    expect(settingsState.vrmPower).toBe("quality");
-    expect(settingsState.animateWhenHidden).toBe("1");
-    expect(settingsState.providerLabel).toContain("OpenAI");
-    expect(settingsState.backend).toBe("openai");
-    await writeHarnessScreenshot(
-      harness,
-      testInfo,
-      "persistence-settings-after-relaunch",
-    );
+      await openRouteAndWait(harness, PLUGINS_ROUTE, PLUGINS_SELECTOR);
+      const pluginIds = await readVisiblePluginSectionIds(harness);
+      expect(pluginIds).toEqual(expect.arrayContaining(["openai", "ollama"]));
+      await writeHarnessScreenshot(
+        harness,
+        testInfo,
+        "persistence-plugins-after-relaunch",
+      );
+    });
+  },
+);
 
-    await openRouteAndWait(harness, PLUGINS_ROUTE, PLUGINS_SELECTOR);
-    const pluginIds = await readVisiblePluginSectionIds(harness);
-    expect(pluginIds).toEqual(expect.arrayContaining(["openai", "ollama"]));
-    await writeHarnessScreenshot(
-      harness,
-      testInfo,
-      "persistence-plugins-after-relaunch",
-    );
-  });
-});
+packagedTest?.(
+  "packaged desktop reset from Settings returns the shell to onboarding",
+  async (_fixtures, testInfo) => {
+    await withPackagedHarness(async ({ api, harness }) => {
+      await openRouteAndWait(harness, SETTINGS_ROUTE, SETTINGS_SELECTOR);
+      await seedResettableState(harness);
+      await triggerSettingsReset(harness);
+      await waitForResetRequest(api);
+      await waitForResetUiState(harness);
+      await writeHarnessScreenshot(harness, testInfo, "reset-from-settings");
+    });
+  },
+);
 
-test("packaged desktop reset from Settings returns the shell to onboarding", async (_fixtures, testInfo) => {
-  test.skip(
-    !isPackagedPlatform(),
-    "Packaged desktop regressions require a macOS or Windows launcher.",
-  );
+packagedTest?.(
+  "packaged desktop reset from the application menu returns the shell to onboarding",
+  async (_fixtures, testInfo) => {
+    await withPackagedHarness(async ({ api, harness }) => {
+      await openRouteAndWait(harness, SETTINGS_ROUTE, SETTINGS_SELECTOR);
+      await seedResettableState(harness);
+      await harness.menuAction("reset-app");
+      await waitForResetRequest(api);
+      await waitForResetUiState(harness);
+      await writeHarnessScreenshot(
+        harness,
+        testInfo,
+        "reset-from-application-menu",
+      );
+    });
+  },
+);
 
-  await withPackagedHarness(async ({ api, harness }) => {
-    await openRouteAndWait(harness, SETTINGS_ROUTE, SETTINGS_SELECTOR);
-    await seedResettableState(harness);
-    await triggerSettingsReset(harness);
-    await waitForResetRequest(api);
-    await waitForResetUiState(harness);
-    await writeHarnessScreenshot(harness, testInfo, "reset-from-settings");
-  });
-});
+macosTest?.(
+  "packaged macOS desktop keeps the tray alive and preserves vibrancy through resize",
+  async (_fixtures, testInfo) => {
+    await withPackagedHarness(async ({ harness }) => {
+      const initialState = await harness.waitForState(
+        (state) =>
+          state.shell.trayPresent &&
+          state.mainWindow.present &&
+          state.mainWindow.transparent === true &&
+          state.mainWindow.vibrancyEnabled === true,
+        "Expected a tray-backed transparent macOS main window with vibrancy enabled.",
+        30000,
+      );
 
-test("packaged desktop reset from the application menu returns the shell to onboarding", async (_fixtures, testInfo) => {
-  test.skip(
-    !isPackagedPlatform(),
-    "Packaged desktop regressions require a macOS or Windows launcher.",
-  );
+      expect(initialState.mainWindow.titleBarStyle).toBe("hiddenInset");
+      await writeHarnessScreenshot(
+        harness,
+        testInfo,
+        "macos-vibrancy-before-close",
+      );
 
-  await withPackagedHarness(async ({ api, harness }) => {
-    await openRouteAndWait(harness, SETTINGS_ROUTE, SETTINGS_SELECTOR);
-    await seedResettableState(harness);
-    await harness.menuAction("reset-app");
-    await waitForResetRequest(api);
-    await waitForResetUiState(harness);
-    await writeHarnessScreenshot(
-      harness,
-      testInfo,
-      "reset-from-application-menu",
-    );
-  });
-});
+      const initialEffects = await readMainWindowEffects(harness);
+      expect(initialEffects.shadowEnabled).toBe(true);
 
-test("packaged macOS desktop keeps the tray alive and preserves vibrancy through resize", async (_fixtures, testInfo) => {
-  test.skip(
-    process.platform !== "darwin",
-    "Tray and vibrancy regression checks are macOS-only.",
-  );
-
-  await withPackagedHarness(async ({ harness }) => {
-    const initialState = await harness.waitForState(
-      (state) =>
-        state.shell.trayPresent &&
-        state.mainWindow.present &&
-        state.mainWindow.transparent === true &&
-        state.mainWindow.vibrancyEnabled === true,
-      "Expected a tray-backed transparent macOS main window with vibrancy enabled.",
-      30000,
-    );
-
-    expect(initialState.mainWindow.titleBarStyle).toBe("hiddenInset");
-    await writeHarnessScreenshot(
-      harness,
-      testInfo,
-      "macos-vibrancy-before-close",
-    );
-
-    const initialEffects = await readMainWindowEffects(harness);
-    expect(initialEffects.shadowEnabled).toBe(true);
-
-    const closeResult = await harness.eval<EvalResult<Record<string, never>>>(
-      `(() => {
+      const closeResult = await harness.eval<EvalResult<Record<string, never>>>(
+        `(() => {
         const rpc = window.__ELIZAOS_ELECTROBUN_RPC__;
         if (!rpc?.request?.desktopCloseWindow) {
           return { ok: false, error: "desktopCloseWindow RPC is unavailable." };
@@ -1053,39 +1047,41 @@ test("packaged macOS desktop keeps the tray alive and preserves vibrancy through
             error: error instanceof Error ? error.message : String(error),
           }));
       })()`,
-    );
-    expect(closeResult.ok, closeResult.ok ? undefined : closeResult.error).toBe(
-      true,
-    );
+      );
+      expect(
+        closeResult.ok,
+        closeResult.ok ? undefined : closeResult.error,
+      ).toBe(true);
 
-    await harness.waitForState(
-      (state) => !state.mainWindow.present && state.shell.trayPresent,
-      "Expected closing the main window to leave the tray active.",
-      30000,
-    );
+      await harness.waitForState(
+        (state) => !state.mainWindow.present && state.shell.trayPresent,
+        "Expected closing the main window to leave the tray active.",
+        30000,
+      );
 
-    await harness.menuAction("show");
+      await harness.menuAction("show");
 
-    await harness.waitForState(
-      (state) =>
-        state.mainWindow.present &&
-        state.mainWindow.transparent === true &&
-        state.mainWindow.vibrancyEnabled === true,
-      "Expected the tray Show action to restore the transparent vibrancy window.",
-      30000,
-    );
+      await harness.waitForState(
+        (state) =>
+          state.mainWindow.present &&
+          state.mainWindow.transparent === true &&
+          state.mainWindow.vibrancyEnabled === true,
+        "Expected the tray Show action to restore the transparent vibrancy window.",
+        30000,
+      );
 
-    await resizeMainWindow(harness, 1240, 860);
-    const resizedEffects = await readMainWindowEffects(harness);
-    expect(resizedEffects.vibrancyEnabled).toBe(true);
-    expect(resizedEffects.transparent).toBe(true);
-    expect(resizedEffects.titleBarStyle).toBe(initialEffects.titleBarStyle);
-    expect(resizedEffects.bounds?.width).toBe(1240);
-    expect(resizedEffects.bounds?.height).toBe(860);
-    await writeHarnessScreenshot(
-      harness,
-      testInfo,
-      "macos-vibrancy-after-resize",
-    );
-  });
-});
+      await resizeMainWindow(harness, 1240, 860);
+      const resizedEffects = await readMainWindowEffects(harness);
+      expect(resizedEffects.vibrancyEnabled).toBe(true);
+      expect(resizedEffects.transparent).toBe(true);
+      expect(resizedEffects.titleBarStyle).toBe(initialEffects.titleBarStyle);
+      expect(resizedEffects.bounds?.width).toBe(1240);
+      expect(resizedEffects.bounds?.height).toBe(860);
+      await writeHarnessScreenshot(
+        harness,
+        testInfo,
+        "macos-vibrancy-after-resize",
+      );
+    });
+  },
+);

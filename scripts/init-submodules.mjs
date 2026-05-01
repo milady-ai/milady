@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { execSync } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, rmSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -19,6 +19,77 @@ const SUBMODULE_READINESS_MARKERS = {
 const NO_RECURSE_SUBMODULES = new Set(["eliza"]);
 
 const LEGACY_ROOT_SUBMODULE_PATHS = ["cloud"];
+
+function shellQuote(value) {
+  return `'${String(value).replaceAll("'", "'\"'\"'")}'`;
+}
+
+function readGitConfigValue(key, { cwd, exec = execSync } = {}) {
+  try {
+    return exec(`git config --file .gitmodules --get ${shellQuote(key)}`, {
+      cwd,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+  } catch {
+    return "";
+  }
+}
+
+function resolveGitDir(cwd, { exec = execSync } = {}) {
+  const gitDir = exec("git rev-parse --git-dir", {
+    cwd,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "ignore"],
+  }).trim();
+  return resolve(cwd, gitDir);
+}
+
+export function hydrateSubmoduleFromConfiguredBranch(
+  submodule,
+  { rootDir = root, exec = execSync, remove = rmSync, log = console.log } = {},
+) {
+  const url = readGitConfigValue(`submodule.${submodule.name}.url`, {
+    cwd: rootDir,
+    exec,
+  });
+  if (!url) {
+    throw new Error(`missing .gitmodules url for ${submodule.name}`);
+  }
+
+  const branch = readGitConfigValue(`submodule.${submodule.name}.branch`, {
+    cwd: rootDir,
+    exec,
+  });
+  const branchArg = branch ? ` --branch ${shellQuote(branch)}` : "";
+  const submoduleRoot = resolve(rootDir, submodule.path);
+  const modulesRoot = resolve(resolveGitDir(rootDir, { exec }), "modules");
+  const submoduleGitDir = resolve(modulesRoot, submodule.path);
+
+  log(
+    `[init-submodules] Falling back to ${submodule.name} (${submodule.path}) from ${
+      branch ? `branch ${branch}` : "the default branch"
+    } because the recorded gitlink could not be fetched.`,
+  );
+
+  try {
+    exec(`git submodule deinit -f -- ${shellQuote(submodule.path)}`, {
+      cwd: rootDir,
+      stdio: "inherit",
+    });
+  } catch {}
+
+  remove(submoduleRoot, { recursive: true, force: true });
+  remove(submoduleGitDir, { recursive: true, force: true });
+
+  exec(
+    `git clone --depth=1${branchArg} ${shellQuote(url)} ${shellQuote(submodule.path)}`,
+    {
+      cwd: rootDir,
+      stdio: "inherit",
+    },
+  );
+}
 
 function getSubmoduleSkipReason(
   submodulePath,
@@ -337,23 +408,32 @@ export function runInitSubmodules({
           `[init-submodules] Shallow init failed for ${submodule.name}, retrying with full fetch...`,
         );
         try {
-          exec(`git submodule init "${submodule.path}"`, {
+          try {
+            exec(`git submodule init "${submodule.path}"`, {
+              cwd: rootDir,
+              stdio: "inherit",
+            });
+          } catch {}
+          const smRoot = resolve(rootDir, submodule.path);
+          if (exists(smRoot) && exists(resolve(smRoot, ".git"))) {
+            exec("git fetch --unshallow || git fetch --all", {
+              cwd: smRoot,
+              stdio: "inherit",
+              shell: true,
+            });
+          }
+          exec(`git submodule update${recurseFlag} "${submodule.path}"`, {
             cwd: rootDir,
             stdio: "inherit",
           });
-        } catch {}
-        const smRoot = resolve(rootDir, submodule.path);
-        if (exists(smRoot) && exists(resolve(smRoot, ".git"))) {
-          exec("git fetch --unshallow || git fetch --all", {
-            cwd: smRoot,
-            stdio: "inherit",
-            shell: true,
+        } catch {
+          hydrateSubmoduleFromConfiguredBranch(submodule, {
+            rootDir,
+            exec,
+            remove: rmSync,
+            log,
           });
         }
-        exec(`git submodule update${recurseFlag} "${submodule.path}"`, {
-          cwd: rootDir,
-          stdio: "inherit",
-        });
       }
       if (
         !isSubmoduleCheckoutReady(submodule.path, {
@@ -487,12 +567,28 @@ export function runInitSubmodules({
             },
           );
         } catch (err) {
-          failed++;
-          logError(
-            `[init-submodules] Failed to initialize nested ${nestedSubmodule.name} (${rootRelativePath}): ${
-              err instanceof Error ? err.message : String(err)
-            }`,
-          );
+          try {
+            hydrateSubmoduleFromConfiguredBranch(nestedSubmodule, {
+              rootDir: elizaRoot,
+              exec,
+              remove: rmSync,
+              log,
+            });
+          } catch (fallbackErr) {
+            failed++;
+            logError(
+              `[init-submodules] Failed to initialize nested ${nestedSubmodule.name} (${rootRelativePath}): ${
+                fallbackErr instanceof Error
+                  ? fallbackErr.message
+                  : String(fallbackErr)
+              }`,
+            );
+            logError(
+              `[init-submodules] Original nested submodule error: ${
+                err instanceof Error ? err.message : String(err)
+              }`,
+            );
+          }
         }
       }
     } catch (err) {

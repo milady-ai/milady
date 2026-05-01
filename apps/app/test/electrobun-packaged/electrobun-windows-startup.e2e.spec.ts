@@ -9,49 +9,51 @@ import {
 } from "./packaged-app-helpers";
 import { hasPackagedRendererBootstrapRequests } from "./windows-bootstrap";
 
-test("packaged Windows app bootstraps the renderer against the external API override", async () => {
-  test.skip(
-    process.platform !== "win32",
-    "Windows startup test is win32-only.",
-  );
+const windowsTest = process.platform === "win32" ? test : null;
 
-  const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "milady-win-e2e-"));
-  const extractDir = path.join(tempRoot, "extract");
-  const launcherPath = await resolvePackagedLauncher(extractDir);
-  test.skip(!launcherPath, "Windows packaged launcher is required");
-
-  let api: TestApiServer | null = null;
-  let harness: PackagedDesktopHarness | null = null;
-
-  try {
-    api = await startLiveApiServer({ onboardingComplete: true, port: 0 });
-    harness = new PackagedDesktopHarness({
-      tempRoot,
-      launcherPath,
-      apiBase: api.baseUrl,
-    });
-
-    await harness.start();
-
-    await expect
-      .poll(() => hasPackagedRendererBootstrapRequests(api?.requests ?? []), {
-        timeout: process.env.CI ? 180_000 : 90_000,
-        message:
-          "Expected the packaged Windows renderer to reach the external API bootstrap requests",
-      })
-      .toBe(true);
-
-    expect(api.requests.length).toBeGreaterThan(0);
-    expect(
-      `${harness.logs?.stdout.join("") ?? ""}\n${harness.logs?.stderr.join("") ?? ""}`,
-    ).not.toMatch(
-      /Fatal error during startup|startup failure|Cannot find module/i,
+windowsTest?.(
+  "packaged Windows app bootstraps the renderer against the external API override",
+  async () => {
+    const tempRoot = await fs.mkdtemp(
+      path.join(os.tmpdir(), "milady-win-e2e-"),
     );
-  } finally {
-    await harness?.stop().catch(() => undefined);
-    await api?.close().catch(() => undefined);
-    await fs
-      .rm(tempRoot, { recursive: true, force: true })
-      .catch(() => undefined);
-  }
-});
+    const extractDir = path.join(tempRoot, "extract");
+    const launcherPath = await resolvePackagedLauncher(extractDir);
+    expect(launcherPath, "Windows packaged launcher is required.").toBeTruthy();
+
+    let api: TestApiServer | null = null;
+    let harness: PackagedDesktopHarness | null = null;
+
+    try {
+      api = await startLiveApiServer({ onboardingComplete: true, port: 0 });
+      harness = new PackagedDesktopHarness({
+        tempRoot,
+        launcherPath: launcherPath as string,
+        apiBase: api.baseUrl,
+      });
+
+      await harness.start();
+
+      await expect
+        .poll(() => hasPackagedRendererBootstrapRequests(api?.requests ?? []), {
+          timeout: process.env.CI ? 180_000 : 90_000,
+          message:
+            "Expected the packaged Windows renderer to reach the external API bootstrap requests",
+        })
+        .toBe(true);
+
+      expect(api.requests.length).toBeGreaterThan(0);
+      expect(
+        `${harness.logs?.stdout.join("") ?? ""}\n${harness.logs?.stderr.join("") ?? ""}`,
+      ).not.toMatch(
+        /Fatal error during startup|startup failure|Cannot find module/i,
+      );
+    } finally {
+      await harness?.stop().catch(() => undefined);
+      await api?.close().catch(() => undefined);
+      await fs
+        .rm(tempRoot, { recursive: true, force: true })
+        .catch(() => undefined);
+    }
+  },
+);

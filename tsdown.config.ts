@@ -24,11 +24,13 @@ const optionalAppExternal = /^@elizaos\/app-/;
 // variants like @node-rs/argon2-darwin-arm64). Single regex covers all
 // of them — always external; rolldown can't bundle the .node binary.
 const nodeRsExternal = /^@node-rs\//;
+const napiRsExternal = /^@napi-rs\//;
 const allExternals = [
   ...nativeExternals,
   pluginExternal,
   optionalAppExternal,
   nodeRsExternal,
+  napiRsExternal,
 ];
 
 export default [

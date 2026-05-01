@@ -326,6 +326,34 @@ export async function installDefaultAppRoutes(page: Page): Promise<void> {
     });
   });
 
+  await page.route("**/api/secrets/inventory**", async (route) => {
+    const request = route.request();
+    const method = request.method();
+    const url = new URL(request.url());
+    if (method === "GET") {
+      const body = url.pathname.endsWith("/profiles")
+        ? { profiles: [] }
+        : url.pathname === "/api/secrets/inventory"
+          ? { entries: [] }
+          : { value: "" };
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(body),
+      });
+      return;
+    }
+    if (["DELETE", "PATCH", "POST", "PUT"].includes(method)) {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ ok: true }),
+      });
+      return;
+    }
+    await route.fallback();
+  });
+
   await page.route("**/api/catalog/apps", async (route) => {
     if (route.request().method() !== "GET") {
       await route.fallback();
@@ -519,6 +547,9 @@ export async function installDefaultAppRoutes(page: Page): Promise<void> {
 type CloudWalletImportMockApi = {
   lastWalletConfigPut: () => Record<string, unknown> | null;
   refreshCloudRequestCount: () => number;
+  walletConfig: () => {
+    selectedRpcProviders: Record<string, string>;
+  };
   walletConfigGetCount: () => number;
 };
 
@@ -685,6 +716,7 @@ export async function installCloudWalletImportApiOverrides(
   return {
     lastWalletConfigPut: () => lastWalletPut,
     refreshCloudRequestCount: () => refreshCloudHits,
+    walletConfig: () => walletConfigState,
     walletConfigGetCount: () => walletConfigGetHits,
   };
 }

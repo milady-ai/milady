@@ -91,6 +91,7 @@ USER.md
 .eliza.broken.*/
 .milady-repo-setup.lock
 .milady/desktop-dev-console.log
+.milady/*.png
 .milady/gmail-fixtures/
 .milady/avd-signed/
 reports/avd-smoke/

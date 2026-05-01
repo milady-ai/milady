@@ -316,6 +316,9 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
+            APP_CORE_DIR=eliza/packages/app-core
+            AGENT_DIR=eliza/packages/agent
+            APP_DIR=apps/app
             APP_ENTRYPOINT=${{ env.APP_ENTRYPOINT }}
             APP_CMD_START=${{ env.APP_CMD_START }}
             APP_PORT=${{ env.APP_PORT }}
@@ -342,6 +345,9 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
+            APP_CORE_DIR=eliza/packages/app-core
+            AGENT_DIR=eliza/packages/agent
+            APP_DIR=apps/app
             APP_ENTRYPOINT=${{ env.APP_ENTRYPOINT }}
             APP_CMD_START=${{ env.APP_CMD_START }}
             APP_PORT=${{ env.APP_PORT }}
