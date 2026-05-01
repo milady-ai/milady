@@ -1045,6 +1045,17 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
+      - name: Upload Windows installer .exe + Inno log on smoke failure
+        if: failure() && matrix.platform.os == 'windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: electrobun-windows-installer-debug
+          path: |
+            eliza/packages/app-core/platforms/electrobun/artifacts/*.exe
+            ${{ runner.temp }}/milady-inno-setup.log
+          if-no-files-found: warn
+          retention-days: 14
+
       - name: Run Windows packaged renderer bootstrap check
         if: matrix.platform.os == 'windows' && steps.build-electrobun-app.outputs.fallback != 'true'
         run: bun run test:desktop:playwright
