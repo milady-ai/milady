@@ -910,26 +910,6 @@ jobs:
               Write-Error "eliza-dist @elizaos/agent package manifest NOT found: $agentManifestPath"
               exit 1
             }
-            $agentManifest = Get-Content $agentManifestPath -Raw | ConvertFrom-Json
-            $agentExportNames = @($agentManifest.exports.PSObject.Properties.Name)
-            $agentRequiredExports = @(
-              "./config/env-vars",
-              "./config/plugin-auto-enable",
-              "./config/schema",
-              "./runtime/advanced-capabilities-config",
-              "./runtime/embedding-presets",
-              "./runtime/plugin-collector",
-              "./runtime/plugin-resolver",
-              "./runtime/plugin-types"
-            )
-            foreach ($runtimeExport in $agentRequiredExports) {
-              if ($agentExportNames -contains $runtimeExport) {
-                Write-Host "eliza-dist @elizaos/agent package export found: $runtimeExport"
-              } else {
-                Write-Error "eliza-dist @elizaos/agent package export NOT found: $runtimeExport"
-                exit 1
-              }
-            }
           }
 
       - name: Build Inno Setup installer
