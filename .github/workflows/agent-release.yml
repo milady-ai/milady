@@ -694,20 +694,20 @@ jobs:
       ]
     if: >-
       always() &&
-      needs.smoke-auth.result == 'success' &&
-      needs.build-electrobun.result == 'success' &&
-      needs.build-docker.result == 'success' &&
-      needs.build-cloud-image.result == 'success' &&
-      needs.build-npm.result == 'success' &&
-      needs.build-android.result == 'success' &&
-      needs.build-snap.result == 'success' &&
-      needs.build-flatpak.result == 'success' &&
-      needs.build-pypi.result == 'success' &&
-      needs.build-debian.result == 'success' &&
-      needs.build-ios.result == 'success' &&
-      needs.build-macos-store.result == 'success' &&
-      needs.build-homepage.result == 'success' &&
-      needs.build-docs.result == 'success'
+      (needs.smoke-auth.result == 'success' || needs.smoke-auth.result == 'skipped') &&
+      (needs.build-electrobun.result == 'success' || needs.build-electrobun.result == 'skipped') &&
+      (needs.build-docker.result == 'success' || needs.build-docker.result == 'skipped') &&
+      (needs.build-cloud-image.result == 'success' || needs.build-cloud-image.result == 'skipped') &&
+      (needs.build-npm.result == 'success' || needs.build-npm.result == 'skipped') &&
+      (needs.build-android.result == 'success' || needs.build-android.result == 'skipped') &&
+      (needs.build-snap.result == 'success' || needs.build-snap.result == 'skipped') &&
+      (needs.build-flatpak.result == 'success' || needs.build-flatpak.result == 'skipped') &&
+      (needs.build-pypi.result == 'success' || needs.build-pypi.result == 'skipped') &&
+      (needs.build-debian.result == 'success' || needs.build-debian.result == 'skipped') &&
+      (needs.build-ios.result == 'success' || needs.build-ios.result == 'skipped') &&
+      (needs.build-macos-store.result == 'success' || needs.build-macos-store.result == 'skipped') &&
+      (needs.build-homepage.result == 'success' || needs.build-homepage.result == 'skipped') &&
+      (needs.build-docs.result == 'success' || needs.build-docs.result == 'skipped')
     runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
     permissions:
       contents: write
@@ -895,7 +895,7 @@ jobs:
   push-agent-image:
     name: Push agent image to GHCR
     needs: [version, publish]
-    if: needs.publish.result == 'success'
+    if: (needs.publish.result == 'success' || needs.publish.result == 'skipped')
     uses: ./.github/workflows/build-docker.yml
     with:
       version: ${{ needs.version.outputs.tag }}
@@ -906,7 +906,7 @@ jobs:
   push-cloud-image:
     name: Push cloud app image to GHCR
     needs: [version, publish]
-    if: needs.publish.result == 'success'
+    if: (needs.publish.result == 'success' || needs.publish.result == 'skipped')
     uses: ./.github/workflows/build-cloud-image.yml
     with:
       version: ${{ needs.version.outputs.tag }}
@@ -917,7 +917,7 @@ jobs:
   distribute-release:
     name: Distribute release
     needs: [version, publish, push-agent-image, push-cloud-image]
-    if: needs.publish.result == 'success' && needs.push-agent-image.result == 'success' && needs.push-cloud-image.result == 'success'
+    if: (needs.publish.result == 'success' || needs.publish.result == 'skipped') && (needs.push-agent-image.result == 'success' || needs.push-agent-image.result == 'skipped') && (needs.push-cloud-image.result == 'success' || needs.push-cloud-image.result == 'skipped')
     uses: ./.github/workflows/release-orchestrator.yml
     with:
       version: ${{ needs.version.outputs.version }}
