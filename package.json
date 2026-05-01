@@ -34,7 +34,6 @@
     "eliza/packages/native-plugins/*",
     "eliza/packages/app-core/platforms/*",
     "eliza/apps/*",
-    "eliza/cloud/packages/sdk",
     "eliza/plugins/*",
     "eliza/plugins/plugin-*/typescript",
     "eliza/packages/*"
