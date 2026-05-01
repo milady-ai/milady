@@ -416,6 +416,9 @@ jobs:
       - name: Run repository postinstall patches
         run: bun run postinstall
 
+      - name: Apply Electrobun release compatibility patches
+        run: node scripts/patch-electrobun-release-compat.mjs
+
       - name: Cache Whisper models and binaries
         if: matrix.platform.os == 'macos' || matrix.platform.os == 'linux'
         uses: actions/cache@v5
@@ -1402,8 +1405,8 @@ jobs:
         shell: pwsh
         run: |
           $diagnosticsDir = Join-Path $PWD "eliza/packages/app-core/platforms/electrobun/artifacts/windows-smoke-diagnostics"
-          $appDataRoot = if ($env:ELIZA_TEST_WINDOWS_APPDATA_PATH) { $env:ELIZA_TEST_WINDOWS_APPDATA_PATH } else { $env:APPDATA }
-          $localAppDataRoot = if ($env:ELIZA_TEST_WINDOWS_LOCALAPPDATA_PATH) { $env:ELIZA_TEST_WINDOWS_LOCALAPPDATA_PATH } else { $env:LOCALAPPDATA }
+          $appDataRoot = if ($env:MILADY_TEST_WINDOWS_APPDATA_PATH) { $env:MILADY_TEST_WINDOWS_APPDATA_PATH } elseif ($env:ELIZA_TEST_WINDOWS_APPDATA_PATH) { $env:ELIZA_TEST_WINDOWS_APPDATA_PATH } else { $env:APPDATA }
+          $localAppDataRoot = if ($env:MILADY_TEST_WINDOWS_LOCALAPPDATA_PATH) { $env:MILADY_TEST_WINDOWS_LOCALAPPDATA_PATH } elseif ($env:ELIZA_TEST_WINDOWS_LOCALAPPDATA_PATH) { $env:ELIZA_TEST_WINDOWS_LOCALAPPDATA_PATH } else { $env:LOCALAPPDATA }
           $wrapperRoot = Join-Path $localAppDataRoot "ai.elizaos.Eliza"
 
           Write-Host "Diagnostics roots:"
