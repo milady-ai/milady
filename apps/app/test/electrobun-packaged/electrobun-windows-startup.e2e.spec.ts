@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { expect, test } from "@playwright/test";
-import { startMockApiServer, type MockApiServer } from "./mock-api";
+import { type MockApiServer, startMockApiServer } from "./mock-api";
 import {
   PackagedDesktopHarness,
   resolvePackagedLauncher,
