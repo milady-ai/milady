@@ -152,7 +152,9 @@ async function findWindowsLauncherExe(dir: string): Promise<string | null> {
 async function resolveWindowsLauncher(tempExtractDir: string): Promise<string> {
   const explicit =
     process.env.MILADY_TEST_PACKAGED_LAUNCHER_PATH?.trim() ||
-    process.env.MILADY_TEST_WINDOWS_LAUNCHER_PATH?.trim();
+    process.env.ELIZA_TEST_PACKAGED_LAUNCHER_PATH?.trim() ||
+    process.env.MILADY_TEST_WINDOWS_LAUNCHER_PATH?.trim() ||
+    process.env.ELIZA_TEST_WINDOWS_LAUNCHER_PATH?.trim();
   if (explicit) {
     await fs.access(explicit);
     return await fs.realpath(explicit);
