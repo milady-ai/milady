@@ -59,6 +59,11 @@ export const miladySidecarTypecheckSteps = [];
 export const suites = {
   lint: [
     {
+      label: "Submodule contract",
+      command: "node",
+      args: ["scripts/check-submodule-contract.mjs"],
+    },
+    {
       label: "Repo Biome",
       command: "bun",
       args: ["run", "verify:lint:workspace"],
