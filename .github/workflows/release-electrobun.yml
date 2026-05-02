@@ -1245,15 +1245,16 @@ jobs:
         run: |
           Write-Host "=== Disk space before smoke test cleanup ==="
           Get-Volume | Where-Object { $_.DriveLetter } | Format-Table DriveLetter, @{N='FreeGB';E={[math]::Round($_.SizeRemaining/1GB,1)}}, @{N='TotalGB';E={[math]::Round($_.Size/1GB,1)}}
-          # The desktop build leaves large intermediate artifacts that the smoke
-          # test doesn't need. Remove the runtime dist copy (the installer already
-          # has everything packed inside it).
+          # The installer is self-contained — aggressively free everything
+          # the smoke test doesn't need. The installer extracts ~1.5GB of
+          # files and the runner only has ~14GB total.
           Remove-Item "dist" -Recurse -Force -ErrorAction SilentlyContinue
-          # Remove the Bun install cache — it can be 2-4GB on a full workspace.
-          Remove-Item "$env:LOCALAPPDATA\bun\install\cache" -Recurse -Force -ErrorAction SilentlyContinue
-          # Remove eliza's node_modules — the installer is self-contained.
-          # Keep root node_modules since bun scripts reference it.
           Remove-Item "eliza\node_modules" -Recurse -Force -ErrorAction SilentlyContinue
+          Remove-Item "eliza\packages\app-core\platforms\electrobun\build" -Recurse -Force -ErrorAction SilentlyContinue
+          Remove-Item "eliza\packages\app-core\platforms\electrobun\node_modules" -Recurse -Force -ErrorAction SilentlyContinue
+          Remove-Item "$env:LOCALAPPDATA\bun\install\cache" -Recurse -Force -ErrorAction SilentlyContinue
+          Remove-Item "node_modules\.bun" -Recurse -Force -ErrorAction SilentlyContinue
+          Remove-Item "node_modules\.cache" -Recurse -Force -ErrorAction SilentlyContinue
           Write-Host "=== Disk space after cleanup ==="
           Get-Volume | Where-Object { $_.DriveLetter } | Format-Table DriveLetter, @{N='FreeGB';E={[math]::Round($_.SizeRemaining/1GB,1)}}, @{N='TotalGB';E={[math]::Round($_.Size/1GB,1)}}
 
