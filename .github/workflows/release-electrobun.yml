@@ -837,6 +837,23 @@ jobs:
         run: |
           node eliza/packages/app-core/scripts/build-patched-electrobun-cli.mjs "${{ steps.resolve-electrobun.outputs.package-dir }}" "${{ matrix.platform.artifact-name }}"
 
+      - name: Free disk space before desktop build
+        if: matrix.platform.os == 'windows'
+        shell: pwsh
+        run: |
+          Write-Host "=== Disk space before cleanup ==="
+          Get-Volume | Where-Object { $_.DriveLetter } | Format-Table DriveLetter, @{N='FreeGB';E={[math]::Round($_.SizeRemaining/1GB,1)}}, @{N='TotalGB';E={[math]::Round($_.Size/1GB,1)}}
+          # Remove Bun install cache to free space for packaging
+          Remove-Item "$env:LOCALAPPDATA\bun\install\cache" -Recurse -Force -ErrorAction SilentlyContinue
+          # Remove stale Electrobun cache artifacts from prior runs
+          Remove-Item "eliza\packages\app-core\platforms\electrobun\node_modules\.electrobun-cache" -Recurse -Force -ErrorAction SilentlyContinue
+          # Remove npm/nuget/pip caches the runner pre-installs
+          Remove-Item "$env:LOCALAPPDATA\npm-cache" -Recurse -Force -ErrorAction SilentlyContinue
+          Remove-Item "$env:LOCALAPPDATA\pip\Cache" -Recurse -Force -ErrorAction SilentlyContinue
+          Remove-Item "$env:USERPROFILE\.nuget\packages" -Recurse -Force -ErrorAction SilentlyContinue
+          Write-Host "=== Disk space after cleanup ==="
+          Get-Volume | Where-Object { $_.DriveLetter } | Format-Table DriveLetter, @{N='FreeGB';E={[math]::Round($_.SizeRemaining/1GB,1)}}, @{N='TotalGB';E={[math]::Round($_.Size/1GB,1)}}
+
       - name: Build Electrobun app
         id: build-electrobun-app
         run: |
@@ -1221,6 +1238,24 @@ jobs:
           }
 
           Write-Host "Windows embedding model cache ready: $modelPath"
+
+      - name: Free disk space before Windows smoke test
+        if: matrix.platform.os == 'windows' && steps.build-electrobun-app.outputs.fallback != 'true'
+        shell: pwsh
+        run: |
+          Write-Host "=== Disk space before smoke test cleanup ==="
+          Get-Volume | Where-Object { $_.DriveLetter } | Format-Table DriveLetter, @{N='FreeGB';E={[math]::Round($_.SizeRemaining/1GB,1)}}, @{N='TotalGB';E={[math]::Round($_.Size/1GB,1)}}
+          # The desktop build leaves large intermediate artifacts that the smoke
+          # test doesn't need. Remove the runtime dist copy (the installer already
+          # has everything packed inside it).
+          Remove-Item "dist" -Recurse -Force -ErrorAction SilentlyContinue
+          # Remove the Bun install cache — it can be 2-4GB on a full workspace.
+          Remove-Item "$env:LOCALAPPDATA\bun\install\cache" -Recurse -Force -ErrorAction SilentlyContinue
+          # Remove eliza's node_modules — the installer is self-contained.
+          # Keep root node_modules since bun scripts reference it.
+          Remove-Item "eliza\node_modules" -Recurse -Force -ErrorAction SilentlyContinue
+          Write-Host "=== Disk space after cleanup ==="
+          Get-Volume | Where-Object { $_.DriveLetter } | Format-Table DriveLetter, @{N='FreeGB';E={[math]::Round($_.SizeRemaining/1GB,1)}}, @{N='TotalGB';E={[math]::Round($_.Size/1GB,1)}}
 
       - name: Smoke test packaged Windows app
         if: matrix.platform.os == 'windows' && steps.build-electrobun-app.outputs.fallback != 'true'
