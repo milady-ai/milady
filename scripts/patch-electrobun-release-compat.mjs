@@ -141,6 +141,55 @@ const patches = [
     description: "publish legacy AppData paths for downstream diagnostics",
     transform(source) {
       let next = source;
+      const eol = next.includes("\r\n") ? "\r\n" : "\n";
+      const block = (lines) => lines.join(eol);
+
+      if (!next.includes("elseif ($env:ELIZA_TEST_WINDOWS_APPDATA_PATH)")) {
+        const anchor = block([
+          "$testAppDataRoot = if ($env:MILADY_TEST_WINDOWS_APPDATA_PATH) {",
+          "  $env:MILADY_TEST_WINDOWS_APPDATA_PATH",
+          "} else {",
+        ]);
+        if (!next.includes(anchor)) {
+          throw new Error("could not locate Windows AppData path selection");
+        }
+        next = next.replace(
+          anchor,
+          block([
+            "$testAppDataRoot = if ($env:MILADY_TEST_WINDOWS_APPDATA_PATH) {",
+            "  $env:MILADY_TEST_WINDOWS_APPDATA_PATH",
+            "} elseif ($env:ELIZA_TEST_WINDOWS_APPDATA_PATH) {",
+            "  $env:ELIZA_TEST_WINDOWS_APPDATA_PATH",
+            "} else {",
+          ]),
+        );
+      }
+
+      if (
+        !next.includes("elseif ($env:ELIZA_TEST_WINDOWS_LOCALAPPDATA_PATH)")
+      ) {
+        const anchor = block([
+          "$testLocalAppDataRoot = if ($env:MILADY_TEST_WINDOWS_LOCALAPPDATA_PATH) {",
+          "  $env:MILADY_TEST_WINDOWS_LOCALAPPDATA_PATH",
+          "} else {",
+        ]);
+        if (!next.includes(anchor)) {
+          throw new Error(
+            "could not locate Windows LocalAppData path selection",
+          );
+        }
+        next = next.replace(
+          anchor,
+          block([
+            "$testLocalAppDataRoot = if ($env:MILADY_TEST_WINDOWS_LOCALAPPDATA_PATH) {",
+            "  $env:MILADY_TEST_WINDOWS_LOCALAPPDATA_PATH",
+            "} elseif ($env:ELIZA_TEST_WINDOWS_LOCALAPPDATA_PATH) {",
+            "  $env:ELIZA_TEST_WINDOWS_LOCALAPPDATA_PATH",
+            "} else {",
+          ]),
+        );
+      }
+
       if (
         !next.includes(
           'Add-Content -Path $env:GITHUB_ENV -Value "ELIZA_TEST_WINDOWS_APPDATA_PATH=$($env:APPDATA)"',
@@ -173,6 +222,149 @@ const patches = [
           `${anchor}\n  Add-Content -Path $env:GITHUB_ENV -Value "ELIZA_TEST_WINDOWS_LOCALAPPDATA_PATH=$($env:LOCALAPPDATA)"`,
         );
       }
+      return next;
+    },
+  },
+  {
+    relativePath: windowsSmokePath,
+    description: "align Windows smoke installer and startup diagnostics",
+    transform(source) {
+      let next = source;
+      const eol = next.includes("\r\n") ? "\r\n" : "\n";
+      const block = (lines) => lines.join(eol);
+
+      if (!next.includes("$defaultStartupLog =")) {
+        const anchor =
+          '$legacyStartupLog = Join-Path $env:APPDATA "Eliza\\\\eliza-startup.log"';
+        if (!next.includes(anchor)) {
+          throw new Error("could not locate legacy startup log anchor");
+        }
+        next = next.replace(
+          anchor,
+          block([
+            anchor,
+            '$defaultStartupLog = Join-Path $env:APPDATA "elizaOS\\\\eliza-startup.log"',
+            '$miladyStartupLog = Join-Path $env:APPDATA "Milady\\\\eliza-startup.log"',
+          ]),
+        );
+      }
+
+      next = next.replace(
+        /\$startupLogs = @\(\$startupLog, \$legacyStartupLog\) \| Select-Object -Unique/,
+        "$startupLogs = @($startupLog, $miladyStartupLog, $defaultStartupLog, $legacyStartupLog) | Select-Object -Unique",
+      );
+
+      if (!next.includes("elseif ($env:ELIZA_TEST_WINDOWS_INSTALL_DIR)")) {
+        const anchor = block([
+          "$installerRoot = if ($env:MILADY_TEST_WINDOWS_INSTALL_DIR) {",
+          "  $env:MILADY_TEST_WINDOWS_INSTALL_DIR",
+          "} else {",
+        ]);
+        if (!next.includes(anchor)) {
+          throw new Error("could not locate Windows installer root selection");
+        }
+        next = next.replace(
+          anchor,
+          block([
+            "$installerRoot = if ($env:MILADY_TEST_WINDOWS_INSTALL_DIR) {",
+            "  $env:MILADY_TEST_WINDOWS_INSTALL_DIR",
+            "} elseif ($env:ELIZA_TEST_WINDOWS_INSTALL_DIR) {",
+            "  $env:ELIZA_TEST_WINDOWS_INSTALL_DIR",
+            "} else {",
+          ]),
+        );
+      }
+
+      next = next.replace(/\r?\n\s*"\/CLOSEAPPLICATIONS",/, "");
+      next = next.replaceAll(
+        "Get-Content $installerLogPath -Tail 100 | ForEach-Object { Write-Host $_ }",
+        "Get-Content $installerLogPath | ForEach-Object { Write-Host $_ }",
+      );
+
+      const retryAnchor = block([
+        '    Write-Host "Retrying installer via cmd /c (headless fallback)..."',
+        "    Remove-Item $installerRoot -Recurse -Force -ErrorAction SilentlyContinue",
+        "    New-Item -ItemType Directory -Force -Path $installerRoot | Out-Null",
+        "    Remove-Item $installerLogPath -Force -ErrorAction SilentlyContinue",
+      ]);
+      if (
+        next.includes(retryAnchor) &&
+        !next.includes(
+          'Copy-Item $installerLogPath ($installerLogPath + ".attempt1")',
+        )
+      ) {
+        next = next.replace(
+          retryAnchor,
+          block([
+            '    Write-Host "Retrying installer via cmd /c (headless fallback)..."',
+            "    Remove-Item $installerRoot -Recurse -Force -ErrorAction SilentlyContinue",
+            "    New-Item -ItemType Directory -Force -Path $installerRoot | Out-Null",
+            "    if (Test-Path $installerLogPath) {",
+            '      Copy-Item $installerLogPath ($installerLogPath + ".attempt1") -Force -ErrorAction SilentlyContinue',
+            "    }",
+            "    Remove-Item $installerLogPath -Force -ErrorAction SilentlyContinue",
+          ]),
+        );
+      }
+
+      if (!next.includes("[4c/6] Startup logs:")) {
+        const eventsAnchor = block([
+          "  if (Test-Path $startupEventsFile) {",
+          "    Get-Content $startupEventsFile -Tail 200 -ErrorAction SilentlyContinue | ForEach-Object { Write-Host $_ }",
+          "  } else {",
+          '    Write-Host "(startup events file not found)"',
+          "  }",
+        ]);
+        if (!next.includes(eventsAnchor)) {
+          throw new Error("could not locate startup events diagnostics block");
+        }
+        next = next.replace(
+          eventsAnchor,
+          block([
+            eventsAnchor,
+            "",
+            '  Write-Host ""',
+            '  Write-Host "[4c/6] Startup logs:"',
+            "  foreach ($candidateLog in $startupLogs) {",
+            '    Write-Host "--- $candidateLog ---"',
+            "    if (Test-Path $candidateLog) {",
+            "      Get-Content $candidateLog -Tail 400 -ErrorAction SilentlyContinue | ForEach-Object { Write-Host $_ }",
+            "    } else {",
+            '      Write-Host "(startup log not found)"',
+            "    }",
+            '    Write-Host "--- end $candidateLog ---"',
+            "  }",
+          ]),
+        );
+      }
+
+      if (!next.includes("--- Bun/launcher command lines ---")) {
+        const processTableAnchor = block([
+          "      Format-Table -Property Id, ProcessName, StartTime, Responding -AutoSize |",
+          "      Out-String |",
+          "      Write-Host",
+        ]);
+        if (!next.includes(processTableAnchor)) {
+          throw new Error("could not locate process diagnostics table");
+        }
+        next = next.replace(
+          processTableAnchor,
+          block([
+            processTableAnchor,
+            '    Write-Host "--- Bun/launcher command lines ---"',
+            "    Get-CimInstance Win32_Process |",
+            "      Where-Object {",
+            '        $_.Name -in @("launcher.exe", "bun.exe") -or',
+            '        $_.Name -like "Milady*"',
+            "      } |",
+            "      Select-Object ProcessId, Name, CommandLine |",
+            "      Format-List |",
+            "      Out-String |",
+            "      Write-Host",
+          ]),
+        );
+      }
+
       return next;
     },
   },
