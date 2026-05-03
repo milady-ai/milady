@@ -21,6 +21,7 @@
     "install.cmd",
     "scripts/init-submodules.mjs",
     "scripts/milady-postinstall-repo-setup.mjs",
+    "scripts/patch-coding-agent-adapters-codex-full-auto.mjs",
     "scripts/patch-coding-agent-adapters-tools-flag.mjs",
     "scripts/patch-eliza-electrobun-macos-stage-entitlements.mjs",
     "scripts/patch-eliza-electrobun-windows-smoke-startup.mjs",

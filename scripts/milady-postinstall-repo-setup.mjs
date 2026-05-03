@@ -51,6 +51,8 @@ const miladyBridgePatchScripts = [
   "patch-elizacloud.mjs",
   // milady-only fix for claude.ai OAuth tier — see script header.
   "patch-coding-agent-adapters-tools-flag.mjs",
+  // milady-only fix for codex 0.128 — see script header.
+  "patch-coding-agent-adapters-codex-full-auto.mjs",
 ];
 
 for (const scriptName of miladyBridgePatchScripts) {
