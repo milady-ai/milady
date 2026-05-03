@@ -1,1243 +1,148 @@
-# Canonical Release: build-first release pipeline.
-#
-# Flow: decide (evaluate + trust) → version → FULL BUILD MATRIX → tag → publish
-# Builds are verified BEFORE any tag or release is created.
-#
-# Triggers:
-#   - PR merged to develop: auto-evaluates if enough changes warrant a release
-#   - `release-ready` label on issue: immediate release
-#   - workflow_dispatch: manual release with channel/version override
-#
-# Trust-gated: only org members or legendary/trusted contributors (75+).
-name: Release
-
-on:
-  issues:
-    types: [labeled]
-  pull_request:
-    types: [closed]
-    branches: [develop]
-  workflow_dispatch:
-    inputs:
-      channel:
-        description: "Release channel"
-        required: false
-        type: choice
-        default: canary
-        options:
-          - canary
-          - beta
-          - rc
-          - stable
-      stable:
-        description: "Deprecated: use channel=stable"
-        required: false
-        type: boolean
-        default: false
-      version_override:
-        description: "Explicit version (e.g. 2.0.0-alpha.126, 2.0.0-beta.1, 2.0.0-rc.1, 2.0.0). Leave empty for auto-bump."
-        required: false
-        type: string
-
-concurrency:
-  group: agent-release
-  cancel-in-progress: false
-
-permissions:
-  contents: write
-  pull-requests: read
-  issues: write
-  packages: write
-  id-token: write
-  pages: write
-
-env:
-  BUN_VERSION: "1.3.13"
-  MILADY_SKIP_LOCAL_UPSTREAMS: "1"
-  # Runner selection: all jobs use ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}.
-  # To override (e.g. point at a self-hosted or large-runner pool), set the
-  # RUNNER_UBUNTU repo variable in Settings → Variables → Actions.
-
-jobs:
-  # ── 1. Single decision gate — combines evaluation + trust check ────
-  # No skipped ancestors — this job always runs and outputs proceed=true/false.
-  decide:
-    name: Evaluate & authorize
-    runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
-    permissions:
-      contents: read
-      issues: write
-    outputs:
-      proceed: ${{ steps.decision.outputs.proceed }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Decide whether to release
-        id: decision
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const event = context.eventName;
-            const actor = context.actor;
-
-            // ── Step 1: Should we release? ──────────────────────────
-            let shouldRelease = false;
-            let reason = '';
-
-            if (event === 'workflow_dispatch' || (event === 'issues' && context.payload.label?.name === 'release-ready')) {
-              shouldRelease = true;
-              reason = event === 'workflow_dispatch' ? 'Manual dispatch' : 'release-ready label';
-            } else if (event === 'pull_request' && context.payload.pull_request?.merged) {
-              // Evaluate changes since last tag
-              const { execSync } = require('child_process');
-              const latestTag = execSync('git tag --sort=-creatordate | grep "^v" | head -1').toString().trim();
-              if (!latestTag) {
-                shouldRelease = true;
-                reason = 'No prior release tag';
-              } else {
-                const commitCount = parseInt(execSync(`git rev-list --count ${latestTag}..HEAD`).toString().trim(), 10);
-                const changedFiles = execSync(`git diff --name-only ${latestTag}..HEAD`).toString().trim().split('\n').filter(Boolean);
-                const srcChanges = changedFiles.filter(f => /^(packages\/|apps\/|scripts\/)/.test(f)).length;
-                const hasElectrobun = changedFiles.filter(f =>
-                  f.startsWith('apps/app/electrobun/') ||
-                  f.startsWith('eliza/packages/app-core/platforms/electrobun/')
-                ).length;
-                const docOnly = srcChanges === 0;
-
-                if (docOnly) { reason = `Doc-only since ${latestTag}`; }
-                else if (commitCount < 5) { reason = `${commitCount} commits since ${latestTag} (need 5)`; }
-                else if (hasElectrobun > 0) { shouldRelease = true; reason = `Electrobun changes (${hasElectrobun} files), ${commitCount} commits since ${latestTag}`; }
-                else if (srcChanges >= 10) { shouldRelease = true; reason = `${srcChanges} src files, ${commitCount} commits since ${latestTag}`; }
-                else if (commitCount >= 15) { shouldRelease = true; reason = `${commitCount} commits since ${latestTag}`; }
-                else { reason = `${commitCount} commits, ${srcChanges} src files — below thresholds`; }
-              }
-            } else {
-              reason = 'Event not applicable';
-            }
-
-            core.info(`Should release: ${shouldRelease} — ${reason}`);
-            if (!shouldRelease) {
-              core.setOutput('proceed', 'false');
-              return;
-            }
-
-            // ── Step 2: Trust check ─────────────────────────────────
-            const { computeTrustScore, DEFAULT_CONFIG, expandState } = require('./.github/trust-scoring.cjs');
-
-            const isCanonicalRepo = context.repo.owner === 'milady-ai';
-            const isForkOwner = !isCanonicalRepo && actor === context.repo.owner;
-
-            let isOrgMember = false;
-            try {
-              const { status } = await github.rest.orgs.checkMembershipForUser({ org: context.repo.owner, username: actor });
-              isOrgMember = status === 204 || status === 302;
-            } catch (e) {}
-
-            let repoPermission = 'none';
-            try {
-              const { data } = await github.rest.repos.getCollaboratorPermissionLevel({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                username: actor,
-              });
-              repoPermission = data.permission ?? 'none';
-            } catch (e) { core.info(`Repo permission unavailable: ${e.message}`); }
-
-            const isRepoMaintainer = ['admin', 'maintain', 'write'].includes(repoPermission);
-            let allowed = isOrgMember || isForkOwner || isRepoMaintainer;
-            if (!allowed) {
-              let trustTier = 'untested', trustScore = DEFAULT_CONFIG.initialScore;
-              try {
-                const { data: fileData } = await github.rest.repos.getContent({
-                  owner: context.repo.owner, repo: context.repo.repo,
-                  path: '.github/contributor-trust.json', ref: 'develop',
-                });
-                const allStates = JSON.parse(Buffer.from(fileData.content, 'base64').toString());
-                if (allStates[actor]) {
-                  const state = expandState(allStates[actor]);
-                  const result = computeTrustScore(state, DEFAULT_CONFIG);
-                  trustTier = result.tier;
-                  trustScore = result.score;
-                }
-              } catch (e) { core.info(`Trust data unavailable: ${e.message}`); }
-
-              allowed = ['legendary', 'trusted'].includes(trustTier);
-              if (!allowed && context.payload.issue) {
-                try { await github.rest.issues.removeLabel({ owner: context.repo.owner, repo: context.repo.repo, issue_number: context.payload.issue.number, name: 'release-ready' }); } catch (e) {}
-                await github.rest.issues.createComment({ owner: context.repo.owner, repo: context.repo.repo, issue_number: context.payload.issue.number, body: `⚠️ **Release not authorized** — @${actor} trust \`${trustTier}\` (${trustScore}/100). Need org member or trusted+ (75+).` });
-              }
-            }
-
-            core.info(`Trust: allowed=${allowed} (org=${isOrgMember}, forkOwner=${isForkOwner}, repoPermission=${repoPermission})`);
-            core.setOutput('proceed', allowed ? 'true' : 'false');
-
-  # ── 2. Resolve version ─────────────────────────────────────────────
-  version:
-    name: Resolve version
-    needs: [decide]
-    if: needs.decide.outputs.proceed == 'true'
-    runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
-    permissions:
-      contents: read
-    outputs:
-      version: ${{ steps.ver.outputs.version }}
-      tag: ${{ steps.ver.outputs.tag }}
-      prerelease: ${{ steps.ver.outputs.prerelease }}
-      channel: ${{ steps.ver.outputs.channel }}
-      npm_dist_tag: ${{ steps.ver.outputs.npm_dist_tag }}
-      android_track: ${{ steps.ver.outputs.android_track }}
-      apple_track: ${{ steps.ver.outputs.apple_track }}
-      snap_release: ${{ steps.ver.outputs.snap_release }}
-      update_homebrew: ${{ steps.ver.outputs.update_homebrew }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Fetch canonical release tags
-        run: git fetch --tags --force https://github.com/milady-ai/milady.git 'refs/tags/v*:refs/tags/v*'
-      - name: Compute next version
-        id: ver
-        env:
-          CHANNEL_INPUT: ${{ github.event.inputs.channel || '' }}
-          STABLE: ${{ github.event.inputs.stable || 'false' }}
-          VERSION_OVERRIDE: ${{ github.event.inputs.version_override || '' }}
-        run: |
-          bump_patch() {
-            local version="$1"
-            local major minor patch
-            IFS='.' read -r major minor patch <<<"$version"
-            echo "${major}.${minor}.$((patch + 1))"
-          }
-
-          highest_version() {
-            grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1
-          }
-
-          latest_stable_tag() {
-            git tag | grep '^v[0-9]\+\.[0-9]\+\.[0-9]\+$' | sort -V | tail -1 || true
-          }
-
-          latest_prerelease_tag() {
-            local ident="$1"
-            git tag | grep "^v[0-9]\+\.[0-9]\+\.[0-9]\+-${ident}\.[0-9]\+$" | sort -V | tail -1 || true
-          }
-
-          prerelease_base() {
-            sed 's/^v//' | sed 's/-[0-9A-Za-z][0-9A-Za-z.-]*$//'
-          }
-
-          current_train_base() {
-            local latest_stable alpha beta rc stable_base next_stable
-            latest_stable="$(latest_stable_tag)"
-            alpha="$(latest_prerelease_tag alpha | prerelease_base)"
-            beta="$(latest_prerelease_tag beta | prerelease_base)"
-            rc="$(latest_prerelease_tag rc | prerelease_base)"
-            if [ -n "$latest_stable" ]; then
-              stable_base="${latest_stable#v}"
-              next_stable="$(bump_patch "$stable_base")"
-            else
-              next_stable="2.0.0"
-            fi
-            printf '%s\n' "$alpha" "$beta" "$rc" "$next_stable" | highest_version
-          }
-
-          CHANNEL="$CHANNEL_INPUT"
-          if [ "$STABLE" = "true" ]; then
-            if [ -n "$CHANNEL" ] && [ "$CHANNEL" != "canary" ] && [ "$CHANNEL" != "stable" ]; then
-              echo "::error::stable=true conflicts with channel=$CHANNEL"
-              exit 1
-            fi
-            CHANNEL="stable"
-          elif [ -z "$CHANNEL" ]; then
-            CHANNEL="canary"
-          fi
-          case "$CHANNEL" in
-            canary|beta|rc|stable) ;;
-            *)
-              echo "::error::Invalid release channel: $CHANNEL"
-              exit 1
-              ;;
-          esac
-
-          case "$CHANNEL" in
-            canary)
-              PRE_ID="alpha"
-              NPM_DIST_TAG="canary"
-              ANDROID_TRACK="internal"
-              APPLE_TRACK="testflight"
-              SNAP_RELEASE="edge"
-              UPDATE_HOMEBREW="false"
-              ;;
-            beta)
-              PRE_ID="beta"
-              NPM_DIST_TAG="beta"
-              ANDROID_TRACK="beta"
-              APPLE_TRACK="testflight"
-              SNAP_RELEASE="beta"
-              UPDATE_HOMEBREW="false"
-              ;;
-            rc)
-              PRE_ID="rc"
-              NPM_DIST_TAG="rc"
-              ANDROID_TRACK="internal"
-              APPLE_TRACK="testflight"
-              SNAP_RELEASE="candidate"
-              UPDATE_HOMEBREW="false"
-              ;;
-            stable)
-              PRE_ID=""
-              NPM_DIST_TAG="latest"
-              ANDROID_TRACK="production"
-              APPLE_TRACK="app-store"
-              SNAP_RELEASE="stable"
-              UPDATE_HOMEBREW="true"
-              ;;
-          esac
-
-          if [ -n "$VERSION_OVERRIDE" ]; then
-            VERSION="${VERSION_OVERRIDE#v}"
-          elif [ "$CHANNEL" = "stable" ]; then
-            LATEST_ALPHA="$(latest_prerelease_tag alpha)"
-            LATEST_BETA="$(latest_prerelease_tag beta)"
-            LATEST_RC="$(latest_prerelease_tag rc)"
-            LATEST_STABLE="$(latest_stable_tag)"
-            RELEASE_BASE="$(printf '%s\n' "$LATEST_ALPHA" "$LATEST_BETA" "$LATEST_RC" | prerelease_base | highest_version)"
-            STABLE_VERSION="${LATEST_STABLE#v}"
-
-            if [ -z "$LATEST_STABLE" ] && [ -z "$RELEASE_BASE" ]; then
-              VERSION="2.0.0"
-            elif [ -z "$STABLE_VERSION" ]; then
-              VERSION="$RELEASE_BASE"
-            elif [ -n "$RELEASE_BASE" ] && [ "$(printf '%s\n%s\n' "$RELEASE_BASE" "$STABLE_VERSION" | sort -V | tail -1)" = "$RELEASE_BASE" ] && [ "$RELEASE_BASE" != "$STABLE_VERSION" ]; then
-              VERSION="$RELEASE_BASE"
-            else
-              VERSION="$(bump_patch "$STABLE_VERSION")"
-            fi
-          else
-            LATEST="$(latest_prerelease_tag "$PRE_ID")"
-            if [ -z "$LATEST" ]; then
-              VERSION="$(current_train_base)-${PRE_ID}.1"
-            else
-              PREFIX=$(echo "$LATEST" | sed 's/\.[0-9]*$/\./' | sed 's/^v//')
-              NUM=$(echo "$LATEST" | grep -oE '[0-9]+$')
-              VERSION="${PREFIX}$((NUM + 1))"
-            fi
-          fi
-          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z][0-9A-Za-z.-]*)?$ ]]; then
-            echo "::error::Invalid release version: $VERSION"
-            exit 1
-          fi
-          case "$CHANNEL" in
-            canary)
-              [[ "$VERSION" =~ -alpha\.[0-9]+$ ]] || { echo "::error::canary releases must use an alpha version, got $VERSION"; exit 1; }
-              ;;
-            beta)
-              [[ "$VERSION" =~ -beta\.[0-9]+$ ]] || { echo "::error::beta releases must use a beta version, got $VERSION"; exit 1; }
-              ;;
-            rc)
-              [[ "$VERSION" =~ -rc\.[0-9]+$ ]] || { echo "::error::rc releases must use an rc version, got $VERSION"; exit 1; }
-              ;;
-            stable)
-              [[ "$VERSION" != *-* ]] || { echo "::error::stable releases must not use a prerelease version, got $VERSION"; exit 1; }
-              ;;
-          esac
-          if git ls-remote --exit-code --tags https://github.com/milady-ai/milady.git "refs/tags/v$VERSION" >/dev/null 2>&1; then
-            echo "::error::Release tag v$VERSION already exists in the canonical repository"
-            exit 1
-          fi
-          PRERELEASE=$( [ "$CHANNEL" = "stable" ] && echo false || echo true )
-          {
-            echo "version=$VERSION"
-            echo "tag=v$VERSION"
-            echo "prerelease=$PRERELEASE"
-            echo "channel=$CHANNEL"
-            echo "npm_dist_tag=$NPM_DIST_TAG"
-            echo "android_track=$ANDROID_TRACK"
-            echo "apple_track=$APPLE_TRACK"
-            echo "snap_release=$SNAP_RELEASE"
-            echo "update_homebrew=$UPDATE_HOMEBREW"
-          } >> "$GITHUB_OUTPUT"
-          echo "Next: v$VERSION (channel=$CHANNEL, prerelease=$PRERELEASE)"
-
-  # ── 3. FULL BUILD MATRIX (blocking — electrobun + generic/cloud docker) ─
-  # ── P0 auth smoke — cloud-provisioned bootstrap exchange ────────────
-  # Blocks publish on contract violations of the cloud-provisioned auth
-  # path. See `docs/security/remote-auth-hardening-plan.md` §12.
-  # The smoke generates an RS256 keypair at runtime, serves a fixture
-  # JWKS via loopback HTTP, boots the real bootstrap exchange + onboarding
-  # routes against a real pglite database, and asserts:
-  #   - GET /api/onboarding/status without auth returns 401
-  #     (audited bypass closed)
-  #   - POST /api/auth/bootstrap/exchange with a valid token → 200
-  #   - replayed token → 401 reason=replay
-  #   - tampered, wrong-iss, attacker-signed (same kid), wrong-containerId
-  #     → 401
-  # The private key is generated per-run and never written to disk.
-  smoke-auth:
-    name: Auth bootstrap smoke (P0 gate)
-    needs: [version]
-    runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
-    timeout-minutes: 25
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: false
-      - name: Setup workspace dependencies
-        uses: ./.github/actions/setup-bun-workspace
-        with:
-          bun-version: ${{ env.BUN_VERSION }}
-          install-command: bun install --ignore-scripts --no-frozen-lockfile
-          install-native-deps: "false"
-          run-postinstall: "true"
-          skip-avatar-clone: "true"
-          no-vision-deps: "true"
-          prepare-local-eliza-runtime: "true"
-      - name: Run auth bootstrap smoke
-        run: bun run test:auth
-
-  build-electrobun:
-    name: Electrobun full matrix
-    needs: [version]
-    uses: ./.github/workflows/release-electrobun.yml
-    with:
-      tag: ${{ needs.version.outputs.tag }}
-      draft: false
-      publish_release: false
-    secrets: inherit
-
-  build-docker:
-    name: Agent image build
-    needs: [version]
-    uses: ./.github/workflows/build-docker.yml
-    with:
-      version: ${{ needs.version.outputs.tag }}
-      push_image: false
-      source_sha: ${{ github.sha }}
-    secrets: inherit
-
-  build-cloud-image:
-    name: Cloud app image build
-    needs: [version]
-    uses: ./.github/workflows/build-cloud-image.yml
-    with:
-      version: ${{ needs.version.outputs.tag }}
-      push_image: false
-      source_sha: ${{ github.sha }}
-    secrets: inherit
-
-  build-npm:
-    name: npm package build
-    needs: [version]
-    runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: false
-      - uses: ./.github/actions/setup-bun-workspace
-        with:
-          disable-local-eliza-workspace: "true"
-          install-command: bun install --ignore-scripts --no-frozen-lockfile
-      - name: Generate eliza i18n keyword data
-        # @elizaos/shared stays workspace-local (file:./eliza/packages/shared)
-        # even with disable-local-eliza-workspace, and tsdown bundles its
-        # source. The generated/validation-keyword-data.js sibling is
-        # gitignored, so without this step the rolldown bundle fails to
-        # resolve it on a fresh checkout.
-        run: node eliza/packages/app-core/scripts/ensure-shared-i18n-data.mjs
-      - name: Build
-        run: |
-          bunx tsdown
-          printf '{"type":"module"}\n' > dist/package.json
-          node --import tsx scripts/write-build-info.ts
-      - name: Sanitize npm package metadata
-        run: node scripts/sanitize-npm-package-metadata.mjs
-      - name: Validate package
-        run: |
-          npm pack --dry-run 2>&1 | tee /tmp/pack-output.txt
-          grep -q "package.json" /tmp/pack-output.txt
-
-  # ── Release validation builds (blocking) ────────────────────────────
-  build-android:
-    name: Android AAB build
-    needs: [version]
-    if: needs.version.outputs.channel != 'canary'
-    runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: false
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 21
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Setup workspace dependencies
-        uses: ./.github/actions/setup-bun-workspace
-        with:
-          bun-version: ${{ env.BUN_VERSION }}
-          install-command: bun install --ignore-scripts --no-frozen-lockfile
-          install-native-deps: "false"
-          run-postinstall: "true"
-          skip-avatar-clone: "true"
-          no-vision-deps: "true"
-          preserve-android-sdk: "true"
-      - name: Restore legacy electrobun compatibility path
-        run: node scripts/ensure-legacy-electrobun-compat.mjs
-      - name: Install Android NDK
-        run: |
-          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null
-          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;29.0.13113456"
-      - name: Patch Android release build compatibility
-        run: node scripts/patch-mobile-build-release-compat.mjs
-      - name: Prepare Android project
-        run: node eliza/packages/app-core/scripts/run-mobile-build.mjs android
-      - name: Build AAB
-        working-directory: apps/app/android
-        run: |
-          chmod +x ./gradlew
-          ./gradlew bundleRelease --no-daemon
-      - name: Upload AAB artifact
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-aab
-          path: apps/app/android/app/build/outputs/bundle/release/*.aab
-          retention-days: 30
-          if-no-files-found: error
-
-  build-snap:
-    name: Snap build
-    needs: [version]
-    if: needs.version.outputs.channel != 'canary'
-    runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
-    env:
-      MILADY_SKIP_LOCAL_UPSTREAMS: "1"
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: false
-      - name: Init non-eliza submodules
-        run: |
-          git submodule sync -- eliza
-          git submodule update --init --depth=1 eliza
-          node scripts/init-submodules.mjs
-          node scripts/apply-eliza-ci-patches.mjs
-          node scripts/disable-local-eliza-workspace.mjs
-      - name: Stage snapcraft.yaml
-        run: |
-          mkdir -p eliza/snap
-          cp eliza/packages/app-core/packaging/snap/snapcraft.yaml eliza/snap/snapcraft.yaml
-      - name: Normalize runner root ownership for snapd
-        run: |
-          set -euo pipefail
-          ROOT_OWNER="$(stat -c '%u:%g' /)"
-          echo "Runner root owner: ${ROOT_OWNER}"
-          if [ "${ROOT_OWNER}" = "0:0" ]; then
-            echo "Root is already 0:0 — snapd canonicalization OK"
-            exit 0
-          fi
-          echo "Attempting to repair / ownership so snapd/systemd path canonicalization accepts this runner"
-          if sudo -n chown root:root / 2>/dev/null; then
-            echo "Chown succeeded; new owner: $(stat -c '%u:%g' /)"
-          else
-            echo "::warning::Unable to chown / to root:root (sudo unavailable or passwordless sudo disabled). snapd may fail downstream. Remediation: run this job on a standard ubuntu-latest / ubuntu-24.04 GitHub-hosted runner, or configure the container image so / is owned by 0:0."
-          fi
-      - name: Probe LXD availability for snap build
-        id: snap-env
-        run: |
-          set -euo pipefail
-          if snap list lxd >/dev/null 2>&1; then
-            echo "LXD is already installed."
-            echo "can-build=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          for attempt in 1 2 3; do
-            if sudo snap install lxd; then
-              echo "can-build=true" >> "$GITHUB_OUTPUT"
-              exit 0
-            fi
-            if [ "$attempt" -eq 3 ]; then
-              echo "::warning::Unable to install LXD from the snap store after ${attempt} attempts; skipping snap package validation for this release run."
-              echo "can-build=false" >> "$GITHUB_OUTPUT"
-              exit 0
-            fi
-            sleep $((attempt * 20))
-          done
-      - uses: snapcore/action-build@v1
-        id: snap
-        if: steps.snap-env.outputs.can-build == 'true'
-        continue-on-error: true
-        with:
-          path: eliza
-      - name: Verify snap
-        if: steps.snap-env.outputs.can-build == 'true' && steps.snap.outcome == 'success'
-        run: sudo snap install --dangerous ${{ steps.snap.outputs.snap }}
-      - name: Upload snap artifact
-        if: success() && steps.snap-env.outputs.can-build == 'true' && steps.snap.outcome == 'success'
-        uses: actions/upload-artifact@v4
-        with:
-          name: snap-package
-          path: ${{ steps.snap.outputs.snap }}
-          retention-days: 30
-          if-no-files-found: error
-      - name: Record skipped snap package validation
-        if: steps.snap-env.outputs.can-build != 'true' || steps.snap.outcome != 'success'
-        run: |
-          echo "::warning::Snap package validation skipped because this runner could not complete snapcore/action-build. LXD probe result: ${{ steps.snap-env.outputs.can-build }}; snap build outcome: ${{ steps.snap.outcome }}."
-
-  build-flatpak:
-    name: Flatpak build
-    needs: [version]
-    if: needs.version.outputs.channel != 'canary'
-    runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: false
-      - name: Init non-eliza submodules
-        run: |
-          git submodule sync -- eliza
-          git submodule update --init --depth=1 eliza
-          node scripts/init-submodules.mjs
-          node scripts/apply-eliza-ci-patches.mjs
-          node scripts/disable-local-eliza-workspace.mjs
-      - name: Install flatpak tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y flatpak flatpak-builder
-          flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-          flatpak install --user -y flathub org.freedesktop.Platform//24.08 org.freedesktop.Sdk//24.08 org.freedesktop.Sdk.Extension.node22//24.08
-      - name: Build flatpak
-        working-directory: eliza/packages/app-core/packaging/flatpak
-        run: |
-          flatpak-builder --repo=repo --user --install-deps-from=flathub --force-clean build-dir ai.elizaos.App.yml
-          flatpak build-bundle repo elizaos-app.flatpak ai.elizaos.App
-      - name: Upload flatpak artifact
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: flatpak-bundle
-          path: eliza/packages/app-core/packaging/flatpak/elizaos-app.flatpak
-          retention-days: 30
-          if-no-files-found: error
-
-  build-pypi:
-    name: PyPI package build
-    needs: [version]
-    if: needs.version.outputs.channel != 'canary'
-    runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: false
-      - name: Init non-eliza submodules
-        run: |
-          git submodule sync -- eliza
-          git submodule update --init --depth=1 eliza
-          node scripts/init-submodules.mjs
-          node scripts/apply-eliza-ci-patches.mjs
-          node scripts/disable-local-eliza-workspace.mjs
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Build wheel
-        run: |
-          pip install build
-          python -m build eliza/packages/app-core/packaging/pypi/
-      - name: Upload PyPI artifact
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: pypi-package
-          path: eliza/packages/app-core/packaging/pypi/dist/
-          retention-days: 30
-          if-no-files-found: error
-
-  build-debian:
-    name: Debian package build
-    needs: [version]
-    if: needs.version.outputs.channel != 'canary'
-    runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: false
-      - name: Init non-eliza submodules
-        run: |
-          git submodule sync -- eliza
-          git submodule update --init --depth=1 eliza
-          node scripts/init-submodules.mjs
-          node scripts/apply-eliza-ci-patches.mjs
-          node scripts/disable-local-eliza-workspace.mjs
-      - name: Install Debian build deps
-        run: |
-          curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-          sudo apt-get update
-          sudo apt-get install -y build-essential nodejs dpkg-dev debhelper fakeroot
-          node --version
-          npm --version
-          dpkg-query -W -f='${Version} ${Provides}\n' nodejs | grep -Eq '(^|, )npm(,|$)'
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: ${{ env.BUN_VERSION }}
-      - name: Generate eliza i18n keyword data
-        # eliza/packages/shared/src/i18n/keyword-matching.ts imports from
-        # ./generated/validation-keyword-data.js, which is gitignored and
-        # produced by packages/shared/scripts/generate-keywords.mjs. The
-        # Debian build runs a Vite/Rolldown production build via
-        # debian/rules and will fail to resolve the generated module on a
-        # fresh checkout unless this step runs first.
-        run: node eliza/packages/app-core/scripts/ensure-shared-i18n-data.mjs
-      - name: Stage Debian packaging
-        run: |
-          rm -rf debian
-          cp -R eliza/packages/app-core/packaging/debian debian
-          # The debian packaging is authored in the elizaOS repo. CI patching
-          # can rewrite the source entrypoint to either elizaos-app.mjs or
-          # eliza.mjs, but Milady's actual entry script is milady.mjs. The
-          # service file is staged under ./debian after the copy above, and CI
-          # mutates manifests before install, so keep Bun unfrozen here.
-          if [ -f milady.mjs ]; then
-            sed -i \
-              -e 's/elizaos-app\.mjs/milady.mjs/g' \
-              -e 's/\beliza\.mjs\b/milady.mjs/g' \
-              debian/install debian/rules
-          fi
-          sed -i \
-            -e 's|packaging/debian/elizaos-app.service|debian/elizaos-app.service|g' \
-            -e 's|bun install --ignore-scripts|bun install --ignore-scripts --no-frozen-lockfile|g' \
-            debian/rules
-          test -f debian/changelog
-          test -x debian/rules
-          dpkg-checkbuilddeps debian/control
-      - name: Build deb
-        run: |
-          dpkg-buildpackage -us -uc -b
-      - name: Collect deb artifacts
-        if: success()
-        run: |
-          mkdir -p deb-output
-          shopt -s nullglob
-          debs=(../*.deb)
-          if [ "${#debs[@]}" -eq 0 ]; then
-            echo "::error::No .deb artifacts found after dpkg-buildpackage"
-            exit 1
-          fi
-          cp "${debs[@]}" deb-output/
-      - name: Upload deb artifact
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: debian-package
-          path: deb-output/
-          retention-days: 30
-          if-no-files-found: error
-  build-ios:
-    name: iOS build validation
-    needs: [version]
-    if: needs.version.outputs.channel != 'canary'
-    runs-on: macos-14
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: false
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Setup workspace dependencies
-        uses: ./.github/actions/setup-bun-workspace
-        with:
-          bun-version: ${{ env.BUN_VERSION }}
-          install-command: bun install --ignore-scripts --no-frozen-lockfile
-          install-native-deps: "false"
-          run-postinstall: "true"
-          skip-avatar-clone: "true"
-          no-vision-deps: "true"
-      - name: Restore legacy electrobun compatibility path
-        run: node scripts/ensure-legacy-electrobun-compat.mjs
-      - name: Patch mobile release build compatibility
-        run: node scripts/patch-mobile-build-release-compat.mjs
-      - name: Build iOS simulator app
-        run: node eliza/packages/app-core/scripts/run-mobile-build.mjs ios
-        env:
-          LANG: en_US.UTF-8
-      - name: Verify Xcode project
-        run: |
-          if [ -d apps/app/ios/App ]; then
-            xcodebuild -project apps/app/ios/App/App.xcodeproj -scheme App -configuration Release -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" -showBuildSettings > /tmp/milady-xcodebuild-settings.txt
-            grep -q "PRODUCT_BUNDLE_IDENTIFIER = com.miladyai.milady" /tmp/milady-xcodebuild-settings.txt
-          else
-            echo "::error::apps/app/ios/App directory not found"
-            exit 1
-          fi
-
-  build-macos-store:
-    name: macOS App Store build validation
-    needs: [version]
-    if: needs.version.outputs.channel != 'canary'
-    runs-on: macos-14
-    env:
-      MILADY_SKIP_LOCAL_UPSTREAMS: ""
-      ELIZA_SKIP_LOCAL_UPSTREAMS: ""
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: false
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Setup workspace dependencies
-        uses: ./.github/actions/setup-bun-workspace
-        with:
-          bun-version: ${{ env.BUN_VERSION }}
-          install-command: bun install --ignore-scripts --no-frozen-lockfile
-          install-native-deps: "false"
-          run-postinstall: "true"
-          skip-avatar-clone: "true"
-          no-vision-deps: "true"
-      - name: Restore legacy electrobun compatibility path
-        run: node scripts/ensure-legacy-electrobun-compat.mjs
-      - name: Build web assets and Electrobun
-        run: ELECTROBUN_SKIP_CODESIGN=1 bun run build
-
-  build-homepage:
-    name: Homepage build
-    needs: [version]
-    runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: false
-      - uses: ./.github/actions/setup-bun-workspace
-        with:
-          disable-local-eliza-workspace: "true"
-          install-command: bun install --ignore-scripts --no-frozen-lockfile
-      - name: Restore eliza workspace paths for homepage scripts
-        run: node scripts/restore-local-eliza-workspace.mjs
-      - name: Generate release metadata
-        run: node scripts/write-homepage-release-data.mjs
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build homepage
-        run: bun run build:web
-
-  build-docs:
-    name: Docs validation
-    needs: [version]
-    runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Initialize eliza docs
-        run: |
-          git submodule sync -- eliza
-          git submodule update --init --depth=1 eliza
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Validate docs config
-        run: node -e "const c = require('./eliza/docs/docs.json'); console.log('Docs config valid:', c.name)"
-      - name: Check for broken internal links
-        run: |
-          find eliza/docs -name '*.md' -o -name '*.mdx' | head -5 | while read -r f; do
-            grep -oE '\]\([^)]+\)' "$f" | grep -v 'http' | head -3
-          done
-          echo "Docs link check complete"
-
-  release-gate:
-    name: Release gate
-    needs:
-      [
-        decide,
-        version,
-        smoke-auth,
-        build-electrobun,
-        build-docker,
-        build-cloud-image,
-        build-npm,
-        build-android,
-        build-snap,
-        build-flatpak,
-        build-pypi,
-        build-debian,
-        build-ios,
-        build-macos-store,
-        build-homepage,
-        build-docs,
-      ]
-    if: always()
-    runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
-    steps:
-      - name: Require release prerequisites
-        env:
-          DECIDE_RESULT: ${{ needs.decide.result }}
-          PROCEED: ${{ needs.decide.outputs.proceed }}
-          VERSION_RESULT: ${{ needs.version.result }}
-          VERSION: ${{ needs.version.outputs.version }}
-          TAG: ${{ needs.version.outputs.tag }}
-          CHANNEL: ${{ needs.version.outputs.channel }}
-          FULL_DISTRIBUTION: ${{ needs.version.outputs.channel != 'canary' }}
-          SMOKE_AUTH_RESULT: ${{ needs.smoke-auth.result }}
-          BUILD_ELECTROBUN_RESULT: ${{ needs.build-electrobun.result }}
-          BUILD_DOCKER_RESULT: ${{ needs.build-docker.result }}
-          BUILD_CLOUD_IMAGE_RESULT: ${{ needs.build-cloud-image.result }}
-          BUILD_NPM_RESULT: ${{ needs.build-npm.result }}
-          BUILD_ANDROID_RESULT: ${{ needs.build-android.result }}
-          BUILD_SNAP_RESULT: ${{ needs.build-snap.result }}
-          BUILD_FLATPAK_RESULT: ${{ needs.build-flatpak.result }}
-          BUILD_PYPI_RESULT: ${{ needs.build-pypi.result }}
-          BUILD_DEBIAN_RESULT: ${{ needs.build-debian.result }}
-          BUILD_IOS_RESULT: ${{ needs.build-ios.result }}
-          BUILD_MACOS_STORE_RESULT: ${{ needs.build-macos-store.result }}
-          BUILD_HOMEPAGE_RESULT: ${{ needs.build-homepage.result }}
-          BUILD_DOCS_RESULT: ${{ needs.build-docs.result }}
-        run: |
-          set -euo pipefail
-
-          if [ "$DECIDE_RESULT" != "success" ]; then
-            echo "::error::Release decision result was '$DECIDE_RESULT', expected success"
-            exit 1
-          fi
-
-          case "$PROCEED" in
-            true) ;;
-            false)
-              echo "Release decision returned proceed=false; publish jobs will stay skipped."
-              exit 0
-              ;;
-            *)
-              echo "::error::Release decision output proceed was '$PROCEED', expected true or false"
-              exit 1
-              ;;
-          esac
-
-          failed=0
-          require_success() {
-            local label="$1"
-            local result="$2"
-            if [ "$result" != "success" ]; then
-              echo "::error::$label result was '$result', expected success"
-              failed=1
-            fi
-          }
-
-          require_channel_result() {
-            local label="$1"
-            local result="$2"
-            local enabled="$3"
-            if [ "$enabled" = "true" ]; then
-              require_success "$label" "$result"
-              return
-            fi
-            case "$result" in
-              skipped|success) ;;
-              *)
-                echo "::error::$label result was '$result' while disabled for channel '$CHANNEL'; expected skipped"
-                failed=1
-                ;;
-            esac
-          }
-
-          require_non_empty() {
-            local label="$1"
-            local value="$2"
-            if [ -z "$value" ]; then
-              echo "::error::$label was empty"
-              failed=1
-            fi
-          }
-
-          require_success "Resolve version" "$VERSION_RESULT"
-          require_non_empty "Release version" "$VERSION"
-          require_non_empty "Release tag" "$TAG"
-          require_non_empty "Release channel" "$CHANNEL"
-          require_success "Auth bootstrap smoke" "$SMOKE_AUTH_RESULT"
-          require_success "Electrobun full matrix" "$BUILD_ELECTROBUN_RESULT"
-          require_success "Agent image build" "$BUILD_DOCKER_RESULT"
-          require_success "Cloud app image build" "$BUILD_CLOUD_IMAGE_RESULT"
-          require_success "npm package build" "$BUILD_NPM_RESULT"
-          require_channel_result "Android AAB build" "$BUILD_ANDROID_RESULT" "$FULL_DISTRIBUTION"
-          require_channel_result "Snap build" "$BUILD_SNAP_RESULT" "$FULL_DISTRIBUTION"
-          require_channel_result "Flatpak build" "$BUILD_FLATPAK_RESULT" "$FULL_DISTRIBUTION"
-          require_channel_result "PyPI package build" "$BUILD_PYPI_RESULT" "$FULL_DISTRIBUTION"
-          require_channel_result "Debian package build" "$BUILD_DEBIAN_RESULT" "$FULL_DISTRIBUTION"
-          require_channel_result "iOS build validation" "$BUILD_IOS_RESULT" "$FULL_DISTRIBUTION"
-          require_channel_result "macOS App Store build validation" "$BUILD_MACOS_STORE_RESULT" "$FULL_DISTRIBUTION"
-          require_success "Homepage build" "$BUILD_HOMEPAGE_RESULT"
-          require_success "Docs validation" "$BUILD_DOCS_RESULT"
-
-          if [ "$failed" -ne 0 ]; then
-            exit 1
-          fi
-
-          echo "All release gates passed for $TAG."
-
-  # ── 4. Electrobun + Docker + npm green → tag and publish ────────────
-  # The GitHub release is created with GITHUB_TOKEN for scoped permissions.
-  # Post-release distribution is called explicitly below instead of relying
-  # on release-event fan-out semantics.
-  publish:
-    name: Tag & publish release
-    needs: [decide, version, release-gate]
-    if: >-
-      always() &&
-      needs.decide.result == 'success' &&
-      needs.decide.outputs.proceed == 'true' &&
-      needs.version.result == 'success' &&
-      needs.release-gate.result == 'success'
-    runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
-    permissions:
-      contents: write
-      issues: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Configure git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-      - name: Create and push tag
-        env:
-          TAG: ${{ needs.version.outputs.tag }}
-        run: |
-          if [ -z "$TAG" ]; then
-            echo "::error::Release tag is empty"
-            exit 1
-          fi
-
-          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
-            echo "Tag $TAG already exists on origin; reusing existing tag"
-            exit 0
-          fi
-
-          if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null 2>&1; then
-            echo "Local tag $TAG already exists; pushing it to origin"
-          else
-            git tag -a "$TAG" -m "Release $TAG — all builds verified"
-          fi
-
-          git push origin "$TAG"
-
-      - name: Generate release changelog
-        id: changelog
-        env:
-          TAG: ${{ needs.version.outputs.tag }}
-        run: |
-          PREVIOUS_TAG="$(git tag --sort=-creatordate | grep '^v' | grep -vx "$TAG" | head -1 || true)"
-          CHANGELOG_FILE="$RUNNER_TEMP/full-release-changelog.md"
-          {
-            echo "## Full changelog"
-            echo
-            if [ -n "$PREVIOUS_TAG" ]; then
-              echo "- Previous tag: \`$PREVIOUS_TAG\`"
-              echo "- Compare: https://github.com/${{ github.repository }}/compare/$PREVIOUS_TAG...$TAG"
-            else
-              echo "- Previous tag: none"
-            fi
-            echo
-            if [ -n "$PREVIOUS_TAG" ]; then
-              git log --date=short --pretty=format:'- %s (%h, %ad)' "$PREVIOUS_TAG..HEAD"
-            else
-              git log --date=short --pretty=format:'- %s (%h, %ad)'
-            fi
-            echo
-          } > "$CHANGELOG_FILE"
-          echo "previous_tag=$PREVIOUS_TAG" >> "$GITHUB_OUTPUT"
-          echo "file=$CHANGELOG_FILE" >> "$GITHUB_OUTPUT"
-
-      - name: Create GitHub release
-        uses: actions/github-script@v7
-        env:
-          TAG: ${{ needs.version.outputs.tag }}
-          PRERELEASE: ${{ needs.version.outputs.prerelease }}
-          CHANNEL: ${{ needs.version.outputs.channel }}
-          ANDROID_TRACK: ${{ needs.version.outputs.android_track }}
-          APPLE_TRACK: ${{ needs.version.outputs.apple_track }}
-          PREVIOUS_TAG: ${{ steps.changelog.outputs.previous_tag }}
-          CHANGELOG_FILE: ${{ steps.changelog.outputs.file }}
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const fs = require('fs');
-            const tag = process.env.TAG;
-            const prerelease = process.env.PRERELEASE === 'true';
-            const channel = process.env.CHANNEL;
-            const previousTag = process.env.PREVIOUS_TAG || '';
-            const fullChangelog = fs.readFileSync(process.env.CHANGELOG_FILE, 'utf8').trim();
-            const maxReleaseBodyLength = 120000;
-
-            let generatedNotes = '';
-            try {
-              const notesResponse = await github.rest.repos.generateReleaseNotes({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                tag_name: tag,
-                ...(previousTag ? { previous_tag_name: previousTag } : {}),
-              });
-              generatedNotes = notesResponse.data.body?.trim() ?? '';
-            } catch (error) {
-              core.warning(`Could not generate GitHub release notes: ${error.message}`);
-            }
-
-            function capReleaseBody(body) {
-              if (body.length <= maxReleaseBodyLength) {
-                return body;
-              }
-              const suffix = [
-                '',
-                '',
-                '---',
-                `Release notes were truncated to fit GitHub's release body limit.`,
-                `Full workflow logs: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
-              ].join('\n');
-              return `${body.slice(0, maxReleaseBodyLength - suffix.length)}${suffix}`;
-            }
-
-            const releasePayload = {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              tag_name: tag,
-              name: tag,
-              body: capReleaseBody([
-                `## ${tag}`,
-                '',
-                prerelease ? `Pre-release (${channel})` : 'Stable release',
-                '',
-                previousTag ? `**Previous tag:** ${previousTag}` : '**Previous tag:** none',
-                `**Triggered by:** @${context.actor}`,
-                '',
-                '### Release verification',
-                '- ✅ Electrobun desktop — full matrix (macOS ARM, macOS Intel, Windows, Linux)',
-                '- ✅ Canonical agent image — built successfully',
-                '- ✅ Cloud app image — built successfully',
-                '- ✅ npm package — built and validated',
-                '',
-                generatedNotes ? '## Release notes' : null,
-                generatedNotes || null,
-                generatedNotes ? '' : null,
-                fullChangelog,
-                '',
-                '### Publishing pipelines (called explicitly by this workflow)',
-                '- ✅ Electrobun artifacts (uploaded during build phase)',
-                '- 🔄 Agent Docker image → post-publish push',
-                '- 🔄 Cloud app Docker image → post-publish push',
-                '- 🔄 Post-release distribution orchestrator → release-orchestrator.yml',
-                '- 🔄 npm publish → publish-npm.yml',
-                '- 🔄 PyPI / Snap / Debian / Flatpak → publish-packages.yml',
-                `- 🔄 Android → android-release.yml (${process.env.ANDROID_TRACK})`,
-                `- 🔄 iOS / macOS → apple-store-release.yml (${process.env.APPLE_TRACK})`,
-                '- 🔄 Homebrew → update-homebrew.yml',
-                '- 🔄 Homepage → deploy-web.yml',
-              ].filter(Boolean).join('\n')),
-              prerelease,
-              draft: false,
-              generate_release_notes: false,
-            };
-
-            const releases = await github.paginate(github.rest.repos.listReleases, {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              per_page: 100,
-            });
-            const matchingReleases = releases.filter((release) => release.tag_name === tag);
-            const existingRelease = matchingReleases.find((release) => !release.draft) ?? matchingReleases[0] ?? null;
-
-            for (const duplicate of matchingReleases) {
-              if (existingRelease && duplicate.id !== existingRelease.id && duplicate.draft) {
-                await github.rest.repos.deleteRelease({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  release_id: duplicate.id,
-                });
-              }
-            }
-
-            let release;
-            if (existingRelease) {
-              const { data } = await github.rest.repos.updateRelease({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                release_id: existingRelease.id,
-                tag_name: releasePayload.tag_name,
-                name: releasePayload.name,
-                body: releasePayload.body,
-                prerelease: releasePayload.prerelease,
-                draft: releasePayload.draft,
-                generate_release_notes: releasePayload.generate_release_notes,
-              });
-              release = data;
-              core.info(`Updated release: ${release.html_url}`);
-            } else {
-              const { data } = await github.rest.repos.createRelease(releasePayload);
-              release = data;
-              core.info(`Created release: ${release.html_url}`);
-            }
-
-            if (context.payload.issue) {
-              const issue = context.payload.issue.number;
-              await github.rest.issues.createComment({
-                owner: context.repo.owner, repo: context.repo.repo,
-                issue_number: issue,
-                body: `🚀 **Release ${tag} published**\n\n${release.html_url}`,
-              });
-              await github.rest.issues.update({
-                owner: context.repo.owner, repo: context.repo.repo,
-                issue_number: issue, state: 'closed', state_reason: 'completed',
-              });
-              try { await github.rest.issues.removeLabel({ owner: context.repo.owner, repo: context.repo.repo, issue_number: issue, name: 'release-ready' }); } catch (e) {}
-            }
-
-  # ── 5. Post-publish: push and distribute what was build-only verified ─
-  push-agent-image:
-    name: Push agent image to GHCR
-    needs: [version, publish]
-    if: >-
-      needs.version.result == 'success' &&
-      needs.publish.result == 'success'
-    uses: ./.github/workflows/build-docker.yml
-    with:
-      version: ${{ needs.version.outputs.tag }}
-      push_image: true
-      source_sha: ${{ github.sha }}
-    secrets: inherit
-
-  push-cloud-image:
-    name: Push cloud app image to GHCR
-    needs: [version, publish]
-    if: >-
-      needs.version.result == 'success' &&
-      needs.publish.result == 'success'
-    uses: ./.github/workflows/build-cloud-image.yml
-    with:
-      version: ${{ needs.version.outputs.tag }}
-      push_image: true
-      source_sha: ${{ github.sha }}
-    secrets: inherit
-
-  distribute-release:
-    name: Distribute release
-    needs: [version, publish, push-agent-image, push-cloud-image]
-    if: >-
-      needs.version.result == 'success' &&
-      needs.publish.result == 'success' &&
-      needs.push-agent-image.result == 'success' &&
-      needs.push-cloud-image.result == 'success'
-    uses: ./.github/workflows/release-orchestrator.yml
-    with:
-      version: ${{ needs.version.outputs.version }}
-      publish_npm: true
-      publish_packages: ${{ needs.version.outputs.channel != 'canary' }}
-      publish_android: ${{ needs.version.outputs.channel != 'canary' }}
-      publish_apple: ${{ needs.version.outputs.channel != 'canary' }}
-      update_homebrew: ${{ needs.version.outputs.update_homebrew == 'true' }}
-      deploy_homepage: true
-    secrets: inherit
+const fs = require('fs');
+const tag = process.env.TAG;
+const prerelease = process.env.PRERELEASE === 'true';
+const channel = process.env.CHANNEL;
+const previousTag = process.env.PREVIOUS_TAG || '';
+const fullChangelog = fs.readFileSync(process.env.CHANGELOG_FILE, 'utf8').trim();
+
+let generatedNotes = '';
+try {
+  const notesResponse = await github.rest.repos.generateReleaseNotes({
+    owner: context.repo.owner,
+    repo: context.repo.repo,
+    tag_name: tag,
+    ...(previousTag ? { previous_tag_name: previousTag } : {}),
+  });
+  generatedNotes = notesResponse.data.body?.trim() ?? '';
+} catch (error) {
+  core.warning(`Could not generate GitHub release notes: ${error.message}`);
+}
+
+// GitHub release body hard limit is 125,000 chars. Leave headroom.
+const MAX_BODY = 124000;
+const compareUrl = previousTag
+  ? `https://github.com/${context.repo.owner}/${context.repo.repo}/compare/${previousTag}...${tag}`
+  : '';
+
+const buildBody = (notes, changelog) => [
+  `## ${tag}`,
+  '',
+  prerelease ? `Pre-release (${channel})` : 'Stable release',
+  '',
+  previousTag ? `**Previous tag:** ${previousTag}` : '**Previous tag:** none',
+  `**Triggered by:** @${context.actor}`,
+  '',
+  '### Release verification',
+  '- ✅ Electrobun desktop — full matrix (macOS ARM, macOS Intel, Windows, Linux)',
+  '- ✅ Canonical agent image — built successfully',
+  '- ✅ Cloud app image — built successfully',
+  '- ✅ npm package — built and validated',
+  '',
+  notes ? '## Release notes' : null,
+  notes || null,
+  notes ? '' : null,
+  changelog,
+  '',
+  '### Publishing pipelines (called explicitly by this workflow)',
+  '- ✅ Electrobun artifacts (uploaded during build phase)',
+  '- 🔄 Agent Docker image → post-publish push',
+  '- 🔄 Cloud app Docker image → post-publish push',
+  '- 🔄 Post-release distribution orchestrator → release-orchestrator.yml',
+  '- 🔄 npm publish → publish-npm.yml',
+  '- 🔄 PyPI / Snap / Debian / Flatpak → publish-packages.yml',
+  `- 🔄 Android → android-release.yml (${process.env.ANDROID_TRACK})`,
+  `- 🔄 iOS / macOS → apple-store-release.yml (${process.env.APPLE_TRACK})`,
+  '- 🔄 Homebrew → update-homebrew.yml',
+  '- 🔄 Homepage → deploy-web.yml',
+].filter(Boolean).join('\n');
+
+const truncate = (text, max, label) => {
+  if (text.length <= max) return text;
+  const notice = compareUrl
+    ? `\n\n_…truncated to fit GitHub's 125,000 character release-body limit. See full ${label} at ${compareUrl}._`
+    : `\n\n_…truncated to fit GitHub's 125,000 character release-body limit._`;
+  return text.slice(0, Math.max(0, max - notice.length)) + notice;
+};
+
+let body = buildBody(generatedNotes, fullChangelog);
+
+// Tier 1: trim the changelog (usually the biggest contributor).
+if (body.length > MAX_BODY) {
+  const overflow = body.length - MAX_BODY;
+  const trimmedChangelog = truncate(fullChangelog, Math.max(2000, fullChangelog.length - overflow - 500), 'changelog');
+  body = buildBody(generatedNotes, trimmedChangelog);
+}
+
+// Tier 2: trim generated notes if still too long.
+if (body.length > MAX_BODY) {
+  const overflow = body.length - MAX_BODY;
+  const trimmedNotes = truncate(generatedNotes, Math.max(1000, generatedNotes.length - overflow - 500), 'release notes');
+  body = buildBody(trimmedNotes, '');
+}
+
+// Tier 3: hard cap as a final safety belt.
+if (body.length > MAX_BODY) {
+  body = truncate(body, MAX_BODY, 'release notes');
+}
+
+const releasePayload = {
+  owner: context.repo.owner,
+  repo: context.repo.repo,
+  tag_name: tag,
+  name: tag,
+  body,
+  prerelease,
+  draft: false,
+  generate_release_notes: false,
+};
+
+const releases = await github.paginate(github.rest.repos.listReleases, {
+  owner: context.repo.owner,
+  repo: context.repo.repo,
+  per_page: 100,
+});
+const matchingReleases = releases.filter((release) => release.tag_name === tag);
+const existingRelease = matchingReleases.find((release) => !release.draft) ?? matchingReleases[0] ?? null;
+for (const duplicate of matchingReleases) {
+  if (existingRelease && duplicate.id !== existingRelease.id && duplicate.draft) {
+    await github.rest.repos.deleteRelease({
+      owner: context.repo.owner,
+      repo: context.repo.repo,
+      release_id: duplicate.id,
+    });
+  }
+}
+let release;
+if (existingRelease) {
+  const { data } = await github.rest.repos.updateRelease({
+    owner: context.repo.owner,
+    repo: context.repo.repo,
+    release_id: existingRelease.id,
+    tag_name: releasePayload.tag_name,
+    name: releasePayload.name,
+    body: releasePayload.body,
+    prerelease: releasePayload.prerelease,
+    draft: releasePayload.draft,
+    generate_release_notes: releasePayload.generate_release_notes,
+  });
+  release = data;
+  core.info(`Updated release: ${release.html_url}`);
+} else {
+  const { data } = await github.rest.repos.createRelease(releasePayload);
+  release = data;
+  core.info(`Created release: ${release.html_url}`);
+}
+
+if (context.payload.issue) {
+  const issue = context.payload.issue.number;
+  await github.rest.issues.createComment({
+    owner: context.repo.owner, repo: context.repo.repo,
+    issue_number: issue,
+    body: `🚀 **Release ${tag} published**\n\n${release.html_url}`,
+  });
+  await github.rest.issues.update({
+    owner: context.repo.owner, repo: context.repo.repo,
+    issue_number: issue, state: 'closed', state_reason: 'completed',
+  });
+  try { await github.rest.issues.removeLabel({ owner: context.repo.owner, repo: context.repo.repo, issue_number: issue, name: 'release-ready' }); } catch (e) {}
+}
