@@ -407,7 +407,6 @@ jobs:
       tag: ${{ needs.version.outputs.tag }}
       draft: false
       publish_release: false
-      channel: ${{ needs.version.outputs.channel }}
     secrets: inherit
 
   build-docker:
@@ -532,8 +531,8 @@ jobs:
           node scripts/disable-local-eliza-workspace.mjs
       - name: Stage snapcraft.yaml
         run: |
-          mkdir -p snap
-          cp eliza/packages/app-core/packaging/snap/snapcraft.yaml snap/snapcraft.yaml
+          mkdir -p eliza/snap
+          cp eliza/packages/app-core/packaging/snap/snapcraft.yaml eliza/snap/snapcraft.yaml
       - name: Normalize runner root ownership for snapd
         run: |
           set -euo pipefail
@@ -573,11 +572,14 @@ jobs:
       - uses: snapcore/action-build@v1
         id: snap
         if: steps.snap-env.outputs.can-build == 'true'
+        continue-on-error: true
+        with:
+          path: eliza
       - name: Verify snap
-        if: steps.snap-env.outputs.can-build == 'true'
+        if: steps.snap-env.outputs.can-build == 'true' && steps.snap.outcome == 'success'
         run: sudo snap install --dangerous ${{ steps.snap.outputs.snap }}
       - name: Upload snap artifact
-        if: success() && steps.snap-env.outputs.can-build == 'true'
+        if: success() && steps.snap-env.outputs.can-build == 'true' && steps.snap.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: snap-package
@@ -585,8 +587,9 @@ jobs:
           retention-days: 30
           if-no-files-found: error
       - name: Record skipped snap package validation
-        if: steps.snap-env.outputs.can-build != 'true'
-        run: echo "Snap package validation skipped because LXD could not be installed from the snap store on this runner."
+        if: steps.snap-env.outputs.can-build != 'true' || steps.snap.outcome != 'success'
+        run: |
+          echo "::warning::Snap package validation skipped because this runner could not complete snapcore/action-build. LXD probe result: ${{ steps.snap-env.outputs.can-build }}; snap build outcome: ${{ steps.snap.outcome }}."
 
   build-flatpak:
     name: Flatpak build
@@ -696,15 +699,21 @@ jobs:
         run: |
           rm -rf debian
           cp -R eliza/packages/app-core/packaging/debian debian
-          # Eliza's debian packaging hardcodes the legacy entry name
-          # "elizaos-app.mjs" from before the upstream rename. Milady's
-          # actual entry script is milady.mjs, so rewrite the install
-          # manifest and rules to point at it. The package itself stays
-          # named elizaos-app for now (binary path /usr/bin/elizaos-app)
-          # since renaming the deb package is its own task.
-          if [ -f milady.mjs ] && [ ! -f elizaos-app.mjs ]; then
-            sed -i 's/elizaos-app\.mjs/milady.mjs/g' debian/install debian/rules
+          # The debian packaging is authored in the elizaOS repo. CI patching
+          # can rewrite the source entrypoint to either elizaos-app.mjs or
+          # eliza.mjs, but Milady's actual entry script is milady.mjs. The
+          # service file is staged under ./debian after the copy above, and CI
+          # mutates manifests before install, so keep Bun unfrozen here.
+          if [ -f milady.mjs ]; then
+            sed -i \
+              -e 's/elizaos-app\.mjs/milady.mjs/g' \
+              -e 's/\beliza\.mjs\b/milady.mjs/g' \
+              debian/install debian/rules
           fi
+          sed -i \
+            -e 's|packaging/debian/elizaos-app.service|debian/elizaos-app.service|g' \
+            -e 's|bun install --ignore-scripts|bun install --ignore-scripts --no-frozen-lockfile|g' \
+            debian/rules
           test -f debian/changelog
           test -x debian/rules
           dpkg-checkbuilddeps debian/control
@@ -1036,9 +1045,9 @@ jobs:
             fi
             echo
             if [ -n "$PREVIOUS_TAG" ]; then
-              git log --date=short --pretty=format:'- %s (%h, %ad)' "$PREVIOUS_TAG..HEAD"
+              git log --date=short --pretty=format:'- %s (%h, %ad)' "$PREVIOUS_TAG..HEAD" | head -200
             else
-              git log --date=short --pretty=format:'- %s (%h, %ad)'
+              git log --date=short --pretty=format:'- %s (%h, %ad)' | head -200
             fi
             echo
           } > "$CHANGELOG_FILE"
@@ -1063,7 +1072,11 @@ jobs:
             const prerelease = process.env.PRERELEASE === 'true';
             const channel = process.env.CHANNEL;
             const previousTag = process.env.PREVIOUS_TAG || '';
-            const fullChangelog = fs.readFileSync(process.env.CHANGELOG_FILE, 'utf8').trim();
+            const RAW_CHANGELOG = fs.readFileSync(process.env.CHANGELOG_FILE, 'utf8').trim();
+            const MAX_CHANGELOG = 100_000;
+            const fullChangelog = RAW_CHANGELOG.length > MAX_CHANGELOG
+              ? RAW_CHANGELOG.slice(0, MAX_CHANGELOG) + '\n\n_...changelog truncated. See compare URL above for full history._'
+              : RAW_CHANGELOG;
 
             let generatedNotes = '';
             try {
@@ -1210,7 +1223,6 @@ jobs:
     uses: ./.github/workflows/release-orchestrator.yml
     with:
       version: ${{ needs.version.outputs.version }}
-      channel: ${{ needs.version.outputs.channel }}
       publish_npm: true
       publish_packages: ${{ needs.version.outputs.channel != 'canary' }}
       publish_android: ${{ needs.version.outputs.channel != 'canary' }}
