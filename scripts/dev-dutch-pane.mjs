@@ -1,4 +1,5 @@
-#!/usr/bin/env node
+﻿#!/usr/bin/env node
+
 /**
  * Milady dev dashboard pane runner — called by dev-dutch.mjs, one instance per pane.
  *
@@ -9,8 +10,8 @@
  * and emits OSC 8 clickable hyperlinks for "listening on http://..." URLs.
  */
 
-import { existsSync, readFileSync } from "node:fs";
 import { spawn } from "node:child_process";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -168,10 +169,10 @@ console.log(
 // Returns null to drop the line entirely.
 function colorLine(raw) {
   // strip existing ANSI so our checks work on plain text, then re-emit raw
+  const ANSI_ESC = "";
   const plain = raw
-    .replace(/\x1b\[[0-9;]*m/g, "")
-    .replace(/\x1b\].*?\x1b\\/g, "");
-  const l = plain.toLowerCase();
+    .replace(new RegExp(`${ANSI_ESC}\\[[0-9;]*m`, "g"), "")
+    .replace(new RegExp(`${ANSI_ESC}\\].*?${ANSI_ESC}\\\\`, "g"), "");
 
   // ── drop: HTTP access log lines (any method + path + status) ──
   if (
