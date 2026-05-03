@@ -735,7 +735,7 @@ jobs:
           # (canary-macos-arm64-update.json etc.), so the baseUrl has no env subdir.
           # TODO: Configure releases host on milady-ai/milady repo settings (replace
           # releases.milady.ai placeholder with the eliza release host).
-          ELIZA_RELEASE_URL: ${{ (github.event_name != 'workflow_call' || inputs.publish_release) && !inputs.draft && 'https://releases.elizaos.ai/' || '' }}
+          ELIZA_RELEASE_URL: ${{ (github.event_name != 'workflow_call' || inputs.publish_release) && !inputs.draft && 'https://releases.milady.ai/' || '' }}
 
       - name: Dump Electrobun build diagnostics
         if: failure()
@@ -1649,7 +1649,7 @@ jobs:
       #   ${baseUrl}/${platformPrefix}-${tarballFileName}
       # Requires RELEASE_UPLOAD_KEY secret (SSH private key for releases server).
       # Skipped for draft releases — test/preview builds must not pollute the production update channel.
-      # TODO: configure releases.elizaos.ai (or chosen release host) and update
+      # TODO: configure releases.milady.ai (or chosen release host) and update
       # the rsync target / known_hosts entry below before enabling.
       - name: Upload update channel files to release host
         if: ${{ !inputs.draft }}
@@ -1673,7 +1673,7 @@ jobs:
           rsync -av --delete-after \
             -e "ssh -i /tmp/release_key" \
             update-channel/ \
-            releases@releases.elizaos.ai:/var/www/releases/
+            releases@releases.milady.ai:/var/www/releases/
           rm -f /tmp/release_key
 
   publish-browser-companions:

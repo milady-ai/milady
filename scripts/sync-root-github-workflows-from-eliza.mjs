@@ -61,6 +61,7 @@ export function applyMiladyWorkflowTransform(fileName, content) {
   const orgPairs = [
     ["elizaOS/eliza", "milady-ai/milady"],
     ["repos/elizaOS/apt", "repos/milady-ai/apt"],
+    ["releases.elizaos.ai", "releases.milady.ai"],
   ];
   if (fileName === "update-homebrew.yml") {
     orgPairs.push(["elizaOS/homebrew-tap", "milady-ai/homebrew-tap"]);
