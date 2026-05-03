@@ -44,12 +44,8 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
-  contents: write
+  contents: read
   pull-requests: read
-  issues: write
-  packages: write
-  id-token: write
-  pages: write
 
 env:
   BUN_VERSION: "1.3.13"
@@ -402,37 +398,42 @@ jobs:
   build-electrobun:
     name: Electrobun full matrix
     needs: [version]
+    permissions:
+      contents: read
     uses: ./.github/workflows/release-electrobun.yml
     with:
       tag: ${{ needs.version.outputs.tag }}
       draft: false
       publish_release: false
-    secrets: inherit
 
   build-docker:
     name: Agent image build
     needs: [version]
+    permissions:
+      contents: read
     uses: ./.github/workflows/build-docker.yml
     with:
       version: ${{ needs.version.outputs.tag }}
       push_image: false
       source_sha: ${{ github.sha }}
-    secrets: inherit
 
   build-cloud-image:
     name: Cloud app image build
     needs: [version]
+    permissions:
+      contents: read
     uses: ./.github/workflows/build-cloud-image.yml
     with:
       version: ${{ needs.version.outputs.tag }}
       push_image: false
       source_sha: ${{ github.sha }}
-    secrets: inherit
 
   build-npm:
     name: npm package build
     needs: [version]
     runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
         with:
