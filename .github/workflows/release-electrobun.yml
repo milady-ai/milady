@@ -1130,6 +1130,25 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
+      - name: Patch vitest lazy import for Playwright isolation
+        if: matrix.platform.os == 'windows' && steps.build-electrobun-app.outputs.fallback != 'true'
+        shell: bash
+        run: |
+          # live-provider.ts has a top-level `import { test } from "vitest"` that
+          # causes @vitest/expect to load during Playwright runs, crashing with
+          # "Cannot redefine property: Symbol($$jest-matchers-object)".
+          # Replace the eager import with a lazy one inside requireLiveProvider().
+          target="eliza/packages/app-core/test/helpers/live-provider.ts"
+          if grep -q 'import { test } from "vitest"' "$target" 2>/dev/null; then
+            sed -i 's/^import { test } from "vitest";//' "$target"
+            sed -i 's/test\.skip("No LLM provider API key available")/const { test: t } = await import("vitest"); t.skip("No LLM provider API key available")/' "$target"
+            sed -i 's/^export function requireLiveProvider(/export async function requireLiveProvider(/' "$target"
+            sed -i 's/): LiveProviderConfig | null {/): Promise<LiveProviderConfig | null> {/' "$target"
+            echo "Patched $target: vitest import made lazy for Playwright isolation"
+          else
+            echo "$target already patched or not found — skipping"
+          fi
+
       - name: Run Windows packaged renderer bootstrap check
         if: matrix.platform.os == 'windows' && steps.build-electrobun-app.outputs.fallback != 'true'
         run: bun run test:desktop:playwright
