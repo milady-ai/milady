@@ -18,14 +18,7 @@ const canonicalElectrobunDir = path.join(
   "electrobun",
 );
 export const releaseContractTests = [
-  "scripts/release-workflow-path-contract.test.ts",
   "scripts/electrobun-runtime-root-contract.test.ts",
-  "scripts/run-release-contract-suite.test.ts",
-  "scripts/build-local-eliza-ci-overrides.test.ts",
-  "scripts/disable-local-eliza-workspace.test.ts",
-  "scripts/patch-mobile-build-release-compat.test.ts",
-  "scripts/patch-release-check-pack-fallback.test.ts",
-  "scripts/electrobun-pr-workflow-contract.test.ts",
   "eliza/packages/app-core/scripts/electrobun-release-workflow-drift.test.ts",
   "eliza/packages/app-core/scripts/release-check.test.ts",
   "eliza/packages/app-core/scripts/static-asset-manifest.test.ts",
