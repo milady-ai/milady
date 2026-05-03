@@ -236,6 +236,10 @@ const workflowSnippetCompatReplacements = [
     "path: eliza/packages/app-core/platforms/electrobun/artifacts/windows-installer-proof/**",
   ],
   [
+    'ELIZA_WINDOWS_SMOKE_REQUIRE_INSTALLER: "1"',
+    "Smoke runs against the build tree, not the installer extraction.",
+  ],
+  [
     "packages/homepage/src/generated/release-data.ts",
     "apps/homepage/src/generated/release-data.ts",
   ],
