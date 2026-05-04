@@ -8,14 +8,24 @@ import { fileURLToPath } from "node:url";
 const scriptPath = fileURLToPath(import.meta.url);
 const repoRoot = path.resolve(path.dirname(scriptPath), "..");
 const elizaDir = path.join(repoRoot, "eliza");
-const patchPath = path.join(
-  repoRoot,
-  "eliza",
-  "patches",
-  "milady",
-  "eliza-ci-bootstrap",
-  "ci-release-contracts.patch",
-);
+const patchPathCandidates = [
+  path.join(
+    repoRoot,
+    "eliza",
+    "patches",
+    "milady",
+    "eliza-ci-bootstrap",
+    "ci-release-contracts.patch",
+  ),
+  path.join(
+    repoRoot,
+    "eliza",
+    "patches",
+    "eliza",
+    "eliza-ci-bootstrap",
+    "ci-release-contracts.patch",
+  ),
+];
 
 function runGit(args, { allowFailure = false } = {}) {
   const result = spawnSync("git", ["-C", elizaDir, ...args], {
@@ -40,7 +50,8 @@ function runGit(args, { allowFailure = false } = {}) {
 // the unaffected files still apply, surfacing drift as a precise list rather
 // than masking everything.
 function splitPatchByFile(patchText) {
-  const lines = patchText.split("\n");
+  const lines = patchText.split("
+");
   const chunks = [];
   let current = null;
 
@@ -60,7 +71,9 @@ function splitPatchByFile(patchText) {
 
   return chunks.map((chunk) => ({
     path: chunk.path ?? "<unknown>",
-    text: `${chunk.lines.join("\n")}\n`,
+    text: `${chunk.lines.join("
+")}
+`,
   }));
 }
 
@@ -94,14 +107,24 @@ function tryApplyPatchChunk(chunk) {
 
 function main() {
   if (!fs.existsSync(path.join(elizaDir, "package.json"))) {
+    if (process.env.MILADY_SKIP_LOCAL_UPSTREAMS === "1") {
+      console.log(
+        "[apply-eliza-ci-patches] eliza checkout is absent in published-only mode; skipping local patch overlay",
+      );
+      return;
+    }
     throw new Error(
       "eliza submodule is not initialized; run scripts/init-submodules.mjs first",
     );
   }
+  const patchPath =
+    patchPathCandidates.find((candidate) => fs.existsSync(candidate)) ??
+    patchPathCandidates[0];
   if (!fs.existsSync(patchPath)) {
-    throw new Error(
-      `missing eliza CI patch file: ${path.relative(repoRoot, patchPath)}`,
+    console.log(
+      `[apply-eliza-ci-patches] no eliza CI patch file found at ${path.relative(repoRoot, patchPath)}; assuming current eliza checkout carries the required CI contracts`,
     );
+    return;
   }
 
   const wholeApplied = runGit(
@@ -152,7 +175,10 @@ function main() {
   }
   if (drifted.length > 0) {
     console.warn(
-      `[apply-eliza-ci-patches] ${drifted.length} file(s) drifted from upstream and were skipped:\n  - ${drifted.join("\n  - ")}\nRegenerate eliza/patches/milady/eliza-ci-bootstrap/ci-release-contracts.patch against the current eliza submodule HEAD.`,
+      `[apply-eliza-ci-patches] ${drifted.length} file(s) drifted from upstream and were skipped:
+  - ${drifted.join("
+  - ")}
+Regenerate eliza/patches/milady/eliza-ci-bootstrap/ci-release-contracts.patch against the current eliza submodule HEAD.`,
     );
   }
 }
