@@ -74,6 +74,29 @@ describe("CI bootstrap contract", () => {
     );
   });
 
+  it("builds local runtime plugins after auth package alignment", () => {
+    const agentReview = workflow("agent-review.yml");
+    const align = "- name: Align nested eliza package resolution";
+    const buildPlugins = "- name: Build local eliza runtime plugins";
+    const coreBuild = "(cd eliza/packages/core && bun run build)";
+    const pluginBuild =
+      "(cd eliza/plugins/plugin-agent-skills && bun run build)";
+    const runAuthSuite = "- name: Run auth test suite";
+
+    expect(agentReview).toContain(buildPlugins);
+    expect(agentReview).toContain(coreBuild);
+    expect(agentReview).toContain(pluginBuild);
+    expect(agentReview.indexOf(align)).toBeLessThan(
+      agentReview.indexOf(buildPlugins),
+    );
+    expect(agentReview.indexOf(coreBuild)).toBeLessThan(
+      agentReview.indexOf(pluginBuild),
+    );
+    expect(agentReview.indexOf(buildPlugins)).toBeLessThan(
+      agentReview.indexOf(runAuthSuite),
+    );
+  });
+
   it("aligns nested eliza package resolution before auth tests run", () => {
     const agentReview = workflow("agent-review.yml");
     const align = "- name: Align nested eliza package resolution";

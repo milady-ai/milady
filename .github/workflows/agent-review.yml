@@ -153,6 +153,15 @@ jobs:
             bunx @bufbuild/buf@1.67.0 generate
           fi
 
+      - name: Build local eliza runtime plugins
+        run: |
+          if [ ! -f eliza/packages/core/dist/index.node.js ] || [ ! -f eliza/packages/core/dist/index.d.ts ]; then
+            (cd eliza/packages/core && bun run build)
+          fi
+          if [ -f eliza/plugins/plugin-agent-skills/package.json ] && [ ! -f eliza/plugins/plugin-agent-skills/dist/index.js ]; then
+            (cd eliza/plugins/plugin-agent-skills && bun run build)
+          fi
+
       - name: Run auth test suite
         run: bun run test:auth
 

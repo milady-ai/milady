@@ -234,20 +234,6 @@ runs:
           bunx @bufbuild/buf@1.67.0 generate
         fi
 
-    - name: Build local eliza runtime plugins
-      if: ${{ inputs.prepare-local-eliza-runtime == 'true' }}
-      shell: bash
-      run: |
-        if [ -f eliza/plugins/plugin-agent-skills/package.json ] && [ ! -f eliza/plugins/plugin-agent-skills/dist/index.js ]; then
-          # align-eliza-ci-node-modules.mjs runs after this action, so create the
-          # minimal @elizaos/core symlink inline so tsup can resolve the peer dep.
-          mkdir -p eliza/node_modules/@elizaos
-          if [ ! -e eliza/node_modules/@elizaos/core ]; then
-            ln -sfn "$(pwd)/eliza/packages/core" eliza/node_modules/@elizaos/core
-          fi
-          (cd eliza/plugins/plugin-agent-skills && bun run build)
-        fi
-
     - name: Install published-workspace fallback dependencies
       if: ${{ inputs.disable-local-eliza-workspace == 'true' }}
       shell: bash
