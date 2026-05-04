@@ -13,7 +13,7 @@ const repoRoot = resolveRepoRoot(import.meta.url);
  */
 
 const files = {
-  workflow: ".github/workflows/test.yml",
+  workflow: ".github/workflows/ci.yml",
   action: ".github/actions/setup-bun-workspace/action.yml",
   packageJson: "package.json",
   disableScript: "scripts/disable-local-eliza-workspace.mjs",
@@ -29,10 +29,9 @@ const files = {
 };
 
 const workflows = [
-  ".github/workflows/test.yml",
   ".github/workflows/ci.yml",
   ".github/workflows/ci-fork.yml",
-  ".github/workflows/docker-ci-smoke.yml",
+  ".github/workflows/build-docker.yml",
 ];
 
 const allWorkflowPaths = fs
@@ -42,12 +41,13 @@ const allWorkflowPaths = fs
   .map((entry) => path.join(".github", "workflows", entry));
 
 const requiredWorkflowSnippets = [
-  "name: Regression Matrix Contract",
-  "run: node scripts/validate-ci-bootstrap-contract.mjs",
+  "name: CI",
   "uses: ./.github/actions/setup-bun-workspace",
   "install-command: bun install --ignore-scripts --no-frozen-lockfile",
   "run: node scripts/restore-local-eliza-workspace.mjs",
-  "run: bun run test:regression-matrix:pr",
+  "run: node scripts/align-eliza-ci-node-modules.mjs",
+  "run: bun run pre-review:local",
+  "run: bun run verify:typecheck",
 ];
 
 const requiredActionSnippets = [
@@ -97,10 +97,6 @@ for (const relativePath of Object.values(files).filter((value) =>
     failures.push(`Missing bootstrap dependency: ${relativePath}`);
   }
 }
-if (!fs.existsSync(path.join(repoRoot, files.elizaCiPatch))) {
-  failures.push(`Missing bootstrap dependency: ${files.elizaCiPatch}`);
-}
-
 const workflowText = readText(files.workflow, failures);
 const actionText = readText(files.action, failures);
 const packageJson = readJson(files.packageJson, failures);
@@ -286,8 +282,15 @@ function assertCiPreReviewBootstrap(workflowText, targetFailures) {
     "- name: Install submodule verification dependencies",
     "bun install --cwd eliza --no-frozen-lockfile --ignore-scripts",
     "bun install --cwd eliza/cloud --no-frozen-lockfile --ignore-scripts",
-    "- name: Ensure biome uses correct architecture",
-    `ln -s "\${{ github.workspace }}/node_modules/@biomejs" eliza/node_modules/@biomejs`,
+    "- name: Align nested eliza package resolution",
+    "run: node scripts/align-eliza-ci-node-modules.mjs",
+    "- name: Generate protobuf types",
+    "bunx @bufbuild/buf@1.67.0 generate",
+    "- name: Generate i18n keyword data",
+    "run: node packages/shared/scripts/generate-keywords.mjs --target ts",
+    "- name: Build eliza packages required for typecheck",
+    "(cd eliza/packages/core && bun run build)",
+    "(cd eliza/packages/skills && bun run build)",
     "- name: Run local pre-review gate",
     "run: bun run pre-review:local",
   ];

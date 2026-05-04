@@ -50,8 +50,7 @@ function runGit(args, { allowFailure = false } = {}) {
 // the unaffected files still apply, surfacing drift as a precise list rather
 // than masking everything.
 function splitPatchByFile(patchText) {
-  const lines = patchText.split("
-");
+  const lines = patchText.split("\n");
   const chunks = [];
   let current = null;
 
@@ -71,9 +70,7 @@ function splitPatchByFile(patchText) {
 
   return chunks.map((chunk) => ({
     path: chunk.path ?? "<unknown>",
-    text: `${chunk.lines.join("
-")}
-`,
+    text: `${chunk.lines.join("\n")}\n`,
   }));
 }
 
@@ -175,10 +172,7 @@ function main() {
   }
   if (drifted.length > 0) {
     console.warn(
-      `[apply-eliza-ci-patches] ${drifted.length} file(s) drifted from upstream and were skipped:
-  - ${drifted.join("
-  - ")}
-Regenerate eliza/patches/milady/eliza-ci-bootstrap/ci-release-contracts.patch against the current eliza submodule HEAD.`,
+      `[apply-eliza-ci-patches] ${drifted.length} file(s) drifted from upstream and were skipped:\n  - ${drifted.join("\n  - ")}\nRegenerate eliza/patches/milady/eliza-ci-bootstrap/ci-release-contracts.patch against the current eliza submodule HEAD.`,
     );
   }
 }

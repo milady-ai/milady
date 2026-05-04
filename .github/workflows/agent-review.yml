@@ -139,6 +139,7 @@ jobs:
           run-postinstall: "true"
           skip-avatar-clone: "true"
           no-vision-deps: "true"
+          skip-local-upstreams-postinstall: "true"
           prepare-local-eliza-runtime: "true"
 
       - name: Run auth test suite

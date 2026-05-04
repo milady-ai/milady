@@ -34,6 +34,10 @@ inputs:
     description: "Disable repo-local eliza workspace in CI when local upstreams are skipped"
     required: false
     default: "false"
+  skip-local-upstreams-postinstall:
+    description: "Set MILADY_SKIP_LOCAL_UPSTREAMS=1 only while running repository postinstall patches"
+    required: false
+    default: "false"
   prepare-local-eliza-runtime:
     description: "Install repo-local eliza dependencies needed by jobs that execute local eliza scripts after published-only setup"
     required: false
@@ -239,7 +243,7 @@ runs:
       env:
         SKIP_AVATAR_CLONE: ${{ inputs.skip-avatar-clone == 'true' && '1' || '' }}
         MILADY_NO_VISION_DEPS: ${{ inputs.no-vision-deps == 'true' && '1' || '' }}
-        MILADY_SKIP_LOCAL_UPSTREAMS: ${{ inputs.disable-local-eliza-workspace == 'true' && '1' || '' }}
+        MILADY_SKIP_LOCAL_UPSTREAMS: ${{ (inputs.disable-local-eliza-workspace == 'true' || inputs.skip-local-upstreams-postinstall == 'true') && '1' || '' }}
 
     - name: Install local eliza runtime dependencies
       if: ${{ inputs.prepare-local-eliza-runtime == 'true' && inputs.disable-local-eliza-workspace == 'true' }}
