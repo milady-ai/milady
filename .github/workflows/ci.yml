@@ -53,8 +53,10 @@ jobs:
           bun-version: ${{ env.BUN_VERSION }}
           install-command: bun install --ignore-scripts --no-frozen-lockfile
           prepare-local-eliza-runtime: "true"
+          run-postinstall: "false"
           skip-avatar-clone: "true"
           no-vision-deps: "true"
+          skip-cloud-submodule: "true"
 
       - name: Restore eliza workspace paths for repo scripts
         run: node scripts/restore-local-eliza-workspace.mjs
@@ -62,13 +64,28 @@ jobs:
       - name: Install submodule verification dependencies
         run: |
           bun install --cwd eliza --no-frozen-lockfile --ignore-scripts
-          bun install --cwd eliza/cloud --no-frozen-lockfile --ignore-scripts
+          if [ -d eliza/cloud ]; then bun install --cwd eliza/cloud --no-frozen-lockfile --ignore-scripts; fi
 
-      - name: Ensure biome uses correct architecture
+      - name: Align nested eliza package resolution
+        run: node scripts/align-eliza-ci-node-modules.mjs
+
+      - name: Generate protobuf types
         run: |
-          mkdir -p eliza/node_modules
-          rm -rf eliza/node_modules/@biomejs
-          ln -s "${{ github.workspace }}/node_modules/@biomejs" eliza/node_modules/@biomejs
+          if [ -d eliza/packages/schemas ] && [ -f eliza/packages/schemas/buf.gen.yaml ] && [ ! -d eliza/packages/core/src/types/generated ]; then
+            cd eliza/packages/schemas
+            node node_modules/@bufbuild/buf/install.js 2>/dev/null || true
+            bunx @bufbuild/buf@1.67.0 generate
+          fi
+
+      - name: Generate i18n keyword data
+        run: node packages/shared/scripts/generate-keywords.mjs --target ts
+        working-directory: eliza
+
+      - name: Build eliza packages required for typecheck
+        run: |
+          if [ ! -f eliza/packages/skills/dist/index.js ]; then
+            (cd eliza/packages/skills && bun run build)
+          fi
 
       - name: Fetch upstream develop for pre-review base
         run: |
@@ -100,6 +117,7 @@ jobs:
           bun-version: ${{ env.BUN_VERSION }}
           install-command: bun install --ignore-scripts --no-frozen-lockfile
           prepare-local-eliza-runtime: "true"
+          skip-cloud-submodule: "true"
 
       - name: Restore eliza workspace paths for repo scripts
         run: node scripts/restore-local-eliza-workspace.mjs
@@ -107,16 +125,10 @@ jobs:
       - name: Install submodule verification dependencies
         run: |
           bun install --cwd eliza --no-frozen-lockfile --ignore-scripts
-          bun install --cwd eliza/cloud --no-frozen-lockfile --ignore-scripts
+          if [ -d eliza/cloud ]; then bun install --cwd eliza/cloud --no-frozen-lockfile --ignore-scripts; fi
 
-      - name: Ensure biome uses correct architecture
-        run: |
-          # bunx resolves the @biomejs/biome package first, so replacing only the
-          # biome binary is not enough when eliza/node_modules contains a cached
-          # wrong-arch install. Point the whole @biomejs scope at the root install.
-          mkdir -p eliza/node_modules
-          rm -rf eliza/node_modules/@biomejs
-          ln -s "${{ github.workspace }}/node_modules/@biomejs" eliza/node_modules/@biomejs
+      - name: Align nested eliza package resolution
+        run: node scripts/align-eliza-ci-node-modules.mjs
 
       - name: Biome lint
         run: bun run verify:lint
@@ -143,6 +155,7 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
           install-command: bun install --ignore-scripts --no-frozen-lockfile
+          skip-cloud-submodule: "true"
 
       - name: Restore eliza workspace paths for repo scripts
         run: node scripts/restore-local-eliza-workspace.mjs
@@ -150,11 +163,14 @@ jobs:
       - name: Install submodule verification dependencies
         run: |
           bun install --cwd eliza --no-frozen-lockfile --ignore-scripts
-          bun install --cwd eliza/cloud --no-frozen-lockfile --ignore-scripts
+          if [ -d eliza/cloud ]; then bun install --cwd eliza/cloud --no-frozen-lockfile --ignore-scripts; fi
+
+      - name: Align nested eliza package resolution
+        run: node scripts/align-eliza-ci-node-modules.mjs
 
       - name: Generate protobuf types
         run: |
-          if [ -d eliza/packages/schemas ] && [ -f eliza/packages/schemas/buf.gen.yaml ] && [ ! -d eliza/packages/typescript/src/types/generated ]; then
+          if [ -d eliza/packages/schemas ] && [ -f eliza/packages/schemas/buf.gen.yaml ] && [ ! -d eliza/packages/core/src/types/generated ]; then
             cd eliza/packages/schemas
             node node_modules/@bufbuild/buf/install.js 2>/dev/null || true
             bunx @bufbuild/buf@1.67.0 generate
@@ -186,9 +202,13 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
           install-command: bun install --ignore-scripts --no-frozen-lockfile
+          skip-cloud-submodule: "true"
 
       - name: Restore eliza workspace paths for repo scripts
         run: node scripts/restore-local-eliza-workspace.mjs
+
+      - name: Align nested eliza package resolution
+        run: node scripts/align-eliza-ci-node-modules.mjs
 
       - name: Build project
         run: bun run build
