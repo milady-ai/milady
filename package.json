@@ -36,7 +36,6 @@
     "eliza/apps/*",
     "eliza/cloud/packages/sdk",
     "eliza/plugins/*",
-    "eliza/plugins/plugin-*/typescript",
     "eliza/packages/*"
   ],
   "type": "module",
@@ -293,10 +292,8 @@
     "@elizaos/plugin-commands": "workspace:*",
     "@elizaos/plugin-anthropic": "workspace:*",
     "@elizaos/plugin-app-control": "workspace:*",
-    "@elizaos/plugin-cron": "workspace:*",
     "@elizaos/plugin-edge-tts": "workspace:*",
     "@elizaos/plugin-elizacloud": "workspace:*",
-    "@elizaos/plugin-evm": "workspace:*",
     "@elizaos/plugin-google-genai": "workspace:*",
     "@elizaos/plugin-bluebubbles": "workspace:*",
     "@elizaos/plugin-local-embedding": "workspace:*",
