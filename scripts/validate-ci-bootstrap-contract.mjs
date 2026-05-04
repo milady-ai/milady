@@ -60,6 +60,8 @@ const requiredActionSnippets = [
   "name: Generate local eliza protobuf types",
   "inputs.prepare-local-eliza-runtime == 'true'",
   "bunx @bufbuild/buf@1.67.0 generate",
+  "name: Build local eliza runtime plugins",
+  "eliza/plugins/plugin-agent-skills && bun run build",
   "run: bash scripts/install-published-workspace-fallback-deps.sh",
   "name: Build local eliza CI override packages",
   "run: node scripts/build-local-eliza-ci-overrides.mjs",
@@ -129,6 +131,7 @@ assertOrdered(
   [
     "name: Install dependencies",
     "name: Generate local eliza protobuf types",
+    "name: Build local eliza runtime plugins",
     "run: bash scripts/install-published-workspace-fallback-deps.sh",
     "run: node scripts/build-local-eliza-ci-overrides.mjs",
     "name: Run repository postinstall patches",
@@ -136,6 +139,7 @@ assertOrdered(
   failures,
 );
 assertDisabledWorkspaceInstallsUseNoFrozen(allWorkflowPaths, failures);
+assertAgentReviewAuthBootstrap(failures);
 
 const regressionMatrixCommand =
   packageJson?.scripts?.["test:regression-matrix:pr"];
@@ -310,6 +314,36 @@ function assertCiPreReviewBootstrap(workflowText, targetFailures) {
     preReviewBlock,
     ".github/workflows/ci.yml pre-review job",
     requiredSnippets,
+    targetFailures,
+  );
+}
+
+function assertAgentReviewAuthBootstrap(targetFailures) {
+  const workflowText = readText(
+    ".github/workflows/agent-review.yml",
+    targetFailures,
+  );
+  const authBlockMatch = /\n {2}test-auth:\n([\s\S]*?)\n {2}review-pr:\n/.exec(
+    workflowText,
+  );
+
+  if (!authBlockMatch) {
+    targetFailures.push(
+      '.github/workflows/agent-review.yml is missing the "test-auth" job block',
+    );
+    return;
+  }
+
+  assertContainsAll(
+    authBlockMatch[1],
+    ".github/workflows/agent-review.yml test-auth job",
+    [
+      "- name: Setup workspace dependencies",
+      "- name: Align nested eliza package resolution",
+      "run: node scripts/align-eliza-ci-node-modules.mjs",
+      "- name: Generate protobuf types",
+      "- name: Run auth test suite",
+    ],
     targetFailures,
   );
 }

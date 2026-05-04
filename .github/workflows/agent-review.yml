@@ -142,6 +142,9 @@ jobs:
           skip-local-upstreams-postinstall: "true"
           prepare-local-eliza-runtime: "true"
 
+      - name: Align nested eliza package resolution
+        run: node scripts/align-eliza-ci-node-modules.mjs
+
       - name: Generate protobuf types
         run: |
           if [ -d eliza/packages/schemas ] && [ -f eliza/packages/schemas/buf.gen.yaml ] && [ ! -f eliza/packages/core/src/types/generated/eliza/v1/agent_pb.ts ]; then

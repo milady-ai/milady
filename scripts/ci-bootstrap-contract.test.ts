@@ -74,6 +74,20 @@ describe("CI bootstrap contract", () => {
     );
   });
 
+  it("aligns nested eliza package resolution before auth tests run", () => {
+    const agentReview = workflow("agent-review.yml");
+    const align = "- name: Align nested eliza package resolution";
+    const runAuthSuite = "- name: Run auth test suite";
+
+    expect(agentReview).toContain(align);
+    expect(agentReview).toContain(
+      "run: node scripts/align-eliza-ci-node-modules.mjs",
+    );
+    expect(agentReview.indexOf(align)).toBeLessThan(
+      agentReview.indexOf(runAuthSuite),
+    );
+  });
+
   it("lets elizaCloud patch version drift skip cleanly", () => {
     const output = execFileSync(process.execPath, [
       "scripts/patch-elizacloud.mjs",

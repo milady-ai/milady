@@ -234,6 +234,14 @@ runs:
           bunx @bufbuild/buf@1.67.0 generate
         fi
 
+    - name: Build local eliza runtime plugins
+      if: ${{ inputs.prepare-local-eliza-runtime == 'true' }}
+      shell: bash
+      run: |
+        if [ -f eliza/plugins/plugin-agent-skills/package.json ] && [ ! -f eliza/plugins/plugin-agent-skills/dist/index.js ]; then
+          (cd eliza/plugins/plugin-agent-skills && bun run build)
+        fi
+
     - name: Install published-workspace fallback dependencies
       if: ${{ inputs.disable-local-eliza-workspace == 'true' }}
       shell: bash

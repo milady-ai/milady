@@ -112,6 +112,18 @@ function linkLocalPackage(packageName, sourceRel, targets) {
   }
 }
 
+function linkOptionalLocalPackage(packageName, sourceRel, targets) {
+  const source = path.join(repoRoot, sourceRel, "package.json");
+  if (!fs.existsSync(source)) {
+    console.log(
+      `[align-eliza-ci-node-modules] skipping ${packageName}; missing ${sourceRel}/package.json`,
+    );
+    return;
+  }
+
+  linkLocalPackage(packageName, sourceRel, targets);
+}
+
 linkRootPackage("@biomejs", ["eliza/node_modules/@biomejs"]);
 
 linkRootPackage("drizzle-orm", [
@@ -146,6 +158,20 @@ linkRootPackage("@types/node", [
   "apps/homepage/node_modules/@types/node",
 ]);
 
+linkRootPackage("@types/react", [
+  "eliza/node_modules/@types/react",
+  "eliza/packages/ui/node_modules/@types/react",
+  "apps/app/node_modules/@types/react",
+  "apps/homepage/node_modules/@types/react",
+]);
+
+linkRootPackage("@types/react-dom", [
+  "eliza/node_modules/@types/react-dom",
+  "eliza/packages/ui/node_modules/@types/react-dom",
+  "apps/app/node_modules/@types/react-dom",
+  "apps/homepage/node_modules/@types/react-dom",
+]);
+
 linkLocalPackage("@elizaos/core", "eliza/packages/core", [
   "node_modules/@elizaos/core",
   "eliza/node_modules/@elizaos/core",
@@ -161,3 +187,13 @@ linkLocalPackage("@elizaos/skills", "eliza/packages/skills", [
   "apps/app/node_modules/@elizaos/skills",
   "apps/homepage/node_modules/@elizaos/skills",
 ]);
+
+linkOptionalLocalPackage(
+  "@elizaos/plugin-agent-skills",
+  "eliza/plugins/plugin-agent-skills",
+  [
+    "node_modules/@elizaos/plugin-agent-skills",
+    "eliza/node_modules/@elizaos/plugin-agent-skills",
+    "eliza/packages/agent/node_modules/@elizaos/plugin-agent-skills",
+  ],
+);
