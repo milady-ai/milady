@@ -38,6 +38,14 @@ inputs:
     description: "Install repo-local eliza dependencies needed by jobs that execute local eliza scripts after published-only setup"
     required: false
     default: "false"
+  preserve-android-sdk:
+    description: "Keep the preinstalled Android SDK on Linux runners for Android packaging jobs"
+    required: false
+    default: "false"
+  skip-cloud-submodule:
+    description: "Skip the nested eliza/cloud submodule and remove its workspace entry for jobs that do not need cloud source"
+    required: false
+    default: "false"
 
 runs:
   using: "composite"
@@ -50,7 +58,10 @@ runs:
       # extraction. Drop unused preinstalled toolchains to reclaim ~25 GB.
       run: |
         df -h /
-        sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /opt/hostedtoolcache/CodeQL
+        if [ "${{ inputs.preserve-android-sdk }}" != "true" ]; then
+          sudo rm -rf /usr/local/lib/android
+        fi
+        sudo rm -rf /usr/share/dotnet /opt/ghc /opt/hostedtoolcache/CodeQL
         df -h /
 
     - name: Setup Python
@@ -70,6 +81,10 @@ runs:
         # Force IPv4 and retry apt commands to make CI setup resilient.
         APT_ARGS=(-o Acquire::ForceIPv4=true -o Acquire::Retries=5 -o Acquire::http::Timeout=30)
         for attempt in 1 2 3; do
+          if [ "$attempt" -gt 1 ]; then
+            sudo dpkg --configure -a || true
+            sudo apt-get "${APT_ARGS[@]}" -f install -y --fix-missing || true
+          fi
           if sudo apt-get "${APT_ARGS[@]}" update && \
              sudo apt-get "${APT_ARGS[@]}" install -y --fix-missing \
                build-essential libcairo2-dev libpango1.0-dev libjpeg-dev \
@@ -98,6 +113,9 @@ runs:
     - name: Initialize tracked workspace submodules
       shell: bash
       run: node scripts/init-submodules.mjs
+      env:
+        MILADY_SKIP_LOCAL_UPSTREAMS: ${{ inputs.disable-local-eliza-workspace == 'true' && '1' || '' }}
+        MILADY_SKIP_CLOUD_SUBMODULE: ${{ inputs.skip-cloud-submodule == 'true' && '1' || '' }}
 
     - name: Initialize local eliza workspace
       if: ${{ inputs.disable-local-eliza-workspace != 'true' }}
@@ -108,13 +126,14 @@ runs:
         # skip flags here so the full eliza checkout (including nested plugins)
         # is available to Bun.
         MILADY_SKIP_LOCAL_UPSTREAMS= ELIZA_SKIP_LOCAL_UPSTREAMS= node scripts/init-submodules.mjs
+      env:
+        MILADY_SKIP_CLOUD_SUBMODULE: ${{ inputs.skip-cloud-submodule == 'true' && '1' || '' }}
 
-    # disable-local-eliza-workspace.mjs needs eliza/ on disk to read package
-    # versions from workspace package.json files (overrides use workspace:*,
-    # not pinned versions). Shallow-init the submodule so version resolution
-    # succeeds, then the disable script rewrites workspace:* to registry versions.
+    # Some review jobs still execute local eliza runtime scripts after the
+    # published-only install rewrite. Hydrate eliza only for those jobs; normal
+    # published-only CI resolves @elizaos/* versions from npm dist-tags.
     - name: Shallow-init eliza submodule for version resolution
-      if: ${{ inputs.disable-local-eliza-workspace == 'true' }}
+      if: ${{ inputs.disable-local-eliza-workspace == 'true' && inputs.prepare-local-eliza-runtime == 'true' }}
       shell: bash
       run: |
         git submodule sync -- eliza
@@ -123,6 +142,8 @@ runs:
     - name: Apply Milady eliza CI patches
       shell: bash
       run: node scripts/apply-eliza-ci-patches.mjs
+      env:
+        MILADY_SKIP_LOCAL_UPSTREAMS: ${{ inputs.disable-local-eliza-workspace == 'true' && '1' || '' }}
 
     # IMPORTANT: This mode is for published-only CI jobs. Do not enable it for
     # jobs that execute repo-local paths under eliza/ after dependency setup.
@@ -155,12 +176,32 @@ runs:
         NODE
 
     - name: Ensure nested cloud workspace is hydrated
-      if: ${{ inputs.disable-local-eliza-workspace != 'true' }}
+      if: ${{ inputs.disable-local-eliza-workspace != 'true' && inputs.skip-cloud-submodule != 'true' }}
       shell: bash
       run: |
         git -C eliza submodule update --init cloud
         test -d eliza/cloud/packages/sdk
         test -d eliza/cloud/packages/billing
+
+    # eliza/cloud/package.json declares Steward packages under
+    # `.external/steward/packages/*` as workspaces. Bun resolves the cloud
+    # workspace graph as soon as it walks into `eliza/cloud/packages/sdk` (a
+    # workspace member of milady root and of eliza). Without these dirs on
+    # disk, `bun install` aborts with "Workspace not found
+    # .external/steward/packages/api". Pre-create minimal stub package.json
+    # files so workspace validation passes in CI jobs that only need install
+    # and type/build verification.
+    - name: Stub Steward workspace dirs for nested cloud workspace
+      if: ${{ hashFiles('eliza/cloud/package.json') != '' }}
+      shell: bash
+      run: |
+        for p in api auth db policy-engine redis shared vault webhooks; do
+          d="eliza/cloud/.external/steward/packages/$p"
+          if [ ! -f "$d/package.json" ]; then
+            mkdir -p "$d"
+            printf '{"name":"@stwd/%s","version":"0.0.0","private":true}\n' "$p" > "$d/package.json"
+          fi
+        done
 
     - name: Install dependencies
       shell: bash
@@ -183,6 +224,8 @@ runs:
       if: ${{ inputs.disable-local-eliza-workspace == 'true' }}
       shell: bash
       run: bash scripts/install-published-workspace-fallback-deps.sh
+      env:
+        MILADY_SKIP_LOCAL_UPSTREAMS: "1"
 
     - name: Build local eliza CI override packages
       if: ${{ inputs.disable-local-eliza-workspace == 'true' }}
