@@ -142,6 +142,14 @@ jobs:
           skip-local-upstreams-postinstall: "true"
           prepare-local-eliza-runtime: "true"
 
+      - name: Generate protobuf types
+        run: |
+          if [ -d eliza/packages/schemas ] && [ -f eliza/packages/schemas/buf.gen.yaml ] && [ ! -f eliza/packages/core/src/types/generated/eliza/v1/agent_pb.ts ]; then
+            cd eliza/packages/schemas
+            node node_modules/@bufbuild/buf/install.js 2>/dev/null || true
+            bunx @bufbuild/buf@1.67.0 generate
+          fi
+
       - name: Run auth test suite
         run: bun run test:auth
 

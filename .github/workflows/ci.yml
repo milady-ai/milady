@@ -61,11 +61,6 @@ jobs:
       - name: Restore eliza workspace paths for repo scripts
         run: node scripts/restore-local-eliza-workspace.mjs
 
-      - name: Install submodule verification dependencies
-        run: |
-          bun install --cwd eliza --no-frozen-lockfile --ignore-scripts
-          if [ -d eliza/cloud ]; then bun install --cwd eliza/cloud --no-frozen-lockfile --ignore-scripts; fi
-
       - name: Align nested eliza package resolution
         run: node scripts/align-eliza-ci-node-modules.mjs
 
@@ -126,11 +121,6 @@ jobs:
       - name: Restore eliza workspace paths for repo scripts
         run: node scripts/restore-local-eliza-workspace.mjs
 
-      - name: Install submodule verification dependencies
-        run: |
-          bun install --cwd eliza --no-frozen-lockfile --ignore-scripts
-          if [ -d eliza/cloud ]; then bun install --cwd eliza/cloud --no-frozen-lockfile --ignore-scripts; fi
-
       - name: Align nested eliza package resolution
         run: node scripts/align-eliza-ci-node-modules.mjs
 
@@ -164,11 +154,6 @@ jobs:
 
       - name: Restore eliza workspace paths for repo scripts
         run: node scripts/restore-local-eliza-workspace.mjs
-
-      - name: Install submodule verification dependencies
-        run: |
-          bun install --cwd eliza --no-frozen-lockfile --ignore-scripts
-          if [ -d eliza/cloud ]; then bun install --cwd eliza/cloud --no-frozen-lockfile --ignore-scripts; fi
 
       - name: Align nested eliza package resolution
         run: node scripts/align-eliza-ci-node-modules.mjs

@@ -109,6 +109,15 @@ assertContainsAll(
   failures,
 );
 assertCiPreReviewBootstrap(ciWorkflowText, failures);
+assertContainsNone(
+  ciWorkflowText,
+  ".github/workflows/ci.yml",
+  [
+    "bun install --cwd eliza --no-frozen-lockfile --ignore-scripts",
+    "bun install --cwd eliza/cloud --no-frozen-lockfile --ignore-scripts",
+  ],
+  failures,
+);
 assertContainsAll(actionText, files.action, requiredActionSnippets, failures);
 assertContainsNone(actionText, files.action, forbiddenActionSnippets, failures);
 assertOrdered(
@@ -279,9 +288,6 @@ function assertCiPreReviewBootstrap(workflowText, targetFailures) {
 
   const preReviewBlock = preReviewBlockMatch[1];
   const requiredSnippets = [
-    "- name: Install submodule verification dependencies",
-    "bun install --cwd eliza --no-frozen-lockfile --ignore-scripts",
-    "bun install --cwd eliza/cloud --no-frozen-lockfile --ignore-scripts",
     "- name: Align nested eliza package resolution",
     "run: node scripts/align-eliza-ci-node-modules.mjs",
     "- name: Generate protobuf types",
