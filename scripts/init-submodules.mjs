@@ -283,6 +283,7 @@ export function pruneDuplicateLegacyElizaPluginWorkspaces({
   exists = existsSync,
   readFile = readFileSync,
   writeFile = writeFileSync,
+  remove = rmSync,
   log = console.log,
 } = {}) {
   const packageJsonPath = resolve(rootDir, "eliza", "package.json");
@@ -297,33 +298,73 @@ export function pruneDuplicateLegacyElizaPluginWorkspaces({
     return [];
   }
 
-  const duplicateLegacyEntries = LEGACY_ELIZA_PLUGIN_WORKSPACE_ENTRIES.filter(
-    ({ canonicalEntry, legacyEntry }) => {
-      return (
-        workspaces.includes(legacyEntry) &&
-        exists(resolve(rootDir, "eliza", canonicalEntry, "package.json")) &&
-        exists(resolve(rootDir, "eliza", legacyEntry, "package.json"))
-      );
-    },
-  ).map(({ legacyEntry }) => legacyEntry);
+  const duplicateLegacyEntries = [];
+  const duplicateLegacyManifests = [];
+  for (const {
+    canonicalEntry,
+    legacyEntry,
+  } of LEGACY_ELIZA_PLUGIN_WORKSPACE_ENTRIES) {
+    const canonicalPackageJsonPath = resolve(
+      rootDir,
+      "eliza",
+      canonicalEntry,
+      "package.json",
+    );
+    const legacyPackageJsonPath = resolve(
+      rootDir,
+      "eliza",
+      legacyEntry,
+      "package.json",
+    );
+    if (!exists(canonicalPackageJsonPath) || !exists(legacyPackageJsonPath)) {
+      continue;
+    }
 
-  if (duplicateLegacyEntries.length === 0) {
+    if (workspaces.includes(legacyEntry)) {
+      duplicateLegacyEntries.push(legacyEntry);
+    }
+
+    const canonicalPackage = JSON.parse(
+      readFile(canonicalPackageJsonPath, "utf8"),
+    );
+    const legacyPackage = JSON.parse(readFile(legacyPackageJsonPath, "utf8"));
+    if (
+      typeof canonicalPackage.name === "string" &&
+      canonicalPackage.name === legacyPackage.name
+    ) {
+      remove(legacyPackageJsonPath, { force: true });
+      duplicateLegacyManifests.push(`${legacyEntry}/package.json`);
+    }
+  }
+
+  if (
+    duplicateLegacyEntries.length === 0 &&
+    duplicateLegacyManifests.length === 0
+  ) {
     return [];
   }
 
-  setPackageWorkspaces(
-    pkg,
-    workspaces.filter(
-      (workspaceEntry) => !duplicateLegacyEntries.includes(workspaceEntry),
-    ),
-  );
-  const indent = raw.match(/^(\s+)"/m)?.[1] ?? "  ";
-  writeFile(packageJsonPath, `${JSON.stringify(pkg, null, indent)}\n`);
-  log(
-    `[init-submodules] Removed duplicate legacy eliza plugin workspace entries (${duplicateLegacyEntries.join(", ")})`,
-  );
+  if (duplicateLegacyEntries.length > 0) {
+    setPackageWorkspaces(
+      pkg,
+      workspaces.filter(
+        (workspaceEntry) => !duplicateLegacyEntries.includes(workspaceEntry),
+      ),
+    );
+    const indent = raw.match(/^(\s+)"/m)?.[1] ?? "  ";
+    writeFile(packageJsonPath, `${JSON.stringify(pkg, null, indent)}\n`);
+    log(
+      `[init-submodules] Removed duplicate legacy eliza plugin workspace entries (${duplicateLegacyEntries.join(", ")})`,
+    );
+  }
 
-  return duplicateLegacyEntries;
+  if (duplicateLegacyManifests.length > 0) {
+    log(
+      `[init-submodules] Removed duplicate legacy eliza plugin package manifests (${duplicateLegacyManifests.join(", ")})`,
+    );
+  }
+
+  return [...duplicateLegacyEntries, ...duplicateLegacyManifests];
 }
 
 export function parseTrackedSubmodules(configOutput) {
