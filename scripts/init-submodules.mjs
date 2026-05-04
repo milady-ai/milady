@@ -38,6 +38,20 @@ const SKIPPED_CLOUD_COUPLED_SUBMODULE_PATHS = new Set([
 const SKIPPED_CLOUD_DEPENDENCY_FALLBACKS = {
   "@elizaos/plugin-elizacloud": "2.0.0-alpha.8",
 };
+const LEGACY_ELIZA_PLUGIN_WORKSPACE_ENTRIES = [
+  {
+    canonicalEntry: "plugins/plugin-sql",
+    legacyEntry: "plugins/plugin-sql/typescript",
+  },
+  {
+    canonicalEntry: "plugins/plugin-ollama",
+    legacyEntry: "plugins/plugin-ollama/typescript",
+  },
+  {
+    canonicalEntry: "plugins/plugin-local-ai",
+    legacyEntry: "plugins/plugin-local-ai/typescript",
+  },
+];
 const PACKAGE_DEPENDENCY_FIELDS = [
   "dependencies",
   "devDependencies",
@@ -262,6 +276,54 @@ export function pruneSkippedCloudWorkspace({
   }
 
   return changed;
+}
+
+export function pruneDuplicateLegacyElizaPluginWorkspaces({
+  rootDir = root,
+  exists = existsSync,
+  readFile = readFileSync,
+  writeFile = writeFileSync,
+  log = console.log,
+} = {}) {
+  const packageJsonPath = resolve(rootDir, "eliza", "package.json");
+  if (!exists(packageJsonPath)) {
+    return [];
+  }
+
+  const raw = readFile(packageJsonPath, "utf8");
+  const pkg = JSON.parse(raw);
+  const workspaces = getPackageWorkspaces(pkg);
+  if (!workspaces) {
+    return [];
+  }
+
+  const duplicateLegacyEntries = LEGACY_ELIZA_PLUGIN_WORKSPACE_ENTRIES.filter(
+    ({ canonicalEntry, legacyEntry }) => {
+      return (
+        workspaces.includes(legacyEntry) &&
+        exists(resolve(rootDir, "eliza", canonicalEntry, "package.json")) &&
+        exists(resolve(rootDir, "eliza", legacyEntry, "package.json"))
+      );
+    },
+  ).map(({ legacyEntry }) => legacyEntry);
+
+  if (duplicateLegacyEntries.length === 0) {
+    return [];
+  }
+
+  setPackageWorkspaces(
+    pkg,
+    workspaces.filter(
+      (workspaceEntry) => !duplicateLegacyEntries.includes(workspaceEntry),
+    ),
+  );
+  const indent = raw.match(/^(\s+)"/m)?.[1] ?? "  ";
+  writeFile(packageJsonPath, `${JSON.stringify(pkg, null, indent)}\n`);
+  log(
+    `[init-submodules] Removed duplicate legacy eliza plugin workspace entries (${duplicateLegacyEntries.join(", ")})`,
+  );
+
+  return duplicateLegacyEntries;
 }
 
 export function parseTrackedSubmodules(configOutput) {
@@ -769,6 +831,11 @@ export function runInitSubmodules({
   }
 
   pruneSkippedCloudWorkspace({
+    rootDir,
+    exists,
+    log,
+  });
+  pruneDuplicateLegacyElizaPluginWorkspaces({
     rootDir,
     exists,
     log,

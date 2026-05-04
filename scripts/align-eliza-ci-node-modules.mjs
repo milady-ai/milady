@@ -5,10 +5,75 @@ import path from "node:path";
 
 const repoRoot = process.cwd();
 
+function compareVersions(left, right) {
+  const leftParts = String(left)
+    .split(/[^0-9]+/)
+    .filter(Boolean)
+    .map(Number);
+  const rightParts = String(right)
+    .split(/[^0-9]+/)
+    .filter(Boolean)
+    .map(Number);
+  const length = Math.max(leftParts.length, rightParts.length, 3);
+  for (let index = 0; index < length; index += 1) {
+    const diff = (leftParts[index] ?? 0) - (rightParts[index] ?? 0);
+    if (diff !== 0) return diff;
+  }
+  return String(left).localeCompare(String(right));
+}
+
+function resolveBunStorePackage(packageName) {
+  const store = path.join(repoRoot, "node_modules", ".bun");
+  if (!fs.existsSync(store)) {
+    return null;
+  }
+
+  let best = null;
+  for (const entry of fs.readdirSync(store).sort()) {
+    const packageDir = path.join(
+      store,
+      entry,
+      "node_modules",
+      ...packageName.split("/"),
+    );
+    const packageJsonPath = path.join(packageDir, "package.json");
+    if (!fs.existsSync(packageJsonPath)) {
+      continue;
+    }
+
+    try {
+      const pkg = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
+      if (pkg.name !== packageName) {
+        continue;
+      }
+      const version = typeof pkg.version === "string" ? pkg.version : "0.0.0";
+      if (!best || compareVersions(version, best.version) > 0) {
+        best = { packageDir, version };
+      }
+    } catch {}
+  }
+
+  return best?.packageDir ?? null;
+}
+
+function resolveInstalledPackage(packageName) {
+  const direct = path.join(repoRoot, "node_modules", ...packageName.split("/"));
+  if (fs.existsSync(direct)) {
+    return direct;
+  }
+
+  const storePackage = resolveBunStorePackage(packageName);
+  if (storePackage) {
+    return storePackage;
+  }
+
+  return null;
+}
+
 function linkRootPackage(packageName, targets) {
-  const source = path.join(repoRoot, "node_modules", ...packageName.split("/"));
-  if (!fs.existsSync(source)) {
-    throw new Error(`missing root package install: ${source}`);
+  const source = resolveInstalledPackage(packageName);
+  if (!source) {
+    throw new Error(`missing root package install: ${packageName}`);
   }
 
   for (const targetRel of targets) {
@@ -55,6 +120,32 @@ linkRootPackage("drizzle-orm", [
   "eliza/plugins/plugin-sql/node_modules/drizzle-orm",
 ]);
 
+// @types/bun is milady's canonical Bun declaration package. Some eliza
+// tsconfigs still reference the older "bun-types" alias; link both names.
+linkRootPackage("@types/bun", [
+  "eliza/node_modules/bun-types",
+  "eliza/packages/core/node_modules/bun-types",
+  "eliza/packages/ui/node_modules/bun-types",
+  "apps/app/node_modules/bun-types",
+  "apps/homepage/node_modules/bun-types",
+]);
+
+linkRootPackage("@types/bun", [
+  "eliza/node_modules/@types/bun",
+  "eliza/packages/core/node_modules/@types/bun",
+  "eliza/packages/ui/node_modules/@types/bun",
+  "apps/app/node_modules/@types/bun",
+  "apps/homepage/node_modules/@types/bun",
+]);
+
+linkRootPackage("@types/node", [
+  "eliza/node_modules/@types/node",
+  "eliza/packages/core/node_modules/@types/node",
+  "eliza/packages/ui/node_modules/@types/node",
+  "apps/app/node_modules/@types/node",
+  "apps/homepage/node_modules/@types/node",
+]);
+
 linkLocalPackage("@elizaos/core", "eliza/packages/core", [
   "node_modules/@elizaos/core",
   "eliza/node_modules/@elizaos/core",
@@ -70,9 +161,3 @@ linkLocalPackage("@elizaos/skills", "eliza/packages/skills", [
   "apps/app/node_modules/@elizaos/skills",
   "apps/homepage/node_modules/@elizaos/skills",
 ]);
-
-// @types/bun is milady's canonical bun type declaration package.
-// eliza/packages/ui tsconfig references "bun-types" (eliza's older alias) which
-// needs to resolve to the same declarations. Symlink the two so the typecheck
-// finds the correct declarations without a full eliza workspace install.
-linkRootPackage("@types/bun", ["eliza/node_modules/bun-types"]);

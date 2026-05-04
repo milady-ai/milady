@@ -224,6 +224,16 @@ runs:
       env:
         npm_config_python: ${{ env.pythonLocation }}/bin/python3
 
+    - name: Generate local eliza protobuf types
+      if: ${{ inputs.prepare-local-eliza-runtime == 'true' }}
+      shell: bash
+      run: |
+        if [ -d eliza/packages/schemas ] && [ -f eliza/packages/schemas/buf.gen.yaml ] && [ ! -f eliza/packages/core/src/types/generated/eliza/v1/agent_pb.ts ]; then
+          cd eliza/packages/schemas
+          node node_modules/@bufbuild/buf/install.js 2>/dev/null || true
+          bunx @bufbuild/buf@1.67.0 generate
+        fi
+
     - name: Install published-workspace fallback dependencies
       if: ${{ inputs.disable-local-eliza-workspace == 'true' }}
       shell: bash
