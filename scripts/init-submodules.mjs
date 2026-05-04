@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { execSync } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -10,8 +10,11 @@ const root = resolve(__dirname, "..");
 const skipLocalUpstreams =
   process.env.MILADY_SKIP_LOCAL_UPSTREAMS === "1" ||
   process.env.ELIZA_SKIP_LOCAL_UPSTREAMS === "1";
+const skipCloudSubmodule =
+  process.env.MILADY_SKIP_CLOUD_SUBMODULE === "1" ||
+  process.env.ELIZA_SKIP_CLOUD_SUBMODULE === "1";
 const SUBMODULE_READINESS_MARKERS = {
-  eliza: ["package.json", "packages/typescript/package.json"],
+  eliza: ["package.json", "packages/app-core/package.json"],
 };
 
 // Initialize nested eliza submodules in a second pass from inside eliza/ so
@@ -19,22 +22,246 @@ const SUBMODULE_READINESS_MARKERS = {
 const NO_RECURSE_SUBMODULES = new Set(["eliza"]);
 
 const LEGACY_ROOT_SUBMODULE_PATHS = ["cloud"];
+const SKIPPED_CLOUD_WORKSPACE_ENTRIES = [
+  { packageJson: "package.json", workspaces: ["eliza/cloud/packages/sdk"] },
+  { packageJson: "eliza/package.json", workspaces: ["cloud/packages/sdk"] },
+  {
+    packageJson:
+      "eliza/packages/app-core/deploy/cloud-agent-template/package.json",
+    workspaces: [],
+  },
+];
+const SKIPPED_CLOUD_COUPLED_SUBMODULE_PATHS = new Set([
+  "plugins/plugin-elizacloud",
+  "eliza/plugins/plugin-elizacloud",
+]);
+const SKIPPED_CLOUD_DEPENDENCY_FALLBACKS = {
+  "@elizaos/plugin-elizacloud": "2.0.0-alpha.8",
+};
+const PACKAGE_DEPENDENCY_FIELDS = [
+  "dependencies",
+  "devDependencies",
+  "peerDependencies",
+  "optionalDependencies",
+  "overrides",
+];
+const SKIPPED_CLOUD_LOCKFILES = ["bun.lock", "bun.lockb"];
+
+function shellQuote(value) {
+  return `'${String(value).replaceAll("'", "'\"'\"'")}'`;
+}
+
+function readGitConfigValue(key, { cwd, exec = execSync } = {}) {
+  try {
+    return exec(`git config --file .gitmodules --get ${shellQuote(key)}`, {
+      cwd,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+  } catch {
+    return "";
+  }
+}
+
+function resolveGitDir(cwd, { exec = execSync } = {}) {
+  const gitDir = exec("git rev-parse --git-dir", {
+    cwd,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "ignore"],
+  }).trim();
+  return resolve(cwd, gitDir);
+}
+
+export function hydrateSubmoduleFromConfiguredBranch(
+  submodule,
+  { rootDir = root, exec = execSync, remove = rmSync, log = console.log } = {},
+) {
+  const url = readGitConfigValue(`submodule.${submodule.name}.url`, {
+    cwd: rootDir,
+    exec,
+  });
+  if (!url) {
+    throw new Error(`missing .gitmodules url for ${submodule.name}`);
+  }
+
+  const branch = readGitConfigValue(`submodule.${submodule.name}.branch`, {
+    cwd: rootDir,
+    exec,
+  });
+  const branchArg = branch ? ` --branch ${shellQuote(branch)}` : "";
+  const submoduleRoot = resolve(rootDir, submodule.path);
+  const modulesRoot = resolve(resolveGitDir(rootDir, { exec }), "modules");
+  const submoduleGitDir = resolve(modulesRoot, submodule.path);
+
+  log(
+    `[init-submodules] Falling back to ${submodule.name} (${submodule.path}) from ${
+      branch ? `branch ${branch}` : "the default branch"
+    } because the recorded gitlink could not be fetched.`,
+  );
+
+  try {
+    exec(`git submodule deinit -f -- ${shellQuote(submodule.path)}`, {
+      cwd: rootDir,
+      stdio: "inherit",
+    });
+  } catch {}
+
+  remove(submoduleRoot, { recursive: true, force: true });
+  remove(submoduleGitDir, { recursive: true, force: true });
+
+  exec(
+    `git clone --depth=1${branchArg} ${shellQuote(url)} ${shellQuote(submodule.path)}`,
+    {
+      cwd: rootDir,
+      stdio: "inherit",
+    },
+  );
+}
 
 function getSubmoduleSkipReason(
   submodulePath,
-  { skipLocal = skipLocalUpstreams } = {},
+  { skipLocal = skipLocalUpstreams, skipCloud = skipCloudSubmodule } = {},
 ) {
   if (skipLocal && submodulePath === "eliza") {
     return "local upstreams are disabled";
+  }
+  if (
+    skipCloud &&
+    (submodulePath === "cloud" || submodulePath === "eliza/cloud")
+  ) {
+    return "cloud submodule is disabled";
+  }
+  if (skipCloud && SKIPPED_CLOUD_COUPLED_SUBMODULE_PATHS.has(submodulePath)) {
+    return "cloud-coupled plugin workspace is disabled";
   }
   return null;
 }
 
 export function shouldSkipSubmoduleInit(
   submodulePath,
-  { skipLocal = skipLocalUpstreams } = {},
+  { skipLocal = skipLocalUpstreams, skipCloud = skipCloudSubmodule } = {},
 ) {
-  return getSubmoduleSkipReason(submodulePath, { skipLocal }) !== null;
+  return (
+    getSubmoduleSkipReason(submodulePath, { skipLocal, skipCloud }) !== null
+  );
+}
+
+function isStringArray(value) {
+  return (
+    Array.isArray(value) && value.every((entry) => typeof entry === "string")
+  );
+}
+
+function getPackageWorkspaces(pkg) {
+  if (isStringArray(pkg.workspaces)) {
+    return pkg.workspaces;
+  }
+  if (
+    pkg.workspaces &&
+    typeof pkg.workspaces === "object" &&
+    isStringArray(pkg.workspaces.packages)
+  ) {
+    return pkg.workspaces.packages;
+  }
+  return null;
+}
+
+function setPackageWorkspaces(pkg, workspaces) {
+  if (Array.isArray(pkg.workspaces)) {
+    pkg.workspaces = workspaces;
+    return;
+  }
+  pkg.workspaces.packages = workspaces;
+}
+
+function rewriteSkippedCloudDependencies(pkg) {
+  let changed = false;
+  for (const field of PACKAGE_DEPENDENCY_FIELDS) {
+    const deps = pkg[field];
+    if (!deps || typeof deps !== "object" || Array.isArray(deps)) {
+      continue;
+    }
+    for (const [name, version] of Object.entries(
+      SKIPPED_CLOUD_DEPENDENCY_FALLBACKS,
+    )) {
+      if (deps[name] === "workspace:*") {
+        deps[name] = version;
+        changed = true;
+      }
+    }
+  }
+  return changed;
+}
+
+export function pruneSkippedCloudWorkspace({
+  rootDir = root,
+  exists = existsSync,
+  readFile = readFileSync,
+  writeFile = writeFileSync,
+  remove = rmSync,
+  log = console.log,
+  skipCloud = skipCloudSubmodule,
+} = {}) {
+  if (!skipCloud) {
+    return [];
+  }
+
+  if (exists(resolve(rootDir, "eliza/cloud/packages/sdk/package.json"))) {
+    return [];
+  }
+
+  const changed = [];
+  for (const entry of SKIPPED_CLOUD_WORKSPACE_ENTRIES) {
+    const packageJsonPath = resolve(rootDir, entry.packageJson);
+    if (!exists(packageJsonPath)) {
+      continue;
+    }
+
+    const raw = readFile(packageJsonPath, "utf8");
+    const pkg = JSON.parse(raw);
+    const workspaces = getPackageWorkspaces(pkg);
+    let packageChanged = false;
+
+    if (workspaces) {
+      const nextWorkspaces = workspaces.filter(
+        (workspaceEntry) => !entry.workspaces.includes(workspaceEntry),
+      );
+      if (nextWorkspaces.length !== workspaces.length) {
+        setPackageWorkspaces(pkg, nextWorkspaces);
+        packageChanged = true;
+      }
+    }
+
+    if (rewriteSkippedCloudDependencies(pkg)) {
+      packageChanged = true;
+    }
+
+    if (!packageChanged) {
+      continue;
+    }
+
+    const indent = raw.match(/^(\s+)"/m)?.[1] ?? "  ";
+    writeFile(packageJsonPath, `${JSON.stringify(pkg, null, indent)}\n`);
+    changed.push(entry.packageJson);
+    log(
+      `[init-submodules] Applied skipped cloud workspace fallbacks to ${entry.packageJson}`,
+    );
+  }
+
+  if (changed.length > 0) {
+    for (const lockfile of SKIPPED_CLOUD_LOCKFILES) {
+      const lockfilePath = resolve(rootDir, lockfile);
+      if (!exists(lockfilePath)) {
+        continue;
+      }
+      remove(lockfilePath, { force: true });
+      log(
+        `[init-submodules] Removed ${lockfile} so Bun regenerates without skipped cloud workspaces`,
+      );
+    }
+  }
+
+  return changed;
 }
 
 export function parseTrackedSubmodules(configOutput) {
@@ -337,23 +564,32 @@ export function runInitSubmodules({
           `[init-submodules] Shallow init failed for ${submodule.name}, retrying with full fetch...`,
         );
         try {
-          exec(`git submodule init "${submodule.path}"`, {
+          try {
+            exec(`git submodule init "${submodule.path}"`, {
+              cwd: rootDir,
+              stdio: "inherit",
+            });
+          } catch {}
+          const smRoot = resolve(rootDir, submodule.path);
+          if (exists(smRoot) && exists(resolve(smRoot, ".git"))) {
+            exec("git fetch --unshallow || git fetch --all", {
+              cwd: smRoot,
+              stdio: "inherit",
+              shell: true,
+            });
+          }
+          exec(`git submodule update${recurseFlag} "${submodule.path}"`, {
             cwd: rootDir,
             stdio: "inherit",
           });
-        } catch {}
-        const smRoot = resolve(rootDir, submodule.path);
-        if (exists(smRoot) && exists(resolve(smRoot, ".git"))) {
-          exec("git fetch --unshallow || git fetch --all", {
-            cwd: smRoot,
-            stdio: "inherit",
-            shell: true,
+        } catch {
+          hydrateSubmoduleFromConfiguredBranch(submodule, {
+            rootDir,
+            exec,
+            remove: rmSync,
+            log,
           });
         }
-        exec(`git submodule update${recurseFlag} "${submodule.path}"`, {
-          cwd: rootDir,
-          stdio: "inherit",
-        });
       }
       if (
         !isSubmoduleCheckoutReady(submodule.path, {
@@ -487,12 +723,28 @@ export function runInitSubmodules({
             },
           );
         } catch (err) {
-          failed++;
-          logError(
-            `[init-submodules] Failed to initialize nested ${nestedSubmodule.name} (${rootRelativePath}): ${
-              err instanceof Error ? err.message : String(err)
-            }`,
-          );
+          try {
+            hydrateSubmoduleFromConfiguredBranch(nestedSubmodule, {
+              rootDir: elizaRoot,
+              exec,
+              remove: rmSync,
+              log,
+            });
+          } catch (fallbackErr) {
+            failed++;
+            logError(
+              `[init-submodules] Failed to initialize nested ${nestedSubmodule.name} (${rootRelativePath}): ${
+                fallbackErr instanceof Error
+                  ? fallbackErr.message
+                  : String(fallbackErr)
+              }`,
+            );
+            logError(
+              `[init-submodules] Original nested submodule error: ${
+                err instanceof Error ? err.message : String(err)
+              }`,
+            );
+          }
         }
       }
     } catch (err) {
@@ -515,6 +767,12 @@ export function runInitSubmodules({
       `[init-submodules] Initialized ${initialized} submodule(s); ${alreadyInitialized} already ready.`,
     );
   }
+
+  pruneSkippedCloudWorkspace({
+    rootDir,
+    exists,
+    log,
+  });
 
   return { initialized, alreadyInitialized, failed, submodules };
 }
