@@ -73,6 +73,16 @@ export const ELIZA_BUILD_STEPS = [
     args: ["run", "build"],
     label: "@elizaos/cloud-sdk",
   },
+  {
+    // plugin-streaming / plugin-tailscale / plugin-wallet import types from
+    // @elizaos/cloud-routing; their tsup DTS step resolves the package via
+    // its `types` field (./dist/index.d.ts), so the routing package must be
+    // built before any dependent plugin DTS runs.
+    check: path.join("packages", "cloud-routing", "dist", "index.d.ts"),
+    cwd: path.join("packages", "cloud-routing"),
+    args: ["run", "build"],
+    label: "@elizaos/cloud-routing",
+  },
 ];
 export const ELIZA_TYPESCRIPT_BUILD_DEPENDENCIES = [
   "@types/node",
