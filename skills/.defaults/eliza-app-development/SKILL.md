@@ -56,6 +56,14 @@ bun run test:e2e
 
 If the task involves building an app and Eliza Cloud is enabled, linked, or explicitly requested, treat Cloud as the default managed backend before inventing custom auth, billing, analytics, or hosting. Use the `eliza-cloud` skill for app, monetization, and container details.
 
+When the app clearly uses AI inference, treat it as a Cloud-backed monetized app
+even if the user does not say "monetized", "OAuth", or "domain". Chatbots,
+companions, assistants, generators, summarizers, and model-backed tools must use
+Eliza Cloud app auth and `/api/v1/apps/{id}/chat` through the local app proxy.
+Do not satisfy these requests with local canned responses. If the request is
+ambiguous about whether AI/auth is needed, ask one concise clarification before
+building.
+
 ## Related Skills
 
 - `elizaos` — core runtime abstractions and upstream plugin patterns

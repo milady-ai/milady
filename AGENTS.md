@@ -134,7 +134,7 @@ Open the `SKILL.md` of any of these from the workspace mirror when relevant:
 
 **Agent-orchestration / authoring:**
 - `coding-agent` — spawning Codex / Claude Code / OpenCode / Pi via PTY-backed bash for sub-agent work.
-- `claude-subagent-milady-bridge` — loopback endpoints exposing parent runtime context to a spawned coding sub-agent.
+- `task-agent-eliza-bridge` — loopback endpoints exposing parent runtime context to a spawned coding task agent.
 - `skill-creator` — authoring new SKILL.md packages (frontmatter, scripts, references, progressive disclosure).
 
 **Connectors / OS / SaaS integrations** (use when the task touches that surface):
@@ -203,7 +203,7 @@ Coding sub-agents spawned by the orchestrator (Claude Code, Codex, etc.) live in
 - `GET /api/coding-agents/:sessionId/memory?q=<query>&limit=<N>` — query the parent agent's memory.
 - `GET /api/coding-agents/:sessionId/active-workspaces` — list the parent's currently-active workspaces.
 
-All bridge responses are read-only. Mutations stay with the orchestrator — sub-agents cannot write parent state through the bridge. The `claude-subagent-milady-bridge` skill (in `skills/.defaults/`) documents the calling pattern in detail.
+All bridge responses are read-only. Mutations stay with the orchestrator — sub-agents cannot write parent state through the bridge. The `task-agent-eliza-bridge` skill (in `skills/.defaults/`) documents the calling pattern in detail.
 
 ### Mandatory verification loop for `create` modes
 
