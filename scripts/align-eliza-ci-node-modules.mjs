@@ -70,3 +70,9 @@ linkLocalPackage("@elizaos/skills", "eliza/packages/skills", [
   "apps/app/node_modules/@elizaos/skills",
   "apps/homepage/node_modules/@elizaos/skills",
 ]);
+
+// @types/bun is milady's canonical bun type declaration package.
+// eliza/packages/ui tsconfig references "bun-types" (eliza's older alias) which
+// needs to resolve to the same declarations. Symlink the two so the typecheck
+// finds the correct declarations without a full eliza workspace install.
+linkRootPackage("@types/bun", ["eliza/node_modules/bun-types"]);
