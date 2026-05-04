@@ -132,9 +132,11 @@ linkRootPackage("drizzle-orm", [
   "eliza/plugins/plugin-sql/node_modules/drizzle-orm",
 ]);
 
-// @types/bun is milady's canonical Bun declaration package. Some eliza
-// tsconfigs still reference the older "bun-types" alias; link both names.
-linkRootPackage("@types/bun", [
+// bun-types is the real Bun declaration package (ffi, sqlite, etc.).
+// @types/bun is a thin wrapper that does `/// <reference types="bun-types" />`;
+// symlinking bun-types → @types/bun creates a circular reference and loses the
+// actual declarations. Always point bun-types aliases at the real bun-types.
+linkRootPackage("bun-types", [
   "eliza/node_modules/bun-types",
   "eliza/packages/core/node_modules/bun-types",
   "eliza/packages/ui/node_modules/bun-types",
