@@ -3,8 +3,8 @@ import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
-  LOCAL_UPSTREAM_SKIP_ENV_KEYS,
   getExplicitElizaSourceMode,
+  LOCAL_UPSTREAM_SKIP_ENV_KEYS,
 } from "./eliza-package-mode.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -20,9 +20,7 @@ function localUpstreamsDisabled() {
     return false;
   }
 
-  return LOCAL_UPSTREAM_SKIP_ENV_KEYS.some(
-    (key) => process.env[key] === "1",
-  );
+  return LOCAL_UPSTREAM_SKIP_ENV_KEYS.some((key) => process.env[key] === "1");
 }
 
 function explicitAppCoreRoot() {
