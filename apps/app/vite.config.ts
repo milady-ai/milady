@@ -1028,11 +1028,9 @@ function desktopCorsPlugin(): Plugin {
 function generateNodeBuiltinStub(moduleId: string, req = _require): string {
   const bareModule = moduleId.replace(/^node:/, "");
   const lines = [
-    // noop: returns itself (for chained calls like createRequire(url)(id)),
-    // and is a valid class base (so `class X extends noop` works).
-    "function noop() { return noop; }",
+    "const handler = { get(t, p) { if (typeof p === 'symbol') return undefined; if (p === '__esModule') return true; if (p === 'default') return t; if (p === 'prototype') return {}; if (p in t) return t[p]; return noop; }, set(t, p, v) { try { t[p] = v; } catch {} return true; }, apply() { return noop; }, construct() { return noop; }, defineProperty(t, p, d) { try { Object.defineProperty(t, p, { configurable: true, writable: true, enumerable: true, ...d }); } catch {} return true; } };",
+    "const noop = new Proxy(function noop(){}, handler);",
     "const asyncNoop = () => Promise.resolve();",
-    "const handler = { get(t, p) { if (typeof p === 'symbol') return undefined; if (p === '__esModule') return true; if (p === 'default') return t; if (p === 'prototype') return {}; return noop; }, has() { return true; }, ownKeys() { return []; }, getOwnPropertyDescriptor() { return { configurable: true, enumerable: true }; } };",
     "const stub = new Proxy({}, handler);",
     "export default stub;",
   ];
@@ -1975,9 +1973,13 @@ export default defineConfig({
             const polyfills: Record<string, string> = {};
             for (const [nodeId, pkg, entry] of [
               ["node:events", "events", "events.js"],
+              ["events", "events", "events.js"],
               ["node:buffer", "buffer", "index.js"],
+              ["buffer", "buffer", "index.js"],
               ["node:util", "util", "util.js"],
+              ["util", "util", "util.js"],
               ["node:process", "process", "browser.js"],
+              ["process", "process", "browser.js"],
               ["node:stream", "stream-browserify", "index.js"],
               ["stream", "stream-browserify", "index.js"],
             ] as const) {
