@@ -54,6 +54,8 @@ export function resolveCompanionInferenceNotice(): null {
   return null;
 }
 
+export async function prefetchVrmToCache(): Promise<void> {}
+
 // Stubs for @elizaos/app-wallet — the canonical wallet UI ships in
 // eliza/plugins/app-wallet, but the host app sometimes aliases the
 // whole package to this no-op stub (Capacitor / minimal builds without
@@ -489,16 +491,6 @@ export { THREE };
 // useOnboardingCallbacks and the wallet onboarding flow degrades to a
 // no-op RPC update. With `bun run eliza:local`, the alias auto-detect in
 // vite.config.ts routes through the real package instead.
-export function buildWalletRpcUpdateRequest(_args: unknown): {
-  credentials: Record<string, string>;
-  selections: Record<string, never>;
-} {
-  return { credentials: {}, selections: {} };
-}
-
-export function normalizeWalletRpcSelections(_selections: unknown): {} {
-  return {};
-}
 
 export function collectSelectedCredentialKeys(_selections: unknown): string[] {
   return [];
