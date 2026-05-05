@@ -2,14 +2,27 @@ import { existsSync } from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { isLocalElizaDisabled } from "./eliza-package-mode.mjs";
+import {
+  LOCAL_UPSTREAM_SKIP_ENV_KEYS,
+  getExplicitElizaSourceMode,
+} from "./eliza-package-mode.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const defaultRepoRoot = path.resolve(__dirname, "..", "..");
 const requireFromHere = createRequire(import.meta.url);
 
 function localUpstreamsDisabled() {
-  return isLocalElizaDisabled();
+  const explicitMode = getExplicitElizaSourceMode();
+  if (explicitMode === "packages") {
+    return true;
+  }
+  if (explicitMode === "local") {
+    return false;
+  }
+
+  return LOCAL_UPSTREAM_SKIP_ENV_KEYS.some(
+    (key) => process.env[key] === "1",
+  );
 }
 
 function explicitAppCoreRoot() {
