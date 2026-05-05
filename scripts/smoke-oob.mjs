@@ -34,10 +34,12 @@
  */
 
 import { spawn } from "node:child_process";
+import { existsSync } from "node:fs";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { resolveElizaAppCoreRoot } from "./lib/resolve-eliza-app-core-script.mjs";
 
 const REPO_ROOT = fileURLToPath(new URL("..", import.meta.url));
 const READY_TIMEOUT_MS = 60_000;
@@ -55,6 +57,36 @@ function log(level, message) {
 
 function debugLog(message) {
   if (debug) log("debug", message);
+}
+
+function resolveDevServerEntry() {
+  const appCoreRoot = resolveElizaAppCoreRoot({ repoRoot: REPO_ROOT });
+  const candidates = [
+    join(appCoreRoot, "src", "runtime", "dev-server.ts"),
+    join(appCoreRoot, "src", "runtime", "dev-server.js"),
+    join(
+      appCoreRoot,
+      "packages",
+      "app-core",
+      "src",
+      "runtime",
+      "dev-server.ts",
+    ),
+    join(
+      appCoreRoot,
+      "packages",
+      "app-core",
+      "src",
+      "runtime",
+      "dev-server.js",
+    ),
+  ];
+  for (const candidate of candidates) {
+    if (existsSync(candidate)) return candidate;
+  }
+  throw new Error(
+    `Could not locate app-core dev-server entry under ${appCoreRoot}`,
+  );
 }
 
 async function pickFreePort() {
@@ -113,13 +145,17 @@ async function chat(baseUrl, prompt) {
   });
   const text = await res.text();
   if (!res.ok) {
-    throw new Error(`/v1/chat/completions HTTP ${res.status}: ${text.slice(0, 200)}`);
+    throw new Error(
+      `/v1/chat/completions HTTP ${res.status}: ${text.slice(0, 200)}`,
+    );
   }
   let body;
   try {
     body = JSON.parse(text);
   } catch {
-    throw new Error(`/v1/chat/completions returned non-JSON: ${text.slice(0, 200)}`);
+    throw new Error(
+      `/v1/chat/completions returned non-JSON: ${text.slice(0, 200)}`,
+    );
   }
   const reply = body?.choices?.[0]?.message?.content;
   if (typeof reply !== "string") {
@@ -152,7 +188,9 @@ async function reset(baseUrl) {
   });
   if (!res.ok && res.status !== 405) {
     const text = await res.text();
-    throw new Error(`/api/agent/reset HTTP ${res.status}: ${text.slice(0, 200)}`);
+    throw new Error(
+      `/api/agent/reset HTTP ${res.status}: ${text.slice(0, 200)}`,
+    );
   }
 }
 
@@ -171,26 +209,21 @@ async function main() {
   // state dir, known port. Boot exercises the same vault bootstrap,
   // SECRET_SALT persistence, and route registration paths a real boot
   // hits — just without the renderer/static-server side.
-  const devServerEntry =
-    "eliza/packages/app-core/src/runtime/dev-server.ts";
-  const child = spawn(
-    "bun",
-    [devServerEntry],
-    {
-      cwd: REPO_ROOT,
-      env: {
-        ...process.env,
-        MILADY_STATE_DIR: stateDir,
-        ELIZA_STATE_DIR: stateDir,
-        MILADY_API_PORT: String(port),
-        ELIZA_API_PORT: String(port),
-        ELIZA_HEADLESS: "1",
-        FORCE_COLOR: "0",
-      },
-      stdio: ["ignore", debug ? "inherit" : "pipe", debug ? "inherit" : "pipe"],
-      detached: process.platform !== "win32",
+  const devServerEntry = resolveDevServerEntry();
+  const child = spawn("bun", [devServerEntry], {
+    cwd: REPO_ROOT,
+    env: {
+      ...process.env,
+      MILADY_STATE_DIR: stateDir,
+      ELIZA_STATE_DIR: stateDir,
+      MILADY_API_PORT: String(port),
+      ELIZA_API_PORT: String(port),
+      ELIZA_HEADLESS: "1",
+      FORCE_COLOR: "0",
     },
-  );
+    stdio: ["ignore", debug ? "inherit" : "pipe", debug ? "inherit" : "pipe"],
+    detached: process.platform !== "win32",
+  });
   // If we asked for piped stdio (non-debug), still capture stderr so
   // boot failures aren't silently swallowed.
   if (!debug && child.stderr) {

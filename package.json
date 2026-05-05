@@ -166,6 +166,7 @@
     "lifeops:gmail:real-smoke": "node scripts/gmail-real-smoke.mjs",
     "lifeops:gmail:real-sweep": "node scripts/gmail-real-sweep.mjs",
     "scenarios:creds:pull": "node scripts/scenario-creds-pull.mjs",
+    "test:auth": "bun scripts/test-auth-gate.mjs",
     "test:selfcontrol:mobile:android": "node scripts/run-eliza-app-core-script.mjs run-mobile-build.mjs android",
     "test:selfcontrol:mobile:ios": "node scripts/run-eliza-app-core-script.mjs run-mobile-build.mjs ios",
     "test:live:browser-workspace": "node apps/app/scripts/run-ui-playwright.mjs --config playwright.ui-smoke.config.ts test/ui-smoke/browser-workspace.spec.ts",
