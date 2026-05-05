@@ -185,6 +185,27 @@ export function collectConnectorEnvVars(
         entries.DISCORD_API_TOKEN = tokenValue;
         entries.DISCORD_BOT_TOKEN = tokenValue;
       }
+
+      const intents =
+        configObj.intents &&
+        typeof configObj.intents === "object" &&
+        !Array.isArray(configObj.intents)
+          ? (configObj.intents as Record<string, unknown>)
+          : undefined;
+      if (intents) {
+        const setIntent = (field: string, envKey: string): void => {
+          const value = intents[field];
+          if (typeof value === "boolean") {
+            entries[envKey] = String(value);
+          } else if (typeof value === "string" && value.trim()) {
+            entries[envKey] = value.trim();
+          }
+        };
+
+        setIntent("presence", "DISCORD_PRESENCE_INTENT");
+        setIntent("guildMembers", "DISCORD_GUILD_MEMBERS_INTENT");
+        setIntent("messageContent", "DISCORD_MESSAGE_CONTENT_INTENT");
+      }
     }
 
     for (const [configField, envKey] of Object.entries(envMap)) {

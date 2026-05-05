@@ -1,0 +1,15 @@
+sandbox_mode = "workspace-write"
+
+[mcp_servers.context7]
+args = [
+    "-y",
+    "@upstash/context7-mcp@2.1.4",
+]
+command = "npx"
+
+[mcp_servers.deepwiki]
+args = [
+    "-y",
+    "mcp-deepwiki@0.0.10",
+]
+command = "npx"

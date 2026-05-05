@@ -2,6 +2,9 @@
  * Role utility functions — hierarchy checks, permission gates, world helpers.
  */
 
+import fs from "node:fs";
+import path from "node:path";
+
 import {
   createUniqueUuid,
   type IAgentRuntime,
@@ -60,11 +63,48 @@ function normalizeConnectorAdminWhitelist(
   );
 }
 
+function mergeConnectorAdminWhitelist(
+  base: ConnectorAdminWhitelist,
+  extra: ConnectorAdminWhitelist | Record<string, unknown> | undefined,
+): ConnectorAdminWhitelist {
+  const normalizedExtra = normalizeConnectorAdminWhitelist(extra);
+  const merged: ConnectorAdminWhitelist = { ...base };
+  for (const [connector, ids] of Object.entries(normalizedExtra)) {
+    const existing = new Set(merged[connector] ?? []);
+    for (const id of ids) {
+      existing.add(id);
+    }
+    merged[connector] = Array.from(existing);
+  }
+  return merged;
+}
+
 function asRecord(value: unknown): Record<string, unknown> | undefined {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return undefined;
   }
   return value as Record<string, unknown>;
+}
+
+function readLocalConnectorAdminWhitelist():
+  | ConnectorAdminWhitelist
+  | undefined {
+  try {
+    const configPath = path.join(process.env.HOME ?? "", ".milady/milady.json");
+    const config = JSON.parse(fs.readFileSync(configPath, "utf8")) as {
+      plugins?: {
+        entries?: Record<string, { config?: { connectorAdmins?: unknown } }>;
+      };
+    };
+    return normalizeConnectorAdminWhitelist(
+      asRecord(
+        config.plugins?.entries?.["@miladyai/plugin-roles"]?.config
+          ?.connectorAdmins,
+      ),
+    );
+  } catch {
+    return undefined;
+  }
 }
 
 function formatError(error: unknown): string {
@@ -375,8 +415,23 @@ export function setConnectorAdminWhitelist(
 export function getConnectorAdminWhitelist(
   runtime: IAgentRuntime,
 ): ConnectorAdminWhitelist {
-  return (
-    (runtime as RuntimeWithConnectorAdmins)[CONNECTOR_ADMIN_WHITELIST_KEY] ?? {}
+  let whitelist = normalizeConnectorAdminWhitelist(
+    (runtime as RuntimeWithConnectorAdmins)[CONNECTOR_ADMIN_WHITELIST_KEY],
+  );
+
+  const envDiscordAdmins = getRuntimeSettingString(
+    runtime,
+    "DISCORD_ADMIN_USER_IDS",
+  );
+  if (envDiscordAdmins) {
+    whitelist = mergeConnectorAdminWhitelist(whitelist, {
+      discord: envDiscordAdmins.split(","),
+    });
+  }
+
+  return mergeConnectorAdminWhitelist(
+    whitelist,
+    readLocalConnectorAdminWhitelist(),
   );
 }
 
@@ -407,6 +462,22 @@ export function matchEntityToConnectorAdminWhitelist(
     }
   }
 
+  return null;
+}
+
+function matchEntityIdToConnectorAdminWhitelist(
+  runtime: IAgentRuntime,
+  entityId: string,
+  whitelist: ConnectorAdminWhitelist | Record<string, unknown> | undefined,
+): { connector: string; matchedValue: string } | null {
+  const normalizedWhitelist = normalizeConnectorAdminWhitelist(whitelist);
+  for (const [connector, platformIds] of Object.entries(normalizedWhitelist)) {
+    for (const platformId of platformIds) {
+      if (createUniqueUuid(runtime, platformId) === entityId) {
+        return { connector, matchedValue: platformId };
+      }
+    }
+  }
   return null;
 }
 
@@ -480,6 +551,16 @@ export async function resolveEntityRole(
   }
 
   const connectorAdminCache = getConnectorAdminCache(runtime);
+  const entityIdMatched = matchEntityIdToConnectorAdminWhitelist(
+    runtime,
+    entityId,
+    whitelist,
+  );
+  if (entityIdMatched) {
+    connectorAdminCache.add(entityId);
+    return "ADMIN";
+  }
+
   const liveMatched = matchEntityToConnectorAdminWhitelist(
     options?.liveEntityMetadata ?? undefined,
     whitelist,
@@ -580,10 +661,24 @@ export async function checkSenderRole(
   isAdmin: boolean;
   canManageRoles: boolean;
 } | null> {
+  const entityId = message.entityId as UUID;
+  const whitelist = getConnectorAdminWhitelist(runtime);
+  if (
+    Object.keys(whitelist).length > 0 &&
+    matchEntityIdToConnectorAdminWhitelist(runtime, entityId, whitelist)
+  ) {
+    return {
+      entityId,
+      role: "ADMIN",
+      isOwner: false,
+      isAdmin: true,
+      canManageRoles: true,
+    };
+  }
+
   const resolved = await resolveWorldForMessage(runtime, message);
   if (!resolved) return null;
   const { world, metadata } = resolved;
-  const entityId = message.entityId as UUID;
   const role = await resolveEntityRole(runtime, world, metadata, entityId, {
     liveEntityMetadata: getLiveEntityMetadataFromMessage(message),
   });

@@ -15,6 +15,7 @@ export function buildCorsAllowedPorts(): Set<string> {
     String(process.env.MILADY_PORT ?? "2138"),
     String(process.env.MILADY_GATEWAY_PORT ?? "18789"),
     String(process.env.MILADY_HOME_PORT ?? "2142"),
+    "2138",
   ]);
   // Electrobun renderer static server picks a free port in the 5174–5200
   // range. Allow the full range so cross-origin fetches from WKWebView

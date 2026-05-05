@@ -228,4 +228,39 @@ describe("generateChatResponse fallback recovery", () => {
     expect(result.text).toBe("");
     expect(result.noResponseReason).toBe("ignored");
   });
+
+  it("lets task action callbacks replace premature streamed start claims", async () => {
+    const snapshots: string[] = [];
+    const runtime = createRuntimeForChatRouteTests({
+      handleMessage: async (_runtime, _message, onResponse, messageOptions) => {
+        await messageOptions?.onStreamChunk?.(
+          "Started. I’m running it now: scaffold and deploy via Wrangler.",
+        );
+        await onResponse({
+          action: "CREATE_TASK",
+          text: 'Blocked: no task agents launched.\nFailed: "deploy-site": Cloudflare auth missing',
+        });
+        return {
+          didRespond: true,
+          responseContent: {
+            text: "Started. I’m running it now: scaffold and deploy via Wrangler.",
+            actions: ["REPLY", "CREATE_TASK"],
+          },
+          responseMessages: [],
+          mode: "actions",
+        };
+      },
+    });
+
+    const result = await generateChatResponse(
+      runtime,
+      createUserMessage("make and deploy a test site"),
+      "ChatRouteAgent",
+      { onSnapshot: (text) => snapshots.push(text) },
+    );
+
+    expect(result.text).toContain("Blocked: no task agents launched.");
+    expect(result.text).not.toContain("Started. I’m running it now");
+    expect(snapshots.at(-1)).toContain("Cloudflare auth missing");
+  });
 });

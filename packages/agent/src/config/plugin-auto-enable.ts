@@ -397,9 +397,11 @@ export function applyPluginAutoEnable(
     typeof subscriptionProvider === "string" &&
     subscriptionProvider !== "anthropic-subscription";
   const subscriptionPluginId = subscriptionIsRuntimeApplicable
-    ? SUBSCRIPTION_PROVIDER_MAP[
-        subscriptionProvider as keyof typeof SUBSCRIPTION_PROVIDER_MAP
-      ]
+    ? subscriptionProvider === "openai-codex"
+      ? "pi-ai"
+      : SUBSCRIPTION_PROVIDER_MAP[
+          subscriptionProvider as keyof typeof SUBSCRIPTION_PROVIDER_MAP
+        ]
     : undefined;
   if (subscriptionPluginId) {
     const pluginName = PROVIDER_PLUGINS[subscriptionPluginId];

@@ -144,6 +144,7 @@ import {
 import { handleAuthPairingCompatRoutes } from "./auth-pairing-compat-routes";
 import { handleDatabaseRowsCompatRoute } from "./database-rows-compat-routes";
 import { handleDevCompatRoutes } from "./dev-compat-routes";
+import { handleGitHubRoutes } from "./github-routes";
 import { handleOnboardingCompatRoute } from "./onboarding-compat-routes";
 import { handlePluginsCompatRoutes } from "./plugins-compat-routes";
 import { handleWalletBrowserCompatRoutes } from "./wallet-browser-compat-routes";
@@ -751,6 +752,21 @@ async function handleMiladyCompatRoute(
   // Auth / pairing / onboarding status — extracted to auth-pairing-compat-routes.ts
   if (await handleAuthPairingCompatRoutes(req, res, state)) return true;
 
+  // GitHub PAT routes — power the "GitHub" connection card in Coding Agents
+  // settings. Auth sits in front so token metadata stays behind local API auth.
+  if (url.pathname === "/api/github/token") {
+    if (!ensureCompatApiAuthorized(req, res)) return true;
+    return handleGitHubRoutes({
+      req,
+      res,
+      method,
+      pathname: url.pathname,
+      json: (status, body) => {
+        sendJsonResponse(res, status, body);
+      },
+    });
+  }
+
   if (method === "POST" && url.pathname === "/api/tts/cloud") {
     if (!ensureCompatApiAuthorized(req, res)) return true;
     return await _handleCloudTtsPreviewRoute(req, res);
@@ -1057,7 +1073,7 @@ export function patchHttpCreateServerForMiladyCompat(
         );
         res.setHeader(
           "Access-Control-Allow-Headers",
-          "Content-Type, Authorization, X-API-Token, X-Api-Key, X-Milady-Client-Id, X-Milady-UI-Language, X-Milady-Token, X-Milady-Export-Token, X-Milady-Terminal-Token",
+          "Content-Type, Authorization, X-API-Token, X-Api-Key, X-Milady-Client-Id, X-Milady-UI-Language, X-Milady-Token, X-Milady-Export-Token, X-Milady-Terminal-Token, X-ElizaOS-Client-Id, X-ElizaOS-UI-Language, X-Eliza-Client-Id, X-Eliza-UI-Language, X-Eliza-Token, X-Eliza-Export-Token, X-Eliza-Terminal-Token",
         );
         res.setHeader("Access-Control-Allow-Credentials", "true");
       }

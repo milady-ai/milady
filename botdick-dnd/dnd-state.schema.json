@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://botdick.com/schemas/dnd-state.schema.json",
+  "title": "botdick DND campaign state",
+  "type": "object",
+  "required": ["campaignId", "channelId", "phase", "players", "quest", "turn"],
+  "properties": {
+    "campaignId": { "type": "string" },
+    "channelId": { "type": "string" },
+    "phase": {
+      "type": "string",
+      "enum": [
+        "onboarding",
+        "exploration",
+        "roleplay",
+        "shop",
+        "combat",
+        "loot",
+        "recap",
+        "paused",
+        "complete"
+      ]
+    },
+    "players": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["discordUserId", "sheet", "cards"],
+        "properties": {
+          "discordUserId": { "type": "string" },
+          "displayName": { "type": "string" },
+          "sheet": {
+            "type": "object",
+            "required": ["name", "level", "className", "hp", "maxHp", "ac", "abilityMods"],
+            "properties": {
+              "name": { "type": "string" },
+              "pronouns": { "type": "string" },
+              "level": { "type": "integer", "minimum": 1, "maximum": 20 },
+              "className": { "type": "string" },
+              "ancestry": { "type": "string" },
+              "background": { "type": "string" },
+              "hp": { "type": "integer" },
+              "maxHp": { "type": "integer" },
+              "tempHp": { "type": "integer", "default": 0 },
+              "ac": { "type": "integer" },
+              "speed": { "type": "integer", "default": 30 },
+              "proficiencyBonus": { "type": "integer" },
+              "abilityMods": {
+                "type": "object",
+                "properties": {
+                  "str": { "type": "integer" },
+                  "dex": { "type": "integer" },
+                  "con": { "type": "integer" },
+                  "int": { "type": "integer" },
+                  "wis": { "type": "integer" },
+                  "cha": { "type": "integer" }
+                },
+                "additionalProperties": false
+              },
+              "saves": { "type": "object", "additionalProperties": { "type": "integer" } },
+              "skills": { "type": "object", "additionalProperties": { "type": "integer" } },
+              "passivePerception": { "type": "integer" },
+              "spellSlots": { "type": "object", "additionalProperties": { "type": "integer" } },
+              "features": { "type": "array", "items": { "type": "string" } }
+            },
+            "additionalProperties": true
+          },
+          "cards": {
+            "type": "object",
+            "properties": {
+              "inventory": { "type": "array", "items": { "$ref": "#/$defs/card" } },
+              "conditions": { "type": "array", "items": { "$ref": "#/$defs/card" } },
+              "quests": { "type": "array", "items": { "$ref": "#/$defs/card" } },
+              "loot": { "type": "array", "items": { "$ref": "#/$defs/card" } },
+              "xp": { "type": "integer", "minimum": 0 }
+            },
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "quest": {
+      "type": "object",
+      "required": ["id", "title", "palette", "objectives"],
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "palette": { "type": "array", "minItems": 4, "items": { "type": "string" } },
+        "objectives": { "type": "array", "items": { "type": "string" } },
+        "completedObjectives": { "type": "array", "items": { "type": "string" } },
+        "clues": { "type": "array", "items": { "type": "string" } },
+        "npcs": { "type": "object", "additionalProperties": true },
+        "sceneId": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "turn": {
+      "type": "object",
+      "properties": {
+        "round": { "type": "integer", "minimum": 0 },
+        "initiative": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["actorId", "name", "initiative"],
+            "properties": {
+              "actorId": { "type": "string" },
+              "name": { "type": "string" },
+              "initiative": { "type": "integer" },
+              "type": { "type": "string", "enum": ["player", "npc", "monster", "environment"] },
+              "active": { "type": "boolean" }
+            },
+            "additionalProperties": true
+          }
+        },
+        "currentActorId": { "type": "string" },
+        "used": {
+          "type": "object",
+          "properties": {
+            "action": { "type": "boolean" },
+            "bonusAction": { "type": "boolean" },
+            "reaction": { "type": "boolean" },
+            "movement": { "type": "integer" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": true
+    },
+    "images": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["sceneId", "prompt", "model", "palette"],
+        "properties": {
+          "sceneId": { "type": "string" },
+          "round": { "type": "integer" },
+          "prompt": { "type": "string" },
+          "model": { "type": "string", "const": "classic" },
+          "palette": { "type": "array", "items": { "type": "string" } },
+          "url": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "$defs": {
+    "card": {
+      "type": "object",
+      "required": ["id", "title", "kind"],
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "kind": { "type": "string" },
+        "text": { "type": "string" },
+        "quantity": { "type": "integer", "default": 1 },
+        "tags": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}
+

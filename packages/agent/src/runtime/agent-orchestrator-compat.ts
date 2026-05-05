@@ -915,7 +915,9 @@ function createTaskAgentExamplesProvider(): Provider {
         "Guidance:",
         "- Prefer CREATE_TASK whenever the work is open-ended, multi-step, or can continue asynchronously.",
         "- If the task references a real repository or prior workspace, include the repo/workspace context instead of dropping the agent into scratch space.",
+        "- If the user asks for a new local subfolder, set workdir to the existing parent directory and put the subfolder creation in the task text. Do not set workdir to a path that does not exist yet.",
         "- Use multiple agents only when the subtasks are clearly separable and benefit from parallelism.",
+        "- Do not say 'Started' or imply a task agent is running unless you are also calling CREATE_TASK or SPAWN_AGENT in the same response. If you cannot call one of those actions, say what blocks you.",
       ].join("\n");
 
       return {
@@ -1267,7 +1269,7 @@ function injectIntelligentWorkspace(action: Action | undefined): void {
         parameters: { ...sanitizedParameters, workdir: decision.path },
       } as HandlerOptions;
 
-      if (callback) {
+      if (callback && sanitizedContent.source !== "discord") {
         await callback({
           text: decision.created
             ? `Creating fresh workspace at ${decision.path} — ${decision.reason}`

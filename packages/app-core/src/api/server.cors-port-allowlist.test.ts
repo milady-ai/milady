@@ -74,7 +74,14 @@ describe("buildCorsAllowedPorts", () => {
     process.env.MILADY_PORT = "3000";
     const ports = buildCorsAllowedPorts();
     expect(ports.has("3000")).toBe(true);
-    expect(ports.has("2138")).toBe(false);
+    expect(ports.has("2138")).toBe(true);
+  });
+
+  it("always allows the default dev UI port even when ELIZA_PORT is used by the API", () => {
+    process.env.ELIZA_PORT = "31337";
+    const ports = buildCorsAllowedPorts();
+    expect(ports.has("31337")).toBe(true);
+    expect(ports.has("2138")).toBe(true);
   });
 });
 

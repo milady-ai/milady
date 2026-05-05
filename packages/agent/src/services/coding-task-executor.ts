@@ -7,6 +7,7 @@ import type {
   UUID,
 } from "@elizaos/core";
 import type { TaskExecutor, TaskResult, TaskSpec } from "./task-executor.js";
+import { pickPreferredCreateTaskAction } from "../runtime/task-agent-action-resolver.js";
 
 const CODING_PATTERNS =
   /\b(build|create|make|scaffold|generate|code|implement|develop|fix|debug|refactor|write)\b/i;
@@ -49,11 +50,7 @@ function findCreateTaskAction(
   const actions = Array.isArray(runtime.actions)
     ? (runtime.actions as CreateTaskActionLike[])
     : [];
-  return (
-    actions.find((action) => action.name === "CREATE_TASK") ??
-    actions.find((action) => action.name === "START_CODING_TASK") ??
-    null
-  );
+  return pickPreferredCreateTaskAction(actions, { preferTaskAgent: true });
 }
 
 function buildSyntheticTaskMemory(
@@ -122,7 +119,10 @@ export class CodingTaskExecutor implements TaskExecutor {
       const memory = buildSyntheticTaskMemory(runtime, spec);
       const callbackLines: string[] = [];
       const callback = async (content: Content): Promise<Memory[]> => {
-        if (typeof content.text === "string" && content.text.trim().length > 0) {
+        if (
+          typeof content.text === "string" &&
+          content.text.trim().length > 0
+        ) {
           callbackLines.push(content.text);
         }
         return [];
@@ -170,6 +170,18 @@ export class CodingTaskExecutor implements TaskExecutor {
             taskId: spec.id,
             success: false,
             error: result.error || result.text || "Task creation failed",
+            durationMs: Date.now() - startTime,
+          };
+        }
+        if (result?.data?.agents && !sessionId) {
+          return {
+            taskId: spec.id,
+            success: false,
+            error:
+              result.error ||
+              result.text ||
+              callbackLines.join("\n") ||
+              "Task creation did not launch an agent session",
             durationMs: Date.now() - startTime,
           };
         }

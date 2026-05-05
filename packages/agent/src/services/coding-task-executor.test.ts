@@ -197,4 +197,94 @@ describe("CodingTaskExecutor", () => {
       output: "session-123",
     });
   });
+
+  it("prefers the task-agent CREATE_TASK when multiple CREATE_TASK actions exist", async () => {
+    const executor = new CodingTaskExecutor();
+    const triggerCreateTaskAction = {
+      name: "CREATE_TASK",
+      description:
+        "Create an autonomous trigger task (interval, once, or cron)",
+      validate: vi.fn().mockResolvedValue(true),
+      handler: vi.fn().mockResolvedValue({
+        success: true,
+        text: "created trigger",
+      }),
+    };
+    const taskAgentCreateTaskAction = {
+      name: "CREATE_TASK",
+      similes: ["START_CODING_TASK", "CODE_TASK"],
+      description:
+        "Create one or more asynchronous task agents for any open-ended multi-step job.",
+      validate: vi.fn().mockResolvedValue(true),
+      handler: vi.fn().mockResolvedValue({
+        success: true,
+        text: "created task",
+        data: {
+          agents: [{ sessionId: "session-task-agent" }],
+        },
+      }),
+    };
+    const runtime = {
+      agentId: "agent-1",
+      getService: vi.fn().mockReturnValue(null),
+      actions: [triggerCreateTaskAction, taskAgentCreateTaskAction],
+    } as unknown as IAgentRuntime;
+
+    const result = await executor.execute(
+      {
+        id: "task-7",
+        type: "coding",
+        description: "fix wallet execution",
+        agentType: "codex",
+      },
+      runtime,
+    );
+
+    expect(triggerCreateTaskAction.handler).not.toHaveBeenCalled();
+    expect(taskAgentCreateTaskAction.handler).toHaveBeenCalled();
+    expect(result).toMatchObject({
+      taskId: "task-7",
+      success: true,
+      output: "session-task-agent",
+    });
+  });
+
+  it("treats CREATE_TASK without a launched session as a failure", async () => {
+    const executor = new CodingTaskExecutor();
+    const createTaskAction = {
+      name: "CREATE_TASK",
+      similes: ["START_CODING_TASK", "CODE_TASK"],
+      description:
+        "Create one or more asynchronous task agents for any open-ended multi-step job.",
+      validate: vi.fn().mockResolvedValue(true),
+      handler: vi.fn().mockResolvedValue({
+        success: true,
+        text: "Blocked: no task agents launched.",
+        data: {
+          agents: [{ error: "Codex CLI is not installed" }],
+        },
+      }),
+    };
+    const runtime = {
+      agentId: "agent-1",
+      getService: vi.fn().mockReturnValue(null),
+      actions: [createTaskAction],
+    } as unknown as IAgentRuntime;
+
+    const result = await executor.execute(
+      {
+        id: "task-8",
+        type: "coding",
+        description: "build a dashboard",
+        agentType: "codex",
+      },
+      runtime,
+    );
+
+    expect(result).toMatchObject({
+      taskId: "task-8",
+      success: false,
+      error: "Blocked: no task agents launched.",
+    });
+  });
 });

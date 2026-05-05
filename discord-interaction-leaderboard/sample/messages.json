@@ -1,0 +1,49 @@
+{
+  "exportedAt": "2026-04-29T18:12:00-07:00",
+  "channel": "Cozy Devs sample",
+  "messages": [
+    {
+      "id": "1001",
+      "timestamp": "2026-04-29T17:58:00-07:00",
+      "author": { "id": "u1", "name": "ash" },
+      "content": "ship the tiny leaderboard today, looks great",
+      "mentions": [{ "id": "u2", "name": "nina" }],
+      "reactions": [{ "emoji": "heart", "count": 3, "users": [{ "id": "u2", "name": "nina" }, { "id": "u3", "name": "mika" }] }]
+    },
+    {
+      "id": "1002",
+      "timestamp": "2026-04-29T18:00:00-07:00",
+      "author": { "id": "u2", "name": "nina" },
+      "content": "thanks, I can wire the export path and post updates",
+      "replyTo": "1001",
+      "mentions": [{ "id": "u1", "name": "ash" }],
+      "reactions": [{ "emoji": "spark", "count": 1, "users": [{ "id": "u1", "name": "ash" }] }]
+    },
+    {
+      "id": "1003",
+      "timestamp": "2026-04-29T18:01:00-07:00",
+      "author": { "id": "u3", "name": "mika" },
+      "content": "helpful. add a small vibes bonus but label it clearly.",
+      "replyTo": "1002",
+      "mentions": [],
+      "reactions": [{ "emoji": "thumbsup", "count": 2, "users": [{ "id": "u1", "name": "ash" }, { "id": "u2", "name": "nina" }] }]
+    },
+    {
+      "id": "1004",
+      "timestamp": "2026-04-29T18:02:00-07:00",
+      "author": { "id": "u1", "name": "ash" },
+      "content": "love it, keep it small so the main score stays interaction based",
+      "replyTo": "1003",
+      "mentions": [{ "id": "u3", "name": "mika" }],
+      "reactions": []
+    },
+    {
+      "id": "1005",
+      "timestamp": "2026-04-29T18:03:00-07:00",
+      "author": { "id": "u4", "name": "rio" },
+      "content": "I will review the numbers once the real export is available",
+      "mentions": [],
+      "reactions": [{ "emoji": "eyes", "count": 1, "users": [{ "id": "u2", "name": "nina" }] }]
+    }
+  ]
+}

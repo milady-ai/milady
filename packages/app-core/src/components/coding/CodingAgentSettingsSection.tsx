@@ -21,6 +21,7 @@ import {
   type ModelOption,
 } from "./coding-agent-settings-shared";
 import { GlobalPrefsSection } from "./GlobalPrefsSection";
+import { GitHubConnectionCard } from "./GitHubConnectionCard";
 import { LlmProviderSection } from "./LlmProviderSection";
 import { ModelConfigSection } from "./ModelConfigSection";
 
@@ -439,6 +440,8 @@ export function CodingAgentSettingsSection() {
         isDynamic={isDynamic}
         setPref={setPref}
       />
+
+      <GitHubConnectionCard />
     </div>
   );
 }

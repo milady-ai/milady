@@ -1,4 +1,12 @@
-declare module "@elizaos/plugin-coding-agent";
+declare module "@elizaos/plugin-coding-agent" {
+  export class EmulatorBridgeServer {
+    readonly isConnected: boolean;
+    attachClient(send: (data: string) => void): void;
+    detachClient(): void;
+    onMessage(raw: string): void;
+    sendCommand(command: unknown, timeoutMs?: number): Promise<unknown>;
+  }
+}
 declare module "@elizaos/plugin-agent-orchestrator";
 declare module "@elizaos/plugin-agent-skills";
 declare module "@elizaos/plugin-elizacloud";

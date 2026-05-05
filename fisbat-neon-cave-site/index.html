@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Fisbat Neon Cave is a polished static Cloudflare Pages test site."
+    />
+    <title>Fisbat Neon Cave Site</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main>
+      <section class="hero" aria-labelledby="site-title">
+        <canvas id="caveCanvas" aria-hidden="true"></canvas>
+        <div class="hero-tone" aria-hidden="true"></div>
+
+        <header class="site-header">
+          <a class="brand" href="#top" aria-label="Fisbat Neon Cave home">
+            <span class="brand-mark" aria-hidden="true"></span>
+            <span>Fisbat Neon Cave</span>
+          </a>
+          <nav class="site-nav" aria-label="Primary">
+            <a href="#signal">Signal</a>
+            <a href="#route">Route</a>
+            <a href="#telemetry">Telemetry</a>
+          </nav>
+        </header>
+
+        <div class="hero-copy" id="top">
+          <p class="eyebrow">Static edge test</p>
+          <h1 id="site-title">Fisbat Neon Cave</h1>
+          <p class="lede">
+            A luminous one-page test target for botdick on Cloudflare Pages,
+            built to prove static hosting, responsive layout, and custom-domain
+            delivery.
+          </p>
+          <div class="hero-actions" aria-label="Page shortcuts">
+            <a class="button button-primary" href="#telemetry">View telemetry</a>
+            <a class="button button-secondary" href="#route">Trace the route</a>
+          </div>
+        </div>
+
+        <aside class="deploy-panel" aria-label="Deployment target">
+          <p class="panel-kicker">Target host</p>
+          <p class="hostname">botdick.fisbat-neon-cave-site.milaidy.agency</p>
+          <dl class="deploy-facts">
+            <div>
+              <dt>Mode</dt>
+              <dd>Static</dd>
+            </div>
+            <div>
+              <dt>Build</dt>
+              <dd>None</dd>
+            </div>
+            <div>
+              <dt>Runtime</dt>
+              <dd>Browser</dd>
+            </div>
+          </dl>
+        </aside>
+      </section>
+
+      <section class="band signal-band" id="signal" aria-labelledby="signal-title">
+        <div class="section-heading">
+          <p class="eyebrow">Signal</p>
+          <h2 id="signal-title">Cave-ready static checks</h2>
+          <p>
+            The page keeps every moving piece client-side so the hosted artifact
+            is easy to inspect, cache, and redeploy.
+          </p>
+        </div>
+
+        <div class="metric-grid">
+          <article class="metric-card">
+            <span class="metric-value">01</span>
+            <h3>Single input directory</h3>
+            <p>All site files live under <code>fisbat-neon-cave-site</code>.</p>
+          </article>
+          <article class="metric-card">
+            <span class="metric-value">0</span>
+            <h3>Server dependencies</h3>
+            <p>No build output, SSR process, API route, or package install.</p>
+          </article>
+          <article class="metric-card">
+            <span class="metric-value">200</span>
+            <h3>Expected route</h3>
+            <p>Every public path falls back to a usable static page.</p>
+          </article>
+          <article class="metric-card">
+            <span class="metric-value">TLS</span>
+            <h3>Custom domain</h3>
+            <p>The target hostname is ready for Cloudflare Pages attachment.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="band route-band" id="route" aria-labelledby="route-title">
+        <div class="route-layout">
+          <div class="section-heading">
+            <p class="eyebrow">Route</p>
+            <h2 id="route-title">Neon path through the deploy cave</h2>
+            <p>
+              A compact deployment trail, from local files to the Pages edge
+              hostname.
+            </p>
+          </div>
+
+          <div class="cave-map" aria-label="Static deployment route">
+            <div class="map-line"></div>
+            <div class="map-node node-files">
+              <span>Files</span>
+            </div>
+            <div class="map-node node-pages">
+              <span>Pages</span>
+            </div>
+            <div class="map-node node-domain">
+              <span>Domain</span>
+            </div>
+            <div class="map-node node-live">
+              <span>Live</span>
+            </div>
+          </div>
+
+          <ol class="route-list">
+            <li>
+              <strong>Local artifact</strong>
+              <span>Plain static files in the requested folder.</span>
+            </li>
+            <li>
+              <strong>Direct upload</strong>
+              <span>Cloudflare Pages receives the folder as the deploy source.</span>
+            </li>
+            <li>
+              <strong>Nested hostname</strong>
+              <span>The bot and project slugs form the public URL.</span>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="band telemetry-band" id="telemetry" aria-labelledby="telemetry-title">
+        <div class="section-heading">
+          <p class="eyebrow">Telemetry</p>
+          <h2 id="telemetry-title">Static page health</h2>
+          <p>
+            These checks are rendered from local browser state so the page can
+            verify itself without calling an external service.
+          </p>
+        </div>
+
+        <div class="status-board" role="list" aria-label="Static site checks">
+          <div class="status-row" role="listitem">
+            <span class="status-light status-ok" aria-hidden="true"></span>
+            <span class="status-name">Document loaded</span>
+            <span class="status-value" id="loadedAt">Pending</span>
+          </div>
+          <div class="status-row" role="listitem">
+            <span class="status-light status-ok" aria-hidden="true"></span>
+            <span class="status-name">Viewport</span>
+            <span class="status-value" id="viewportSize">Pending</span>
+          </div>
+          <div class="status-row" role="listitem">
+            <span class="status-light status-ok" aria-hidden="true"></span>
+            <span class="status-name">Canvas scene</span>
+            <span class="status-value" id="canvasState">Ready</span>
+          </div>
+          <div class="status-row" role="listitem">
+            <span class="status-light status-warn" aria-hidden="true"></span>
+            <span class="status-name">Deploy target</span>
+            <span class="status-value">botdick / fisbat-neon-cave-site</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>Fisbat Neon Cave Site</span>
+      <a href="#top">Back to top</a>
+    </footer>
+
+    <script src="./script.js" defer></script>
+  </body>
+</html>

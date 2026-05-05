@@ -40,6 +40,9 @@ type MutableElizaConfig = Partial<ElizaConfig> & {
   serviceRouting?: ServiceRoutingConfig;
 };
 
+const OPENAI_CODEX_PI_MODEL_SPEC = "openai-codex/gpt-5.5";
+const PI_AI_PLUGIN_NAME = "@elizaos/plugin-pi-ai";
+
 function asRecord(value: unknown): Record<string, unknown> | null {
   return value && typeof value === "object" && !Array.isArray(value)
     ? (value as Record<string, unknown>)
@@ -237,10 +240,55 @@ function setPrimaryModel(
     return;
   }
   defaults.model = { ...defaults.model, primary: primaryModel };
+  delete (defaults.model as Record<string, unknown>).provider;
+}
+
+function getPluginEntryId(pluginName: string): string {
+  const marker = "/plugin-";
+  const markerIndex = pluginName.lastIndexOf(marker);
+  if (markerIndex >= 0) {
+    return pluginName.slice(markerIndex + marker.length);
+  }
+  return pluginName;
+}
+
+function enableProviderPlugin(
+  config: MutableElizaConfig,
+  pluginName: string | undefined,
+): void {
+  if (!pluginName) {
+    return;
+  }
+
+  const pluginId = getPluginEntryId(pluginName);
+  config.plugins ??= {};
+  config.plugins.entries ??= {};
+  config.plugins.entries[pluginId] = {
+    ...(config.plugins.entries[pluginId] ?? {}),
+    enabled: true,
+  };
+  config.plugins.deny = config.plugins.deny?.filter(
+    (entry) => entry !== pluginId && entry !== pluginName,
+  );
+  if (config.plugins.deny?.length === 0) {
+    delete config.plugins.deny;
+  }
 }
 
 function clearPiAiFlag(config: MutableElizaConfig): void {
   for (const key of ["ELIZA_USE_PI_AI", "MILADY_USE_PI_AI"] as const) {
+    clearPersistedEnvValue(config, key);
+    delete process.env[key];
+  }
+}
+
+function clearOpenAiDirectRuntimeEnv(config: MutableElizaConfig): void {
+  for (const key of [
+    "OPENAI_API_KEY",
+    "OPENAI_BASE_URL",
+    "OPENAI_SMALL_MODEL",
+    "OPENAI_LARGE_MODEL",
+  ] as const) {
     clearPersistedEnvValue(config, key);
     delete process.env[key];
   }
@@ -352,6 +400,7 @@ function applyLocalProviderCapabilities(
     clearPiAiFlag(config);
   }
 
+  const providerOption = getOnboardingProviderOption(normalizedProvider);
   const storedProviderId = getStoredOnboardingProviderId(normalizedProvider);
   if (
     storedProviderId === "anthropic-subscription" ||
@@ -378,14 +427,28 @@ function applyLocalProviderCapabilities(
       return Promise.resolve();
     }
 
-    return applySubscriptionCredentials(config);
+    const requestedModelSpec = trimToUndefined(selection.primaryModel);
+    const modelSpec = requestedModelSpec?.startsWith("openai-codex/")
+      ? requestedModelSpec
+      : OPENAI_CODEX_PI_MODEL_SPEC;
+
+    clearOpenAiDirectRuntimeEnv(config);
+    setEnvValue(config, "ELIZA_USE_PI_AI", "1");
+    setEnvValue(config, "MILADY_USE_PI_AI", "1");
+    setEnvValue(config, "PI_AI_MODEL_SPEC", modelSpec);
+    setEnvValue(config, "PI_AI_SMALL_MODEL_SPEC", modelSpec);
+    setEnvValue(config, "PI_AI_LARGE_MODEL_SPEC", modelSpec);
+    setEnvValue(config, "PI_AI_PRIORITY", "100000");
+    setPrimaryModel(config, "pi-ai");
+    enableProviderPlugin(config, PI_AI_PLUGIN_NAME);
+    return Promise.resolve();
   }
 
   if (normalizedProvider === "pi-ai") {
     setEnvValue(config, "ELIZA_USE_PI_AI", "1");
   }
 
-  const providerOption = getOnboardingProviderOption(normalizedProvider);
+  enableProviderPlugin(config, providerOption?.pluginName);
   if (providerOption?.envKey) {
     const apiKey = trimToUndefined(selection.apiKey);
     if (apiKey) {
@@ -552,7 +615,10 @@ export function applySubscriptionProviderConfig(
     // Code CLI (TOS) so the runtime cannot use them for LLM inference.
     const runtimeApplicable = subscriptionKey !== "anthropic-subscription";
     if (runtimeApplicable) {
-      defaults.model = { ...defaults.model, primary: modelProvider };
+      const runtimeProvider =
+        subscriptionKey === "openai-codex" ? "pi-ai" : modelProvider;
+      defaults.model = { ...defaults.model, primary: runtimeProvider };
+      delete (defaults.model as Record<string, unknown>).provider;
     }
   }
 }
@@ -801,12 +867,19 @@ export async function applyOnboardingConnectionConfig(
   const shouldDefaultCloudServices =
     existingDeploymentTarget?.runtime === "cloud" &&
     existingDeploymentTarget.provider === "elizacloud";
+  const requestedPrimaryModel = trimToUndefined(
+    normalizedConnection.primaryModel,
+  );
+  const directPrimaryModel =
+    normalizedConnection.provider === "openai-subscription"
+      ? requestedPrimaryModel?.startsWith("openai-codex/")
+        ? requestedPrimaryModel
+        : OPENAI_CODEX_PI_MODEL_SPEC
+      : requestedPrimaryModel;
   const directLlmRoute = {
     backend: normalizedConnection.provider,
     transport: "direct",
-    ...(normalizedConnection.primaryModel
-      ? { primaryModel: normalizedConnection.primaryModel }
-      : {}),
+    ...(directPrimaryModel ? { primaryModel: directPrimaryModel } : {}),
   } satisfies NonNullable<ServiceRoutingConfig["llmText"]>;
   const serviceRouting = shouldDefaultCloudServices
     ? buildDefaultElizaCloudServiceRouting({

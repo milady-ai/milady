@@ -10,6 +10,7 @@ import type { IAgentRuntime, Plugin, ServiceClass } from "@elizaos/core";
 import { AgentEventService } from "@elizaos/core";
 import { emoteAction } from "../actions/emote.js";
 import { lifeAction } from "../actions/life.js";
+import { publishHomepageContentAction } from "../actions/publish-homepage.js";
 import { restartAction } from "../actions/restart.js";
 import { sendAdminMessageAction } from "../actions/send-admin-message.js";
 import { setUserNameAction } from "../actions/set-user-name.js";
@@ -19,6 +20,9 @@ import {
   skillCommandAction,
 } from "../actions/skill-command.js";
 import { terminalAction } from "../actions/terminal.js";
+import { draftXPostsAction } from "../actions/x-drafts.js";
+import { postToXBrowserAction } from "../actions/x-post-browser.js";
+import { postToXAction } from "../actions/x-post.js";
 import {
   ensureProactiveAgentTask,
   registerProactiveTaskWorker,
@@ -47,6 +51,11 @@ import { DEFAULT_AGENT_WORKSPACE_DIR } from "../providers/workspace.js";
 import { createWorkspaceProvider } from "../providers/workspace-provider.js";
 import { createTriggerTaskAction } from "../triggers/action.js";
 import { registerTriggerTaskWorker } from "../triggers/runtime.js";
+import {
+  ensureXAutonomyTask,
+  registerXAutonomyTaskWorker,
+  startXAutonomyRuntimeLoop,
+} from "../x-autonomy/runtime.js";
 import { AdvancedMemoryStorageService } from "./advanced-memory-storage.js";
 import { setCustomActionsRuntime } from "./custom-actions.js";
 
@@ -101,6 +110,7 @@ export function createElizaPlugin(config?: ElizaPluginConfig): Plugin {
       registerTriggerTaskWorker(runtime);
       registerLifeOpsTaskWorker(runtime);
       registerProactiveTaskWorker(runtime);
+      registerXAutonomyTaskWorker(runtime);
       setCustomActionsRuntime(runtime);
       void ensureLifeOpsSchedulerTask(runtime).catch((error) => {
         runtime.logger?.warn?.(
@@ -112,6 +122,12 @@ export function createElizaPlugin(config?: ElizaPluginConfig): Plugin {
           `[proactive] Failed to ensure proactive task: ${error instanceof Error ? error.message : String(error)}`,
         );
       });
+      void ensureXAutonomyTask(runtime).catch((error) => {
+        runtime.logger?.warn?.(
+          `[x-autonomy] Failed to ensure X autonomy task: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      });
+      startXAutonomyRuntimeLoop(runtime);
 
       // Honour DISABLE_EMOTES: remove PLAY_EMOTE so it never appears in prompts.
       if (runtime.character?.settings?.DISABLE_EMOTES) {
@@ -221,6 +237,10 @@ export function createElizaPlugin(config?: ElizaPluginConfig): Plugin {
       lifeAction,
       setUserNameAction,
       skillCommandAction,
+      publishHomepageContentAction,
+      draftXPostsAction,
+      postToXBrowserAction,
+      postToXAction,
     ],
   };
 

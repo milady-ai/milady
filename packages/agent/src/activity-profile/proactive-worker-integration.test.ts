@@ -66,6 +66,7 @@ import {
 // ── Fixtures ──────────────────────────────────────────
 
 const MORNING_NOW = new Date("2026-04-06T07:00:00Z");
+const ORIGINAL_ENV = { ...process.env };
 
 function makeProfile(
   overrides: Partial<ActivityProfile> = {},
@@ -266,6 +267,8 @@ describe("executeProactiveTask", () => {
     vi.clearAllMocks();
     vi.useFakeTimers();
     vi.setSystemTime(MORNING_NOW);
+    process.env = { ...ORIGINAL_ENV };
+    delete process.env.BOTDICK_PROACTIVE_MESSAGES_ENABLED;
     _resetMissingSendHandlerLogsForTests();
     mocks.resolveDefaultTimeZone.mockReturnValue("UTC");
     mocks.mockGetOverview.mockResolvedValue({ occurrences: [] });
@@ -275,7 +278,19 @@ describe("executeProactiveTask", () => {
   });
 
   afterEach(() => {
+    process.env = { ...ORIGINAL_ENV };
     vi.useRealTimers();
+  });
+
+  it("returns nextInterval without sending when proactive messages are disabled", async () => {
+    process.env.BOTDICK_PROACTIVE_MESSAGES_ENABLED = "false";
+    const { runtime } = createRuntimeMock([makeExistingProactiveTask()]);
+
+    const result = await executeProactiveTask(runtime);
+
+    expect(result.nextInterval).toBe(PROACTIVE_TASK_INTERVAL_MS);
+    expect(mocks.resolveOwnerEntityId).not.toHaveBeenCalled();
+    expect(vi.mocked(runtime.sendMessageToTarget)).not.toHaveBeenCalled();
   });
 
   it("returns nextInterval when no owner is configured", async () => {

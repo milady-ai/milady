@@ -41,6 +41,12 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
+function proactiveMessagesEnabled(): boolean {
+  const raw = process.env.BOTDICK_PROACTIVE_MESSAGES_ENABLED?.trim().toLowerCase();
+  if (!raw) return true;
+  return !["0", "false", "no", "off"].includes(raw);
+}
+
 function isProactiveTask(task: Task): boolean {
   const metadata = isRecord(task.metadata) ? task.metadata : null;
   const agent = metadata?.proactiveAgent;
@@ -114,6 +120,10 @@ export function resolveProactiveOwnerContact(args: {
 export async function executeProactiveTask(
   runtime: IAgentRuntime,
 ): Promise<{ nextInterval: number }> {
+  if (!proactiveMessagesEnabled()) {
+    return { nextInterval: PROACTIVE_TASK_INTERVAL_MS };
+  }
+
   const now = new Date();
   const timezone = resolveDefaultTimeZone();
 

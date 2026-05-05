@@ -181,7 +181,8 @@ Per-channel settings under `guilds.<guild-id>.channels.<channel-id>`:
     "discord": {
       "intents": {
         "presence": true,
-        "guildMembers": true
+        "guildMembers": true,
+        "messageContent": true
       }
     }
   }

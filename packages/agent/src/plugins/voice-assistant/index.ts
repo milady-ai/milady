@@ -48,6 +48,10 @@ class VoiceAssistantService extends Service {
   static async start(runtime: IAgentRuntime) {
     logger.info('*** Starting Voice Assistant service ***');
     const service = new VoiceAssistantService(runtime);
+    if (process.env.FISBAT_VOICE_DISABLED === '1') {
+      logger.info('[Fisbat Voice] Disabled for headless runtime');
+      return service;
+    }
     service.startListening();
     return service;
   }

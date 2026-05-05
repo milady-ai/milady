@@ -218,4 +218,48 @@ describe("MiladyClient runtime API base/token fallback", () => {
       vi.useRealTimers();
     }
   });
+
+  it("uses the extended provider-switch timeout for settings provider changes", async () => {
+    vi.useFakeTimers();
+    try {
+      const { setBootConfig, DEFAULT_BOOT_CONFIG } = await import(
+        "../config/boot-config"
+      );
+      const { MiladyClient } = await import("./client");
+
+      setBootConfig(DEFAULT_BOOT_CONFIG);
+      let aborted = false;
+      vi.spyOn(globalThis, "fetch").mockImplementation(
+        (_input: string | URL | Request, init?: RequestInit) =>
+          new Promise<Response>((_resolve, reject) => {
+            init?.signal?.addEventListener(
+              "abort",
+              () => {
+                aborted = true;
+                reject(new DOMException("Aborted", "AbortError"));
+              },
+              { once: true },
+            );
+          }),
+      );
+
+      const client = new MiladyClient("http://127.0.0.1:31337");
+      const request = client.switchProvider("openai-subscription");
+
+      await vi.advanceTimersByTimeAsync(10_000);
+      expect(aborted).toBe(false);
+
+      const rejection = expect(request).rejects.toMatchObject({
+        kind: "timeout",
+        path: "/api/provider/switch",
+        message: "Request timed out after 60000ms",
+      });
+
+      await vi.advanceTimersByTimeAsync(50_000);
+      await rejection;
+      expect(aborted).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });

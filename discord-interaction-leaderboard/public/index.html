@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cozy Devs Interaction Leaderboard</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f7f4ee;
+        --ink: #1c2321;
+        --muted: #68736e;
+        --line: #d9d3c8;
+        --panel: #ffffff;
+        --accent: #1f7a68;
+        --accent-2: #9b3d2e;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font: 16px/1.45 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: var(--bg);
+        color: var(--ink);
+      }
+
+      main {
+        width: min(1120px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 32px 0;
+      }
+
+      header {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 24px;
+        border-bottom: 1px solid var(--line);
+        padding-bottom: 18px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(2rem, 5vw, 4rem);
+        line-height: 0.95;
+        letter-spacing: 0;
+      }
+
+      .meta {
+        color: var(--muted);
+        text-align: right;
+        max-width: 380px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--panel);
+        border: 1px solid var(--line);
+      }
+
+      th,
+      td {
+        padding: 12px 14px;
+        text-align: left;
+        border-bottom: 1px solid var(--line);
+        white-space: nowrap;
+      }
+
+      th {
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        color: var(--muted);
+        letter-spacing: 0.04em;
+      }
+
+      tbody tr:first-child td {
+        font-weight: 700;
+      }
+
+      .score {
+        color: var(--accent);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .bonus {
+        color: var(--accent-2);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .status {
+        margin-top: 18px;
+        color: var(--muted);
+      }
+
+      @media (max-width: 760px) {
+        header {
+          display: block;
+        }
+
+        .meta {
+          text-align: left;
+          margin-top: 12px;
+        }
+
+        .table-wrap {
+          overflow-x: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <h1>Interaction Leaderboard</h1>
+        </div>
+        <div class="meta" id="meta">Loading local leaderboard data...</div>
+      </header>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>User</th>
+              <th>Total</th>
+              <th>Messages</th>
+              <th>Replies</th>
+              <th>Mentions</th>
+              <th>Reactions In</th>
+              <th>Reactions Out</th>
+              <th>Vibes Bonus</th>
+            </tr>
+          </thead>
+          <tbody id="rows">
+            <tr><td colspan="9">No generated data yet. Run npm run sample.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="status" id="status"></p>
+    </main>
+    <script src="leaderboard-data.js"></script>
+    <script>
+      const data = window.LEADERBOARD_DATA || { leaderboard: [], status: {} };
+      const rows = document.getElementById("rows");
+      const meta = document.getElementById("meta");
+      const status = document.getElementById("status");
+
+      meta.textContent = `${data.status.channel || "Local export"} | ${data.status.generatedAt || ""}`;
+      status.textContent = data.status.blocker || "Generated from local export data.";
+
+      if (data.leaderboard.length) {
+        rows.innerHTML = data.leaderboard.map((row) => `
+          <tr>
+            <td>${row.rank}</td>
+            <td>${row.name}</td>
+            <td class="score">${row.totalScore.toFixed(2)}</td>
+            <td>${row.messages}</td>
+            <td>${row.repliesSent}</td>
+            <td>${row.mentionsReceived}</td>
+            <td>${row.reactionsReceived}</td>
+            <td>${row.reactionsGiven}</td>
+            <td class="bonus">${row.vibesBonus.toFixed(2)}</td>
+          </tr>
+        `).join("");
+      }
+    </script>
+  </body>
+</html>

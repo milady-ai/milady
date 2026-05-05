@@ -18,12 +18,17 @@ const testUtilsPath = path.resolve(
   "../../../../../eliza/packages/typescript/src/__tests__/test-utils.ts",
 );
 const hasElizaTestUtils = existsSync(testUtilsPath);
+const testUtilsImportPath =
+  "../../../../../eliza/packages/typescript/src/__tests__/test-utils";
+
+type TestRuntimeUtils = {
+  cleanupTestRuntime?: (runtime: unknown) => Promise<void> | void;
+  createTestRuntime?: () => Promise<unknown>;
+};
 
 // Dynamic import so the module-not-found error is deferred, not top-level.
 const { cleanupTestRuntime, createTestRuntime } = hasElizaTestUtils
-  ? await import(
-      "../../../../../eliza/packages/typescript/src/__tests__/test-utils"
-    )
+  ? ((await import(testUtilsImportPath)) as TestRuntimeUtils)
   : { cleanupTestRuntime: undefined, createTestRuntime: undefined };
 
 // The eliza submodule and the npm-installed @elizaos/core are separate module

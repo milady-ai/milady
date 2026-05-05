@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D Bouncing Ball</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a0f;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+    font-family: monospace;
+  }
+  #container {
+    width: 700px;
+    height: 500px;
+    perspective: 900px;
+    position: relative;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    overflow: hidden;
+    background: radial-gradient(ellipse at 50% 120%, #1a1a2e 0%, #0a0a0f 70%);
+  }
+  #scene {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+  }
+  /* floor grid */
+  #floor {
+    position: absolute;
+    width: 700px;
+    height: 600px;
+    bottom: -100px;
+    left: 0;
+    transform: rotateX(65deg);
+    transform-origin: bottom center;
+    background-image:
+      linear-gradient(rgba(100,100,255,0.12) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(100,100,255,0.12) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+  #shadow {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(0,0,0,0.5) 0%, transparent 70%);
+    pointer-events: none;
+    filter: blur(4px);
+  }
+  #ball {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #ff6baf, #d63384 40%, #8b1a5a 100%);
+    box-shadow:
+      inset -6px -6px 14px rgba(0,0,0,0.4),
+      inset 4px 4px 10px rgba(255,255,255,0.2),
+      0 0 20px rgba(214,51,132,0.4);
+    pointer-events: none;
+  }
+  /* trail dots */
+  .trail {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(214,51,132,0.3);
+    pointer-events: none;
+  }
+  #stats {
+    position: absolute;
+    top: 10px;
+    left: 14px;
+    color: rgba(255,255,255,0.35);
+    font-size: 11px;
+    line-height: 1.6;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+<div id="container">
+  <div id="scene">
+    <div id="floor"></div>
+    <div id="shadow"></div>
+    <div id="ball"></div>
+  </div>
+  <div id="stats"></div>
+</div>
+<script>
+(() => {
+  const ball = document.getElementById('ball');
+  const shadow = document.getElementById('shadow');
+  const stats = document.getElementById('stats');
+  const scene = document.getElementById('scene');
+
+  const W = 700, H = 500, D = 400;
+  const R = 25; // ball radius
+  const GRAVITY = 0.35;
+  const DAMPING = 0.82;
+  const FRICTION = 0.995;
+  const TRAIL_COUNT = 12;
+
+  let x = W / 2, y = H / 3, z = D / 2;
+  let vx = 4.5, vy = 0, vz = 3.2;
+
+  // trail elements
+  const trails = [];
+  for (let i = 0; i < TRAIL_COUNT; i++) {
+    const t = document.createElement('div');
+    t.className = 'trail';
+    scene.appendChild(t);
+    trails.push({ el: t, x: x, y: y, z: z });
+  }
+  let trailIdx = 0;
+  let frame = 0;
+
+  function update() {
+    // gravity
+    vy += GRAVITY;
+
+    // friction
+    vx *= FRICTION;
+    vz *= FRICTION;
+
+    // integrate
+    x += vx;
+    y += vy;
+    z += vz;
+
+    // boundary collisions
+    // left / right
+    if (x - R < 0) { x = R; vx = Math.abs(vx) * DAMPING; }
+    if (x + R > W) { x = W - R; vx = -Math.abs(vx) * DAMPING; }
+
+    // top / bottom (floor)
+    if (y - R < 0) { y = R; vy = Math.abs(vy) * DAMPING; }
+    if (y + R > H) {
+      y = H - R;
+      vy = -Math.abs(vy) * DAMPING;
+      // add some horizontal energy on floor bounce for variety
+      if (Math.abs(vy) < 1.5) {
+        vx += (Math.random() - 0.5) * 2;
+        vz += (Math.random() - 0.5) * 2;
+        vy = -Math.abs(vy) - 2; // minimum bounce
+      }
+    }
+
+    // depth
+    if (z - R < 0) { z = R; vz = Math.abs(vz) * DAMPING; }
+    if (z + R > D) { z = D - R; vz = -Math.abs(vz) * DAMPING; }
+
+    // keep things lively: if energy is very low, give a kick
+    const speed = Math.sqrt(vx * vx + vy * vy + vz * vz);
+    if (speed < 2) {
+      vx += (Math.random() - 0.5) * 6;
+      vy -= 6 + Math.random() * 4;
+      vz += (Math.random() - 0.5) * 6;
+    }
+
+    // 3D → 2D projection
+    const depthScale = 0.6 + 0.4 * (z / D); // closer = bigger
+    const projX = x;
+    const projY = y;
+    const size = 50 * depthScale;
+
+    ball.style.width = size + 'px';
+    ball.style.height = size + 'px';
+    ball.style.left = (projX - size / 2) + 'px';
+    ball.style.top = (projY - size / 2) + 'px';
+    ball.style.opacity = 0.6 + 0.4 * depthScale;
+    ball.style.filter = `blur(${((1 - depthScale) * 1.5).toFixed(1)}px)`;
+
+    // shadow on floor
+    const shadowScale = depthScale * 0.7;
+    const shadowY = H - 5;
+    const shadowW = size * 1.3 * (1 - (H - y) / H * 0.5);
+    const shadowH = shadowW * 0.3;
+    shadow.style.width = shadowW + 'px';
+    shadow.style.height = shadowH + 'px';
+    shadow.style.left = (projX - shadowW / 2) + 'px';
+    shadow.style.top = (shadowY - shadowH / 2) + 'px';
+    shadow.style.opacity = (0.5 * (1 - (H - y) / H * 0.7)).toFixed(2);
+
+    // trail
+    if (frame % 3 === 0) {
+      const t = trails[trailIdx % TRAIL_COUNT];
+      t.x = projX; t.y = projY; t.size = size * 0.4;
+      t.life = 1;
+      trailIdx++;
+    }
+    for (const t of trails) {
+      if (t.life > 0) {
+        t.life -= 0.04;
+        t.el.style.width = (t.size * t.life) + 'px';
+        t.el.style.height = (t.size * t.life) + 'px';
+        t.el.style.left = (t.x - t.size * t.life / 2) + 'px';
+        t.el.style.top = (t.y - t.size * t.life / 2) + 'px';
+        t.el.style.opacity = (t.life * 0.4).toFixed(2);
+      }
+    }
+
+    // stats
+    stats.textContent =
+      `vel: ${speed.toFixed(1)}  x:${x.toFixed(0)} y:${y.toFixed(0)} z:${z.toFixed(0)}`;
+
+    frame++;
+    requestAnimationFrame(update);
+  }
+
+  update();
+})();
+</script>
+</body>
+</html>

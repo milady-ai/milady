@@ -1,0 +1,75 @@
+{
+  "status": {
+    "generatedAt": "2026-04-30T01:13:22.260Z",
+    "channel": "messages.json",
+    "sourcePath": "/Users/binkyfishai/milady-fisbat/discord-interaction-leaderboard/sample/messages.json",
+    "scoring": {
+      "message": 1,
+      "replySent": 1.25,
+      "mentionReceived": 1,
+      "reactionReceived": 0.75,
+      "reactionGiven": 0.25,
+      "vibeWord": 0.2,
+      "vibeCap": 2
+    },
+    "blocker": "Live Discord collection blocked: no channel ID, guild ID, or live message source was supplied in this workspace."
+  },
+  "leaderboard": [
+    {
+      "rank": 1,
+      "id": "u1",
+      "name": "ash",
+      "messages": 2,
+      "repliesSent": 1,
+      "mentionsReceived": 1,
+      "reactionsReceived": 3,
+      "reactionsGiven": 2,
+      "vibeHits": 3,
+      "activityScore": 7,
+      "vibesBonus": 0.6,
+      "totalScore": 7.6
+    },
+    {
+      "rank": 2,
+      "id": "u3",
+      "name": "mika",
+      "messages": 1,
+      "repliesSent": 1,
+      "mentionsReceived": 1,
+      "reactionsReceived": 2,
+      "reactionsGiven": 1,
+      "vibeHits": 1,
+      "activityScore": 5,
+      "vibesBonus": 0.2,
+      "totalScore": 5.2
+    },
+    {
+      "rank": 3,
+      "id": "u2",
+      "name": "nina",
+      "messages": 1,
+      "repliesSent": 1,
+      "mentionsReceived": 1,
+      "reactionsReceived": 1,
+      "reactionsGiven": 3,
+      "vibeHits": 1,
+      "activityScore": 4.75,
+      "vibesBonus": 0.2,
+      "totalScore": 4.95
+    },
+    {
+      "rank": 4,
+      "id": "u4",
+      "name": "rio",
+      "messages": 1,
+      "repliesSent": 0,
+      "mentionsReceived": 0,
+      "reactionsReceived": 1,
+      "reactionsGiven": 0,
+      "vibeHits": 0,
+      "activityScore": 1.75,
+      "vibesBonus": 0,
+      "totalScore": 1.75
+    }
+  ]
+}

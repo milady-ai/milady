@@ -1,0 +1,7 @@
+{
+  "approval_policy": "never",
+  "sandbox_mode": "workspace-write",
+  "tools": {
+    "web_search": true
+  }
+}

@@ -659,19 +659,28 @@ export async function resolvePlugins(
           `[eliza] Loading workspace plugin override: ${pluginName} from ${workspaceOverridePath}`,
         );
         if (isOfficialElizaPlugin) {
-          // Prefer the repo-level package import for official workspace plugins.
-          // In local checkouts, root node_modules usually symlinks back to the
-          // workspace package while keeping dependency resolution intact.
-          try {
-            mod = await importOfficialPluginFromNodeModules();
-          } catch (npmErr) {
-            logger.info(
-              `[eliza] Node_modules resolution unavailable for workspace plugin ${pluginName} (${formatError(npmErr)}). Using staged workspace import at ${redactUserSegments(workspaceOverridePath)}.`,
-            );
+          if (pluginName === "@elizaos/plugin-solana") {
+            // The npm cache can contain an older Solana build pulled through
+            // @miladyai/agent; prefer the workspace copy so local fixes apply.
             mod = await importPluginModuleFromPath(
               workspaceOverridePath,
               pluginName,
             );
+          } else {
+            // Prefer the repo-level package import for official workspace plugins.
+            // In local checkouts, root node_modules usually symlinks back to the
+            // workspace package while keeping dependency resolution intact.
+            try {
+              mod = await importOfficialPluginFromNodeModules();
+            } catch (npmErr) {
+              logger.info(
+                `[eliza] Node_modules resolution unavailable for workspace plugin ${pluginName} (${formatError(npmErr)}). Using staged workspace import at ${redactUserSegments(workspaceOverridePath)}.`,
+              );
+              mod = await importPluginModuleFromPath(
+                workspaceOverridePath,
+                pluginName,
+              );
+            }
           }
         } else {
           mod = await importPluginModuleFromPath(

@@ -1,0 +1,10 @@
+{
+  "name": "discord-interaction-leaderboard",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "sample": "node scripts/interaction-leaderboard.mjs --input sample/messages.json --out-dir output",
+    "check": "node scripts/interaction-leaderboard.mjs --input sample/messages.json --out-dir output"
+  }
+}

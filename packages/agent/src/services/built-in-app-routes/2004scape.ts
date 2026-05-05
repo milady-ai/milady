@@ -1,5 +1,6 @@
 import type http from "node:http";
 import { Readable } from "node:stream";
+import type { ReadableStream as NodeReadableStream } from "node:stream/web";
 import type { IAgentRuntime } from "@elizaos/core";
 import type {
   AppLaunchPreparation,
@@ -37,26 +38,24 @@ type OperatorIntent =
   | "explore"
   | "bank";
 
-type BridgeCommand =
+type BridgeCommandInput =
   | {
-      seq: number;
       type: "pause" | "resume" | "skip-tutorial";
     }
   | {
-      seq: number;
       type: "set-goal";
       goal: string;
     }
   | {
-      seq: number;
       type: "set-intent";
       intent: OperatorIntent;
     }
   | {
-      seq: number;
       type: "say";
       text: string;
     };
+
+type BridgeCommand = BridgeCommandInput & { seq: number };
 
 interface RecentActivityEntry {
   id: string;
@@ -161,7 +160,7 @@ function toJsonValue(
     typeof value === "number" ||
     typeof value === "boolean"
   ) {
-    return value;
+    return value as AppSessionJsonValue;
   }
   if (Array.isArray(value)) {
     const next = value
@@ -327,7 +326,7 @@ function appendActivity(
 
 function enqueueCommand(
   record: SessionRecord,
-  command: Omit<BridgeCommand, "seq">,
+  command: BridgeCommandInput,
 ): BridgeCommand {
   const next = {
     ...command,
@@ -1257,7 +1256,7 @@ async function buildViewerHtml(runtime: IAgentRuntime | null): Promise<string> {
   }
 
   // Resolve the gateway port from the game service if available
-  const gameService = runtime?.getService?.("rs_2004scape") as
+  const gameService = runtime?.getService?.("rs_2004scape") as unknown as
     | { getGatewayPort(): number | null }
     | undefined;
   const gatewayPort = gameService?.getGatewayPort?.() ?? null;
@@ -1352,9 +1351,9 @@ async function proxyViewerRequest(
     return true;
   }
 
-  Readable.fromWeb(upstream.body as unknown as ReadableStream<Uint8Array>).pipe(
-    ctx.res,
-  );
+  Readable.fromWeb(
+    upstream.body as unknown as NodeReadableStream<Uint8Array>,
+  ).pipe(ctx.res);
   return true;
 }
 
@@ -1439,9 +1438,11 @@ function applyControlAction(
 function resolveLaunchRecord(
   ctx: AppLaunchSessionContext | AppRunSessionContext,
 ): SessionRecord | null {
+  const currentSessionId =
+    "session" in ctx ? ctx.session?.sessionId : undefined;
   const sessionId = normalizeSessionId(
     ctx.viewer?.authMessage?.authToken ??
-      ctx.session?.sessionId ??
+      currentSessionId ??
       ctx.viewer?.authMessage?.characterId ??
       ctx.runtime?.agentId ??
       null,

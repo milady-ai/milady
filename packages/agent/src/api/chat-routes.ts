@@ -12,8 +12,11 @@
  */
 
 import crypto from "node:crypto";
+import { existsSync, statSync } from "node:fs";
 import type http from "node:http";
+import path from "node:path";
 import {
+  type ActionParameters,
   type AgentRuntime,
   ChannelType,
   type Content,
@@ -93,6 +96,10 @@ import {
   WALLET_EXECUTION_INTENT_RE,
   WALLET_PROGRESS_ONLY_RE,
 } from "./server.js";
+import {
+  pickPreferredCreateTaskAction,
+  shouldPreferTaskAgentCreateTask,
+} from "../runtime/task-agent-action-resolver.js";
 import { resolveStreamingUpdate } from "./streaming-text.js";
 
 const MAX_BODY_BYTES = 1024 * 1024; // 1 MB
@@ -156,9 +163,151 @@ const WEBSITE_BLOCK_PERMISSION_RE =
 const WEBSITE_BLOCK_PERMISSION_MODEL_RE =
   /\b(permission|approval|approve|access|admin|administrator|root|sudo)\b/i;
 const NON_EXECUTABLE_FALLBACK_ACTIONS = new Set(["REPLY", "NONE", "IGNORE"]);
+const AUTHORITATIVE_TASK_ACTIONS = new Set([
+  "CREATE_TASK",
+  "START_CODING_TASK",
+  "SPAWN_AGENT",
+  "DEPLOY_PROJECT",
+]);
+const INTERNAL_TASK_AGENT_DISPATCH_SOURCES = new Set([
+  "action",
+  "coding-agent",
+  "coordinator",
+  "swarm_synthesis",
+  "task-agent",
+]);
 
 function isExecutableFallbackAction(action: { name: string }): boolean {
   return !NON_EXECUTABLE_FALLBACK_ACTIONS.has(action.name);
+}
+
+function isAuthoritativeTaskActionCallback(
+  actionTag: unknown,
+  text: string,
+): boolean {
+  const normalizedAction =
+    typeof actionTag === "string" ? actionTag.trim().toUpperCase() : "";
+  if (AUTHORITATIVE_TASK_ACTIONS.has(normalizedAction)) return true;
+
+  return /^(?:Started:|Started \d+\/\d+ agents:|Launched \d+\/\d+ agents|Blocked:|Failed to (?:start|create)|Task-agent access|Creating fresh workspace|Launching \d+ agents)/i.test(
+    text.trim(),
+  );
+}
+
+function isTaskAgentStartIntent(userText: string, responseText: string): boolean {
+  const combined = `${userText}\n${responseText}`;
+  return (
+    /\b(start(?:ed|ing)?|launch(?:ed|ing)?|spawn(?:ed|ing)?|creat(?:e|ed|ing)|run(?:ning)?|make|build|scaffold|design|host|deploy)\b/i.test(
+      combined,
+    ) &&
+    /\b(task[- ]?agent|sub[- ]?agent|background task|design and host|deploy|wrangler|cloudflare|pages|host(?:ing)?|site|website)\b/i.test(
+      combined,
+    )
+  );
+}
+
+function shouldSuppressTaskAgentDispatch(
+  messageSource: string,
+  userText: string,
+): boolean {
+  const source = messageSource.trim();
+  const trimmed = userText.trim();
+  return (
+    INTERNAL_TASK_AGENT_DISPATCH_SOURCES.has(source) ||
+    trimmed.startsWith("[Task Agent Event]") ||
+    trimmed.includes("Include a JSON action block at the end of your response:") ||
+    /"action"\s*:\s*"respond\|complete\|escalate\|ignore"/.test(trimmed)
+  );
+}
+
+function directoryExists(value: string): boolean {
+  try {
+    return existsSync(value) && statSync(value).isDirectory();
+  } catch {
+    return false;
+  }
+}
+
+function nearestExistingDirectory(value: string): string | undefined {
+  let candidate = path.resolve(value.replace(/[),.;:!?'"`]+$/g, ""));
+  if (!path.extname(candidate) && directoryExists(candidate)) return candidate;
+  while (candidate && candidate !== path.dirname(candidate)) {
+    if (directoryExists(candidate)) return candidate;
+    candidate = path.dirname(candidate);
+  }
+  return directoryExists(candidate) ? candidate : undefined;
+}
+
+function stripTaskAgentMetaInstructions(userText: string): string {
+  return userText
+    .replace(
+      /\bUse\s+CREATE_TASK\/task-agent\s+for\s+the\s+work\s+and\s+reply\s+with\s+the\s+started\s+task\s+or\s+exact\s+blocker\.?/gi,
+      "",
+    )
+    .replace(
+      /\bUse\s+task\s+agents?\s*\/\s*CREATE_TASK\s+instead\s+of\s+only\s+saying\s+you\s+started\.?/gi,
+      "",
+    )
+    .replace(
+      /\bReply\s+with\s+the\s+started\s+task\s+or\s+the\s+exact\s+blocker\.?/gi,
+      "",
+    )
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
+function enrichTaskAgentTask(userText: string, task: string): string {
+  if (
+    /\b(deploy|host|publish|ship|make\s+live|go\s+live|wrangler|cloudflare|pages|milaidy\.agency)\b/i.test(
+      userText,
+    ) &&
+    /\b(site|website|app|project|subfolder|folder)\b/i.test(userText)
+  ) {
+    const deployHelperPath = `${process.cwd()}/scripts/deploy-cloudflare-pages-subdomain.mjs`;
+    return [
+      task,
+      "",
+      "After creating the local site/app, deploy it yourself from this workspace.",
+      "Use the repo deploy helper when available:",
+      `node ${deployHelperPath} --input-dir <created-project-folder> --bot-name <bot-name> --project-title <project-title> --base-domain milaidy.agency`,
+      "Derive the final hostname as <bot-name>.<project-title>.milaidy.agency, verify it with curl, and report the live URL or the exact Cloudflare permission blocker.",
+    ].join("\n");
+  }
+  return task;
+}
+
+function inferCreateTaskFallback(
+  userText: string,
+  responseText: string,
+): { name: string; parameters: ActionParameters } | null {
+  if (!isTaskAgentStartIntent(userText, responseText)) return null;
+
+  const pathMatches = Array.from(
+    userText.matchAll(/(?:^|[\s`"'])(\/[^\s`"']+)/g),
+  )
+    .map((match) => match[1])
+    .filter((value): value is string => Boolean(value));
+  const workdir =
+    pathMatches.map(nearestExistingDirectory).find(Boolean) ?? process.cwd();
+
+  return {
+    name: "CREATE_TASK",
+    parameters: {
+      task: enrichTaskAgentTask(
+        userText,
+        stripTaskAgentMetaInstructions(userText) || userText.trim(),
+      ),
+      workdir,
+      approvalPreset: "autonomous",
+    },
+  };
+}
+
+function inferDirectCreateTaskIntent(
+  userText: string,
+): { name: string; parameters: ActionParameters } | null {
+  if (!isTaskAgentStartIntent(userText, "start task-agent")) return null;
+  return inferCreateTaskFallback(userText, "Started: launching a task agent.");
 }
 
 function hasWebsiteBlockingPermissionIntent(text: string): boolean {
@@ -744,6 +893,10 @@ export async function generateChatResponse(
       message.content.source.trim().length > 0
         ? message.content.source
         : "api";
+    const suppressTaskAgentDispatch = shouldSuppressTaskAgentDispatch(
+      messageSource,
+      originalUserText,
+    );
     const emitChunk = (chunk: string): void => {
       if (!chunk) return;
       responseText += chunk;
@@ -772,8 +925,20 @@ export async function generateChatResponse(
       }
       emitSnapshot(update.nextText);
     };
-    /** Latest action callback wins: replaces prior callback text, keeps LLM prefix. */
-    const replaceCallbackText = (incoming: string): void => {
+    /**
+     * Latest action callback wins: replaces prior callback text, keeps LLM prefix.
+     * Task/deploy action callbacks are authoritative and replace the prefix too:
+     * a streamed "Started" claim is not evidence that a session or deploy exists.
+     */
+    const replaceCallbackText = (
+      incoming: string,
+      actionTag?: unknown,
+    ): void => {
+      if (isAuthoritativeTaskActionCallback(actionTag, incoming)) {
+        preCallbackText = "";
+        emitSnapshot(incoming);
+        return;
+      }
       if (preCallbackText === null) {
         preCallbackText = responseText;
       }
@@ -857,22 +1022,44 @@ export async function generateChatResponse(
             return;
           }
 
-          // Direct dispatch for explicit task creation intent from UI
+          // Direct dispatch for explicit task creation intent from UI, plus
+          // natural "make/design/host/deploy a site" requests that should not
+          // be routed through todo/reminder-style actions first.
           const contentMetadata = message.content.metadata as
             | Record<string, unknown>
             | undefined;
-          if (contentMetadata?.intent === "create_task") {
+          const directCreateTaskFallback =
+            suppressTaskAgentDispatch
+              ? null
+              : contentMetadata?.intent === "create_task"
+                ? {
+                    name: "CREATE_TASK",
+                    parameters: {
+                      task:
+                        stripTaskAgentMetaInstructions(originalUserText) ||
+                        originalUserText.trim(),
+                      approvalPreset: "autonomous",
+                    },
+                  }
+                : inferDirectCreateTaskIntent(originalUserText);
+          if (directCreateTaskFallback) {
             const coordinator = runtime.getService("SWARM_COORDINATOR");
             if (coordinator) {
-              const createTaskAction = runtime.actions.find(
-                (a) => a?.name?.toUpperCase() === "CREATE_TASK",
+              const createTaskAction = pickPreferredCreateTaskAction(
+                Array.isArray(runtime.actions) ? runtime.actions : [],
+                {
+                  preferTaskAgent: shouldPreferTaskAgentCreateTask(
+                    directCreateTaskFallback.parameters,
+                  ),
+                },
               );
               if (createTaskAction) {
                 runtime.logger?.info(
                   {
                     src: "eliza-api",
-                    agentType: contentMetadata.agentType,
-                    intent: "create_task",
+                    agentType: contentMetadata?.agentType,
+                    intent: contentMetadata?.intent ?? "direct_create_task",
+                    parameters: directCreateTaskFallback.parameters,
                   },
                   "[eliza-api] Direct dispatch CREATE_TASK from UI intent",
                 );
@@ -881,7 +1068,7 @@ export async function generateChatResponse(
                   runtime,
                   message,
                   undefined,
-                  {},
+                  { parameters: directCreateTaskFallback.parameters },
                   async (content: Content) => {
                     if (generationTimedOut || opts?.isAborted?.()) {
                       throw createChatGenerationTimeoutError(generationTimeoutMs);
@@ -889,7 +1076,7 @@ export async function generateChatResponse(
 
                     const chunk = extractCompatTextContent(content);
                     if (chunk) {
-                      replaceCallbackText(chunk);
+                      replaceCallbackText(chunk, "CREATE_TASK");
                       actionResponseText = responseText;
                     }
                     return [];
@@ -973,8 +1160,13 @@ export async function generateChatResponse(
 
                 const chunk = extractCompatTextContent(content);
                 if (!chunk) return [];
+                if (isAuthoritativeTaskActionCallback(actionTag, chunk)) {
+                  activeStreamSource = "callback";
+                  replaceCallbackText(chunk, actionTag);
+                  return [];
+                }
                 if (!claimStreamSource("callback")) return [];
-                replaceCallbackText(chunk);
+                replaceCallbackText(chunk, actionTag);
                 return [];
               },
               {
@@ -1187,6 +1379,28 @@ export async function generateChatResponse(
           } else {
             responseText = inferredWalletFallback.errorText;
           }
+        }
+      }
+
+      if (
+        !suppressTaskAgentDispatch &&
+        actionCallbacksSeen === 0 &&
+        !fallbackActionsToRun.some((action) => action.name === "CREATE_TASK")
+      ) {
+        const inferredCreateTaskFallback = inferCreateTaskFallback(
+          userText,
+          modelText,
+        );
+        if (inferredCreateTaskFallback) {
+          fallbackActionsToRun.push(inferredCreateTaskFallback);
+          runtime.logger?.warn(
+            {
+              src: "eliza-api",
+              action: inferredCreateTaskFallback.name,
+              parameters: inferredCreateTaskFallback.parameters,
+            },
+            "[eliza-api] Injecting CREATE_TASK fallback for fake task-agent start",
+          );
         }
       }
 

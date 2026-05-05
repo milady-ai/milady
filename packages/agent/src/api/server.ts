@@ -3137,7 +3137,7 @@ function applyCors(
     );
     res.setHeader(
       "Access-Control-Allow-Headers",
-      "Content-Type, Authorization, X-Eliza-Token, X-Api-Key, X-Eliza-Export-Token, X-Eliza-Client-Id, X-Eliza-Terminal-Token, X-Eliza-UI-Language",
+      "Content-Type, Authorization, X-Eliza-Token, X-Api-Key, X-Eliza-Export-Token, X-Eliza-Client-Id, X-Eliza-Terminal-Token, X-Eliza-UI-Language, X-ElizaOS-Client-Id, X-ElizaOS-UI-Language, X-Milady-Client-Id, X-Milady-UI-Language, X-Milady-Token, X-Milady-Export-Token, X-Milady-Terminal-Token",
     );
   }
 
@@ -6663,6 +6663,7 @@ export async function startApiServer(opts?: {
     pendingRestartReasons: [],
     connectorRouteHandlers: [],
     connectorHealthMonitor: null,
+    emulatorBridge: null,
   };
   const trainingServiceCtor = await resolveTrainingServiceCtor();
   const trainingServiceOptions = {

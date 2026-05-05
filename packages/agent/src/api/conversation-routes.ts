@@ -63,6 +63,7 @@ import {
   resolveConversationGreetingText,
 } from "./server.js";
 import { stripLeakedStructuredFields } from "./chat-text-helpers.js";
+import { applyResponseTriggers } from "./response-triggers.js";
 
 import fs from "node:fs";
 import path from "node:path";
@@ -935,10 +936,10 @@ export async function handleConversationRoutes(
       if (!aborted) {
         conv.updatedAt = new Date().toISOString();
         if (result.noResponseReason !== "ignored") {
-          const resolvedText = normalizeChatResponseText(
-            result.text,
-            state.logBuffer,
-            runtime,
+          const resolvedText = applyResponseTriggers(
+            normalizeChatResponseText(result.text, state.logBuffer, runtime),
+            prompt,
+            state.config,
           );
           await persistAssistantConversationMemory(
             runtime,
@@ -1091,10 +1092,10 @@ export async function handleConversationRoutes(
 
       conv.updatedAt = new Date().toISOString();
       if (result.noResponseReason !== "ignored") {
-        const resolvedText = normalizeChatResponseText(
-          result.text,
-          state.logBuffer,
-          runtime,
+        const resolvedText = applyResponseTriggers(
+          normalizeChatResponseText(result.text, state.logBuffer, runtime),
+          prompt,
+          state.config,
         );
         await persistAssistantConversationMemory(
           runtime,

@@ -651,6 +651,32 @@ describe("checkSenderRole", () => {
     });
   });
 
+  it("returns ADMIN for a Discord sender whitelisted by runtime settings", async () => {
+    const runtime = mockRuntime({
+      room: { worldId: "w1" },
+      world: { id: "w1", metadata: { roles: {} } },
+      settings: {
+        DISCORD_ADMIN_USER_IDS: "1281434689910997084",
+      },
+    });
+
+    expect(
+      await checkSenderRole(
+        runtime,
+        msg("unknown", "room-1", undefined, {
+          fromId: "1281434689910997084",
+          discordServerId: "guild-1",
+        }),
+      ),
+    ).toEqual({
+      entityId: "unknown",
+      role: "ADMIN",
+      isOwner: false,
+      isAdmin: true,
+      canManageRoles: true,
+    });
+  });
+
   it("returns null when world can't be resolved", async () => {
     expect(
       await checkSenderRole(mockRuntime({ room: null }), msg("e1")),

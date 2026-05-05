@@ -7,7 +7,13 @@ import type {
   AppLaunchPreparation,
   AppSessionState,
 } from "@miladyai/shared/contracts/apps";
-import type { AppRouteModule, AppRunSessionContext } from "../app-package-modules.js";
+import type {
+  AppRouteModule,
+  AppRunSessionContext,
+} from "../app-package-modules.js";
+
+const HYPERSCAPE_APP_NAME = "@hyperscape/plugin-hyperscape";
+const DEFAULT_HYPERSCAPE_URL = "https://hyperscape.gg";
 
 function resolveSettingLike(
   runtime: IAgentRuntime | null | undefined,
@@ -108,8 +114,10 @@ export const prepareLaunch: AppRouteModule["prepareLaunch"] = async (ctx) => {
     preparation.launchUrl = serverUrl;
   }
 
+  const viewerUrl = serverUrl ?? DEFAULT_HYPERSCAPE_URL;
   if (authToken && explicitCharacterId) {
     preparation.viewer = {
+      url: viewerUrl,
       postMessageAuth: true,
       embedParams: { characterId: explicitCharacterId },
     };
@@ -120,6 +128,7 @@ export const prepareLaunch: AppRouteModule["prepareLaunch"] = async (ctx) => {
   const characterId =
     explicitCharacterId ?? (await getOrCreateDevCharacterId(apiBase));
   preparation.viewer = {
+    url: viewerUrl,
     embedParams: { characterId },
   };
   return preparation;
@@ -168,11 +177,16 @@ export const resolveLaunchSession: AppRouteModule["resolveLaunchSession"] =
     const { runtime } = ctx;
     const serverUrl =
       resolveSettingLike(runtime, "HYPERSCAPE_SERVER_URL") ??
-      "https://hyperscape.gg";
+      DEFAULT_HYPERSCAPE_URL;
     const authToken = resolveSettingLike(runtime, "HYPERSCAPE_AUTH_TOKEN");
+    const characterId = resolveSettingLike(runtime, "HYPERSCAPE_CHARACTER_ID");
 
     const session: AppSessionState = {
+      sessionId: characterId ?? runtime?.agentId ?? HYPERSCAPE_APP_NAME,
+      appName: HYPERSCAPE_APP_NAME,
+      mode: "viewer",
       status: authToken ? "running" : "connecting",
+      characterId,
       summary: authToken
         ? `Connected to Hyperscape at ${serverUrl}`
         : "Waiting for HYPERSCAPE_AUTH_TOKEN to authenticate.",

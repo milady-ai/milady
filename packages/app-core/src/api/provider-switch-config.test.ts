@@ -54,7 +54,7 @@ describe("applySubscriptionProviderConfig", () => {
     applySubscriptionProviderConfig(config, "openai-codex");
 
     expect(config.agents?.defaults?.subscriptionProvider).toBe("openai-codex");
-    expect(config.agents?.defaults?.model?.primary).toBe("openai");
+    expect(config.agents?.defaults?.model?.primary).toBe("pi-ai");
   });
 
   it("sets subscriptionProvider but NOT model.primary for anthropic-subscription (TOS restriction)", () => {
@@ -74,7 +74,7 @@ describe("applySubscriptionProviderConfig", () => {
     applySubscriptionProviderConfig(config, "openai-subscription");
 
     expect(config.agents?.defaults?.subscriptionProvider).toBe("openai-codex");
-    expect(config.agents?.defaults?.model?.primary).toBe("openai");
+    expect(config.agents?.defaults?.model?.primary).toBe("pi-ai");
   });
 
   it("preserves existing model fallbacks", () => {
@@ -82,13 +82,17 @@ describe("applySubscriptionProviderConfig", () => {
       subscriptionProvider: "anthropic-subscription",
       model: {
         primary: "anthropic",
+        provider: "anthropic",
         fallbacks: ["openai", "groq"],
       },
     });
 
     applySubscriptionProviderConfig(config, "openai-codex");
 
-    expect(config.agents?.defaults?.model?.primary).toBe("openai");
+    expect(config.agents?.defaults?.model?.primary).toBe("pi-ai");
+    expect(
+      (config.agents?.defaults?.model as Record<string, unknown>)?.provider,
+    ).toBeUndefined();
     expect(config.agents?.defaults?.model?.fallbacks).toEqual([
       "openai",
       "groq",
@@ -202,8 +206,18 @@ describe("applyOnboardingConnectionConfig", () => {
     expect(applySubscriptionCredentials).not.toHaveBeenCalled();
   });
 
-  it("keeps Codex subscription runtime-capable and applies stored credentials", async () => {
-    const config = emptyConfig();
+  it("routes Codex subscription through pi-ai instead of the OpenAI SDK", async () => {
+    const config = {
+      plugins: {
+        entries: {
+          openai: {
+            enabled: false,
+            config: { preserved: true },
+          },
+        },
+        deny: ["openai", "@elizaos/plugin-openai"],
+      },
+    } as Partial<ElizaConfig>;
 
     await applyOnboardingConnectionConfig(config, {
       kind: "local-provider",
@@ -211,12 +225,55 @@ describe("applyOnboardingConnectionConfig", () => {
     });
 
     expect(config.agents?.defaults?.subscriptionProvider).toBe("openai-codex");
-    expect(config.agents?.defaults?.model?.primary).toBe("openai");
+    expect(config.agents?.defaults?.model?.primary).toBe("pi-ai");
     expect(config.serviceRouting?.llmText).toEqual({
       backend: "openai-subscription",
       transport: "direct",
+      primaryModel: "openai-codex/gpt-5.5",
     });
-    expect(applySubscriptionCredentials).toHaveBeenCalledWith(config);
+    expect(config.plugins?.entries?.["pi-ai"]?.enabled).toBe(true);
+    expect(config.plugins?.entries?.openai).toEqual({
+      enabled: false,
+      config: { preserved: true },
+    });
+    expect(config.plugins?.deny).toEqual(["openai", "@elizaos/plugin-openai"]);
+    expect(config.env?.ELIZA_USE_PI_AI).toBe("1");
+    expect(config.env?.MILADY_USE_PI_AI).toBe("1");
+    expect(config.env?.PI_AI_MODEL_SPEC).toBe("openai-codex/gpt-5.5");
+    expect(config.env?.PI_AI_PRIORITY).toBe("100000");
+    expect(applySubscriptionCredentials).not.toHaveBeenCalled();
+  });
+
+  it("re-enables an explicitly disabled direct provider when selected", async () => {
+    const config = {
+      plugins: {
+        entries: {
+          openai: { enabled: false },
+        },
+      },
+      agents: {
+        defaults: {
+          model: {
+            provider: "openrouter",
+          } as Record<string, unknown>,
+        },
+      },
+    } as Partial<ElizaConfig>;
+
+    await applyOnboardingConnectionConfig(config, {
+      kind: "local-provider",
+      provider: "openai",
+      apiKey: "sk-openai-test",
+    });
+
+    expect(config.plugins?.entries?.openai?.enabled).toBe(true);
+    expect(config.serviceRouting?.llmText).toEqual({
+      backend: "openai",
+      transport: "direct",
+    });
+    expect(
+      (config.agents?.defaults?.model as Record<string, unknown>)?.provider,
+    ).toBeUndefined();
   });
 
   it("preserves an existing direct-provider key when selection changes without a new apiKey", async () => {

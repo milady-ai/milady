@@ -51,6 +51,7 @@ import {
   type Entity,
   type LogEntry,
   logger,
+  ModelType,
   // loggerScope, // removed
   mergeCharacterDefaults,
   type Plugin,
@@ -1401,6 +1402,27 @@ export function applyConnectorSecretsToEnv(config: ElizaConfig): void {
         process.env.DISCORD_API_TOKEN = tokenValue;
         process.env.DISCORD_BOT_TOKEN = tokenValue;
       }
+
+      const intents =
+        configObj.intents &&
+        typeof configObj.intents === "object" &&
+        !Array.isArray(configObj.intents)
+          ? (configObj.intents as Record<string, unknown>)
+          : undefined;
+      if (intents) {
+        const setIntent = (field: string, envKey: string): void => {
+          const value = intents[field];
+          if (typeof value === "boolean") {
+            process.env[envKey] = String(value);
+          } else if (typeof value === "string" && value.trim()) {
+            process.env[envKey] = value.trim();
+          }
+        };
+
+        setIntent("presence", "DISCORD_PRESENCE_INTENT");
+        setIntent("guildMembers", "DISCORD_GUILD_MEMBERS_INTENT");
+        setIntent("messageContent", "DISCORD_MESSAGE_CONTENT_INTENT");
+      }
     }
 
     const envMap = CHANNEL_ENV_MAP[channelName];
@@ -2226,6 +2248,8 @@ export function installRuntimeMethodBindings(runtime: AgentRuntime): void {
     "GOOGLE_LARGE_MODEL",
     // GitHub
     "GITHUB_TOKEN",
+    "GITHUB_API_TOKEN",
+    "GITHUB_PAT",
     "GITHUB_OAUTH_CLIENT_ID",
     // Coding agent model preferences
     "PARALLAX_CLAUDE_MODEL_POWERFUL",
@@ -2414,6 +2438,57 @@ export function installRuntimeMethodBindings(runtime: AgentRuntime): void {
   }
 
   runtimeWithBindings.__elizaMethodBindingsInstalled = true;
+}
+
+function installPiAiModelProviderOverride(
+  runtime: AgentRuntime,
+  enabled: boolean,
+): void {
+  if (!enabled) {
+    return;
+  }
+
+  const forcedModelTypes = new Set(
+    [
+      ModelType.TEXT_NANO,
+      ModelType.TEXT_SMALL,
+      ModelType.TEXT_MEDIUM,
+      ModelType.TEXT_LARGE,
+      ModelType.TEXT_MEGA,
+      ModelType.TEXT_REASONING_SMALL,
+      ModelType.TEXT_REASONING_LARGE,
+      ModelType.RESPONSE_HANDLER,
+      ModelType.ACTION_PLANNER,
+      ModelType.TEXT_COMPLETION,
+      ModelType.OBJECT_SMALL,
+      ModelType.OBJECT_LARGE,
+    ].map(String),
+  );
+  const escapableProviders = new Set([
+    "elizacloud",
+    "openai-subscription",
+    "openai",
+    "openrouter",
+    "vercel-ai-gateway",
+  ]);
+  const originalUseModel = runtime.useModel.bind(runtime);
+
+  runtime.useModel = ((
+    modelType: Parameters<typeof runtime.useModel>[0],
+    params: Parameters<typeof runtime.useModel>[1],
+    provider?: string,
+  ) => {
+    const requestedProvider = typeof provider === "string" ? provider : undefined;
+    if (
+      forcedModelTypes.has(String(modelType)) &&
+      (!requestedProvider || escapableProviders.has(requestedProvider))
+    ) {
+      return originalUseModel(modelType as never, params as never, "pi-ai");
+    }
+    return originalUseModel(modelType as never, params as never, provider);
+  }) as typeof runtime.useModel;
+
+  logger.info("[eliza] Codex subscription model calls pinned to pi-ai");
 }
 
 function installActionAliases(runtime: AgentRuntime): void {
@@ -2641,6 +2716,8 @@ export function buildCharacterFromConfig(config: ElizaConfig): Character {
     "X402_DB_PATH",
     // GitHub access for coding agent plugin
     "GITHUB_TOKEN",
+    "GITHUB_API_TOKEN",
+    "GITHUB_PAT",
     "GITHUB_OAUTH_CLIENT_ID",
   ];
 
@@ -2742,6 +2819,9 @@ export function resolvePreferredProviderId(
   if (llmText?.transport === "direct") {
     const directProvider =
       backend && backend !== "elizacloud" ? backend : undefined;
+    if (directProvider === "openai-subscription") {
+      return "pi-ai";
+    }
     return (
       directProvider ?? resolveProviderIdFromSelectionHint(llmText.primaryModel)
     );
@@ -3519,6 +3599,7 @@ export async function startEliza(
     },
   });
   installRuntimeMethodBindings(runtime);
+  installPiAiModelProviderOverride(runtime, preferredProviderId === "pi-ai");
 
   // 7b. Pre-register plugin-sql so the adapter is ready before other plugins init.
   //     This is OPTIONAL — without it, some features (memory, todos) won't work.

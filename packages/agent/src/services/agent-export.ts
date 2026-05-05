@@ -471,7 +471,7 @@ async function extractAgentData(
     for (const tableName of MEMORY_TABLES) {
       const worldMemories = await db.getMemoriesByWorldId({
         worldIds: [world.id],
-        count: Number.MAX_SAFE_INTEGER,
+        limit: Number.MAX_SAFE_INTEGER,
         tableName,
       });
       for (const mem of worldMemories) {
@@ -499,7 +499,7 @@ async function extractAgentData(
   // 9. Logs (optional)
   let logs: Log[] = [];
   if (options.includeLogs) {
-    logs = await db.getLogs({ count: Number.MAX_SAFE_INTEGER });
+    logs = await db.getLogs({ limit: Number.MAX_SAFE_INTEGER });
     logger.info(`[agent-export] Found ${logs.length} logs`);
   }
 

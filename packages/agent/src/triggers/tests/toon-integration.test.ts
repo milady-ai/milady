@@ -9,9 +9,38 @@ config({ path: fileURLToPath(new URL("../../../../../.env", import.meta.url)) })
 let callLLM: (prompt: string) => Promise<string>;
 let hasApiKey = false;
 
+const anthropicSdkPackage = "@anthropic-ai/sdk";
+const openAiSdkPackage = "openai";
+
+type AnthropicClient = {
+  messages: {
+    create(input: {
+      model: string;
+      max_tokens: number;
+      messages: Array<{ role: "user"; content: string }>;
+    }): Promise<{ content: Array<{ type: string; text?: string }> }>;
+  };
+};
+
+type OpenAiClient = {
+  chat: {
+    completions: {
+      create(input: {
+        model: string;
+        max_tokens: number;
+        messages: Array<{ role: "user"; content: string }>;
+      }): Promise<{
+        choices: Array<{ message?: { content?: string | null } }>;
+      }>;
+    };
+  };
+};
+
 try {
   if (process.env.ANTHROPIC_API_KEY) {
-    const { default: Anthropic } = await import("@anthropic-ai/sdk");
+    const { default: Anthropic } = (await import(anthropicSdkPackage)) as {
+      default: new () => AnthropicClient;
+    };
     const client = new Anthropic();
     hasApiKey = true;
     callLLM = async (prompt: string) => {
@@ -23,7 +52,9 @@ try {
       return msg.content[0].type === "text" ? msg.content[0].text : "";
     };
   } else if (process.env.OPENAI_API_KEY) {
-    const { default: OpenAI } = await import("openai");
+    const { default: OpenAI } = (await import(openAiSdkPackage)) as {
+      default: new (options?: { baseURL?: string }) => OpenAiClient;
+    };
     const baseURL = process.env.OPENAI_BASE_URL || undefined;
     const isGroq = baseURL?.includes("groq.com");
     const client = new OpenAI({ baseURL });

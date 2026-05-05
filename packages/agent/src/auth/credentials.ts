@@ -435,12 +435,14 @@ export async function applySubscriptionCredentials(config?: {
     );
   }
 
-  // ── OpenAI Codex subscription → set OPENAI_API_KEY ────────────────────
+  // ── OpenAI Codex subscription ─────────────────────────────────────────
+  // Codex OAuth tokens are consumed by the pi-ai Codex Responses bridge.
+  // They are not OpenAI platform API keys and must not be injected into
+  // OPENAI_API_KEY, which would route the runtime through the normal SDK.
   const codexToken = await getAccessToken("openai-codex");
   if (codexToken) {
-    process.env.OPENAI_API_KEY = codexToken;
     logger.info(
-      "[auth] Applied OpenAI Codex subscription credentials to environment",
+      "[auth] OpenAI Codex subscription detected — available through pi-ai Codex runtime",
     );
   }
 
@@ -452,7 +454,7 @@ export async function applySubscriptionCredentials(config?: {
     const provider =
       defaults.subscriptionProvider as keyof typeof SUBSCRIPTION_PROVIDER_MAP;
 
-    // Only auto-set for providers whose tokens are applied to the runtime.
+    // Only auto-set for providers whose tokens are available to the runtime.
     const runtimeApplicableProviders: ReadonlySet<string> = new Set([
       "openai-codex",
     ]);
@@ -460,15 +462,16 @@ export async function applySubscriptionCredentials(config?: {
     if (provider && runtimeApplicableProviders.has(provider)) {
       const modelId = SUBSCRIPTION_PROVIDER_MAP[provider];
       if (modelId) {
+        const runtimeProvider = provider === "openai-codex" ? "pi-ai" : modelId;
         if (!defaults.model) {
-          defaults.model = { primary: modelId };
+          defaults.model = { primary: runtimeProvider };
           logger.info(
-            `[auth] Auto-set model.primary to "${modelId}" from subscription provider`,
+            `[auth] Auto-set model.primary to "${runtimeProvider}" from subscription provider`,
           );
         } else if (!defaults.model.primary) {
-          defaults.model.primary = modelId;
+          defaults.model.primary = runtimeProvider;
           logger.info(
-            `[auth] Auto-set model.primary to "${modelId}" from subscription provider`,
+            `[auth] Auto-set model.primary to "${runtimeProvider}" from subscription provider`,
           );
         }
       }

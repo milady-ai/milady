@@ -12,6 +12,10 @@ import {
   ModelType,
 } from "@elizaos/core";
 import { extractCompatTextContent } from "./compat-utils.js";
+import {
+  isTaskAgentCreateTaskAction,
+  shouldPreferTaskAgentCreateTask,
+} from "../runtime/task-agent-action-resolver.js";
 
 const EXPOSED_BINANCE_SKILL_IDS = new Set([
   "binance-crypto-market-rank",
@@ -150,7 +154,7 @@ export async function executeFallbackParsedActions(
   onActionCallback: (actionTag: string, hasText: boolean) => void,
   options?: {
     getCurrentText?: () => string;
-    onCallbackText?: (incoming: string) => void;
+    onCallbackText?: (incoming: string, actionTag?: string) => void;
   },
 ): Promise<void> {
   const runtimeActions = Array.isArray(
@@ -166,11 +170,36 @@ export async function executeFallbackParsedActions(
 
   const lookup = new Map<string, (typeof runtimeActions)[number]>();
   for (const action of runtimeActions) {
-    if (typeof action.name === "string")
-      lookup.set(action.name.toUpperCase(), action);
+    if (typeof action.name === "string") {
+      const actionKey = action.name.toUpperCase();
+      const existing = lookup.get(actionKey);
+      if (
+        actionKey === "CREATE_TASK" &&
+        existing &&
+        isTaskAgentCreateTaskAction(action) &&
+        !isTaskAgentCreateTaskAction(existing)
+      ) {
+        lookup.set(actionKey, action);
+      } else if (!existing) {
+        lookup.set(actionKey, action);
+      }
+    }
     if (!Array.isArray(action.similes)) continue;
     for (const alias of action.similes) {
-      if (typeof alias === "string") lookup.set(alias.toUpperCase(), action);
+      if (typeof alias === "string") {
+        const aliasKey = alias.toUpperCase();
+        const existing = lookup.get(aliasKey);
+        if (
+          aliasKey === "CREATE_TASK" &&
+          existing &&
+          isTaskAgentCreateTaskAction(action) &&
+          !isTaskAgentCreateTaskAction(existing)
+        ) {
+          lookup.set(aliasKey, action);
+        } else if (!existing) {
+          lookup.set(aliasKey, action);
+        }
+      }
     }
   }
 
@@ -182,7 +211,17 @@ export async function executeFallbackParsedActions(
     ) {
       continue;
     }
-    const action = lookup.get(parsed.name);
+    const action =
+      parsed.name === "CREATE_TASK" &&
+      shouldPreferTaskAgentCreateTask(parsed.parameters)
+        ? runtimeActions.find(
+            (candidate) =>
+              candidate &&
+              typeof candidate.name === "string" &&
+              candidate.name.toUpperCase() === "CREATE_TASK" &&
+              isTaskAgentCreateTaskAction(candidate),
+          ) ?? lookup.get(parsed.name)
+        : lookup.get(parsed.name);
     if (!action || typeof action.handler !== "function") continue;
 
     if (typeof action.validate === "function") {
@@ -215,7 +254,11 @@ export async function executeFallbackParsedActions(
           callbackSeen = true;
           onActionCallback(actionTag, Boolean(chunk));
           if (chunk) {
-            (options?.onCallbackText ?? appendIncomingText)(chunk);
+            if (options?.onCallbackText) {
+              options.onCallbackText(chunk, actionTag);
+            } else {
+              appendIncomingText(chunk);
+            }
           }
           return [];
         },
@@ -241,11 +284,13 @@ export async function executeFallbackParsedActions(
       if (fallbackText) {
         onActionCallback(parsed.name, !shouldSuppressSuccessFallbackText);
         if (!shouldSuppressSuccessFallbackText) {
-          appendIncomingText(
-            currentText.trim().length > 0
-              ? `\n\n${fallbackText}`
-              : fallbackText,
-          );
+          const text =
+            currentText.trim().length > 0 ? `\n\n${fallbackText}` : fallbackText;
+          if (options?.onCallbackText) {
+            options.onCallbackText(text, parsed.name);
+          } else {
+            appendIncomingText(text);
+          }
         }
       }
     }

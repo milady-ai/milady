@@ -1,0 +1,26 @@
+{
+  "name": "@hyperscape/plugin-hyperscape",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Milady app integration for Hyperscape 3D multiplayer RPG.",
+  "main": "./src/index.ts",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": "./src/index.ts"
+  },
+  "elizaos": {
+    "kind": "app"
+  },
+  "keywords": [
+    "game",
+    "mmorpg",
+    "hyperscape",
+    "elizaos",
+    "milady"
+  ],
+  "dependencies": {
+    "@elizaos/core": "workspace:*",
+    "@miladyai/shared": "workspace:*"
+  }
+}

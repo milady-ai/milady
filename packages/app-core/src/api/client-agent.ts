@@ -145,6 +145,7 @@ function logSettingsClient(
 }
 
 const SETTINGS_MUTATION_TIMEOUT_MS = 30_000;
+const PROVIDER_SWITCH_TIMEOUT_MS = 60_000;
 
 // ---------------------------------------------------------------------------
 // Declaration merging
@@ -777,15 +778,21 @@ MiladyClient.prototype.switchProvider = async function (
     hasPrimaryModel: Boolean(primaryModel?.trim()),
     primaryModel,
   });
-  const result = (await this.fetch("/api/provider/switch", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      provider,
-      ...(apiKey ? { apiKey } : {}),
-      ...(primaryModel ? { primaryModel } : {}),
-    }),
-  })) as { success: boolean; provider: string; restarting: boolean };
+  const result = (await this.fetch(
+    "/api/provider/switch",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        provider,
+        ...(apiKey ? { apiKey } : {}),
+        ...(primaryModel ? { primaryModel } : {}),
+      }),
+    },
+    {
+      timeoutMs: PROVIDER_SWITCH_TIMEOUT_MS,
+    },
+  )) as { success: boolean; provider: string; restarting: boolean };
   logSettingsClient("POST /api/provider/switch ← ok", {
     baseUrl: this.getBaseUrl(),
     result,
