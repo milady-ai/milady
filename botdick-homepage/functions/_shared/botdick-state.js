@@ -15,6 +15,10 @@ const lifecycleStages = [
 const seedState = {
   version: 1,
   updatedAt: "",
+  // worldEpochAt anchors all client-side scene rotations (ad board, station
+  // cycle, ambient cycles) to a single server-issued instant so every viewer
+  // sees the same thing at the same wall-clock time. Set on first KV write.
+  worldEpochAt: "",
   agent: {
     name: "botdick",
     status: "online",
@@ -322,13 +326,24 @@ export async function readState(env) {
   if (!store) {
     return {
       ...seedState,
+      worldEpochAt: STATIC_FALLBACK_EPOCH,
       source: "static-fallback",
       persistent: false,
     };
   }
 
   const stored = await store.get(STATE_KEY, { type: "json" });
-  return normalizeState(stored || seedState, true);
+  let normalized = normalizeState(stored || seedState, true);
+  if (!normalized.worldEpochAt) {
+    // First read after deploy: stamp the world epoch and persist it so every
+    // client computes the same elapsed time for scene rotations.
+    normalized = {
+      ...normalized,
+      worldEpochAt: new Date().toISOString(),
+    };
+    await store.put(STATE_KEY, JSON.stringify(normalized));
+  }
+  return normalized;
 }
 
 export async function writeState(env, state) {
@@ -337,9 +352,18 @@ export async function writeState(env, state) {
     return false;
   }
 
-  await store.put(STATE_KEY, JSON.stringify(normalizeState(state, true)));
+  const next = normalizeState(state, true);
+  // Preserve the world epoch across writes; only set it once, on first persist.
+  if (!next.worldEpochAt) {
+    next.worldEpochAt = state?.worldEpochAt || new Date().toISOString();
+  }
+  await store.put(STATE_KEY, JSON.stringify(next));
   return true;
 }
+
+// Static epoch for KV-less previews. Clients anchored to this value still get
+// the same scene rotation across viewers, just without server persistence.
+const STATIC_FALLBACK_EPOCH = "2026-04-30T00:00:00.000Z";
 
 export function isAuthorized(request, env) {
   const expected = env?.BOTDICK_INGEST_TOKEN;
@@ -706,6 +730,7 @@ function normalizeState(input, persistent = false) {
   return {
     ...seedState,
     ...state,
+    worldEpochAt: clean(state.worldEpochAt || "", 80),
     persistent,
     agent: {
       ...seedState.agent,

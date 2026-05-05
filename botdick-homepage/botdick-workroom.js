@@ -241,6 +241,17 @@ if (canvas) {
   let liveFeed = { drops: [], leaderboard: [] };
   let currentAdIndex = -1;
   let currentFeederStamp = "";
+
+  // Server-anchored epoch for shared scene timing. All rotations (ad index,
+  // station cycle when idle) derive from this so two browsers see the same
+  // ad and the same agent station at the same wall-clock instant.
+  let worldEpochSec = 0;
+
+  // Active media binding for the ad board. When the rotation lands on an ad
+  // with mediaUrl, we mount an <img> or <video> element off-DOM and re-paint
+  // its frames into the screen's CanvasTexture every animation tick.
+  // Only one media binding lives at a time; rotation tears down the previous.
+  let adMediaBinding = null;
   const snackTokens = new Map();
   const eatenSnackIds = new Set();
   const cameraDesired = new THREE.Vector3();
@@ -408,6 +419,15 @@ if (canvas) {
   }
 
   function applyLiveState(state) {
+    // Anchor scene rotations to the server epoch. If KV is unbound the API
+    // returns the static fallback string; both branches produce a stable
+    // shared instant so two viewers stay in lockstep on ad/station cycles.
+    if (state?.worldEpochAt) {
+      const epochMs = Date.parse(state.worldEpochAt);
+      if (Number.isFinite(epochMs)) {
+        worldEpochSec = epochMs / 1000;
+      }
+    }
     const events = Array.isArray(state?.events) ? state.events : [];
     const actualEvents = events.filter((event) => !isSeedEvent(event));
     const toolEvents = actualEvents.filter(isToolTelemetryEvent);
@@ -672,26 +692,205 @@ if (canvas) {
 	    ]);
 	  }
 
+  // Screen rotation cadence. 9s gives enough time to read text and gives a
+  // looping video roughly two play-throughs at 30fps without feeling stale.
+  const AD_ROTATION_SECONDS = 9;
+
   function renderAdScreen(elapsed = 0, force = false) {
     if (!adScreen) return;
-    const ads = Array.isArray(liveAds) ? liveAds.filter((ad) => ad?.headline && ad?.body) : [];
+    // Accept ads with EITHER text body OR media — body-only and media-only ads
+    // both render. An ad with no headline is skipped (server enforces this).
+    const ads = Array.isArray(liveAds)
+      ? liveAds.filter((ad) => ad?.headline && (ad?.body || ad?.mediaUrl))
+      : [];
     if (!ads.length) {
       if (currentAdIndex !== -2 || force) {
         currentAdIndex = -2;
-        adScreen.update("ad board", ["300k BOTDICK slot", "queue via /api/ads", "rotates in this room", "no ad loaded"]);
+        teardownAdMediaBinding();
+        adScreen.update("ad board", ["300k BOTDICK slot", "queue via /api/ads", "image / gif / video allowed", "no ad loaded"]);
       }
+      // Even when empty, repaint each frame if a media element is somehow live
+      // so it tears down cleanly on the next state arrival.
+      paintAdMediaBinding();
       return;
     }
-    const nextIndex = Math.floor(elapsed / 7) % ads.length;
-    if (nextIndex === currentAdIndex && !force) return;
-    currentAdIndex = nextIndex;
-    const ad = ads[nextIndex];
-    adScreen.update("ad board", [
-      ad.headline,
-      ad.body,
-      ad.name ? `from: ${ad.name}` : ad.displayAddress || "holder ad",
-      ad.url ? "link attached" : `${ad.cost || "300000"} BOTDICK`,
-    ]);
+    // Server-anchored rotation: every viewer sees the same ad at the same
+    // wall-clock instant regardless of when their tab loaded.
+    const wallNowSec = Date.now() / 1000;
+    const sharedElapsed = worldEpochSec > 0 ? wallNowSec - worldEpochSec : elapsed;
+    const nextIndex = Math.floor(sharedElapsed / AD_ROTATION_SECONDS) % ads.length;
+    if (nextIndex !== currentAdIndex || force) {
+      currentAdIndex = nextIndex;
+      const ad = ads[nextIndex];
+      teardownAdMediaBinding();
+      if (ad.mediaUrl) {
+        // Media path: build a binding (img or video) and paint a composite
+        // frame each tick. Text fields render as a translucent caption strip.
+        adMediaBinding = createAdMediaBinding(ad);
+      } else {
+        // Text-only path keeps the legacy multi-line screen look.
+        adScreen.update("ad board", [
+          ad.headline,
+          ad.body,
+          ad.name ? `from: ${ad.name}` : ad.displayAddress || "holder ad",
+          ad.url ? "link attached" : `${ad.cost || "300000"} BOTDICK`,
+        ]);
+      }
+    }
+    paintAdMediaBinding();
+  }
+
+  function teardownAdMediaBinding() {
+    if (!adMediaBinding) return;
+    try {
+      adMediaBinding.dispose?.();
+    } catch {
+      // Disposal failures should not block the next ad rotation.
+    }
+    adMediaBinding = null;
+  }
+
+  // Media binding: holds an <img> for image/gif ads, a <video> for video ads.
+  // The element stays detached from the document; we read its current frame
+  // into the existing CanvasTexture canvas every animation tick.
+  function createAdMediaBinding(ad) {
+    const type = ad.mediaType || inferMediaType(ad.mediaUrl);
+    if (type === "video") {
+      const video = document.createElement("video");
+      video.src = ad.mediaUrl;
+      video.crossOrigin = "anonymous";
+      video.muted = true;
+      video.loop = true;
+      video.playsInline = true;
+      video.autoplay = true;
+      video.preload = "auto";
+      const playing = video.play();
+      if (playing && typeof playing.catch === "function") {
+        // Autoplay may reject without user gesture in some browsers; the next
+        // user interaction with the page typically unblocks it. Frame copies
+        // before that point will paint a black rectangle which is acceptable.
+        playing.catch(() => {});
+      }
+      return {
+        ad,
+        type: "video",
+        ready: () => video.readyState >= 2 && video.videoWidth > 0,
+        source: video,
+        sourceWidth: () => video.videoWidth,
+        sourceHeight: () => video.videoHeight,
+        dispose() {
+          try { video.pause(); } catch {}
+          video.src = "";
+          video.removeAttribute("src");
+          try { video.load(); } catch {}
+        },
+      };
+    }
+    // image and gif both go through <img>; gifs animate naturally because
+    // browsers tick their frame timer regardless of DOM mounting state.
+    const img = document.createElement("img");
+    img.crossOrigin = "anonymous";
+    img.decoding = "async";
+    img.src = ad.mediaUrl;
+    return {
+      ad,
+      type,
+      ready: () => img.complete && img.naturalWidth > 0,
+      source: img,
+      sourceWidth: () => img.naturalWidth,
+      sourceHeight: () => img.naturalHeight,
+      dispose() {
+        img.src = "";
+      },
+    };
+  }
+
+  function inferMediaType(url) {
+    const ext = String(url || "").toLowerCase().split("?")[0].split(".").pop();
+    if (["mp4", "webm", "mov", "m4v"].includes(ext)) return "video";
+    if (ext === "gif") return "gif";
+    return "image";
+  }
+
+  function paintAdMediaBinding() {
+    if (!adScreen || !adMediaBinding) return;
+    const binding = adMediaBinding;
+    if (binding.failed) return;
+    if (!binding.ready()) return;
+    const canvas = adScreen.textureCanvas;
+    const ctx = canvas.getContext("2d");
+    const cw = canvas.width;
+    const ch = canvas.height;
+    const sw = binding.sourceWidth();
+    const sh = binding.sourceHeight();
+    if (!sw || !sh) return;
+
+    // Letterbox the source into the screen's 16:9 canvas without cropping —
+    // ad creatives are rarely 16:9 and cropping looks worse than bars.
+    ctx.fillStyle = "#04060a";
+    ctx.fillRect(0, 0, cw, ch);
+    const scale = Math.min(cw / sw, ch / sh);
+    const dw = sw * scale;
+    const dh = sh * scale;
+    const dx = (cw - dw) / 2;
+    const dy = (ch - dh) / 2;
+    try {
+      ctx.drawImage(binding.source, dx, dy, dw, dh);
+    } catch {
+      // CORS-tainted draws throw; mark this binding failed and fall back to
+      // the text-only rendering so the rotation does not get stuck.
+      binding.failed = true;
+      adScreen.update("ad board", [
+        binding.ad.headline,
+        binding.ad.body || "(media blocked by host CORS)",
+        binding.ad.name ? `from: ${binding.ad.name}` : binding.ad.displayAddress || "holder ad",
+        "media host must allow cross-origin reads",
+      ]);
+      return;
+    }
+    // After the first successful draw we need to detect tainting before the
+    // GPU upload. getImageData throws on tainted canvases; a 1x1 probe is
+    // cheap and avoids a WebGL SECURITY_ERR mid-render.
+    if (!binding.cleanProbed) {
+      try {
+        ctx.getImageData(0, 0, 1, 1);
+        binding.cleanProbed = true;
+      } catch {
+        binding.failed = true;
+        adScreen.update("ad board", [
+          binding.ad.headline,
+          binding.ad.body || "(media host disallows CORS)",
+          binding.ad.name ? `from: ${binding.ad.name}` : binding.ad.displayAddress || "holder ad",
+          "use https media that returns Access-Control-Allow-Origin: *",
+        ]);
+        return;
+      }
+    }
+
+    // Caption strip across the bottom: headline + attribution + link tag.
+    const ad = binding.ad;
+    const stripH = Math.round(ch * 0.22);
+    const stripY = ch - stripH;
+    const grad = ctx.createLinearGradient(0, stripY, 0, ch);
+    grad.addColorStop(0, "rgba(4, 6, 10, 0)");
+    grad.addColorStop(0.4, "rgba(4, 6, 10, 0.78)");
+    grad.addColorStop(1, "rgba(4, 6, 10, 0.92)");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, stripY, cw, stripH);
+    ctx.fillStyle = "#f2eadc";
+    ctx.font = "700 36px monospace";
+    ctx.fillText(truncateForStrip(ad.headline, 32), 32, stripY + 48);
+    ctx.font = "22px monospace";
+    ctx.fillStyle = "#9aa3b3";
+    const meta = `${ad.name || ad.displayAddress || "holder"} ${ad.url ? "· link" : ""} · ${ad.mediaType || binding.type}`;
+    ctx.fillText(truncateForStrip(meta, 56), 32, stripY + 84);
+
+    adScreen.texture.needsUpdate = true;
+  }
+
+  function truncateForStrip(value, max) {
+    const s = String(value || "");
+    return s.length > max ? `${s.slice(0, max - 1)}…` : s;
   }
 
   function renderFeederScreen(force = false) {
@@ -711,7 +910,24 @@ if (canvas) {
 	  statusScreen = createScreen("botdick", ["state: loading", "status: booting", "station: --", "tasks: --"], -2.18, 1.43, -1.68, -0.08, 1.18);
 	  agentScreen = createScreen("tool calls", ["waiting for real call", "no staged fake work", "POST /api/events", "receipt pending"], -0.62, 1.35, -1.78, 0.08, 1.22);
 	  traceScreen = createScreen("raw telemetry", ["no command yet", "no file patch yet", "no browser action yet", "botdick.com"], 0.9, 1.32, -1.66, 0.22, 1.1);
-  adScreen = createScreen("ad board", ["300k BOTDICK slot", "queue via /api/ads", "rotates in this room", "no ad loaded"], 2.58, 1.55, -1.52, 0.36, 1.32);
+  // Ad board: scale-up + reposition so it dominates the right-back corner.
+  // Width 2.4 vs old 1.32 makes media legible from the default camera framing.
+  adScreen = createScreen(
+    "ad board",
+    ["300k BOTDICK slot", "queue via /api/ads", "image / gif / video allowed", "no ad loaded"],
+    3.05,
+    1.85,
+    -1.42,
+    0.42,
+    2.4,
+  );
+  // Spotlight aimed at the ad board so media drops read clearly under the fog.
+  const adSpot = new THREE.SpotLight(0xfff4e0, 1.6, 6.8, Math.PI / 5, 0.45, 1.2);
+  adSpot.position.set(2.4, 3.2, 0.6);
+  adSpot.target = adScreen.mesh;
+  adSpot.castShadow = false;
+  room.add(adSpot);
+  room.add(adSpot.target);
   feederScreen = createScreen("feed board", ["send token snacks", "holder credits hourly", "botdick eats them", "leaderboard appears here"], -4.05, 1.34, 0.72, Math.PI / 2, 1.08);
 	  renderScreensFromState(window.BOTDICK_LIVE_STATE || window.BOTDICK_CONTENT || {});
   renderAdScreen(0, true);

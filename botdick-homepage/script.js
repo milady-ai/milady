@@ -50,6 +50,7 @@ const adName = document.querySelector("#ad-name");
 const adHeadline = document.querySelector("#ad-headline");
 const adMessage = document.querySelector("#ad-message");
 const adUrl = document.querySelector("#ad-url");
+const adMedia = document.querySelector("#ad-media");
 const adStatus = document.querySelector("#ad-status");
 const adCost = document.querySelector("#ad-cost");
 const adList = document.querySelector("#ad-list");
@@ -615,7 +616,7 @@ function setAdStatus(text, tone = "") {
   adStatus.dataset.tone = tone;
 }
 
-function buildAdMessage({ address, name, headline, body, url, timestamp }) {
+function buildAdMessage({ address, name, headline, body, url, media, timestamp }) {
   return [
     "botdick.com ad board",
     "",
@@ -627,6 +628,7 @@ function buildAdMessage({ address, name, headline, body, url, timestamp }) {
     `headline: ${headline}`,
     `message: ${body}`,
     `url: ${url}`,
+    `media: ${media || ""}`,
     `required: ${adConfig.cost || "300000"} $BOTDICK`,
     `timestamp: ${timestamp}`,
   ].join("\n");
@@ -808,9 +810,9 @@ function renderAds() {
       const headline = document.createElement("strong");
       headline.textContent = current.headline;
       const body = document.createElement("span");
-      body.textContent = current.body;
+      body.textContent = current.body || (current.mediaUrl ? `[${current.mediaType || "media"}]` : "");
       const meta = document.createElement("small");
-      meta.textContent = `${current.name || "anon"} / ${current.cost || adConfig.cost || "300000"} $BOTDICK`;
+      meta.textContent = `${current.name || "anon"} / ${current.cost || adConfig.cost || "300000"} $BOTDICK${current.mediaUrl ? ` / ${current.mediaType || "media"}` : ""}`;
       adPreview.replaceChildren(headline, body, meta);
     } else {
       const headline = document.createElement("strong");
@@ -1148,17 +1150,22 @@ async function submitAd(event) {
     const headline = (adHeadline?.value || "").trim();
     const body = (adMessage?.value || "").trim();
     const url = (adUrl?.value || "").trim();
+    const mediaUrl = (adMedia?.value || "").trim();
     if (!headline) {
       setAdStatus("write an ad headline first", "bad");
       return;
     }
-    if (!body) {
-      setAdStatus("write ad copy first", "bad");
+    if (!body && !mediaUrl) {
+      setAdStatus("add ad copy or a media URL", "bad");
+      return;
+    }
+    if (mediaUrl && !/^https:\/\/.+\.(png|jpg|jpeg|webp|svg|apng|avif|gif|mp4|webm|mov|m4v)(\?.*)?$/i.test(mediaUrl)) {
+      setAdStatus("media URL must be https + png/jpg/webp/gif/mp4/webm", "bad");
       return;
     }
 
     const timestamp = Date.now();
-    const signedMessage = buildAdMessage({ address, name, headline, body, url, timestamp });
+    const signedMessage = buildAdMessage({ address, name, headline, body, url, media: mediaUrl, timestamp });
     setAdStatus("waiting for wallet signature", "");
     const signature = await window.ethereum.request({
       method: "personal_sign",
@@ -1169,7 +1176,7 @@ async function submitAd(event) {
     const response = await fetch(apiPath("/api/ads"), {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify({ address, name, headline, body, url, timestamp, signature }),
+      body: JSON.stringify({ address, name, headline, body, url, mediaUrl, timestamp, signature }),
     });
     const payload = await response.json().catch(() => ({}));
     if (!response.ok || !payload.ok) {
@@ -1182,6 +1189,7 @@ async function submitAd(event) {
     if (adHeadline) adHeadline.value = "";
     if (adMessage) adMessage.value = "";
     if (adUrl) adUrl.value = "";
+    if (adMedia) adMedia.value = "";
     setAdStatus("ad queued for room screen", "good");
     renderAds();
   } catch (error) {

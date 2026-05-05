@@ -7,7 +7,24 @@ const MAX_NAME_LENGTH = 32;
 const MAX_HEADLINE_LENGTH = 54;
 const MAX_BODY_LENGTH = 150;
 const MAX_URL_LENGTH = 220;
+const MAX_MEDIA_URL_LENGTH = 600;
 const MAX_AGE_MS = 10 * 60 * 1000;
+// Image extensions render as static textures; gif gets per-frame redraw so
+// browsers animate it; video extensions mount a <video> element + VideoTexture.
+const MEDIA_TYPE_BY_EXT = {
+  png: "image",
+  jpg: "image",
+  jpeg: "image",
+  webp: "image",
+  svg: "image",
+  apng: "image",
+  avif: "image",
+  gif: "gif",
+  mp4: "video",
+  webm: "video",
+  mov: "video",
+  m4v: "video",
+};
 const BNB_CHAIN_ID = 56;
 const BOTDICK_TOKEN_ADDRESS = "0xa342991902ca84d85e27069bf6b57d3138b47777";
 const DEFAULT_RPC_URL = "https://bsc-dataseed.binance.org/";
@@ -44,10 +61,24 @@ export async function onRequestPost({ request, env }) {
   const headline = clean(payload?.headline || payload?.title, MAX_HEADLINE_LENGTH);
   const body = clean(payload?.body || payload?.message || payload?.text, MAX_BODY_LENGTH);
   const url = normalizeUrl(payload?.url || payload?.href || "");
+  const mediaInput = clean(
+    payload?.mediaUrl || payload?.media || payload?.imageUrl || payload?.videoUrl || "",
+    MAX_MEDIA_URL_LENGTH,
+  );
+  const media = normalizeMediaUrl(mediaInput);
+  if (mediaInput && !media.url) {
+    return json(
+      { ok: false, error: "media must be png/jpg/webp/gif/mp4/webm at https URL" },
+      { status: 400 },
+    );
+  }
   const timestamp = Number(payload?.timestamp);
   const signature = typeof payload?.signature === "string" ? payload.signature : "";
   if (!headline) return json({ ok: false, error: "ad headline required" }, { status: 400 });
-  if (!body) return json({ ok: false, error: "ad copy required" }, { status: 400 });
+  if (!body && !media.url) {
+    // Either text copy or a media drop is required; an empty board is useless.
+    return json({ ok: false, error: "ad copy or media required" }, { status: 400 });
+  }
   if (!Number.isFinite(timestamp)) {
     return json({ ok: false, error: "timestamp required" }, { status: 400 });
   }
@@ -75,6 +106,7 @@ export async function onRequestPost({ request, env }) {
         headline,
         body,
         url,
+        media: media.url,
         timestamp,
         cost: config.minDisplay,
       }),
@@ -113,6 +145,8 @@ export async function onRequestPost({ request, env }) {
     headline,
     body,
     url,
+    mediaUrl: media.url,
+    mediaType: media.type,
     balance: balance.display,
     cost: config.minDisplay,
     createdAt: now,
@@ -198,7 +232,7 @@ function publicConfig(config) {
   };
 }
 
-function buildSignedAdMessage({ address, name, headline, body, url, timestamp, cost }) {
+function buildSignedAdMessage({ address, name, headline, body, url, media, timestamp, cost }) {
   return [
     "botdick.com ad board",
     "",
@@ -210,6 +244,7 @@ function buildSignedAdMessage({ address, name, headline, body, url, timestamp, c
     `headline: ${headline}`,
     `message: ${body}`,
     `url: ${url}`,
+    `media: ${media || ""}`,
     `required: ${cost} $BOTDICK`,
     `timestamp: ${timestamp}`,
   ].join("\n");
@@ -312,11 +347,35 @@ function normalizeUrl(value) {
   }
 }
 
+// Returns { url, type } where type is "image" | "gif" | "video" | "" and url
+// is empty if input is unsupported. Only https is allowed for media so the
+// 3D viewer can load it without mixed-content blocks.
+function normalizeMediaUrl(value) {
+  const raw = clean(value, MAX_MEDIA_URL_LENGTH);
+  if (!raw) return { url: "", type: "" };
+  let parsed;
+  try {
+    parsed = new URL(raw);
+  } catch {
+    return { url: "", type: "" };
+  }
+  if (parsed.protocol !== "https:") return { url: "", type: "" };
+  const ext = (parsed.pathname.split(".").pop() || "").toLowerCase();
+  const type = MEDIA_TYPE_BY_EXT[ext];
+  if (!type) return { url: "", type: "" };
+  return { url: parsed.href.slice(0, MAX_MEDIA_URL_LENGTH), type };
+}
+
 function normalizeAd(ad = {}) {
   const id = clean(ad.id, 96);
   const headline = clean(ad.headline || ad.title, MAX_HEADLINE_LENGTH);
   const body = clean(ad.body || ad.message || ad.text, MAX_BODY_LENGTH);
-  if (!id || !headline || !body) return null;
+  const media = normalizeMediaUrl(
+    ad.mediaUrl || ad.media || ad.imageUrl || ad.videoUrl || "",
+  );
+  // Reject ads that have neither headline nor any meaningful payload.
+  if (!id || !headline) return null;
+  if (!body && !media.url) return null;
   return {
     id,
     status: ["queued", "live", "paused"].includes(ad.status) ? ad.status : "queued",
@@ -326,6 +385,8 @@ function normalizeAd(ad = {}) {
     headline,
     body,
     url: normalizeUrl(ad.url),
+    mediaUrl: media.url,
+    mediaType: media.type,
     balance: clean(ad.balance, 48),
     cost: clean(ad.cost || DEFAULT_AD_COST, 48),
     createdAt: clean(ad.createdAt || new Date().toISOString(), 80),

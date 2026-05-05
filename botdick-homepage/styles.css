@@ -880,6 +880,16 @@ h1 {
   padding: 0 0.55rem;
 }
 
+.ad-media-hint {
+  color: var(--quiet);
+  font-size: 0.62rem;
+  font-family: var(--mono);
+  letter-spacing: 0.02em;
+  margin-top: 0.18rem;
+  display: block;
+  opacity: 0.78;
+}
+
 .voice-form textarea,
 .ad-form textarea,
 .feed-form textarea {
