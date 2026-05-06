@@ -34,12 +34,170 @@ interface CloudAgentCandidate {
   status: string;
 }
 
+const PROVISIONING_MESSAGE = "Provisioning sandbox... (~45s)";
+const PROVISIONING_STAGES: ReadonlyArray<{
+  afterMs: number;
+  text: string;
+}> = [
+  { afterMs: 8000, text: "Booting your container..." },
+  {
+    afterMs: 16000,
+    text: "Almost there... warming up dependencies.",
+  },
+  { afterMs: 24000, text: "Finishing the boot sequence..." },
+  {
+    afterMs: 32000,
+    text: "Still booting, this is taking longer than usual...",
+  },
+];
+
 function generateCloudAgentName(): string {
   const bytes = crypto.getRandomValues(new Uint8Array(2));
   const suffix = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join(
     "",
   );
   return `milady-${suffix}`;
+}
+
+function cloudAgentCandidateFromManaged(
+  agent: ManagedAgent,
+): CloudAgentCandidate | null {
+  if (agent.source !== "cloud" || !agent.cloudAgentId) return null;
+  return {
+    cloudAgentId: agent.cloudAgentId,
+    name: agent.name,
+    status: agent.status,
+  };
+}
+
+function localCloudAgentCandidates(agents: ManagedAgent[]) {
+  return agents.flatMap((agent) => {
+    const candidate = cloudAgentCandidateFromManaged(agent);
+    return candidate ? [candidate] : [];
+  });
+}
+
+async function loadCloudAgentCandidates(
+  agents: ManagedAgent[],
+  cloudClient: CloudClient,
+) {
+  const localCandidates = localCloudAgentCandidates(agents);
+  if (localCandidates.length > 0) return localCandidates;
+  return (await cloudClient.listAgents()).map((agent) => ({
+    cloudAgentId: agent.id,
+    name: agent.name,
+    status: agent.status,
+  }));
+}
+
+function selectReusableCloudAgent(cloudAgents: CloudAgentCandidate[]) {
+  return (
+    cloudAgents.find((agent) => agent.status === "running") ??
+    cloudAgents.find((agent) => agent.status === "paused") ??
+    null
+  );
+}
+
+function provisioningMessageForElapsed(elapsed: number) {
+  let message = PROVISIONING_MESSAGE;
+  for (const stage of PROVISIONING_STAGES) {
+    if (elapsed >= stage.afterMs) message = stage.text;
+  }
+  return message;
+}
+
+function startProvisioningMessageRotation(getPopup: () => Window | null) {
+  const startedAt = Date.now();
+  return window.setInterval(() => {
+    const popup = getPopup();
+    if (!popup || popup.closed) return;
+    updatePopupMessage(
+      popup,
+      provisioningMessageForElapsed(Date.now() - startedAt),
+    );
+  }, 1000);
+}
+
+async function waitForProvisioningJob(
+  cloudClient: CloudClient,
+  jobId: string,
+  getPopup: () => Window | null,
+) {
+  const rotateId = startProvisioningMessageRotation(getPopup);
+  try {
+    const job = await cloudClient.pollJobUntilDone(jobId, PROVISION_TIMEOUT_MS);
+    if (job.status === "failed") {
+      throw new Error(job.error ?? "provisioning failed.");
+    }
+  } finally {
+    window.clearInterval(rotateId);
+  }
+}
+
+async function createAndProvisionCloudAgent(
+  cloudClient: CloudClient,
+  popup: Window,
+  getPopup: () => Window | null,
+) {
+  updatePopupMessage(popup, "Creating your cloud agent...");
+  const created = await cloudClient.createAgent({
+    name: generateCloudAgentName(),
+  });
+  if (!created.id) {
+    throw new Error("agent created but no id was returned.");
+  }
+
+  updatePopupMessage(popup, PROVISIONING_MESSAGE);
+  const provisioning = await cloudClient.provisionAgent(created.id);
+  if (provisioning.jobId) {
+    await waitForProvisioningJob(cloudClient, provisioning.jobId, getPopup);
+  }
+  return created.id;
+}
+
+async function resolveCloudAgentForOpen({
+  agents,
+  cloudClient,
+  popup,
+  refresh,
+  getPopup,
+}: {
+  agents: ManagedAgent[];
+  cloudClient: CloudClient;
+  popup: Window;
+  refresh: () => Promise<void>;
+  getPopup: () => Window | null;
+}) {
+  const cloudAgents = await loadCloudAgentCandidates(agents, cloudClient);
+  const existingCloud = selectReusableCloudAgent(cloudAgents);
+  if (existingCloud?.cloudAgentId) {
+    updatePopupMessage(popup, `Opening ${existingCloud.name}...`);
+    return existingCloud.cloudAgentId;
+  }
+
+  const cloudAgentId = await createAndProvisionCloudAgent(
+    cloudClient,
+    popup,
+    getPopup,
+  );
+  void refresh();
+  return cloudAgentId;
+}
+
+function cloudOpenErrorNotice(error: unknown): Notice {
+  if (error instanceof CloudAgentsNotAvailableError) {
+    return {
+      tone: "error",
+      text: "cloud agent hosting isn't deployed on this Eliza Cloud instance yet.",
+    };
+  }
+  return {
+    tone: "error",
+    text:
+      error instanceof Error
+        ? `cloud open failed: ${error.message}`
+        : "cloud open failed.",
+  };
 }
 
 export function useCloudOpenFlow({
@@ -84,90 +242,18 @@ export function useCloudOpenFlow({
     }
 
     try {
-      let cloudAgentId: string | undefined;
-
-      let cloudAgents: CloudAgentCandidate[] = agents
-        .filter((agent) => agent.source === "cloud" && agent.cloudAgentId)
-        .map((agent) => ({
-          cloudAgentId: agent.cloudAgentId ?? "",
-          name: agent.name,
-          status: agent.status,
-        }));
-      if (cloudAgents.length === 0) {
-        cloudAgents = (await cloudClient.listAgents()).map((agent) => ({
-          cloudAgentId: agent.id,
-          name: agent.name,
-          status: agent.status,
-        }));
-      }
-      const existingCloud =
-        cloudAgents.find((agent) => agent.status === "running") ??
-        cloudAgents.find((agent) => agent.status === "paused") ??
-        null;
-      if (existingCloud?.cloudAgentId) {
-        cloudAgentId = existingCloud.cloudAgentId;
-        updatePopupMessage(popup, `Opening ${existingCloud.name}...`);
-      } else {
-        updatePopupMessage(popup, "Creating your cloud agent...");
-        const created = await cloudClient.createAgent({
-          name: generateCloudAgentName(),
-        });
-        if (!created.id) {
-          throw new Error("agent created but no id was returned.");
-        }
-        cloudAgentId = created.id;
-
-        updatePopupMessage(popup, "Provisioning sandbox... (~45s)");
-        const provResult = await cloudClient.provisionAgent(cloudAgentId);
-        if (provResult.jobId) {
-          const startedAt = Date.now();
-          const provisioningStages: ReadonlyArray<{
-            afterMs: number;
-            text: string;
-          }> = [
-            { afterMs: 8000, text: "Booting your container..." },
-            {
-              afterMs: 16000,
-              text: "Almost there... warming up dependencies.",
-            },
-            { afterMs: 24000, text: "Finishing the boot sequence..." },
-            {
-              afterMs: 32000,
-              text: "Still booting, this is taking longer than usual...",
-            },
-          ];
-          const rotateId = window.setInterval(() => {
-            const live = cloudPopupRef.current;
-            if (!live || live.closed) return;
-            const elapsed = Date.now() - startedAt;
-            let next = "Provisioning sandbox... (~45s)";
-            for (const stage of provisioningStages) {
-              if (elapsed >= stage.afterMs) next = stage.text;
-            }
-            updatePopupMessage(live, next);
-          }, 1000);
-          try {
-            const job = await cloudClient.pollJobUntilDone(
-              provResult.jobId,
-              PROVISION_TIMEOUT_MS,
-            );
-            if (job.status === "failed") {
-              throw new Error(job.error ?? "provisioning failed.");
-            }
-          } finally {
-            window.clearInterval(rotateId);
-          }
-        }
-        void refresh();
-      }
+      const cloudAgentId = await resolveCloudAgentForOpen({
+        agents,
+        cloudClient,
+        popup,
+        refresh,
+        getPopup: () => cloudPopupRef.current,
+      });
 
       if (popup.closed) {
         setCloudOpenState("idle");
         cloudPopupRef.current = null;
         return;
-      }
-      if (!cloudAgentId) {
-        throw new Error("cloud agent id missing.");
       }
 
       updatePopupMessage(popup, "Authenticating...");
@@ -181,20 +267,7 @@ export function useCloudOpenFlow({
     } catch (err) {
       closeCloudPopup();
       setCloudOpenState("idle");
-      if (err instanceof CloudAgentsNotAvailableError) {
-        setNotice({
-          tone: "error",
-          text: "cloud agent hosting isn't deployed on this Eliza Cloud instance yet.",
-        });
-        return;
-      }
-      setNotice({
-        tone: "error",
-        text:
-          err instanceof Error
-            ? `cloud open failed: ${err.message}`
-            : "cloud open failed.",
-      });
+      setNotice(cloudOpenErrorNotice(err));
     }
   }, [agents, cloudClient, closeCloudPopup, refresh, setNotice]);
 
