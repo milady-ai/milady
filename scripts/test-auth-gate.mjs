@@ -36,7 +36,7 @@ async function main() {
   const verifyBootstrapToken = await loadVerifyBootstrapToken();
   const nowMs = Date.now();
   const nowSeconds = Math.floor(nowMs / 1000);
-  const issuer = "https://issuer.milady.local";
+  const issuer = `https://issuer.milady.local/${nowMs.toString(36)}`;
   const containerId = "container-1";
 
   const { privateKey, publicKey } = await generateKeyPair("RS256");

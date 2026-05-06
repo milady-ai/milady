@@ -65,6 +65,7 @@
         "drizzle-orm": "0.45.2",
         "ethers": "^6.16.0",
         "glob": "^13.0.6",
+        "jose": "^6.1.0",
         "json5": "^2.2.3",
         "lucide-react": "^0.577.0",
         "node-llama-cpp": "^3.18.1",

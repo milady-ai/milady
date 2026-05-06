@@ -235,6 +235,7 @@
     "ethers": "^6.16.0",
     "glob": "^13.0.6",
     "json5": "^2.2.3",
+    "jose": "^6.1.0",
     "lucide-react": "^0.577.0",
     "clsx": "^2.1.1",
     "class-variance-authority": "^0.7.1",
