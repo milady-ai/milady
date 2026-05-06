@@ -295,26 +295,40 @@ function patchRealRuntimeLiveProviderImport(text) {
   return result;
 }
 
-function patchMacosArtifactStager(text) {
-  const notaryTimeout60 =
-    'NOTARY_WAIT_TIMEOUT="$' + '{ELECTROBUN_NOTARY_WAIT_TIMEOUT:-60m}"';
+function runTextPatchSteps(text, steps) {
   let result = { matched: true, text };
-  if (!result.text.includes(notaryTimeout60)) {
-    result = replaceRequiredBlock(
-      result.text,
-      /NOTARY_WAIT_TIMEOUT="\$\{ELECTROBUN_NOTARY_WAIT_TIMEOUT:-30m\}"/,
-      notaryTimeout60,
-    );
+  for (const step of steps) {
+    result = step(result.text);
     if (!result.matched) {
       return result;
     }
   }
+  return result;
+}
 
-  if (!result.text.includes("retry_codesign() {")) {
-    result = replaceRequiredBlock(
-      result.text,
-      / {2}return "\$command_status"\r?\n}\r?\n\r?\nparse_notary_submission_id\(\) \{/,
-      `  return "$command_status"
+function patchMacosNotaryTimeout(text) {
+  const notaryTimeout60 =
+    'NOTARY_WAIT_TIMEOUT="$' + '{ELECTROBUN_NOTARY_WAIT_TIMEOUT:-60m}"';
+  if (text.includes(notaryTimeout60)) {
+    return { matched: true, text };
+  }
+
+  return replaceRequiredBlock(
+    text,
+    /NOTARY_WAIT_TIMEOUT="\$\{ELECTROBUN_NOTARY_WAIT_TIMEOUT:-30m\}"/,
+    notaryTimeout60,
+  );
+}
+
+function patchMacosCodesignRetryHelper(text) {
+  if (text.includes("retry_codesign() {")) {
+    return { matched: true, text };
+  }
+
+  return replaceRequiredBlock(
+    text,
+    / {2}return "\$command_status"\r?\n}\r?\n\r?\nparse_notary_submission_id\(\) \{/,
+    `  return "$command_status"
 }
 
 retry_codesign() {
@@ -322,22 +336,24 @@ retry_codesign() {
 }
 
 parse_notary_submission_id() {`,
-    );
-    if (!result.matched) {
-      return result;
-    }
+  );
+}
+
+function patchMacosNotaryRetryHelpers(text) {
+  if (text.includes("retry_notarytool_submit() {")) {
+    return { matched: true, text };
   }
 
-  if (!result.text.includes("retry_notarytool_submit() {")) {
-    const notaryRetryAnchor = `TARBALL_PATH=`;
-    if (!result.text.includes(notaryRetryAnchor)) {
-      return { matched: false, text };
-    }
-    result = {
-      matched: true,
-      text: result.text.replace(
-        notaryRetryAnchor,
-        `parse_notary_status() {
+  const notaryRetryAnchor = `TARBALL_PATH=`;
+  if (!text.includes(notaryRetryAnchor)) {
+    return { matched: false, text };
+  }
+
+  return {
+    matched: true,
+    text: text.replace(
+      notaryRetryAnchor,
+      `parse_notary_status() {
   local output_path="$1"
   /usr/bin/python3 - "$output_path" <<'PY'
 import json
@@ -455,32 +471,37 @@ retry_notarytool_log() {
 }
 
 TARBALL_PATH=`,
-      ),
-    };
+    ),
+  };
+}
+
+function patchMacosTarballDiscovery(text) {
+  if (text.includes('for tarball_pattern in "*-macos-*.app.tar.zst"')) {
+    return { matched: true, text };
   }
 
-  if (!result.text.includes('for tarball_pattern in "*-macos-*.app.tar.zst"')) {
-    result = replaceRequiredBlock(
-      result.text,
-      /TARBALL_PATH="\$\(find -L "\$ARTIFACTS_DIR" -maxdepth 1 -type f -name "\*-macos-\*\.app\.tar\.zst" \| sort \| head -1\)"/,
-      `TARBALL_PATH=""
+  return replaceRequiredBlock(
+    text,
+    /TARBALL_PATH="\$\(find -L "\$ARTIFACTS_DIR" -maxdepth 1 -type f -name "\*-macos-\*\.app\.tar\.zst" \| sort \| head -1\)"/,
+    `TARBALL_PATH=""
 for tarball_pattern in "*-macos-*.app.tar.zst" "*-macos-*.app.tar.gz" "*-macos-*.tar.gz"; do
   TARBALL_PATH="$(find -L "$ARTIFACTS_DIR" -maxdepth 1 -type f -name "$tarball_pattern" | sort | head -1)"
   if [[ -n "$TARBALL_PATH" ]]; then
     break
   fi
 done`,
-    );
-    if (!result.matched) {
-      return result;
-    }
+  );
+}
+
+function patchMacosTarballExtraction(text) {
+  if (text.includes('tar -xzf "$TARBALL_PATH" -C "$EXTRACT_DIR"')) {
+    return { matched: true, text };
   }
 
-  if (!result.text.includes('tar -xzf "$TARBALL_PATH" -C "$EXTRACT_DIR"')) {
-    result = replaceRequiredBlock(
-      result.text,
-      /echo "Using updater tarball: \$TARBALL_PATH"\r?\ntar --zstd -xf "\$TARBALL_PATH" -C "\$EXTRACT_DIR"/,
-      `echo "Using updater tarball: $TARBALL_PATH"
+  return replaceRequiredBlock(
+    text,
+    /echo "Using updater tarball: \$TARBALL_PATH"\r?\ntar --zstd -xf "\$TARBALL_PATH" -C "\$EXTRACT_DIR"/,
+    `echo "Using updater tarball: $TARBALL_PATH"
 TARBALL_BASENAME="$(basename "$TARBALL_PATH")"
 case "$TARBALL_BASENAME" in
   *.tar.zst)
@@ -494,22 +515,20 @@ case "$TARBALL_BASENAME" in
     exit 1
     ;;
 esac`,
-    );
-    if (!result.matched) {
-      return result;
-    }
+  );
+}
+
+function patchMacosFinalDmgName(text) {
+  const finalDmgAppTarZst =
+    'FINAL_DMG_NAME="$' + '{TARBALL_BASENAME%.app.tar.zst}.dmg"';
+  if (text.includes(finalDmgAppTarZst)) {
+    return { matched: true, text };
   }
 
-  if (
-    !result.text.includes(
-      // biome-ignore lint/suspicious/noTemplateCurlyInString: intentional bash string
-      'FINAL_DMG_NAME="${TARBALL_BASENAME%.app.tar.zst}.dmg"',
-    )
-  ) {
-    result = replaceRequiredBlock(
-      result.text,
-      /FINAL_DMG_NAME="\$\(basename "\$\{TARBALL_PATH%\.app\.tar\.zst\}\.dmg"\)"/,
-      `case "$TARBALL_BASENAME" in
+  return replaceRequiredBlock(
+    text,
+    /FINAL_DMG_NAME="\$\(basename "\$\{TARBALL_PATH%\.app\.tar\.zst\}\.dmg"\)"/,
+    `case "$TARBALL_BASENAME" in
   *.app.tar.zst)
     FINAL_DMG_NAME="\${TARBALL_BASENAME%.app.tar.zst}.dmg"
     ;;
@@ -524,28 +543,26 @@ esac`,
     exit 1
     ;;
 esac`,
-    );
-    if (!result.matched) {
-      return result;
-    }
+  );
+}
+
+function patchMacosEmptyEntitlements(text) {
+  if (text.includes("write_config_entitlements_plist")) {
+    return { matched: true, text };
   }
 
-  if (!result.text.includes("write_config_entitlements_plist")) {
-    result = replaceRequiredBlock(
-      result.text,
-      / {2}if \[\[ ! -s "\$TMP_ENTITLEMENTS_PATH" \]\]; then\r?\n {4}echo "stage-macos-release-artifacts: extracted entitlements were empty"\r?\n {4}exit 1\r?\n {2}fi\r?\n {2}entitlement_args=\(--entitlements "\$TMP_ENTITLEMENTS_PATH"\)/,
-      `  if [[ -s "$TMP_ENTITLEMENTS_PATH" ]]; then
+  return replaceRequiredBlock(
+    text,
+    / {2}if \[\[ ! -s "\$TMP_ENTITLEMENTS_PATH" \]\]; then\r?\n {4}echo "stage-macos-release-artifacts: extracted entitlements were empty"\r?\n {4}exit 1\r?\n {2}fi\r?\n {2}entitlement_args=\(--entitlements "\$TMP_ENTITLEMENTS_PATH"\)/,
+    `  if [[ -s "$TMP_ENTITLEMENTS_PATH" ]]; then
     entitlement_args=(--entitlements "$TMP_ENTITLEMENTS_PATH")
   else
     echo "stage-macos-release-artifacts: extracted entitlements were empty; signing without entitlement plist"
   fi`,
-    );
-    if (!result.matched) {
-      return result;
-    }
-  }
+  );
+}
 
-  const nestedSigningFunction = `  sign_nested_macos_runtime_targets() {
+const nestedMacosSigningFunction = `  sign_nested_macos_runtime_targets() {
     local runtime_resources_dir="$STAGED_APP_PATH/Contents/Resources/app/eliza-dist"
     local candidate_path file_type
     if [[ ! -d "$runtime_resources_dir" ]]; then
@@ -562,13 +579,15 @@ esac`,
   }
 `;
 
-  if (result.text.includes("sign_nested_macos_runtime_targets()")) {
-    result = { matched: true, text: result.text };
-  } else {
-    result = replaceRequiredBlock(
-      result.text,
-      / {2}if ! codesign --force --timestamp --sign "\$ELECTROBUN_DEVELOPER_ID" --options runtime "\$\{entitlement_args\[@\]\}" "\$LAUNCHER_PATH"; then\r?\n {4}echo "stage-macos-release-artifacts: launcher runtime signing failed, retrying without hardened runtime" >&2\r?\n {4}codesign --force --timestamp --sign "\$ELECTROBUN_DEVELOPER_ID" "\$\{entitlement_args\[@\]\}" "\$LAUNCHER_PATH"\r?\n {2}fi\r?\n {2}codesign --force --timestamp --sign "\$ELECTROBUN_DEVELOPER_ID" --options runtime "\$\{entitlement_args\[@\]\}" "\$STAGED_APP_PATH"/,
-      `  runtime_sign_args=(--force --timestamp --sign "$ELECTROBUN_DEVELOPER_ID" --options runtime)
+function patchMacosNestedRuntimeSigning(text) {
+  if (text.includes("sign_nested_macos_runtime_targets()")) {
+    return { matched: true, text };
+  }
+
+  let result = replaceRequiredBlock(
+    text,
+    / {2}if ! codesign --force --timestamp --sign "\$ELECTROBUN_DEVELOPER_ID" --options runtime "\$\{entitlement_args\[@\]\}" "\$LAUNCHER_PATH"; then\r?\n {4}echo "stage-macos-release-artifacts: launcher runtime signing failed, retrying without hardened runtime" >&2\r?\n {4}codesign --force --timestamp --sign "\$ELECTROBUN_DEVELOPER_ID" "\$\{entitlement_args\[@\]\}" "\$LAUNCHER_PATH"\r?\n {2}fi\r?\n {2}codesign --force --timestamp --sign "\$ELECTROBUN_DEVELOPER_ID" --options runtime "\$\{entitlement_args\[@\]\}" "\$STAGED_APP_PATH"/,
+    `  runtime_sign_args=(--force --timestamp --sign "$ELECTROBUN_DEVELOPER_ID" --options runtime)
   fallback_runtime_sign_args=(--force --timestamp --sign "$ELECTROBUN_DEVELOPER_ID")
   app_sign_args=(--force --timestamp --sign "$ELECTROBUN_DEVELOPER_ID" --options runtime)
   if [[ -s "\${TMP_ENTITLEMENTS_PATH:-}" ]]; then
@@ -583,7 +602,7 @@ esac`,
       retry_codesign "\${fallback_runtime_sign_args[@]}" "$target_path"
     fi
   }
-${nestedSigningFunction}  macos_code_dir="$STAGED_APP_PATH/Contents/MacOS"
+${nestedMacosSigningFunction}  macos_code_dir="$STAGED_APP_PATH/Contents/MacOS"
   for runtime_target in \\
     "$macos_code_dir/libNativeWrapper.dylib" \\
     "$macos_code_dir/libwebgpu_dawn.dylib" \\
@@ -602,52 +621,54 @@ ${nestedSigningFunction}  macos_code_dir="$STAGED_APP_PATH/Contents/MacOS"
   sign_nested_macos_runtime_targets
   sign_macos_runtime_target "$LAUNCHER_PATH"
   retry_codesign "\${app_sign_args[@]}" "$STAGED_APP_PATH"`,
+  );
+
+  if (!result.matched) {
+    result = replaceRequiredBlock(
+      result.text,
+      / {2}macos_code_dir="\$STAGED_APP_PATH\/Contents\/MacOS"/,
+      `${nestedMacosSigningFunction}  macos_code_dir="$STAGED_APP_PATH/Contents/MacOS"`,
     );
-    if (!result.matched) {
+    if (result.matched) {
       result = replaceRequiredBlock(
         result.text,
-        / {2}macos_code_dir="\$STAGED_APP_PATH\/Contents\/MacOS"/,
-        `${nestedSigningFunction}  macos_code_dir="$STAGED_APP_PATH/Contents/MacOS"`,
-      );
-      if (result.matched) {
-        result = replaceRequiredBlock(
-          result.text,
-          / {2}sign_macos_runtime_target "\$LAUNCHER_PATH"/,
-          `  sign_nested_macos_runtime_targets
+        / {2}sign_macos_runtime_target "\$LAUNCHER_PATH"/,
+        `  sign_nested_macos_runtime_targets
   sign_macos_runtime_target "$LAUNCHER_PATH"`,
-        );
-      }
+      );
     }
   }
-  if (!result.matched) {
-    return result;
-  }
 
+  return result;
+}
+
+function patchMacosDmgCodesignRetry(text) {
   if (
-    !result.text.includes(
+    text.includes(
       'retry_codesign --force --timestamp --sign "$ELECTROBUN_DEVELOPER_ID" "$TEMP_DMG_PATH"',
     )
   ) {
-    result = replaceRequiredBlock(
-      result.text,
-      / {2}codesign --force --timestamp --sign "\$ELECTROBUN_DEVELOPER_ID" "\$TEMP_DMG_PATH"/,
-      '  retry_codesign --force --timestamp --sign "$ELECTROBUN_DEVELOPER_ID" "$TEMP_DMG_PATH"',
-    );
-    if (!result.matched) {
-      return result;
-    }
+    return { matched: true, text };
   }
 
-  if (
-    !result.text.includes(
-      // biome-ignore lint/suspicious/noTemplateCurlyInString: intentional bash string
-      'NOTARY_SUBMIT_ATTEMPTS="${ELECTROBUN_NOTARY_SUBMIT_ATTEMPTS:-3}"',
-    )
-  ) {
-    result = replaceRequiredBlock(
-      result.text,
-      / {2}NOTARY_SUBMIT_OUTPUT_PATH="\$TMP_ROOT\/notary-submit\.json"\r?\n {2}"\$REAL_XCRUN" notarytool submit \\\r?\n {4}--apple-id "\$ELECTROBUN_APPLEID" \\\r?\n {4}--password "\$ELECTROBUN_APPLEIDPASS" \\\r?\n {4}--team-id "\$ELECTROBUN_TEAMID" \\\r?\n {4}--output-format json \\\r?\n {4}"\$TEMP_DMG_PATH" >"\$NOTARY_SUBMIT_OUTPUT_PATH"/,
-      `  NOTARY_SUBMIT_ATTEMPTS="\${ELECTROBUN_NOTARY_SUBMIT_ATTEMPTS:-3}"
+  return replaceRequiredBlock(
+    text,
+    / {2}codesign --force --timestamp --sign "\$ELECTROBUN_DEVELOPER_ID" "\$TEMP_DMG_PATH"/,
+    '  retry_codesign --force --timestamp --sign "$ELECTROBUN_DEVELOPER_ID" "$TEMP_DMG_PATH"',
+  );
+}
+
+function patchMacosNotarySubmitCall(text) {
+  const notarySubmitAttempts =
+    'NOTARY_SUBMIT_ATTEMPTS="$' + '{ELECTROBUN_NOTARY_SUBMIT_ATTEMPTS:-3}"';
+  if (text.includes(notarySubmitAttempts)) {
+    return { matched: true, text };
+  }
+
+  return replaceRequiredBlock(
+    text,
+    / {2}NOTARY_SUBMIT_OUTPUT_PATH="\$TMP_ROOT\/notary-submit\.json"\r?\n {2}"\$REAL_XCRUN" notarytool submit \\\r?\n {4}--apple-id "\$ELECTROBUN_APPLEID" \\\r?\n {4}--password "\$ELECTROBUN_APPLEIDPASS" \\\r?\n {4}--team-id "\$ELECTROBUN_TEAMID" \\\r?\n {4}--output-format json \\\r?\n {4}"\$TEMP_DMG_PATH" >"\$NOTARY_SUBMIT_OUTPUT_PATH"/,
+    `  NOTARY_SUBMIT_ATTEMPTS="\${ELECTROBUN_NOTARY_SUBMIT_ATTEMPTS:-3}"
   NOTARY_SUBMIT_RETRY_DELAY_SECONDS="\${ELECTROBUN_NOTARY_SUBMIT_RETRY_DELAY_SECONDS:-30}"
   NOTARY_SUBMIT_OUTPUT_PATH="$TMP_ROOT/notary-submit.json"
   if ! retry_notarytool_submit "$NOTARY_SUBMIT_OUTPUT_PATH" "$NOTARY_SUBMIT_ATTEMPTS" "$NOTARY_SUBMIT_RETRY_DELAY_SECONDS"; then
@@ -655,22 +676,20 @@ ${nestedSigningFunction}  macos_code_dir="$STAGED_APP_PATH/Contents/MacOS"
     sed -n '1,80p' "$NOTARY_SUBMIT_OUTPUT_PATH" >&2 || true
     exit 1
   fi`,
-    );
-    if (!result.matched) {
-      return result;
-    }
+  );
+}
+
+function patchMacosNotaryWaitCall(text) {
+  const notaryWaitAttempts =
+    'NOTARY_WAIT_ATTEMPTS="$' + '{ELECTROBUN_NOTARY_WAIT_ATTEMPTS:-3}"';
+  if (text.includes(notaryWaitAttempts)) {
+    return { matched: true, text };
   }
 
-  if (
-    !result.text.includes(
-      // biome-ignore lint/suspicious/noTemplateCurlyInString: intentional bash string
-      'NOTARY_WAIT_ATTEMPTS="${ELECTROBUN_NOTARY_WAIT_ATTEMPTS:-3}"',
-    )
-  ) {
-    result = replaceRequiredBlock(
-      result.text,
-      / {2}NOTARY_WAIT_OUTPUT_PATH="\$TMP_ROOT\/notary-wait\.json"\r?\n {2}if ! "\$REAL_XCRUN" notarytool wait \\\r?\n {4}--apple-id "\$ELECTROBUN_APPLEID" \\\r?\n {4}--password "\$ELECTROBUN_APPLEIDPASS" \\\r?\n {4}--team-id "\$ELECTROBUN_TEAMID" \\\r?\n {4}--timeout "\$NOTARY_WAIT_TIMEOUT" \\\r?\n {4}--output-format json \\\r?\n {4}"\$NOTARY_SUBMISSION_ID" >"\$NOTARY_WAIT_OUTPUT_PATH"; then\r?\n {4}echo "stage-macos-release-artifacts: notarization wait failed for submission \$NOTARY_SUBMISSION_ID" >&2\r?\n {4}sed -n '1,80p' "\$NOTARY_WAIT_OUTPUT_PATH" >&2 \|\| true\r?\n {4}"\$REAL_XCRUN" notarytool log \\\r?\n {6}--apple-id "\$ELECTROBUN_APPLEID" \\\r?\n {6}--password "\$ELECTROBUN_APPLEIDPASS" \\\r?\n {6}--team-id "\$ELECTROBUN_TEAMID" \\\r?\n {6}"\$NOTARY_SUBMISSION_ID" >&2 \|\| true\r?\n {4}exit 1\r?\n {2}fi/,
-      `  NOTARY_WAIT_ATTEMPTS="\${ELECTROBUN_NOTARY_WAIT_ATTEMPTS:-3}"
+  return replaceRequiredBlock(
+    text,
+    / {2}NOTARY_WAIT_OUTPUT_PATH="\$TMP_ROOT\/notary-wait\.json"\r?\n {2}if ! "\$REAL_XCRUN" notarytool wait \\\r?\n {4}--apple-id "\$ELECTROBUN_APPLEID" \\\r?\n {4}--password "\$ELECTROBUN_APPLEIDPASS" \\\r?\n {4}--team-id "\$ELECTROBUN_TEAMID" \\\r?\n {4}--timeout "\$NOTARY_WAIT_TIMEOUT" \\\r?\n {4}--output-format json \\\r?\n {4}"\$NOTARY_SUBMISSION_ID" >"\$NOTARY_WAIT_OUTPUT_PATH"; then\r?\n {4}echo "stage-macos-release-artifacts: notarization wait failed for submission \$NOTARY_SUBMISSION_ID" >&2\r?\n {4}sed -n '1,80p' "\$NOTARY_WAIT_OUTPUT_PATH" >&2 \|\| true\r?\n {4}"\$REAL_XCRUN" notarytool log \\\r?\n {6}--apple-id "\$ELECTROBUN_APPLEID" \\\r?\n {6}--password "\$ELECTROBUN_APPLEIDPASS" \\\r?\n {6}--team-id "\$ELECTROBUN_TEAMID" \\\r?\n {6}"\$NOTARY_SUBMISSION_ID" >&2 \|\| true\r?\n {4}exit 1\r?\n {2}fi/,
+    `  NOTARY_WAIT_ATTEMPTS="\${ELECTROBUN_NOTARY_WAIT_ATTEMPTS:-3}"
   NOTARY_WAIT_RETRY_DELAY_SECONDS="\${ELECTROBUN_NOTARY_WAIT_RETRY_DELAY_SECONDS:-60}"
   NOTARY_WAIT_OUTPUT_PATH="$TMP_ROOT/notary-wait.json"
   if ! retry_notarytool_wait "$NOTARY_WAIT_OUTPUT_PATH" "$NOTARY_WAIT_ATTEMPTS" "$NOTARY_WAIT_RETRY_DELAY_SECONDS"; then
@@ -679,21 +698,22 @@ ${nestedSigningFunction}  macos_code_dir="$STAGED_APP_PATH/Contents/MacOS"
     retry_notarytool_log >&2 || true
     exit 1
   fi`,
-    );
-    if (!result.matched) {
-      return result;
-    }
-  }
+  );
+}
 
+function patchMacosStaplerFallback(text) {
   if (
-    !result.text.includes(
+    text.includes(
       "notarization accepted but stapler ticket was not available; continuing without stapled DMG",
     )
   ) {
-    result = replaceRequiredBlock(
-      result.text,
-      / {2}(?:retry_command 8 20 xcrun stapler staple "\$TEMP_DMG_PATH"|STAPLER_ATTEMPTS="\$\{ELECTROBUN_STAPLER_ATTEMPTS:-12\}"\r?\n {2}STAPLER_DELAY_SECONDS="\$\{ELECTROBUN_STAPLER_DELAY_SECONDS:-30\}"\r?\n {2}retry_command "\$STAPLER_ATTEMPTS" "\$STAPLER_DELAY_SECONDS" xcrun stapler staple "\$TEMP_DMG_PATH")/,
-      `  STAPLER_ATTEMPTS="\${ELECTROBUN_STAPLER_ATTEMPTS:-12}"
+    return { matched: true, text };
+  }
+
+  return replaceRequiredBlock(
+    text,
+    / {2}(?:retry_command 8 20 xcrun stapler staple "\$TEMP_DMG_PATH"|STAPLER_ATTEMPTS="\$\{ELECTROBUN_STAPLER_ATTEMPTS:-12\}"\r?\n {2}STAPLER_DELAY_SECONDS="\$\{ELECTROBUN_STAPLER_DELAY_SECONDS:-30\}"\r?\n {2}retry_command "\$STAPLER_ATTEMPTS" "\$STAPLER_DELAY_SECONDS" xcrun stapler staple "\$TEMP_DMG_PATH")/,
+    `  STAPLER_ATTEMPTS="\${ELECTROBUN_STAPLER_ATTEMPTS:-12}"
   STAPLER_DELAY_SECONDS="\${ELECTROBUN_STAPLER_DELAY_SECONDS:-30}"
   if ! retry_command "$STAPLER_ATTEMPTS" "$STAPLER_DELAY_SECONDS" xcrun stapler staple "$TEMP_DMG_PATH"; then
     if [[ "\${ELECTROBUN_REQUIRE_STAPLED_DMG:-0}" == "1" ]]; then
@@ -701,12 +721,24 @@ ${nestedSigningFunction}  macos_code_dir="$STAGED_APP_PATH/Contents/MacOS"
     fi
     echo "stage-macos-release-artifacts: notarization accepted but stapler ticket was not available; continuing without stapled DMG" >&2
   fi`,
-    );
-    if (!result.matched) {
-      return result;
-    }
-  }
-  return result;
+  );
+}
+
+function patchMacosArtifactStager(text) {
+  return runTextPatchSteps(text, [
+    patchMacosNotaryTimeout,
+    patchMacosCodesignRetryHelper,
+    patchMacosNotaryRetryHelpers,
+    patchMacosTarballDiscovery,
+    patchMacosTarballExtraction,
+    patchMacosFinalDmgName,
+    patchMacosEmptyEntitlements,
+    patchMacosNestedRuntimeSigning,
+    patchMacosDmgCodesignRetry,
+    patchMacosNotarySubmitCall,
+    patchMacosNotaryWaitCall,
+    patchMacosStaplerFallback,
+  ]);
 }
 
 function patchLocalAdhocMacosSigningOrder(text) {
