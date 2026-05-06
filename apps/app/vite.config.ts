@@ -1185,6 +1185,265 @@ function generatePluginSqlStub(strippedId: string): string | null {
   ].join("\n");
 }
 
+function generateNodeLlamaCppStub(): string {
+  return [
+    "const handler = { get: (_, p) => (p === Symbol.toPrimitive ? () => 0 : typeof p === 'string' ? (() => {}) : undefined) };",
+    "const stub = new Proxy({}, handler);",
+    "export default stub;",
+    "export const getLlama = () => Promise.resolve(stub);",
+    "export const LlamaLogLevel = Object.freeze({ error: 0, warn: 1, info: 2, debug: 3 });",
+    "export const Llama = stub;",
+    "export const LlamaModel = stub;",
+    "export const LlamaEmbeddingContext = stub;",
+    "export const LlamaContext = stub;",
+    "export const LlamaChatSession = stub;",
+    "export const LlamaGrammar = stub;",
+    "export const LlamaJsonSchemaGrammar = stub;",
+  ].join("\n");
+}
+
+function generateFsExtraStub(): string {
+  return [
+    "const noop = () => {};",
+    "const stub = new Proxy({}, { get: () => noop });",
+    "export default stub;",
+    ...[
+      "copy",
+      "copySync",
+      "move",
+      "moveSync",
+      "remove",
+      "removeSync",
+      "ensureDir",
+      "ensureDirSync",
+      "ensureFile",
+      "ensureFileSync",
+      "mkdirs",
+      "mkdirsSync",
+      "readJson",
+      "readJsonSync",
+      "writeJson",
+      "writeJsonSync",
+      "pathExists",
+      "pathExistsSync",
+      "outputFile",
+      "outputFileSync",
+      "outputJson",
+      "outputJsonSync",
+      "emptyDir",
+      "emptyDirSync",
+    ].map((n) => `export const ${n} = noop;`),
+  ].join("\n");
+}
+
+function generateTelegramStub(strippedId: string): string {
+  if (strippedId.startsWith("telegram/sessions")) {
+    return [
+      "export class StringSession { constructor(value = '') { this.value = value; } }",
+      "export default { StringSession };",
+    ].join("\n");
+  }
+
+  return [
+    "const noop = () => {};",
+    "class SignIn { constructor(input = {}) { Object.assign(this, input); } }",
+    "class Authorization { constructor(input = {}) { Object.assign(this, input); } }",
+    "const Api = Object.freeze({ auth: Object.freeze({ SignIn, Authorization }) });",
+    "class TelegramClient {}",
+    "export { Api, TelegramClient };",
+    "export default { Api, TelegramClient, noop };",
+  ].join("\n");
+}
+
+function generateEventsStub(): string {
+  return [
+    "function EventEmitter() {}",
+    "EventEmitter.prototype.on = function() { return this; };",
+    "EventEmitter.prototype.off = function() { return this; };",
+    "EventEmitter.prototype.emit = function() { return false; };",
+    "EventEmitter.prototype.addListener = EventEmitter.prototype.on;",
+    "EventEmitter.prototype.removeListener = EventEmitter.prototype.off;",
+    "export { EventEmitter };",
+    "export default EventEmitter;",
+  ].join("\n");
+}
+
+function generateUndiciStub(): string {
+  return [
+    "export const fetch = globalThis.fetch;",
+    "export const Request = globalThis.Request;",
+    "export const Response = globalThis.Response;",
+    "export const Headers = globalThis.Headers;",
+    "export const FormData = globalThis.FormData;",
+    "export const WebSocket = globalThis.WebSocket;",
+    "export const EventSource = globalThis.EventSource || class {};",
+    "export const AbortController = globalThis.AbortController;",
+    "export const File = globalThis.File;",
+    "export const Blob = globalThis.Blob;",
+    "export class Agent {}",
+    "export class Pool {}",
+    "export class Client {}",
+    "export class Dispatcher {}",
+    "export const setGlobalDispatcher = () => {};",
+    "export const getGlobalDispatcher = () => ({});",
+    "export default { fetch, Request, Response, Headers, WebSocket };",
+  ].join("\n");
+}
+
+function generateAsyncHooksStub(): string {
+  return [
+    "function AsyncLocalStorage() {} AsyncLocalStorage.prototype.getStore = function() { return undefined; }; AsyncLocalStorage.prototype.run = function(store, fn) { return fn.apply(void 0, [].slice.call(arguments, 2)); }; AsyncLocalStorage.prototype.enterWith = function() {}; AsyncLocalStorage.prototype.disable = function() {};",
+    "export { AsyncLocalStorage };",
+    "export function executionAsyncId() { return 0; }",
+    "export function triggerAsyncId() { return 0; }",
+    "export function executionAsyncResource() { return {}; }",
+    "function AsyncResource() {} AsyncResource.prototype.runInAsyncScope = function(fn) { return fn.apply(void 0, [].slice.call(arguments, 1)); }; AsyncResource.prototype.emitDestroy = function() { return this; }; AsyncResource.prototype.asyncId = function() { return 0; }; AsyncResource.prototype.triggerAsyncId = function() { return 0; };",
+    "export { AsyncResource };",
+    "export function createHook() { return { enable: function(){}, disable: function(){} }; }",
+    "export default { AsyncLocalStorage: AsyncLocalStorage, AsyncResource: AsyncResource, executionAsyncId: executionAsyncId, triggerAsyncId: triggerAsyncId, executionAsyncResource: executionAsyncResource, createHook: createHook };",
+  ].join("\n");
+}
+
+function generateSharpStub(): string {
+  return [
+    "function mk() {",
+    "  const c = {",
+    "    rotate() { return c; },",
+    "    resize() { return c; },",
+    "    greyscale() { return c; },",
+    "    png() { return c; },",
+    "    jpeg() { return c; },",
+    "    async toBuffer() { return new Uint8Array(0); },",
+    "    async raw() { return { data: new Uint8Array(0), info: { width: 1, height: 1, channels: 1 } }; },",
+    "  };",
+    "  return c;",
+    "}",
+    "export default function sharp() { return mk(); }",
+  ].join("\n");
+}
+
+function generatePluginSqlDrizzleStub(): string {
+  return [
+    "const expr = {};",
+    "export const and = () => expr;",
+    "export const desc = () => expr;",
+    "export const eq = () => expr;",
+    "export const isNull = () => expr;",
+    "export const lte = () => expr;",
+    "export const ne = () => expr;",
+    "export default expr;",
+  ].join("\n");
+}
+
+function generateCapacitorHapticsStub(): string {
+  return [
+    "const noop = () => {};const noopObj = new Proxy({}, { get: () => noop });",
+    "export const Haptics = noopObj;",
+    "export const ImpactStyle = Object.freeze({ Heavy: 'HEAVY', Medium: 'MEDIUM', Light: 'LIGHT' });",
+    "export const NotificationType = Object.freeze({ Success: 'SUCCESS', Warning: 'WARNING', Error: 'ERROR' });",
+    "export default noopObj;",
+  ].join("\n");
+}
+
+function generateCapacitorKeyboardStub(): string {
+  return [
+    "const noop = () => {};const noopObj = new Proxy({}, { get: () => noop });",
+    "export const Keyboard = noopObj;",
+    "export default noopObj;",
+  ].join("\n");
+}
+
+function generateCapacitorPreferencesStub(): string {
+  return [
+    "const noop = () => Promise.resolve({ value: null });const noopObj = new Proxy({}, { get: () => noop });",
+    "export const Preferences = noopObj;",
+    "export default noopObj;",
+  ].join("\n");
+}
+
+function generateCapacitorPushNotificationsStub(): string {
+  return [
+    "const asyncNoop = async () => {};",
+    "const listenerHandle = { remove: asyncNoop };",
+    "export const PushNotifications = {",
+    "  requestPermissions: async () => ({ receive: 'denied' }),",
+    "  addListener: async () => listenerHandle,",
+    "  register: asyncNoop,",
+    "  removeAllListeners: asyncNoop,",
+    "};",
+    "export default PushNotifications;",
+  ].join("\n");
+}
+
+function generateCapacitorBarcodeScannerStub(): string {
+  return [
+    "const asyncNoop = async () => ({ ScanResult: '' });",
+    "export const CapacitorBarcodeScanner = { scanBarcode: asyncNoop };",
+    "export const CapacitorBarcodeScannerTypeHint = Object.freeze({ QR_CODE: 'QR_CODE' });",
+    "export default CapacitorBarcodeScanner;",
+  ].join("\n");
+}
+
+const CAPACITOR_NATIVE_STUB_GENERATORS = new Map<string, () => string>([
+  ["@capacitor/haptics", generateCapacitorHapticsStub],
+  ["@capacitor/keyboard", generateCapacitorKeyboardStub],
+  ["@capacitor/preferences", generateCapacitorPreferencesStub],
+  ["@capacitor/push-notifications", generateCapacitorPushNotificationsStub],
+  ["@capacitor/barcode-scanner", generateCapacitorBarcodeScannerStub],
+]);
+
+function generateCapacitorNativeStub(strippedId: string): string {
+  const capPkg = strippedId.split("/").slice(0, 2).join("/");
+  const stubGenerator = CAPACITOR_NATIVE_STUB_GENERATORS.get(capPkg);
+  if (stubGenerator) return stubGenerator();
+
+  return [
+    "const noop = () => {};const stub = new Proxy({}, { get: () => noop });",
+    "export default stub;",
+  ].join("\n");
+}
+
+const NATIVE_MODULE_STUB_GENERATORS = new Map<
+  string,
+  (strippedId: string) => string
+>([
+  ["node-llama-cpp", generateNodeLlamaCppStub],
+  ["fs-extra", generateFsExtraStub],
+  ["telegram", generateTelegramStub],
+  ["events", generateEventsStub],
+  ["undici", generateUndiciStub],
+  ["node:async_hooks", generateAsyncHooksStub],
+  ["async_hooks", generateAsyncHooksStub],
+]);
+
+function isSharpStubId(strippedId: string): boolean {
+  return (
+    strippedId === "sharp" ||
+    strippedId.startsWith("sharp/") ||
+    strippedId.startsWith("@img/sharp")
+  );
+}
+
+function generateNativeModuleStub(
+  strippedId: string,
+  capacitorNativeScopeRe: RegExp,
+): string {
+  const modName = strippedId.split("/")[0];
+  const stubGenerator = NATIVE_MODULE_STUB_GENERATORS.get(modName);
+  if (stubGenerator) return stubGenerator(strippedId);
+  if (modName.startsWith("node:")) return generateNodeBuiltinStub(strippedId);
+  if (isSharpStubId(strippedId)) return generateSharpStub();
+  if (strippedId === "@elizaos/plugin-sql/drizzle")
+    return generatePluginSqlDrizzleStub();
+
+  const pluginSqlStub = generatePluginSqlStub(strippedId);
+  if (pluginSqlStub) return pluginSqlStub;
+  if (capacitorNativeScopeRe.test(strippedId))
+    return generateCapacitorNativeStub(strippedId);
+
+  return "export default {};\n";
+}
+
 /**
  * Dev-mode plugin that stubs native-only packages.  In production builds
  * rollupOptions.external handles this, but the Vite dev server still tries
@@ -1313,250 +1572,7 @@ function nativeModuleStubPlugin(): Plugin {
       if (!id.startsWith(VIRTUAL_PREFIX)) return null;
 
       const strippedId = id.slice(VIRTUAL_PREFIX.length);
-      const modName = strippedId.split("/")[0];
-      // node-llama-cpp is the most import-heavy native module — its consumers
-      // use many named exports (LlamaLogLevel, getLlama, etc.).  Return a
-      // module whose default export is a Proxy that returns no-op stubs for
-      // any property access, AND re-export that proxy as every known name so
-      // static `import { X }` statements resolve without error.
-      if (modName === "node-llama-cpp") {
-        return [
-          "const handler = { get: (_, p) => (p === Symbol.toPrimitive ? () => 0 : typeof p === 'string' ? (() => {}) : undefined) };",
-          "const stub = new Proxy({}, handler);",
-          "export default stub;",
-          // Known named exports used by @elizaos/plugin-local-embedding and
-          // other consumers — extend as needed:
-          "export const getLlama = () => Promise.resolve(stub);",
-          "export const LlamaLogLevel = Object.freeze({ error: 0, warn: 1, info: 2, debug: 3 });",
-          "export const Llama = stub;",
-          "export const LlamaModel = stub;",
-          "export const LlamaEmbeddingContext = stub;",
-          "export const LlamaContext = stub;",
-          "export const LlamaChatSession = stub;",
-          "export const LlamaGrammar = stub;",
-          "export const LlamaJsonSchemaGrammar = stub;",
-        ].join("\n");
-      }
-
-      // fs-extra: CJS module with default + named exports
-      if (modName === "fs-extra") {
-        return [
-          "const noop = () => {};",
-          "const stub = new Proxy({}, { get: () => noop });",
-          "export default stub;",
-          // Re-export common fs-extra named exports so static imports work:
-          ...[
-            "copy",
-            "copySync",
-            "move",
-            "moveSync",
-            "remove",
-            "removeSync",
-            "ensureDir",
-            "ensureDirSync",
-            "ensureFile",
-            "ensureFileSync",
-            "mkdirs",
-            "mkdirsSync",
-            "readJson",
-            "readJsonSync",
-            "writeJson",
-            "writeJsonSync",
-            "pathExists",
-            "pathExistsSync",
-            "outputFile",
-            "outputFileSync",
-            "outputJson",
-            "outputJsonSync",
-            "emptyDir",
-            "emptyDirSync",
-          ].map((n) => `export const ${n} = noop;`),
-        ].join("\n");
-      }
-
-      // Telegram's MTProto client is server-only. If it reaches this virtual
-      // native stub path, preserve the static exports used by account auth.
-      if (modName === "telegram") {
-        if (strippedId.startsWith("telegram/sessions")) {
-          return [
-            "export class StringSession { constructor(value = '') { this.value = value; } }",
-            "export default { StringSession };",
-          ].join("\n");
-        }
-
-        return [
-          "const noop = () => {};",
-          "class SignIn { constructor(input = {}) { Object.assign(this, input); } }",
-          "class Authorization { constructor(input = {}) { Object.assign(this, input); } }",
-          "const Api = Object.freeze({ auth: Object.freeze({ SignIn, Authorization }) });",
-          "class TelegramClient {}",
-          "export { Api, TelegramClient };",
-          "export default { Api, TelegramClient, noop };",
-        ].join("\n");
-      }
-
-      // events: CJS module, consumers use `import { EventEmitter } from "events"`
-      if (modName === "events") {
-        return [
-          "function EventEmitter() {}",
-          "EventEmitter.prototype.on = function() { return this; };",
-          "EventEmitter.prototype.off = function() { return this; };",
-          "EventEmitter.prototype.emit = function() { return false; };",
-          "EventEmitter.prototype.addListener = EventEmitter.prototype.on;",
-          "EventEmitter.prototype.removeListener = EventEmitter.prototype.off;",
-          "export { EventEmitter };",
-          "export default EventEmitter;",
-        ].join("\n");
-      }
-
-      // undici: Node HTTP client — re-export browser globals (fetch, WebSocket, etc.)
-      if (modName === "undici") {
-        return [
-          "export const fetch = globalThis.fetch;",
-          "export const Request = globalThis.Request;",
-          "export const Response = globalThis.Response;",
-          "export const Headers = globalThis.Headers;",
-          "export const FormData = globalThis.FormData;",
-          "export const WebSocket = globalThis.WebSocket;",
-          "export const EventSource = globalThis.EventSource || class {};",
-          "export const AbortController = globalThis.AbortController;",
-          "export const File = globalThis.File;",
-          "export const Blob = globalThis.Blob;",
-          "export class Agent {}",
-          "export class Pool {}",
-          "export class Client {}",
-          "export class Dispatcher {}",
-          "export const setGlobalDispatcher = () => {};",
-          "export const getGlobalDispatcher = () => ({});",
-          "export default { fetch, Request, Response, Headers, WebSocket };",
-        ].join("\n");
-      }
-
-      // async_hooks — AsyncLocalStorage must be a real constructor because
-      // langsmith and @elizaos packages do `new AsyncLocalStorage()` at the
-      // top level. Uses function-constructor syntax (not class expressions)
-      // for maximum WebView compatibility. The renderChunk plugin
-      // (asyncLocalStoragePatchPlugin) also patches the final bundle output
-      // as a safety net for patterns inlined by Rollup.
-      if (modName === "node:async_hooks" || modName === "async_hooks") {
-        return [
-          "function AsyncLocalStorage() {} AsyncLocalStorage.prototype.getStore = function() { return undefined; }; AsyncLocalStorage.prototype.run = function(store, fn) { return fn.apply(void 0, [].slice.call(arguments, 2)); }; AsyncLocalStorage.prototype.enterWith = function() {}; AsyncLocalStorage.prototype.disable = function() {};",
-          "export { AsyncLocalStorage };",
-          "export function executionAsyncId() { return 0; }",
-          "export function triggerAsyncId() { return 0; }",
-          "export function executionAsyncResource() { return {}; }",
-          "function AsyncResource() {} AsyncResource.prototype.runInAsyncScope = function(fn) { return fn.apply(void 0, [].slice.call(arguments, 1)); }; AsyncResource.prototype.emitDestroy = function() { return this; }; AsyncResource.prototype.asyncId = function() { return 0; }; AsyncResource.prototype.triggerAsyncId = function() { return 0; };",
-          "export { AsyncResource };",
-          "export function createHook() { return { enable: function(){}, disable: function(){} }; }",
-          "export default { AsyncLocalStorage: AsyncLocalStorage, AsyncResource: AsyncResource, executionAsyncId: executionAsyncId, triggerAsyncId: triggerAsyncId, executionAsyncResource: executionAsyncResource, createHook: createHook };",
-        ].join("\n");
-      }
-
-      // node:* builtins — return a Proxy-based module that provides any
-      // named export as a no-op function.  This handles @elizaos/core's node
-      // entry which uses createRequire, randomUUID, fs, etc. at the top level.
-      if (modName.startsWith("node:")) {
-        // Dynamic: read the real Node module's export names at config time
-        // and generate matching no-op stubs so esbuild's static analysis passes.
-        return generateNodeBuiltinStub(id.slice(VIRTUAL_PREFIX.length));
-      }
-
-      // libvips native / wasm bindings — only used server-side for LifeOps screen sampling
-      if (
-        strippedId === "sharp" ||
-        strippedId.startsWith("sharp/") ||
-        strippedId.startsWith("@img/sharp")
-      ) {
-        return [
-          "function mk() {",
-          "  const c = {",
-          "    rotate() { return c; },",
-          "    resize() { return c; },",
-          "    greyscale() { return c; },",
-          "    png() { return c; },",
-          "    jpeg() { return c; },",
-          "    async toBuffer() { return new Uint8Array(0); },",
-          "    async raw() { return { data: new Uint8Array(0), info: { width: 1, height: 1, channels: 1 } }; },",
-          "  };",
-          "  return c;",
-          "}",
-          "export default function sharp() { return mk(); }",
-        ].join("\n");
-      }
-
-      if (strippedId === "@elizaos/plugin-sql/drizzle") {
-        return [
-          "const expr = {};",
-          "export const and = () => expr;",
-          "export const desc = () => expr;",
-          "export const eq = () => expr;",
-          "export const isNull = () => expr;",
-          "export const lte = () => expr;",
-          "export const ne = () => expr;",
-          "export default expr;",
-        ].join("\n");
-      }
-
-      const pluginSqlStub = generatePluginSqlStub(strippedId);
-      if (pluginSqlStub) return pluginSqlStub;
-
-      // Capacitor native plugins — mobile-only, cloud builds stub them.
-      // Must export the exact named identifiers used in app-core sources.
-      if (capacitorNativeScopeRe.test(strippedId)) {
-        const capPkg = strippedId.split("/").slice(0, 2).join("/");
-        if (capPkg === "@capacitor/haptics") {
-          return [
-            "const noop = () => {};const noopObj = new Proxy({}, { get: () => noop });",
-            "export const Haptics = noopObj;",
-            "export const ImpactStyle = Object.freeze({ Heavy: 'HEAVY', Medium: 'MEDIUM', Light: 'LIGHT' });",
-            "export const NotificationType = Object.freeze({ Success: 'SUCCESS', Warning: 'WARNING', Error: 'ERROR' });",
-            "export default noopObj;",
-          ].join("\n");
-        }
-        if (capPkg === "@capacitor/keyboard") {
-          return [
-            "const noop = () => {};const noopObj = new Proxy({}, { get: () => noop });",
-            "export const Keyboard = noopObj;",
-            "export default noopObj;",
-          ].join("\n");
-        }
-        if (capPkg === "@capacitor/preferences") {
-          return [
-            "const noop = () => Promise.resolve({ value: null });const noopObj = new Proxy({}, { get: () => noop });",
-            "export const Preferences = noopObj;",
-            "export default noopObj;",
-          ].join("\n");
-        }
-        if (capPkg === "@capacitor/push-notifications") {
-          return [
-            "const asyncNoop = async () => {};",
-            "const listenerHandle = { remove: asyncNoop };",
-            "export const PushNotifications = {",
-            "  requestPermissions: async () => ({ receive: 'denied' }),",
-            "  addListener: async () => listenerHandle,",
-            "  register: asyncNoop,",
-            "  removeAllListeners: asyncNoop,",
-            "};",
-            "export default PushNotifications;",
-          ].join("\n");
-        }
-        if (capPkg === "@capacitor/barcode-scanner") {
-          return [
-            "const asyncNoop = async () => ({ ScanResult: '' });",
-            "export const CapacitorBarcodeScanner = { scanBarcode: asyncNoop };",
-            "export const CapacitorBarcodeScannerTypeHint = Object.freeze({ QR_CODE: 'QR_CODE' });",
-            "export default CapacitorBarcodeScanner;",
-          ].join("\n");
-        }
-        // Generic Capacitor plugin stub
-        return [
-          "const noop = () => {};const stub = new Proxy({}, { get: () => noop });",
-          "export default stub;",
-        ].join("\n");
-      }
-
-      // Generic fallback for other native modules
-      return "export default {};\n";
+      return generateNativeModuleStub(strippedId, capacitorNativeScopeRe);
     },
     // Patch @elizaos/core browser entry at transform time to add missing
     // exports and fix browser-incompatible patterns.
