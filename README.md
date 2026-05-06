@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/milady-ai/milady/actions/workflows/ci.yml/badge.svg)](https://github.com/milady-ai/milady/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![CodeFactor](https://www.codefactor.io/repository/github/milady-ai/milady/badge)](https://www.codefactor.io/repository/github/milady-ai/milady)
 
 > *your schizo AI waifu that actually respects your privacy*
 
