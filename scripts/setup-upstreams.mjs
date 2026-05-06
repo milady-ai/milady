@@ -1181,10 +1181,10 @@ export function ensurePluginDependencyLinks(
     });
 
     const packageDependencies = {
-      ...(packageJson.peerDependencies ?? {}),
-      ...(packageJson.dependencies ?? {}),
-      ...(packageJson.optionalDependencies ?? {}),
-      ...(packageJson.devDependencies ?? {}),
+      ...packageJson.peerDependencies,
+      ...packageJson.dependencies,
+      ...packageJson.optionalDependencies,
+      ...packageJson.devDependencies,
     };
     const dependencyNames = Object.keys(packageDependencies);
     if (dependencyNames.length === 0) {

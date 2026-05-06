@@ -1124,6 +1124,67 @@ function generateNodeBuiltinStub(moduleId: string, req = _require): string {
   return lines.join("\n");
 }
 
+const SQL_TABLE_EXPORT_NAMES = [
+  "agentTable",
+  "approvalRequestTable",
+  "authAuditEventTable",
+  "authBootstrapJtiSeenTable",
+  "authIdentityCreatedAtDefault",
+  "authIdentityTable",
+  "authOwnerBindingTable",
+  "authOwnerLoginTokenTable",
+  "authSessionTable",
+  "cacheTable",
+  "channelTable",
+  "channelParticipantsTable",
+  "componentTable",
+  "embeddingTable",
+  "entityTable",
+  "entityIdentityTable",
+  "entityMergeCandidateTable",
+  "factCandidateTable",
+  "logTable",
+  "longTermMemories",
+  "memoryTable",
+  "memoryAccessLogs",
+  "messageTable",
+  "messageServerTable",
+  "messageServerAgentsTable",
+  "pairingAllowlistTable",
+  "pairingRequestTable",
+  "participantTable",
+  "relationshipTable",
+  "roomTable",
+  "serverTable",
+  "sessionSummaries",
+  "taskTable",
+  "worldTable",
+];
+
+function generatePluginSqlStub(strippedId: string): string | null {
+  if (
+    strippedId !== "@elizaos/plugin-sql/schema" &&
+    strippedId !== "@elizaos/plugin-sql"
+  ) {
+    return null;
+  }
+
+  return [
+    "const handler = { get: () => table, apply: () => table };",
+    "const table = new Proxy(function table() {}, handler);",
+    ...SQL_TABLE_EXPORT_NAMES.map((name) => `export const ${name} = table;`),
+    ...(strippedId === "@elizaos/plugin-sql"
+      ? [
+          "export const PGLITE_ERROR_CODES = Object.freeze({ ACTIVE_LOCK: 'ACTIVE_LOCK', CORRUPT_DATA: 'CORRUPT_DATA', MANUAL_RESET_REQUIRED: 'MANUAL_RESET_REQUIRED' });",
+          "export const getPgliteErrorCode = () => null;",
+          "export const createPgliteInitError = (_code, message) => new Error(message);",
+          "export const plugin = table;",
+        ]
+      : []),
+    "export default table;",
+  ].join("\n");
+}
+
 /**
  * Dev-mode plugin that stubs native-only packages.  In production builds
  * rollupOptions.external handles this, but the Vite dev server still tries
@@ -1436,97 +1497,8 @@ function nativeModuleStubPlugin(): Plugin {
         ].join("\n");
       }
 
-      if (strippedId === "@elizaos/plugin-sql/schema") {
-        return [
-          "const handler = { get: () => table, apply: () => table };",
-          "const table = new Proxy(function table() {}, handler);",
-          ...[
-            "agentTable",
-            "approvalRequestTable",
-            "authAuditEventTable",
-            "authBootstrapJtiSeenTable",
-            "authIdentityCreatedAtDefault",
-            "authIdentityTable",
-            "authOwnerBindingTable",
-            "authOwnerLoginTokenTable",
-            "authSessionTable",
-            "cacheTable",
-            "channelTable",
-            "channelParticipantsTable",
-            "componentTable",
-            "embeddingTable",
-            "entityTable",
-            "entityIdentityTable",
-            "entityMergeCandidateTable",
-            "factCandidateTable",
-            "logTable",
-            "longTermMemories",
-            "memoryTable",
-            "memoryAccessLogs",
-            "messageTable",
-            "messageServerTable",
-            "messageServerAgentsTable",
-            "pairingAllowlistTable",
-            "pairingRequestTable",
-            "participantTable",
-            "relationshipTable",
-            "roomTable",
-            "serverTable",
-            "sessionSummaries",
-            "taskTable",
-            "worldTable",
-          ].map((name) => `export const ${name} = table;`),
-          "export default table;",
-        ].join("\n");
-      }
-
-      if (strippedId === "@elizaos/plugin-sql") {
-        return [
-          "const handler = { get: () => table, apply: () => table };",
-          "const table = new Proxy(function table() {}, handler);",
-          ...[
-            "agentTable",
-            "approvalRequestTable",
-            "authAuditEventTable",
-            "authBootstrapJtiSeenTable",
-            "authIdentityCreatedAtDefault",
-            "authIdentityTable",
-            "authOwnerBindingTable",
-            "authOwnerLoginTokenTable",
-            "authSessionTable",
-            "cacheTable",
-            "channelTable",
-            "channelParticipantsTable",
-            "componentTable",
-            "embeddingTable",
-            "entityTable",
-            "entityIdentityTable",
-            "entityMergeCandidateTable",
-            "factCandidateTable",
-            "logTable",
-            "longTermMemories",
-            "memoryTable",
-            "memoryAccessLogs",
-            "messageTable",
-            "messageServerTable",
-            "messageServerAgentsTable",
-            "pairingAllowlistTable",
-            "pairingRequestTable",
-            "participantTable",
-            "relationshipTable",
-            "roomTable",
-            "serverTable",
-            "sessionSummaries",
-            "taskTable",
-            "worldTable",
-          ].map((name) => `export const ${name} = table;`),
-          "export const PGLITE_ERROR_CODES = Object.freeze({ ACTIVE_LOCK: 'ACTIVE_LOCK', CORRUPT_DATA: 'CORRUPT_DATA', MANUAL_RESET_REQUIRED: 'MANUAL_RESET_REQUIRED' });",
-          "export const getPgliteErrorCode = () => null;",
-          "export const createPgliteInitError = (_code, message) => new Error(message);",
-          "export const plugin = table;",
-          "export default table;",
-        ].join("\n");
-      }
+      const pluginSqlStub = generatePluginSqlStub(strippedId);
+      if (pluginSqlStub) return pluginSqlStub;
 
       // Capacitor native plugins — mobile-only, cloud builds stub them.
       // Must export the exact named identifiers used in app-core sources.

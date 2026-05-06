@@ -1,0 +1,5 @@
+exclude:
+  - "apps/app/test/electrobun-packaged/mock-api.ts"
+  - "scripts/disable-local-eliza-workspace.mjs"
+  - "scripts/init-submodules.mjs"
+  - "scripts/patch-eliza-electrobun-windows-smoke-startup.mjs"
