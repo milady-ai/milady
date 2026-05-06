@@ -465,6 +465,423 @@ export function isTrackedAsGitlink(
   }
 }
 
+function emptySubmoduleInitResult(submodules = []) {
+  return { initialized: 0, alreadyInitialized: 0, failed: 0, submodules };
+}
+
+function syncSubmoduleUrls(rootDir, { exec, logError }) {
+  try {
+    exec("git submodule sync --recursive", {
+      cwd: rootDir,
+      stdio: "inherit",
+    });
+  } catch (err) {
+    logError(
+      `[init-submodules] git submodule sync --recursive failed: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+    );
+  }
+}
+
+function readSubmoduleStatus(submodulePath, { cwd, exec }) {
+  try {
+    return exec(`git submodule status -- "${submodulePath}"`, {
+      cwd,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+  } catch {
+    return null;
+  }
+}
+
+function hasDirtySubmoduleCheckout(submodulePath, { cwd, exec, log, label }) {
+  try {
+    const checkoutRoot = resolve(cwd, submodulePath);
+    const dirty = exec("git status --porcelain", {
+      cwd: checkoutRoot,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+    if (!dirty) {
+      return false;
+    }
+    log(`[init-submodules] ⚠ ${label} has uncommitted local changes`);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function resolveRootSubmoduleInitPlan(
+  submodule,
+  { rootDir, exists, exec, log },
+) {
+  const checkoutReady = isSubmoduleCheckoutReady(submodule.path, {
+    rootDir,
+    exists,
+  });
+  let needsInit = !checkoutReady;
+  let initReason = checkoutReady ? "" : "checkout is incomplete";
+  let hasUncommittedChanges = false;
+  const status = readSubmoduleStatus(submodule.path, { cwd: rootDir, exec });
+
+  if (status === null) {
+    return {
+      needsInit: true,
+      initReason: initReason || "status check failed",
+      hasUncommittedChanges,
+    };
+  }
+
+  if (status.startsWith("-")) {
+    needsInit = true;
+    initReason = "submodule is not initialized";
+  } else if (status.startsWith("+")) {
+    needsInit = true;
+    initReason = "checkout is not at the parent repo's recorded commit";
+    log(
+      `[init-submodules] ${submodule.name} (${submodule.path}) is not at the parent repo's recorded commit`,
+    );
+  } else {
+    hasUncommittedChanges = hasDirtySubmoduleCheckout(submodule.path, {
+      cwd: rootDir,
+      exec,
+      log,
+      label: `${submodule.name} (${submodule.path})`,
+    });
+  }
+
+  return { needsInit, initReason, hasUncommittedChanges };
+}
+
+function initializeRootSubmoduleCheckout(
+  submodule,
+  { rootDir, exists, exec, log },
+) {
+  const recurseFlag = NO_RECURSE_SUBMODULES.has(submodule.path)
+    ? ""
+    : " --recursive";
+  try {
+    exec(`git submodule sync -- "${submodule.path}"`, {
+      cwd: rootDir,
+      stdio: "inherit",
+    });
+  } catch {}
+  try {
+    exec(`git submodule update --init${recurseFlag} "${submodule.path}"`, {
+      cwd: rootDir,
+      stdio: "inherit",
+    });
+  } catch {
+    log(
+      `[init-submodules] Shallow init failed for ${submodule.name}, retrying with full fetch...`,
+    );
+    initializeRootSubmoduleFromFullFetch(submodule, {
+      rootDir,
+      exists,
+      exec,
+      log,
+      recurseFlag,
+    });
+  }
+  if (!isSubmoduleCheckoutReady(submodule.path, { rootDir, exists })) {
+    throw new Error(
+      `submodule checkout is still incomplete after update: ${submodule.path}`,
+    );
+  }
+}
+
+function initializeRootSubmoduleFromFullFetch(
+  submodule,
+  { rootDir, exists, exec, log, recurseFlag },
+) {
+  try {
+    try {
+      exec(`git submodule init "${submodule.path}"`, {
+        cwd: rootDir,
+        stdio: "inherit",
+      });
+    } catch {}
+    const smRoot = resolve(rootDir, submodule.path);
+    if (exists(smRoot) && exists(resolve(smRoot, ".git"))) {
+      exec("git fetch --unshallow || git fetch --all", {
+        cwd: smRoot,
+        stdio: "inherit",
+        shell: true,
+      });
+    }
+    exec(`git submodule update${recurseFlag} "${submodule.path}"`, {
+      cwd: rootDir,
+      stdio: "inherit",
+    });
+  } catch {
+    hydrateSubmoduleFromConfiguredBranch(submodule, {
+      rootDir,
+      exec,
+      remove: rmSync,
+      log,
+    });
+  }
+}
+
+function processRootSubmodule(
+  submodule,
+  { rootDir, exists, exec, log, logError, shouldSkipSubmodule },
+) {
+  const skipReason = getSubmoduleSkipReason(submodule.path);
+  if (shouldSkipSubmodule(submodule.path)) {
+    log(
+      `[init-submodules] Skipping ${submodule.name} (${submodule.path}) because ${skipReason ?? "local upstreams are disabled"}`,
+    );
+    return "skipped";
+  }
+
+  if (!isTrackedAsGitlink(submodule.path, { exec, cwd: rootDir })) {
+    log(
+      `[init-submodules] Skipping ${submodule.name} (${submodule.path}) because the parent repo tracks that path as regular files, not a gitlink`,
+    );
+    return "skipped";
+  }
+
+  const plan = resolveRootSubmoduleInitPlan(submodule, {
+    rootDir,
+    exists,
+    exec,
+    log,
+  });
+  if (plan.needsInit && plan.hasUncommittedChanges) {
+    logError(
+      `[init-submodules] Refusing to update ${submodule.name} (${submodule.path}) because it has uncommitted local changes`,
+    );
+    return "failed";
+  }
+  if (!plan.needsInit) {
+    return "alreadyInitialized";
+  }
+
+  log(
+    `[init-submodules] Initializing ${submodule.name} (${submodule.path})${
+      plan.initReason ? ` because ${plan.initReason}` : ""
+    }...`,
+  );
+  try {
+    initializeRootSubmoduleCheckout(submodule, { rootDir, exists, exec, log });
+    log(`[init-submodules] ${submodule.name} initialized successfully`);
+    return "initialized";
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    logError(
+      `[init-submodules] Failed to initialize ${submodule.name} (${submodule.path}): ${message}`,
+    );
+    return "failed";
+  }
+}
+
+function processRootSubmodules(submodules, options) {
+  const summary = { initialized: 0, alreadyInitialized: 0, failed: 0 };
+  for (const submodule of submodules) {
+    const result = processRootSubmodule(submodule, options);
+    if (result in summary) {
+      summary[result]++;
+    }
+  }
+  return summary;
+}
+
+function resolveNestedSubmoduleInitPlan(
+  nestedSubmodule,
+  rootRelativePath,
+  { elizaRoot, exec, log },
+) {
+  let needsInit = true;
+  let initReason = "status check failed";
+  let hasUncommittedChanges = false;
+  const status = readSubmoduleStatus(nestedSubmodule.path, {
+    cwd: elizaRoot,
+    exec,
+  });
+
+  if (status === null) {
+    return { needsInit, initReason, hasUncommittedChanges };
+  }
+
+  if (status.startsWith("-")) {
+    initReason = "submodule is not initialized";
+  } else if (status.startsWith("+")) {
+    initReason = "checkout is not at eliza's recorded commit";
+  } else {
+    needsInit = false;
+    initReason = "";
+  }
+
+  if (!status.startsWith("-")) {
+    hasUncommittedChanges = hasDirtySubmoduleCheckout(nestedSubmodule.path, {
+      cwd: elizaRoot,
+      exec,
+      log,
+      label: `nested ${nestedSubmodule.name} (${rootRelativePath})`,
+    });
+  }
+
+  return { needsInit, initReason, hasUncommittedChanges };
+}
+
+function updateNestedSubmodule(nestedSubmodule, rootRelativePath, options) {
+  const { elizaRoot, exec, log, logError } = options;
+  try {
+    exec(
+      `git submodule update --init --recursive -- "${nestedSubmodule.path}"`,
+      {
+        cwd: elizaRoot,
+        stdio: "inherit",
+      },
+    );
+    return true;
+  } catch (err) {
+    try {
+      hydrateSubmoduleFromConfiguredBranch(nestedSubmodule, {
+        rootDir: elizaRoot,
+        exec,
+        remove: rmSync,
+        log,
+      });
+      return true;
+    } catch (fallbackErr) {
+      logError(
+        `[init-submodules] Failed to initialize nested ${nestedSubmodule.name} (${rootRelativePath}): ${
+          fallbackErr instanceof Error
+            ? fallbackErr.message
+            : String(fallbackErr)
+        }`,
+      );
+      logError(
+        `[init-submodules] Original nested submodule error: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      );
+      return false;
+    }
+  }
+}
+
+function processNestedSubmodule(nestedSubmodule, options) {
+  const { elizaRoot, exec, log, logError } = options;
+  const rootRelativePath = `eliza/${nestedSubmodule.path}`;
+  const skipReason = getSubmoduleSkipReason(rootRelativePath, {
+    skipLocal: false,
+  });
+  if (skipReason) {
+    log(
+      `[init-submodules] Skipping nested ${nestedSubmodule.name} (${rootRelativePath}) because ${skipReason}`,
+    );
+    return "skipped";
+  }
+  if (!isTrackedAsGitlink(nestedSubmodule.path, { exec, cwd: elizaRoot })) {
+    return "skipped";
+  }
+
+  const plan = resolveNestedSubmoduleInitPlan(
+    nestedSubmodule,
+    rootRelativePath,
+    {
+      elizaRoot,
+      exec,
+      log,
+    },
+  );
+  if (!plan.needsInit) {
+    return "skipped";
+  }
+  if (plan.hasUncommittedChanges) {
+    logError(
+      `[init-submodules] Refusing to update nested ${nestedSubmodule.name} (${rootRelativePath}) because it has uncommitted local changes`,
+    );
+    return "failed";
+  }
+
+  log(
+    `[init-submodules] Updating nested ${nestedSubmodule.name} (${rootRelativePath})${
+      plan.initReason ? ` because ${plan.initReason}` : ""
+    }...`,
+  );
+  return updateNestedSubmodule(nestedSubmodule, rootRelativePath, options)
+    ? "updated"
+    : "failed";
+}
+
+function ensureNestedElizaSubmodules({
+  rootDir,
+  exists,
+  exec,
+  log,
+  logError,
+  shouldSkipSubmodule,
+}) {
+  if (
+    shouldSkipSubmodule("eliza") ||
+    !exists(resolve(rootDir, "eliza", ".gitmodules"))
+  ) {
+    return 0;
+  }
+
+  const elizaRoot = resolve(rootDir, "eliza");
+  log(
+    "[init-submodules] Ensuring nested checkouts under eliza/ (cloud, plugins, …)…",
+  );
+  try {
+    exec("git submodule sync --recursive", {
+      cwd: elizaRoot,
+      stdio: "inherit",
+    });
+
+    let failed = 0;
+    for (const nestedSubmodule of loadTrackedSubmodules({
+      exec,
+      cwd: elizaRoot,
+    })) {
+      if (
+        processNestedSubmodule(nestedSubmodule, {
+          elizaRoot,
+          exec,
+          log,
+          logError,
+        }) === "failed"
+      ) {
+        failed++;
+      }
+    }
+    return failed;
+  } catch (err) {
+    logError(
+      `[init-submodules] Unexpected error initializing nested eliza submodules: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+    );
+    return 0;
+  }
+}
+
+function logInitSubmodulesSummary(
+  { initialized, alreadyInitialized, failed },
+  { log, logError },
+) {
+  if (failed > 0) {
+    logError(
+      `[init-submodules] Initialized ${initialized}, already ready ${alreadyInitialized}, failed ${failed}.`,
+    );
+    return;
+  }
+  if (initialized === 0) {
+    log("[init-submodules] All submodules already initialized");
+    return;
+  }
+  log(
+    `[init-submodules] Initialized ${initialized} submodule(s); ${alreadyInitialized} already ready.`,
+  );
+}
+
 export function runInitSubmodules({
   rootDir = root,
   exists = existsSync,
@@ -476,19 +893,19 @@ export function runInitSubmodules({
   const gitDir = resolve(rootDir, ".git");
   if (!exists(gitDir)) {
     log("[init-submodules] Not a git repository — skipping");
-    return { initialized: 0, alreadyInitialized: 0, failed: 0, submodules: [] };
+    return emptySubmoduleInitResult();
   }
 
   const gitmodulesPath = resolve(rootDir, ".gitmodules");
   if (!exists(gitmodulesPath)) {
     log("[init-submodules] No .gitmodules found — skipping");
-    return { initialized: 0, alreadyInitialized: 0, failed: 0, submodules: [] };
+    return emptySubmoduleInitResult();
   }
 
   const submodules = loadTrackedSubmodules({ exec, cwd: rootDir });
   if (submodules.length === 0) {
     log("[init-submodules] No tracked submodules found — skipping");
-    return { initialized: 0, alreadyInitialized: 0, failed: 0, submodules: [] };
+    return emptySubmoduleInitResult();
   }
 
   const hasLegacyRootCloudPaths = submodules.some((s) => s.path === "cloud");
@@ -505,334 +922,26 @@ export function runInitSubmodules({
     exists,
   });
 
-  // Re-align every submodule's .git/config remote URL with .gitmodules before
-  // doing anything else. Without this, flipping a submodule URL upstream (e.g.
-  // retargeting eliza between elizaOS/eliza and milady-ai/eliza) leaves the
-  // local .git/modules/<name>/config stuck on the old remote — so `git pull`
-  // later fails to fetch commits that only exist on the new remote. The
-  // per-submodule sync below only runs when `needsInit` is true, which misses
-  // the common case where the submodule is still checked out cleanly.
-  try {
-    exec("git submodule sync --recursive", {
-      cwd: rootDir,
-      stdio: "inherit",
-    });
-  } catch (err) {
-    logError(
-      `[init-submodules] git submodule sync --recursive failed: ${
-        err instanceof Error ? err.message : String(err)
-      }`,
-    );
-  }
+  syncSubmoduleUrls(rootDir, { exec, logError });
 
-  let initialized = 0;
-  let alreadyInitialized = 0;
-  let failed = 0;
+  const summary = processRootSubmodules(submodules, {
+    rootDir,
+    exists,
+    exec,
+    log,
+    logError,
+    shouldSkipSubmodule,
+  });
+  summary.failed += ensureNestedElizaSubmodules({
+    rootDir,
+    exists,
+    exec,
+    log,
+    logError,
+    shouldSkipSubmodule,
+  });
 
-  for (const submodule of submodules) {
-    const skipReason = getSubmoduleSkipReason(submodule.path);
-    if (shouldSkipSubmodule(submodule.path)) {
-      log(
-        `[init-submodules] Skipping ${submodule.name} (${submodule.path}) because ${skipReason ?? "local upstreams are disabled"}`,
-      );
-      continue;
-    }
-
-    if (!isTrackedAsGitlink(submodule.path, { exec, cwd: rootDir })) {
-      log(
-        `[init-submodules] Skipping ${submodule.name} (${submodule.path}) because the parent repo tracks that path as regular files, not a gitlink`,
-      );
-      continue;
-    }
-
-    const checkoutReady = isSubmoduleCheckoutReady(submodule.path, {
-      rootDir,
-      exists,
-    });
-    let needsInit = !checkoutReady;
-    let initReason = checkoutReady ? "" : "checkout is incomplete";
-
-    let hasUncommittedChanges = false;
-    try {
-      const status = exec(`git submodule status -- "${submodule.path}"`, {
-        cwd: rootDir,
-        encoding: "utf8",
-        stdio: ["ignore", "pipe", "ignore"],
-      }).trim();
-      if (status.startsWith("-")) {
-        needsInit = true;
-        initReason = "submodule is not initialized";
-      } else if (status.startsWith("+")) {
-        needsInit = true;
-        initReason = "checkout is not at the parent repo's recorded commit";
-        log(
-          `[init-submodules] ${submodule.name} (${submodule.path}) is not at the parent repo's recorded commit`,
-        );
-      }
-      if (!status.startsWith("-")) {
-        try {
-          const smRoot = resolve(rootDir, submodule.path);
-          const dirty = exec("git status --porcelain", {
-            cwd: smRoot,
-            encoding: "utf8",
-            stdio: ["ignore", "pipe", "ignore"],
-          }).trim();
-          if (dirty) {
-            hasUncommittedChanges = true;
-            log(
-              `[init-submodules] ⚠ ${submodule.name} (${submodule.path}) has uncommitted local changes`,
-            );
-          }
-        } catch {}
-      }
-    } catch {
-      needsInit = true;
-      if (!initReason) {
-        initReason = "status check failed";
-      }
-    }
-
-    if (needsInit && hasUncommittedChanges) {
-      failed++;
-      logError(
-        `[init-submodules] Refusing to update ${submodule.name} (${submodule.path}) because it has uncommitted local changes`,
-      );
-      continue;
-    }
-
-    if (!needsInit) {
-      alreadyInitialized++;
-      continue;
-    }
-
-    log(
-      `[init-submodules] Initializing ${submodule.name} (${submodule.path})${
-        initReason ? ` because ${initReason}` : ""
-      }...`,
-    );
-    try {
-      const recurseFlag = NO_RECURSE_SUBMODULES.has(submodule.path)
-        ? ""
-        : " --recursive";
-      try {
-        exec(`git submodule sync -- "${submodule.path}"`, {
-          cwd: rootDir,
-          stdio: "inherit",
-        });
-      } catch {}
-      try {
-        exec(`git submodule update --init${recurseFlag} "${submodule.path}"`, {
-          cwd: rootDir,
-          stdio: "inherit",
-        });
-      } catch (_shallowErr) {
-        log(
-          `[init-submodules] Shallow init failed for ${submodule.name}, retrying with full fetch...`,
-        );
-        try {
-          try {
-            exec(`git submodule init "${submodule.path}"`, {
-              cwd: rootDir,
-              stdio: "inherit",
-            });
-          } catch {}
-          const smRoot = resolve(rootDir, submodule.path);
-          if (exists(smRoot) && exists(resolve(smRoot, ".git"))) {
-            exec("git fetch --unshallow || git fetch --all", {
-              cwd: smRoot,
-              stdio: "inherit",
-              shell: true,
-            });
-          }
-          exec(`git submodule update${recurseFlag} "${submodule.path}"`, {
-            cwd: rootDir,
-            stdio: "inherit",
-          });
-        } catch {
-          hydrateSubmoduleFromConfiguredBranch(submodule, {
-            rootDir,
-            exec,
-            remove: rmSync,
-            log,
-          });
-        }
-      }
-      if (
-        !isSubmoduleCheckoutReady(submodule.path, {
-          rootDir,
-          exists,
-        })
-      ) {
-        throw new Error(
-          `submodule checkout is still incomplete after update: ${submodule.path}`,
-        );
-      }
-      initialized++;
-      log(`[init-submodules] ${submodule.name} initialized successfully`);
-    } catch (err) {
-      failed++;
-      const message = err instanceof Error ? err.message : String(err);
-      logError(
-        `[init-submodules] Failed to initialize ${submodule.name} (${submodule.path}): ${message}`,
-      );
-    }
-  }
-
-  if (
-    !shouldSkipSubmodule("eliza") &&
-    exists(resolve(rootDir, "eliza", ".gitmodules"))
-  ) {
-    const elizaRoot = resolve(rootDir, "eliza");
-    log(
-      "[init-submodules] Ensuring nested checkouts under eliza/ (cloud, plugins, …)…",
-    );
-    try {
-      // Sync nested config first so git does not keep stale URLs from older
-      // eliza merges around in .git/config.
-      exec("git submodule sync --recursive", {
-        cwd: elizaRoot,
-        stdio: "inherit",
-      });
-
-      const nestedSubmodules = loadTrackedSubmodules({
-        exec,
-        cwd: elizaRoot,
-      });
-
-      for (const nestedSubmodule of nestedSubmodules) {
-        const rootRelativePath = `eliza/${nestedSubmodule.path}`;
-        const skipReason = getSubmoduleSkipReason(rootRelativePath, {
-          skipLocal: false,
-        });
-        if (skipReason) {
-          log(
-            `[init-submodules] Skipping nested ${nestedSubmodule.name} (${rootRelativePath}) because ${skipReason}`,
-          );
-          continue;
-        }
-
-        if (
-          !isTrackedAsGitlink(nestedSubmodule.path, {
-            exec,
-            cwd: elizaRoot,
-          })
-        ) {
-          continue;
-        }
-
-        let needsInit = true;
-        let initReason = "status check failed";
-        let hasUncommittedChanges = false;
-        try {
-          const status = exec(
-            `git submodule status -- "${nestedSubmodule.path}"`,
-            {
-              cwd: elizaRoot,
-              encoding: "utf8",
-              stdio: ["ignore", "pipe", "ignore"],
-            },
-          ).trim();
-          if (status.startsWith("-")) {
-            needsInit = true;
-            initReason = "submodule is not initialized";
-          } else if (status.startsWith("+")) {
-            needsInit = true;
-            initReason = "checkout is not at eliza's recorded commit";
-          } else {
-            needsInit = false;
-            initReason = "";
-          }
-
-          if (!status.startsWith("-")) {
-            try {
-              const nestedRoot = resolve(elizaRoot, nestedSubmodule.path);
-              const dirty = exec("git status --porcelain", {
-                cwd: nestedRoot,
-                encoding: "utf8",
-                stdio: ["ignore", "pipe", "ignore"],
-              }).trim();
-              if (dirty) {
-                hasUncommittedChanges = true;
-                log(
-                  `[init-submodules] ⚠ nested ${nestedSubmodule.name} (${rootRelativePath}) has uncommitted local changes`,
-                );
-              }
-            } catch {}
-          }
-        } catch {
-          needsInit = true;
-        }
-
-        if (!needsInit) {
-          continue;
-        }
-
-        if (hasUncommittedChanges) {
-          failed++;
-          logError(
-            `[init-submodules] Refusing to update nested ${nestedSubmodule.name} (${rootRelativePath}) because it has uncommitted local changes`,
-          );
-          continue;
-        }
-
-        try {
-          log(
-            `[init-submodules] Updating nested ${nestedSubmodule.name} (${rootRelativePath})${
-              initReason ? ` because ${initReason}` : ""
-            }...`,
-          );
-          exec(
-            `git submodule update --init --recursive -- "${nestedSubmodule.path}"`,
-            {
-              cwd: elizaRoot,
-              stdio: "inherit",
-            },
-          );
-        } catch (err) {
-          try {
-            hydrateSubmoduleFromConfiguredBranch(nestedSubmodule, {
-              rootDir: elizaRoot,
-              exec,
-              remove: rmSync,
-              log,
-            });
-          } catch (fallbackErr) {
-            failed++;
-            logError(
-              `[init-submodules] Failed to initialize nested ${nestedSubmodule.name} (${rootRelativePath}): ${
-                fallbackErr instanceof Error
-                  ? fallbackErr.message
-                  : String(fallbackErr)
-              }`,
-            );
-            logError(
-              `[init-submodules] Original nested submodule error: ${
-                err instanceof Error ? err.message : String(err)
-              }`,
-            );
-          }
-        }
-      }
-    } catch (err) {
-      logError(
-        `[init-submodules] Unexpected error initializing nested eliza submodules: ${
-          err instanceof Error ? err.message : String(err)
-        }`,
-      );
-    }
-  }
-
-  if (failed > 0) {
-    logError(
-      `[init-submodules] Initialized ${initialized}, already ready ${alreadyInitialized}, failed ${failed}.`,
-    );
-  } else if (initialized === 0) {
-    log("[init-submodules] All submodules already initialized");
-  } else {
-    log(
-      `[init-submodules] Initialized ${initialized} submodule(s); ${alreadyInitialized} already ready.`,
-    );
-  }
+  logInitSubmodulesSummary(summary, { log, logError });
 
   pruneSkippedCloudWorkspace({
     rootDir,
@@ -845,7 +954,7 @@ export function runInitSubmodules({
     log,
   });
 
-  return { initialized, alreadyInitialized, failed, submodules };
+  return { ...summary, submodules };
 }
 
 const isDirectRun =
