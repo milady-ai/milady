@@ -216,6 +216,37 @@ jobs:
       - name: Run type checker
         run: bun run verify:typecheck
 
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Published-only CI restores required non-eliza submodules during setup.
+          submodules: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup workspace dependencies
+        uses: ./.github/actions/setup-bun-workspace
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+          install-command: bun install --ignore-scripts --no-frozen-lockfile
+          skip-cloud-submodule: "true"
+          skip-local-upstreams-postinstall: "true"
+
+      - name: Restore eliza workspace paths for repo scripts
+        run: node scripts/restore-local-eliza-workspace.mjs
+
+      - name: Align nested eliza package resolution
+        run: node scripts/align-eliza-ci-node-modules.mjs
+
+      - name: Run auth gate regression test
+        run: bun run test:auth
+
   build:
     name: Build
     runs-on: ubuntu-24.04
@@ -276,3 +307,30 @@ jobs:
         run: bun run build:web
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  all-tests-passed:
+    name: All Tests Passed
+    if: ${{ always() }}
+    runs-on: ubuntu-24.04
+    needs:
+      - pre-review
+      - lint
+      - typecheck
+      - unit-tests
+      - build
+    steps:
+      - name: Require all CI gates to pass
+        env:
+          PRE_REVIEW: ${{ needs.pre-review.result }}
+          LINT: ${{ needs.lint.result }}
+          TYPECHECK: ${{ needs.typecheck.result }}
+          UNIT_TESTS: ${{ needs.unit-tests.result }}
+          BUILD: ${{ needs.build.result }}
+        run: |
+          set -euo pipefail
+          for result in "$PRE_REVIEW" "$LINT" "$TYPECHECK" "$UNIT_TESTS" "$BUILD"; do
+            if [ "$result" != "success" ]; then
+              echo "Required CI gate did not pass: $result"
+              exit 1
+            fi
+          done
