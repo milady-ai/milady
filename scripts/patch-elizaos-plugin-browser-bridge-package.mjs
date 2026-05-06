@@ -151,7 +151,7 @@ function writeStubPackage(packageDir, existingPackageJson = {}) {
     types: "./stub.d.ts",
     exports: {
       ...defaultExportsMap,
-      ...(existingPackageJson.exports ?? {}),
+      ...existingPackageJson.exports,
     },
   };
   // Conditional export form so resolvers pick the .d.ts for type imports

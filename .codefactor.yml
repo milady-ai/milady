@@ -3,3 +3,5 @@ exclude:
   - "scripts/disable-local-eliza-workspace.mjs"
   - "scripts/init-submodules.mjs"
   - "scripts/patch-eliza-electrobun-windows-smoke-startup.mjs"
+  - "skills/.defaults/nano-banana-pro/scripts/generate_image.py"
+  - "skills/.defaults/skill-creator/scripts/quick_validate.py"
