@@ -3,5 +3,7 @@ exclude:
   - "scripts/disable-local-eliza-workspace.mjs"
   - "scripts/init-submodules.mjs"
   - "scripts/patch-eliza-electrobun-windows-smoke-startup.mjs"
+  - ".github/trust-scoring.js"
+  - ".github/trust-scoring.cjs"
   - "skills/.defaults/nano-banana-pro/scripts/generate_image.py"
   - "skills/.defaults/skill-creator/scripts/quick_validate.py"

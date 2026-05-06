@@ -1,13 +1,11 @@
 #!/usr/bin/env node
 import crypto from "node:crypto";
+import {
+  lifeopsConnectorParams,
+  readLifeOpsApiBases,
+} from "./lib/lifeops-api-base.mjs";
 
 const GMAIL_BASE = "https://gmail.googleapis.com/gmail/v1/users/me";
-const DEFAULT_LIFEOPS_API_BASES = [
-  "http://127.0.0.1:31337",
-  "http://localhost:31337",
-  "http://127.0.0.1:2138",
-  "http://localhost:2138",
-];
 const METADATA_HEADERS = [
   "Subject",
   "From",
@@ -150,7 +148,7 @@ async function gmailJson(pathname, token, init = {}) {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",
       ...(init.body ? { "Content-Type": "application/json" } : {}),
-      ...(init.headers ?? {}),
+      ...init.headers,
     },
   });
   const text = await response.text();
@@ -169,7 +167,7 @@ async function lifeopsJson(baseUrl, pathname, init = {}) {
     headers: {
       Accept: "application/json",
       ...(init.body ? { "Content-Type": "application/json" } : {}),
-      ...(init.headers ?? {}),
+      ...init.headers,
     },
   });
   const text = await response.text();
@@ -220,34 +218,6 @@ async function listMetadata(token, query, maxResults, includeSpamTrash) {
   };
 }
 
-function normalizeBaseUrl(value) {
-  return value.replace(/\/+$/g, "");
-}
-
-function readLifeOpsApiBases() {
-  const explicit = readFlag("--api-base");
-  const env = [
-    process.env.MILADY_LIFEOPS_API_BASE,
-    process.env.LIFEOPS_API_BASE,
-    process.env.ELIZA_API_BASE,
-  ];
-  return [explicit, ...env]
-    .flatMap((value) => (value ?? "").split(","))
-    .map((value) => value.trim())
-    .filter(Boolean)
-    .concat(DEFAULT_LIFEOPS_API_BASES)
-    .map(normalizeBaseUrl)
-    .filter((value, index, all) => all.indexOf(value) === index);
-}
-
-function lifeopsConnectorParams(options) {
-  const params = new URLSearchParams();
-  if (options.side) params.set("side", options.side);
-  if (options.mode) params.set("mode", options.mode);
-  if (options.grantId) params.set("grantId", options.grantId);
-  return params;
-}
-
 function lifeopsGmailParams(options) {
   const params = lifeopsConnectorParams(options);
   params.set("forceSync", String(options.forceSync));
@@ -265,7 +235,7 @@ function lifeopsGmailParams(options) {
 async function resolveLifeOpsApiBase(options) {
   const statusPath = `/api/lifeops/connectors/google/status?${lifeopsConnectorParams(options).toString()}`;
   let lastError = null;
-  for (const baseUrl of readLifeOpsApiBases()) {
+  for (const baseUrl of readLifeOpsApiBases(readFlag("--api-base"))) {
     try {
       const status = await lifeopsJson(baseUrl, statusPath);
       return { baseUrl, status, statusPath };
