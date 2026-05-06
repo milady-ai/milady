@@ -218,6 +218,32 @@ runs:
     - name: Install dependencies
       shell: bash
       run: |
+        clean_bun_install_cache() {
+          node --input-type=module <<'NODE'
+        import fs from "node:fs";
+        import os from "node:os";
+        import path from "node:path";
+
+        const candidates = [
+          path.join(os.homedir(), ".bun", "install", "cache"),
+          process.env.BUN_INSTALL
+            ? path.join(process.env.BUN_INSTALL, "install", "cache")
+            : null,
+          process.env.LOCALAPPDATA
+            ? path.join(process.env.LOCALAPPDATA, "bun", "install", "cache")
+            : null,
+          process.env.XDG_CACHE_HOME
+            ? path.join(process.env.XDG_CACHE_HOME, "bun", "install", "cache")
+            : null,
+        ].filter(Boolean);
+
+        for (const cacheDir of new Set(candidates)) {
+          fs.rmSync(cacheDir, { recursive: true, force: true });
+          console.log(`Removed Bun install cache: ${cacheDir}`);
+        }
+        NODE
+        }
+
         for attempt in 1 2; do
           if ${{ inputs.install-command }}; then
             exit 0
@@ -225,8 +251,8 @@ runs:
           if [ "$attempt" -eq 2 ]; then
             exit 1
           fi
-          echo "Dependency install failed; retrying once after cleaning Bun's install cache."
-          rm -rf ~/.bun/install/cache
+          echo "Dependency install failed; retrying once after cleaning Bun install caches."
+          clean_bun_install_cache
           sleep 5
         done
       env:
