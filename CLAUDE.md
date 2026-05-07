@@ -184,7 +184,7 @@ Milady builds against published `@elizaos/*` packages by default (`alpha` dist-t
 Two source modes, switched by `bun run eliza:local` / `bun run eliza:packages` (full docs in [README — elizaOS source modes](README.md#elizaos-source-modes-eject--uneject)):
 
 - **`packages` (default):** `MILADY_ELIZA_SOURCE=packages`. Runtime resolves `@elizaos/*` from npm. Checked-in `tsconfig.json` matches [scripts/templates/tsconfig.packages-mode.json](scripts/templates/tsconfig.packages-mode.json). Enforced by [scripts/standalone-eliza-package-contract.test.ts](scripts/standalone-eliza-package-contract.test.ts).
-- **`local`:** `MILADY_ELIZA_SOURCE=local`. `bun run eliza:local` clones `eliza/` (default URL `https://github.com/milady-ai/eliza.git`), links workspace packages into `node_modules/@elizaos/*`, and swaps the root tsconfig to source-priority paths from [scripts/templates/tsconfig.local-mode.json](scripts/templates/tsconfig.local-mode.json). Use this when patching elizaOS upstream alongside Milady.
+- **`local`:** `MILADY_ELIZA_SOURCE=local`. `bun run eliza:local` clones `eliza/` (default URL `https://github.com/elizaOS/eliza.git`), links workspace packages into `node_modules/@elizaos/*`, and swaps the root tsconfig to source-priority paths from [scripts/templates/tsconfig.local-mode.json](scripts/templates/tsconfig.local-mode.json). Use this when patching elizaOS upstream alongside Milady.
 
 `MILADY_SKIP_LOCAL_UPSTREAMS=1` is the legacy equivalent of `MILADY_ELIZA_SOURCE=packages` — still respected for back-compat. Other knobs: `MILADY_ELIZAOS_DIST_TAG`, `MILADY_ELIZAOS_VERSION`, `MILADY_ELIZA_GIT_URL`, `MILADY_ELIZA_BRANCH` (see [scripts/lib/eliza-package-mode.mjs](scripts/lib/eliza-package-mode.mjs)).
 

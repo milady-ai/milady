@@ -55,7 +55,7 @@ jobs:
       - name: Initialize eliza source checkout
         run: |
           if [ ! -f eliza/package.json ]; then
-            git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/milady-ai/eliza.git eliza
+            git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza
           fi
 
       - name: Set version in package.json

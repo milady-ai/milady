@@ -99,11 +99,11 @@ test("distribution workflows consume the canonical channel policy", () => {
   assert.match(electrobun, /channel:\n\s+description: "Release channel/);
   assert.match(
     electrobun,
-    /git clone --depth=1 --branch "\$\{MILADY_ELIZA_BRANCH:-develop\}" https:\/\/github\.com\/milady-ai\/eliza\.git eliza/,
+    /git clone --depth=1 --branch "\$\{MILADY_ELIZA_BRANCH:-develop\}" https:\/\/github\.com\/elizaOS\/eliza\.git eliza/,
   );
   assert.match(
     electrobun,
-    /\n\s+build:\n\s+name: Build \$\{\{ matrix\.platform\.name \}\}[\s\S]*?name: Initialize eliza source checkout[\s\S]*?git clone --depth=1 --branch "\$\{MILADY_ELIZA_BRANCH:-develop\}" https:\/\/github\.com\/milady-ai\/eliza\.git eliza[\s\S]*?name: Initialize tracked workspace submodules/,
+    /\n\s+build:\n\s+name: Build \$\{\{ matrix\.platform\.name \}\}[\s\S]*?name: Initialize eliza source checkout[\s\S]*?git clone --depth=1 --branch "\$\{MILADY_ELIZA_BRANCH:-develop\}" https:\/\/github\.com\/elizaOS\/eliza\.git eliza[\s\S]*?name: Initialize tracked workspace submodules/,
   );
   assert.match(
     electrobun,
@@ -125,7 +125,7 @@ test("cloud image build stages Milady app into Dockerfile layout", () => {
 
   assert.match(
     cloudImage,
-    /git clone --depth=1 --branch "\$\{MILADY_ELIZA_BRANCH:-develop\}" https:\/\/github\.com\/milady-ai\/eliza\.git eliza/,
+    /git clone --depth=1 --branch "\$\{MILADY_ELIZA_BRANCH:-develop\}" https:\/\/github\.com\/elizaOS\/eliza\.git eliza/,
   );
   assert.match(cloudImage, /bun install --cwd eliza --no-frozen-lockfile/);
   assert.match(
@@ -187,7 +187,7 @@ test("release jobs hydrate eliza source without a root eliza gitlink", () => {
 
   assert.match(
     release,
-    /git clone --depth=1 --branch "\$\{MILADY_ELIZA_BRANCH:-develop\}" https:\/\/github\.com\/milady-ai\/eliza\.git eliza/,
+    /git clone --depth=1 --branch "\$\{MILADY_ELIZA_BRANCH:-develop\}" https:\/\/github\.com\/elizaOS\/eliza\.git eliza/,
   );
   assert.doesNotMatch(release, /git submodule sync -- eliza/);
   assert.doesNotMatch(release, /git submodule update --init --depth=1 eliza/);
@@ -212,7 +212,7 @@ test("npm release builds generate gitignored eliza i18n data before bundling", (
   for (const content of [release, reusableNpmPublish]) {
     assert.match(
       content,
-      /git clone --depth=1 --branch "\$\{MILADY_ELIZA_BRANCH:-develop\}" https:\/\/github\.com\/milady-ai\/eliza\.git eliza/,
+      /git clone --depth=1 --branch "\$\{MILADY_ELIZA_BRANCH:-develop\}" https:\/\/github\.com\/elizaOS\/eliza\.git eliza/,
     );
     assert.match(
       content,
@@ -364,7 +364,7 @@ test("Electrobun release has a lightweight PR contract workflow", () => {
   assert.match(workflowText, /MILADY_SKIP_LOCAL_UPSTREAMS: "1"/);
   assert.match(
     workflowText,
-    /git clone --depth=1 --branch "\$\{MILADY_ELIZA_BRANCH:-develop\}" https:\/\/github\.com\/milady-ai\/eliza\.git eliza/,
+    /git clone --depth=1 --branch "\$\{MILADY_ELIZA_BRANCH:-develop\}" https:\/\/github\.com\/elizaOS\/eliza\.git eliza/,
   );
   assert.match(
     workflowText,

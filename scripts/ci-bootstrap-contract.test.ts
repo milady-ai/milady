@@ -105,7 +105,7 @@ describe("CI bootstrap contract", () => {
     );
     const cloneCommand =
       'git clone --depth=1 --branch "$' +
-      '{MILADY_ELIZA_BRANCH:-develop}" https://github.com/milady-ai/eliza.git eliza';
+      '{MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza';
 
     expect(setupAction).toContain(cloneCommand);
     expect(setupAction).not.toContain("git submodule sync -- eliza");

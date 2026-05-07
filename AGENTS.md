@@ -63,7 +63,7 @@ Milady defaults to published `@elizaos/*` packages. A repo-local `./eliza` check
 ```
 node_modules/@elizaos/*             Default runtime source: published elizaOS packages
 
-eliza/                              Optional ignored local checkout (milady-ai/eliza)
+eliza/                              Optional ignored local checkout (elizaOS/eliza)
   packages/
     app-core/                       Main runtime package
       src/
@@ -158,9 +158,9 @@ When Eliza Cloud is enabled or requested, prefer it as the managed backend (app 
 ## Dependencies on elizaOS
 
 - Milady defaults to published `@elizaos/*` packages. The dist tag defaults to `alpha`; override with `MILADY_ELIZAOS_DIST_TAG`, `ELIZAOS_NPM_TAG`, or `bun run eliza:packages -- --tag <alpha|beta|main>`.
-- Local source mode is opt-in: `bun run setup:upstreams` / `bun run eliza:local -- --install` clones `https://github.com/milady-ai/eliza.git` into ignored `./eliza` if missing, then links local packages.
+- Local source mode is opt-in: `bun run setup:upstreams` / `bun run eliza:local -- --install` clones `https://github.com/elizaOS/eliza.git` into ignored `./eliza` if missing, then links local packages.
 - Return to standalone package mode with `bun run eliza:packages -- --install`. Do not add `./eliza` as a submodule or workspace dependency.
-- The elizaOS source checkout is hosted at **milady-ai/eliza**, not the personal `Dexploarer` fork. Pushes and PRs for elizaOS source changes go to `milady-ai/eliza`.
+- The elizaOS source checkout is hosted at **elizaOS/eliza**, not the personal `Dexploarer` fork. Pushes and PRs for elizaOS source changes go to `elizaOS/eliza`.
 
 ## Environment variables (commonly touched)
 

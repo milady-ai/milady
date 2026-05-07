@@ -460,7 +460,7 @@ jobs:
       - name: Initialize eliza source checkout
         run: |
           if [ ! -f eliza/package.json ]; then
-            git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/milady-ai/eliza.git eliza
+            git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza
           fi
       - name: Generate eliza i18n keyword data
         run: node scripts/run-eliza-app-core-script.mjs ensure-shared-i18n-data.mjs
@@ -548,7 +548,7 @@ jobs:
       - name: Init non-eliza submodules
         run: |
           if [ ! -f eliza/package.json ]; then
-            git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/milady-ai/eliza.git eliza
+            git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza
           fi
           node scripts/init-submodules.mjs
           node scripts/apply-eliza-ci-patches.mjs
@@ -627,7 +627,7 @@ jobs:
       - name: Init non-eliza submodules
         run: |
           if [ ! -f eliza/package.json ]; then
-            git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/milady-ai/eliza.git eliza
+            git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza
           fi
           node scripts/init-submodules.mjs
           node scripts/apply-eliza-ci-patches.mjs
@@ -664,7 +664,7 @@ jobs:
       - name: Init non-eliza submodules
         run: |
           if [ ! -f eliza/package.json ]; then
-            git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/milady-ai/eliza.git eliza
+            git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza
           fi
           node scripts/init-submodules.mjs
           node scripts/apply-eliza-ci-patches.mjs
@@ -697,7 +697,7 @@ jobs:
       - name: Init non-eliza submodules
         run: |
           if [ ! -f eliza/package.json ]; then
-            git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/milady-ai/eliza.git eliza
+            git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza
           fi
           node scripts/init-submodules.mjs
           node scripts/apply-eliza-ci-patches.mjs
@@ -861,7 +861,7 @@ jobs:
       - name: Initialize eliza docs
         run: |
           if [ ! -f eliza/packages/docs/docs.json ]; then
-            git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/milady-ai/eliza.git eliza
+            git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza
           fi
       - uses: actions/setup-node@v4
         with:
