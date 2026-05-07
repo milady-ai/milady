@@ -100,6 +100,17 @@ function linkElizaPackage(scopedPackageName, sourcePath, options = {}) {
   );
 }
 
+function linkRendererSourcePackage(scopedPackageName, sourcePath) {
+  for (const nodeModulesRoot of [
+    path.join(repoRoot, "node_modules"),
+    path.join(repoRoot, "apps", "app", "node_modules"),
+    path.join(repoRoot, "eliza", "node_modules"),
+    path.join(repoRoot, "eliza", "packages", "app-core", "node_modules"),
+  ]) {
+    linkScopedPackage(nodeModulesRoot, scopedPackageName, sourcePath);
+  }
+}
+
 function addEntryCandidate(candidates, value) {
   if (typeof value !== "string" || !value.trim()) return;
   candidates.push(value.replace(/^\.\//, ""));
@@ -286,6 +297,13 @@ if (fs.existsSync(path.join(elizaRoot, "package.json"))) {
   const sharedPath = path.join(elizaRoot, "packages", "shared");
   const sqlPluginPath = path.join(elizaRoot, "plugins", "plugin-sql");
   const sqlPluginTypescriptPath = path.join(sqlPluginPath, "typescript");
+  const sqlPluginRuntimeEntries = [
+    "dist/node/index.node.js",
+    "index.ts",
+    "drizzle/index.ts",
+    "schema/index.ts",
+    "types.ts",
+  ];
   const elizaCloudPluginPath = path.join(
     elizaRoot,
     "plugins",
@@ -300,7 +318,7 @@ if (fs.existsSync(path.join(elizaRoot, "package.json"))) {
   const sqlPluginRuntimePath = selectRuntimePackageRoot(
     "@elizaos/plugin-sql",
     sqlPluginTypescriptPath,
-    ["dist/node/index.node.js"],
+    sqlPluginRuntimeEntries,
   );
   const elizaCloudPluginRuntimePath = selectOptionalRuntimePackageRoot(
     "@elizaos/plugin-elizacloud",
@@ -315,9 +333,12 @@ if (fs.existsSync(path.join(elizaRoot, "package.json"))) {
   );
   linkElizaPackage("@elizaos/shared", sharedPath);
   if (elizaCloudPluginRuntimePath) {
-    linkElizaPackage("@elizaos/plugin-elizacloud", elizaCloudPluginRuntimePath);
+    linkRendererSourcePackage(
+      "@elizaos/plugin-elizacloud",
+      elizaCloudPluginRuntimePath,
+    );
   }
-  linkElizaPackage("@elizaos/plugin-sql", sqlPluginRuntimePath);
+  linkRendererSourcePackage("@elizaos/plugin-sql", sqlPluginRuntimePath);
   linkScopedPackage(
     path.join(sqlPluginPath, "node_modules"),
     "@elizaos/core",
@@ -334,7 +355,7 @@ if (fs.existsSync(path.join(elizaRoot, "package.json"))) {
     "dist/index.node.js",
     "dist/node/index.node.js",
   ]);
-  assertElizaPackageEntry("@elizaos/plugin-sql", ["dist/node/index.node.js"]);
+  assertElizaPackageEntry("@elizaos/plugin-sql", sqlPluginRuntimeEntries);
   if (elizaCloudPluginRuntimePath) {
     assertElizaPackageEntry(
       "@elizaos/plugin-elizacloud",

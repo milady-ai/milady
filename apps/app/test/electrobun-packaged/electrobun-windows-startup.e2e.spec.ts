@@ -7,7 +7,12 @@ import {
   PackagedDesktopHarness,
   resolvePackagedLauncher,
 } from "./packaged-app-helpers";
-import { hasPackagedRendererBootstrapRequests } from "./windows-bootstrap";
+import {
+  getPackagedRendererBootstrapProbeScript,
+  hasPackagedRendererBootstrapRequests,
+  isPackagedRendererBootstrapProbeReady,
+  type PackagedRendererBootstrapProbe,
+} from "./windows-bootstrap";
 
 const windowsTest = process.platform === "win32" ? test : null;
 
@@ -34,13 +39,38 @@ windowsTest?.(
 
       await harness.start();
 
-      await expect
-        .poll(() => hasPackagedRendererBootstrapRequests(api?.requests ?? []), {
-          timeout: process.env.CI ? 180_000 : 90_000,
-          message:
+      let lastProbe: PackagedRendererBootstrapProbe | null = null;
+      try {
+        await expect
+          .poll(
+            async () => {
+              lastProbe = await harness.eval<PackagedRendererBootstrapProbe>(
+                getPackagedRendererBootstrapProbeScript(),
+              );
+              return (
+                isPackagedRendererBootstrapProbeReady(
+                  lastProbe,
+                  api?.baseUrl ?? "",
+                ) && hasPackagedRendererBootstrapRequests(api?.requests ?? [])
+              );
+            },
+            {
+              timeout: process.env.CI ? 180_000 : 90_000,
+              message:
+                "Expected the packaged Windows renderer to reach the external API bootstrap requests",
+            },
+          )
+          .toBe(true);
+      } catch (error) {
+        throw new Error(
+          [
             "Expected the packaged Windows renderer to reach the external API bootstrap requests",
-        })
-        .toBe(true);
+            `Last renderer probe: ${JSON.stringify(lastProbe)}`,
+            `Observed API requests: ${JSON.stringify(api?.requests ?? [])}`,
+            error instanceof Error ? error.message : String(error),
+          ].join("\n"),
+        );
+      }
 
       expect(api.requests.length).toBeGreaterThan(0);
       expect(
