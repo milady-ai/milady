@@ -440,6 +440,11 @@ test("Electrobun Windows release runs packaged Playwright check after disk clean
   assert.match(hydrateScript, /plugins", "plugin-sql/);
   assert.match(hydrateScript, /sqlPluginTypescriptPath = path\.join/);
   assert.match(hydrateScript, /sqlPluginPath,\s*"typescript"/);
+  assert.match(hydrateScript, /linkRendererSourcePackage/);
+  assert.match(
+    hydrateScript,
+    /repoRoot,\s*"eliza",\s*"packages",\s*"app-core",\s*"node_modules"/,
+  );
   assert.match(hydrateScript, /copy: true/);
   assert.match(hydrateScript, /packageEntryCandidates/);
   assert.match(hydrateScript, /assertPackageRuntimeEntry/);
@@ -452,6 +457,9 @@ test("Electrobun Windows release runs packaged Playwright check after disk clean
   assert.match(hydrateScript, /using installed \$\{scopedPackageName\}/);
   assert.match(hydrateScript, /dist\/index\.node\.js/);
   assert.match(hydrateScript, /dist\/node\/index\.node\.js/);
+  assert.match(hydrateScript, /drizzle\/index\.ts/);
+  assert.match(hydrateScript, /schema\/index\.ts/);
+  assert.match(hydrateScript, /types\.ts/);
   assert.match(hydrateScript, /lib\/cloud-connection\.ts/);
   assert.match(hydrateScript, /lib\/server-cloud-tts\.ts/);
   assert.match(hydrateScript, /lib\/cloud-secrets\.ts/);
