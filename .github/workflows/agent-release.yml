@@ -1099,6 +1099,7 @@ jobs:
             const previousTag = process.env.PREVIOUS_TAG || '';
             const RAW_CHANGELOG = fs.readFileSync(process.env.CHANGELOG_FILE, 'utf8').trim();
             const MAX_CHANGELOG = 100_000;
+            const maxReleaseBodyLength = 120_000;
             const fullChangelog = RAW_CHANGELOG.length > MAX_CHANGELOG
               ? RAW_CHANGELOG.slice(0, MAX_CHANGELOG) + '\n\n_...changelog truncated. See compare URL above for full history._'
               : RAW_CHANGELOG;
