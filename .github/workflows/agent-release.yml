@@ -466,7 +466,7 @@ jobs:
         run: node scripts/run-eliza-app-core-script.mjs ensure-shared-i18n-data.mjs
       - name: Build
         run: |
-          bunx tsdown
+          node scripts/run-tsdown.mjs
           printf '{"type":"module"}\n' > dist/package.json
           node --import tsx scripts/write-build-info.ts
       - name: Sanitize npm package metadata

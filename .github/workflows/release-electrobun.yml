@@ -323,7 +323,7 @@ jobs:
 
       - name: Build core dist (server bundle)
         run: |
-          bunx tsdown
+          node scripts/run-tsdown.mjs
           echo '{"type":"module"}' > dist/package.json
           node --import tsx scripts/write-build-info.ts
 
@@ -1193,8 +1193,8 @@ jobs:
           # exercises the same standalone artifact users download. Use a short
           # path under runner.temp to avoid MAX_PATH issues with
           # deeply nested node_modules while staying in a user-writable location.
-          ELIZA_TEST_WINDOWS_INSTALL_DIR: ${{ runner.temp }}\el
-          MILADY_TEST_WINDOWS_INSTALL_DIR: ${{ runner.temp }}\el
+          ELIZA_TEST_WINDOWS_INSTALL_DIR: ${{ runner.temp }}\el-smoke
+          MILADY_TEST_WINDOWS_INSTALL_DIR: ${{ runner.temp }}\el-smoke
           ELIZA_TEST_WINDOWS_LAUNCHER_DIR: ${{ runner.temp }}\eliza-windows-ui-launcher
           MILADY_TEST_WINDOWS_LAUNCHER_DIR: ${{ runner.temp }}\eliza-windows-ui-launcher
           ELIZA_TEST_WINDOWS_LAUNCHER_PATH_FILE: ${{ runner.temp }}\eliza-windows-ui-launcher.txt
@@ -1213,24 +1213,28 @@ jobs:
           Remove-Item $env:MILADY_TEST_WINDOWS_LAUNCHER_PATH_FILE -Force -ErrorAction SilentlyContinue
 
           bun run test:desktop:packaged:windows
-          if ($LASTEXITCODE -ne 0) {
-            Write-Error "Packaged Windows smoke test exited with code $LASTEXITCODE."
-            exit $LASTEXITCODE
-          }
+          $smokeExitCode = $LASTEXITCODE
 
           if (-not (Test-Path $env:ELIZA_TEST_WINDOWS_LAUNCHER_PATH_FILE)) {
             Write-Error "Smoke test did not emit a reusable Windows launcher path."
-            exit 1
+            $exitCode = if ($smokeExitCode -ne 0) { $smokeExitCode } else { 1 }
+            exit $exitCode
           }
 
           $launcherPath = (Get-Content $env:ELIZA_TEST_WINDOWS_LAUNCHER_PATH_FILE -Raw).Trim()
           if ([string]::IsNullOrWhiteSpace($launcherPath) -or -not (Test-Path $launcherPath)) {
             Write-Error "Reusable Windows launcher path is invalid: $launcherPath"
-            exit 1
+            $exitCode = if ($smokeExitCode -ne 0) { $smokeExitCode } else { 1 }
+            exit $exitCode
           }
 
           Add-Content -Path $env:GITHUB_ENV -Value "ELIZA_TEST_WINDOWS_LAUNCHER_PATH=$launcherPath"
           Write-Host "Reusing packaged Windows launcher for Playwright: $launcherPath"
+
+          if ($smokeExitCode -ne 0) {
+            Write-Error "Packaged Windows smoke test exited with code $LASTEXITCODE."
+            exit $smokeExitCode
+          }
 
       - name: Run Windows clean installer proof
         if: matrix.platform.os == 'windows' && steps.build-electrobun-app.outputs.fallback != 'true'

@@ -23,7 +23,7 @@ function localUpstreamsDisabled() {
   );
 }
 
-function explicitAppCoreEntry(localRelativePath: string) {
+function explicitAppCoreEntry(localRelativePath) {
   const rawRoot =
     process.env.MILADY_ELIZA_APP_CORE_ROOT ?? process.env.ELIZA_APP_CORE_ROOT;
   if (!rawRoot) {
@@ -38,7 +38,7 @@ function explicitAppCoreEntry(localRelativePath: string) {
   return entry;
 }
 
-function appCoreEntry(subpath: string, localRelativePath: string) {
+function appCoreEntry(subpath, localRelativePath) {
   const explicitEntry = explicitAppCoreEntry(localRelativePath);
   if (explicitEntry) {
     return explicitEntry;

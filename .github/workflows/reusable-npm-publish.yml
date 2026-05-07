@@ -68,7 +68,7 @@ jobs:
 
       - name: Build
         run: |
-          bunx tsdown
+          node scripts/run-tsdown.mjs
           node --import tsx scripts/write-build-info.ts
           echo '{"type":"module"}' > dist/package.json
 

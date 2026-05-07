@@ -240,7 +240,7 @@ jobs:
           if [ -d node_modules/bun ] && [ -f node_modules/bun/install.js ]; then
             (cd node_modules/bun && node install.js) || true
           fi
-          npx tsdown
+          node scripts/run-tsdown.mjs
           echo '{"type":"module"}' > dist/package.json
           # write-build-info.ts may not exist on all branches — soft fail
           node --import tsx eliza/packages/app-core/scripts/write-build-info.ts 2>/dev/null || true

@@ -216,6 +216,42 @@ function selectRuntimePackageRoot(
   assertPackageRuntimeEntry(sourcePath, scopedPackageName, fallbackEntries);
 }
 
+function selectOptionalRuntimePackageRoot(
+  scopedPackageName,
+  sourcePath,
+  fallbackEntries,
+) {
+  const sourceEntry = findPackageRuntimeEntry(sourcePath, fallbackEntries);
+  if (sourceEntry.filePath) {
+    console.log(
+      `[hydrate-windows-playwright-deps] using source ${scopedPackageName} at ${relativePath(
+        sourcePath,
+      )}`,
+    );
+    return sourcePath;
+  }
+
+  for (const installedRoot of installedPackageRoots(scopedPackageName)) {
+    const installedEntry = findPackageRuntimeEntry(
+      installedRoot,
+      fallbackEntries,
+    );
+    if (installedEntry.filePath) {
+      console.log(
+        `[hydrate-windows-playwright-deps] using installed ${scopedPackageName} at ${relativePath(
+          installedRoot,
+        )}`,
+      );
+      return installedRoot;
+    }
+  }
+
+  console.warn(
+    `[hydrate-windows-playwright-deps] optional ${scopedPackageName} runtime entry unavailable; skipping link`,
+  );
+  return null;
+}
+
 function assertElizaPackageEntry(scopedPackageName, fallbackEntries) {
   const [, packageName] = scopedPackageName.split("/");
   assertPackageRuntimeEntry(
@@ -255,15 +291,21 @@ if (fs.existsSync(path.join(elizaRoot, "package.json"))) {
     "plugins",
     "plugin-elizacloud",
   );
+  const elizaCloudPluginRuntimeEntries = [
+    "dist/node/index.node.js",
+    "lib/cloud-connection.ts",
+    "lib/server-cloud-tts.ts",
+    "lib/cloud-secrets.ts",
+  ];
   const sqlPluginRuntimePath = selectRuntimePackageRoot(
     "@elizaos/plugin-sql",
     sqlPluginTypescriptPath,
     ["dist/node/index.node.js"],
   );
-  const elizaCloudPluginRuntimePath = selectRuntimePackageRoot(
+  const elizaCloudPluginRuntimePath = selectOptionalRuntimePackageRoot(
     "@elizaos/plugin-elizacloud",
     elizaCloudPluginPath,
-    ["dist/node/index.node.js"],
+    elizaCloudPluginRuntimeEntries,
   );
 
   linkElizaPackage("@elizaos/core", coreRuntimePath);
@@ -272,7 +314,9 @@ if (fs.existsSync(path.join(elizaRoot, "package.json"))) {
     path.join(elizaRoot, "cloud", "packages", "sdk"),
   );
   linkElizaPackage("@elizaos/shared", sharedPath);
-  linkElizaPackage("@elizaos/plugin-elizacloud", elizaCloudPluginRuntimePath);
+  if (elizaCloudPluginRuntimePath) {
+    linkElizaPackage("@elizaos/plugin-elizacloud", elizaCloudPluginRuntimePath);
+  }
   linkElizaPackage("@elizaos/plugin-sql", sqlPluginRuntimePath);
   linkScopedPackage(
     path.join(sqlPluginPath, "node_modules"),
@@ -291,9 +335,12 @@ if (fs.existsSync(path.join(elizaRoot, "package.json"))) {
     "dist/node/index.node.js",
   ]);
   assertElizaPackageEntry("@elizaos/plugin-sql", ["dist/node/index.node.js"]);
-  assertElizaPackageEntry("@elizaos/plugin-elizacloud", [
-    "dist/node/index.node.js",
-  ]);
+  if (elizaCloudPluginRuntimePath) {
+    assertElizaPackageEntry(
+      "@elizaos/plugin-elizacloud",
+      elizaCloudPluginRuntimeEntries,
+    );
+  }
   assertCorePackageEntry(path.join(sqlPluginPath, "node_modules"));
   assertCorePackageEntry(path.join(sqlPluginTypescriptPath, "node_modules"));
 }

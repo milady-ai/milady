@@ -316,13 +316,29 @@ test("npm release builds generate gitignored eliza i18n data before bundling", (
     );
     assert.match(
       content,
-      /node scripts\/run-eliza-app-core-script\.mjs ensure-shared-i18n-data\.mjs[\s\S]*?bunx tsdown/,
+      /node scripts\/run-eliza-app-core-script\.mjs ensure-shared-i18n-data\.mjs[\s\S]*?node scripts\/run-tsdown\.mjs/,
     );
   }
   assert.match(
     releaseContractSuite,
-    /ensure-shared-i18n-data\.mjs"[\s\S]*?run\("bunx", \["tsdown"/,
+    /ensure-shared-i18n-data\.mjs"[\s\S]*?run\("node", \["scripts\/run-tsdown\.mjs"/,
   );
+});
+
+test("release workflows use the checked-in tsdown runner", () => {
+  for (const name of [
+    "agent-release.yml",
+    "apple-store-release.yml",
+    "build-cloud-agent.yml",
+    "build-cloud-image.yml",
+    "build-docker.yml",
+    "release-electrobun.yml",
+    "reusable-npm-publish.yml",
+  ]) {
+    const content = workflow(name);
+    assert.match(content, /node scripts\/run-tsdown\.mjs/);
+    assert.doesNotMatch(content, /\b(?:bunx|npx) tsdown\b/);
+  }
 });
 
 test("Electrobun release exposes whisper-node for upstream script layout", () => {
@@ -400,6 +416,19 @@ test("Electrobun Windows release runs packaged Playwright check after disk clean
     /name: Run Windows packaged renderer bootstrap check[\s\S]*?run: bun run test:desktop:playwright:windows/,
   );
   assert.match(
+    electrobun,
+    /ELIZA_TEST_WINDOWS_INSTALL_DIR: \$\{\{ runner\.temp \}\}\\el-smoke/,
+  );
+  assert.match(
+    electrobun,
+    /MILADY_TEST_WINDOWS_INSTALL_DIR: \$\{\{ runner\.temp \}\}\\el-smoke/,
+  );
+  assert.match(electrobun, /\$smokeExitCode = \$LASTEXITCODE/);
+  assert.match(
+    electrobun,
+    /Add-Content -Path \$env:GITHUB_ENV -Value "ELIZA_TEST_WINDOWS_LAUNCHER_PATH=\$launcherPath"[\s\S]*?if \(\$smokeExitCode -ne 0\)/,
+  );
+  assert.match(
     rootPackage.scripts["test:desktop:playwright:windows"],
     /node scripts\/hydrate-windows-playwright-deps\.mjs && cd apps\/app &&/,
   );
@@ -415,9 +444,17 @@ test("Electrobun Windows release runs packaged Playwright check after disk clean
   assert.match(hydrateScript, /packageEntryCandidates/);
   assert.match(hydrateScript, /assertPackageRuntimeEntry/);
   assert.match(hydrateScript, /selectRuntimePackageRoot/);
+  assert.match(hydrateScript, /selectOptionalRuntimePackageRoot/);
+  assert.match(
+    hydrateScript,
+    /optional \$\{scopedPackageName\} runtime entry unavailable/,
+  );
   assert.match(hydrateScript, /using installed \$\{scopedPackageName\}/);
   assert.match(hydrateScript, /dist\/index\.node\.js/);
   assert.match(hydrateScript, /dist\/node\/index\.node\.js/);
+  assert.match(hydrateScript, /lib\/cloud-connection\.ts/);
+  assert.match(hydrateScript, /lib\/server-cloud-tts\.ts/);
+  assert.match(hydrateScript, /lib\/cloud-secrets\.ts/);
   assert.match(hydrateScript, /linkElizaPackage/);
   assert.match(hydrateScript, /linkScopedPackage/);
   assert.match(hydrateScript, /symlinkSync/);
@@ -426,6 +463,7 @@ test("Electrobun Windows release runs packaged Playwright check after disk clean
     hydrateScript,
     /@elizaos\/plugin-elizacloud@\$\{?elizaPackageSpecifier/,
   );
+  assert.doesNotMatch(hydrateScript, /@elizaos\/plugin-elizacloud@alpha/);
   assert.doesNotMatch(hydrateScript, /elizaPackageSpecifier/);
   assert.match(
     rootPackage.scripts["test:desktop:playwright:windows"],
@@ -449,7 +487,7 @@ test("package-mode production build reapplies native app-core patch before Vite"
 
   assert.match(
     productionBuild,
-    /tsdownCli[\s\S]*patch-elizaos-app-core-native-browser-package\.mjs[\s\S]*viteCli/,
+    /tsdownCli[\s\S]*"--config-loader"[\s\S]*"native"[\s\S]*patch-elizaos-app-core-native-browser-package\.mjs[\s\S]*viteCli/,
   );
   assert.match(nativePatch, /node_modules", "\.bun"/);
   assert.match(nativePatch, /entry\.startsWith\("@elizaos\+app-core@"/);
