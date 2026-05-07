@@ -5,14 +5,17 @@ import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
 const tsdownRun = require.resolve("tsdown/run");
-const result = spawnSync(
-  process.execPath,
-  [tsdownRun, ...process.argv.slice(2)],
-  {
-    env: process.env,
-    stdio: "inherit",
-  },
+const args = process.argv.slice(2);
+const hasConfigLoader = args.some(
+  (arg) => arg === "--config-loader" || arg.startsWith("--config-loader="),
 );
+const tsdownArgs = hasConfigLoader
+  ? args
+  : ["--config-loader", "native", ...args];
+const result = spawnSync(process.execPath, [tsdownRun, ...tsdownArgs], {
+  env: process.env,
+  stdio: "inherit",
+});
 
 if (result.error) {
   throw result.error;

@@ -484,7 +484,7 @@ test("package-mode production build reapplies native app-core patch before Vite"
 
   assert.match(
     productionBuild,
-    /tsdownCli[\s\S]*patch-elizaos-app-core-native-browser-package\.mjs[\s\S]*viteCli/,
+    /tsdownCli[\s\S]*"--config-loader"[\s\S]*"native"[\s\S]*patch-elizaos-app-core-native-browser-package\.mjs[\s\S]*viteCli/,
   );
   assert.match(nativePatch, /node_modules", "\.bun"/);
   assert.match(nativePatch, /entry\.startsWith\("@elizaos\+app-core@"/);
