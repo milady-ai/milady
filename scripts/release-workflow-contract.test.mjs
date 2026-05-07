@@ -400,11 +400,23 @@ test("Electrobun Windows release runs packaged Playwright check after disk clean
     /name: Run Windows packaged renderer bootstrap check[\s\S]*?run: bun run test:desktop:playwright:windows/,
   );
   assert.match(
+    electrobun,
+    /ELIZA_TEST_WINDOWS_INSTALL_DIR: \$\{\{ runner\.temp \}\}\\el-smoke/,
+  );
+  assert.match(
+    electrobun,
+    /MILADY_TEST_WINDOWS_INSTALL_DIR: \$\{\{ runner\.temp \}\}\\el-smoke/,
+  );
+  assert.match(electrobun, /\$smokeExitCode = \$LASTEXITCODE/);
+  assert.match(
+    electrobun,
+    /Add-Content -Path \$env:GITHUB_ENV -Value "ELIZA_TEST_WINDOWS_LAUNCHER_PATH=\$launcherPath"[\s\S]*?if \(\$smokeExitCode -ne 0\)/,
+  );
+  assert.match(
     rootPackage.scripts["test:desktop:playwright:windows"],
     /node scripts\/hydrate-windows-playwright-deps\.mjs && cd apps\/app &&/,
   );
   assert.match(hydrateScript, /@playwright\/test@1\.59\.1/);
-  assert.match(hydrateScript, /@elizaos\/plugin-elizacloud@alpha/);
   assert.match(hydrateScript, /@elizaos\/plugin-elizacloud/);
   assert.match(hydrateScript, /@elizaos\/cloud-sdk/);
   assert.match(hydrateScript, /@elizaos\/core/);
@@ -416,6 +428,11 @@ test("Electrobun Windows release runs packaged Playwright check after disk clean
   assert.match(hydrateScript, /packageEntryCandidates/);
   assert.match(hydrateScript, /assertPackageRuntimeEntry/);
   assert.match(hydrateScript, /selectRuntimePackageRoot/);
+  assert.match(hydrateScript, /selectOptionalRuntimePackageRoot/);
+  assert.match(
+    hydrateScript,
+    /optional \$\{scopedPackageName\} runtime entry unavailable/,
+  );
   assert.match(hydrateScript, /using installed \$\{scopedPackageName\}/);
   assert.match(hydrateScript, /dist\/index\.node\.js/);
   assert.match(hydrateScript, /dist\/node\/index\.node\.js/);
@@ -427,6 +444,7 @@ test("Electrobun Windows release runs packaged Playwright check after disk clean
     hydrateScript,
     /@elizaos\/plugin-elizacloud@\$\{?elizaPackageSpecifier/,
   );
+  assert.doesNotMatch(hydrateScript, /@elizaos\/plugin-elizacloud@alpha/);
   assert.doesNotMatch(hydrateScript, /elizaPackageSpecifier/);
   assert.match(
     rootPackage.scripts["test:desktop:playwright:windows"],
