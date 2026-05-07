@@ -291,6 +291,12 @@ if (fs.existsSync(path.join(elizaRoot, "package.json"))) {
     "plugins",
     "plugin-elizacloud",
   );
+  const elizaCloudPluginRuntimeEntries = [
+    "dist/node/index.node.js",
+    "lib/cloud-connection.ts",
+    "lib/server-cloud-tts.ts",
+    "lib/cloud-secrets.ts",
+  ];
   const sqlPluginRuntimePath = selectRuntimePackageRoot(
     "@elizaos/plugin-sql",
     sqlPluginTypescriptPath,
@@ -299,7 +305,7 @@ if (fs.existsSync(path.join(elizaRoot, "package.json"))) {
   const elizaCloudPluginRuntimePath = selectOptionalRuntimePackageRoot(
     "@elizaos/plugin-elizacloud",
     elizaCloudPluginPath,
-    ["dist/node/index.node.js"],
+    elizaCloudPluginRuntimeEntries,
   );
 
   linkElizaPackage("@elizaos/core", coreRuntimePath);
@@ -330,9 +336,10 @@ if (fs.existsSync(path.join(elizaRoot, "package.json"))) {
   ]);
   assertElizaPackageEntry("@elizaos/plugin-sql", ["dist/node/index.node.js"]);
   if (elizaCloudPluginRuntimePath) {
-    assertElizaPackageEntry("@elizaos/plugin-elizacloud", [
-      "dist/node/index.node.js",
-    ]);
+    assertElizaPackageEntry(
+      "@elizaos/plugin-elizacloud",
+      elizaCloudPluginRuntimeEntries,
+    );
   }
   assertCorePackageEntry(path.join(sqlPluginPath, "node_modules"));
   assertCorePackageEntry(path.join(sqlPluginTypescriptPath, "node_modules"));
