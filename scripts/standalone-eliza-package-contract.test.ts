@@ -109,7 +109,7 @@ test("package manifests default to published elizaOS alpha packages", () => {
 test("root build resolves app-core entries from packages by default", () => {
   const helper = read("scripts/lib/eliza-package-mode.mjs");
   const resolver = read("scripts/lib/resolve-eliza-app-core-script.mjs");
-  const tsdownConfig = read("tsdown.config.ts");
+  const tsdownConfig = read("tsdown.config.mjs");
 
   assert.match(helper, /DEFAULT_ELIZA_SOURCE_MODE = "packages"/);
   assert.match(read("scripts/run-app-web-build.mjs"), /isLocalElizaDisabled/);
