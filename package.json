@@ -324,8 +324,8 @@
     "@elizaos/plugin-telegram": "alpha",
     "@elizaos/core": "alpha",
     "@elizaos/schemas": "alpha",
-    "@elizaos/shared": "alpha",
-    "@elizaos/ui": "alpha",
+    "@elizaos/shared": "file:./eliza/packages/shared",
+    "@elizaos/ui": "file:./eliza/packages/ui",
     "drizzle-orm": "0.45.2",
     "@electric-sql/pglite": "^0.4.5",
     "ai": "6.0.30",
@@ -342,7 +342,15 @@
     "defu": "6.1.6",
     "esbuild": "0.28.0",
     "dompurify": "3.4.0",
-    "@solana/web3.js": "1.98.4"
+    "@solana/web3.js": "1.98.4",
+    "@elizaos/agent": "file:./eliza/packages/agent",
+    "@elizaos/app-core": "file:./eliza/packages/app-core",
+    "@elizaos/plugin-browser-bridge": "file:./eliza/plugins/plugin-browser-bridge",
+    "@elizaos/plugin-app-control": "file:./eliza/plugins/plugin-app-control",
+    "@elizaos/plugin-signal": "file:./eliza/plugins/plugin-signal",
+    "@elizaos/plugin-wechat": "file:./eliza/plugins/plugin-wechat",
+    "@elizaos/skills": "file:./eliza/packages/skills",
+    "@elizaos/vault": "file:./eliza/packages/vault"
   },
   "patchedDependencies": {
     "@noble/curves@2.0.1": "patches/@noble%2Fcurves@2.0.1.patch",

@@ -1181,7 +1181,7 @@ export function ensurePluginDependencyLinks(
   pluginsRoot = getRepoPluginsRoot(repoRoot),
 ) {
   let linkedDependencies = 0;
-  const searchRoots = [repoRoot, getRepoElizaRoot(repoRoot)];
+  const searchRoots = [getRepoElizaRoot(repoRoot), repoRoot];
 
   for (const packageDir of discoverPluginPackageDirs(pluginsRoot)) {
     const packageJson = readPackageJson(packageDir);
@@ -1247,7 +1247,7 @@ export function ensureMiladySingletonDependencyLinks(
   repoRoot = DEFAULT_REPO_ROOT,
 ) {
   let linkedDependencies = 0;
-  const searchRoots = [repoRoot, getRepoElizaRoot(repoRoot)];
+  const searchRoots = [getRepoElizaRoot(repoRoot), repoRoot];
 
   for (const {
     packageDir: relativePackageDir,
