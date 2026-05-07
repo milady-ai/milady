@@ -57,7 +57,7 @@ jobs:
       dist_tag: ${{ steps.meta.outputs.dist_tag }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Determine version and dist-tag
         id: meta

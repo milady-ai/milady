@@ -169,7 +169,7 @@
     "test:desktop:packaged": "bash eliza/packages/app-core/platforms/electrobun/scripts/smoke-test.sh",
     "test:desktop:packaged:windows": "pwsh -File eliza/packages/app-core/platforms/electrobun/scripts/smoke-test-windows.ps1",
     "test:desktop:playwright": "node scripts/run-eliza-app-core-script.mjs run-desktop-playwright.mjs",
-    "test:desktop:playwright:windows": "cd apps/app && bun add --no-save --dev --ignore-scripts @playwright/test@1.59.1 && bunx playwright test --config playwright.electrobun.packaged.config.ts test/electrobun-packaged/electrobun-windows-startup.e2e.spec.ts",
+    "test:desktop:playwright:windows": "node scripts/hydrate-windows-playwright-deps.mjs && cd apps/app && bunx playwright test --config playwright.electrobun.packaged.config.ts test/electrobun-packaged/electrobun-windows-startup.e2e.spec.ts",
     "lifeops:gmail:export-fixture": "node scripts/export-gmail-fixture.mjs",
     "lifeops:gmail:real-smoke": "node scripts/gmail-real-smoke.mjs",
     "lifeops:gmail:real-sweep": "node scripts/gmail-real-sweep.mjs",

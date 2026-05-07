@@ -70,13 +70,13 @@ jobs:
     outputs:
       proceed: ${{ steps.decision.outputs.proceed }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Decide whether to release
         id: decision
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const event = context.eventName;
@@ -192,7 +192,7 @@ jobs:
       snap_release: ${{ steps.ver.outputs.snap_release }}
       update_homebrew: ${{ steps.ver.outputs.update_homebrew }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Fetch canonical release tags
@@ -383,7 +383,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: false
       - name: Setup workspace dependencies
@@ -449,7 +449,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: false
       - uses: ./.github/actions/setup-bun-workspace
@@ -483,14 +483,14 @@ jobs:
     if: needs.version.outputs.channel != 'canary'
     runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: false
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 21
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
       - name: Setup workspace dependencies
@@ -542,7 +542,7 @@ jobs:
     env:
       MILADY_SKIP_LOCAL_UPSTREAMS: "1"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: false
       - name: Init non-eliza submodules
@@ -621,7 +621,7 @@ jobs:
     if: needs.version.outputs.channel != 'canary'
     runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: false
       - name: Init non-eliza submodules
@@ -658,7 +658,7 @@ jobs:
     if: needs.version.outputs.channel != 'canary'
     runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: false
       - name: Init non-eliza submodules
@@ -669,7 +669,7 @@ jobs:
           node scripts/init-submodules.mjs
           node scripts/apply-eliza-ci-patches.mjs
           node scripts/disable-local-eliza-workspace.mjs
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - name: Build wheel
@@ -691,7 +691,7 @@ jobs:
     if: needs.version.outputs.channel != 'canary'
     runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: false
       - name: Init non-eliza submodules
@@ -766,10 +766,10 @@ jobs:
     if: needs.version.outputs.channel != 'canary'
     runs-on: macos-14
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
       - name: Setup workspace dependencies
@@ -807,10 +807,10 @@ jobs:
       MILADY_SKIP_LOCAL_UPSTREAMS: ""
       ELIZA_SKIP_LOCAL_UPSTREAMS: ""
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
       - name: Setup workspace dependencies
@@ -833,7 +833,7 @@ jobs:
     needs: [version]
     runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: false
       - uses: ./.github/actions/setup-bun-workspace
@@ -857,13 +857,13 @@ jobs:
     needs: [version]
     runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Initialize eliza docs
         run: |
           if [ ! -f eliza/packages/docs/docs.json ]; then
             git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza
           fi
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
       - name: Validate docs config
@@ -1021,7 +1021,7 @@ jobs:
       contents: write
       issues: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -1080,7 +1080,7 @@ jobs:
           echo "file=$CHANGELOG_FILE" >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub release
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         env:
           TAG: ${{ needs.version.outputs.tag }}
           PRERELEASE: ${{ needs.version.outputs.prerelease }}

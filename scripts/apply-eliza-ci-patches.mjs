@@ -169,12 +169,16 @@ function patchElectrobunCliPatchScript(raw) {
 function patchDesktopSmokeScript(raw) {
   return raw
     .replace(
-      /\$defaultAvatarAssetSlugs\s*=\s*@\(\s*["']eliza-1["']\s*\)/,
-      '$defaultAvatarAssetSlugs = @("eliza-1", "milady-1")',
+      /\$pgliteDataDir\s*=\s*Join-Path\s+\$tempRoot\s+"pglite"/,
+      '$pgliteDataDir = Join-Path $tempRoot ("pglite-" + [Guid]::NewGuid().ToString("N"))',
     )
     .replace(
-      /DEFAULT_AVATAR_ASSET_SLUGS=\(\s*eliza-1\s*\)/,
-      "DEFAULT_AVATAR_ASSET_SLUGS=(eliza-1 milady-1)",
+      /\$defaultAvatarAssetSlugs\s*=\s*@\([^)]*\)/,
+      '$defaultAvatarAssetSlugs = @("eliza-1")',
+    )
+    .replace(
+      /DEFAULT_AVATAR_ASSET_SLUGS=\([^)]*\)/,
+      "DEFAULT_AVATAR_ASSET_SLUGS=(eliza-1)",
     );
 }
 
@@ -183,6 +187,102 @@ function patchCoreRuntimeTypes(raw) {
     'type StructuredResponseFormat = "JSON";',
     'type StructuredResponseFormat = "JSON" | "TOON";',
   );
+}
+
+function patchCoreStateTypes(raw) {
+  return raw.replace('format: "JSON";', 'format: "JSON" | "TOON";');
+}
+
+function patchRuntimeCopyTarSafeHoists(raw) {
+  let next = raw.replace(
+    'const ALWAYS_HOISTED_PACKAGES = new Set(["@elizaos/core"]);',
+    'const ALWAYS_HOISTED_PACKAGES = new Set(["@elizaos/core", "commander"]);',
+  );
+  if (!next.includes("function shouldHoistRuntimePackage")) {
+    next = next.replace(
+      "\ntype CopyTargetOptions = {",
+      `
+function shouldHoistRuntimePackage(name: string): boolean {
+  return ALWAYS_HOISTED_PACKAGES.has(name) || name.startsWith("@solana/");
+}
+
+type CopyTargetOptions = {`,
+    );
+  }
+  return next.replace(
+    "if (ALWAYS_HOISTED_PACKAGES.has(name) && topLevelVersions.has(name)) {",
+    "if (shouldHoistRuntimePackage(name) && topLevelVersions.has(name)) {",
+  );
+}
+
+function patchBrowserBridgeReleaseVersion(raw) {
+  return raw
+    .replace(
+      "(?:-(beta|rc|nightly)\\.([0-9A-Za-z.-]+))?",
+      "(?:-(alpha|beta|rc|nightly)\\.([0-9A-Za-z.-]+))?",
+    )
+    .replace(
+      "Expected 1.2.3 or 1.2.3-beta.0 style semver.",
+      "Expected 1.2.3 or 1.2.3-alpha.0 style semver.",
+    );
+}
+
+function patchBrowserBridgeSafariPackage(raw) {
+  const bundleIdentifierMarker =
+    "PRODUCT_BUNDLE_IDENTIFIER = $" + "{bundleIdentifier}";
+  const extensionBundleIdentifierMarker =
+    "PRODUCT_BUNDLE_IDENTIFIER = $" + "{bundleIdentifier}.Extension";
+  const currentProjectVersionPatch = `${[
+    "  source = source.replace(",
+    "    /CURRENT_PROJECT_VERSION = [^;]+;/g,",
+    "    `CURRENT_PROJECT_VERSION = $" + "{safariVersions.buildVersion};`,",
+    "  );",
+  ].join("\n")}\n`;
+  const safariBundlePatch = `${[
+    "  source = source.replace(",
+    '    /PRODUCT_BUNDLE_IDENTIFIER = "ai\\.elizaos\\.browserbridge\\.Agent-Browser-Bridge";/g,',
+    "    `PRODUCT_BUNDLE_IDENTIFIER = $" + "{bundleIdentifier};`,",
+    "  );",
+  ].join("\n")}\n`;
+  const safariExtensionBundlePatch = `${[
+    "  source = source.replace(",
+    '    /PRODUCT_BUNDLE_IDENTIFIER = "ai\\.elizaos\\.browserbridge\\.Agent-Browser-Bridge\\.Extension";/g,',
+    "    `PRODUCT_BUNDLE_IDENTIFIER = $" + "{bundleIdentifier}.Extension;`,",
+    "  );",
+  ].join("\n")}\n`;
+  let patched = raw;
+  if (!patched.includes(bundleIdentifierMarker)) {
+    patched = patched.replace(
+      currentProjectVersionPatch,
+      currentProjectVersionPatch + safariBundlePatch,
+    );
+  }
+  if (!patched.includes(extensionBundleIdentifierMarker)) {
+    const insertionAnchor = patched.includes(safariBundlePatch)
+      ? safariBundlePatch
+      : currentProjectVersionPatch;
+    patched = patched.replace(
+      insertionAnchor,
+      insertionAnchor + safariExtensionBundlePatch,
+    );
+  }
+  return patched;
+}
+
+function patchAppCoreReleaseCheck(raw) {
+  return raw
+    .replace(
+      '  "if bun run browser-bridge:package:release; then",\n',
+      '  "bun run browser-bridge:package:release",\n',
+    )
+    .replace(
+      '  "Agent Browser Bridge packaging failed; desktop release will continue without browser companion bundles.",\n',
+      "",
+    )
+    .replace(
+      "release-check: release workflow is missing notary wrapper wiring:",
+      "release-check: release workflow is missing required release wiring:",
+    );
 }
 
 function patchWorkspaceDistRelinkScript(raw) {
@@ -219,6 +319,44 @@ if (existsSync(nestedElizaPackageJson)) {
 }
 const candidateBases = [root, ...workspaceDirs];
 `,
+  );
+}
+
+function patchCorePluginRuntimeSurface(raw) {
+  return raw
+    .replace(
+      '  "@elizaos/app-companion", // VRM companion emotes; actions gated until app session is active\n',
+      "",
+    )
+    .replace(
+      '  "@elizaos/app-lifeops", // LifeOps: personal ops — tasks, goals, calendar, inbox, website blocking\n',
+      "",
+    )
+    .replace(
+      '  "@elizaos/plugin-video", // Video download / transcription (managed yt-dlp + ffmpeg with auto-update on extractor failure)\n',
+      "",
+    );
+}
+
+function patchN8nAutoEnableDefault(raw) {
+  return raw.replace(
+    `    const localN8nEnabled =
+      params.isNativePlatform === true
+        ? false
+        : n8nConfig?.localEnabled !== false;
+`,
+    `    const localN8nEnabled =
+      params.isNativePlatform === true
+        ? false
+        : n8nConfig?.localEnabled === true;
+`,
+  );
+}
+
+function patchN8nCharacterKnowledge(raw) {
+  return raw.replace(
+    "  const n8nLocalEnabled = config.n8n?.localEnabled !== false;",
+    "  const n8nLocalEnabled = config.n8n?.localEnabled === true;",
   );
 }
 
@@ -280,6 +418,54 @@ function applyReleaseSourcePatches() {
   );
 
   replaceFileText(
+    path.join(elizaDir, "packages", "core", "src", "types", "state.ts"),
+    patchCoreStateTypes,
+    "core structured failure format type",
+  );
+
+  replaceFileText(
+    path.join(
+      elizaDir,
+      "packages",
+      "app-core",
+      "scripts",
+      "copy-runtime-node-modules.ts",
+    ),
+    patchRuntimeCopyTarSafeHoists,
+    "runtime copy tar-safe Solana hoists",
+  );
+
+  replaceFileText(
+    path.join(
+      elizaDir,
+      "packages",
+      "browser-bridge",
+      "scripts",
+      "release-version.mjs",
+    ),
+    patchBrowserBridgeReleaseVersion,
+    "browser bridge canary release versions",
+  );
+
+  replaceFileText(
+    path.join(
+      elizaDir,
+      "packages",
+      "browser-bridge",
+      "scripts",
+      "package-safari.mjs",
+    ),
+    patchBrowserBridgeSafariPackage,
+    "browser bridge Safari bundle identifiers",
+  );
+
+  replaceFileText(
+    path.join(elizaDir, "packages", "app-core", "scripts", "release-check.ts"),
+    patchAppCoreReleaseCheck,
+    "app-core release browser bridge hard gate",
+  );
+
+  replaceFileText(
     path.join(
       elizaDir,
       "packages",
@@ -289,6 +475,45 @@ function applyReleaseSourcePatches() {
     ),
     patchWorkspaceDistRelinkScript,
     "workspace dist relink nested eliza discovery",
+  );
+
+  replaceFileText(
+    path.join(
+      elizaDir,
+      "packages",
+      "agent",
+      "src",
+      "runtime",
+      "core-plugins.ts",
+    ),
+    patchCorePluginRuntimeSurface,
+    "agent core plugin runtime surface",
+  );
+
+  replaceFileText(
+    path.join(
+      elizaDir,
+      "packages",
+      "agent",
+      "src",
+      "config",
+      "plugin-auto-enable.ts",
+    ),
+    patchN8nAutoEnableDefault,
+    "agent n8n explicit local auto-enable",
+  );
+
+  replaceFileText(
+    path.join(
+      elizaDir,
+      "packages",
+      "agent",
+      "src",
+      "runtime",
+      "build-character-config.ts",
+    ),
+    patchN8nCharacterKnowledge,
+    "agent n8n explicit knowledge gate",
   );
 }
 

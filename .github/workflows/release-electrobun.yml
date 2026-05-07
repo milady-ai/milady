@@ -434,12 +434,8 @@ jobs:
       - name: Package Agent Browser Bridge release bundles
         id: package-browser-bridge
         run: |
-          if bun run browser-bridge:package:release; then
-            echo "packaged=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "::warning::Agent Browser Bridge packaging failed; desktop release will continue without browser companion bundles."
-            echo "packaged=false" >> "$GITHUB_OUTPUT"
-          fi
+          bun run browser-bridge:package:release
+          echo "packaged=true" >> "$GITHUB_OUTPUT"
 
       - name: Upload Agent Browser Bridge release artifacts
         if: steps.package-browser-bridge.outputs.packaged == 'true'
@@ -630,10 +626,14 @@ jobs:
       - name: Stage desktop bundle inputs
         run: |
           node eliza/packages/app-core/scripts/desktop-build.mjs stage --variant=base --build-whisper
+          node scripts/ensure-eliza-renderer-avatar-assets.mjs
           mkdir -p dist/node_modules/@elizaos/shared/src/i18n/generated
           cp eliza/packages/shared/src/i18n/generated/validation-keyword-data.ts dist/node_modules/@elizaos/shared/src/i18n/generated/
           cp eliza/packages/shared/src/i18n/generated/validation-keyword-data.js dist/node_modules/@elizaos/shared/src/i18n/generated/
           test -f dist/node_modules/@elizaos/shared/src/i18n/generated/validation-keyword-data.js
+          test -f apps/app/dist/vrms/eliza-1.vrm.gz -o -f apps/app/dist/vrms/eliza-1.vrm
+          test -f apps/app/dist/vrms/previews/eliza-1.png
+          test -f apps/app/dist/vrms/backgrounds/eliza-1.png
 
       - name: Validate Electrobun runtime copy contract
         env:
@@ -833,6 +833,7 @@ jobs:
         run: |
           out_dir="$RUNNER_TEMP/electrobun-entry-probe"
           rm -rf "$out_dir"
+          node "$GITHUB_WORKSPACE/scripts/copy-runtime-node-modules.ts" --link-only
           bun build src/index.ts --target=bun --outdir "$out_dir"
 
       - name: Build patched Electrobun CLI

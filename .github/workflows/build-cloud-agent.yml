@@ -62,7 +62,7 @@ jobs:
     steps:
       # ── 1. Checkout ─────────────────────────────────────────────────────────
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ env.SOURCE_REF }}
           fetch-depth: 0
@@ -70,7 +70,7 @@ jobs:
 
       # ── 2. Set up Node + Bun ────────────────────────────────────────────────
       - name: Setup Node.js 22
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "22"
 
@@ -81,7 +81,7 @@ jobs:
 
       # ── 3. Cache bun store ──────────────────────────────────────────────────
       - name: Cache bun store
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.bun/install/cache
           key: bun-store-cloud-${{ runner.os }}-${{ hashFiles('bun.lock') }}
@@ -249,14 +249,9 @@ jobs:
           node eliza/packages/app-core/scripts/build-native-plugins.mjs
 
       # ── 5.5. Build @elizaos/core + agent (needed for tsx runtime) ───────
-      - name: Install buf CLI
-        uses: bufbuild/buf-setup-action@v1
-        with:
-          version: "1.50.0"
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Build @elizaos/core
         run: |
+          export PATH="$GITHUB_WORKSPACE/eliza/node_modules/.bin:$GITHUB_WORKSPACE/eliza/packages/schemas/node_modules/.bin:$PATH"
           # Proto generation
           cd eliza/packages/schemas
           buf dep update && buf generate
@@ -385,11 +380,11 @@ jobs:
 
       # ── 10. Set up Docker Buildx ────────────────────────────────
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       # ── 11. Login to GHCR ──────────────────────────────────────────────────
       - name: Login to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         if: ${{ github.event_name == 'push' || inputs.push_image != false }}
         with:
           registry: ${{ env.REGISTRY }}
@@ -398,7 +393,7 @@ jobs:
 
       # ── 12. Build and push Docker image ────────────────────────────────────
       - name: Build and push Docker image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: deploy/Dockerfile.ci

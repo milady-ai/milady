@@ -45,14 +45,14 @@ jobs:
       attempt: ${{ steps.check.outputs.attempt }}
     steps:
       - name: Checkout (for trust-scoring.cjs)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           sparse-checkout: .github
           fetch-depth: 1
 
       - name: Check PR eligibility
         id: check
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const { computeTrustScore, DEFAULT_CONFIG, createContributorState, expandState } = require('./.github/trust-scoring.cjs');
@@ -187,14 +187,14 @@ jobs:
       checks: read
     steps:
       - name: Checkout PR branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.event.workflow_run.head_branch }}
           fetch-depth: 0
           submodules: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org'
@@ -221,7 +221,7 @@ jobs:
           MILADY_NO_VISION_DEPS: "1"
 
       - name: Post fix-attempt marker
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             await github.rest.issues.createComment({

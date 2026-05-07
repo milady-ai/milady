@@ -29,6 +29,7 @@ const optionalPackages = [
 
 const stubSource = `const optionalStub = Object.freeze({
   name: "milady-optional-elizaos-app-stub",
+  description: "Optional elizaOS app package placeholder.",
   routes: [],
 });
 
