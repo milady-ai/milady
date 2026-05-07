@@ -18,51 +18,154 @@
     "useDefineForClassFields": false,
     "baseUrl": ".",
     "paths": {
-      "@elizaos/app-lifeops": ["./node_modules/@elizaos/app-lifeops"],
-      "@elizaos/app-lifeops/*": ["./node_modules/@elizaos/app-lifeops/*"],
-      "@elizaos/app-screenshare": ["./node_modules/@elizaos/app-screenshare"],
+      "@elizaos/app-lifeops": [
+        "./eliza/apps/app-lifeops/src/index.ts",
+        "./node_modules/@elizaos/app-lifeops"
+      ],
+      "@elizaos/app-lifeops/*": [
+        "./eliza/apps/app-lifeops/src/*",
+        "./node_modules/@elizaos/app-lifeops/*"
+      ],
+      "@elizaos/app-screenshare": [
+        "./eliza/apps/app-screenshare/src/index.ts",
+        "./node_modules/@elizaos/app-screenshare"
+      ],
       "@elizaos/app-screenshare/*": [
+        "./eliza/apps/app-screenshare/src/*",
         "./node_modules/@elizaos/app-screenshare/*"
       ],
-      "@elizaos/app-companion": ["./node_modules/@elizaos/app-companion"],
-      "@elizaos/app-companion/*": ["./node_modules/@elizaos/app-companion/*"],
-      "@elizaos/app-shopify": ["./node_modules/@elizaos/app-shopify"],
-      "@elizaos/app-shopify/*": ["./node_modules/@elizaos/app-shopify/*"],
-      "@elizaos/app-hyperliquid": ["./node_modules/@elizaos/app-hyperliquid"],
+      "@elizaos/app-companion": [
+        "./eliza/apps/app-companion/src/index.ts",
+        "./node_modules/@elizaos/app-companion"
+      ],
+      "@elizaos/app-companion/*": [
+        "./eliza/apps/app-companion/src/*",
+        "./node_modules/@elizaos/app-companion/*"
+      ],
+      "@elizaos/app-shopify": [
+        "./eliza/apps/app-shopify/src/index.ts",
+        "./node_modules/@elizaos/app-shopify"
+      ],
+      "@elizaos/app-shopify/*": [
+        "./eliza/apps/app-shopify/src/*",
+        "./node_modules/@elizaos/app-shopify/*"
+      ],
+      "@elizaos/app-hyperliquid": [
+        "./eliza/apps/app-hyperliquid/src/index.ts",
+        "./node_modules/@elizaos/app-hyperliquid"
+      ],
       "@elizaos/app-hyperliquid/*": [
+        "./eliza/apps/app-hyperliquid/src/*",
         "./node_modules/@elizaos/app-hyperliquid/*"
       ],
-      "@elizaos/app-polymarket": ["./node_modules/@elizaos/app-polymarket"],
-      "@elizaos/app-polymarket/*": ["./node_modules/@elizaos/app-polymarket/*"],
-      "@elizaos/app-vincent": ["./node_modules/@elizaos/app-vincent"],
-      "@elizaos/app-vincent/*": ["./node_modules/@elizaos/app-vincent/*"],
-      "@elizaos/app-elizamaker": ["./node_modules/@elizaos/app-elizamaker"],
-      "@elizaos/app-elizamaker/*": ["./node_modules/@elizaos/app-elizamaker/*"],
-      "@elizaos/app-core": ["./node_modules/@elizaos/app-core"],
-      "@elizaos/app-core/*": ["./node_modules/@elizaos/app-core/*"],
-      "@elizaos/shared": ["./node_modules/@elizaos/shared"],
-      "@elizaos/shared/*": ["./node_modules/@elizaos/shared/*"],
-      "@elizaos/skills": ["./node_modules/@elizaos/skills"],
-      "@elizaos/skills/*": ["./node_modules/@elizaos/skills/*"],
-      "@elizaos/core": ["./node_modules/@elizaos/core"],
-      "@elizaos/core/*": ["./node_modules/@elizaos/core/*"],
-      "@elizaos/agent": ["./node_modules/@elizaos/agent"],
-      "@elizaos/agent/*": ["./node_modules/@elizaos/agent/*"],
+      "@elizaos/app-polymarket": [
+        "./eliza/apps/app-polymarket/src/index.ts",
+        "./node_modules/@elizaos/app-polymarket"
+      ],
+      "@elizaos/app-polymarket/*": [
+        "./eliza/apps/app-polymarket/src/*",
+        "./node_modules/@elizaos/app-polymarket/*"
+      ],
+      "@elizaos/app-vincent": [
+        "./eliza/apps/app-vincent/src/index.ts",
+        "./node_modules/@elizaos/app-vincent"
+      ],
+      "@elizaos/app-vincent/*": [
+        "./eliza/apps/app-vincent/src/*",
+        "./node_modules/@elizaos/app-vincent/*"
+      ],
+      "@elizaos/app-elizamaker": [
+        "./eliza/apps/app-elizamaker/src/index.ts",
+        "./node_modules/@elizaos/app-elizamaker"
+      ],
+      "@elizaos/app-elizamaker/*": [
+        "./eliza/apps/app-elizamaker/src/*",
+        "./node_modules/@elizaos/app-elizamaker/*"
+      ],
+      "@elizaos/app-core": [
+        "./eliza/packages/app-core/src/index.ts",
+        "./node_modules/@elizaos/app-core"
+      ],
+      "@elizaos/app-core/*": [
+        "./eliza/packages/app-core/src/*",
+        "./node_modules/@elizaos/app-core/*"
+      ],
+      "@elizaos/shared": [
+        "./eliza/packages/shared/src/index.ts",
+        "./node_modules/@elizaos/shared"
+      ],
+      "@elizaos/shared/*": [
+        "./eliza/packages/shared/src/*",
+        "./node_modules/@elizaos/shared/*"
+      ],
+      "@elizaos/skills": [
+        "./eliza/packages/skills/src/index.ts",
+        "./node_modules/@elizaos/skills"
+      ],
+      "@elizaos/skills/*": [
+        "./eliza/packages/skills/src/*",
+        "./node_modules/@elizaos/skills/*"
+      ],
+      "@elizaos/core": [
+        "./eliza/packages/core/src/index.ts",
+        "./node_modules/@elizaos/core"
+      ],
+      "@elizaos/core/*": [
+        "./eliza/packages/core/src/*",
+        "./node_modules/@elizaos/core/*"
+      ],
+      "@elizaos/agent": [
+        "./eliza/packages/agent/src/index.ts",
+        "./node_modules/@elizaos/agent"
+      ],
+      "@elizaos/agent/*": [
+        "./eliza/packages/agent/src/*",
+        "./node_modules/@elizaos/agent/*"
+      ],
       "@elizaos/plugin-browser-bridge": [
+        "./eliza/plugins/plugin-browser-bridge/src/index.ts",
         "./node_modules/@elizaos/plugin-browser-bridge"
       ],
       "@elizaos/plugin-browser-bridge/*": [
+        "./eliza/plugins/plugin-browser-bridge/src/*",
         "./node_modules/@elizaos/plugin-browser-bridge/*"
       ],
-      "@elizaos/ui": ["./node_modules/@elizaos/ui"],
-      "@elizaos/ui/*": ["./node_modules/@elizaos/ui/*"],
+      "@elizaos/ui": [
+        "./eliza/packages/ui/src/index.ts",
+        "./node_modules/@elizaos/ui"
+      ],
+      "@elizaos/ui/*": [
+        "./eliza/packages/ui/src/*",
+        "./node_modules/@elizaos/ui/*"
+      ],
       "@elizaos/capacitor-mobile-signals": [
+        "./eliza/packages/native-plugins/mobile-signals/src/index.ts",
         "./node_modules/@elizaos/capacitor-mobile-signals"
       ],
-      "@elizaos/app-steward": ["./node_modules/@elizaos/app-steward"],
-      "@elizaos/app-steward/*": ["./node_modules/@elizaos/app-steward/*"]
+      "@elizaos/app-steward": [
+        "./eliza/apps/app-steward/src/index.ts",
+        "./node_modules/@elizaos/app-steward"
+      ],
+      "@elizaos/app-steward/*": [
+        "./eliza/apps/app-steward/src/*",
+        "./node_modules/@elizaos/app-steward/*"
+      ]
     }
   },
-  "include": ["vitest.config.ts", "scripts/lib/repo-root.d.mts"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "vitest.config.ts",
+    "eliza/test/vitest/**/*.ts",
+    "eliza/test/eliza-package-paths.ts",
+    "scripts/lib/repo-root.d.mts",
+    "eliza/packages/app-core/src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "eliza/plugins",
+    "eliza/packages/app-core/src/**/*.test.ts",
+    "eliza/packages/app-core/src/**/*.test.tsx",
+    "eliza/packages/app-core/src/**/test-helpers.ts",
+    "eliza/packages/app-core/src/services/training-service.ts"
+  ]
 }
