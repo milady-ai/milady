@@ -316,13 +316,29 @@ test("npm release builds generate gitignored eliza i18n data before bundling", (
     );
     assert.match(
       content,
-      /node scripts\/run-eliza-app-core-script\.mjs ensure-shared-i18n-data\.mjs[\s\S]*?bunx tsdown/,
+      /node scripts\/run-eliza-app-core-script\.mjs ensure-shared-i18n-data\.mjs[\s\S]*?node scripts\/run-tsdown\.mjs/,
     );
   }
   assert.match(
     releaseContractSuite,
-    /ensure-shared-i18n-data\.mjs"[\s\S]*?run\("bunx", \["tsdown"/,
+    /ensure-shared-i18n-data\.mjs"[\s\S]*?run\("node", \["scripts\/run-tsdown\.mjs"/,
   );
+});
+
+test("release workflows use the checked-in tsdown runner", () => {
+  for (const name of [
+    "agent-release.yml",
+    "apple-store-release.yml",
+    "build-cloud-agent.yml",
+    "build-cloud-image.yml",
+    "build-docker.yml",
+    "release-electrobun.yml",
+    "reusable-npm-publish.yml",
+  ]) {
+    const content = workflow(name);
+    assert.match(content, /node scripts\/run-tsdown\.mjs/);
+    assert.doesNotMatch(content, /\b(?:bunx|npx) tsdown\b/);
+  }
 });
 
 test("Electrobun release exposes whisper-node for upstream script layout", () => {

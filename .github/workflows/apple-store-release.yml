@@ -332,7 +332,7 @@ jobs:
 
       - name: Build core dist
         run: |
-          bunx tsdown
+          node scripts/run-tsdown.mjs
           echo '{"type":"module"}' > dist/package.json
           node --import tsx scripts/write-build-info.ts
 

@@ -262,7 +262,7 @@ jobs:
                - If the failure involves Electrobun desktop files (eliza/packages/app-core/platforms/electrobun/**):
                  also run `bunx vitest run scripts/electrobun-release-workflow-drift.test.ts`
                  and `bun run release:check` after building dist prerequisites:
-                 `bunx tsdown && printf '{"type":"module"}\n' > dist/package.json && node --import tsx scripts/write-build-info.ts`
+                 `node scripts/run-tsdown.mjs && printf '{"type":"module"}\n' > dist/package.json && node --import tsx scripts/write-build-info.ts`
             5. Commit and push the fix
 
             ## Rules

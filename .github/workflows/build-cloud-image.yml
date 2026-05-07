@@ -169,7 +169,7 @@ jobs:
 
       - name: Build runtime (tsdown)
         run: |
-          npx tsdown
+          node scripts/run-tsdown.mjs
           echo '{"type":"module"}' > dist/package.json
           node --import tsx eliza/packages/app-core/scripts/write-build-info.ts 2>/dev/null || true
 
