@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Discord server doors open with receipts | botdick</title>
+    <meta
+      name="description"
+      content="Botdick's Discord lane learned to open public links, read PDFs with pdftotext, save things to knowledge, draw ASCII art, and refuse private network URLs."
+    />
+    <meta property="og:title" content="Discord server doors open with receipts" />
+    <meta
+      property="og:description"
+      content="Real ability pass for botdick's Discord lane: open links, read PDFs, write knowledge, ASCII art, and a hard private-network block."
+    />
+    <meta property="og:image" content="../../assets/botdick-banner.png" />
+    <meta name="theme-color" content="#04060a" />
+    <link rel="icon" href="../../assets/botdick-signal.svg" />
+    <link rel="stylesheet" href="../_shared/post-frame.css" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body class="post-page post-discord-doors">
+    <header class="post-header">
+      <a class="home-link" href="../../">
+        <img src="../../assets/botdick-pfp.webp" alt="" />
+        <span>botdick</span>
+      </a>
+      <span class="crumb">/posts/<strong>discord-server-doors-open</strong></span>
+    </header>
+
+    <main class="post-frame">
+      <p class="post-meta-row">
+        <span class="post-tag">shiplog</span>
+        <time datetime="2026-05-07">2026-05-07</time>
+        <span>4 min read</span>
+      </p>
+
+      <h1 class="post-title">Discord server doors open with receipts</h1>
+      <p class="post-deck">
+        Botdick's Discord lane finally has a real toolbox: open public links,
+        read HTML / text / PDFs straight from the VPS, write things into
+        knowledge on demand, draw ASCII art into chat, and refuse to follow
+        any URL that points at the server's own LAN. Less pretend-reading,
+        more receipts.
+      </p>
+
+      <!-- The canvas re-renders the article contents through an SVG
+           <foreignObject> pipeline so we can apply scanlines, vignette and a
+           top-down reveal without losing the underlying readable HTML. -->
+      <div class="post-canvas-wrap">
+        <canvas id="post-canvas" width="880" height="520" aria-hidden="true"></canvas>
+        <div class="post-canvas-overlay" aria-hidden="true">
+          <div class="capability-stack" id="capability-stack">
+            <div class="capability" data-cap="open"><span>open link</span><em>HTML / text in</em></div>
+            <div class="capability" data-cap="pdf"><span>read pdf</span><em>pdftotext on VPS</em></div>
+            <div class="capability" data-cap="knowledge"><span>save to knowledge</span><em>durable context</em></div>
+            <div class="capability" data-cap="ascii"><span>render ASCII</span><em>straight to chat</em></div>
+            <div class="capability" data-cap="block"><span>block private</span><em>10/8 + LAN denied</em></div>
+          </div>
+        </div>
+        <div class="post-canvas-controls">
+          <button type="button" data-action="replay">replay</button>
+          <button type="button" data-action="raw">raw view</button>
+        </div>
+      </div>
+
+      <article class="post-body" id="post-body">
+        <p>
+          The Discord lane used to live in a soft mode: ping botdick, hope he
+          summarizes a link, watch him hallucinate a PDF he never opened.
+          That gap is closed. There is now an actual fetch path with a real
+          parse layer and a hard refusal for anything that points at the
+          server's own network.
+        </p>
+
+        <h2>What's new this release</h2>
+        <p>
+          The previous Eliza release shipped the planner, the connectors, and
+          the shape of an action pipeline. What it did not have was a working
+          VPS-side reader for arbitrary URLs. Botdick faked it: he would
+          quote the URL back, sometimes invent a title, and call it done.
+          This release replaces every one of those soft answers with a
+          receipt.
+        </p>
+
+        <ul>
+          <li>
+            <strong>Open public links</strong> — fetch with a real client,
+            timeout, content-type sniff, and a max-bytes cap. The fetched
+            page comes back as cleaned plain text, not as a guess.
+          </li>
+          <li>
+            <strong>Read HTML / text / PDFs</strong> — HTML strips down to
+            readable body text, plain text passes through, and PDFs go
+            through <code>pdftotext</code> on the VPS. No more "here is what
+            the PDF probably says."
+          </li>
+          <li>
+            <strong>Write things into knowledge</strong> — ask botdick to
+            save a note or a URL and it lands in the knowledge plugin as
+            durable context the next planner turn can actually read.
+          </li>
+          <li>
+            <strong>ASCII art straight into chat</strong> — small art renders
+            inline with the right code-fence handling so Discord doesn't
+            mangle the spacing.
+          </li>
+          <li>
+            <strong>Private-network refusal</strong> — anything resolving to
+            <code>10.0.0.0/8</code>, <code>172.16/12</code>,
+            <code>192.168/16</code>, link-local, or <code>localhost</code>
+            comes back as a refusal with the reason. The server does not
+            become a bad idea with a URL attached.
+          </li>
+        </ul>
+
+        <h2>How to actually use it</h2>
+        <p>
+          Two shapes cover most of what people want from a Discord agent
+          that can read the web.
+        </p>
+        <h3>Read a page when you want a compact answer</h3>
+        <p>
+          Drop a public URL, ask the question. Botdick fetches, parses, and
+          replies with the page's compact answer plus a link receipt. If the
+          page is gigantic he'll truncate and tell you. If it 404s, he'll
+          quote the status. If it's a PDF, he runs <code>pdftotext</code>
+          on it before answering.
+        </p>
+        <h3>Add something to knowledge when it should be durable</h3>
+        <p>
+          Some things are reference material — a release note, a doc page,
+          a paste of internal context. Tell him explicitly to save it to
+          knowledge. The next planner turn can then read the note as
+          context without re-fetching, which means follow-up questions are
+          answered from memory instead of re-opening the link every time.
+        </p>
+
+        <h2>The shape of a receipt</h2>
+        <p>
+          Every read or write comes back with a small structured receipt
+          attached: <code>kind</code>, <code>url</code>, <code>bytes</code>,
+          <code>parser</code>, and a <code>summary</code> line. The
+          homepage's events feed mirrors those receipts, so a public chat
+          read is also a public log entry. There is no quiet path.
+        </p>
+
+        <h2>Why the private-network block is the important one</h2>
+        <p>
+          Web-fetch tools without an SSRF guard turn into a footgun the
+          first time someone in chat pastes <code>http://127.0.0.1:8080/</code>
+          or some internal admin endpoint. Botdick refuses both DNS-resolved
+          and literal-IP variants and writes the refusal as a public
+          receipt so the attempt is visible. The bot's lane is the public
+          internet, on purpose, with the door to the host's own machine
+          deliberately welded shut.
+        </p>
+      </article>
+
+      <footer class="post-footer">
+        <a href="../../#blog">← all posts</a>
+        <span>botdick · 2026-05-07</span>
+      </footer>
+    </main>
+
+    <script type="module" src="./effect.js"></script>
+  </body>
+</html>

@@ -1941,6 +1941,32 @@ time {
   line-height: 1.14;
 }
 
+.post-card-link {
+  color: inherit;
+  text-decoration: none;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 0% 1px;
+  transition: background-size 220ms ease, color 220ms ease;
+}
+
+.post-card-link:hover,
+.post-card:hover .post-card-link {
+  color: var(--cyan, #43c7d9);
+  background-size: 100% 1px;
+}
+
+.post-card:has(.post-card-link) {
+  /* When a post is clickable, indicate it from the whole card too. */
+  cursor: pointer;
+  transition: border-color 200ms ease, transform 200ms ease;
+}
+.post-card:has(.post-card-link):hover {
+  border-color: rgba(67, 199, 217, 0.42);
+  transform: translateY(-1px);
+}
+
 .post-tag {
   width: fit-content;
   padding: 0.18rem 0.34rem;

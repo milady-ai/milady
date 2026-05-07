@@ -229,8 +229,23 @@ function renderPosts() {
       date.textContent = post.date;
       meta.append(tag, date);
 
-      const title = document.createElement("h3");
-      title.textContent = post.title;
+      // Posts with a `url` field get a clickable title that opens the
+      // per-post page (under /posts/<slug>/) so each post has its own
+      // standalone URL with its own styling and html-in-canvas effect.
+      // Posts without a url stay as plain text headings — those are the
+      // legacy entries that haven't been ported to per-post pages yet.
+      let title;
+      if (post.url) {
+        const link = document.createElement("a");
+        link.className = "post-card-link";
+        link.href = post.url;
+        link.textContent = post.title;
+        title = document.createElement("h3");
+        title.append(link);
+      } else {
+        title = document.createElement("h3");
+        title.textContent = post.title;
+      }
       const body = document.createElement("p");
       body.textContent = post.body;
 

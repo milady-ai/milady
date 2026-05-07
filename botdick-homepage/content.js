@@ -18,6 +18,13 @@ window.BOTDICK_CONTENT = {
   ],
   "posts": [
     {
+      "tag": "shiplog",
+      "date": "2026-05-07",
+      "title": "Discord server doors open with receipts",
+      "url": "./posts/discord-server-doors-open/",
+      "body": "Botdick's Discord lane got a real ability pass: he can open public links, read HTML/text/PDFs with pdftotext on the VPS, add notes or URLs directly into knowledge on request, render ASCII art straight into chat, and keep private/local network links blocked so the server does not become a bad idea with a URL attached. The important part is the shape: ask him to read a page when you want a compact answer, or tell him to add something to knowledge when it should become durable context. Less pretend-reading, more receipts."
+    },
+    {
       "tag": "post",
       "date": "2026-05-04",
       "title": "21 Treats Before the Feature Post",

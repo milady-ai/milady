@@ -1,0 +1,241 @@
+/*
+ * Shared chrome for /posts/<slug>/ pages. Each post may further override or
+ * extend these rules with its own stylesheet to give the page a unique
+ * personality. The frame deliberately stays unopinionated about layout
+ * width, hero treatment, and color so the per-post stylesheet can lean in.
+ */
+
+:root {
+  --post-paper: #f2eadc;
+  --post-ink: #04060a;
+  --post-quiet: #9aa3b3;
+  --post-accent: #43c7d9;
+  --post-mono: ui-monospace, "Berkeley Mono", "JetBrains Mono", "Menlo", monospace;
+  --post-sans: "Inter", "Helvetica Neue", system-ui, sans-serif;
+  --post-frame-max: 920px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  background: #04060a;
+  color: var(--post-paper);
+  font-family: var(--post-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--post-accent);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+.post-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(to bottom, rgba(4, 6, 10, 0.95), rgba(4, 6, 10, 0.55));
+  backdrop-filter: blur(8px);
+  font-family: var(--post-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+}
+
+.post-header .home-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--post-paper);
+}
+
+.post-header .home-link img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+}
+
+.post-header .crumb {
+  color: var(--post-quiet);
+}
+
+.post-header .crumb strong {
+  color: var(--post-paper);
+}
+
+.post-frame {
+  max-width: var(--post-frame-max);
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 6rem;
+}
+
+.post-meta-row {
+  display: flex;
+  gap: 0.85rem;
+  font-family: var(--post-mono);
+  font-size: 0.72rem;
+  color: var(--post-quiet);
+  letter-spacing: 0.05em;
+  margin-bottom: 1.25rem;
+}
+
+.post-meta-row .post-tag {
+  color: var(--post-accent);
+}
+
+.post-title {
+  font-family: var(--post-sans);
+  font-weight: 700;
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  margin: 0 0 1.5rem;
+}
+
+.post-deck {
+  font-size: 1.15rem;
+  line-height: 1.55;
+  color: var(--post-quiet);
+  max-width: 36em;
+  margin: 0 0 2.5rem;
+}
+
+.post-canvas-wrap {
+  position: relative;
+  margin: 0 0 3rem;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #04060a;
+  /* Subtle inset so the canvas feels mounted rather than full-bleed. */
+  box-shadow:
+    0 0 0 1px rgba(67, 199, 217, 0.18),
+    inset 0 0 60px rgba(0, 0, 0, 0.45);
+}
+
+.post-canvas-wrap canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Per-post effects can position any number of overlay UIs on top of the
+ * canvas. The .post-canvas-overlay class keeps them aligned with the canvas. */
+.post-canvas-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.post-canvas-overlay.interactive {
+  pointer-events: auto;
+}
+
+.post-canvas-controls {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  display: flex;
+  gap: 0.4rem;
+  font-family: var(--post-mono);
+  font-size: 0.65rem;
+  pointer-events: auto;
+  z-index: 2;
+}
+
+.post-canvas-controls button {
+  background: rgba(4, 6, 10, 0.7);
+  border: 1px solid rgba(242, 234, 220, 0.18);
+  color: var(--post-paper);
+  padding: 0.35rem 0.6rem;
+  border-radius: 3px;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  font-family: inherit;
+}
+.post-canvas-controls button:hover {
+  border-color: var(--post-accent);
+  color: var(--post-accent);
+}
+
+.post-body {
+  font-size: 1.08rem;
+  line-height: 1.65;
+}
+
+.post-body p {
+  margin: 0 0 1.2rem;
+}
+
+.post-body h2 {
+  margin: 2.5rem 0 1rem;
+  font-size: 1.4rem;
+}
+
+.post-body h3 {
+  margin: 1.8rem 0 0.6rem;
+  font-size: 1.15rem;
+  color: var(--post-accent);
+}
+
+.post-body code {
+  font-family: var(--post-mono);
+  font-size: 0.92em;
+  background: rgba(242, 234, 220, 0.08);
+  padding: 0.08em 0.35em;
+  border-radius: 3px;
+}
+
+.post-body pre {
+  background: rgba(242, 234, 220, 0.05);
+  border: 1px solid rgba(242, 234, 220, 0.1);
+  padding: 0.85rem 1rem;
+  border-radius: 4px;
+  overflow-x: auto;
+  font-family: var(--post-mono);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.post-body ul {
+  padding-left: 1.2rem;
+}
+.post-body li {
+  margin-bottom: 0.55rem;
+}
+
+.post-body strong {
+  color: var(--post-paper);
+}
+
+.post-footer {
+  margin-top: 4rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(242, 234, 220, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--post-mono);
+  font-size: 0.72rem;
+  color: var(--post-quiet);
+  letter-spacing: 0.04em;
+}
+
+.post-footer a {
+  color: var(--post-paper);
+}
+
+@media (max-width: 540px) {
+  .post-frame {
+    padding: 2rem 1.1rem 4rem;
+  }
+  .post-deck {
+    font-size: 1rem;
+  }
+}
