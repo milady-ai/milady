@@ -177,7 +177,7 @@ function getAppWindow(): AppCompatWindow {
 // True when the APK is running on the AOSP MiladyOS variant. Detection:
 // MainActivity.applyMiladyOSUserAgentSuffix appends `MiladyOS/<tag>` to the
 // WebView user-agent when `ro.miladyos.product` is set by the AOSP product
-// config. The upstream eliza framework reads its own `ElizaOS/<tag>` marker
+// config. The upstream elizaOS layer reads its own `ElizaOS/<tag>` marker
 // from the same place; this helper only cares about the Milady-brand layer.
 function isMiladyOS(): boolean {
   if (typeof navigator === "undefined") return false;

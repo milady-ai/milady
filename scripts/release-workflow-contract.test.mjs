@@ -68,6 +68,24 @@ test("canonical release workflow grants reusable workflow permissions", () => {
   );
 });
 
+test("canonical release publish script caps the GitHub release body", () => {
+  const release = workflow("agent-release.yml");
+  const limitIndex = release.indexOf("const maxReleaseBodyLength = 120_000;");
+  const capIndex = release.indexOf("function capReleaseBody(body)");
+
+  assert.ok(limitIndex !== -1, "missing release body length limit");
+  assert.ok(capIndex !== -1, "missing release body cap helper");
+  assert.ok(
+    limitIndex < capIndex,
+    "release body limit must be defined before use",
+  );
+  assert.match(release, /if \(body\.length <= maxReleaseBodyLength\)/);
+  assert.match(
+    release,
+    /body\.slice\(0, maxReleaseBodyLength - suffix\.length\)/,
+  );
+});
+
 test("distribution workflows consume the canonical channel policy", () => {
   const orchestrator = workflow("release-orchestrator.yml");
   const publishPackages = workflow("publish-packages.yml");
