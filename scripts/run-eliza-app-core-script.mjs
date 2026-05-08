@@ -57,11 +57,11 @@ const localRegressionMatrix = path.join(
   "test",
   "regression-matrix.json",
 );
-const shouldUseLocalScript =
-  fs.existsSync(localScriptPath) &&
-  (scriptName === "ensure-shared-i18n-data.mjs" ||
-    (scriptName === "validate-regression-matrix.mjs" &&
-      fs.existsSync(localRegressionMatrix)));
+// Prefer the local elizaOS app-core script when a local checkout exists.
+// Makes `bun run eliza:local` use local source for every app-core script,
+// so patches in the local checkout (including platforms/android/build.gradle
+// templates) actually take effect.
+const shouldUseLocalScript = fs.existsSync(localScriptPath);
 const resolvedScriptPath = shouldUseLocalScript ? localScriptPath : scriptPath;
 const useBun = path
   .resolve(resolvedScriptPath)
