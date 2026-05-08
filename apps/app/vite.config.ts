@@ -2137,6 +2137,7 @@ export default defineConfig({
       "/api": {
         target: `http://127.0.0.1:${apiPort}`,
         changeOrigin: true,
+        xfwd: true,
         configure: (proxy) => {
           proxy.on("error", (_err, _req, res) => {
             if (!res.headersSent) {
