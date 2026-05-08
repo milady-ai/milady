@@ -67,7 +67,8 @@
     "three": "^0.182.0",
     "@elizaos/app-core": "alpha",
     "@elizaos/app-hyperscape": "alpha",
-    "@elizaos/shared": "alpha"
+    "@elizaos/shared": "alpha",
+    "@clawville/app-clawville": "^0.2.0"
   },
   "devDependencies": {
     "@capacitor/cli": "8.3.1",
