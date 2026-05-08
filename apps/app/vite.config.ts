@@ -1920,10 +1920,6 @@ export default defineConfig({
         replacement: emptyNodeModuleEntry,
       },
       {
-        find: /^@clawville\/app-clawville(\/.*)?$/,
-        replacement: optionalElizaAppStubEntry,
-      },
-      {
         find: /^@elizaos\/app-hyperscape\/ui(\/.*)?$/,
         replacement: optionalElizaAppStubEntry,
       },
