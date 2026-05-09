@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import {
   parseAllowedHostEnv,
   toViteAllowedHosts,
-} from "@elizaos/app-core/config/allowed-hosts";
+} from "@elizaos/shared/config/allowed-hosts";
 import { colorizeDevSettingsStartupBanner } from "@elizaos/shared/dev-settings-banner-style";
 import { prependDevSubsystemFigletHeading } from "@elizaos/shared/dev-settings-figlet-heading";
 import {
@@ -77,8 +77,11 @@ const appCoreSrcRoot = hasLocalElizaWorkspace
   ? path.join(localElizaRoot, "packages/app-core/src")
   : null;
 const appCoreNativePluginEntrypoints = appCoreSrcRoot
-  ? path.join(appCoreSrcRoot, "platform/native-plugin-entrypoints.ts")
-  : requireResolve("@elizaos/app-core/platform/native-plugin-entrypoints");
+  ? path.join(
+      localElizaRoot,
+      "packages/ui/src/platform/native-plugin-entrypoints.ts",
+    )
+  : requireResolve("@elizaos/ui/platform/native-plugin-entrypoints");
 const emptyNodeModuleEntry = appCoreSrcRoot
   ? path.join(appCoreSrcRoot, "platform/empty-node-module.ts")
   : requireResolve("@elizaos/app-core/platform/empty-node-module");
