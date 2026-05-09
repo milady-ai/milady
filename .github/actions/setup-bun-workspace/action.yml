@@ -133,15 +133,23 @@ runs:
       env:
         MILADY_SKIP_CLOUD_SUBMODULE: ${{ inputs.skip-cloud-submodule == 'true' && '1' || '' }}
 
-    # Some review jobs still execute local eliza runtime scripts after the
-    # published-only install rewrite. Hydrate eliza only for those jobs; normal
-    # published-only CI resolves @elizaos/* versions from npm dist-tags.
-    - name: Shallow-init eliza submodule for version resolution
-      if: ${{ inputs.disable-local-eliza-workspace == 'true' && inputs.prepare-local-eliza-runtime == 'true' }}
+    # Some jobs execute repo-local eliza runtime scripts even when checkout
+    # omits submodules, such as fork CI and review jobs. Hydrate eliza only
+    # for those jobs; normal published-only CI resolves @elizaos/* versions
+    # from npm dist-tags.
+    - name: Hydrate local eliza runtime checkout
+      if: ${{ inputs.prepare-local-eliza-runtime == 'true' }}
       shell: bash
       run: |
         if [ ! -f eliza/package.json ]; then
           git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza
+        fi
+        if [ "${{ inputs.skip-cloud-submodule }}" = "true" ]; then
+          MILADY_SKIP_CLOUD_SUBMODULE=1 node --input-type=module <<'NODE'
+        import { pruneSkippedCloudWorkspace } from "./scripts/init-submodules.mjs";
+
+        pruneSkippedCloudWorkspace({ rootDir: process.cwd() });
+        NODE
         fi
 
     - name: Apply elizaOS source CI patches
@@ -259,6 +267,17 @@ runs:
       env:
         npm_config_python: ${{ env.pythonLocation }}/bin/python3
 
+    - name: Install local eliza runtime dependencies
+      if: ${{ inputs.prepare-local-eliza-runtime == 'true' && hashFiles('eliza/package.json') != '' }}
+      shell: bash
+      run: |
+        bun install --cwd eliza --no-frozen-lockfile --ignore-scripts
+
+    - name: Hydrate local eliza Bun package postinstall
+      if: ${{ inputs.prepare-local-eliza-runtime == 'true' && hashFiles('eliza/node_modules/bun/install.js') != '' }}
+      shell: bash
+      run: cd eliza/node_modules/bun && node install.js
+
     - name: Generate local eliza protobuf types
       if: ${{ inputs.prepare-local-eliza-runtime == 'true' }}
       shell: bash
@@ -290,14 +309,8 @@ runs:
         MILADY_NO_VISION_DEPS: ${{ inputs.no-vision-deps == 'true' && '1' || '' }}
         MILADY_SKIP_LOCAL_UPSTREAMS: ${{ (inputs.disable-local-eliza-workspace == 'true' || inputs.skip-local-upstreams-postinstall == 'true') && '1' || '' }}
 
-    - name: Install local eliza runtime dependencies
-      if: ${{ inputs.prepare-local-eliza-runtime == 'true' && inputs.disable-local-eliza-workspace == 'true' }}
-      shell: bash
-      run: |
-        bun install --cwd eliza --no-frozen-lockfile --ignore-scripts
-
     - name: Generate local eliza keyword data
-      if: ${{ inputs.prepare-local-eliza-runtime == 'true' && inputs.disable-local-eliza-workspace == 'true' }}
+      if: ${{ inputs.prepare-local-eliza-runtime == 'true' && hashFiles('eliza/package.json') != '' }}
       shell: bash
       run: |
         if [ -f eliza/packages/shared/scripts/generate-keywords.mjs ]; then

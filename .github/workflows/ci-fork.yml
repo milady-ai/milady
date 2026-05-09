@@ -30,14 +30,11 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
           install-command: bun install --ignore-scripts --no-frozen-lockfile
+          prepare-local-eliza-runtime: "true"
+          skip-cloud-submodule: "true"
 
       - name: Restore eliza workspace paths for repo scripts
         run: node scripts/restore-local-eliza-workspace.mjs
-
-      - name: Install submodule verification dependencies
-        run: |
-          bun install --cwd eliza --no-frozen-lockfile --ignore-scripts
-          bun install --cwd eliza/cloud --no-frozen-lockfile --ignore-scripts
 
       - name: Biome lint
         run: bun run verify:lint
@@ -62,14 +59,11 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
           install-command: bun install --ignore-scripts --no-frozen-lockfile
+          prepare-local-eliza-runtime: "true"
+          skip-cloud-submodule: "true"
 
       - name: Restore eliza workspace paths for repo scripts
         run: node scripts/restore-local-eliza-workspace.mjs
-
-      - name: Install submodule verification dependencies
-        run: |
-          bun install --cwd eliza --no-frozen-lockfile --ignore-scripts
-          bun install --cwd eliza/cloud --no-frozen-lockfile --ignore-scripts
 
       - name: Run type checker
         run: bun run verify:typecheck
@@ -91,6 +85,8 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
           install-command: bun install --ignore-scripts --no-frozen-lockfile
+          prepare-local-eliza-runtime: "true"
+          skip-cloud-submodule: "true"
 
       - name: Restore eliza workspace paths for repo scripts
         run: node scripts/restore-local-eliza-workspace.mjs
@@ -117,6 +113,8 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
           install-command: bun install --ignore-scripts --no-frozen-lockfile
+          prepare-local-eliza-runtime: "true"
+          skip-cloud-submodule: "true"
 
       - name: Restore eliza workspace paths for repo scripts
         run: node scripts/restore-local-eliza-workspace.mjs

@@ -59,6 +59,7 @@ describe("CI bootstrap contract", () => {
 
   it("does not run nested eliza workspace installs inside CI jobs", () => {
     const ci = workflow("ci.yml");
+    const ciFork = workflow("ci-fork.yml");
 
     expect(ci).not.toContain(
       "bun install --cwd eliza --no-frozen-lockfile --ignore-scripts",
@@ -66,6 +67,21 @@ describe("CI bootstrap contract", () => {
     expect(ci).not.toContain(
       "bun install --cwd eliza/cloud --no-frozen-lockfile --ignore-scripts",
     );
+    expect(ciFork).not.toContain(
+      "bun install --cwd eliza --no-frozen-lockfile --ignore-scripts",
+    );
+    expect(ciFork).not.toContain(
+      "bun install --cwd eliza/cloud --no-frozen-lockfile --ignore-scripts",
+    );
+  });
+
+  it("prepares local eliza runtime paths explicitly in fork CI", () => {
+    const ciFork = workflow("ci-fork.yml");
+
+    expect(ciFork.match(/prepare-local-eliza-runtime: "true"/g)).toHaveLength(
+      4,
+    );
+    expect(ciFork.match(/skip-cloud-submodule: "true"/g)).toHaveLength(4);
   });
 
   it("builds elizaOS core before bundled skills", () => {
@@ -96,15 +112,24 @@ describe("CI bootstrap contract", () => {
       "utf8",
     );
     const installDependencies = "- name: Install dependencies";
+    const hydrateElizaBun =
+      "- name: Hydrate local eliza Bun package postinstall";
     const generateProtobuf = "- name: Generate local eliza protobuf types";
     const postinstallPatches = "- name: Run repository postinstall patches";
 
     expect(setupAction).toContain(generateProtobuf);
+    expect(setupAction).toContain(hydrateElizaBun);
+    expect(setupAction).toContain(
+      "cd eliza/node_modules/bun && node install.js",
+    );
     expect(setupAction).toContain(
       "inputs.prepare-local-eliza-runtime == 'true'",
     );
     expect(setupAction).toContain("bunx @bufbuild/buf@1.67.0 generate");
     expect(setupAction.indexOf(installDependencies)).toBeLessThan(
+      setupAction.indexOf(hydrateElizaBun),
+    );
+    expect(setupAction.indexOf(hydrateElizaBun)).toBeLessThan(
       setupAction.indexOf(generateProtobuf),
     );
     expect(setupAction.indexOf(generateProtobuf)).toBeLessThan(
@@ -173,6 +198,31 @@ describe("CI bootstrap contract", () => {
     expect(agentReview.indexOf(align)).toBeLessThan(
       agentReview.indexOf(runAuthSuite),
     );
+  });
+
+  it("patches plugin-sql raw connection declarations for nested eliza CI builds", () => {
+    const patchScript = fs.readFileSync(
+      "scripts/apply-eliza-ci-patches.mjs",
+      "utf8",
+    );
+
+    expect(patchScript).toContain("patchSqlRawConnectionReturnType");
+    expect(patchScript).toContain("ReturnType<");
+    expect(patchScript).toContain("managerTypeName");
+    expect(patchScript).toContain('["getConnection"]>');
+    for (const token of [
+      "plugin-sql",
+      "typescript",
+      "pg",
+      "pglite",
+      "neon",
+      "adapter.ts",
+      "PostgresConnectionManager",
+      "PGliteClientManager",
+      "NeonConnectionManager",
+    ]) {
+      expect(patchScript).toContain(token);
+    }
   });
 
   it("links elizaOS runtime plugins and ambient UI types for local eliza checks", () => {
