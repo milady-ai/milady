@@ -39,24 +39,6 @@ index 772361a..7c103d7 100644
      }
      
      compileOptions {
-diff --git a/android/src/main/java/ai/annadata/plugin/capacitor/LlamaCpp.java b/android/src/main/java/ai/annadata/plugin/capacitor/LlamaCpp.java
-index b037159..862fced 100644
---- a/android/src/main/java/ai/annadata/plugin/capacitor/LlamaCpp.java
-+++ b/android/src/main/java/ai/annadata/plugin/capacitor/LlamaCpp.java
-@@ -315,11 +315,58 @@ public class LlamaCpp {
-             System.loadLibrary(libraryName);
-             Log.i(TAG, "Successfully loaded llama-cpp native library: " + libraryName);
-         } catch (UnsatisfiedLinkError e) {
--            Log.e(TAG, "Failed to load llama-cpp native library: " + e.getMessage());
--            throw e;
-+            // Don't re-throw — the plugin's static initializer would crash
-+            // the entire host app even when llama-cpp isn't actually used.
-+            // Native API calls will fail later with their own errors; that's
-+            // the appropriate failure surface, not a process-level kill.
-+            Log.e(TAG, "Failed to load llama-cpp native library (continuing without on-device inference): " + e.getMessage());
-         }
-     }
- 
 diff --git a/android/src/main/jni.cpp b/android/src/main/jni.cpp
 index 0000000..0000001 100644
 --- a/android/src/main/jni.cpp
@@ -81,7 +63,7 @@ index 0000000..0000001 100644
                      jstring normalizeKey = jni_utils::string_to_jstring(env, "embd_normalize");
 -                    jobject normalizeObj = env->CallObjectMethod(params, getDoubleMethod, normalizeKey);
 -                    if (normalizeObj != nullptr && !env->ExceptionCheck()) {
--                        embd_normalize = env->CallDoubleMethod(normalizeObj,
+-                        embd_normalize = env->CallDoubleMethod(normalizeObj, 
 -                            env->GetMethodID(env->FindClass("java/lang/Double"), "doubleValue", "()D"));
 -                        env->DeleteLocalRef(normalizeObj);
 -                    }
@@ -93,6 +75,24 @@ index 0000000..0000001 100644
                      }
                  }
              }
+diff --git a/android/src/main/java/ai/annadata/plugin/capacitor/LlamaCpp.java b/android/src/main/java/ai/annadata/plugin/capacitor/LlamaCpp.java
+index b037159..862fced 100644
+--- a/android/src/main/java/ai/annadata/plugin/capacitor/LlamaCpp.java
++++ b/android/src/main/java/ai/annadata/plugin/capacitor/LlamaCpp.java
+@@ -315,11 +315,58 @@ public class LlamaCpp {
+             System.loadLibrary(libraryName);
+             Log.i(TAG, "Successfully loaded llama-cpp native library: " + libraryName);
+         } catch (UnsatisfiedLinkError e) {
+-            Log.e(TAG, "Failed to load llama-cpp native library: " + e.getMessage());
+-            throw e;
++            // Don't re-throw — the plugin's static initializer would crash
++            // the entire host app even when llama-cpp isn't actually used.
++            // Native API calls will fail later with their own errors; that's
++            // the appropriate failure surface, not a process-level kill.
++            Log.e(TAG, "Failed to load llama-cpp native library (continuing without on-device inference): " + e.getMessage());
+         }
+     }
+ 
 +    /**
 +     * Probe the kernels manifest shipped alongside the fork-built native
 +     * library. The buun-llama-cpp build script writes
@@ -138,7 +138,7 @@ index 0000000..0000001 100644
 +    }
 +
      // MARK: - Core initialization and management
-
+ 
      public void toggleNativeLog(boolean enabled, LlamaCallback<Void> callback) {
 diff --git a/android/src/main/java/ai/annadata/plugin/capacitor/LlamaCppPlugin.java b/android/src/main/java/ai/annadata/plugin/capacitor/LlamaCppPlugin.java
 index f2d7628..68790de 100644
@@ -147,7 +147,7 @@ index f2d7628..68790de 100644
 @@ -721,6 +721,28 @@ public class LlamaCppPlugin extends Plugin {
          });
      }
-
+ 
 +    /**
 +     * Surface the fork-build kernels manifest to the JS bridge. Returns
 +     * { kernels: string[], variant: "buun-llama-cpp" | "stock-llama-cpp" }.
@@ -171,7 +171,7 @@ index f2d7628..68790de 100644
 +    }
 +
      // MARK: - Utility Methods
-
+ 
      /**
 diff --git a/types/llama-cpp-capacitor.d.ts b/types/llama-cpp-capacitor.d.ts
 index 61e2672..7d53c48 100644
@@ -180,7 +180,7 @@ index 61e2672..7d53c48 100644
 @@ -421,6 +421,38 @@ declare module 'llama-cpp-capacitor' {
    ): Promise<LlamaContext>;
    export function releaseAllLlama(): Promise<void>;
-
+ 
 +  /**
 +   * Configure the KV cache types for the next loaded context. Honoured by
 +   * the buun-llama-cpp fork (e.g. "q4_tq3" / "q4_tq4"); stock builds may
