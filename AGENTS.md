@@ -1,6 +1,8 @@
 # Milady — Project Codex Guidance
 
-Milady is a local-first AI assistant built on [elizaOS](https://github.com/elizaOS). It wraps the elizaOS runtime with a CLI, desktop app (Electrobun), web dashboard, and platform connectors (Telegram, Discord, WeChat, etc.). Inherits `~/.codex/AGENTS.md`.
+Milady is a local-first AI assistant built on [elizaOS](https://github.com/elizaOS). It wraps the elizaOS runtime with a CLI, desktop app (Electrobun), web dashboard, and platform connectors (Telegram, Discord, WeChat, etc.).
+
+Codex agents read this `AGENTS.md` from the workspace. When spawned by the agent orchestrator, they also receive generated task context with the current room, task, repo routes, and loopback bridge endpoints. Keep stable project rules here; keep deployment/persona policy in the runtime character/config.
 
 ## elizaOS naming
 
@@ -151,9 +153,11 @@ Open the `SKILL.md` of any of these from the workspace mirror when relevant:
 
 When Eliza Cloud is enabled or requested, prefer it as the managed backend (app registration, auth, hosted APIs, usage tracking, billing, app domains, creator monetization, Docker container deployments) before inventing custom infrastructure. Cloud monetization (inference markups, purchase-share, redeemable earnings) is a first-class product constraint. If docs disagree with the current schema/UI/API in this repo, the repo wins.
 
-### 2. Claude Code project skills (out-of-band for Codex)
+### 2. Claude Code project context (out-of-band for Codex)
 
-`.claude/skills/<name>/SKILL.md` files exist in this repo (currently `phase-review`) but they are **Claude Code slash commands** — they only fire when the user is running Claude Code, not Codex. Codex agents can ignore them. Documented here so you don't mistake them for elizaOS runtime skills if you encounter them in a directory listing.
+`.claude/agents/`, `.claude/plugins/`, and `.claude/hooks/` are Claude Code project assets for humans or Claude Code sessions. They are not Codex instructions.
+
+The Eliza task-agent orchestrator also bundles a Claude Code runtime skill at `eliza/plugins/plugin-agent-orchestrator/assets/claude-code-skills/eliza-runtime/` and installs it into `~/.claude/skills/eliza-runtime/` when the PTY service starts. That skill teaches Claude sub-agents how autonomous Eliza task sessions work. Codex does not use Claude skills; Codex uses this `AGENTS.md` plus the orchestrator's generated task context.
 
 ## Dependencies on elizaOS
 
