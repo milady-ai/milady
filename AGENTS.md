@@ -179,8 +179,8 @@ The Eliza task-agent orchestrator also bundles a Claude Code runtime skill at `e
 - `MILADY_BROWSER_VERIFY_OPTIONAL=1` — explicit opt-out for the headless-browser check when `puppeteer-core` is absent.
 
 Model defaults (sub-agents inherit unless overridden):
-- Anthropic large: `claude-opus-4-7` (override: `ANTHROPIC_LARGE_MODEL`). Small: `claude-haiku-4-5-20251001`.
-- OpenAI large/small: `gpt-5.5` / `gpt-5.5-mini` (override: `OPENAI_LARGE_MODEL` / `OPENAI_SMALL_MODEL`).
+- Anthropic large: `claude-opus-4-7` (override: `PARALLAX_CLAUDE_MODEL_POWERFUL`). Small/fast tasks use the configured Claude fast model when available.
+- Codex powerful/fast: `gpt-5.5` / `gpt-5.4-mini` (override: `PARALLAX_CODEX_MODEL_POWERFUL` / `PARALLAX_CODEX_MODEL_FAST`).
 
 Port env vars (never hardcoded — the dev orchestrator auto-shifts to the next free port and syncs env): `MILADY_API_PORT` (31337), `MILADY_PORT` (2138), `ELIZA_GATEWAY_PORT` (18789), `ELIZA_HOME_PORT` (2142), `MILADY_WECHAT_WEBHOOK_PORT` (18790).
 
