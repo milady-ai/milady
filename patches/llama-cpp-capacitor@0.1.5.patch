@@ -1,5 +1,5 @@
 diff --git a/android/build.gradle b/android/build.gradle
-index 772361a..c76814f 100644
+index 772361a..7c103d7 100644
 --- a/android/build.gradle
 +++ b/android/build.gradle
 @@ -18,7 +18,7 @@ buildscript {
@@ -22,7 +22,8 @@ index 772361a..c76814f 100644
 +            ndkVersion = "29.0.13113456"
          }
      }
-     
+-    
++
      buildTypes {
          release {
              minifyEnabled false
@@ -30,7 +31,8 @@ index 772361a..c76814f 100644
 +            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
          }
      }
-     
+-    
++
      lintOptions {
 -        abortOnError false
 +        abortOnError = false
@@ -38,10 +40,10 @@ index 772361a..c76814f 100644
      
      compileOptions {
 diff --git a/android/src/main/java/ai/annadata/plugin/capacitor/LlamaCpp.java b/android/src/main/java/ai/annadata/plugin/capacitor/LlamaCpp.java
-index 0000000..0000001 100644
+index b037159..862fced 100644
 --- a/android/src/main/java/ai/annadata/plugin/capacitor/LlamaCpp.java
 +++ b/android/src/main/java/ai/annadata/plugin/capacitor/LlamaCpp.java
-@@ -315,8 +315,11 @@
+@@ -315,11 +315,58 @@ public class LlamaCpp {
              System.loadLibrary(libraryName);
              Log.i(TAG, "Successfully loaded llama-cpp native library: " + libraryName);
          } catch (UnsatisfiedLinkError e) {
@@ -79,7 +81,7 @@ index 0000000..0000001 100644
                      jstring normalizeKey = jni_utils::string_to_jstring(env, "embd_normalize");
 -                    jobject normalizeObj = env->CallObjectMethod(params, getDoubleMethod, normalizeKey);
 -                    if (normalizeObj != nullptr && !env->ExceptionCheck()) {
--                        embd_normalize = env->CallDoubleMethod(normalizeObj, 
+-                        embd_normalize = env->CallDoubleMethod(normalizeObj,
 -                            env->GetMethodID(env->FindClass("java/lang/Double"), "doubleValue", "()D"));
 -                        env->DeleteLocalRef(normalizeObj);
 -                    }
@@ -91,3 +93,126 @@ index 0000000..0000001 100644
                      }
                  }
              }
++    /**
++     * Probe the kernels manifest shipped alongside the fork-built native
++     * library. The buun-llama-cpp build script writes
++     * `assets/llama-cpp-kernels.json` (e.g. {"variant":"buun-llama-cpp",
++     * "kernels":["turbo3","turbo4","dflash"]}) into the host APK; stock
++     * builds don't ship that file and we report an empty list.
++     */
++    public Map<String, Object> readNativeKernelsManifest() {
++        Map<String, Object> result = new HashMap<>();
++        List<String> kernels = new ArrayList<>();
++        String variant = "stock-llama-cpp";
++        try {
++            java.io.InputStream is = context.getAssets().open("llama-cpp-kernels.json");
++            try {
++                java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
++                byte[] buf = new byte[1024];
++                int n;
++                while ((n = is.read(buf)) > 0) {
++                    baos.write(buf, 0, n);
++                }
++                String json = baos.toString("UTF-8");
++                org.json.JSONObject obj = new org.json.JSONObject(json);
++                String v = obj.optString("variant", "");
++                if (v.length() > 0) variant = v;
++                org.json.JSONArray arr = obj.optJSONArray("kernels");
++                if (arr != null) {
++                    for (int i = 0; i < arr.length(); i++) {
++                        kernels.add(arr.optString(i, ""));
++                    }
++                }
++            } finally {
++                is.close();
++            }
++        } catch (java.io.FileNotFoundException e) {
++            // Stock build: no kernels manifest. Caller treats as stock-llama-cpp.
++            Log.d(TAG, "llama-cpp-kernels.json not present; assuming stock-llama-cpp");
++        } catch (Exception e) {
++            Log.w(TAG, "Failed to read llama-cpp-kernels.json: " + e.getMessage());
++        }
++        result.put("variant", variant);
++        result.put("kernels", kernels);
++        return result;
++    }
++
+     // MARK: - Core initialization and management
+
+     public void toggleNativeLog(boolean enabled, LlamaCallback<Void> callback) {
+diff --git a/android/src/main/java/ai/annadata/plugin/capacitor/LlamaCppPlugin.java b/android/src/main/java/ai/annadata/plugin/capacitor/LlamaCppPlugin.java
+index f2d7628..68790de 100644
+--- a/android/src/main/java/ai/annadata/plugin/capacitor/LlamaCppPlugin.java
++++ b/android/src/main/java/ai/annadata/plugin/capacitor/LlamaCppPlugin.java
+@@ -721,6 +721,28 @@ public class LlamaCppPlugin extends Plugin {
+         });
+     }
+
++    /**
++     * Surface the fork-build kernels manifest to the JS bridge. Returns
++     * { kernels: string[], variant: "buun-llama-cpp" | "stock-llama-cpp" }.
++     * Stock builds always resolve with an empty kernels list.
++     */
++    @PluginMethod
++    public void getNativeKernels(PluginCall call) {
++        Map<String, Object> manifest = implementation.readNativeKernelsManifest();
++        JSObject ret = new JSObject();
++        Object variant = manifest.get("variant");
++        ret.put("variant", variant == null ? "stock-llama-cpp" : variant);
++        JSArray kernelsArr = new JSArray();
++        Object kernelsObj = manifest.get("kernels");
++        if (kernelsObj instanceof List<?>) {
++            for (Object k : (List<?>) kernelsObj) {
++                if (k != null) kernelsArr.put(k.toString());
++            }
++        }
++        ret.put("kernels", kernelsArr);
++        call.resolve(ret);
++    }
++
+     // MARK: - Utility Methods
+
+     /**
+diff --git a/types/llama-cpp-capacitor.d.ts b/types/llama-cpp-capacitor.d.ts
+index 61e2672..7d53c48 100644
+--- a/types/llama-cpp-capacitor.d.ts
++++ b/types/llama-cpp-capacitor.d.ts
+@@ -421,6 +421,38 @@ declare module 'llama-cpp-capacitor' {
+   ): Promise<LlamaContext>;
+   export function releaseAllLlama(): Promise<void>;
+
++  /**
++   * Configure the KV cache types for the next loaded context. Honoured by
++   * the buun-llama-cpp fork (e.g. "q4_tq3" / "q4_tq4"); stock builds may
++   * not implement this and the JS adapter feature-detects + warn-no-ops.
++   */
++  export function setCacheType(options: {
++    cacheTypeK: string;
++    cacheTypeV: string;
++  }): Promise<void>;
++
++  /**
++   * Configure DFlash speculative decoding for the next loaded context.
++   * Honoured only by the buun-llama-cpp fork.
++   */
++  export function setSpecType(options: {
++    target: string;
++    drafter: string;
++    specType: "dflash";
++    draftMin: number;
++    draftMax: number;
++  }): Promise<void>;
++
++  /**
++   * Returns the list of fork-specific kernels compiled into the loaded
++   * native library. Stock builds resolve with an empty list and
++   * `variant: "stock-llama-cpp"`.
++   */
++  export function getNativeKernels(): Promise<{
++    kernels: string[];
++    variant: "buun-llama-cpp" | "stock-llama-cpp";
++  }>;
++
+   // Constants
+   export const BuildInfo: {
+     number: string;
