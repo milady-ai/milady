@@ -4,6 +4,10 @@ Canonical reference for how Milady is distributed, sandboxed, and routed to a ru
 across desktop and mobile. Covers the build-variant axis, the hosting-target axis, the
 per-platform availability matrix, and the runtime gating that ties them together.
 
+> **User-facing summary**: see [desktop/build-variants.md](./desktop/build-variants.md)
+> for the short "which download should I install?" guide. This document is
+> for engineers maintaining the system.
+
 ## 1. Why this exists
 
 Two pressures forced the split:
