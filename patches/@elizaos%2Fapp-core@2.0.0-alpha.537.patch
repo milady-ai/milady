@@ -1,6 +1,28 @@
 diff --git a/packages/app-core/src/components/shell/RuntimeGate.js b/packages/app-core/src/components/shell/RuntimeGate.js
 --- a/packages/app-core/src/components/shell/RuntimeGate.js
 +++ b/packages/app-core/src/components/shell/RuntimeGate.js
+@@ -70,15 +70,15 @@
+ //   local: "app-heroes/runtime-debugger.png",
+ //   remote: "app-heroes/log-viewer.png",
+ // };
+ function resolveRuntimeChoices(args) {
+-    if (args.isAndroid && args.localProbePending)
+-        return [];
+-    if (args.isAndroid && args.showLocalOption)
+-        return ["local"];
+-    if (args.isIOS || args.isAndroid)
+-        return ["cloud", "remote"];
++    if (args.isAndroid)
++        return ["cloud", "local", "remote"];
++    if (args.isIOS)
++        return ["cloud", "local", "remote"];
+     if (args.isDesktop || args.isDev)
+         return ["cloud", "local", "remote"];
++    if (args.showLocalOption || args.localProbePending)
++        return ["cloud", "local", "remote"];
+     return ["cloud", "remote"];
+ }
+ function statusBadge(status) {
 @@ -336,7 +336,21 @@
              // next launch; the `local` mobile runtime mode records the
              // distinction for any UI that needs it.
