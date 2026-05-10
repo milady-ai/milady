@@ -27,6 +27,20 @@ const allowNavigation: CapacitorAllowNavigation = [
   ),
 ];
 
+// Live-reload dev mode: when MILADY_LIVE_RELOAD_URL points at a
+// reachable Vite dev server (e.g. `http://192.168.1.71:5173`), the
+// Capacitor WebView loads the React UI from that URL instead of the
+// bundled APK assets. Save a `.tsx` on the host → see it on the
+// on-device WebView in ~200 ms via Vite HMR. The agent stays on the
+// device on `127.0.0.1:31337`, the ElizaNativeBridge + AOSP plugins
+// stay real, llama.cpp keeps running on-device hardware. Only the
+// renderer comes from the host.
+//
+// Production builds leave MILADY_LIVE_RELOAD_URL unset → the WebView
+// loads from bundled assets and `cleartext` stays off.
+const liveReloadUrl = process.env.MILADY_LIVE_RELOAD_URL?.trim();
+const liveReloadEnabled = !!liveReloadUrl;
+
 const config: CapacitorConfig = {
   appId: appConfig.appId,
   appName: appConfig.appName,
@@ -37,6 +51,15 @@ const config: CapacitorConfig = {
     // Self-hosters add their own domains via MILADY_ALLOWED_HOSTS
     // (build-time env, comma-separated). Listed entries are baseline.
     allowNavigation,
+    ...(liveReloadEnabled
+      ? {
+          url: liveReloadUrl,
+          // Vite dev servers default to plain HTTP; allow it for the
+          // dev URL only. Production builds have this off (mTLS / https
+          // via Capacitor's own scheme).
+          cleartext: true,
+        }
+      : {}),
   },
   plugins: {
     CapacitorHttp: {
@@ -55,9 +78,14 @@ const config: CapacitorConfig = {
   },
   android: {
     backgroundColor: "#0a0a0a",
-    allowMixedContent: false,
+    // Mixed-content allowed in live-reload mode so http://<host>:5173
+    // can fetch https://localhost subresources without WebView upgrade
+    // warnings. Production builds keep mixed-content off.
+    allowMixedContent: liveReloadEnabled,
     captureInput: true,
-    webContentsDebuggingEnabled: false,
+    // WebView Chrome DevTools enabled in live-reload mode so we can
+    // chrome://inspect into the device WebView during dev iterations.
+    webContentsDebuggingEnabled: liveReloadEnabled,
   },
 };
 

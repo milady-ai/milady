@@ -18,6 +18,13 @@
 #   start             Start cuttlefish-host-resources and launch a fresh cvd
 #   reset             Stop, reset, then start (clean slate)
 #   open              Open the WebRTC UI in your default browser
+#   live              Build a live-reload APK + start vite host dev server.
+#                     The on-device WebView loads UI from the host vite, so
+#                     editing apps/app/src/*.tsx HMRs onto the running cvd or
+#                     real device in ~200 ms. Agent stays on device, real bridge
+#                     and llama unchanged. Stop with `stop-live` or Ctrl-C the
+#                     vite process.
+#   stop-live         Kill the host vite + restore the production-bundled APK.
 #
 # Requires: adb, cvd (cuttlefish-base+user installed), bun, AOSP at ~/aosp.
 
@@ -119,6 +126,53 @@ cmd_rebuild_apk() {
   ls -la "$MILADY_ROOT/os/android/vendor/milady/apps/Milady/Milady.apk"
 }
 
+# Push the most recently staged APK at os/android/vendor/milady/apps/Milady/Milady.apk
+# to /system/priv-app on the running cvd. Used by `live` and `stop-live` to swap
+# the on-device APK without going through a full reflash.
+push_staged_apk_to_running_cvd() {
+  local apk="$MILADY_ROOT/os/android/vendor/milady/apps/Milady/Milady.apk"
+  [[ -f "$apk" ]] || fail "no staged APK at $apk — run rebuild-apk first"
+  adb -s "$CVD_DEVICE" root >/dev/null 2>&1 || true
+  adb -s "$CVD_DEVICE" wait-for-device
+  adb -s "$CVD_DEVICE" remount >/dev/null 2>&1 || true
+  say "pushing APK ($(du -h "$apk" | awk '{print $1}')) to /system/priv-app/Milady/Milady.apk…"
+  adb -s "$CVD_DEVICE" push "$apk" /system/priv-app/Milady/Milady.apk
+  adb -s "$CVD_DEVICE" shell am force-stop ai.milady.milady
+  adb -s "$CVD_DEVICE" shell pm clear ai.milady.milady >/dev/null 2>&1 || true
+  adb -s "$CVD_DEVICE" shell am start -W -n ai.milady.milady/.MainActivity
+}
+
+# Vite HMR dev loop. The on-device WebView loads the React UI from
+# `http://<host-lan>:5173` instead of the bundled APK assets, so editing
+# `apps/app/src/*.tsx` shows up in 200 ms via Vite HMR. The agent stays on
+# the device on `127.0.0.1:31337`, so the ElizaNativeBridge + AOSP plugins
+# + on-device llama all stay real. Only the renderer comes from the host.
+cmd_live() {
+  [[ -n "${LAN_IP:-}" ]] || fail "could not detect host LAN IP for live-reload"
+  local port="${MILADY_VITE_PORT:-5173}"
+  local url="http://${LAN_IP}:${port}"
+
+  say "building APK with MILADY_LIVE_RELOAD_URL=${url}…"
+  ( cd "$MILADY_ROOT" && MILADY_LIVE_RELOAD_URL="$url" \
+      MILADY_AOSP_BUILD=1 MILADY_GRADLE_AOSP_BUILD=true \
+      bun run build:android:system )
+  push_staged_apk_to_running_cvd
+
+  say "starting vite host dev server on 0.0.0.0:${port}…"
+  say "edit apps/app/src/*.tsx and the WebView reloads in ~200 ms."
+  say "stop with Ctrl-C; then run 'miladyos-dev.sh stop-live' to restore prod APK."
+  ( cd "$MILADY_ROOT/apps/app" && bunx vite --host 0.0.0.0 --port "$port" )
+}
+
+cmd_stop_live() {
+  say "rebuilding production APK (no live-reload URL)…"
+  cd "$MILADY_ROOT"
+  unset MILADY_LIVE_RELOAD_URL
+  MILADY_AOSP_BUILD=1 MILADY_GRADLE_AOSP_BUILD=true bun run build:android:system
+  push_staged_apk_to_running_cvd
+  say "production APK restored. Run 'miladyos-dev.sh live' to re-enter dev mode."
+}
+
 cmd_reflash() {
   cmd_rebuild_apk
   say "validating staged vendor tree…"
@@ -184,6 +238,8 @@ main() {
     stop)           cmd_stop ;;
     start)          cmd_start ;;
     reset)          cmd_reset ;;
+    live)           cmd_live ;;
+    stop-live)      cmd_stop_live ;;
     -h|--help|help) sed -n '2,/^set -/p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//; /^set -/d' ;;
     *) fail "unknown command: ${1:-}. run 'miladyos-dev.sh help' for list." ;;
   esac
