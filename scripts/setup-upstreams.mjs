@@ -61,7 +61,13 @@ export const ELIZA_BUILD_STEPS = [
     // `build:typescript` target that emitted dist/typescript/index.ts; the
     // current source uses a single `build` script that regenerates the
     // plugin-action spec + action docs. Detect the actual build outputs.
-    check: path.join("packages", "prompts", "specs", "actions", "plugins.generated.json"),
+    check: path.join(
+      "packages",
+      "prompts",
+      "specs",
+      "actions",
+      "plugins.generated.json",
+    ),
     cwd: path.join("packages", "prompts"),
     args: ["run", "build"],
     label: "@elizaos/prompts",
