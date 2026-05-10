@@ -88,6 +88,13 @@ export function buildModeEnv(
   const next = {
     VITE_MILADY_IOS_RUNTIME_MODE: mode,
     VITE_ELIZA_CLOUD_BASE: resolveCloudBase(env),
+    // The iOS shell is a thin HTTP client in every mode; on-device
+    // llama.cpp is never required. Default the build-time pod gate to "0"
+    // so the App Store binary excludes the LlamaCppCapacitor pod and the
+    // bundled xcframework. A user can still opt in by setting
+    // MILADY_IOS_INCLUDE_LLAMA=1 in the calling environment, in which case
+    // we leave their value alone.
+    MILADY_IOS_INCLUDE_LLAMA: env.MILADY_IOS_INCLUDE_LLAMA ?? "0",
   };
 
   if (mode === "remote-mac") {
