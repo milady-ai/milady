@@ -121,8 +121,13 @@ Per-OS build artifacts (sandbox-relevant entries only):
   signed with Developer ID; notarized.
 - **macOS store** — same source, packaged with `mas.entitlements`
   (`com.apple.security.app-sandbox`, JIT entitlement explanation, security-scoped
-  bookmarks). Submitted to MAS. STATUS: `mas.entitlements` wiring in flight
-  (Foundation agent).
+  bookmarks). Post-package codesign via
+  [`scripts/codesign-mas.mjs`](../eliza/packages/app-core/scripts/codesign-mas.mjs)
+  walks the bundle bottom-up applying `mas-child.entitlements` (sandbox +
+  `cs.inherit`) to nested binaries, then signs the outer `.app` with
+  `mas.entitlements`. Requires `MILADY_MAS_SIGNING_IDENTITY` env;
+  `MILADY_MAS_INSTALLER_IDENTITY` (optional) triggers `productbuild` of a
+  MAS-submittable `.pkg`. Submitted to MAS.
 - **Windows direct** — EXE installer. `runFullTrust` capability.
 - **Windows store** — MSIX. `AppxManifest.xml` strips `runFullTrust`,
   retains `broadFileSystemAccess` opt-in. STATUS: in flight (Windows MSIX agent).
