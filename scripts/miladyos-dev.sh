@@ -143,8 +143,18 @@ cmd_stop() {
 
 cmd_start() {
   ensure_host_resources
-  say "launching MiladyOS in cuttlefish (cvd create --daemon)…"
-  sg cvdnetwork -c "cd $AOSP_ROOT && source build/envsetup.sh >/dev/null 2>&1 && lunch $LUNCH_TARGET >/dev/null 2>&1 && cvd create --host_path=\$ANDROID_HOST_OUT --product_path=\$ANDROID_PRODUCT_OUT --daemon --report_anonymous_usage_stats=n --gpu_mode=gfxstream_guest_angle_host_swiftshader"
+  # Default to half the host's cores and ~40% of RAM so the VM can run
+  # llama at workable speeds without locking up the laptop. Override via
+  # MILADYOS_CVD_CPUS / MILADYOS_CVD_MEM_MB. nproc fallback to 4, RAM
+  # fallback to 4 GB if /proc/meminfo isn't readable.
+  local host_cores host_mem_mb cvd_cpus cvd_mem_mb
+  host_cores=$(nproc 2>/dev/null || echo 4)
+  host_mem_mb=$(awk '/^MemTotal:/ { printf "%d", $2 / 1024 }' /proc/meminfo 2>/dev/null)
+  : "${host_mem_mb:=4096}"
+  cvd_cpus="${MILADYOS_CVD_CPUS:-$(( host_cores > 2 ? host_cores - 2 : host_cores ))}"
+  cvd_mem_mb="${MILADYOS_CVD_MEM_MB:-$(( host_mem_mb * 4 / 10 ))}"
+  say "launching MiladyOS in cuttlefish (cvd create --daemon, cpus=${cvd_cpus} mem=${cvd_mem_mb}MB)…"
+  sg cvdnetwork -c "cd $AOSP_ROOT && source build/envsetup.sh >/dev/null 2>&1 && lunch $LUNCH_TARGET >/dev/null 2>&1 && cvd create --host_path=\$ANDROID_HOST_OUT --product_path=\$ANDROID_PRODUCT_OUT --daemon --report_anonymous_usage_stats=n --gpu_mode=gfxstream_guest_angle_host_swiftshader --cpus=${cvd_cpus} --memory_mb=${cvd_mem_mb}"
   say "waiting for sys.boot_completed…"
   for _ in $(seq 1 90); do
     [[ "$(adb -s "$CVD_DEVICE" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" == "1" ]] && break
