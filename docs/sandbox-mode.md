@@ -279,10 +279,63 @@ simultaneously without conflict because the state dirs do not overlap.
 - **Sandboxed Ollama bridge.** A Cloud-routed local-inference shim that lets
   store builds reach a host Ollama via a user-explicit bridge would lift the
   Cloud-forced rule for some users. Not in scope.
-- **AOSP terminal-surface plugin pinning.** Tracked separately; the AOSP
-  build today seeds the mobile-curated plugin list which excludes
-  `plugin-shell`. The privileged surface needs a follow-up to pin the shell
-  plugin into the AOSP-only seed.
+- **AOSP terminal-surface plugin pinning.** See § AOSP audit (below) for
+  the plugin-list gap and the path to closing it.
+
+## AOSP audit (terminal-access surface)
+
+The AOSP build (`bun run build:android:system`,
+`eliza/packages/app-core/scripts/aosp/`) is the privileged platform-signed APK.
+It is not a sandbox variant — it is the on-device build for AOSP. The agent
+runs as `priv_app` SELinux domain, with `BuildConfig.AOSP_BUILD=true` flipping
+on `ELIZA_LOCAL_LLAMA=1` and the bundled libllama.so under `agent/{abi}/`.
+
+**The host capability is present.** `ElizaAgentService` (see
+`apps/app/android/app/src/main/java/ai/milady/milady/ElizaAgentService.java`
+lines 700–900) launches bun via `ProcessBuilder` from the priv_app data dir.
+Android's seccomp filter blocks `io_uring` / `pidfd_open` / `preadv2` (worked
+around by the `BUN_FEATURE_FLAG_*` knobs at lines 898–900) but does **not**
+block `fork`, `execve`, `posix_openpt`, or `/dev/ptmx`. AOSP's `system/sepolicy`
+allows `priv_app privapp_data_file:file execute`. So a child `sh` and a PTY
+master/slave pair are reachable in principle.
+
+**The runtime gap.** `eliza/packages/agent/src/runtime/core-plugins.ts`
+defines `MOBILE_CORE_PLUGINS = ["@elizaos/plugin-sql"]` and
+`ELIZAOS_ANDROID_CORE_PLUGINS = ["@elizaos/app-wifi", "@elizaos/app-contacts",
+"@elizaos/app-phone"]`. `plugin-collector.ts` (line 338) seeds with
+`MOBILE_CORE_PLUGINS` whenever `isMobilePlatform()` is true — and AOSP sets
+`ELIZA_PLATFORM=android` (`ElizaAgentService.java` line 761), so AOSP gets the
+mobile-curated set. **`plugin-shell` and `plugin-coding-tools` are excluded**,
+so the agent has no exposed shell/PTY action even though the host process
+could spawn one.
+
+**TODO (not fixed in this worktree)**:
+
+1. Add a third constant `ELIZAOS_AOSP_TERMINAL_PLUGINS` in
+   `eliza/packages/agent/src/runtime/core-plugins.ts` containing
+   `["@elizaos/plugin-shell"]` (and optionally `@elizaos/plugin-coding-tools`).
+2. In `eliza/packages/agent/src/runtime/plugin-collector.ts` around line 352,
+   when `onElizaOsAndroid` is true, additionally seed the new list.
+3. Verify `@lydell/node-pty` resolves under the bundled bun runtime on AOSP —
+   it ships a prebuilt binary per arch and the AOSP agent-bundle staging in
+   `run-mobile-build.mjs` needs to include the matching `.node`. If the
+   native module is missing, `plugin-shell` falls back to the non-PTY
+   `cross-spawn` path (line 1301 of
+   `eliza/plugins/plugin-shell/services/shellService.ts`), which is still a
+   usable shell — PTY is the upgrade.
+4. Optional: stage a terminal-emulator UI surface in the WebView. The agent's
+   action is what the user really needs ("the agent runs `sh` and reads
+   output"), so this is purely UX.
+
+The Capacitor/Play target is not affected — `build:android` (the regular
+Capacitor APK) and the new `build:android:cloud` (in flight) are stock
+Android, run unprivileged, and should remain shell-less. The privileged AOSP
+target is the one that should expose the surface.
+
+**Verified untouched.** The Android-cloud agent is adding a *new* target;
+existing `android` and `android-system` targets in `run-mobile-build.mjs`
+(lines 2931, 3050) keep their current behavior. The privileged AOSP build is
+not at risk of inheriting Play-Store gating.
 
 ## See also
 
