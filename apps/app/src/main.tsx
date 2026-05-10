@@ -752,10 +752,23 @@ function setupPlatformStyles(): void {
   // unreachable. Set the padding directly on #root so the fix is
   // self-contained in this entry and doesn't wait on an upstream
   // @elizaos/app-core stylesheet ship.
+  //
+  // Android-specific: emulators (Cuttlefish, Android Studio AVD) and
+  // notch-less hardware report `env(safe-area-inset-top)` as `0px`
+  // because the WebView's viewport-fit calculation has nothing to
+  // exclude — but the system status bar (clock + signal + battery) IS
+  // still drawn on top, by the framework, at a fixed 24dp. Without a
+  // floor on the top inset the Android time/battery overlay covers the
+  // top toolbar's sidebar / chats / notifications icons. Use
+  // `max(env(...), 24px)` so real notched devices keep their bigger
+  // notch inset and emulators get the standard status-bar height.
   if (isNative) {
     const reactRoot = document.getElementById("root");
     if (reactRoot) {
-      reactRoot.style.paddingTop = "env(safe-area-inset-top, 0px)";
+      const topInset = isAndroid
+        ? "max(env(safe-area-inset-top, 0px), 24px)"
+        : "env(safe-area-inset-top, 0px)";
+      reactRoot.style.paddingTop = topInset;
       reactRoot.style.paddingBottom = "env(safe-area-inset-bottom, 0px)";
       reactRoot.style.paddingLeft = "env(safe-area-inset-left, 0px)";
       reactRoot.style.paddingRight = "env(safe-area-inset-right, 0px)";

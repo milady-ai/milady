@@ -24,6 +24,33 @@ diff --git a/packages/app-core/src/components/shell/RuntimeGate.js b/packages/ap
              savePersistedActiveServer({
                  id: "local:android",
                  kind: "remote",
+diff --git a/packages/app-core/src/components/shell/StartupShell.js b/packages/app-core/src/components/shell/StartupShell.js
+--- a/packages/app-core/src/components/shell/StartupShell.js
++++ b/packages/app-core/src/components/shell/StartupShell.js
+@@ -31,12 +31,22 @@
+     ready: 100,
+ };
+ function phaseToStatusKey(phase) {
++    // On AOSP / branded native shells the device IS the agent — the
++    // polling-backend phase is waiting for the on-device agent's loopback
++    // bind (127.0.0.1:31337), not dialing a remote backend. Reuse the
++    // existing "Initializing agent…" string so the splash doesn't tell the
++    // user the device is "Connecting to backend" when there is no remote
++    // backend involved. Stock Capacitor builds keep the legacy wording.
++    const __isMilady = typeof navigator !== "undefined" &&
++        /\bMiladyOS\//.test(navigator.userAgent ?? "");
+     switch (phase) {
+         case "restoring-session":
+             return "startupshell.Starting";
+         case "resolving-target":
+         case "polling-backend":
+-            return "startupshell.ConnectingBackend";
++            return __isMilady
++                ? "startupshell.InitializingAgent"
++                : "startupshell.ConnectingBackend";
+         case "starting-runtime":
+             return "startupshell.InitializingAgent";
+         case "hydrating":
 diff --git a/packages/app-core/src/state/startup-phase-restore.js b/packages/app-core/src/state/startup-phase-restore.js
 --- a/packages/app-core/src/state/startup-phase-restore.js
 +++ b/packages/app-core/src/state/startup-phase-restore.js
