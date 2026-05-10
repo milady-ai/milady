@@ -220,7 +220,7 @@ test("release workflows hydrate eliza Bun after ignored nested install", () => {
     const text = workflow(name);
     assert.match(
       text,
-      /name: Install eliza source dependencies[\s\S]*?bun install --cwd eliza --no-frozen-lockfile --ignore-scripts[\s\S]*?name: Hydrate eliza Bun package postinstall[\s\S]*?run: cd eliza\/node_modules\/bun && node install\.js/,
+      /name: Install eliza source dependencies[\s\S]*?bun install --cwd eliza --no-frozen-lockfile --ignore-scripts[\s\S]*?name: Hydrate eliza Bun package postinstall[\s\S]*?cd eliza\/node_modules\/bun && node install\.js/,
     );
   }
 });

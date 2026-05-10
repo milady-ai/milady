@@ -190,7 +190,14 @@ jobs:
           done
 
       - name: Hydrate eliza Bun package postinstall
-        run: cd eliza/node_modules/bun && node install.js
+        # bun is hoisted to top-level node_modules in some setups; only hydrate
+        # the eliza-nested copy when it actually exists.
+        run: |
+          if [ -f eliza/node_modules/bun/install.js ]; then
+            (cd eliza/node_modules/bun && node install.js)
+          else
+            echo "eliza/node_modules/bun not present (likely hoisted) — skipping hydration"
+          fi
 
       # ── 5b. Install build fallback dependencies ────────────────────────────
       # Hydrate published-only dependency fallbacks first so package-local builds
