@@ -680,6 +680,29 @@ function setupPlatformStyles(): void {
     "env(safe-area-inset-right, 0px)",
   );
   root.style.setProperty("--keyboard-height", "0px");
+
+  // Apply the inset to the React mount on native.
+  // @elizaos/app-core/styles/styles.css ships only the desktop variant
+  // (body.desktop { padding-top: env(safe-area-inset-top, 0px) }). On
+  // Capacitor Android/iOS the WebView renders behind the system status
+  // bar after StatusBar.setOverlaysWebView({overlay:true}), so without
+  // matching padding on #root the top toolbar buttons (sidebar toggle,
+  // mini-chats, notifications) render under the status bar and become
+  // unreachable. Set the padding directly on #root so the fix is
+  // self-contained in this entry and doesn't wait on an upstream
+  // @elizaos/app-core stylesheet ship.
+  if (isNative) {
+    const reactRoot = document.getElementById("root");
+    if (reactRoot) {
+      reactRoot.style.paddingTop = "env(safe-area-inset-top, 0px)";
+      reactRoot.style.paddingBottom = "env(safe-area-inset-bottom, 0px)";
+      reactRoot.style.paddingLeft = "env(safe-area-inset-left, 0px)";
+      reactRoot.style.paddingRight = "env(safe-area-inset-right, 0px)";
+      reactRoot.style.boxSizing = "border-box";
+      reactRoot.style.minHeight = "100dvh";
+      reactRoot.style.maxHeight = "100dvh";
+    }
+  }
 }
 
 function isPhoneCompanionMode(): boolean {
