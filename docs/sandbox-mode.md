@@ -309,21 +309,25 @@ mobile-curated set. **`plugin-shell` and `plugin-coding-tools` are excluded**,
 so the agent has no exposed shell/PTY action even though the host process
 could spawn one.
 
-**TODO (not fixed in this worktree)**:
+**RESOLVED.** `ELIZAOS_ANDROID_TERMINAL_PLUGINS = ["@elizaos/plugin-shell",
+"@elizaos/plugin-coding-tools"]` is now seeded by `plugin-collector.ts` when
+`isElizaOsAndroidRuntime()` is true (i.e. `ELIZA_PLATFORM=android` +
+`ELIZA_LOCAL_LLAMA=1`). The mobile allowlist filter at the end of
+`collectPluginNames` was extended to admit them on AOSP only. Stock Play
+Android still excludes them — verified in
+`packages/agent/src/runtime/plugin-collector-aosp.test.ts` (5 cases:
+AOSP includes them, stock Android excludes them, iOS excludes them,
+ELIZAOS_ANDROID_CORE_PLUGINS still load alongside, `features.shellEnabled=false`
+still removes plugin-shell).
 
-1. Add a third constant `ELIZAOS_AOSP_TERMINAL_PLUGINS` in
-   `eliza/packages/agent/src/runtime/core-plugins.ts` containing
-   `["@elizaos/plugin-shell"]` (and optionally `@elizaos/plugin-coding-tools`).
-2. In `eliza/packages/agent/src/runtime/plugin-collector.ts` around line 352,
-   when `onElizaOsAndroid` is true, additionally seed the new list.
-3. Verify `@lydell/node-pty` resolves under the bundled bun runtime on AOSP —
+**Remaining (optional, lower priority)**:
+
+1. Verify `@lydell/node-pty` resolves under the bundled bun runtime on AOSP —
    it ships a prebuilt binary per arch and the AOSP agent-bundle staging in
    `run-mobile-build.mjs` needs to include the matching `.node`. If the
    native module is missing, `plugin-shell` falls back to the non-PTY
-   `cross-spawn` path (line 1301 of
-   `eliza/plugins/plugin-shell/services/shellService.ts`), which is still a
-   usable shell — PTY is the upgrade.
-4. Optional: stage a terminal-emulator UI surface in the WebView. The agent's
+   `cross-spawn` path, which is still a usable shell — PTY is the upgrade.
+2. Optional: stage a terminal-emulator UI surface in the WebView. The agent's
    action is what the user really needs ("the agent runs `sh` and reads
    output"), so this is purely UX.
 
