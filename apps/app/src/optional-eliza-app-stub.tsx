@@ -47,6 +47,7 @@ export const CodingAgentControlChip = EmptyComponent;
 export const CodingAgentSettingsSection = EmptyComponent;
 export const CodingAgentTasksPanel = EmptyComponent;
 export const PtyConsoleDrawer = EmptyComponent;
+export const PtyConsoleSidePanel = EmptyComponent;
 export const FineTuningView = EmptyComponent;
 
 // Restored from before upstream 0a75bd6eb dropped it — main.tsx still imports

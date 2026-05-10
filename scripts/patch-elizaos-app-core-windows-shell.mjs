@@ -33,6 +33,23 @@ function ensureContains(text, marker, filePath) {
   }
 }
 
+const REQUEST_BODY_BROWSER_FALLBACK_EXPORTS = [
+  "export const DEFAULT_MAX_BODY_BYTES = 1_048_576;",
+  "export const readRequestBodyBuffer = async () => null;",
+  "export const readRequestBody = async () => null;",
+];
+
+function removeRequestBodyFallbackExports(text) {
+  const duplicateMarkers = new Set([
+    "// @elizaos/agent request-body browser fallback",
+    ...REQUEST_BODY_BROWSER_FALLBACK_EXPORTS,
+  ]);
+  return text
+    .split("\n")
+    .filter((line) => !duplicateMarkers.has(line.trim()))
+    .join("\n");
+}
+
 function patchDevPlatform(devPlatformPath) {
   let next = fs.readFileSync(devPlatformPath, "utf8");
   const original = next;
@@ -208,28 +225,18 @@ function patchWalletHydrate(walletHydratePath) {
 function patchEmptyNodeModule(emptyNodeModulePath) {
   let next = fs.readFileSync(emptyNodeModulePath, "utf8");
   const original = next;
+  const telemetryFallback = `export const createIntegrationTelemetrySpan = () => ({\n    success: () => { },\n    failure: () => { },\n});`;
 
+  next = removeRequestBodyFallbackExports(next);
   next = replaceIfPresent(
     next,
-    `export const createIntegrationTelemetrySpan = () => ({\n    success: () => { },\n    failure: () => { },\n});`,
-    `export const createIntegrationTelemetrySpan = () => ({\n    success: () => { },\n    failure: () => { },\n});\nexport const DEFAULT_MAX_BODY_BYTES = 1_048_576;\nexport const readRequestBodyBuffer = async () => null;\nexport const readRequestBody = async () => null;`,
+    telemetryFallback,
+    `${telemetryFallback}\n${REQUEST_BODY_BROWSER_FALLBACK_EXPORTS.join("\n")}`,
   );
 
-  ensureContains(
-    next,
-    "export const DEFAULT_MAX_BODY_BYTES = 1_048_576;",
-    emptyNodeModulePath,
-  );
-  ensureContains(
-    next,
-    "export const readRequestBodyBuffer = async () => null;",
-    emptyNodeModulePath,
-  );
-  ensureContains(
-    next,
-    "export const readRequestBody = async () => null;",
-    emptyNodeModulePath,
-  );
+  for (const marker of REQUEST_BODY_BROWSER_FALLBACK_EXPORTS) {
+    ensureContains(next, marker, emptyNodeModulePath);
+  }
 
   if (next !== original) {
     fs.writeFileSync(emptyNodeModulePath, next);

@@ -158,16 +158,6 @@ jobs:
           buf dep update && buf generate
           cd ../core
           node ../shared/scripts/generate-keywords.mjs --target ts 2>/dev/null || echo "keyword gen skipped"
-          node <<'NODE'
-          const fs = require("node:fs");
-          const file = "tsconfig.declarations.json";
-          const config = JSON.parse(fs.readFileSync(file, "utf8"));
-          config.compilerOptions = {
-            ...(config.compilerOptions ?? {}),
-            ignoreDeprecations: "6.0",
-          };
-          fs.writeFileSync(file, JSON.stringify(config, null, 2) + "\n");
-          NODE
           bun run build:node
 
       - name: Build runtime (tsdown)

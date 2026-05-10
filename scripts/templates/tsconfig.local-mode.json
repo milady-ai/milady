@@ -6,7 +6,6 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
-    "ignoreDeprecations": "6.0",
     "lib": ["DOM", "DOM.Iterable", "ES2023", "ScriptHost"],
     "module": "ESNext",
     "moduleResolution": "bundler",
@@ -16,7 +15,6 @@
     "strict": true,
     "target": "es2023",
     "useDefineForClassFields": false,
-    "baseUrl": ".",
     "paths": {
       "@elizaos/app-lifeops": [
         "./eliza/apps/app-lifeops/src/index.ts",

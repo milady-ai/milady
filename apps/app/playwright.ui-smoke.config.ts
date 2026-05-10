@@ -55,7 +55,7 @@ export default defineConfig({
     },
     {
       name: "mobile-chromium",
-      testMatch: /mobile-routes\.spec\.ts/,
+      testMatch: /(?:backgrounds|mobile-routes)\.spec\.ts/,
       use: { ...devices["Pixel 7"] },
     },
   ],

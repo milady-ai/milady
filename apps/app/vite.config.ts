@@ -82,6 +82,10 @@ const appCoreNativePluginEntrypoints = appCoreSrcRoot
 const emptyNodeModuleEntry = appCoreSrcRoot
   ? path.join(appCoreSrcRoot, "platform/empty-node-module.ts")
   : requireResolve("@elizaos/app-core/platform/empty-node-module");
+const publishedAppCoreSrcRoot = path.join(
+  path.dirname(requireResolve("@elizaos/app-core/package.json")),
+  "packages/app-core/src",
+);
 const uiPkgRoot = hasLocalElizaWorkspace
   ? path.join(localElizaRoot, "packages/ui")
   : null;
@@ -130,11 +134,76 @@ function elizaAppPackageExists(name: string): boolean {
 const shouldResolveRealHyperscapeApp = elizaAppPackageExists("app-hyperscape");
 const shouldResolveRealWalletApp = elizaAppPackageExists("app-wallet");
 const optionalElizaAppAliasPattern = (() => {
-  const realApps = ["core"];
+  const realApps = ["core", "companion"];
   if (shouldResolveRealHyperscapeApp) realApps.push("hyperscape");
   if (shouldResolveRealWalletApp) realApps.push("wallet");
   return new RegExp(`^@elizaos\\/app-(?!(${realApps.join("|")})(\\/|$)).+$`);
 })();
+
+const APP_CORE_COMPANION_SUBPATH_ALIASES: Alias[] = appCoreSrcRoot
+  ? []
+  : [
+      {
+        find: /^@elizaos\/app-core\/character-catalog$/,
+        replacement: path.join(publishedAppCoreSrcRoot, "character-catalog.js"),
+      },
+      {
+        find: /^@elizaos\/app-core\/components\/character\/CharacterEditor$/,
+        replacement: path.join(
+          publishedAppCoreSrcRoot,
+          "components/character/CharacterEditor.js",
+        ),
+      },
+      {
+        find: /^@elizaos\/app-core\/components\/pages\/vector-browser-utils$/,
+        replacement: path.join(
+          publishedAppCoreSrcRoot,
+          "components/pages/vector-browser-utils.js",
+        ),
+      },
+      {
+        find: /^@elizaos\/app-core\/components\/shell\/LoadingScreen$/,
+        replacement: path.join(
+          publishedAppCoreSrcRoot,
+          "components/shell/LoadingScreen.js",
+        ),
+      },
+      {
+        find: /^@elizaos\/app-core\/state\/PtySessionsContext$/,
+        replacement: path.join(
+          publishedAppCoreSrcRoot,
+          "state/PtySessionsContext.js",
+        ),
+      },
+      {
+        find: /^@elizaos\/app-core\/state\/vrm$/,
+        replacement: path.join(publishedAppCoreSrcRoot, "state/vrm.js"),
+      },
+    ];
+
+const localCompanionRoot = path.join(localElizaRoot, "plugins/app-companion");
+const APP_COMPANION_SOURCE_ALIASES: Alias[] = fs.existsSync(
+  path.join(localCompanionRoot, "package.json"),
+)
+  ? [
+      {
+        find: /^@elizaos\/app-companion$/,
+        replacement: path.join(localCompanionRoot, "src/index.ts"),
+      },
+      {
+        find: /^@elizaos\/app-companion\/ui$/,
+        replacement: path.join(localCompanionRoot, "src/ui.ts"),
+      },
+      {
+        find: /^@elizaos\/app-companion\/register$/,
+        replacement: path.join(localCompanionRoot, "src/register.ts"),
+      },
+      {
+        find: /^@elizaos\/app-companion\/(.*)$/,
+        replacement: path.join(localCompanionRoot, "src/$1"),
+      },
+    ]
+  : [];
 
 function isExpectedWsProxySocketError(
   message: unknown,
@@ -216,7 +285,6 @@ function resolveLocalUiAliases(): Alias[] {
     {
       find: /^@elizaos\/ui\/components\/ui\/(.*)$/,
       replacement: `${uiPkgRoot}/src/components/ui/$1.tsx`,
-      customResolver: resolveExistingUiSourceModule,
     },
     {
       find: /^@elizaos\/ui\/components\/composites\/([^/]+)$/,
@@ -225,12 +293,10 @@ function resolveLocalUiAliases(): Alias[] {
     {
       find: /^@elizaos\/ui\/components\/composites\/(.+)\/([^/]+)$/,
       replacement: `${uiPkgRoot}/src/components/composites/$1/$2.tsx`,
-      customResolver: resolveExistingUiSourceModule,
     },
     {
       find: /^@elizaos\/ui\/components\/(.+)\/([^/]+)$/,
       replacement: `${uiPkgRoot}/src/components/$1/$2.tsx`,
-      customResolver: resolveExistingUiSourceModule,
     },
     {
       find: /^@elizaos\/ui\/hooks$/,
@@ -1770,6 +1836,46 @@ function companionAssetsPlugin(): Plugin {
   };
 }
 
+function localUiSourceResolverPlugin(): Plugin {
+  const enabled =
+    !!uiPkgRoot && fs.existsSync(path.join(uiPkgRoot, "package.json"));
+  const patterns: Array<{
+    re: RegExp;
+    build: (m: RegExpMatchArray) => string;
+  }> = enabled
+    ? [
+        {
+          re: /^@elizaos\/ui\/components\/ui\/(.+)$/,
+          build: (m) => `${uiPkgRoot}/src/components/ui/${m[1]}.tsx`,
+        },
+        {
+          re: /^@elizaos\/ui\/components\/composites\/(.+)\/([^/]+)$/,
+          build: (m) =>
+            `${uiPkgRoot}/src/components/composites/${m[1]}/${m[2]}.tsx`,
+        },
+        {
+          re: /^@elizaos\/ui\/components\/(.+)\/([^/]+)$/,
+          build: (m) => `${uiPkgRoot}/src/components/${m[1]}/${m[2]}.tsx`,
+        },
+      ]
+    : [];
+
+  return {
+    name: "elizaos-ui-source-resolver",
+    enforce: "pre",
+    resolveId(source) {
+      for (const { re, build } of patterns) {
+        const m = source.match(re);
+        if (!m) continue;
+        const candidate = build(m);
+        const resolved = resolveExistingUiSourceModule(candidate);
+        if (fs.existsSync(resolved)) return resolved;
+      }
+      return null;
+    },
+  };
+}
+
 function workspaceJsxInJsPlugin(): Plugin {
   const normalizedAppCoreSrcRoot = appCoreSrcRoot
     ? appCoreSrcRoot.split(path.sep).join("/")
@@ -1822,6 +1928,7 @@ export default defineConfig({
     ),
   },
   plugins: [
+    localUiSourceResolverPlugin(),
     appShellMetadataPlugin(),
     companionAssetsPlugin(),
     elizaCoreBrowserEntryFallbackPlugin(),
@@ -1900,6 +2007,8 @@ export default defineConfig({
         find: /^telegram(\/.*)?$/,
         replacement: emptyNodeModuleEntry,
       },
+      ...APP_CORE_COMPANION_SUBPATH_ALIASES,
+      ...APP_COMPANION_SOURCE_ALIASES,
       // Local app-package aliases must run before optional stubs so local mode
       // actually exercises eliza/plugins/app-* packages.
       ...LOCAL_ELIZA_APP_ALIAS_ENTRIES,

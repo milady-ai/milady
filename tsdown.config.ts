@@ -107,40 +107,45 @@ const allExternals = [
   napiRsExternal,
 ];
 
+const bundleDeps = {
+  neverBundle: allExternals,
+  onlyBundle: false,
+} as const;
+
 export default [
   {
     entry: appCoreEntry(".", "src/index.ts"),
     env,
+    external: allExternals,
     fixedExtension: false,
     platform: "node",
-    inlineOnly: false,
-    external: allExternals,
+    deps: bundleDeps,
   },
   {
     entry: appCoreEntry("entry", "src/entry.ts"),
     env,
+    external: allExternals,
     fixedExtension: false,
     platform: "node",
-    inlineOnly: false,
-    external: allExternals,
+    deps: bundleDeps,
     outputOptions: { codeSplitting: false },
   },
   {
     entry: appCoreEntry("runtime/eliza", "src/runtime/eliza.ts"),
     env,
+    external: allExternals,
     fixedExtension: false,
     platform: "node",
-    inlineOnly: false,
-    external: allExternals,
+    deps: bundleDeps,
     outputOptions: { codeSplitting: false },
   },
   {
     entry: appCoreEntry("api/server", "src/api/server.ts"),
     env,
+    external: allExternals,
     fixedExtension: false,
     platform: "node",
-    inlineOnly: false,
-    external: allExternals,
+    deps: bundleDeps,
     // Disable code splitting to avoid circular imports in server.js.
     outputOptions: { codeSplitting: false },
   },
