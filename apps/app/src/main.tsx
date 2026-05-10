@@ -111,7 +111,6 @@ import {
   PtyConsoleDrawer,
 } from "@elizaos/app-task-coordinator";
 import { FineTuningView } from "@elizaos/app-training/ui";
-import "@elizaos/app-trajectory-logger/register";
 import "@elizaos/app-shopify/register";
 import "@elizaos/app-hyperliquid/client";
 import "@elizaos/app-hyperliquid/register";

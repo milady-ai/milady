@@ -50,13 +50,6 @@ const localScriptPath = path.join(
   "scripts",
   scriptName,
 );
-const localRegressionMatrix = path.join(
-  localElizaRoot,
-  "packages",
-  "app-core",
-  "test",
-  "regression-matrix.json",
-);
 // Prefer the local elizaOS app-core script when a local checkout exists.
 // Makes `bun run eliza:local` use local source for every app-core script,
 // so patches in the local checkout (including platforms/android/build.gradle

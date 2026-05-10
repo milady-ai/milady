@@ -300,3 +300,5 @@ eliza-beta-prep/
 # Local CI fix scratch checkouts (not part of the project)
 eliza-ci-fix/
 eliza-ci-followup/
+eliza-ci-clean/
+package.json.pre-disable-backup
