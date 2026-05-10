@@ -370,9 +370,11 @@ try {
   // for the loopback case where the device IS the agent.
   if (!bootstrapToken) {
     try {
-      const native = (window as unknown as {
-        ElizaNative?: { getLocalAgentToken?: () => string | null };
-      }).ElizaNative;
+      const native = (
+        window as unknown as {
+          ElizaNative?: { getLocalAgentToken?: () => string | null };
+        }
+      ).ElizaNative;
       const nativeToken = native?.getLocalAgentToken?.()?.trim();
       if (nativeToken) {
         bootstrapToken = nativeToken;
