@@ -128,8 +128,11 @@ cmd_reflash() {
     --brand-config "$MILADY_ROOT/os/android/brand.milady.json" \
     --source-vendor "$MILADY_ROOT/os/android/vendor/milady" \
     "$AOSP_ROOT"
-  say "running incremental m -j6 (~5-15 min)…"
-  ( cd "$AOSP_ROOT" && bash -lc "source build/envsetup.sh && lunch $LUNCH_TARGET && m -j6" )
+  # Default parallelism is light (-j3) so the host stays usable for other
+  # work; override with `MILADYOS_AOSP_J=6` if you have spare CPU.
+  local j_flag="${MILADYOS_AOSP_J:-3}"
+  say "running incremental m -j${j_flag} (~5-15 min)…"
+  ( cd "$AOSP_ROOT" && nice -n 19 ionice -c 3 bash -lc "source build/envsetup.sh && lunch $LUNCH_TARGET && m -j${j_flag}" )
   cmd_reset
 }
 
