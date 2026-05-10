@@ -363,6 +363,28 @@ try {
       if (saved) bootstrapToken = saved;
     } catch {}
   }
+  // On AOSP/Milady the agent runs in the same APK and exposes its
+  // per-boot bearer through `window.ElizaNative.getLocalAgentToken()`
+  // (see `os/android/.../ElizaNativeBridge.java`). Pull it before the
+  // first auth-status poll so the React shell never hits PairingView
+  // for the loopback case where the device IS the agent.
+  if (!bootstrapToken) {
+    try {
+      const native = (window as unknown as {
+        ElizaNative?: { getLocalAgentToken?: () => string | null };
+      }).ElizaNative;
+      const nativeToken = native?.getLocalAgentToken?.()?.trim();
+      if (nativeToken) {
+        bootstrapToken = nativeToken;
+        // Persist to the same key the fragment-token path uses so any
+        // later re-load through localStorage finds it without needing
+        // the bridge to be available at that moment.
+        try {
+          window.localStorage.setItem(SELF_HOSTED_TOKEN_KEY, nativeToken);
+        } catch {}
+      }
+    } catch {}
+  }
   if (bootstrapToken) {
     appBootConfig.apiToken = bootstrapToken;
     appBootConfig.apiBase ??= window.location.origin;
