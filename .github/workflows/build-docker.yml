@@ -225,14 +225,16 @@ jobs:
       # eliza/packages/app-core/scripts/ensure-generated-core-proto-js.mjs
       # (invoked from the agent Dockerfile) errors out when the proto outputs
       # under eliza/packages/core/src/types/generated/eliza/v1 are missing.
-      # Match the CI Type-Check / Build flow and run buf generate first.
+      # Run buf generate when the v1 outputs are absent (an empty `generated/`
+      # parent directory still trips the script).
       - name: Generate protobuf types
         run: |
-          if [ -d eliza/packages/schemas ] && [ -f eliza/packages/schemas/buf.gen.yaml ] && [ ! -d eliza/packages/core/src/types/generated ]; then
+          if [ -d eliza/packages/schemas ] && [ -f eliza/packages/schemas/buf.gen.yaml ] && [ ! -d eliza/packages/core/src/types/generated/eliza/v1 ]; then
             cd eliza/packages/schemas
             node node_modules/@bufbuild/buf/install.js 2>/dev/null || true
             bunx @bufbuild/buf@1.67.0 generate
           fi
+          ls -la eliza/packages/core/src/types/generated/eliza/v1 2>/dev/null || echo "WARN: proto generated dir still missing"
 
       # ── 6.5. Build eliza runtime packages needed by the agent image ─────────
       - name: Build @elizaos/core
