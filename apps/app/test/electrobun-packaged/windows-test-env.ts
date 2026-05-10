@@ -1,3 +1,5 @@
+import path from "node:path";
+
 const STRIPPED_ENV_KEYS = [
   "ELIZA_API_BASE",
   "ELIZA_API_BASE_URL",
@@ -33,6 +35,7 @@ const STRIPPED_ENV_KEYS = [
   "MILADY_TEST_WINDOWS_LAUNCHER_PATH",
   "MILADY_TEST_WINDOWS_LOCALAPPDATA_PATH",
   "MILADY_WINDOWS_SMOKE_REQUIRE_INSTALLER",
+  "PGLITE_DATA_DIR",
   "VITE_DEV_SERVER_URL",
 ] as const;
 
@@ -58,10 +61,8 @@ export function createPackagedWindowsAppEnv(args: {
     MILADY_DESKTOP_TEST_PARTITION: "persist:bootstrap-isolated",
     MILADY_DISABLE_LOCAL_EMBEDDINGS: "1",
     ELECTROBUN_CONSOLE: "1",
-    // Redirect both Windows profile roots so the packaged shell and the
-    // explicit bootstrap partition stay isolated from stale host-machine CEF
-    // and runtime state on each test run.
     APPDATA: args.appData,
     LOCALAPPDATA: args.localAppData,
+    PGLITE_DATA_DIR: path.join(args.localAppData, "pglite"),
   };
 }

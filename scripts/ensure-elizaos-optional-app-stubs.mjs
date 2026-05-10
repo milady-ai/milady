@@ -24,10 +24,12 @@ const optionalPackages = [
   "@elizaos/app-task-coordinator",
   "@elizaos/app-training",
   "@elizaos/app-vincent",
+  "@elizaos/app-wallet",
 ];
 
 const stubSource = `const optionalStub = Object.freeze({
   name: "milady-optional-elizaos-app-stub",
+  description: "Optional elizaOS app package placeholder.",
   routes: [],
 });
 

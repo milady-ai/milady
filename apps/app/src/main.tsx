@@ -149,6 +149,9 @@ declare global {
     __ELIZA_APP_SHARE_QUEUE__?: ShareTargetPayload[];
     __ELIZA_APP_CHARACTER_EDITOR__?: typeof CharacterEditor;
     __ELIZA_APP_API_BASE__?: string;
+    __ELIZA_API_BASE__?: string;
+    __ELIZAOS_APP_BOOT_CONFIG__?: AppBootConfig;
+    __ELIZA_APP_BOOT_CONFIG__?: AppBootConfig;
   }
 }
 
@@ -163,6 +166,9 @@ type AppCompatWindow = Window &
     __ELIZA_APP_SHARE_QUEUE__?: ShareTargetPayload[];
     __ELIZA_APP_CHARACTER_EDITOR__?: typeof CharacterEditor;
     __ELIZA_APP_API_BASE__?: string;
+    __ELIZA_API_BASE__?: string;
+    __ELIZAOS_APP_BOOT_CONFIG__?: AppBootConfig;
+    __ELIZA_APP_BOOT_CONFIG__?: AppBootConfig;
   };
 
 function getAppWindow(): AppCompatWindow {
@@ -172,7 +178,7 @@ function getAppWindow(): AppCompatWindow {
 // True when the APK is running on the AOSP MiladyOS variant. Detection:
 // MainActivity.applyMiladyOSUserAgentSuffix appends `MiladyOS/<tag>` to the
 // WebView user-agent when `ro.miladyos.product` is set by the AOSP product
-// config. The upstream eliza framework reads its own `ElizaOS/<tag>` marker
+// config. The upstream elizaOS layer reads its own `ElizaOS/<tag>` marker
 // from the same place; this helper only cares about the Milady-brand layer.
 function isMiladyOS(): boolean {
   if (typeof navigator === "undefined") return false;
@@ -182,9 +188,14 @@ function isMiladyOS(): boolean {
 function getInjectedAppApiBase(): string | undefined {
   const appWindow = getAppWindow();
   const brandedApiBase = appWindow[BRANDED_WINDOW_KEYS.apiBase];
+  const bootConfig =
+    appWindow.__ELIZAOS_APP_BOOT_CONFIG__ ??
+    appWindow.__ELIZA_APP_BOOT_CONFIG__;
   return (
     appWindow.__ELIZA_APP_API_BASE__ ??
-    (typeof brandedApiBase === "string" ? brandedApiBase : undefined)
+    (typeof brandedApiBase === "string" ? brandedApiBase : undefined) ??
+    bootConfig?.apiBase ??
+    appWindow.__ELIZA_API_BASE__
   );
 }
 
@@ -270,6 +281,7 @@ const APP_VRM_ASSETS = APP_STYLE_PRESETS.slice()
   .map((p) => ({ title: p.name, slug: `${APP_NAMESPACE}-${p.avatarIndex}` }));
 
 const appBootConfig: AppBootConfig = {
+  ...getBootConfig(),
   branding: APP_BRANDING,
   defaultApps: APP_CONFIG.defaultApps,
   assetBaseUrl:

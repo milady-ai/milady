@@ -45,7 +45,7 @@ jobs:
     steps:
       - name: Detect Greptile response to preliminary agent-review
         id: check
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const comment = context.payload.comment;
@@ -166,7 +166,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout at PR head
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           ref: ${{ needs.detect.outputs.pr_head_sha }}
@@ -272,7 +272,7 @@ jobs:
 
       - name: Mark preliminary comment as superseded
         if: steps.claude-weight.outcome == 'success'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const initialId = Number('${{ needs.detect.outputs.initial_review_id }}');
@@ -308,7 +308,7 @@ jobs:
 
       - name: Report weighting failure
         if: steps.claude-weight.outcome == 'failure'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const prNumber = Number('${{ needs.detect.outputs.pr_number }}');

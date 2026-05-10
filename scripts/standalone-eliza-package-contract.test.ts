@@ -99,7 +99,7 @@ test("package manifests default to published elizaOS alpha packages", () => {
   ]) {
     assert.equal(
       appPackage.dependencies[packageName],
-      "alpha",
+      "1.0.0",
       `${packageName} must resolve from npm for Capacitor package mode`,
     );
   }
@@ -109,11 +109,15 @@ test("package manifests default to published elizaOS alpha packages", () => {
 test("root build resolves app-core entries from packages by default", () => {
   const helper = read("scripts/lib/eliza-package-mode.mjs");
   const resolver = read("scripts/lib/resolve-eliza-app-core-script.mjs");
-  const tsdownConfig = read("tsdown.config.ts");
+  const tsdownConfig = read("tsdown.config.mjs");
 
   assert.match(helper, /DEFAULT_ELIZA_SOURCE_MODE = "packages"/);
   assert.match(read("scripts/run-app-web-build.mjs"), /isLocalElizaDisabled/);
-  assert.match(read("scripts/run-app-web-build.mjs"), /build:web/);
+  assert.match(
+    read("scripts/run-app-web-build.mjs"),
+    /patch-elizaos-app-core-native-browser-package\.mjs/,
+  );
+  assert.match(read("scripts/run-app-web-build.mjs"), /vite\.js", "build"/);
   assert.match(resolver, /preferLocal && existsSync/);
   assert.match(tsdownConfig, /"packages"/);
   assert.match(tsdownConfig, /require\.resolve\(packageSubpath\)/);
@@ -167,6 +171,7 @@ test("optional app stubs satisfy route plugin and runtime hook imports", () => {
     "@elizaos/app-steward",
     "@elizaos/app-training",
     "@elizaos/app-vincent",
+    "@elizaos/app-wallet",
   ]) {
     assert.match(stubScript, new RegExp(packageName.replace("/", "\\/")));
   }
@@ -203,6 +208,15 @@ test("elizaOS package channel is configurable instead of alpha-only", () => {
   assert.doesNotMatch(setupScript, /FALLBACK_TAG = "alpha"/);
   assert.match(fallbackDeps, /ELIZAOS_PACKAGE_SPECIFIER/);
   assert.doesNotMatch(fallbackDeps, /@alpha/);
+  assert.notEqual(
+    fallbackDeps.indexOf('if [[ "$package_name" == @elizaos/* ]]; then'),
+    -1,
+  );
+  assert.notEqual(fallbackDeps.indexOf('for manifest in "$@"; do'), -1);
+  assert.ok(
+    fallbackDeps.indexOf('if [[ "$package_name" == @elizaos/* ]]; then') <
+      fallbackDeps.indexOf('for manifest in "$@"; do'),
+  );
 });
 
 test("local eliza source clone target remains explicit and configurable", () => {

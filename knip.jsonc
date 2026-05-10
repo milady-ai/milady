@@ -168,7 +168,7 @@
         "cypress.config.ts",
         "**/*.cy.ts",
         "**/cypress/**",
-        "tsdown.config.ts"
+        "tsdown.config.mjs"
       ]
     },
     "apps/app/electrobun": {

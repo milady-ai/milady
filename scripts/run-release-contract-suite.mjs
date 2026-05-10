@@ -446,7 +446,7 @@ export function main() {
       run("node", [
         "eliza/packages/app-core/scripts/ensure-shared-i18n-data.mjs",
       ]);
-      run("bunx", ["tsdown", "--fail-on-warn", "false"]);
+      run("node", ["scripts/run-tsdown.mjs", "--fail-on-warn", "false"]);
       fs.mkdirSync(path.join(repoRoot, "dist"), { recursive: true });
       fs.writeFileSync(
         path.join(repoRoot, "dist", "package.json"),

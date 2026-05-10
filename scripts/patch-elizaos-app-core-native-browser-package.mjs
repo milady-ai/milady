@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// biome-ignore-all lint/suspicious/noTemplateCurlyInString: replacement payloads contain literal template placeholders.
 
 import fs from "node:fs";
 import { createRequire } from "node:module";
@@ -42,7 +43,9 @@ function patchFile(filePath, patcher) {
   }
 
   fs.writeFileSync(filePath, next);
-  console.log(`${LOG_PREFIX} patched ${path.relative(process.cwd(), filePath)}`);
+  console.log(
+    `${LOG_PREFIX} patched ${path.relative(process.cwd(), filePath)}`,
+  );
   return true;
 }
 
@@ -58,6 +61,191 @@ function writeFileIfChanged(filePath, contents) {
   console.log(`${LOG_PREFIX} wrote ${path.relative(process.cwd(), filePath)}`);
   return true;
 }
+
+function findBunAppCorePackageDirs(primaryDir) {
+  const bunDir = path.join(process.cwd(), "node_modules", ".bun");
+  if (!fs.existsSync(bunDir)) {
+    return [];
+  }
+
+  return fs
+    .readdirSync(bunDir)
+    .filter((entry) => entry.startsWith("@elizaos+app-core@"))
+    .map((entry) =>
+      path.join(bunDir, entry, "node_modules", "@elizaos", "app-core"),
+    )
+    .filter(
+      (candidate) =>
+        candidate !== primaryDir &&
+        fs.existsSync(path.join(candidate, "package.json")),
+    );
+}
+
+function findBunAppCoreNativeTransportPaths() {
+  return findBunAppCorePackageDirs(appCoreDir).map((packageDir) =>
+    path.join(
+      packageDir,
+      "packages",
+      "app-core",
+      "src",
+      "api",
+      "native-cloud-http-transport.js",
+    ),
+  );
+}
+
+const fallbackPackageExportSources = new Map([
+  ["./api/client-types-chat", "api/client-types-chat"],
+  ["./api/server-wallet-trade", "api/server-wallet-trade"],
+  ["./api/wallet-export-guard", "api/wallet-export-guard"],
+  ["./app-shell-components", "app-shell-components"],
+  ["./browser", "browser"],
+  ["./platform/is-native-server", "platform/is-native-server"],
+  ["./runtime/app-route-plugin-registry", "runtime/app-route-plugin-registry"],
+  ["./services/github-credentials", "services/github-credentials"],
+  ["./services/n8n-mode", "services/n8n-mode"],
+  ["./services/n8n-sidecar", "services/n8n-sidecar"],
+  ["./widgets/registry", "widgets/registry"],
+]);
+
+function localAppCorePackageJsonPath() {
+  const localPath = path.join(
+    process.cwd(),
+    "eliza",
+    "packages",
+    "app-core",
+    "package.json",
+  );
+  return fs.existsSync(localPath) ? localPath : null;
+}
+
+function toCompiledPackageExportSource(value) {
+  if (typeof value !== "string") {
+    return null;
+  }
+  if (!value.startsWith("./src/") || value.includes("*")) {
+    return null;
+  }
+
+  const source = value.replace(/^\.\/src\//, "").replace(/\.(ts|tsx)$/, "");
+  return source.endsWith(".css") ? null : source;
+}
+
+function packageExportSources() {
+  const sources = new Map(fallbackPackageExportSources);
+  const localPackageJsonPath = localAppCorePackageJsonPath();
+  if (!localPackageJsonPath) {
+    return sources;
+  }
+
+  const localPackageJson = JSON.parse(
+    fs.readFileSync(localPackageJsonPath, "utf8"),
+  );
+  for (const [key, value] of Object.entries(localPackageJson.exports ?? {})) {
+    const source = toCompiledPackageExportSource(value);
+    if (source) {
+      sources.set(key, source);
+    }
+  }
+  return sources;
+}
+
+function compiledExportValue(source) {
+  return {
+    types: `./packages/app-core/src/${source}.d.ts`,
+    import: `./packages/app-core/src/${source}.js`,
+    default: `./packages/app-core/src/${source}.js`,
+  };
+}
+
+function patchPackageJsonExports(packageJsonPath, sources) {
+  if (!fs.existsSync(packageJsonPath)) {
+    return false;
+  }
+
+  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
+  packageJson.exports ??= {};
+  let patched = false;
+  for (const [key, source] of sources) {
+    if (packageJson.exports[key]) {
+      continue;
+    }
+
+    const importPath = path.join(
+      path.dirname(packageJsonPath),
+      "packages",
+      "app-core",
+      "src",
+      `${source}.js`,
+    );
+    const typesPath = path.join(
+      path.dirname(packageJsonPath),
+      "packages",
+      "app-core",
+      "src",
+      `${source}.d.ts`,
+    );
+    if (!fs.existsSync(importPath) || !fs.existsSync(typesPath)) {
+      continue;
+    }
+
+    packageJson.exports[key] = compiledExportValue(source);
+    patched = true;
+  }
+
+  if (!patched) {
+    return false;
+  }
+
+  fs.writeFileSync(
+    packageJsonPath,
+    `${JSON.stringify(packageJson, null, 2)}\n`,
+  );
+  console.log(
+    `${LOG_PREFIX} patched exports in ${path.relative(process.cwd(), packageJsonPath)}`,
+  );
+  return true;
+}
+
+function appCorePackageSourcePath(packageDir, relativePath) {
+  return path.join(packageDir, "packages", "app-core", "src", relativePath);
+}
+
+const appShellRegistrySource = `const APP_SHELL_PAGE_REGISTRY_KEY = Symbol.for("elizaos.app-core.app-shell-page-registry");
+function getAppShellPageRegistryStore() {
+    const globalObject = globalThis;
+    const existing = globalObject[APP_SHELL_PAGE_REGISTRY_KEY];
+    if (existing)
+        return existing;
+    const created = {
+        entries: new Map(),
+    };
+    globalObject[APP_SHELL_PAGE_REGISTRY_KEY] = created;
+    return created;
+}
+export function registerAppShellPage(registration) {
+    getAppShellPageRegistryStore().entries.set(registration.id, registration);
+}
+export function listAppShellPages() {
+    return [...getAppShellPageRegistryStore().entries.values()];
+}
+`;
+
+const appShellRegistryTypesSource = `import type { ComponentType } from "react";
+export interface AppShellPageRegistration {
+    id: string;
+    pluginId: string;
+    label: string;
+    icon?: string;
+    path: string;
+    order?: number;
+    developerOnly?: boolean;
+    group?: string;
+    Component: ComponentType<unknown>;
+}
+export declare function registerAppShellPage(registration: AppShellPageRegistration): void;
+export declare function listAppShellPages(): AppShellPageRegistration[];
+`;
 
 function replacePrototypeFunction(source, methodName, replacement) {
   const pattern = new RegExp(
@@ -105,14 +293,27 @@ const nativeCloudHttpTransportPath = path.join(
   "packages/app-core/src/api/native-cloud-http-transport.js",
 );
 
-const runMobileBuildPath = path.join(appCoreDir, "scripts/run-mobile-build.mjs");
+const runMobileBuildPath = path.join(
+  appCoreDir,
+  "scripts/run-mobile-build.mjs",
+);
 
 let changed = false;
+const exportSources = packageExportSources();
+const appCorePackageDirs = [
+  appCoreDir,
+  ...findBunAppCorePackageDirs(appCoreDir),
+];
 
-changed =
-  writeFileIfChanged(
-    nativeCloudHttpTransportPath,
-    `import { Capacitor, CapacitorHttp } from "@capacitor/core";
+for (const packageDir of appCorePackageDirs) {
+  changed =
+    patchPackageJsonExports(
+      path.join(packageDir, "package.json"),
+      exportSources,
+    ) || changed;
+}
+
+const nativeCloudHttpTransportSource = `import { Capacitor, CapacitorHttp } from "@capacitor/core";
 
 const DIRECT_CLOUD_API_HOSTS = new Set([
     "api.elizacloud.ai",
@@ -191,8 +392,42 @@ export async function requestWithNativeCloudHttp(url, init, context) {
         headers: result.headers,
     });
 }
-`,
+`;
+
+changed =
+  writeFileIfChanged(
+    nativeCloudHttpTransportPath,
+    nativeCloudHttpTransportSource,
   ) || changed;
+
+for (const transportPath of findBunAppCoreNativeTransportPaths()) {
+  changed =
+    writeFileIfChanged(transportPath, nativeCloudHttpTransportSource) ||
+    changed;
+}
+
+for (const packageDir of appCorePackageDirs) {
+  changed =
+    patchFile(
+      appCorePackageSourcePath(packageDir, "app-shell-components.js"),
+      (source) => {
+        if (source.includes("registerAppShellPage")) {
+          return source;
+        }
+        return `${source.trimEnd()}\n${appShellRegistrySource}`;
+      },
+    ) || changed;
+  changed =
+    patchFile(
+      appCorePackageSourcePath(packageDir, "app-shell-components.d.ts"),
+      (source) => {
+        if (source.includes("registerAppShellPage")) {
+          return source;
+        }
+        return `${source.trimEnd()}\n${appShellRegistryTypesSource}`;
+      },
+    ) || changed;
+}
 
 changed =
   patchFile(clientBasePath, (source) => {
@@ -234,8 +469,8 @@ changed =
     }
 
     next = next.replace(
-      "    if (getElectrobunRendererRpc() !== undefined)\n        return null; // Desktop uses RPC\n    if (typeof window === \"undefined\" || typeof window.open !== \"function\")",
-      "    if (getElectrobunRendererRpc() !== undefined)\n        return null; // Desktop uses RPC\n    if (Capacitor.isNativePlatform())\n        return null;\n    if (typeof window === \"undefined\" || typeof window.open !== \"function\")",
+      '    if (getElectrobunRendererRpc() !== undefined)\n        return null; // Desktop uses RPC\n    if (typeof window === "undefined" || typeof window.open !== "function")',
+      '    if (getElectrobunRendererRpc() !== undefined)\n        return null; // Desktop uses RPC\n    if (Capacitor.isNativePlatform())\n        return null;\n    if (typeof window === "undefined" || typeof window.open !== "function")',
     );
 
     return next;
@@ -254,7 +489,7 @@ changed =
 
     if (!next.includes("function isCapacitorAssetBase")) {
       next = next.replace(
-        'const ELIZA_CLOUD_LOGIN_MAX_CONSECUTIVE_ERRORS = 3;\n// ── Helpers',
+        "const ELIZA_CLOUD_LOGIN_MAX_CONSECUTIVE_ERRORS = 3;\n// ── Helpers",
         'const ELIZA_CLOUD_LOGIN_MAX_CONSECUTIVE_ERRORS = 3;\nconst DEFAULT_DIRECT_CLOUD_BASE_URL = "https://www.elizacloud.ai";\n// ── Helpers',
       );
       next = next.replace(
@@ -296,13 +531,13 @@ changed =
     let next = source;
 
     next = next.replace(
-      "                    await client.provisionCloudSandbox({\n                        cloudApiBase,\n                        authToken,\n                        name: onboardingName,\n                        bio: style?.bio ?? [\"An autonomous AI agent.\"],\n                        onProgress: (status, detail) => {\n                            console.log(`[Sandbox] ${status}: ${detail ?? \"\"}`);\n                        },\n                    });\n                    client.setBaseUrl(cloudApiBase);",
-      "                    const provisionedAgent = await client.provisionCloudSandbox({\n                        cloudApiBase,\n                        authToken,\n                        name: onboardingName,\n                        bio: style?.bio ?? [\"An autonomous AI agent.\"],\n                        onProgress: (status, detail) => {\n                            console.log(`[Sandbox] ${status}: ${detail ?? \"\"}`);\n                        },\n                    });\n                    client.setBaseUrl(provisionedAgent.bridgeUrl);",
+      '                    await client.provisionCloudSandbox({\n                        cloudApiBase,\n                        authToken,\n                        name: onboardingName,\n                        bio: style?.bio ?? ["An autonomous AI agent."],\n                        onProgress: (status, detail) => {\n                            console.log(`[Sandbox] ${status}: ${detail ?? ""}`);\n                        },\n                    });\n                    client.setBaseUrl(cloudApiBase);',
+      '                    const provisionedAgent = await client.provisionCloudSandbox({\n                        cloudApiBase,\n                        authToken,\n                        name: onboardingName,\n                        bio: style?.bio ?? ["An autonomous AI agent."],\n                        onProgress: (status, detail) => {\n                            console.log(`[Sandbox] ${status}: ${detail ?? ""}`);\n                        },\n                    });\n                    client.setBaseUrl(provisionedAgent.bridgeUrl);',
     );
 
     next = next.replace(
-      "                            kind: \"cloud\",\n                            apiBase: cloudApiBase,\n                            accessToken: authToken,",
-      "                            kind: \"cloud\",\n                            apiBase: provisionedAgent.bridgeUrl,\n                            accessToken: authToken,",
+      '                            kind: "cloud",\n                            apiBase: cloudApiBase,\n                            accessToken: authToken,',
+      '                            kind: "cloud",\n                            apiBase: provisionedAgent.bridgeUrl,\n                            accessToken: authToken,',
     );
 
     return next;
@@ -328,7 +563,7 @@ changed =
 
     if (!next.includes("DEFAULT_DIRECT_CLOUD_API_BASE_URL")) {
       next = next.replace(
-        'const AGENT_TRANSFER_MIN_PASSWORD_LENGTH = 4;\n',
+        "const AGENT_TRANSFER_MIN_PASSWORD_LENGTH = 4;\n",
         'const AGENT_TRANSFER_MIN_PASSWORD_LENGTH = 4;\nconst DEFAULT_DIRECT_CLOUD_BASE_URL = "https://www.elizacloud.ai";\nconst DEFAULT_DIRECT_CLOUD_API_BASE_URL = "https://api.elizacloud.ai";\nconst DIRECT_ELIZA_CLOUD_WEB_HOSTS = new Set([\n    "elizacloud.ai",\n    "www.elizacloud.ai",\n    "dev.elizacloud.ai",\n]);\nconst DIRECT_ELIZA_CLOUD_API_HOST = "api.elizacloud.ai";\n',
       );
     }
@@ -368,13 +603,13 @@ changed =
     next = replaceAnyPrototypeFunction(
       next,
       "getCloudCompatAgent",
-      'ElizaClient.prototype.getCloudCompatAgent = async function (agentId) {\n    if (isDirectCloudBase(this)) {\n        const response = await this.fetch(`/api/v1/eliza/agents/${encodeURIComponent(agentId)}`);\n        return {\n            success: response.success,\n            data: toCloudCompatAgent(response.data ?? { id: agentId }),\n        };\n    }\n    return this.fetch(`/api/cloud/compat/agents/${encodeURIComponent(agentId)}`);\n};',
+      "ElizaClient.prototype.getCloudCompatAgent = async function (agentId) {\n    if (isDirectCloudBase(this)) {\n        const response = await this.fetch(`/api/v1/eliza/agents/${encodeURIComponent(agentId)}`);\n        return {\n            success: response.success,\n            data: toCloudCompatAgent(response.data ?? { id: agentId }),\n        };\n    }\n    return this.fetch(`/api/cloud/compat/agents/${encodeURIComponent(agentId)}`);\n};",
     );
 
     next = replaceAnyPrototypeFunction(
       next,
       "getCloudCompatJobStatus",
-      'ElizaClient.prototype.getCloudCompatJobStatus = async function (jobId) {\n    if (isDirectCloudBase(this)) {\n        const response = await this.fetch(`/api/v1/jobs/${encodeURIComponent(jobId)}`);\n        return {\n            success: response.success,\n            data: toCloudCompatJob(response.data ?? { id: jobId }),\n        };\n    }\n    return this.fetch(`/api/cloud/compat/jobs/${encodeURIComponent(jobId)}`);\n};',
+      "ElizaClient.prototype.getCloudCompatJobStatus = async function (jobId) {\n    if (isDirectCloudBase(this)) {\n        const response = await this.fetch(`/api/v1/jobs/${encodeURIComponent(jobId)}`);\n        return {\n            success: response.success,\n            data: toCloudCompatJob(response.data ?? { id: jobId }),\n        };\n    }\n    return this.fetch(`/api/cloud/compat/jobs/${encodeURIComponent(jobId)}`);\n};",
     );
 
     next = replacePrototypeFunction(

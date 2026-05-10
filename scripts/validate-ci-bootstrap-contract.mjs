@@ -54,7 +54,7 @@ const requiredWorkflowSnippets = [
 const requiredActionSnippets = [
   "disable-local-eliza-workspace:",
   "run: node scripts/disable-local-eliza-workspace.mjs",
-  "name: Apply Milady eliza CI patches",
+  "name: Apply elizaOS source CI patches",
   "run: node scripts/apply-eliza-ci-patches.mjs",
   "name: Validate published-only install mode",
   "disable-local-eliza-workspace requires an install-command with --no-frozen-lockfile",
@@ -169,6 +169,8 @@ assertContainsAll(
   ".github/workflows/build-docker.yml",
   [
     'MILADY_SKIP_LOCAL_UPSTREAMS: "1"',
+    "- name: Apply elizaOS source CI patches",
+    "run: node scripts/apply-eliza-ci-patches.mjs",
     "- name: Build @elizaos/core",
     "- name: Build agent workspace",
     "- name: Build @elizaos/shared",
@@ -179,6 +181,7 @@ assertOrdered(
   buildDockerText,
   ".github/workflows/build-docker.yml",
   [
+    "- name: Apply elizaOS source CI patches",
     "- name: Run postinstall patches",
     "- name: Build @elizaos/core",
     "- name: Build agent workspace",

@@ -24,11 +24,16 @@ describe("CI bootstrap contract", () => {
   it("builds explicit local runtime packages for the agent image", () => {
     const buildDocker = workflow("build-docker.yml");
     const postinstall = "- name: Run postinstall patches";
+    const sourcePatches = "- name: Apply elizaOS source CI patches";
     const coreBuild = "- name: Build @elizaos/core";
     const agentBuild = "- name: Build agent workspace";
     const sharedBuild = "- name: Build @elizaos/shared";
     const runtimeBuild = "- name: Build runtime (tsdown)";
 
+    expect(buildDocker).toContain(sourcePatches);
+    expect(buildDocker.indexOf(sourcePatches)).toBeLessThan(
+      buildDocker.indexOf(coreBuild),
+    );
     expect(buildDocker.indexOf(postinstall)).toBeLessThan(
       buildDocker.indexOf(coreBuild),
     );
@@ -41,6 +46,15 @@ describe("CI bootstrap contract", () => {
     expect(buildDocker.indexOf(sharedBuild)).toBeLessThan(
       buildDocker.indexOf(runtimeBuild),
     );
+  });
+
+  it("bounds nested eliza installs for the agent image", () => {
+    const buildDocker = workflow("build-docker.yml");
+
+    expect(buildDocker).toContain(
+      "timeout 10m bun install --cwd eliza --no-frozen-lockfile --ignore-scripts",
+    );
+    expect(buildDocker).toContain("eliza bun install failed after");
   });
 
   it("does not run nested eliza workspace installs inside CI jobs", () => {

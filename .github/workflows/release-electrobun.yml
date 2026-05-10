@@ -250,7 +250,7 @@ jobs:
       - name: Initialize tracked workspace submodules
         run: node scripts/init-submodules.mjs
 
-      - name: Apply Milady eliza CI patches
+      - name: Apply elizaOS source CI patches
         run: node scripts/apply-eliza-ci-patches.mjs
 
       - name: Setup Node.js
@@ -323,7 +323,7 @@ jobs:
 
       - name: Build core dist (server bundle)
         run: |
-          bunx tsdown
+          node scripts/run-tsdown.mjs
           echo '{"type":"module"}' > dist/package.json
           node --import tsx scripts/write-build-info.ts
 
@@ -414,7 +414,7 @@ jobs:
       - name: Initialize tracked workspace submodules
         run: node scripts/init-submodules.mjs
 
-      - name: Apply Milady eliza CI patches
+      - name: Apply elizaOS source CI patches
         run: node scripts/apply-eliza-ci-patches.mjs
 
       - name: Setup Node.js
@@ -434,12 +434,8 @@ jobs:
       - name: Package Agent Browser Bridge release bundles
         id: package-browser-bridge
         run: |
-          if bun run browser-bridge:package:release; then
-            echo "packaged=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "::warning::Agent Browser Bridge packaging failed; desktop release will continue without browser companion bundles."
-            echo "packaged=false" >> "$GITHUB_OUTPUT"
-          fi
+          bun run browser-bridge:package:release
+          echo "packaged=true" >> "$GITHUB_OUTPUT"
 
       - name: Upload Agent Browser Bridge release artifacts
         if: steps.package-browser-bridge.outputs.packaged == 'true'
@@ -503,7 +499,7 @@ jobs:
       - name: Initialize tracked workspace submodules
         run: node scripts/init-submodules.mjs
 
-      - name: Apply Milady eliza CI patches
+      - name: Apply elizaOS source CI patches
         run: node scripts/apply-eliza-ci-patches.mjs
 
       - name: Setup Node.js
@@ -538,7 +534,10 @@ jobs:
           done
 
       - name: Install eliza source dependencies
-        run: bun install --cwd eliza --no-frozen-lockfile
+        run: bun install --cwd eliza --no-frozen-lockfile --ignore-scripts
+
+      - name: Hydrate eliza Bun package postinstall
+        run: cd eliza/node_modules/bun && node install.js
 
       - name: Run repository postinstall patches
         run: bun run postinstall
@@ -627,10 +626,14 @@ jobs:
       - name: Stage desktop bundle inputs
         run: |
           node eliza/packages/app-core/scripts/desktop-build.mjs stage --variant=base --build-whisper
+          node scripts/ensure-eliza-renderer-avatar-assets.mjs
           mkdir -p dist/node_modules/@elizaos/shared/src/i18n/generated
           cp eliza/packages/shared/src/i18n/generated/validation-keyword-data.ts dist/node_modules/@elizaos/shared/src/i18n/generated/
           cp eliza/packages/shared/src/i18n/generated/validation-keyword-data.js dist/node_modules/@elizaos/shared/src/i18n/generated/
           test -f dist/node_modules/@elizaos/shared/src/i18n/generated/validation-keyword-data.js
+          test -f apps/app/dist/vrms/eliza-1.vrm.gz -o -f apps/app/dist/vrms/eliza-1.vrm
+          test -f apps/app/dist/vrms/previews/eliza-1.png
+          test -f apps/app/dist/vrms/backgrounds/eliza-1.png
 
       - name: Validate Electrobun runtime copy contract
         env:
@@ -830,6 +833,7 @@ jobs:
         run: |
           out_dir="$RUNNER_TEMP/electrobun-entry-probe"
           rm -rf "$out_dir"
+          node "$GITHUB_WORKSPACE/scripts/copy-runtime-node-modules.ts" --link-only
           bun build src/index.ts --target=bun --outdir "$out_dir"
 
       - name: Build patched Electrobun CLI
@@ -1169,6 +1173,10 @@ jobs:
           Write-Host "=== Disk after smoke cleanup ==="
           Get-Volume | Where-Object { $_.DriveLetter } | Format-Table DriveLetter, @{N='FreeGB';E={[math]::Round($_.SizeRemaining/1GB,1)}}, @{N='TotalGB';E={[math]::Round($_.Size/1GB,1)}}
 
+      - name: Reapply Windows smoke asset patch
+        if: matrix.platform.os == 'windows' && steps.build-electrobun-app.outputs.fallback != 'true'
+        run: node scripts/apply-eliza-ci-patches.mjs
+
       - name: Smoke test packaged Windows app
         if: matrix.platform.os == 'windows' && steps.build-electrobun-app.outputs.fallback != 'true'
         continue-on-error: true
@@ -1185,8 +1193,8 @@ jobs:
           # exercises the same standalone artifact users download. Use a short
           # path under runner.temp to avoid MAX_PATH issues with
           # deeply nested node_modules while staying in a user-writable location.
-          ELIZA_TEST_WINDOWS_INSTALL_DIR: ${{ runner.temp }}\el
-          MILADY_TEST_WINDOWS_INSTALL_DIR: ${{ runner.temp }}\el
+          ELIZA_TEST_WINDOWS_INSTALL_DIR: ${{ runner.temp }}\el-smoke
+          MILADY_TEST_WINDOWS_INSTALL_DIR: ${{ runner.temp }}\el-smoke
           ELIZA_TEST_WINDOWS_LAUNCHER_DIR: ${{ runner.temp }}\eliza-windows-ui-launcher
           MILADY_TEST_WINDOWS_LAUNCHER_DIR: ${{ runner.temp }}\eliza-windows-ui-launcher
           ELIZA_TEST_WINDOWS_LAUNCHER_PATH_FILE: ${{ runner.temp }}\eliza-windows-ui-launcher.txt
@@ -1205,24 +1213,28 @@ jobs:
           Remove-Item $env:MILADY_TEST_WINDOWS_LAUNCHER_PATH_FILE -Force -ErrorAction SilentlyContinue
 
           bun run test:desktop:packaged:windows
-          if ($LASTEXITCODE -ne 0) {
-            Write-Error "Packaged Windows smoke test exited with code $LASTEXITCODE."
-            exit $LASTEXITCODE
-          }
+          $smokeExitCode = $LASTEXITCODE
 
           if (-not (Test-Path $env:ELIZA_TEST_WINDOWS_LAUNCHER_PATH_FILE)) {
             Write-Error "Smoke test did not emit a reusable Windows launcher path."
-            exit 1
+            $exitCode = if ($smokeExitCode -ne 0) { $smokeExitCode } else { 1 }
+            exit $exitCode
           }
 
           $launcherPath = (Get-Content $env:ELIZA_TEST_WINDOWS_LAUNCHER_PATH_FILE -Raw).Trim()
           if ([string]::IsNullOrWhiteSpace($launcherPath) -or -not (Test-Path $launcherPath)) {
             Write-Error "Reusable Windows launcher path is invalid: $launcherPath"
-            exit 1
+            $exitCode = if ($smokeExitCode -ne 0) { $smokeExitCode } else { 1 }
+            exit $exitCode
           }
 
           Add-Content -Path $env:GITHUB_ENV -Value "ELIZA_TEST_WINDOWS_LAUNCHER_PATH=$launcherPath"
           Write-Host "Reusing packaged Windows launcher for Playwright: $launcherPath"
+
+          if ($smokeExitCode -ne 0) {
+            Write-Error "Packaged Windows smoke test exited with code $LASTEXITCODE."
+            exit $smokeExitCode
+          }
 
       - name: Run Windows clean installer proof
         if: matrix.platform.os == 'windows' && steps.build-electrobun-app.outputs.fallback != 'true'
@@ -1284,7 +1296,9 @@ jobs:
 
       - name: Run Windows packaged renderer bootstrap check
         if: matrix.platform.os == 'windows' && steps.build-electrobun-app.outputs.fallback != 'true'
-        run: bun run test:desktop:playwright
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+        run: bun run test:desktop:playwright:windows
 
       - name: Upload Windows Playwright UI diagnostics
         if: failure() && matrix.platform.os == 'windows'

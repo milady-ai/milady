@@ -5,6 +5,64 @@ function hasRequestForPath(
   return requests.some((request) => request.endsWith(` ${pathname}`));
 }
 
+export interface PackagedRendererBootstrapProbe {
+  ok: boolean;
+  apiBase: string | null;
+  bootApiBase: string | null;
+  legacyApiBase: string | null;
+  status: number | null;
+  error?: string;
+}
+
+export function getPackagedRendererBootstrapProbeScript(): string {
+  return `(async () => {
+    try {
+      const bootSymbol = Symbol.for("elizaos.app.boot-config");
+      const bootConfig =
+        window.__ELIZAOS_APP_BOOT_CONFIG__ ??
+        window.__ELIZA_APP_BOOT_CONFIG__ ??
+        window[bootSymbol]?.current ??
+        null;
+      const bootApiBase =
+        typeof bootConfig?.apiBase === "string" ? bootConfig.apiBase : null;
+      const legacyApiBase =
+        typeof window.__ELIZA_API_BASE__ === "string"
+          ? window.__ELIZA_API_BASE__
+          : null;
+      const response = await fetch("/api/status", { cache: "no-store" });
+      return {
+        ok: true,
+        apiBase: bootApiBase ?? legacyApiBase,
+        bootApiBase,
+        legacyApiBase,
+        status: response.status,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        apiBase: null,
+        bootApiBase: null,
+        legacyApiBase: null,
+        status: null,
+        error: error instanceof Error ? error.message : String(error),
+      };
+    }
+  })()`;
+}
+
+export function isPackagedRendererBootstrapProbeReady(
+  probe: PackagedRendererBootstrapProbe,
+  expectedApiBase: string,
+): boolean {
+  return (
+    probe.ok &&
+    probe.apiBase === expectedApiBase &&
+    typeof probe.status === "number" &&
+    probe.status >= 200 &&
+    probe.status < 500
+  );
+}
+
 export function hasPackagedRendererBootstrapRequests(
   requests: readonly string[],
 ): boolean {

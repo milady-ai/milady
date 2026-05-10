@@ -22,6 +22,11 @@ function patchWindowsSmokeScript(text) {
 
   for (const patch of [
     {
+      pattern: /\$pgliteDataDir\s*=\s*Join-Path\s+\$tempRoot\s+"pglite"/,
+      replacement:
+        '$pgliteDataDir = Join-Path $tempRoot ("pglite-" + [Guid]::NewGuid().ToString("N"))',
+    },
+    {
       pattern:
         /if \(\$env:GITHUB_ENV\) \{[\s\S]*? {2}Add-Content -Path \$env:GITHUB_ENV -Value "PGLITE_DATA_DIR=\$pgliteDataDir"\r?\n\}/,
       replacement: `if ($env:GITHUB_ENV) {

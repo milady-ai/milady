@@ -46,14 +46,14 @@ jobs:
       allowed: ${{ steps.check.outputs.allowed }}
     steps:
       - name: Checkout (for trust-scoring.cjs)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           sparse-checkout: .github
           fetch-depth: 1
 
       - name: Check trust eligibility
         id: check
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const { computeTrustScore, DEFAULT_CONFIG, createContributorState, expandState } = require('./.github/trust-scoring.cjs');
@@ -160,7 +160,7 @@ jobs:
       actions: read
     steps:
       - name: Mark issue as in-progress
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             await github.rest.issues.addLabels({
@@ -171,7 +171,7 @@ jobs:
             });
 
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: develop
           fetch-depth: 0
@@ -196,7 +196,7 @@ jobs:
           echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org'
@@ -295,7 +295,7 @@ jobs:
 
       - name: Handle failure
         if: failure()
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             // Remove in-progress label on failure
@@ -328,7 +328,7 @@ jobs:
 
       - name: Handle success
         if: success()
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             // Remove agent-ready and in-progress, add agent-implemented

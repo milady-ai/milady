@@ -24,7 +24,8 @@ describe("package mode aliases", () => {
     );
 
     expect(viteConfigText).toContain("shouldResolveRealWalletApp");
-    expect(viteConfigText).toContain("plugins/app-wallet/package.json");
+    expect(viteConfigText).toContain('elizaAppPackageExists("app-wallet")');
+    expect(viteConfigText).toContain('"plugins"');
   });
 
   it("stubs unpublished native plugin packages", () => {

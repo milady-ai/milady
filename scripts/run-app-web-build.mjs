@@ -48,6 +48,9 @@ if (!isLocalElizaDisabled()) {
   await run(process.execPath, [
     "scripts/patch-elizaos-plugin-browser-bridge-package.mjs",
   ]);
+  await run(process.execPath, [
+    "scripts/patch-elizaos-app-core-native-browser-package.mjs",
+  ]);
   await run(
     process.execPath,
     ["node_modules/vite/bin/vite.js", "build"],

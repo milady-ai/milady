@@ -64,6 +64,11 @@ append_versioned_package() {
   local package_name="$1"
   shift
 
+  if [[ "$package_name" == @elizaos/* ]]; then
+    packages+=("${package_name}@${ELIZAOS_PACKAGE_SPECIFIER}")
+    return 0
+  fi
+
   local manifest spec
   for manifest in "$@"; do
     if spec="$(read_package_spec_from_manifest "$package_name" "$manifest" 2>/dev/null)" && [[ -n "$spec" ]]; then
@@ -71,11 +76,6 @@ append_versioned_package() {
       return 0
     fi
   done
-
-  if [[ "$package_name" == @elizaos/* ]]; then
-    packages+=("${package_name}@${ELIZAOS_PACKAGE_SPECIFIER}")
-    return 0
-  fi
 
   packages+=("$package_name")
 }

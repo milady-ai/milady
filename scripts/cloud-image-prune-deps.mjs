@@ -35,6 +35,17 @@ const CLOUD_AGENT_RELEASE_DEPS = [
   "@elizaos/plugin-elizacloud",
 ];
 const CLOUD_SDK_PACKAGE_SPEC = "file:./eliza/cloud/packages/sdk";
+const ELIZAOS_PACKAGE_SPECIFIER =
+  process.env.MILADY_ELIZAOS_VERSION ??
+  process.env.ELIZAOS_VERSION ??
+  process.env.MILADY_ELIZAOS_DIST_TAG ??
+  process.env.ELIZAOS_DIST_TAG ??
+  process.env.MILADY_ELIZAOS_NPM_TAG ??
+  process.env.ELIZAOS_NPM_TAG ??
+  "alpha";
+const PUBLISHED_RELEASE_DEPS = new Map([
+  ["@elizaos/plugin-elizacloud", ELIZAOS_PACKAGE_SPECIFIER],
+]);
 
 function readJson(path) {
   return JSON.parse(fs.readFileSync(path, "utf8"));
@@ -73,6 +84,12 @@ function materializeWorkspaceDeps(path, dependencyNames, versions) {
   for (const name of dependencyNames) {
     const spec = pkg.dependencies?.[name];
     if (typeof spec !== "string" || !spec.startsWith("workspace:")) continue;
+    const publishedSpec = PUBLISHED_RELEASE_DEPS.get(name);
+    if (publishedSpec) {
+      pkg.dependencies[name] = publishedSpec;
+      changed = true;
+      continue;
+    }
     const version = versions.get(name);
     if (!version) throw new Error(`No local package version found for ${name}`);
     pkg.dependencies[name] = version;
