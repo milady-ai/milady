@@ -68,6 +68,14 @@ const packageSafeBridgePatchScripts = [
   "patch-coding-agent-adapters-tools-flag.mjs",
   // milady-only fix for codex 0.128 — see script header.
   "patch-coding-agent-adapters-codex-full-auto.mjs",
+  // milady-only fix: build llama-cpp-capacitor JNI for x86_64 too (Cuttlefish
+  // / emulators). Adds 'x86_64' to abiFilters and swaps in an ABI-aware
+  // CMakeLists.txt; without it, x86_64 builds use the arm64 -march flag and
+  // ndk-clang aborts with "unknown target CPU 'armv8-a'".
+  "patch-llama-cpp-capacitor-x86_64.mjs",
+  // milady-only fix: rewrite jni.cpp's NewStringUTF helper so 4-byte UTF-8
+  // tokens (most emoji, CJK extension blocks) don't crash the host app.
+  "patch-llama-cpp-capacitor-utf8.mjs",
 ];
 
 const miladyBridgePatchScripts = packageMode

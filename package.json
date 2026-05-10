@@ -28,6 +28,8 @@
     "scripts/patch-coding-agent-adapters-codex-full-auto.mjs",
     "scripts/patch-coding-agent-adapters-tools-flag.mjs",
     "scripts/patch-eliza-electrobun-windows-smoke-startup.mjs",
+    "scripts/patch-llama-cpp-capacitor-utf8.mjs",
+    "scripts/patch-llama-cpp-capacitor-x86_64.mjs",
     "scripts/patch-elizaos-package-styles.mjs",
     "scripts/patch-elizaos-plugin-browser-bridge-package.mjs",
     "scripts/repair-elizaos-package-links.mjs",
