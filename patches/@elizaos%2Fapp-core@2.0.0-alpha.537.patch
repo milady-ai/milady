@@ -1,0 +1,55 @@
+diff --git a/packages/app-core/src/components/shell/RuntimeGate.js b/packages/app-core/src/components/shell/RuntimeGate.js
+--- a/packages/app-core/src/components/shell/RuntimeGate.js
++++ b/packages/app-core/src/components/shell/RuntimeGate.js
+@@ -336,7 +336,21 @@
+             // next launch; the `local` mobile runtime mode records the
+             // distinction for any UI that needs it.
+             client.setBaseUrl(LOCAL_AGENT_API_BASE);
+-            client.setToken(null);
++            // AOSP / branded native shells expose the on-device agent's per-boot
++            // bearer through `window.ElizaNative.getLocalAgentToken()` so the
++            // first /api/auth/status fetch can authenticate without showing the
++            // pair-code prompt. Stock Capacitor builds don't register the bridge,
++            // so this resolves to `null` and the legacy pair flow is preserved.
++            // (Local milady patch — pairs with elizaOS/eliza#7548 upstream.)
++            (function () {
++                let __t = null;
++                try {
++                    const __b = (typeof globalThis !== "undefined" ? globalThis : {}).ElizaNative;
++                    const __r = __b && typeof __b.getLocalAgentToken === "function" ? __b.getLocalAgentToken() : null;
++                    if (typeof __r === "string" && __r.trim()) __t = __r.trim();
++                } catch (e) {}
++                client.setToken(__t);
++            })();
+             savePersistedActiveServer({
+                 id: "local:android",
+                 kind: "remote",
+diff --git a/packages/app-core/src/state/startup-phase-restore.js b/packages/app-core/src/state/startup-phase-restore.js
+--- a/packages/app-core/src/state/startup-phase-restore.js
++++ b/packages/app-core/src/state/startup-phase-restore.js
+@@ -26,7 +26,24 @@
+         return;
+     }
+     clientRef.setBaseUrl(restoredActiveServer.apiBase ?? null);
+-    clientRef.setToken(restoredActiveServer.accessToken ?? null);
++    // AOSP / branded native shells expose the on-device agent's per-boot bearer
++    // through `window.ElizaNative.getLocalAgentToken()` so the React shell can
++    // authenticate the very first /api/auth/status without a pair-code prompt.
++    // The restored active-server JSON never carries a token in this scenario
++    // (the bearer rotates per boot and isn't safe to persist), so fall back to
++    // the bridge when the persisted record has no accessToken. Stock Capacitor
++    // builds don't register the bridge, so the lookup returns null and the
++    // legacy pair-code flow runs unchanged.
++    // (Local milady patch — pairs with elizaOS/eliza#7548 upstream.)
++    let __restoredToken = restoredActiveServer.accessToken ?? null;
++    if (__restoredToken === null) {
++        try {
++            const __b = (typeof globalThis !== "undefined" ? globalThis : {}).ElizaNative;
++            const __r = __b && typeof __b.getLocalAgentToken === "function" ? __b.getLocalAgentToken() : null;
++            if (typeof __r === "string" && __r.trim()) __restoredToken = __r.trim();
++        } catch (e) {}
++    }
++    clientRef.setToken(__restoredToken);
+ }
+ function activeServerToTarget(kind) {
+     switch (kind) {

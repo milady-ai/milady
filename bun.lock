@@ -216,6 +216,7 @@
     "llama-cpp-capacitor@0.1.5": "patches/llama-cpp-capacitor@0.1.5.patch",
     "tsup@8.5.1": "patches/tsup@8.5.1.patch",
     "proper-lockfile@4.1.2": "patches/proper-lockfile@4.1.2.patch",
+    "@elizaos/app-core@2.0.0-alpha.537": "patches/@elizaos%2Fapp-core@2.0.0-alpha.537.patch",
     "@pixiv/three-vrm@3.5.2": "patches/@pixiv%2Fthree-vrm@3.5.2.patch",
   },
   "overrides": {
@@ -2336,7 +2337,7 @@
 
     "layout-base": ["layout-base@1.0.2", "", {}, "sha512-8h2oVEZNktL4BH2JCOI90iD1yXwL6iNW7KcCKT2QZgQJR2vbqDsldCTPRU9NifTCqHZci57XvQQ15YTu+sTYPg=="],
 
-    "libsignal": ["@whiskeysockets/libsignal-node@github:whiskeysockets/libsignal-node#1c30d7d", { "dependencies": { "curve25519-js": "^0.0.4", "protobufjs": "6.8.8" } }, "WhiskeySockets-libsignal-node-1c30d7d", "sha512-5q4/OuDQaMYx3RpDqMqS3WYyqjrsSMpU8ipQZtpYnm5l6DwNoLV9oIYMDK0NILKW+tyk3tVCIA11BMYQ+A1+GA=="],
+    "libsignal": ["@whiskeysockets/libsignal-node@github:whiskeysockets/libsignal-node#1c30d7d", { "dependencies": { "curve25519-js": "^0.0.4", "protobufjs": "6.8.8" } }, "WhiskeySockets-libsignal-node-1c30d7d"],
 
     "libsodium": ["libsodium@0.8.4", "", {}, "sha512-lMcYaRi0zcs7tarATsQUYC7rstliIXZuoq0c6zXSgNtSNtdvBgkSegjWhpMJAXzKX3SUSwIp7+zEsob+j3LuRw=="],
 

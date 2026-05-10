@@ -352,6 +352,7 @@
     "pty-manager@1.11.0": "patches/pty-manager@1.11.0.patch",
     "coding-agent-adapters@0.16.3": "patches/coding-agent-adapters@0.16.3.patch",
     "llama-cpp-capacitor@0.1.5": "patches/llama-cpp-capacitor@0.1.5.patch",
-    "tsup@8.5.1": "patches/tsup@8.5.1.patch"
+    "tsup@8.5.1": "patches/tsup@8.5.1.patch",
+    "@elizaos/app-core@2.0.0-alpha.537": "patches/@elizaos%2Fapp-core@2.0.0-alpha.537.patch"
   }
 }
