@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import {
   parseAllowedHostEnv,
   toViteAllowedHosts,
-} from "@elizaos/app-core/config/allowed-hosts";
+} from "@elizaos/shared/config/allowed-hosts";
 import { colorizeDevSettingsStartupBanner } from "@elizaos/shared/dev-settings-banner-style";
 import { prependDevSubsystemFigletHeading } from "@elizaos/shared/dev-settings-figlet-heading";
 import {
@@ -82,6 +82,19 @@ const appCoreNativePluginEntrypoints = appCoreSrcRoot
 const emptyNodeModuleEntry = appCoreSrcRoot
   ? path.join(appCoreSrcRoot, "platform/empty-node-module.ts")
   : requireResolve("@elizaos/app-core/platform/empty-node-module");
+// Renderer-side stub for `@elizaos/agent`. The server runtime exports
+// dozens of symbols (75+ named exports across services/account-pool,
+// onboarding, runtime boot, etc.) that get referenced by `app-core`'s
+// own browser-bundled files. Pointing bare `@elizaos/agent` at
+// `empty-node-module` was insufficient because Rollup's named-import
+// resolver couldn't statically find symbols like
+// `ACCOUNT_CREDENTIAL_PROVIDER_IDS`. This stub exports every known name
+// as a noop/empty and adds a Proxy default so any future addition is
+// resolved automatically. Regenerate via:
+//   grep -rh 'from "@elizaos/agent"' eliza/packages/app-core/dist | ...
+const elizaosAgentBrowserStubEntry = appCoreSrcRoot
+  ? path.join(appCoreSrcRoot, "platform/elizaos-agent-browser-stub.ts")
+  : emptyNodeModuleEntry;
 const uiPkgRoot = hasLocalElizaWorkspace
   ? path.join(localElizaRoot, "packages/ui")
   : null;
@@ -354,7 +367,7 @@ function resolveLocalAppCoreAliases(): Alias[] {
   const packageAgnosticAliases: Alias[] = [
     {
       find: /^@elizaos\/agent$/,
-      replacement: emptyNodeModuleEntry,
+      replacement: elizaosAgentBrowserStubEntry,
     },
     {
       find: /^@elizaos\/core$/,
@@ -378,7 +391,21 @@ function resolveLocalAppCoreAliases(): Alias[] {
 
   const generatedAliases: Alias[] = [];
 
+  // Bare `@elizaos/app-core` resolves to `src/browser.ts` which now
+  // re-exports the full `dist/index.js` surface (so milady's `main.tsx`
+  // sees `DesktopOnboardingRuntime`, `AppProvider`, etc.) plus the
+  // hand-written browser shims on top. The server-only re-exports
+  // inside dist (account-pool, onboarding-routes, …) are kept
+  // renderer-safe by aliasing the underlying `@elizaos/agent` and
+  // `@elizaos/plugin-elizacloud` server packages to their browser-side
+  // stubs in `nativeModuleStubPlugin` + the empty-node-module bake-in.
+  generatedAliases.push({
+    find: /^@elizaos\/app-core$/,
+    replacement: appCoreBrowserEntry,
+  });
+
   for (const [key, value] of Object.entries(appCorePkg.exports || {})) {
+    if (key === ".") continue; // handled by the explicit bare alias above
     if (typeof value !== "string") continue;
     const aliasKey =
       key === "."
@@ -1541,6 +1568,23 @@ function nativeModuleStubPlugin(): Plugin {
     name: "native-module-stub",
     enforce: "pre",
     resolveId(id) {
+      // Server-only `@elizaos/agent` is aliased via packageAgnosticAliases
+      // to `elizaos-agent-browser-stub.ts`. The resolve.alias step runs
+      // AFTER `commonjs--resolver` in some rollup paths, which causes
+      // dist-side static-named-import scans to fail before the alias
+      // fires. Intercept it here with enforce:"pre" so Rollup gets the
+      // stub from the start.
+      if (id === "@elizaos/agent") {
+        return elizaosAgentBrowserStubEntry;
+      }
+      // Plugin-elizacloud is server-only (cloud secrets, TTS routing).
+      // The renderer reaches it transitively through `dist/api/onboarding-routes.js`
+      // re-exports; stub the entire surface so static named-import scans pass.
+      if (id === "@elizaos/plugin-elizacloud") {
+        return appCoreSrcRoot
+          ? path.join(appCoreSrcRoot, "platform/elizaos-plugin-elizacloud-browser-stub.ts")
+          : elizaosAgentBrowserStubEntry;
+      }
       // Intercept ALL node: builtins before Vite externalizes them.
       // The @elizaos/core node entry uses many Node APIs (crypto, fs, module,
       // etc.) at the top level.  Rather than stubbing each one individually,
@@ -1608,15 +1652,21 @@ function nativeModuleStubPlugin(): Plugin {
       return generateNativeModuleStub(strippedId, capacitorNativeScopeRe);
     },
     // Patch @elizaos/core browser entry at transform time to add missing
-    // exports and fix browser-incompatible patterns.
+    // exports and fix browser-incompatible patterns. Local-mode builds
+    // hit `src/index.browser.ts` (TS source) directly — packages mode
+    // hit the published dist `.js`. Cover both.
     transform(code, id) {
-      const isCoreDistFile =
-        id.endsWith("index.browser.js") || id.endsWith("index.node.js");
+      const isCoreBrowserOrNodeFile =
+        id.endsWith("index.browser.js") ||
+        id.endsWith("index.node.js") ||
+        id.endsWith("index.browser.ts") ||
+        id.endsWith("index.node.ts");
       const normId = id.split(path.sep).join("/");
       const isCorePackagePath =
         normId.includes("/node_modules/@elizaos/core/") ||
-        normId.includes("packages/core/dist/");
-      if (!isCoreDistFile || !isCorePackagePath) return null;
+        normId.includes("packages/core/dist/") ||
+        normId.includes("packages/core/src/");
+      if (!isCoreBrowserOrNodeFile || !isCorePackagePath) return null;
 
       // Fix AsyncLocalStorage: the browser entry has a try/catch that does
       //   let {AsyncLocalStorage:$} = (() => {throw new Error(...)})()
@@ -1637,6 +1687,41 @@ function nativeModuleStubPlugin(): Plugin {
         AgentEventService: "function(){}",
         AutonomyService: "function(){}",
         createBasicCapabilitiesPlugin: "function(){return{name:'stub'}}",
+        // Additions for local-mode `index.browser.ts` — these live in
+        // node-only modules (cloud-routing, runtime, etc.) so the
+        // browser entry omits them. The renderer never invokes them,
+        // but app-core's dist re-exports reach them statically.
+        toRuntimeSettings: "function(){return{}}",
+        AgentRuntime: "function(){}",
+        AppRoutePluginLoader: "function(){}",
+        AppRoutePluginRegistryEntry: "function(){}",
+        ActionEventPayload: "function(){}",
+        buildStoreVariantBlockedMessage: "function(){return ''}",
+        BUILD_VARIANTS: "[]",
+        ChannelType: "{}",
+        classifySensitiveRequestSource: "function(){return 'unknown'}",
+        createCharacter: "function(){return{}}",
+        createMessageMemory: "function(){return{}}",
+        createUniqueUuid: "function(){return ''}",
+        DEFAULT_BUILD_VARIANT: "''",
+        defaultSensitiveRequestPolicy: "{}",
+        elizaLogger: "{info:function(){},warn:function(){},error:function(){},debug:function(){}}",
+        EventPayload: "function(){}",
+        EventType: "{}",
+        GenerateTextParams: "function(){}",
+        getBuildVariant: "function(){return ''}",
+        getDirectDownloadUrl: "function(){return null}",
+        IAgentRuntime: "function(){}",
+        isDirectBuild: "function(){return false}",
+        isLocalCodeExecutionAllowed: "function(){return false}",
+        isStoreBuild: "function(){return false}",
+        lifeOpsPassiveConnectorsEnabled: "function(){return false}",
+        listAppRoutePluginLoaders: "function(){return []}",
+        ModelType: "{TEXT_SMALL:'TEXT_SMALL',TEXT_LARGE:'TEXT_LARGE',TEXT_EMBEDDING:'TEXT_EMBEDDING'}",
+        ModelTypeName: "function(){}",
+        PluginManagerService: "function(){}",
+        redactSensitiveRequestMetadata: "function(x){return x}",
+        registerAppCoreRuntimeHooks: "function(){}",
       };
       // Check which are actually missing from the existing export block
       const needed = Object.keys(missingExports).filter((n) => {
@@ -2103,6 +2188,10 @@ export default defineConfig({
         if (/^@napi-rs\/keyring(-.+)?$/.test(id)) return true;
         if (/^@node-llama-cpp\//.test(id)) return true;
         if (/^@napi-rs\/keyring/.test(id)) return true;
+        // @node-rs/argon2 is server-only (Node N-API + WASM fallback). The
+        // renderer never touches password hashing directly — that flow runs
+        // server-side in @elizaos/app-core's api/auth/passwords route.
+        if (/^@node-rs\/argon2/.test(id)) return true;
         return false;
       },
       input: {
