@@ -744,36 +744,17 @@ function setupPlatformStyles(): void {
   );
   root.style.setProperty("--keyboard-height", "0px");
 
-  // Apply the inset to the React mount on native.
-  // @elizaos/app-core/styles/styles.css ships only the desktop variant
-  // (body.desktop { padding-top: env(safe-area-inset-top, 0px) }). On
-  // Capacitor Android/iOS the WebView renders behind the system status
-  // bar after StatusBar.setOverlaysWebView({overlay:true}), so without
-  // matching padding on #root the top toolbar buttons (sidebar toggle,
-  // mini-chats, notifications) render under the status bar and become
-  // unreachable. Set the padding directly on #root so the fix is
-  // self-contained in this entry and doesn't wait on an upstream
-  // @elizaos/app-core stylesheet ship.
-  //
-  // Android-specific: emulators (Cuttlefish, Android Studio AVD) and
-  // notch-less hardware report `env(safe-area-inset-top)` as `0px`
-  // because the WebView's viewport-fit calculation has nothing to
-  // exclude — but the system status bar (clock + signal + battery) IS
-  // still drawn on top, by the framework, at a fixed 24dp. Without a
-  // floor on the top inset the Android time/battery overlay covers the
-  // top toolbar's sidebar / chats / notifications icons. Use
-  // `max(env(...), 24px)` so real notched devices keep their bigger
-  // notch inset and emulators get the standard status-bar height.
+  // Sizing on native: pin the React mount to the full visual viewport
+  // so the chat composer + keyboard-resize interaction stays clamped.
+  // We deliberately do NOT set `paddingTop / paddingLeft / paddingRight`
+  // here — the @elizaos/ui shell components (StartupShell, RuntimeGate,
+  // Header, page-layout-mobile-drawer, dialog, drawer-sheet) all apply
+  // their own `var(--safe-area-*)` padding from the CSS variables set
+  // a few lines above. Adding a second layer on `#root` doubles the
+  // top inset and leaves a visible black band below the status bar.
   if (isNative) {
     const reactRoot = document.getElementById("root");
     if (reactRoot) {
-      const topInset = isAndroid
-        ? "max(env(safe-area-inset-top, 0px), 24px)"
-        : "env(safe-area-inset-top, 0px)";
-      reactRoot.style.paddingTop = topInset;
-      reactRoot.style.paddingBottom = "env(safe-area-inset-bottom, 0px)";
-      reactRoot.style.paddingLeft = "env(safe-area-inset-left, 0px)";
-      reactRoot.style.paddingRight = "env(safe-area-inset-right, 0px)";
       reactRoot.style.boxSizing = "border-box";
       reactRoot.style.minHeight = "100dvh";
       reactRoot.style.maxHeight = "100dvh";
