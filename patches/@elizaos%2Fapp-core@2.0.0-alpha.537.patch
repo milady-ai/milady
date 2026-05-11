@@ -46,6 +46,63 @@ diff --git a/packages/app-core/src/components/shell/RuntimeGate.js b/packages/ap
              savePersistedActiveServer({
                  id: "local:android",
                  kind: "remote",
+@@ -358,9 +358,56 @@
+                 apiBase: LOCAL_AGENT_API_BASE,
+             });
+             addAgentProfile({
+                 kind: "remote",
+                 label: "On-device agent",
+                 apiBase: LOCAL_AGENT_API_BASE,
+             });
++            // alpha.537 set the runtime-mode pref + active-server but
++            // never dispatched the platform-side `Agent.start()` call, so
++            // the foreground service never spawned the bun runtime and the
++            // WebView sat at "Initializing agent…" until Backend Timeout.
++            // Develop fixed this in `startMobileLocalAgent`
++            // (eliza/packages/ui/src/components/shell/RuntimeGate.tsx).
++            // Mirror it inline here until the next published alpha lands.
++            //
++            // Bearer-token race: the per-boot bearer is generated inside
++            // `ElizaAgentService.startAgentProcess()`, which runs on a
++            // background thread *after* the `Agent.start()` Intent is
++            // dispatched. The initial `client.setToken(...)` above
++            // therefore sees `ElizaNative.getLocalAgentToken() === null`
++            // and `/api/status` polling fails with HTTP 401 until we
++            // re-fetch. Poll the bridge for up to 30 s and apply the
++            // bearer the moment the service writes it.
++            // (Local milady patch — pairs with the upstream fix.)
++            (function () {
++                try {
++                    const __cap = (typeof globalThis !== "undefined"
++                        ? globalThis
++                        : window).Capacitor;
++                    const __agent = __cap && __cap.Plugins && __cap.Plugins.Agent;
++                    if (__agent && typeof __agent.start === "function") {
++                        const __p = __agent.start();
++                        if (__p && typeof __p.catch === "function") {
++                            __p.catch(function () { /* swallow */ });
++                        }
++                    }
++                    const __bridge = (typeof globalThis !== "undefined"
++                        ? globalThis
++                        : {}).ElizaNative;
++                    if (__bridge && typeof __bridge.getLocalAgentToken === "function") {
++                        let __tries = 0;
++                        const __iv = setInterval(function () {
++                            if (++__tries > 120) { clearInterval(__iv); return; }
++                            try {
++                                const __t = __bridge.getLocalAgentToken();
++                                if (typeof __t === "string" && __t.trim()) {
++                                    client.setToken(__t.trim());
++                                    clearInterval(__iv);
++                                }
++                            } catch (e) { /* swallow */ }
++                        }, 250);
++                    }
++                } catch (e) { /* swallow */ }
++            })();
+         }
+         else {
 diff --git a/packages/app-core/src/components/shell/StartupShell.js b/packages/app-core/src/components/shell/StartupShell.js
 --- a/packages/app-core/src/components/shell/StartupShell.js
 +++ b/packages/app-core/src/components/shell/StartupShell.js
@@ -102,3 +159,26 @@ diff --git a/packages/app-core/src/state/startup-phase-restore.js b/packages/app
  }
  function activeServerToTarget(kind) {
      switch (kind) {
+diff --git a/packages/app-core/src/components/pages/ChatView.js b/packages/app-core/src/components/pages/ChatView.js
+--- a/packages/app-core/src/components/pages/ChatView.js
++++ b/packages/app-core/src/components/pages/ChatView.js
+@@ -116,7 +116,18 @@
+     // The agent is up but has no inference model wired — no point letting the
+     // user hit send. Surfaced as a composer lock + a pointer to Settings.
+     const agentModel = typeof agentStatus?.model === "string" ? agentStatus.model.trim() : "";
+-    const isMissingInferenceProvider = agentStatus?.state === "running" && agentModel.length === 0;
++    // On mobile local runtime, `/api/status` does not report a `model` field
++    // until the user picks a GGUF in Settings → Model Settings. Locking the
++    // composer in that window forces a chicken-and-egg: user can't ask
++    // "what's a good model" because the input is disabled. Develop fixed
++    // this in eliza/packages/ui/src/components/pages/ChatView.tsx by
++    // gating on the persisted mobile-runtime-mode. Mirror that here.
++    // (Local milady patch — pairs with the upstream fix.)
++    const __isMobileLocalRuntime = (typeof window !== "undefined" &&
++        window.localStorage &&
++        window.localStorage.getItem("eliza:mobile-runtime-mode")) === "local";
++    const isMissingInferenceProvider = agentStatus?.state === "running" && agentModel.length === 0 &&
++        !__isMobileLocalRuntime;
+     const isComposerLocked = (isAgentStarting && !hasCompletedLifecycleActivity) ||
+         isMissingInferenceProvider;
+     const composerPlaceholderOverride = isMissingInferenceProvider
