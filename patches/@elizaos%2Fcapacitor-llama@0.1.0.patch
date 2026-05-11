@@ -1,8 +1,8 @@
 diff --git a/dist/esm/capacitor-llama-adapter.js b/dist/esm/capacitor-llama-adapter.js
-index f29886ff9f9e12c52752fb0084fc9214973c1213..b0bc1e87e47fc342b0ea8293bbba1b7a3b87f934 100644
+index f29886ff9f9e12c52752fb0084fc9214973c1213..19c1c5fb342a2d15c34a00ed4df53211d764d7dd 100644
 --- a/dist/esm/capacitor-llama-adapter.js
 +++ b/dist/esm/capacitor-llama-adapter.js
-@@ -38,6 +38,47 @@ function detectPlatform() {
+@@ -38,6 +38,50 @@ function detectPlatform() {
          return "android";
      return "web";
  }
@@ -44,13 +44,16 @@ index f29886ff9f9e12c52752fb0084fc9214973c1213..b0bc1e87e47fc342b0ea8293bbba1b7a
 +        getNativeKernels: typeof plugin.getNativeKernels === "function"
 +            ? () => plugin.getNativeKernels()
 +            : undefined,
++        getFormattedChat: typeof plugin.getFormattedChat === "function"
++            ? (options) => plugin.getFormattedChat(options)
++            : undefined,
 +        addListener: (event, listener) => plugin.addListener(event, listener),
 +    };
 +}
  class CapacitorLlamaAdapter {
      constructor() {
          this.plugin = null;
-@@ -54,10 +95,11 @@ class CapacitorLlamaAdapter {
+@@ -54,10 +98,11 @@ class CapacitorLlamaAdapter {
          if (this.pluginLoadPromise)
              return this.pluginLoadPromise;
          this.pluginLoadPromise = (async () => {
@@ -64,3 +67,91 @@ index f29886ff9f9e12c52752fb0084fc9214973c1213..b0bc1e87e47fc342b0ea8293bbba1b7a
              const tokenListenerHandle = await plugin.addListener("@LlamaCpp_onToken", (data) => {
                  var _a, _b;
                  const token = (_b = (_a = data.tokenResult) === null || _a === void 0 ? void 0 : _a.token) !== null && _b !== void 0 ? _b : data.token;
+@@ -180,6 +225,33 @@ class CapacitorLlamaAdapter {
+             return;
+         await this.plugin.stopCompletion({ contextId: CONTEXT_ID });
+     }
++    // Shaw's native plugin runs the model's Jinja chat template via
++    // `getFormattedChat`; older plugin builds lack the method, so this
++    // returns null on absence and the caller falls back to a JS template.
++    async formatChat(messages) {
++        var _a;
++        if (!this.plugin || !this.loadedPath)
++            return null;
++        if (typeof this.plugin.getFormattedChat !== "function")
++            return null;
++        try {
++            const result = await this.plugin.getFormattedChat({
++                contextId: CONTEXT_ID,
++                messages: JSON.stringify(messages),
++                params: { jinja: true, add_generation_prompt: true },
++            });
++            if (typeof result === "string")
++                return result.length > 0 ? result : null;
++            const prompt = (_a = result === null || result === void 0 ? void 0 : result.prompt) !== null && _a !== void 0 ? _a : null;
++            return typeof prompt === "string" && prompt.length > 0 ? prompt : null;
++        }
++        catch (err) {
++            console.debug("[capacitor-llama] getFormattedChat failed", {
++                error: err instanceof Error ? err.message : String(err),
++            });
++            return null;
++        }
++    }
+     async embed(options) {
+         var _a;
+         if (!this.plugin || !this.loadedPath) {
+diff --git a/dist/esm/definitions.d.ts b/dist/esm/definitions.d.ts
+index ccdd4b84655f01d167bd3652644cb817d0109f43..3804006763ebc99e665d3e6c63bbb11c5f276c66 100644
+--- a/dist/esm/definitions.d.ts
++++ b/dist/esm/definitions.d.ts
+@@ -89,4 +89,13 @@ export interface LlamaAdapter {
+      * does not expose an embedding method on the active platform.
+      */
+     embed(options: EmbedOptions): Promise<EmbedResult>;
++    /**
++     * Render `messages` through the loaded model's own Jinja chat template
++     * via the native llama.cpp bridge. Returns null when no model is
++     * loaded or the native plugin build doesn't expose the method.
++     */
++    formatChat?(messages: Array<{
++        role: string;
++        content: string;
++    }>): Promise<string | null>;
+ }
+diff --git a/dist/esm/device-bridge-client.js b/dist/esm/device-bridge-client.js
+index e6c585bbe85c951414e98899730bd74ddb712b30..469dfdbbee8106463dc4cc6dcf1e63cd1c7401ee 100644
+--- a/dist/esm/device-bridge-client.js
++++ b/dist/esm/device-bridge-client.js
+@@ -204,6 +204,31 @@ export class DeviceBridgeClient {
+             }
+             return;
+         }
++        if (msg.type === "formatChat") {
++            try {
++                const capacitorLlama = await loadCapacitorLlama();
++                // null propagates back when the native plugin lacks
++                // getFormattedChat so the agent falls back to its JS template.
++                const prompt = typeof capacitorLlama.formatChat === "function"
++                    ? await capacitorLlama.formatChat(msg.messages)
++                    : null;
++                this.send(ws, {
++                    type: "formatChatResult",
++                    correlationId: msg.correlationId,
++                    ok: true,
++                    prompt,
++                });
++            }
++            catch (err) {
++                this.send(ws, {
++                    type: "formatChatResult",
++                    correlationId: msg.correlationId,
++                    ok: false,
++                    error: err instanceof Error ? err.message : String(err),
++                });
++            }
++            return;
++        }
+     }
+ }
+ /**
