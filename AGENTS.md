@@ -168,7 +168,7 @@ Port env vars (never hardcoded — the dev orchestrator auto-shifts to the next 
 - Trajectory persistence is on by default. Every turn lands in the `trajectories` table unless `ELIZA_DISABLE_TRAJECTORY_LOGGING=1`.
 - Native optimization (`--backend native`) is the default training backend (MIPRO / GEPA / bootstrap-fewshot). Outputs land under `~/.milady/optimized-prompts/<task>/` and `OptimizedPromptService` auto-loads at boot.
 - Auto-training defaults: 100 trajectories per task, 12h cooldown. Adjust via `/api/training/auto/config` or Settings → Auto-Training.
-- The privacy filter at `eliza/apps/app-training/src/core/privacy-filter.ts` is mandatory on every write path that touches real user trajectories — both the nightly export cron and the on-demand training orchestrator run it before any JSONL is written.
+- The privacy filter at `eliza/plugins/app-training/src/core/privacy-filter.ts` is mandatory on every write path that touches real user trajectories — both the nightly export cron and the on-demand training orchestrator run it before any JSONL is written.
 
 ## App and plugin primitives
 

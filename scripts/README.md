@@ -14,6 +14,6 @@ loads the new artifact at next runtime boot; the action planner
 prompt is automatically substituted.
 
 The dataset is written to
-`eliza/apps/app-training/datasets/action_planner_from_benchmark.jsonl`
+`eliza/plugins/app-training/datasets/action_planner_from_benchmark.jsonl`
 (plus a sibling `.meta.json`), and artifacts land under
 `~/.milady/optimized-prompts/action_planner/`.

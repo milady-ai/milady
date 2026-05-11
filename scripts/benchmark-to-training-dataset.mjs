@@ -6,7 +6,7 @@
  * JSONL dataset that the native training backend accepts.
  *
  * Output shape (one per line — matches `GeminiTuningExample` expected by
- * eliza/apps/app-training/src/backends/native.ts `parseJsonlDataset`):
+ * eliza/plugins/app-training/src/backends/native.ts `parseJsonlDataset`):
  *   {
  *     "messages": [
  *       { "role": "system", "content": "<optional> " },
