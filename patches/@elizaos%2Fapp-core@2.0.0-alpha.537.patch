@@ -182,3 +182,38 @@ diff --git a/packages/app-core/src/components/pages/ChatView.js b/packages/app-c
      const isComposerLocked = (isAgentStarting && !hasCompletedLifecycleActivity) ||
          isMissingInferenceProvider;
      const composerPlaceholderOverride = isMissingInferenceProvider
+diff --git a/packages/app-core/src/state/useStartupCoordinator.js b/packages/app-core/src/state/useStartupCoordinator.js
+--- a/packages/app-core/src/state/useStartupCoordinator.js
++++ b/packages/app-core/src/state/useStartupCoordinator.js
+@@ -15,22 +15,30 @@
+  */
+ import { useCallback, useEffect, useReducer, useRef } from "react";
+ import { isElectrobunRuntime } from "../bridge";
+ import { isElizaOS, isNative } from "../platform";
+ import { loadPersistedOnboardingComplete } from "./persistence";
+ import { createDesktopPolicy, createElizaOSPolicy, createMobilePolicy, createWebPolicy, INITIAL_STARTUP_STATE, isStartupLoading, isStartupTerminal, startupReducer, toLegacyStartupPhase, } from "./startup-coordinator";
++import { readPersistedMobileRuntimeMode } from "../onboarding/mobile-runtime-mode";
+ import { bindReadyPhase, runHydrating, } from "./startup-phase-hydrate";
+ import { runPollingBackend, } from "./startup-phase-poll";
+ import { runRestoringSession, } from "./startup-phase-restore";
+ import { runStartingRuntime, } from "./startup-phase-runtime";
+ function detectPlatformPolicy() {
+     if (isElectrobunRuntime())
+         return createDesktopPolicy();
+     // ElizaOS check must come before the generic mobile branch — both are
+     // native, but ElizaOS bundles the on-device agent and needs the longer
+     // backend timeout (vanilla mobile is cloud-only with a fast-fail budget).
+-    if (isElizaOS())
++    // Stock Capacitor Android with `mobile-runtime-mode = local` also runs
++    // the bun agent on-device — first-boot has to load ~836 MB of bundled
++    // GGUFs before `/api/auth/status` binds, easily exceeding the vanilla
++    // mobile 15 s `backendTimeoutMs`. Without the elizaOS-style 180 s
++    // budget here the splash dead-ends on "Backend Timeout" before the
++    // agent finishes booting on a real-phone first run.
++    // (Local milady patch — pairs with the upstream fix.)
++    if (isElizaOS() || readPersistedMobileRuntimeMode() === "local")
+         return createElizaOSPolicy();
+     if (isNative)
+         return createMobilePolicy();
+     return createWebPolicy();
+ }
