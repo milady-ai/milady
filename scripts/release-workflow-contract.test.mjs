@@ -6,8 +6,18 @@ import path from "node:path";
 import { test } from "vitest";
 
 const workflow = (name) => fs.readFileSync(`.github/workflows/${name}`, "utf8");
-const localElectrobunStagerPath =
-  "eliza/packages/app-core/platforms/electrobun/scripts/stage-macos-release-artifacts.sh";
+const releasePatchTestRequiredPaths = [
+  "eliza/packages/app-core/platforms/electrobun/scripts/stage-macos-release-artifacts.sh",
+  "eliza/packages/app-core/platforms/electrobun/src/startup-trace.ts",
+  "eliza/packages/app-core/platforms/electrobun/scripts/smoke-test-windows.ps1",
+  "eliza/packages/app-core/platforms/electrobun/src/native/steward.ts",
+  "eliza/packages/agent/src/services/telegram-account-auth.ts",
+  "eliza/packages/app-core/test/helpers/real-runtime.ts",
+  "eliza/packages/app-core/platforms/electrobun/scripts/local-adhoc-sign-macos.ts",
+];
+const releasePatchTestPrereqsPresent = releasePatchTestRequiredPaths.every(
+  (p) => fs.existsSync(p),
+);
 
 test("canonical release workflow owns channel routing", () => {
   const release = workflow("agent-release.yml");
@@ -210,7 +220,7 @@ test("release workflows hydrate eliza Bun after ignored nested install", () => {
     const text = workflow(name);
     assert.match(
       text,
-      /name: Install eliza source dependencies[\s\S]*?bun install --cwd eliza --no-frozen-lockfile --ignore-scripts[\s\S]*?name: Hydrate eliza Bun package postinstall[\s\S]*?run: cd eliza\/node_modules\/bun && node install\.js/,
+      /name: Install eliza source dependencies[\s\S]*?bun install --cwd eliza --no-frozen-lockfile --ignore-scripts[\s\S]*?name: Hydrate eliza Bun package postinstall[\s\S]*?cd eliza\/node_modules\/bun && node install\.js/,
     );
   }
 });
@@ -556,7 +566,7 @@ test("Electrobun macOS release patch signs nested native runtime binaries idempo
   assert.match(patchScript, /text\.includes\('for tarball_pattern in/);
 });
 
-test.skipIf(!fs.existsSync(localElectrobunStagerPath))(
+test.skipIf(!releasePatchTestPrereqsPresent)(
   "Electrobun macOS release patch tolerates CRLF stager checkout",
   () => {
     const tmpRepo = fs.mkdtempSync(

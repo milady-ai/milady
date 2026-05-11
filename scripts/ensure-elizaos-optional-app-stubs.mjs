@@ -136,6 +136,23 @@ function ensureStubPackage(packageName) {
   }
 
   fs.mkdirSync(dir, { recursive: true });
+  // The `"./*": "./stub.js"` wildcard would be invalid per the Node.js
+  // subpath-patterns spec (the value must also contain `*`), and
+  // Vite/rolldown enforces the spec strictly and rejects deep imports like
+  // `/register` if they are not declared explicitly. List every subpath the
+  // host app actually imports (the union of subpaths used in apps/app/src
+  // for the stubbable @elizaos/app-* packages).
+  const exports = {
+    ".": "./stub.js",
+    "./package.json": "./package.json",
+    "./client": "./stub.js",
+    "./components": "./stub.js",
+    "./platform": "./stub.js",
+    "./register": "./stub.js",
+    "./register-slots": "./stub.js",
+    "./ui": "./stub.js",
+    "./widgets": "./stub.js",
+  };
   fs.writeFileSync(
     packageJsonPath,
     `${JSON.stringify(
@@ -144,11 +161,7 @@ function ensureStubPackage(packageName) {
         version: "0.0.0-milady-stub",
         type: "module",
         private: true,
-        exports: {
-          ".": "./stub.js",
-          "./*": "./stub.js",
-          "./package.json": "./package.json",
-        },
+        exports,
       },
       null,
       2,

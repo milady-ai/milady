@@ -63,6 +63,22 @@ export const ELIZA_BUILD_STEPS = [
     label: "@elizaos/shared",
   },
   {
+    // @elizaos/prompts ships a node script package. Older versions exposed a
+    // `build:typescript` target that emitted dist/typescript/index.ts; the
+    // current source uses a single `build` script that regenerates the
+    // plugin-action spec + action docs. Detect the actual build outputs.
+    check: path.join(
+      "packages",
+      "prompts",
+      "specs",
+      "actions",
+      "plugins.generated.json",
+    ),
+    cwd: path.join("packages", "prompts"),
+    args: ["run", "build"],
+    label: "@elizaos/prompts",
+  },
+  {
     check: path.join("packages", "skills", "dist", "index.js"),
     cwd: path.join("packages", "skills"),
     args: ["run", "build"],

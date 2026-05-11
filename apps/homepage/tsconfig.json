@@ -24,30 +24,28 @@
       "../../node_modules",
       "../../node_modules/.bun/node_modules"
     ],
-    "baseUrl": "../..",
     "paths": {
-      "@elizaos/app-core": ["./node_modules/@elizaos/app-core"],
-      "@elizaos/app-core/*": ["./node_modules/@elizaos/app-core/*"],
-      "@elizaos/agent": ["./node_modules/@elizaos/agent"],
-      "@elizaos/agent/*": ["./node_modules/@elizaos/agent/*"],
+      "@elizaos/app-core": ["../../node_modules/@elizaos/app-core"],
+      "@elizaos/app-core/*": ["../../node_modules/@elizaos/app-core/*"],
+      "@elizaos/agent": ["../../node_modules/@elizaos/agent"],
+      "@elizaos/agent/*": ["../../node_modules/@elizaos/agent/*"],
       "@elizaos/plugin-browser-bridge": [
-        "./node_modules/@elizaos/plugin-browser-bridge"
+        "../../node_modules/@elizaos/plugin-browser-bridge"
       ],
       "@elizaos/plugin-browser-bridge/*": [
-        "./node_modules/@elizaos/plugin-browser-bridge/*"
+        "../../node_modules/@elizaos/plugin-browser-bridge/*"
       ],
-      "@elizaos/core": ["./node_modules/@elizaos/core"],
-      "@elizaos/core/*": ["./node_modules/@elizaos/core/*"],
-      "@elizaos/shared": ["./node_modules/@elizaos/shared"],
-      "@elizaos/shared/*": ["./node_modules/@elizaos/shared/*"],
-      "@elizaos/*": ["./node_modules/@elizaos/*"]
+      "@elizaos/core": ["../../node_modules/@elizaos/core"],
+      "@elizaos/core/*": ["../../node_modules/@elizaos/core/*"],
+      "@elizaos/shared": ["../../node_modules/@elizaos/shared"],
+      "@elizaos/shared/*": ["../../node_modules/@elizaos/shared/*"],
+      "@elizaos/*": ["../../node_modules/@elizaos/*"]
     },
     "strict": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
-    "forceConsistentCasingInFileNames": true,
-    "ignoreDeprecations": "6.0"
+    "forceConsistentCasingInFileNames": true
   },
   "include": [
     "src/**/*.ts",

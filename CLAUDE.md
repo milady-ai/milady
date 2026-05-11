@@ -184,7 +184,7 @@ Milady builds against published `@elizaos/*` packages by default (`alpha` dist-t
 Two source modes, switched by `bun run eliza:local` / `bun run eliza:packages` (full docs in [README — elizaOS source modes](README.md#elizaos-source-modes-eject--uneject)):
 
 - **`packages` (default):** `MILADY_ELIZA_SOURCE=packages`. Runtime resolves `@elizaos/*` from npm. Checked-in `tsconfig.json` matches [scripts/templates/tsconfig.packages-mode.json](scripts/templates/tsconfig.packages-mode.json). Enforced by [scripts/standalone-eliza-package-contract.test.ts](scripts/standalone-eliza-package-contract.test.ts).
-- **`local`:** `MILADY_ELIZA_SOURCE=local`. `bun run eliza:local` clones `eliza/` (default URL `https://github.com/milady-ai/eliza.git`), links workspace packages into `node_modules/@elizaos/*`, and swaps the root tsconfig to source-priority paths from [scripts/templates/tsconfig.local-mode.json](scripts/templates/tsconfig.local-mode.json). Use this when patching elizaOS upstream alongside Milady.
+- **`local`:** `MILADY_ELIZA_SOURCE=local`. `bun run eliza:local` clones `eliza/` (default URL `https://github.com/elizaOS/eliza.git`), links workspace packages into `node_modules/@elizaos/*`, and swaps the root tsconfig to source-priority paths from [scripts/templates/tsconfig.local-mode.json](scripts/templates/tsconfig.local-mode.json). Use this when patching elizaOS upstream alongside Milady.
 
 `MILADY_SKIP_LOCAL_UPSTREAMS=1` is the legacy equivalent of `MILADY_ELIZA_SOURCE=packages` — still respected for back-compat. Other knobs: `MILADY_ELIZAOS_DIST_TAG`, `MILADY_ELIZAOS_VERSION`, `MILADY_ELIZA_GIT_URL`, `MILADY_ELIZA_BRANCH` (see [scripts/lib/eliza-package-mode.mjs](scripts/lib/eliza-package-mode.mjs)).
 
@@ -243,8 +243,10 @@ These rules govern all changes. If existing code conflicts with them, fix the co
 4. **BFF is auth + proxy. Nothing else.** Validate JWT, inject `userId`, forward request, `unwrapServerResponse()`. No field additions, no calculations, no transformations.
    - Violation: shadow API contract divergence.
 
-5. **Zero polymorphism for runtime game/content type branching.** Separate classes, methods, and routes per type. No `if (gameType === ...)`, no union parameters, no union return types where separate flows should exist.
-   - Violation: runtime type checks, hidden branches.
+5. **Zero polymorphism for runtime game/content type branching — in code, not in agent surfaces.** Separate classes, methods, and routes per type. No `if (gameType === ...)`, no union parameters, no union return types where separate flows should exist.
+   - **Scope:** This is a code-pattern rule about TypeScript/runtime classes, methods, and HTTP routes. It does **not** apply to elizaOS agent surfaces — Action / Provider / Evaluator / Service definitions, planner-visible action shapes, contextual Evaluators, or any LLM-facing JSON. Those are intentionally polymorphic by design — one `BROWSER` action that dispatches across registered targets is correct; one `BROWSER_NAVIGATE` + `BROWSER_CLICK` + … action per subaction is the antipattern. Same for Providers that gather from multiple sources, Evaluators that branch on context, and Services with target/adapter registries.
+   - Violation (code): runtime type checks, hidden branches in classes/methods/routes.
+   - Not a violation: an Action with a `subaction` / `target` parameter, a Provider that aggregates across registered sources, a Service that routes a command to a registered adapter.
 
 6. **CQRS: readers read, writers write.** Separate classes. Readers return domain objects. Writers return `void` or ID only. Mappers handle all DB-to-domain translation.
    - Violation: mixed concerns, untraceable mutations.

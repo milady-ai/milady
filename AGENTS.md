@@ -247,12 +247,11 @@ These govern every change. If existing code conflicts, fix the code.
 1. **Dependencies point inward only.** Presentation → Application → Domain → Infrastructure. Never import from an outer layer.
 2. **Computation lives in domain code, not presentation.** Derived values are computed in services / actions / use cases and returned as named fields. Clients format DTO fields for display; they do not aggregate, compute, or branch on raw data.
 3. **API routes are auth + dispatch.** Route handlers validate input, resolve the caller, and dispatch to a service / action. No business logic, no transformations, no calculations in route bodies.
-4. **No runtime type-tag branching where separate flows belong.** Distinct content kinds (apps, plugins, providers, actions) get separate handlers, not `if (kind === ...)` chains.
-5. **CQRS.** Readers read and return domain objects. Writers return `void` or an ID. Mappers handle DB↔domain translation.
-6. **Single source of truth for validation.** Route-layer schemas validate and transform input. Services / actions trust pre-validated input and perform presence/invariant checks only. No duplicate inline regex.
-7. **DTO fields are required by default.** Optional only when genuinely nullable. No `as` casts to skip missing fields. No `?? 0` to hide broken pipelines. If TypeScript says a field is missing, fix the pipeline.
-8. **Logger only, never console.** Server logging uses the structured logger only (`Logger.info/warn/error/debug`). Prefix `[ClassName]`. Include structured context on errors.
-9. **Every action and endpoint needs a real caller.** Every POST/PUT/DELETE has a UI invocation path. Every GET has a consuming component/hook. Every action has a planner trigger or programmatic caller. Anything else is dead code.
+4. **CQRS.** Readers read and return domain objects. Writers return `void` or an ID. Mappers handle DB↔domain translation.
+5. **Single source of truth for validation.** Route-layer schemas validate and transform input. Services / actions trust pre-validated input and perform presence/invariant checks only. No duplicate inline regex.
+6. **DTO fields are required by default.** Optional only when genuinely nullable. No `as` casts to skip missing fields. No `?? 0` to hide broken pipelines. If TypeScript says a field is missing, fix the pipeline.
+7. **Logger only, never console.** Server logging uses the structured logger only (`Logger.info/warn/error/debug`). Prefix `[ClassName]`. Include structured context on errors.
+8. **Every action and endpoint needs a real caller.** Every POST/PUT/DELETE has a UI invocation path. Every GET has a consuming component/hook. Every action has a planner trigger or programmatic caller. Anything else is dead code.
 
 ## Quality bar
 

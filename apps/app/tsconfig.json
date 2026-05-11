@@ -115,6 +115,12 @@
       ],
       "@elizaos/app-training": ["./apps/app/src/optional-eliza-app-stub.tsx"],
       "@elizaos/app-training/*": ["./apps/app/src/optional-eliza-app-stub.tsx"],
+      "@elizaos/app-trajectory-logger": [
+        "./apps/app/src/optional-eliza-app-stub.tsx"
+      ],
+      "@elizaos/app-trajectory-logger/*": [
+        "./apps/app/src/optional-eliza-app-stub.tsx"
+      ],
       "@elizaos/app-vincent": ["./apps/app/src/optional-eliza-app-stub.tsx"],
       "@elizaos/app-vincent/*": ["./apps/app/src/optional-eliza-app-stub.tsx"],
       "@elizaos/app-wallet": ["./apps/app/src/optional-eliza-app-stub.tsx"],
