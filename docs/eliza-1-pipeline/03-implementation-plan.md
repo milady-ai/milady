@@ -56,16 +56,17 @@ prefix:
 **Dependencies.** None.
 **Exit.** Doc reviewed, contract diagrams in place. No code yet.
 
-### W0-X2 Delete atropos LARP + Nebius dead code — code agent
-**Scope.** C2, M37.
+### W0-X2 Delete Nebius dead code — code agent
+**Status.** C2 portion closed; see `02-gap-analysis.md#c2` for details.
+Nebius portion (M37) tracked separately.
+**Scope.** M37 (C2 closed).
 **Files.**
-- `CLAUDE.md` — remove `ATROPOS_BIN`, `ATROPOS_DATA_DIR`.
-- `eliza/plugins/app-training/src/backends/` — remove atropos selector entries.
-- Anywhere `Nebius` is referenced.
+- Anywhere `Nebius` is referenced — pending.
 
-**Deliverables.** PR with removals + a follow-up issue if any consumer breaks.
-**Dependencies.** W0-X1 decision to remove atropos.
-**Exit.** `rg -i atropos` returns 0 hits in repo (excluding worktrees/dupes).
+**Deliverables.** PR with Nebius removals + a follow-up issue if any
+consumer breaks.
+**Dependencies.** None remaining.
+**Exit.** Nebius surface compiles or is deleted; gap analysis updated.
 
 ### W0-X3 Promotion registry schema + empty service — code agent
 **Scope.** Scaffolds C3, M2, M20.

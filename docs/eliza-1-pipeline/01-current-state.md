@@ -64,10 +64,6 @@ those files are the source of truth.
   │ • GEPA          │    │  skill scoring) │       │                     │
   │ • bootstrap-fs  │    │                 │       │                     │
   │                 │    │                 │       │                     │
-  │ Atropos backend │    │                 │       │                     │
-  │   ⚠ ZERO refs   │    │                 │       │                     │
-  │   in repo (LARP)│    │                 │       │                     │
-  │                 │    │                 │       │                     │
   │ Tinker backend  │    │                 │       │                     │
   │   ⚠ stub        │    │                 │       │                     │
   │                 │    │                 │       │                     │
@@ -271,9 +267,6 @@ Two distinct things named "privacy" live in the repo:
   - **Native** — real implementations of MIPRO-style instruction-search,
     GEPA-style prompt-evolution, and bootstrap-fewshot. Runs in-process. Dispatches
     JSONL trajectory data, writes JSON artifacts.
-  - **Atropos** — **zero references** in the repo. Documented in `CLAUDE.md` and
-    referenced via `ATROPOS_BIN` / `ATROPOS_DATA_DIR` env vars, but no integration
-    code exists. LARP.
   - **Tinker** — stub. Cloud-API surface only, untested.
 - **Tasks optimized.** Five hard-coded tasks: `should_respond`, `context_routing`,
   `action_planner`, `response`, `media_description`. **Only `action_planner` is
@@ -445,7 +438,6 @@ Coverage matrix:
 | Privacy filter (write-time)            | missing       | Raw PII in DB                                    |
 | Privacy filter (training format step)  | unverified    | No proof it runs on `format_for_training.py`     |
 | Prompt optim — native (MIPRO/GEPA/BS)  | working       | Real implementations                             |
-| Prompt optim — atropos                 | LARP          | 0 references in code                             |
 | Prompt optim — tinker                  | stub          | Cloud surface only                               |
 | Prompt optim — runtime injection       | partial       | Only `action_planner` consumed                   |
 | Prompt optim — A/B + promote           | missing       | No gate                                          |
@@ -501,8 +493,6 @@ Coverage matrix:
   on agent reasoning needs structured traces, and today we get stdout only.
 - **No standard LLM benchmarks** means we can't track Eliza-1 progress against
   the public state-of-the-art.
-- **Atropos is documented but does not exist in code.** Either remove the
-  reference or build it.
 - The local-inference UX exists but the **main agent's planner/action model is
   not yet routable to a local model** — only sub-agents are.
 

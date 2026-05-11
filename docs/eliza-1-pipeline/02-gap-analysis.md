@@ -38,16 +38,12 @@ summaries.
 its streaming JSON output and parse. Merge into the parent trajectory as
 `childSteps[]` with full step records, not just IDs.
 
-### C2. `atropos` backend is LARP [stub]
-**Where.** `CLAUDE.md` documents `ATROPOS_BIN` and `ATROPOS_DATA_DIR`; the
-training plugin advertises an "atropos backend"; **zero references** in the
-codebase outside docs.
-**Impact.** Anyone reading docs will believe an RL training path exists. It
-doesn't.
-**Fix.** Either delete the references (and rename "backend selector" to
-imply only `native` + `tinker`) or build a real atropos dispatcher.
-**Recommendation.** Delete unless there's a concrete plan; replace with the
-real verl-based GRPO path that already exists.
+### C2. `atropos` backend is LARP [CLOSED]
+**Status.** Closed by W0-X2. All atropos references removed from `CLAUDE.md`,
+`eliza/plugins/app-training/src/{backends,cli,core}`, `eliza/packages/docs/`,
+and this docs set. `TrainingBackend` is now `"native"` after tinker is
+removed in a follow-up; for the duration of this commit it is
+`"tinker" | "native"`.
 
 ### C3. No automated checkpoint promotion / publish gate [missing]
 **Where.** Nowhere. The pipeline can train, but cannot decide "this is better
@@ -364,7 +360,6 @@ Large action code truncated.
 
 | Item                            | Where                                              | Status                       |
 |---------------------------------|----------------------------------------------------|------------------------------|
-| Atropos backend                 | docs only                                          | LARP — 0 code references     |
 | Tinker backend                  | training plugin backend selector                   | Stub                         |
 | `DECISION:` channel             | sub-agent memory file                              | Compliance-dependent         |
 | Trajectory search               | `TrajectoryListOptions.search`                     | Accepted, ignored            |
@@ -422,7 +417,7 @@ production model?" Each consumer rolls its own model-id detection.
 
 ### Critical (block the loop) — fix first
 - C1 Sub-agent reasoning capture (data quality)
-- C2 Atropos LARP (clarity)
+- C2 Atropos LARP (clarity) — CLOSED
 - C3 No promotion / publish gate (releases stuck)
 - C4 4/5 optimized prompts unused (waste)
 - C5 Main agent local-only model missing (UX)

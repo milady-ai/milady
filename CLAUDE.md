@@ -47,8 +47,6 @@ Runtime knobs that affect training, skills, code execution, and state placement.
 - `MILADY_ENABLE_CHILD_SKILL_CALLBACK` — set to `0` to disable the child→parent `USE_SKILL` bridge for spawned coding agents. Default: enabled.
 - `EXECUTECODE_TIMEOUT_MS` — default script timeout for the `EXECUTE_CODE` action, in ms. Default: 30000.
 - `EXECUTECODE_DISABLE` — set to `true` / `1` to disable the `EXECUTE_CODE` action entirely. Default: enabled.
-- `ATROPOS_DATA_DIR` — staging directory used by the atropos training backend for dataset files.
-- `ATROPOS_BIN` — override path to the atropos binary when dispatching to that backend.
 - `MILADY_APP_VERIFICATION_MAX_RETRIES` — max retry rounds when `APP create` / `PLUGIN create` verification fails. The parent re-prompts the sub-agent with a structured failure report each round; after the cap the failure is surfaced to the user verbatim. Default `3`.
 - `MILADY_APP_VERIFICATION_DEFAULT_PROFILE` — `fast` (typecheck + lint, ~10s) or `full` (all checks including launch + headless browser smoke test, ~30–90s). Default `full` for create flows, `fast` for relaunch.
 - `MILADY_PROTECTED_APPS` — comma-separated app names that cannot be overridden via `APP load_from_directory`. Apps shipped under `eliza/apps/` are always implicitly included. Names normalize through scope-strip and `app-` prefix-strip before lookup, so `@evil/app-companion`, `app-companion`, and `companion` all collide with first-party `eliza/apps/app-companion`. Enforced by `eliza/plugins/plugin-app-control/typescript/src/protected-apps.ts`.
