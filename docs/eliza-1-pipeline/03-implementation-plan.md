@@ -56,17 +56,13 @@ prefix:
 **Dependencies.** None.
 **Exit.** Doc reviewed, contract diagrams in place. No code yet.
 
-### W0-X2 Delete Nebius dead code — code agent
-**Status.** C2 portion closed; see `02-gap-analysis.md#c2` for details.
-Nebius portion (M37) tracked separately.
-**Scope.** M37 (C2 closed).
-**Files.**
-- Anywhere `Nebius` is referenced — pending.
-
-**Deliverables.** PR with Nebius removals + a follow-up issue if any
-consumer breaks.
-**Dependencies.** None remaining.
-**Exit.** Nebius surface compiles or is deleted; gap analysis updated.
+### W0-X2 Delete Nebius dead code — code agent [CLOSED]
+**Status.** Both portions closed. C2 (atropos) closed first; M37 (Nebius)
+closed in `chore/training-remove-nebius`. The deprecated upstream Nebius
+fallback — scripts, env vars, README snippets, and registry entries — was
+removed wholesale from the active codebase. No consumer broke; the path
+was already dead.
+**Exit.** `rg -i nebius` returns zero hits in the active codebase.
 
 ### W0-X3 Promotion registry schema + empty service — code agent
 **Scope.** Scaffolds C3, M2, M20.

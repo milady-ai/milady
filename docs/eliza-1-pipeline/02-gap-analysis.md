@@ -305,9 +305,10 @@ If skills change mid-session, sub-agent sees stale list.
 Tuning not validated for all sizes.
 **Fix.** Sweep + bake size-specific defaults.
 
-### M37. Nebius fallback deprecated but not removed [legacy]
-Dead code.
-**Fix.** Delete.
+### M37. Nebius fallback deprecated but not removed [CLOSED]
+**Status.** Closed by W0-X2 (Nebius portion). No Nebius references remain in
+the active codebase; the deprecated upstream fallback has been deleted
+along with its env vars, scripts, and docs.
 
 ### M38. Mobile runtime hardening test untracked from git [partial]
 `packages/ui/src/onboarding/__tests__/mobile-runtime-mode-hardening.test.ts`
