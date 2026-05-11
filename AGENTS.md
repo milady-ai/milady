@@ -261,6 +261,56 @@ Remove on sight: unused code, near-duplicate types, legacy / migration leftovers
 
 Constraints: do not preserve bad patterns "for compat" without a documented, verified live caller. Do not add abstractions unless they reduce total complexity. Do not DRY code that should remain separate because the domains differ. Do not centralize unlike concepts. Do not hide uncertainty with fallback values. Do not keep both old and new paths unless a live migration explicitly requires it.
 
+## QA & Testing Protocol
+
+### Required test coverage for any onboarding-touching change
+- Any PR that touches `packages/ui/src/onboarding/**`, `packages/ui/src/state/onboarding-*`, `packages/ui/src/components/onboarding/**`, `packages/app-core/src/api/*onboarding*`, `packages/app-core/src/api/auth-bootstrap-routes.ts`, `packages/app-core/src/api/auth-pairing-compat-routes.ts`, or `plugins/plugin-elizacloud/src/onboarding.ts` MUST ship with:
+  1. A unit test for any state-machine change in `flow.ts`
+  2. A Playwright spec entry in `packages/app/test/ui-smoke/onboarding-*.spec.ts` covering the new path
+  3. A contract test if API shape changed
+  4. A visual snapshot baseline if UI rendering changed
+
+### Test lanes
+- `TEST_LANE=pr` (default in CI) — mocked APIs, no real cloud spend. Excludes `*.real.test.ts` and `*.real.e2e.test.ts`. Runs on every PR.
+- `TEST_LANE=post-merge` — live APIs, full suite. Runs on develop after merge.
+- `MILADY_DESKTOP_QA=1` — opt-in for desktop-stack assertions that require a running `bun run dev:desktop` instance.
+- `ELIZA_LIVE_TEST=1` — gates the live onboarding test in `packages/app-core/test/app/onboarding-companion.live.e2e.test.ts`. Requires a real provider API key.
+
+### Dev observability for QA harnesses
+- `GET /api/dev/stack` returns canonical port/path/renderer-URL discovery. Use this from any QA harness instead of hardcoding 31337/2138.
+- `GET /api/dev/cursor-screenshot` returns a PNG of the Electrobun desktop (OS-level capture). Use this for visual regression of native desktop chrome.
+- `GET /api/dev/console-log?maxLines=400` returns aggregated dev logs (Vite + API + Electrobun child).
+- `bun run desktop:stack-status -- --json` is the single-shot status probe for an entire dev stack.
+
+### Surfaces and how to test each
+| Surface | Primary harness | Visual proof | Failure modes to cover |
+|---|---|---|---|
+| Web (browser) | Playwright in `packages/app/test/ui-smoke/` | Playwright screenshot | Provider auth failure, validation errors, resume from partial state |
+| Desktop (Electrobun) | Playwright + `/api/dev/cursor-screenshot` | OS-level screenshot via dev endpoint | First-launch pre-seed, pairing token TTL, reset-via-query-param |
+| Mobile (Capacitor) | iOS sim + Android emulator (local dev only) | `scripts/qa/mobile-screenshot-walkthrough.mjs` via computer-use MCP | Deep-link entry, Android local-agent pre-seed, permission prompts |
+| Cloud pairing | Mocked cloud endpoints in `plugins/plugin-elizacloud/__tests__/onboarding-failures.test.ts` | API trace, fixture replay | availability=false, auth timeout, provisioning timeout, token revocation |
+
+### Required commands before claiming an onboarding-touching change is done
+```bash
+bun run verify                            # typecheck + lint
+bun run test                              # unit + contract
+bun run --cwd packages/app test:e2e       # Playwright UI smoke (includes onboarding-full-flow.spec.ts)
+bun run desktop:stack-status -- --json    # if changes touched desktop
+```
+
+For changes that touched cloud pairing, additionally run with `TEST_LANE=post-merge` against the staging cloud (do NOT run live cloud tests from CI unless explicitly gated).
+
+### Manual QA — when automation can't reach
+See [docs/QA-onboarding.md](docs/QA-onboarding.md) for the full manual walkthrough matrix per surface. The TL;DR: AI agents can drive web/desktop via Playwright and mobile via the computer-use MCP. For native iOS/Android first-launch dialogs (permission grants, biometric prompts) computer-use is required — Playwright cannot reach those.
+
+### Evidence requirements
+Every reported QA pass must include either:
+- A green test run output, OR
+- A captured screenshot from `/api/dev/cursor-screenshot` or computer-use, OR
+- A network trace from `GET /api/dev/console-log` for backend-only changes.
+
+A bare "I clicked through and it worked" is not acceptable evidence.
+
 ## Git workflow
 
 **Motto: move fast, but never lose work to dangling branches or stashes.**

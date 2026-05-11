@@ -1,0 +1,47 @@
+[android-emu-smoke] Auto-selected AVD: Pixel_API_35
+[android-emu-smoke] Building web bundle (bun run --cwd /Users/shawwalters/eliza-workspace/milady/apps/app build:android)
+$ node ../../scripts/run-eliza-app-core-script.mjs run-mobile-build.mjs android
+[mobile-build] App: Milady (ai.milady.milady)
+[mobile-build] WARNING: target `android` produces an APK that embeds the on-device agent runtime (libeliza_bun.so disguise) and requests system-only permissions (MANAGE_APP_OPS_MODES, PACKAGE_USAGE_STATS). It is SIDELOAD-ONLY and will be rejected by the Play Store. Use `build:android:cloud` for a Play-Store-compliant thin client, or `build:android:system` for the AOSP privileged platform-signed APK.
+$ vite build
+vite v6.4.2 building for production...
+transforming...
+✓ 4161 modules transformed.
+✗ Build failed in 16.36s
+error during build:
+src/main.tsx (19:0): "MILADY_DEFAULT_THEME" is not exported by "../../node_modules/.bun/@elizaos+shared@2.0.0-alpha.538+1ab870a256a16d02/node_modules/@elizaos/shared/index.js", imported by "src/main.tsx".
+file: /Users/shawwalters/eliza-workspace/milady/apps/app/src/main.tsx:19:0
+
+17: import type { BrandingConfig } from "@elizaos/app-core";
+18: import { MILADY_DEFAULT_THEME } from "@elizaos/shared";
+19: import {
+    ^
+20:   type AppBootConfig,
+21:   getBootConfig,
+
+    at getRollupError (file:///Users/shawwalters/eliza-workspace/milady/node_modules/.bun/rollup@4.60.3/node_modules/rollup/dist/es/shared/parseAst.js:406:41)
+    at error (file:///Users/shawwalters/eliza-workspace/milady/node_modules/.bun/rollup@4.60.3/node_modules/rollup/dist/es/shared/parseAst.js:402:42)
+    at Module.error (file:///Users/shawwalters/eliza-workspace/milady/node_modules/.bun/rollup@4.60.3/node_modules/rollup/dist/es/shared/node-entry.js:17390:16)
+    at Module.traceVariable (file:///Users/shawwalters/eliza-workspace/milady/node_modules/.bun/rollup@4.60.3/node_modules/rollup/dist/es/shared/node-entry.js:17823:29)
+    at ModuleScope.findVariable (file:///Users/shawwalters/eliza-workspace/milady/node_modules/.bun/rollup@4.60.3/node_modules/rollup/dist/es/shared/node-entry.js:15413:39)
+    at Identifier.bind (file:///Users/shawwalters/eliza-workspace/milady/node_modules/.bun/rollup@4.60.3/node_modules/rollup/dist/es/shared/node-entry.js:5449:40)
+    at Property.bind (file:///Users/shawwalters/eliza-workspace/milady/node_modules/.bun/rollup@4.60.3/node_modules/rollup/dist/es/shared/node-entry.js:2831:23)
+    at ObjectExpression.bind (file:///Users/shawwalters/eliza-workspace/milady/node_modules/.bun/rollup@4.60.3/node_modules/rollup/dist/es/shared/node-entry.js:2827:28)
+    at VariableDeclarator.bind (file:///Users/shawwalters/eliza-workspace/milady/node_modules/.bun/rollup@4.60.3/node_modules/rollup/dist/es/shared/node-entry.js:2831:23)
+    at VariableDeclaration.bind (file:///Users/shawwalters/eliza-workspace/milady/node_modules/.bun/rollup@4.60.3/node_modules/rollup/dist/es/shared/node-entry.js:2827:28)
+error: script "build:web" exited with code 1
+162 |   return new Promise((resolve, reject) => {
+163 |     const child = spawn(command, args, { cwd, env, stdio: "inherit" });
+164 |     child.on("exit", (code, signal) => {
+165 |       if (signal) return reject(new Error(`${command} killed by ${signal}`));
+166 |       if ((code ?? 1) !== 0)
+167 |         return reject(new Error(`${command} exited with code ${code ?? 1}`));
+                                ^
+error: /Users/shawwalters/.bun/bin/bun exited with code 1
+      at <anonymous> (/Users/shawwalters/eliza-workspace/milady/eliza/packages/app-core/scripts/run-mobile-build.mjs:167:27)
+      at emit (node:events:98:22)
+      at #handleOnExit (node:child_process:520:14)
+
+Bun v1.3.13 (macOS arm64)
+error: script "build:android" exited with code 1
+FAIL: build:android failed (web bundle + cap sync android)

@@ -108,7 +108,7 @@ the upstream agent package.
 ### server-* split-out helpers (4 files)
 
 - [x] `eliza/packages/app-core/src/api/server-cloud-tts.ts` — 21 LOC. **Re-export shim** for `@elizaos/plugin-elizacloud/lib/server-cloud-tts`. legacy:exists only because `server.ts` and `server-wallet-trade.ts` use the relative path; once those import from the plugin directly this file is deletable.
-- [x] `eliza/packages/app-core/src/api/server-onboarding-compat.ts` — 383 LOC. Helpers used by `onboarding-compat-routes.ts` (replay body, extract+persist API key, etc). Clean — no audit issues other than the standard `} catch { /* non-fatal */ }` pattern (3 sites) that should be reviewed during the error-handling pass.
+- [x] `eliza/packages/app-core/src/api/server-onboarding-helpers.ts` — 383 LOC. Helpers used by `onboarding-routes.ts` (replay body, extract+persist API key, etc). Clean — no audit issues other than the standard `} catch { /* non-fatal */ }` pattern (3 sites) that should be reviewed during the error-handling pass. (Renamed 2026-05-11 from `server-onboarding-compat.ts`.)
 - [x] `eliza/packages/app-core/src/api/server-wallet-trade.ts` — 115 LOC. Hardened wallet-export guard composition + per-op env mutation around the upstream rejection resolver. errors:`runWithCompatAuthContext` mutates env in finally — leaky boundary, same disease as `server-security.ts`. dedup:`normalizeCompatRejection` + `normalizeCompatReason` are no-ops on `reason` — leftover from a real normalisation that no longer happens? Or pre-emptive infrastructure? Either delete the no-op chain or document the kept-for-future-use intent.
 - [x] `eliza/packages/app-core/src/api/cloud-secrets.ts` — 13 LOC. **Re-export shim** for `@elizaos/plugin-elizacloud/lib/cloud-secrets`. Same legacy:bin pattern as `server-cloud-tts.ts`; deletable when consumers migrate.
 - [x] `eliza/packages/app-core/src/api/cloud-connection.ts` — 22 LOC. **Re-export shim** for `@elizaos/plugin-elizacloud/lib/cloud-connection`. Same pattern.
@@ -130,15 +130,15 @@ the upstream agent package.
 ### Auth route handlers (4 files)
 
 - [x] `eliza/packages/app-core/src/api/auth-bootstrap-routes.ts` — 234 LOC. Clean. Hard fail-closed at every error path; 3 audit catches use `console.error` not `logger.error` (commandment 9 violation, same as `auth-context.ts`).
-- [x] `eliza/packages/app-core/src/api/auth-pairing-compat-routes.ts` — 290 LOC. Clean.
+- [x] `eliza/packages/app-core/src/api/auth-pairing-routes.ts` — 290 LOC. Clean. (Renamed 2026-05-11 from `auth-pairing-compat-routes.ts`.)
 - [!] `eliza/packages/app-core/src/api/auth-session-routes.ts` — **771 LOC**. dedup:`consumeAuthBucket` (lines 82-97) is a copy of the `authAttempts`/`recordFailedAuth`/`isAuthRateLimited` triad in `auth.ts:71-113`. Two parallel limiters with same name, same window, same cap. Should be one. boundaries:6 routes (setup/login/logout/me/sessions list/sessions revoke) all in one file; each is 60–120 LOC. legacy:`SESSION_COOKIE_NAME` re-imported from `./auth/index` then shadowed by `parseSessionCookie` — confirm one module owns the cookie name.
 - [!] `eliza/packages/app-core/src/api/auth-client.ts` — 448 LOC. **Renderer-side**, not server-side. boundaries:lives in the auth folder family but is consumed only by the SPA. Should move to `client-auth.ts` next to other `client-*.ts` modules so the file naming reflects the runtime.
 
 ### Compat routes (legacy upstream-shim handlers, 8 files)
 
 - [!] `eliza/packages/app-core/src/api/automations-compat-routes.ts` — **907 LOC**. boundaries:huge static `STATIC_AUTOMATION_NODE_SPECS` list (~250 LOC of literals starting line 87) belongs in a data file, not a route handler. types:`as unknown as Pick<Room, "metadata">` (line 334) and `as unknown as Record<string, unknown>` (line 359). legacy:`BLOCKED_AUTOMATION_PROVIDER_NODES` set hides what would be a per-node `enabled` flag — should be metadata not a deny-list.
-- [!] `eliza/packages/app-core/src/api/plugins-compat-routes.ts` — **1651 LOC** — the second-largest file in the layer. boundaries:14+ exported helpers (`maskValue`, `normalizePluginCategory`, `resolveCompatPluginEnabledForList`, `analyzePluginStateDrift`, `buildPluginListResponse`, `validateCompatPluginConfig`, `persistCompatPluginMutation`, `resolvePluginManifestPath`, `resolveAdvancedCapabilityCompatStatus`, etc.) plus 30+ private helpers — this is a *plugin-management module* not a *route handler*. Should split: `plugins/registry.ts` (manifest + drift), `plugins/mutations.ts` (validate + persist), `plugins-compat-routes.ts` (the actual route mux). types:1 `as unknown as CompatPluginRecord[]` (line 566). errors:6 `} catch` blocks. dead:`shortPluginIdFromNpmName` is internal but exported.
-- [!] `eliza/packages/app-core/src/api/onboarding-compat-routes.ts` — 242 LOC. errors:line 92-94 catches and silently returns when re-saving `cloud.apiKey` to the config file fails — exactly the "best effort" pattern AGENTS.md axis 5 calls out. legacy:`scheduleCloudApiKeyResave` (line 77) is a 3-second `setTimeout` workaround "after upstream handler clobbered it" — a workaround for a bug in the upstream handler, not a fix. Should fix the upstream handler and delete this. dedup:loopback fetch on line 65 duplicates `compatLoopbackFetchJson` in `server.ts` — should call the shared helper.
+- [!] `eliza/packages/app-core/src/api/plugins-routes.ts` — **1651 LOC** — the second-largest file in the layer. boundaries:14+ exported helpers (`maskValue`, `normalizePluginCategory`, `resolveCompatPluginEnabledForList`, `analyzePluginStateDrift`, `buildPluginListResponse`, `validateCompatPluginConfig`, `persistCompatPluginMutation`, `resolvePluginManifestPath`, `resolveAdvancedCapabilityCompatStatus`, etc.) plus 30+ private helpers — this is a *plugin-management module* not a *route handler*. Should split: `plugins/registry.ts` (manifest + drift), `plugins/mutations.ts` (validate + persist), `plugins-routes.ts` (the actual route mux). types:1 `as unknown as CompatPluginRecord[]` (line 566). errors:6 `} catch` blocks. dead:`shortPluginIdFromNpmName` is internal but exported. (Renamed 2026-05-11 from `plugins-compat-routes.ts`.)
+- [!] `eliza/packages/app-core/src/api/onboarding-routes.ts` — 242 LOC. errors:line 92-94 catches and silently returns when re-saving `cloud.apiKey` to the config file fails — exactly the "best effort" pattern AGENTS.md axis 5 calls out. legacy:`scheduleCloudApiKeyResave` (line 77) is a 3-second `setTimeout` workaround "after upstream handler clobbered it" — a workaround for a bug in the upstream handler, not a fix. Should fix the upstream handler and delete this. dedup:loopback fetch on line 65 duplicates `compatLoopbackFetchJson` in `server.ts` — should call the shared helper. (Renamed 2026-05-11 from `onboarding-compat-routes.ts`.)
 - [x] `eliza/packages/app-core/src/api/dev-compat-routes.ts` — 169 LOC. Clean. **Only file** with `NODE_ENV === "production"` guard for full-route disable (line 37). Loopback gate + auth gate on every dev endpoint. SSRF guard on the screenshot proxy (lines 79-94) is correct.
 - [!] `eliza/packages/app-core/src/api/local-inference-compat-routes.ts` — 606 LOC. types:1 `as unknown as CatalogModel` cast (line 233). dedup:duplicates download-job, hardware-probe, model-management surface that exists in the local-inference plugin runtime — confirm the boundary; if these routes are strictly compat shims they should be very thin.
 - [!] `eliza/packages/app-core/src/api/database-rows-compat-routes.ts` — 174 LOC. **Database read/write through the API** is a sharp tool; needs a careful read in a future pass to confirm column-name + identifier sanitization is correct.
@@ -234,7 +234,7 @@ the call boundary.
 
 | LOC  | File                                  | Concerns | Recommendation              |
 |-----:|---------------------------------------|----------|-----------------------------|
-| 1651 | `plugins-compat-routes.ts`            | 14+      | Split (registry + mutations + routes) |
+| 1651 | `plugins-routes.ts`                   | 14+      | Split (registry + mutations + routes) |
 | 1194 | `server.ts`                           | 5+       | Split mux from compat router |
 |  907 | `automations-compat-routes.ts`        | 4        | Move static specs to data file |
 |  771 | `auth-session-routes.ts`              | 6 routes | Dedup limiter; split routes |
@@ -246,12 +246,12 @@ the call boundary.
 |  451 | `workbench-compat-routes.ts`          | ?        | Defer detailed audit |
 |  443 | `auth.ts`                             | 6 gates  | **Reduce to 1–2 gates**      |
 |  421 | `auth/sessions.ts`                    | clean    | —                            |
-|  383 | `server-onboarding-compat.ts`         | clean    | —                            |
+|  383 | `server-onboarding-helpers.ts`        | clean    | —                            |
 |  373 | `compat-route-shared.ts`              | dup      | Merge with `trusted-local-request.ts` |
 |  343 | `credential-resolver.ts`              | clean    | —                            |
 |  328 | `wallet-export-guard.ts`              | clean    | `logger.warn` over `console.warn` |
-|  290 | `auth-pairing-compat-routes.ts`       | clean    | —                            |
-|  242 | `onboarding-compat-routes.ts`         | 1        | Delete `scheduleCloudApiKeyResave` workaround |
+|  290 | `auth-pairing-routes.ts`              | clean    | —                            |
+|  242 | `onboarding-routes.ts`                | 1        | Delete `scheduleCloudApiKeyResave` workaround |
 |  234 | `auth-bootstrap-routes.ts`            | clean    | —                            |
 |  223 | `auth/bootstrap-token.ts`             | clean    | —                            |
 |  211 | `trusted-local-request.ts`            | dup      | Delete or merge              |
@@ -296,9 +296,9 @@ the call boundary.
 |    8 | `server-html.ts`                      | shim     | Re-export only               |
 
 **No server-side route file > 2000 LOC.** The biggest single-file
-"route handler" is `plugins-compat-routes.ts` at 1651 LOC, and most of
+"route handler" is `plugins-routes.ts` at 1651 LOC, and most of
 that is plugin manifest/state-management helpers that should live in a
-service. **Files > 1000 LOC: 2** (`plugins-compat-routes.ts`,
+service. **Files > 1000 LOC: 2** (`plugins-routes.ts`,
 `server.ts`).
 
 ### Client-side LOC (descending, for the same scope)
@@ -395,7 +395,7 @@ exempt** (lines 219-271).
 - `secrets-manager-routes.ts` — every state-mutating route routes through `ensureRouteAuthorized` (verify in detailed pass).
 - `dev-compat-routes.ts` — only GETs; CSRF not applicable.
 - `wallet-market-overview-route.ts` — only GETs; CSRF not applicable.
-- `onboarding-compat-routes.ts` — `POST /api/onboarding` uses `ensureRouteAuthorized` (line 109) — CSRF enforced via the gate's default behaviour.
+- `onboarding-routes.ts` — `POST /api/onboarding` uses `ensureRouteAuthorized` (line 109) — CSRF enforced via the gate's default behaviour.
 
 **Confirmed gap:** the route wrappers (`agent-admin-routes.ts`,
 `character-routes.ts`, `permissions-routes.ts`, etc) delegate to
@@ -421,7 +421,7 @@ upstream's gate choice — needs a Layer 6 audit trace.
    14-day grace window for `ELIZA_API_TOKEN`. Delete once all current
    deploys are post-grace, plus the call sites in `auth.ts:233-269`,
    `auth-context.ts:127-152`.
-7. **`onboarding-compat-routes.ts:77-96` `scheduleCloudApiKeyResave`** —
+7. **`onboarding-routes.ts:77-96` `scheduleCloudApiKeyResave`** —
    `setTimeout(... 3000)` workaround "after upstream handler clobbered
    it". Fix the upstream handler in Layer 6, then delete this. Also
    delete the swallowed `try { ... } catch { /* Non-fatal */ }`.
@@ -458,9 +458,9 @@ upstream's gate choice — needs a Layer 6 audit trace.
    `typeof`/`isArray` per-field validation; makes the boundary contract
    visible; makes the client / server impossible to drift.
 
-3. **Split `plugins-compat-routes.ts` (1651 LOC) into 3 modules.**
+3. **Split `plugins-routes.ts` (1651 LOC) into 3 modules.**
    `plugins/registry.ts` (manifest + drift analysis), `plugins/mutations.ts`
-   (validate + persist + reconcile), `plugins-compat-routes.ts` (the
+   (validate + persist + reconcile), `plugins-routes.ts` (the
    actual route mux ≤ 200 LOC). Same pattern for `client-agent.ts` (2800
    LOC, 14+ concerns) and `client-cloud.ts` (1790 LOC). **Why:**
    single-concern modules are auditable; god-files are not.
@@ -492,7 +492,7 @@ upstream's gate choice — needs a Layer 6 audit trace.
 - **In-process rate limiters reimplemented per file** — `auth.ts:71-113`,
   `auth-session-routes.ts:78-111`, `auth/sensitive-rate-limit.ts`
   (single-class registry — best of the three),
-  `wallet-export-guard.ts:34-52`, `auth-pairing-compat-routes.ts:36-51`,
+  `wallet-export-guard.ts:34-52`, `auth-pairing-routes.ts:36-51`,
   `wallet-market-overview-route.ts:88-91`. **6 different limiter
   implementations**; one shared limiter (Layer 5 utility) would replace
   all six.
@@ -507,7 +507,7 @@ upstream's gate choice — needs a Layer 6 audit trace.
   caller.
 
 - **Hand-rolled fetch+headers+token logic** appears in `server.ts`
-  (compat loopback), `onboarding-compat-routes.ts:65`, `client-base.ts`,
+  (compat loopback), `onboarding-routes.ts:65`, `client-base.ts`,
   `csrf-client.ts:fetchWithCsrf`, `auth-client.ts`. Should be one
   request helper used everywhere.
 
@@ -521,7 +521,7 @@ upstream's gate choice — needs a Layer 6 audit trace.
 | File                                  | Violating concern                                | Belongs in            |
 |---------------------------------------|--------------------------------------------------|-----------------------|
 | `wallet-market-overview-route.ts`     | Cache + in-flight dedupe + rate buckets + CoinGecko/Polymarket adapters | `services/wallet-market-overview.ts` |
-| `plugins-compat-routes.ts`            | Plugin manifest analysis + drift detection + mutation persistence | `services/plugin-manifest.ts` |
+| `plugins-routes.ts`                   | Plugin manifest analysis + drift detection + mutation persistence | `services/plugin-manifest.ts` |
 | `automations-compat-routes.ts`        | 250-LOC `STATIC_AUTOMATION_NODE_SPECS` literal list | `data/automation-nodes.ts` |
 | `secrets-manager-routes.ts`           | Install-job orchestration + SSE stream | `services/secrets-installer.ts` |
 | `auth/cloud-sso.ts`                   | OAuth state map + sweep + JWKS verify + identity-link logic | split into 3 modules |

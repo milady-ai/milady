@@ -1,0 +1,1 @@
+{"error":"desktop dev log not configured","hint":"Run via dev-platform (dev:desktop); disable file with ELIZA_DESKTOP_DEV_LOG=0."}

@@ -85,6 +85,45 @@ bun run test:e2e     # end-to-end tests
 bun run db:check     # database security + readonly tests
 ```
 
+## QA & Testing Quick Reference
+
+Full protocol in [AGENTS.md](AGENTS.md#qa--testing-protocol). Onboarding-specific walkthroughs in [docs/QA-onboarding.md](docs/QA-onboarding.md). Coverage matrix in [docs/QA-onboarding-coverage.md](docs/QA-onboarding-coverage.md).
+
+### Dev observability endpoints (use these from any QA harness)
+
+The dev stack exposes loopback-only endpoints for inspecting a running app without a human:
+
+- `GET /api/dev/stack` — canonical discovery: API port, UI port, renderer URL, screenshot/log paths. Always start here. Implementation: [packages/app-core/src/api/dev-stack.ts](eliza/packages/app-core/src/api/dev-stack.ts).
+- `GET /api/dev/cursor-screenshot` — PNG of the Electrobun desktop window (OS-level, not webview pixels). Use for visual regression.
+- `GET /api/dev/console-log?maxLines=400&maxBytes=256000` — aggregated tail of Vite + API + Electrobun logs from `.eliza/desktop-dev-console.log`.
+- `bun run desktop:stack-status -- --json` — one-shot probe combining all of the above plus health/status.
+
+Use these instead of hardcoding ports — the dev orchestrator shifts to the next free port when defaults are busy.
+
+### Test commands
+
+```bash
+bun run verify                                    # typecheck + lint
+bun run test                                      # full suite (server + client)
+bun run test:server                               # agent + core + plugins
+bun run test:client                               # app + ui + lifeops
+bun run --cwd packages/app test:e2e               # Playwright UI smoke
+bun run --cwd packages/app-core test:e2e          # live integration (gated by env)
+TEST_LANE=post-merge bun run test                 # include *.real.test.ts (live APIs)
+ELIZA_LIVE_TEST=1 bun run test:e2e:live           # live onboarding test (paid)
+```
+
+### Onboarding QA — required before merging any onboarding change
+
+1. Run `bun run verify` and `bun run --cwd packages/app test:e2e` (must include `onboarding-full-flow.spec.ts`).
+2. If touching desktop runtime: boot `bun run dev:desktop`, run `bun run desktop:stack-status -- --json`, capture a screenshot via `GET /api/dev/cursor-screenshot`.
+3. If touching cloud pairing: run `plugins/plugin-elizacloud/__tests__/onboarding-failures.test.ts` (covers availability=false, provisioning timeout, token revocation).
+4. If touching the `flow.ts` state machine: confirm `packages/ui/src/onboarding/__tests__/flow.test.ts` covers the new transition.
+
+### Evidence-or-it-didn't-happen rule
+
+When reporting QA results, attach either a green test output, a screenshot from the dev endpoint, or a console-log trace. No "I clicked through and it worked" without proof. AI agents have the dev endpoints; use them.
+
 ## Project Layout
 
 ```

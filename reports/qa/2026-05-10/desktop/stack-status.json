@@ -1,0 +1,85 @@
+{
+  "uiPort": 2138,
+  "apiPort": 2138,
+  "uiListening": true,
+  "apiListening": true,
+  "devStack": {
+    "schema": "elizaos.dev.stack/v1",
+    "api": {
+      "listenPort": 31337,
+      "baseUrl": "http://127.0.0.1:31337"
+    },
+    "desktop": {
+      "rendererUrl": null,
+      "uiPort": 2138,
+      "desktopApiBase": null
+    },
+    "cursorScreenshot": {
+      "available": false,
+      "path": null
+    },
+    "desktopDevLog": {
+      "filePath": null,
+      "apiTailPath": null
+    },
+    "hints": [
+      "Electrobun also binds an ephemeral localhost port for its own RPC (see launcher logs: \"Server started at http://localhost:…\"). That channel is not this API.",
+      "With dev:desktop:watch, open desktop.rendererUrl in a browser or Browser MCP for UI parity when native-only bridges are not required.",
+      "Full-screen PNG for agents: with desktop dev (screenshot server on by default), GET /api/dev/cursor-screenshot on the API (loopback). Capture uses OS screen APIs, not webview-only pixels.",
+      "Aggregated vite/api/electrobun lines: GET /api/dev/console-log?maxLines=400&maxBytes=256000 (loopback) or read desktopDevLog.filePath."
+    ]
+  },
+  "apiHealth": {
+    "ok": true,
+    "status": 200,
+    "json": {
+      "ready": true,
+      "runtime": "ok",
+      "database": "ok",
+      "plugins": {
+        "loaded": 18,
+        "failed": 0
+      },
+      "coordinator": "not_wired",
+      "connectors": {},
+      "uptime": 1006,
+      "agentState": "running",
+      "startup": {
+        "phase": "running",
+        "attempt": 0
+      }
+    },
+    "bodyPreview": "{\"ready\":true,\"runtime\":\"ok\",\"database\":\"ok\",\"plugins\":{\"loaded\":18,\"failed\":0},\"coordinator\":\"not_wired\",\"connectors\":{},\"uptime\":1006,\"agentState\":\"running\",\"startup\":{\"phase\":\"running\",\"attempt\":0}}"
+  },
+  "apiStatus": {
+    "ok": true,
+    "status": 200,
+    "json": {
+      "state": "running",
+      "agentName": "LiveAuthAgent",
+      "startedAt": 1778464782077,
+      "uptime": 1006875,
+      "startup": {
+        "phase": "running",
+        "attempt": 0
+      },
+      "cloud": {
+        "connectionStatus": "connected",
+        "activeAgentId": null,
+        "cloudProvisioned": false,
+        "hasApiKey": true
+      },
+      "pendingRestart": false,
+      "pendingRestartReasons": []
+    },
+    "bodyPreview": "{\"state\":\"running\",\"agentName\":\"LiveAuthAgent\",\"startedAt\":1778464782077,\"uptime\":1006875,\"startup\":{\"phase\":\"running\",\"attempt\":0},\"cloud\":{\"connectionStatus\":\"connected\",\"activeAgentId\":null,\"cloudProvisioned\":false,\"hasApiKey\":true},\"pendingRestart\":false,\"pendingRestartReasons\":[]}"
+  },
+  "hints": {
+    "devCommands": [
+      "bun run dev:desktop",
+      "bun run dev:desktop:watch"
+    ],
+    "docsPath": "docs/apps/desktop-local-development.md",
+    "agentNote": "The native Electrobun window is not visible to the agent. Prefer GET /api/dev/stack on the API for canonical rendererUrl and ports; use Browser MCP on desktop.rendererUrl when native bridges are not required."
+  }
+}
