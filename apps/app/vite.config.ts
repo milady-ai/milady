@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import {
   parseAllowedHostEnv,
   toViteAllowedHosts,
-} from "@elizaos/app-core/config/allowed-hosts";
+} from "@elizaos/shared/config/allowed-hosts";
 import { colorizeDevSettingsStartupBanner } from "@elizaos/shared/dev-settings-banner-style";
 import { prependDevSubsystemFigletHeading } from "@elizaos/shared/dev-settings-figlet-heading";
 import {
@@ -59,12 +59,32 @@ function shouldUseLocalElizaSource(): boolean {
   const sourceMode = (
     process.env.MILADY_ELIZA_SOURCE ??
     process.env.ELIZA_SOURCE ??
-    "packages"
+    ""
   ).toLowerCase();
-  return (
-    ["local", "source", "workspace"].includes(sourceMode) ||
+  if (["local", "source", "workspace"].includes(sourceMode)) return true;
+  if (["package", "packages", "published", "npm"].includes(sourceMode)) {
+    return false;
+  }
+  if (
     process.env.MILADY_FORCE_LOCAL_UPSTREAMS === "1" ||
     process.env.ELIZA_FORCE_LOCAL_UPSTREAMS === "1"
+  ) {
+    return true;
+  }
+  // Auto-detect: when env is unset, fall back to local mode if the
+  // workspace checkout actually exists with linked sources. This lets
+  // `bun run build` succeed after `bun run eliza:local` without
+  // requiring callers to also export MILADY_ELIZA_SOURCE=local.
+  return fs.existsSync(
+    path.join(
+      path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../.."),
+      "eliza",
+      "packages",
+      "app-core",
+      "src",
+      "platform",
+      "native-plugin-entrypoints.ts",
+    ),
   );
 }
 
@@ -268,7 +288,10 @@ function resolveLocalElizaAppAliases(): Alias[] {
       return null;
     }
     const record = value as Record<string, unknown>;
-    for (const condition of ["source", "types", "import", "default"]) {
+    // Never include "types" — that's a TypeScript-only condition
+    // pointing at .d.ts declaration files, which aren't executable
+    // modules. Vite's load-fallback then crashes trying to read them.
+    for (const condition of ["source", "import", "default"]) {
       const target = record[condition];
       if (typeof target === "string") return target;
     }
@@ -1436,6 +1459,51 @@ function generateCapacitorNativeStub(strippedId: string): string {
   ].join("\n");
 }
 
+/**
+ * Build a stub module with explicit named exports for every name a
+ * server-only @elizaos plugin's consumers reference. Named imports must
+ * resolve statically; a default-export Proxy doesn't satisfy them.
+ * Renderer never invokes these — the API child owns the real impls —
+ * so each export is a benign noop.
+ */
+function generateNamedExportStub(names: readonly string[]): string {
+  const lines: string[] = [
+    "const noop = () => undefined;",
+    "const asyncNoop = async () => undefined;",
+  ];
+  for (const name of names) {
+    lines.push(`export const ${name} = noop;`);
+  }
+  lines.push("export default new Proxy(noop, { get: () => noop });");
+  // Quiet "unused" in case the noop branches aren't referenced.
+  lines.push("void asyncNoop;");
+  return `${lines.join("\n")}\n`;
+}
+
+// Names enumerated from `eliza/packages/app-core/dist/**` static imports
+// of each server-only @elizaos plugin. Update when a build error shows
+// a new MISSING_EXPORT in this scope.
+const PLUGIN_ELIZACLOUD_STUB_NAMES = [
+  "__resetCloudBaseUrlCache",
+  "clearCloudSecrets",
+  "elizaOSCloudPlugin",
+  "ensureCloudTtsApiKeyAlias",
+  "getCloudSecret",
+  "handleCloudTtsPreviewRoute",
+  "isCloudProvisionedContainer",
+  "mirrorCompatHeaders",
+  "normalizeCloudSiteUrl",
+  "resolveCloudApiBaseUrl",
+  "resolveCloudApiKey",
+  "resolveCloudTtsBaseUrl",
+  "resolveElevenLabsApiKeyForCloudMode",
+  "validateCloudBaseUrl",
+] as const;
+
+function generatePluginElizacloudStub(): string {
+  return generateNamedExportStub(PLUGIN_ELIZACLOUD_STUB_NAMES);
+}
+
 const NATIVE_MODULE_STUB_GENERATORS = new Map<
   string,
   (strippedId: string) => string
@@ -1447,6 +1515,14 @@ const NATIVE_MODULE_STUB_GENERATORS = new Map<
   ["undici", generateUndiciStub],
   ["node:async_hooks", generateAsyncHooksStub],
   ["async_hooks", generateAsyncHooksStub],
+  ["@elizaos/plugin-elizacloud", generatePluginElizacloudStub],
+  // @node-rs/argon2's server-side Rust binding is referenced by
+  // app-core's password-hashing helpers. Renderer never executes them
+  // (auth happens in the API child); stub the named exports.
+  [
+    "@node-rs/argon2",
+    () => generateNamedExportStub(["hash", "verify", "Algorithm"]),
+  ],
 ]);
 
 function isSharpStubId(strippedId: string): boolean {
@@ -1461,7 +1537,12 @@ function generateNativeModuleStub(
   strippedId: string,
   capacitorNativeScopeRe: RegExp,
 ): string {
-  const modName = strippedId.split("/")[0];
+  // Scoped packages (@scope/name) have a slash in the bare specifier;
+  // treat the @scope/name as the lookup key so per-package stub
+  // generators register against the real package id.
+  const modName = strippedId.startsWith("@")
+    ? strippedId.split("/").slice(0, 2).join("/")
+    : strippedId.split("/")[0];
   const stubGenerator = NATIVE_MODULE_STUB_GENERATORS.get(modName);
   if (stubGenerator) return stubGenerator(strippedId);
   if (modName.startsWith("node:")) return generateNodeBuiltinStub(strippedId);
@@ -1517,6 +1598,21 @@ function nativeModuleStubPlugin(): Plugin {
     "@elizaos/plugin-sql",
     "@elizaos/plugin-agent-skills",
     "@elizaos/plugin-agent-orchestrator",
+    // The agent runtime is server-only — it lives in the API child
+    // process, not in the renderer. app-core/dist code can leak agent
+    // imports (account-pool etc.); stub them so Rollup doesn't try to
+    // pull Node-only auth/credential code into the browser bundle.
+    "@elizaos/agent",
+    // Cloud helper module — server-only (handles cloud credentials,
+    // tts proxy routes). Renderer references the exported names but
+    // never executes the code; named-export stub registered above.
+    "@elizaos/plugin-elizacloud",
+    // @node-rs/argon2 has a wasm32-wasi variant that browser builds
+    // surface via dynamic import. The browser can't resolve the bare
+    // specifier at runtime; stub it so the bundle loads. Real hashing
+    // happens server-side in the API child anyway.
+    "@node-rs/argon2-wasm32-wasi",
+    "@node-rs/argon2",
     // OS keychain bridge — Node-only native addon (.node binary). Pulled
     // transitively by @elizaos/vault. Vite's commonjs--resolver chokes on
     // the platform-specific .node files; stub it for the renderer.

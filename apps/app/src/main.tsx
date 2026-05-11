@@ -1,6 +1,8 @@
 import { App, ErrorBoundary } from "@elizaos/app-core";
-import "@elizaos/app-core/styles/styles.css";
-import "@elizaos/app-core/styles/brand-gold.css";
+// Styles bundled via the @elizaos/ui barrel. The Wave A refactor (eliza
+// commit 5a6f5f337) moved CSS out of @elizaos/app-core/styles/ but
+// didn't update this consumer; the new shape is a single subpath.
+import "@elizaos/ui/styles";
 
 import { App as CapacitorApp } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";
@@ -54,7 +56,6 @@ import { dispatchQueuedLifeOpsGithubCallbackFromUrl } from "@elizaos/app-lifeops
 import type { ShareTargetPayload } from "@elizaos/app-core/platform";
 import {
   DESKTOP_TRAY_MENU_ITEMS,
-  DesktopOnboardingRuntime,
   DesktopSurfaceNavigationRuntime,
   DesktopTrayRuntime,
   DetachedShellRoot,
@@ -139,10 +140,10 @@ import {
   resolveIosRuntimeConfig,
 } from "@elizaos/app-core";
 
-// CharacterEditor is statically re-exported by `@elizaos/app-core/browser`,
-// so the previous `lazy()` wrapper here was eagerly merged back into the
-// main chunk by Rollup. Static import keeps the load path honest.
-import { CharacterEditor } from "@elizaos/app-core/components/character/CharacterEditor";
+// CharacterEditor moved to @elizaos/ui in the Wave A refactor.
+// Static import keeps the load path honest (the previous lazy() wrapper
+// was being eagerly merged back into the main chunk by Rollup anyway).
+import { CharacterEditor } from "@elizaos/ui/components/character/CharacterEditor";
 
 declare global {
   interface Window {
@@ -730,7 +731,9 @@ function mountReactApp(): void {
             </div>
           ) : (
             <>
-              <DesktopOnboardingRuntime />
+              {/* DesktopOnboardingRuntime was deleted upstream but main.tsx
+                  still referenced it. The surface-navigation + tray runtimes
+                  cover the desktop chrome bits we still need. */}
               <DesktopSurfaceNavigationRuntime />
               <DesktopTrayRuntime />
               <LifeOpsActivitySignalsEffect />
