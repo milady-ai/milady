@@ -57,6 +57,12 @@ export const ELIZA_BUILD_STEPS = [
     alwaysRun: true,
   },
   {
+    check: path.join("packages", "shared", "dist", "index.js"),
+    cwd: path.join("packages", "shared"),
+    args: ["run", "build"],
+    label: "@elizaos/shared",
+  },
+  {
     // @elizaos/prompts ships a node script package. Older versions exposed a
     // `build:typescript` target that emitted dist/typescript/index.ts; the
     // current source uses a single `build` script that regenerates the
@@ -1683,11 +1689,26 @@ export async function ensureElizaBuildOutputs(
  */
 export async function ensurePluginBuildOutputs(
   pluginsRoot,
-  { pathExists = existsSync, runCommandImpl = runCommand } = {},
+  {
+    pathExists = existsSync,
+    runCommandImpl = runCommand,
+    requiredPackageNames = new Set(),
+  } = {},
 ) {
-  for (const packageDir of discoverPluginPackageDirs(pluginsRoot)) {
+  const packageDirs = discoverPluginPackageDirs(pluginsRoot).sort(
+    (left, right) => {
+      const leftName = readPackageJson(left)?.name;
+      const rightName = readPackageJson(right)?.name;
+      const leftRequired = requiredPackageNames.has(leftName) ? 0 : 1;
+      const rightRequired = requiredPackageNames.has(rightName) ? 0 : 1;
+      return leftRequired - rightRequired || left.localeCompare(right);
+    },
+  );
+
+  for (const packageDir of packageDirs) {
     const packageJson = readPackageJson(packageDir);
-    if (!packageJson?.name?.startsWith("@elizaos/")) {
+    const packageName = packageJson?.name;
+    if (!packageName?.startsWith("@elizaos/")) {
       continue;
     }
 
@@ -1697,11 +1718,20 @@ export async function ensurePluginBuildOutputs(
       continue;
     }
 
-    console.log(`[setup-upstreams] Building ${packageJson.name}`);
-    await runCommandImpl("bun", ["run", "build"], {
-      cwd: packageDir,
-      label: `bun run build (${packageJson.name})`,
-    });
+    console.log(`[setup-upstreams] Building ${packageName}`);
+    try {
+      await runCommandImpl("bun", ["run", "build"], {
+        cwd: packageDir,
+        label: `bun run build (${packageName})`,
+      });
+    } catch (error) {
+      if (requiredPackageNames.has(packageName)) {
+        throw error;
+      }
+      console.warn(
+        `[setup-upstreams] WARNING: Skipping optional upstream plugin ${packageName}; build failed (${error instanceof Error ? error.message : String(error)})`,
+      );
+    }
   }
 }
 
@@ -1774,15 +1804,24 @@ export async function setupUpstreams(repoRoot = DEFAULT_REPO_ROOT) {
 
   const elizaRoot = await ensureRepoLocalEliza(repoRoot);
   const pluginsRoot = getRepoPluginsRoot(repoRoot);
+  const requiredPluginPackageNames = new Set(
+    getPublishedElizaPackageSpecs(repoRoot)
+      .map(([packageName]) => packageName)
+      .filter((packageName) => packageName.startsWith("@elizaos/plugin-")),
+  );
+  requiredPluginPackageNames.add("@elizaos/plugin-zai");
+
   await ensureElizaDependencies(elizaRoot);
   await ensureElizaBuildOutputs(elizaRoot);
 
   ensurePluginDependencyLinks(repoRoot, pluginsRoot);
   ensureMiladySingletonDependencyLinks(repoRoot);
-  await ensurePluginBuildOutputs(pluginsRoot);
   const updatedLinks = linkUpstreamPackages(repoRoot, {
     elizaRoot,
     pluginsRoot,
+  });
+  await ensurePluginBuildOutputs(pluginsRoot, {
+    requiredPackageNames: requiredPluginPackageNames,
   });
 
   if (updatedLinks === 0) {
