@@ -1,0 +1,66 @@
+diff --git a/dist/esm/capacitor-llama-adapter.js b/dist/esm/capacitor-llama-adapter.js
+index f29886ff9f9e12c52752fb0084fc9214973c1213..b0bc1e87e47fc342b0ea8293bbba1b7a3b87f934 100644
+--- a/dist/esm/capacitor-llama-adapter.js
++++ b/dist/esm/capacitor-llama-adapter.js
+@@ -38,6 +38,47 @@ function detectPlatform() {
+         return "android";
+     return "web";
+ }
++// Wrap the Capacitor LlamaCpp proxy so the await-chain on loadPlugin()
++// does not call `proxy.then(...)` (the proxy intercepts every property
++// access and dispatches it as a native method call; Android does not
++// implement `then`, so the unwrap throws "LlamaCpp.then() is not
++// implemented on android" and every WS-routed load/generate stalls with
++// DEVICE_TIMEOUT). Mirrors the upstream `toPlainLlamaCppPlugin` helper
++// in eliza/packages/native-plugins/llama/src that was lost during the
++// npm publish of @elizaos/capacitor-llama@0.1.0.
++function toPlainLlamaCppPlugin(plugin) {
++    return {
++        initContext: (options) => plugin.initContext(options),
++        releaseContext: (options) => plugin.releaseContext(options),
++        releaseAllContexts: () => plugin.releaseAllContexts(),
++        getHardwareInfo: typeof plugin.getHardwareInfo === "function"
++            ? () => plugin.getHardwareInfo()
++            : undefined,
++        completion: typeof plugin.completion === "function"
++            ? (options) => plugin.completion(options)
++            : undefined,
++        generateText: typeof plugin.generateText === "function"
++            ? (options) => plugin.generateText(options)
++            : undefined,
++        stopCompletion: (options) => plugin.stopCompletion(options),
++        embedding: typeof plugin.embedding === "function"
++            ? (options) => plugin.embedding(options)
++            : undefined,
++        tokenize: typeof plugin.tokenize === "function"
++            ? (options) => plugin.tokenize(options)
++            : undefined,
++        setCacheType: typeof plugin.setCacheType === "function"
++            ? (options) => plugin.setCacheType(options)
++            : undefined,
++        setSpecType: typeof plugin.setSpecType === "function"
++            ? (options) => plugin.setSpecType(options)
++            : undefined,
++        getNativeKernels: typeof plugin.getNativeKernels === "function"
++            ? () => plugin.getNativeKernels()
++            : undefined,
++        addListener: (event, listener) => plugin.addListener(event, listener),
++    };
++}
+ class CapacitorLlamaAdapter {
+     constructor() {
+         this.plugin = null;
+@@ -54,10 +95,11 @@ class CapacitorLlamaAdapter {
+         if (this.pluginLoadPromise)
+             return this.pluginLoadPromise;
+         this.pluginLoadPromise = (async () => {
+-            const plugin = resolveLlamaCppPlugin(await import("llama-cpp-capacitor"));
+-            if (!plugin) {
++            const nativePlugin = resolveLlamaCppPlugin(await import("llama-cpp-capacitor"));
++            if (!nativePlugin) {
+                 throw new Error("llama-cpp-capacitor did not expose an initContext method");
+             }
++            const plugin = toPlainLlamaCppPlugin(nativePlugin);
+             const tokenListenerHandle = await plugin.addListener("@LlamaCpp_onToken", (data) => {
+                 var _a, _b;
+                 const token = (_b = (_a = data.tokenResult) === null || _a === void 0 ? void 0 : _a.token) !== null && _b !== void 0 ? _b : data.token;

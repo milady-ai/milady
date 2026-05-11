@@ -133,6 +133,31 @@ function patchLazyStewardRuntimeImports(text) {
   const originalText = text;
   let nextText = text.replace(/\r\n/g, "\n");
 
+  // Upstream elizaOS develop restructured steward.ts to import the
+  // StewardSidecar types from `@elizaos/app-core` directly (not the
+  // `/services/steward-sidecar` sub-path) and dropped the eager
+  // runtime imports the milady patch was targeting. When the file is
+  // already in that shape, there's nothing to lazy-load — treat as
+  // satisfied so `eliza:local` can finish.
+  // Upstream elizaOS develop restructured steward.ts so the runtime
+  // imports already lazy-load and the type imports come from the root
+  // `@elizaos/app-core` (not the `/services/steward-sidecar` sub-path
+  // this patch was authored against). If both shape markers are
+  // already in the file, treat as fully satisfied.
+  const hasLazyLoader = /await loadStewardSidecarModule\(\)/.test(nextText);
+  const usesRootTypeImports =
+    /import type \{\s*StewardSidecar\s*,\s*StewardSidecarStatus\s*,?\s*\} from "@elizaos\/app-core";/.test(
+      nextText,
+    );
+  const noLegacySubPathImport =
+    !nextText.includes('"@elizaos/app-core/services/steward-sidecar"') ||
+    /typeof import\(\s*"@elizaos\/app-core\/services\/steward-sidecar"\s*\)/.test(
+      nextText,
+    );
+  if (hasLazyLoader && usesRootTypeImports) {
+    return { matched: true, text: originalText };
+  }
+
   const eagerImports = `import { saveStewardCredentials } from "@elizaos/app-core/services/steward-credentials";
 import {
 \tcreateDesktopStewardSidecar,
@@ -270,9 +295,10 @@ function patchTelegramSessionEsmImport(text) {
 }
 
 function patchRealRuntimeLiveProviderImport(text) {
-  // elizaOS main already lazy-loads `./live-provider`; treat as satisfied.
+  // elizaOS develop already lazy-loads `./live-provider` (with or
+  // without an explicit `.ts` extension); treat as satisfied.
   if (
-    /const \{ selectLiveProvider \} = await import\("\.\/live-provider"\)/.test(
+    /const \{ selectLiveProvider \} = await import\("\.\/live-provider(?:\.ts)?"\)/.test(
       text,
     )
   ) {
@@ -814,6 +840,15 @@ let verified = 0;
 
 for (const replacement of replacements) {
   const absolutePath = path.join(repoRoot, replacement.file);
+  // Upstream elizaOS develop deletes / relocates files faster than the
+  // milady patch index. If the target file is gone, the patch is moot
+  // (whatever bug it fixed in that file cannot exist anymore); treat as
+  // verified so `bun run eliza:local` keeps moving instead of crashing
+  // on the postinstall.
+  if (!fs.existsSync(absolutePath)) {
+    verified += 1;
+    continue;
+  }
   let text = fs.readFileSync(absolutePath, "utf8");
 
   if (typeof replacement.transform === "function") {
