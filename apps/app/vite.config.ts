@@ -92,12 +92,23 @@ const nativePluginsRoot = path.join(localElizaRoot, "packages/native-plugins");
 const appCoreSrcRoot = hasLocalElizaWorkspace
   ? path.join(localElizaRoot, "packages/app-core/src")
   : null;
-const appCoreNativePluginEntrypoints = appCoreSrcRoot
-  ? path.join(appCoreSrcRoot, "platform/native-plugin-entrypoints.ts")
-  : requireResolve("@elizaos/app-core/platform/native-plugin-entrypoints");
 const emptyNodeModuleEntry = appCoreSrcRoot
   ? path.join(appCoreSrcRoot, "platform/empty-node-module.ts")
   : requireResolve("@elizaos/app-core/platform/empty-node-module");
+// `native-plugin-entrypoints` is only imported on iOS/Android at runtime, but
+// vite must still statically resolve the specifier. Upstream eliza may remove
+// this file (mobile Capacitor wiring is in flux) — fall back to the empty
+// stub so desktop builds keep working when the source is absent.
+const appCoreNativePluginEntrypoints = (() => {
+  if (appCoreSrcRoot) {
+    const localPath = path.join(
+      appCoreSrcRoot,
+      "platform/native-plugin-entrypoints.ts",
+    );
+    return fs.existsSync(localPath) ? localPath : emptyNodeModuleEntry;
+  }
+  return requireResolve("@elizaos/app-core/platform/native-plugin-entrypoints");
+})();
 const uiPkgRoot = hasLocalElizaWorkspace
   ? path.join(localElizaRoot, "packages/ui")
   : null;
@@ -370,10 +381,18 @@ function resolveLocalSharedAliases(): Alias[] {
 }
 
 function resolveLocalAppCoreAliases(): Alias[] {
+  // Map @elizaos/agent's root import to its real source so static named
+  // imports from compiled app-core code (e.g. account-pool.js's
+  // ACCOUNT_CREDENTIAL_PROVIDER_IDS) resolve. Server-only runtime branches
+  // tree-shake out for the renderer; the previous empty-module stub only
+  // had a default export and broke Rollup's static analysis.
+  const agentRootEntry = appCoreSrcRoot
+    ? path.join(localElizaRoot, "packages/agent/src/index.ts")
+    : emptyNodeModuleEntry;
   const packageAgnosticAliases: Alias[] = [
     {
       find: /^@elizaos\/agent$/,
-      replacement: emptyNodeModuleEntry,
+      replacement: agentRootEntry,
     },
     {
       find: /^@elizaos\/core$/,
@@ -728,6 +747,17 @@ function isElizaCoreBrowserDistId(id: string | undefined): boolean {
  */
 function resolveElizaCoreBundlePath(): string {
   const pkgDir = tryResolveElizaCorePkgDir();
+  // Prefer the Node entry for the renderer bundle when running against a
+  // linked eliza checkout. Upstream's hand-curated index.browser.ts misses
+  // many symbols that server-side modules (statically reachable from the
+  // renderer's dep graph) re-export — fixing each one is whack-a-mole. The
+  // Node entry has the full surface; nativeModuleStubPlugin + the rollup
+  // externals already neutralize the Node-only API surface, and tree-shaking
+  // drops unused code.
+  if (pkgDir) {
+    const nodeEntry = path.join(pkgDir, "dist/node/index.node.js");
+    if (fs.existsSync(nodeEntry)) return nodeEntry;
+  }
   const sourceBrowserEntry = resolveElizaCoreSourceBrowserPath();
   if (sourceBrowserEntry) return sourceBrowserEntry;
   if (pkgDir) {
@@ -1083,11 +1113,16 @@ function desktopCorsPlugin(): Plugin {
 function generateNodeBuiltinStub(moduleId: string, req = _require): string {
   const bareModule = moduleId.replace(/^node:/, "");
   const lines = [
-    // noop: returns itself (for chained calls like createRequire(url)(id)),
-    // and is a valid class base (so `class X extends noop` works).
-    "const handler = { get(t, p) { if (typeof p === 'symbol') return undefined; if (p === '__esModule') return true; if (p === 'default') return t; if (p === 'prototype') return {}; if (p in t) return t[p]; return noop; }, set(t, p, v) { try { t[p] = v; } catch {} return true; }, apply() { return noop; }, construct() { return noop; }, defineProperty(t, p, d) { try { Object.defineProperty(t, p, { configurable: true, writable: true, enumerable: true, ...d }); } catch {} return true; } };",
-    "const noop = new Proxy(function noop(){}, handler);",
-    "const stub = new Proxy({}, handler);",
+    // noop / stub: function-wrapped Proxies so:
+    //   * `class X extends noop` works (Proxy wraps a callable)
+    //   * arbitrary property access falls through to noop (`fs.realpath.native`)
+    //   * mutation traps (set / defineProperty) don't throw under strict mode
+    //   * `instanceof`, `default`, `__esModule` resolve sensibly for ESM<->CJS
+    "function noopFn() { return noop; }",
+    "const handler = { get(t, p) { if (typeof p === 'symbol') return undefined; if (p === '__esModule') return true; if (p === 'default') return noop; if (p === 'prototype') return {}; if (p in t) return t[p]; return noop; }, set(t, p, v) { try { t[p] = v; } catch {} return true; }, has() { return true; }, ownKeys() { return []; }, getOwnPropertyDescriptor() { return { configurable: true, enumerable: true }; }, apply() { return noop; }, construct() { return noop; }, defineProperty(t, p, d) { try { Object.defineProperty(t, p, { configurable: true, writable: true, enumerable: true, ...d }); } catch {} return true; } };",
+    "const noop = new Proxy(noopFn, handler);",
+    "const stub = noop;",
+    "const asyncNoop = () => Promise.resolve();",
     "export default stub;",
   ];
 
@@ -1156,7 +1191,15 @@ function generateNodeBuiltinStub(moduleId: string, req = _require): string {
           val.prototype &&
           Object.getOwnPropertyNames(val.prototype).length > 1
         ) {
-          lines.push(`export class ${name} { constructor() {} }`);
+          // Class constructors: return the noop proxy so that
+          // `new Resolver().setServers(...)` and similar instance-method
+          // accesses on the stubbed object don't throw. Wrap in a Proxy
+          // so static-method access (Buffer.from, Symbol.hasInstance) also
+          // falls through to noop instead of being undefined.
+          lines.push(
+            `class __${name}Class { constructor() { return noop; } }`,
+            `export const ${name} = new Proxy(__${name}Class, { get(t, p) { if (p === 'prototype' || p === 'name' || p === 'length' || (typeof p === 'symbol')) { return Reflect.get(t, p); } if (p in t) return t[p]; return noop; }, construct() { return noop; } });`,
+          );
         } else {
           lines.push(`export const ${name} = noop;`);
         }
@@ -1484,13 +1527,27 @@ function generateNamedExportStub(names: readonly string[]): string {
 const PLUGIN_ELIZACLOUD_STUB_NAMES = [
   "__resetCloudBaseUrlCache",
   "clearCloudSecrets",
+  "CloudOnboardingResult",
+  "CloudRouteState",
+  "CloudWalletDescriptor",
+  "CloudWalletProvider",
+  "ElizaCloudClient",
   "elizaOSCloudPlugin",
   "ensureCloudTtsApiKeyAlias",
   "getCloudSecret",
+  "getOrCreateClientAddressKey",
+  "handleCloudBillingRoute",
+  "handleCloudCompatRoute",
+  "handleCloudRelayRoute",
+  "handleCloudRoute",
+  "handleCloudStatusRoutes",
   "handleCloudTtsPreviewRoute",
   "isCloudProvisionedContainer",
   "mirrorCompatHeaders",
+  "normalizeCloudSecret",
   "normalizeCloudSiteUrl",
+  "persistCloudWalletCache",
+  "provisionCloudWalletsBestEffort",
   "resolveCloudApiBaseUrl",
   "resolveCloudApiKey",
   "resolveCloudTtsBaseUrl",
@@ -1500,6 +1557,43 @@ const PLUGIN_ELIZACLOUD_STUB_NAMES = [
 
 function generatePluginElizacloudStub(): string {
   return generateNamedExportStub(PLUGIN_ELIZACLOUD_STUB_NAMES);
+}
+
+// Names actually imported from @elizaos/plugin-local-inference by server-only
+// agent runtime modules. The renderer never enters those code paths; the
+// stub satisfies Rollup's static analysis and trees away at module init.
+const PLUGIN_LOCAL_INFERENCE_STUB_NAMES = [
+  "getLocalInferenceActiveModelId",
+  "getLocalInferenceActiveSnapshot",
+  "getLocalInferenceChatStatus",
+  "handleLocalInferenceChatCommand",
+  "handleLocalInferenceRoutes",
+] as const;
+
+function generatePluginLocalInferenceStub(): string {
+  return generateNamedExportStub(PLUGIN_LOCAL_INFERENCE_STUB_NAMES);
+}
+
+// esbuild is a server-only build-time dep that drizzle-kit pulls in; the
+// agent's plugin-compiler imports it as a namespace. Stub the surface
+// the renderer's transitive imports might touch.
+const ESBUILD_STUB_NAMES = [
+  "build",
+  "buildSync",
+  "context",
+  "transform",
+  "transformSync",
+  "formatMessages",
+  "formatMessagesSync",
+  "analyzeMetafile",
+  "analyzeMetafileSync",
+  "initialize",
+  "stop",
+  "version",
+] as const;
+
+function generateEsbuildStub(): string {
+  return generateNamedExportStub(ESBUILD_STUB_NAMES);
 }
 
 const NATIVE_MODULE_STUB_GENERATORS = new Map<
@@ -1514,12 +1608,24 @@ const NATIVE_MODULE_STUB_GENERATORS = new Map<
   ["node:async_hooks", generateAsyncHooksStub],
   ["async_hooks", generateAsyncHooksStub],
   ["@elizaos/plugin-elizacloud", generatePluginElizacloudStub],
+  ["@elizaos/plugin-local-inference", generatePluginLocalInferenceStub],
+  ["esbuild", generateEsbuildStub],
   // @node-rs/argon2's server-side Rust binding is referenced by
   // app-core's password-hashing helpers. Renderer never executes them
   // (auth happens in the API child); stub the named exports.
   [
     "@node-rs/argon2",
     () => generateNamedExportStub(["hash", "verify", "Algorithm"]),
+  ],
+  [
+    "qrcode-terminal",
+    () =>
+      // plugin-whatsapp imports { generate } at module scope; provide the
+      // named export so Rollup's static analysis succeeds. The renderer
+      // never paints a terminal QR; this is a no-op shim.
+      "export const generate = (_text, _opts, cb) => { if (cb) cb(''); };\n" +
+      "export const setErrorLevel = () => {};\n" +
+      "export default { generate, setErrorLevel };\n",
   ],
 ]);
 
@@ -1586,11 +1692,20 @@ function nativeModuleStubPlugin(): Plugin {
     // into the renderer graph, stub it before socksclient extends node:net.
     "telegram",
     "socks",
+    // Terminal QR code printer — Node-only, ships legacy CJS with strict-mode
+    // -illegal octal escapes (\033 ANSI codes). Rollup's parser rejects it.
+    // The renderer never paints to a terminal; stub so the server-side OAuth
+    // QR helper that imports it doesn't blow up the browser bundle.
+    "qrcode-terminal",
     // Server-only plugins statically imported from the @elizaos/agent runtime.
     // Their exports maps nest browser/node conditional exports that Vite 6's
     // commonjs--resolver cannot walk. Stubbing returns an empty Proxy virtual
     // module so the browser bundle never tries to execute server-only code.
     "@elizaos/plugin-local-embedding",
+    // plugin-local-inference creates a Node dns.Resolver at module load
+    // (mobileDnsResolver) — server-only side effect. Stub so the renderer
+    // never evaluates that initializer.
+    "@elizaos/plugin-local-inference",
     "@elizaos/plugin-anthropic",
     "@elizaos/plugin-pdf",
     "@elizaos/plugin-sql",
@@ -1611,6 +1726,11 @@ function nativeModuleStubPlugin(): Plugin {
     // happens server-side in the API child anyway.
     "@node-rs/argon2-wasm32-wasi",
     "@node-rs/argon2",
+    // esbuild is a build-time dep that drizzle-kit and friends pull in
+    // transitively. Its `lib/main.js` does `process.versions.node.split(".")`
+    // at module init, which throws in the renderer (process.versions.node
+    // is undefined in browsers). Stub so the bundle never evaluates that.
+    "esbuild",
     // OS keychain bridge — Node-only native addon (.node binary). Pulled
     // transitively by @elizaos/vault. Vite's commonjs--resolver chokes on
     // the platform-specific .node files; stub it for the renderer.
@@ -1627,6 +1747,11 @@ function nativeModuleStubPlugin(): Plugin {
   // (@napi-rs/keyring-darwin-arm64, -darwin-x64, -win32-x64-msvc, etc.).
   // Stub the entire scope so we don't have to enumerate every triple.
   const napiRsKeyringScopeRe = /^@napi-rs\/keyring(-.+)?$/;
+  // @snazzah/davey (Discord voice native bridge) and its platform binaries.
+  // The renderer never enters the voice-relay path; bare-specifier externals
+  // would leak `import "@snazzah/davey"` into the browser output where it
+  // can't resolve, so we stub the entire scope.
+  const snazzahDaveyScopeRe = /^@snazzah\/davey(-.+)?$/;
   // Capacitor native plugins — mobile-only, must never run in the browser.
   // Stubbing prevents Rollup from failing when bun workspaces don't hoist them.
   const capacitorNativeScopeRe = /^@capacitor\/(?!core)(.+)$/;
@@ -1681,6 +1806,12 @@ function nativeModuleStubPlugin(): Plugin {
       if (nativeScopeRe.test(id)) return VIRTUAL_PREFIX + id;
       // Scoped: @napi-rs/keyring + platform binaries
       if (napiRsKeyringScopeRe.test(id)) return VIRTUAL_PREFIX + id;
+      // Scoped: @snazzah/davey + platform binaries (Discord voice native bridge)
+      if (snazzahDaveyScopeRe.test(id)) return VIRTUAL_PREFIX + id;
+      // Compiled Node native addons (.node binaries) — e.g. zlib-sync's
+      // `build/Release/zlib_sync.node` pulled by @discordjs/ws. Browser
+      // can never load these; stub so Rollup doesn't emit bare imports.
+      if (/\.node(\?.*)?$/.test(id)) return VIRTUAL_PREFIX + id;
       // Capacitor native plugins (@capacitor/* except @capacitor/core)
       if (capacitorNativeScopeRe.test(id) && !IS_CAPACITOR_MOBILE_BUILD) {
         return VIRTUAL_PREFIX + id;
@@ -1935,6 +2066,13 @@ export default defineConfig({
     target: "es2022",
   },
   resolve: {
+    // Force vite to pick the "node" condition over "browser" for package
+    // exports. Many upstream eliza plugins ship hand-curated browser
+    // entries that are missing symbols server-side modules statically
+    // import. The Node entries are complete; nativeModuleStubPlugin +
+    // rollup externals neutralize Node-only APIs at module boundaries,
+    // and tree-shaking drops unused code.
+    conditions: ["node", "import", "module", "default"],
     dedupe: [
       "react",
       "react-dom",
@@ -2195,12 +2333,17 @@ export default defineConfig({
           ].includes(id)
         )
           return true;
-        // OS keychain native addon. Renderer never calls keyring directly —
-        // it goes through the API. Externalize the umbrella + platform
-        // binaries so Rollup doesn't try to bundle the .node files.
-        if (/^@napi-rs\/keyring(-.+)?$/.test(id)) return true;
         if (/^@node-llama-cpp\//.test(id)) return true;
-        if (/^@napi-rs\/keyring/.test(id)) return true;
+        // @solana/web3.js is an optional dynamic import in plugin-x402's
+        // server-side Solana payment path. Not a declared dep; the renderer
+        // never enters that branch. Externalize to skip the resolver.
+        if (/^@solana\/web3\.js$/.test(id)) return true;
+        // Note: server-only native binaries (@napi-rs/keyring, @node-rs/argon2,
+        // @snazzah/davey, .node) are NOT externalized here — externalizing
+        // leaves bare-specifier `import "@snazzah/davey"` in the renderer
+        // output, which the browser cannot resolve. nativeModuleStubPlugin
+        // intercepts these at the resolveId stage and returns a virtual
+        // stub module so the bare specifier never escapes into the output.
         return false;
       },
       input: {

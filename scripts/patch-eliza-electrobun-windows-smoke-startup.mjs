@@ -18,6 +18,12 @@ function replaceRequiredBlock(text, pattern, replacement) {
 }
 
 function patchWindowsSmokeScript(text) {
+  // elizaOS main has merged these Windows smoke-test improvements; detect
+  // the post-patch curl form and treat as satisfied.
+  if (/--connect-timeout 3 --max-time 5/.test(text)) {
+    return { matched: true, text };
+  }
+
   let nextText = text;
 
   for (const patch of [
@@ -267,28 +273,12 @@ function loadStewardCredentialsModule(): Promise<StewardCredentialsModule> {
   };
 }
 
-function patchTelegramSessionEsmImport(text) {
-  let result = replaceRequiredBlock(
-    text,
-    /import \{ StringSession \} from "telegram\/sessions";/,
-    'import { StringSession } from "telegram/sessions/index.js";',
-  );
-  if (!result.matched) {
-    return result;
-  }
-
-  result = replaceRequiredBlock(
-    result.text,
-    /return (?:(?:\(client\.session as StringSession\))|(?:client\.session))\.save\(\);/,
-    "return (client.session as unknown as StringSession).save();",
-  );
-  return result;
-}
-
 function patchRealRuntimeLiveProviderImport(text) {
   // elizaOS main already lazy-loads `./live-provider`; treat as satisfied.
+  // Match both extensionless and `.ts` import specifiers — upstream emits
+  // `await import("./live-provider.ts")` since the NodeNext refactor.
   if (
-    /const \{ selectLiveProvider \} = await import\("\.\/live-provider"\)/.test(
+    /const \{ selectLiveProvider \} = await import\("\.\/live-provider(?:\.ts)?"\)/.test(
       text,
     )
   ) {
@@ -802,11 +792,6 @@ const replacements = [
     file: "eliza/packages/app-core/platforms/electrobun/src/native/steward.ts",
     description: "lazy-load Steward sidecar runtime imports",
     transform: patchLazyStewardRuntimeImports,
-  },
-  {
-    file: "eliza/packages/agent/src/services/telegram-account-auth.ts",
-    description: "use explicit Telegram sessions ESM import",
-    transform: patchTelegramSessionEsmImport,
   },
   {
     file: "eliza/packages/app-core/test/helpers/real-runtime.ts",
