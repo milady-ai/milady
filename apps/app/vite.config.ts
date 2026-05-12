@@ -61,6 +61,16 @@ function shouldUseLocalElizaSource(): boolean {
   if (["package", "packages", "published", "npm"].includes(sourceMode)) {
     return false;
   }
+  // Legacy skip flag — set by CI when running in packages mode (e.g. the
+  // setup-bun-workspace action with disable-local-eliza-workspace=true).
+  // Mirrors isLocalElizaDisabled() in scripts/lib/eliza-package-mode.mjs so
+  // vite agrees with the rest of the toolchain about which mode it is in.
+  if (
+    process.env.MILADY_SKIP_LOCAL_UPSTREAMS === "1" ||
+    process.env.ELIZA_SKIP_LOCAL_UPSTREAMS === "1"
+  ) {
+    return false;
+  }
   if (
     process.env.MILADY_FORCE_LOCAL_UPSTREAMS === "1" ||
     process.env.ELIZA_FORCE_LOCAL_UPSTREAMS === "1"
