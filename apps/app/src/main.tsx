@@ -367,7 +367,9 @@ try {
   // through to the normal self-hosted token path above.
   try {
     const elizaNative = (
-      globalThis as unknown as { ElizaNative?: { getLocalAgentToken?: () => string | null } }
+      globalThis as unknown as {
+        ElizaNative?: { getLocalAgentToken?: () => string | null };
+      }
     ).ElizaNative;
     if (elizaNative && typeof elizaNative.getLocalAgentToken === "function") {
       const nativeToken = elizaNative.getLocalAgentToken();
@@ -390,7 +392,9 @@ setBootConfig(appBootConfig);
 void (function watchElizaNativeToken() {
   if (typeof globalThis === "undefined") return;
   const bridge = (
-    globalThis as unknown as { ElizaNative?: { getLocalAgentToken?: () => string | null } }
+    globalThis as unknown as {
+      ElizaNative?: { getLocalAgentToken?: () => string | null };
+    }
   ).ElizaNative;
   if (!bridge || typeof bridge.getLocalAgentToken !== "function") return;
   // If a token was already captured above, don't start the interval.

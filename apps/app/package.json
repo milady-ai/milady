@@ -30,7 +30,7 @@
     "build:web": "vite build"
   },
   "dependencies": {
-    "@clawville/app-clawville": "workspace:*",
+    "@clawville/app-clawville": "^0.2.0",
     "@elizaos/app-companion": "workspace:*",
     "@elizaos/app-hyperliquid": "workspace:*",
     "@elizaos/app-lifeops": "workspace:*",
