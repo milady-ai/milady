@@ -445,7 +445,28 @@ function resolveLocalAppCoreAliases(): Alias[] {
 
   const uiSource = path.join(appCoreSrcRoot, "ui");
 
+  // Wave A moved styles from @elizaos/app-core to @elizaos/ui. The npm
+  // @elizaos/app-core package still includes them for packages-mode compat,
+  // but the local source no longer has ./styles/*.css or the exports entries.
+  // Add an explicit redirect before the catch-all so local builds find the CSS.
+  const uiStylesSourceDir = uiPkgRoot
+    ? path.join(uiPkgRoot, "src/styles")
+    : null;
+  const appCoreStylesLocalDir = path.join(appCoreSrcRoot, "styles");
+  const cssRedirectAlias: Alias[] =
+    uiStylesSourceDir &&
+    fs.existsSync(path.join(uiStylesSourceDir, "styles.css")) &&
+    !fs.existsSync(path.join(appCoreStylesLocalDir, "styles.css"))
+      ? [
+          {
+            find: /^@elizaos\/app-core\/styles\/(.+\.css)$/,
+            replacement: `${uiStylesSourceDir}/$1`,
+          },
+        ]
+      : [];
+
   return [
+    ...cssRedirectAlias,
     ...generatedAliases,
     {
       find: /^@elizaos\/app-core\/(.+)$/,
