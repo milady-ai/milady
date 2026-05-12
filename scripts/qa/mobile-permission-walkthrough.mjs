@@ -45,16 +45,23 @@
  *       --finalize run against a directory that does not exist).
  */
 
-import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { createHash } from "node:crypto";
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const REPO_ROOT = resolve(__dirname, '..', '..');
+const REPO_ROOT = resolve(__dirname, "..", "..");
 
-const SURFACES = new Set(['ios', 'android']);
+const SURFACES = new Set(["ios", "android"]);
 
 /**
  * Permission cascade prompts. P1-P5 are universal; P6 is Android-only
@@ -66,46 +73,48 @@ const SURFACES = new Set(['ios', 'android']);
  */
 const PROMPTS = [
   {
-    id: 'P1',
-    file: 'P1-notifications.png',
-    title: 'Notifications',
+    id: "P1",
+    file: "P1-notifications.png",
+    title: "Notifications",
     trigger:
-      'Drive the app to a point where it schedules a notification (e.g. open Reminders / push-notification setup flow).',
+      "Drive the app to a point where it schedules a notification (e.g. open Reminders / push-notification setup flow).",
     notes:
       'iOS: "Milady" Would Like to Send You Notifications. Android: stock POST_NOTIFICATIONS prompt (API 33+).',
     androidOnly: false,
   },
   {
-    id: 'P2',
-    file: 'P2-photos.png',
-    title: 'Photos / Files',
+    id: "P2",
+    file: "P2-photos.png",
+    title: "Photos / Files",
     trigger:
-      'Trigger an attach-photo / pick-file action (e.g. avatar picker, media generation upload).',
+      "Trigger an attach-photo / pick-file action (e.g. avatar picker, media generation upload).",
     notes:
       'iOS: photo library access prompt with "Limited Access" / "Allow Full Access". Android: READ_MEDIA_IMAGES / Storage Access Framework picker (no classic dialog on API 33+; capture the picker chrome).',
     androidOnly: false,
   },
   {
-    id: 'P3',
-    file: 'P3-camera.png',
-    title: 'Camera',
-    trigger: 'Open a camera-using surface (camsnap skill, profile photo capture, scan barcode).',
-    notes: 'iOS: "Milady" Would Like to Access the Camera. Android: stock CAMERA prompt.',
-    androidOnly: false,
-  },
-  {
-    id: 'P4',
-    file: 'P4-microphone.png',
-    title: 'Microphone',
+    id: "P3",
+    file: "P3-camera.png",
+    title: "Camera",
     trigger:
-      'Trigger voice input (TTS demo, dictation, voice mode toggle).',
-    notes: 'iOS: "Milady" Would Like to Access the Microphone. Android: stock RECORD_AUDIO prompt.',
+      "Open a camera-using surface (camsnap skill, profile photo capture, scan barcode).",
+    notes:
+      'iOS: "Milady" Would Like to Access the Camera. Android: stock CAMERA prompt.',
     androidOnly: false,
   },
   {
-    id: 'P5',
-    file: 'P5-location.png',
-    title: 'Location (when in use)',
+    id: "P4",
+    file: "P4-microphone.png",
+    title: "Microphone",
+    trigger: "Trigger voice input (TTS demo, dictation, voice mode toggle).",
+    notes:
+      'iOS: "Milady" Would Like to Access the Microphone. Android: stock RECORD_AUDIO prompt.',
+    androidOnly: false,
+  },
+  {
+    id: "P5",
+    file: "P5-location.png",
+    title: "Location (when in use)",
     trigger:
       'Trigger a location-dependent action (weather skill, "near me" query).',
     notes:
@@ -113,35 +122,35 @@ const PROMPTS = [
     androidOnly: false,
   },
   {
-    id: 'P6',
-    file: 'P6-bluetooth-localnet.png',
-    title: 'Bluetooth / Local Network',
+    id: "P6",
+    file: "P6-bluetooth-localnet.png",
+    title: "Bluetooth / Local Network",
     trigger:
-      'Trigger any LAN / BLE-scanning flow (device pairing, local agent discovery on 127.0.0.1:31337 pre-seed).',
+      "Trigger any LAN / BLE-scanning flow (device pairing, local agent discovery on 127.0.0.1:31337 pre-seed).",
     notes:
-      'Android-only step. Android 12+ surfaces NEARBY_DEVICES (BLUETOOTH_SCAN/BLUETOOTH_CONNECT). iOS treats Local Network as an opaque first-touch prompt that is captured implicitly by P2/P3 surfaces.',
+      "Android-only step. Android 12+ surfaces NEARBY_DEVICES (BLUETOOTH_SCAN/BLUETOOTH_CONNECT). iOS treats Local Network as an opaque first-touch prompt that is captured implicitly by P2/P3 surfaces.",
     androidOnly: true,
   },
 ];
 
 function promptsForSurface(surface) {
-  return PROMPTS.filter((p) => !p.androidOnly || surface === 'android');
+  return PROMPTS.filter((p) => !p.androidOnly || surface === "android");
 }
 
 function parseArgs(argv) {
   const out = { flags: new Set(), values: {} };
   for (let i = 2; i < argv.length; i++) {
     const arg = argv[i];
-    if (!arg.startsWith('--')) {
+    if (!arg.startsWith("--")) {
       throw new Error(`Unexpected positional argument: ${arg}`);
     }
     const body = arg.slice(2);
-    const eq = body.indexOf('=');
+    const eq = body.indexOf("=");
     if (eq >= 0) {
       out.values[body.slice(0, eq)] = body.slice(eq + 1);
     } else {
       const next = argv[i + 1];
-      if (next && !next.startsWith('--')) {
+      if (next && !next.startsWith("--")) {
         out.values[body] = next;
         i++;
       } else {
@@ -155,55 +164,72 @@ function parseArgs(argv) {
 function today() {
   const d = new Date();
   const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
   return `${y}-${m}-${day}`;
 }
 
 function reportDir(surface) {
-  return join(REPO_ROOT, 'reports', 'qa', today(), 'mobile-permissions', surface);
+  return join(
+    REPO_ROOT,
+    "reports",
+    "qa",
+    today(),
+    "mobile-permissions",
+    surface,
+  );
 }
 
 function writeChecklist(surface, dir, prompts) {
   const lines = [];
   lines.push(`# Mobile permission cascade checklist — ${surface}`);
-  lines.push('');
+  lines.push("");
   lines.push(`Date: ${today()}`);
   lines.push(`Surface: ${surface}`);
-  lines.push(`Prompts: ${prompts.length}${surface === 'ios' ? ' (P6 Bluetooth/LocalNet is Android-only)' : ''}`);
-  lines.push('');
   lines.push(
-    'Source: docs/QA-onboarding.md M5 row + eliza/packages/ui/src/platform/desktop-permissions-client.ts and mobile-permissions-client.ts. Drive each prompt with the computer-use MCP from within a Claude Code session; this script only scaffolds and validates the report directory.',
+    `Prompts: ${prompts.length}${surface === "ios" ? " (P6 Bluetooth/LocalNet is Android-only)" : ""}`,
   );
-  lines.push('');
-  lines.push('| ID | Status | Outcome | Expected screenshot | Title | Trigger | Notes |');
-  lines.push('|----|--------|---------|---------------------|-------|---------|-------|');
+  lines.push("");
+  lines.push(
+    "Source: docs/QA-onboarding.md M5 row + eliza/packages/ui/src/platform/desktop-permissions-client.ts and mobile-permissions-client.ts. Drive each prompt with the computer-use MCP from within a Claude Code session; this script only scaffolds and validates the report directory.",
+  );
+  lines.push("");
+  lines.push(
+    "| ID | Status | Outcome | Expected screenshot | Title | Trigger | Notes |",
+  );
+  lines.push(
+    "|----|--------|---------|---------------------|-------|---------|-------|",
+  );
   for (const p of prompts) {
     lines.push(
       `| ${p.id} | [ ] | granted / skipped | \`${p.file}\` | ${p.title} | ${p.trigger} | ${p.notes} |`,
     );
   }
-  lines.push('');
-  lines.push('## Capture commands (operator)');
-  lines.push('');
+  lines.push("");
+  lines.push("## Capture commands (operator)");
+  lines.push("");
   lines.push(
-    'For each prompt: drive the app to trigger the dialog, screenshot it before responding, then grant or skip. Record the outcome (granted/skipped) in the Outcome column above.',
+    "For each prompt: drive the app to trigger the dialog, screenshot it before responding, then grant or skip. Record the outcome (granted/skipped) in the Outcome column above.",
   );
-  lines.push('');
-  lines.push('```');
-  lines.push('mcp__computer-use__screenshot       (capture the OS prompt)');
-  lines.push('  → save bytes to:');
+  lines.push("");
+  lines.push("```");
+  lines.push("mcp__computer-use__screenshot       (capture the OS prompt)");
+  lines.push("  → save bytes to:");
   lines.push(`     ${dir}/<Pn-name>.png`);
-  lines.push('mcp__computer-use__left_click       (grant or dismiss the dialog)');
-  lines.push('```');
-  lines.push('');
-  lines.push('When done, run:');
-  lines.push('');
-  lines.push('```');
-  lines.push(`node scripts/qa/mobile-permission-walkthrough.mjs --finalize --surface ${surface}`);
-  lines.push('```');
-  lines.push('');
-  writeFileSync(join(dir, 'CHECKLIST.md'), lines.join('\n'));
+  lines.push(
+    "mcp__computer-use__left_click       (grant or dismiss the dialog)",
+  );
+  lines.push("```");
+  lines.push("");
+  lines.push("When done, run:");
+  lines.push("");
+  lines.push("```");
+  lines.push(
+    `node scripts/qa/mobile-permission-walkthrough.mjs --finalize --surface ${surface}`,
+  );
+  lines.push("```");
+  lines.push("");
+  writeFileSync(join(dir, "CHECKLIST.md"), lines.join("\n"));
 }
 
 function init(surface) {
@@ -211,8 +237,10 @@ function init(surface) {
   const prompts = promptsForSurface(surface);
   mkdirSync(dir, { recursive: true });
   writeChecklist(surface, dir, prompts);
-  process.stdout.write(`Scaffolded ${surface} mobile permission walkthrough at:\n  ${dir}\n`);
-  process.stdout.write(`Checklist: ${join(dir, 'CHECKLIST.md')}\n`);
+  process.stdout.write(
+    `Scaffolded ${surface} mobile permission walkthrough at:\n  ${dir}\n`,
+  );
+  process.stdout.write(`Checklist: ${join(dir, "CHECKLIST.md")}\n`);
   process.stdout.write(
     `Save ${prompts.length} screenshots into that directory using the filenames listed in CHECKLIST.md.\n`,
   );
@@ -223,13 +251,15 @@ function init(surface) {
 
 function sha256Of(path) {
   const buf = readFileSync(path);
-  return createHash('sha256').update(buf).digest('hex');
+  return createHash("sha256").update(buf).digest("hex");
 }
 
 function finalize(surface) {
   const dir = reportDir(surface);
   if (!existsSync(dir)) {
-    process.stderr.write(`No report directory found at ${dir}. Run --init first.\n`);
+    process.stderr.write(
+      `No report directory found at ${dir}. Run --init first.\n`,
+    );
     process.exit(2);
   }
 
@@ -248,13 +278,17 @@ function finalize(surface) {
 
   const lines = [];
   lines.push(`# Mobile permission cascade summary — ${surface}`);
-  lines.push('');
+  lines.push("");
   lines.push(`Date: ${today()}`);
   lines.push(`Surface: ${surface}`);
   lines.push(`Captured: ${present.length}/${prompts.length}`);
-  lines.push('');
-  lines.push('| ID | Expected file | Present | Size (bytes) | sha256 | Title |');
-  lines.push('|----|---------------|---------|--------------|--------|-------|');
+  lines.push("");
+  lines.push(
+    "| ID | Expected file | Present | Size (bytes) | sha256 | Title |",
+  );
+  lines.push(
+    "|----|---------------|---------|--------------|--------|-------|",
+  );
   for (const p of prompts) {
     const hit = present.find((entry) => entry.prompt.id === p.id);
     if (hit) {
@@ -269,7 +303,9 @@ function finalize(surface) {
   // Surface any unexpected extras in the directory so operators notice typos.
   const extras = [];
   try {
-    const expected = new Set(prompts.map((p) => p.file).concat(['CHECKLIST.md', 'SUMMARY.md']));
+    const expected = new Set(
+      prompts.map((p) => p.file).concat(["CHECKLIST.md", "SUMMARY.md"]),
+    );
     for (const entry of readdirSync(dir)) {
       if (!expected.has(entry)) extras.push(entry);
     }
@@ -277,27 +313,29 @@ function finalize(surface) {
     // directory was just verified to exist; ignore
   }
   if (extras.length > 0) {
-    lines.push('');
-    lines.push('## Unexpected files');
-    lines.push('');
+    lines.push("");
+    lines.push("## Unexpected files");
+    lines.push("");
     for (const e of extras) lines.push(`- \`${e}\``);
   }
 
-  lines.push('');
-  writeFileSync(join(dir, 'SUMMARY.md'), lines.join('\n'));
+  lines.push("");
+  writeFileSync(join(dir, "SUMMARY.md"), lines.join("\n"));
 
   if (present.length === 0) {
-    const missingIds = missing.map((p) => p.id).join(', ');
+    const missingIds = missing.map((p) => p.id).join(", ");
     process.stdout.write(`INCOMPLETE: missing all (${missingIds})\n`);
     // Partial / empty is OK in local dev — exit 0 as long as the scaffold exists.
     return;
   }
   if (missing.length === 0) {
-    process.stdout.write(`PASS: ${present.length}/${prompts.length} prompts captured\n`);
+    process.stdout.write(
+      `PASS: ${present.length}/${prompts.length} prompts captured\n`,
+    );
     return;
   }
   process.stdout.write(
-    `INCOMPLETE: missing ${missing.map((p) => p.id).join(', ')} (${present.length}/${prompts.length} captured)\n`,
+    `INCOMPLETE: missing ${missing.map((p) => p.id).join(", ")} (${present.length}/${prompts.length} captured)\n`,
   );
 }
 
@@ -310,16 +348,18 @@ function main() {
     process.exit(2);
   }
 
-  const surface = args.values.surface ?? 'ios';
+  const surface = args.values.surface ?? "ios";
   if (!SURFACES.has(surface)) {
-    process.stderr.write(`Invalid --surface: ${surface}. Expected one of: ${[...SURFACES].join(', ')}\n`);
+    process.stderr.write(
+      `Invalid --surface: ${surface}. Expected one of: ${[...SURFACES].join(", ")}\n`,
+    );
     process.exit(2);
   }
 
-  const wantsInit = args.flags.has('init');
-  const wantsFinalize = args.flags.has('finalize');
+  const wantsInit = args.flags.has("init");
+  const wantsFinalize = args.flags.has("finalize");
   if (wantsInit === wantsFinalize) {
-    process.stderr.write('Specify exactly one of --init or --finalize.\n');
+    process.stderr.write("Specify exactly one of --init or --finalize.\n");
     process.exit(2);
   }
 
