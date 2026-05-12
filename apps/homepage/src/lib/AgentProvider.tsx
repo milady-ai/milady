@@ -1,5 +1,6 @@
 import {
   createContext,
+  type MutableRefObject,
   type ReactNode,
   useCallback,
   useContext,
@@ -20,11 +21,13 @@ import { addConnection, getConnections, removeConnection } from "./connections";
 import {
   AGENT_UI_BASE_DOMAIN,
   CLOUD_BASE,
+  getCloudAgentApiPath,
   getCloudTokenStorageKey,
   getSandboxDiscoveryUrls,
   LOCAL_AGENT_BASE,
   rewriteAgentUiUrl,
   shouldAllowPublicSandboxDiscoveryFallback,
+  shouldAutoProbeLocalAgent,
 } from "./runtime-config";
 
 // Timeouts for health probes - shorter than before to avoid long waits
@@ -137,6 +140,16 @@ interface ProbeResult {
   avatarIndex?: number;
 }
 
+type CloudClientRef = MutableRefObject<CloudClient | null>;
+type CloudTokenRef = MutableRefObject<string | null>;
+type ProbeSemaphore = ReturnType<typeof createSemaphore>;
+
+interface CloudAgentLoadResult {
+  results: ManagedAgent[];
+  cloudAuthOk: boolean;
+  fetchError: string | null;
+}
+
 const AgentContext = createContext<AgentContextValue | null>(null);
 
 // Milady self-hosted agent discovery
@@ -163,6 +176,360 @@ function agentsEqual(a: ManagedAgent[], b: ManagedAgent[]): boolean {
       return false;
   }
   return true;
+}
+
+async function collectCloudAgents(
+  token: string | null,
+  cloudClientRef: CloudClientRef,
+  cloudTokenRef: CloudTokenRef,
+): Promise<CloudAgentLoadResult> {
+  if (!token) {
+    cloudClientRef.current = null;
+    cloudTokenRef.current = null;
+    return { results: [], cloudAuthOk: false, fetchError: null };
+  }
+
+  let client = cloudClientRef.current;
+  if (cloudTokenRef.current !== token || !client) {
+    client = new CloudClient(token);
+    cloudClientRef.current = client;
+    cloudTokenRef.current = token;
+  }
+
+  try {
+    const cloudAgents = await client.listAgents();
+    return {
+      results: cloudAgents.map((agent) => ({
+        id: `cloud-${agent.id}`,
+        name: agent.name || agent.id,
+        source: "cloud",
+        status: normalizeAgentState(agent.status),
+        model: agent.model,
+        cloudAgent: agent,
+        cloudClient: client,
+        cloudAgentId: agent.id,
+        sourceUrl: `${CLOUD_BASE}${getCloudAgentApiPath(agent.id)}`,
+        webUiUrl: agent.webUiUrl
+          ? rewriteAgentUiUrl(agent.webUiUrl)
+          : undefined,
+        billing: agent.billing,
+        region: agent.region,
+        createdAt: agent.createdAt,
+        uptime: agent.uptime,
+      })),
+      cloudAuthOk: true,
+      fetchError: null,
+    };
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Cloud API request failed";
+    const isNotAvailable =
+      message.includes("404") ||
+      (error instanceof Error && error.name === "CloudAgentsNotAvailableError");
+    return {
+      results: [],
+      cloudAuthOk: false,
+      fetchError: isNotAvailable ? null : `Cloud API: ${message}`,
+    };
+  }
+}
+
+async function fetchSandboxesForDiscovery(cloudAuthOk: boolean): Promise<{
+  sandboxes: DiscoveredSandbox[];
+  allowPublicSandboxFallback: boolean;
+}> {
+  const allowPublicSandboxFallback =
+    shouldAllowPublicSandboxDiscoveryFallback();
+  if (!cloudAuthOk && !allowPublicSandboxFallback) {
+    return { sandboxes: [], allowPublicSandboxFallback };
+  }
+
+  for (const url of getSandboxDiscoveryUrls()) {
+    try {
+      const response = await fetch(url, {
+        signal: AbortSignal.timeout(DISCOVERY_TIMEOUT_MS),
+      });
+      if (response.ok) {
+        const body = await response.json();
+        return {
+          sandboxes: Array.isArray(body) ? body : [],
+          allowPublicSandboxFallback,
+        };
+      }
+    } catch {}
+  }
+
+  return { sandboxes: [], allowPublicSandboxFallback };
+}
+
+function selectOwnedSandboxes(
+  sandboxes: DiscoveredSandbox[],
+  cloudAuthOk: boolean,
+  allowPublicSandboxFallback: boolean,
+  results: ManagedAgent[],
+) {
+  if (!cloudAuthOk) {
+    return allowPublicSandboxFallback ? sandboxes : [];
+  }
+
+  const cloudAgentNames = new Set(
+    results
+      .filter((agent) => agent.source === "cloud")
+      .map((agent) => agent.name.toLowerCase()),
+  );
+  const cloudAgentIds = new Set(
+    results
+      .filter((agent) => agent.source === "cloud")
+      .map((agent) => agent.cloudAgentId)
+      .filter((id): id is string => typeof id === "string"),
+  );
+
+  return sandboxes.filter((sandbox) => {
+    const nameMatch = cloudAgentNames.has(
+      (sandbox.agent_name || "").toLowerCase(),
+    );
+    const idMatch = cloudAgentIds.has(sandbox.id);
+    return nameMatch || idMatch;
+  });
+}
+
+function buildCloudAgentIndexByName(results: ManagedAgent[]) {
+  const indexByName = new Map<string, number>();
+  results.forEach((agent, index) => {
+    if (agent.source === "cloud") {
+      indexByName.set(agent.name.toLowerCase(), index);
+    }
+  });
+  return indexByName;
+}
+
+function addSandboxAgents(
+  results: ManagedAgent[],
+  probeTargets: ProbeTarget[],
+  discoveredIds: Set<string>,
+  sandboxes: DiscoveredSandbox[],
+) {
+  const cloudAgentIndexByName = buildCloudAgentIndexByName(results);
+
+  for (const sandbox of sandboxes) {
+    discoveredIds.add(sandbox.id);
+    const url = `https://${sandbox.id}.${AGENT_UI_BASE_DOMAIN}`;
+    const apiToken = sandbox.api_token;
+    const client = new CloudApiClient({
+      url,
+      type: "remote",
+      authToken: apiToken,
+    });
+
+    const matchingCloudIndex = cloudAgentIndexByName.get(
+      (sandbox.agent_name || "").toLowerCase(),
+    );
+    if (matchingCloudIndex !== undefined) {
+      const cloudEntry = results[matchingCloudIndex];
+      if (cloudEntry) {
+        cloudEntry.sourceUrl = url;
+        cloudEntry.client = client;
+        cloudEntry.nodeId = sandbox.node_id;
+        cloudEntry.lastHeartbeat = sandbox.last_heartbeat_at;
+        cloudEntry.apiToken = apiToken;
+        cloudEntry.webUiUrl = url;
+        probeTargets.push({
+          index: matchingCloudIndex,
+          client,
+          isCloudEnrich: true,
+        });
+      }
+      continue;
+    }
+
+    const index = results.length;
+    results.push({
+      id: `milady-${sandbox.id}`,
+      name: sandbox.agent_name || sandbox.id,
+      source: "remote",
+      status: "unknown",
+      sourceUrl: url,
+      webUiUrl: url,
+      client,
+      nodeId: sandbox.node_id,
+      lastHeartbeat: sandbox.last_heartbeat_at,
+      apiToken,
+    });
+    probeTargets.push({ index, client });
+  }
+}
+
+function wasDiscoveredMiladyRemote(
+  url: string,
+  discoveredIds: Set<string>,
+): boolean {
+  if (!url.includes(AGENT_UI_BASE_DOMAIN)) return false;
+  const match = url.match(
+    /([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/,
+  );
+  const sandboxId = match?.[1];
+  return typeof sandboxId === "string" && discoveredIds.has(sandboxId);
+}
+
+function addManualRemoteAgents(
+  results: ManagedAgent[],
+  probeTargets: ProbeTarget[],
+  discoveredIds: Set<string>,
+) {
+  for (const remote of getConnections().filter(
+    (item) => item.type === "remote",
+  )) {
+    if (wasDiscoveredMiladyRemote(remote.url, discoveredIds)) continue;
+
+    const client = new CloudApiClient({
+      url: remote.url,
+      type: "remote",
+      authToken: remote.authToken,
+    });
+    const index = results.length;
+    results.push({
+      id: `remote-${remote.id}`,
+      name: remote.name,
+      source: "remote",
+      status: "unknown",
+      sourceUrl: remote.url,
+      client,
+    });
+    probeTargets.push({ index, client });
+  }
+}
+
+function createLocalProbeClient() {
+  return shouldAutoProbeLocalAgent()
+    ? new CloudApiClient({
+        url: LOCAL_AGENT_BASE,
+        type: "local",
+      })
+    : null;
+}
+
+async function probeAgent(
+  target: ProbeTarget,
+  semaphore: ProbeSemaphore,
+): Promise<ProbeResult | null> {
+  await semaphore.acquire();
+  try {
+    const health = await target.client.health({
+      signal: AbortSignal.timeout(HEALTH_TIMEOUT_MS),
+    });
+    if (!health.ready && !health.status) {
+      return { index: target.index, status: "unknown" };
+    }
+    if (health._synthetic) {
+      return { index: target.index, status: "running" };
+    }
+    try {
+      const [status, streamSettings] = await Promise.all([
+        target.client.getAgentStatus({
+          signal: AbortSignal.timeout(STATUS_TIMEOUT_MS),
+        }),
+        target.client.getStreamSettings().catch(() => null),
+      ]);
+      return {
+        index: target.index,
+        status: status.state,
+        model: status.model,
+        uptime: status.uptime,
+        memories: status.memories,
+        agentName: status.agentName,
+        avatarIndex: streamSettings?.settings?.avatarIndex,
+      };
+    } catch {
+      return { index: target.index, status: "running" };
+    }
+  } catch {
+    return target.isCloudEnrich
+      ? null
+      : { index: target.index, status: "unknown" };
+  } finally {
+    semaphore.release();
+  }
+}
+
+async function probeLocalAgent(
+  localClient: CloudApiClient | null,
+  semaphore: ProbeSemaphore,
+): Promise<ManagedAgent | null> {
+  if (!localClient) return null;
+  await semaphore.acquire();
+  try {
+    const health = await localClient.health({
+      signal: AbortSignal.timeout(HEALTH_TIMEOUT_MS),
+    });
+    if (!health.ready && !health.status) return null;
+    if (health._synthetic) {
+      return {
+        id: "local-default",
+        name: "Local Agent",
+        source: "local",
+        status: "running",
+        sourceUrl: LOCAL_AGENT_BASE,
+        client: localClient,
+      };
+    }
+    try {
+      const status = await localClient.getAgentStatus({
+        signal: AbortSignal.timeout(STATUS_TIMEOUT_MS),
+      });
+      return {
+        id: "local-default",
+        name: status.agentName || "Local Agent",
+        source: "local",
+        status: status.state,
+        model: status.model,
+        uptime: status.uptime,
+        memories: status.memories,
+        sourceUrl: LOCAL_AGENT_BASE,
+        client: localClient,
+      };
+    } catch {
+      return {
+        id: "local-default",
+        name: "Local Agent",
+        source: "local",
+        status: "running",
+        sourceUrl: LOCAL_AGENT_BASE,
+        client: localClient,
+      };
+    }
+  } catch {
+    return null;
+  } finally {
+    semaphore.release();
+  }
+}
+
+function applyProbeResult(agent: ManagedAgent, result: ProbeResult) {
+  if (result.status) agent.status = result.status;
+  if (result.model && result.model !== "—") agent.model = result.model;
+  if (result.uptime !== undefined) agent.uptime = result.uptime;
+  if (result.memories !== undefined) agent.memories = result.memories;
+  if (result.agentName && !agent.name) agent.name = result.agentName;
+  if (result.avatarIndex !== undefined) agent.avatarIndex = result.avatarIndex;
+}
+
+function mergeProbeResults(
+  results: ManagedAgent[],
+  probeResults: Array<PromiseSettledResult<ProbeResult | null>>,
+  localAgentResult: ManagedAgent | null,
+) {
+  const enrichedResults = [...results];
+  for (const result of probeResults) {
+    if (result.status !== "fulfilled" || !result.value) continue;
+    const agent = enrichedResults[result.value.index];
+    if (agent) {
+      applyProbeResult(agent, result.value);
+    }
+  }
+  if (localAgentResult) {
+    enrichedResults.push(localAgentResult);
+  }
+  return enrichedResults;
 }
 
 export function AgentProvider({ children }: { children: ReactNode }) {
@@ -204,380 +571,54 @@ export function AgentProvider({ children }: { children: ReactNode }) {
   const clearError = useCallback(() => setError(null), []);
 
   const fetchAll = useCallback(async () => {
-    // Increment sequence to invalidate any in-flight requests
     const currentSequence = ++fetchSequenceRef.current;
-
-    // Helper to check if this fetch is still current
     const isStale = () => currentSequence !== fetchSequenceRef.current;
 
-    // Set refreshing state (but not loading if we've already loaded once)
     setIsRefreshing(true);
 
-    const results: ManagedAgent[] = [];
-    let fetchError: string | null = null;
-
-    // Track agents that need health probes (for parallel enrichment)
+    const { results, cloudAuthOk, fetchError } = await collectCloudAgents(
+      getToken(),
+      cloudClientRef,
+      cloudTokenRef,
+    );
     const probeTargets: ProbeTarget[] = [];
-
-    // 1. Cloud agents (if authenticated with Eliza Cloud)
-    //    Show immediately from API response, then enrich with health probes
-    let cloudAuthOk = false;
-    const token = getToken();
-    if (token) {
-      // Reuse existing CloudClient if token hasn't changed
-      if (cloudTokenRef.current !== token || !cloudClientRef.current) {
-        cloudClientRef.current = new CloudClient(token);
-        cloudTokenRef.current = token;
-      }
-      const cc = cloudClientRef.current;
-      try {
-        const cloudAgents = await cc.listAgents();
-        cloudAuthOk = true;
-        for (const ca of cloudAgents) {
-          results.push({
-            id: `cloud-${ca.id}`,
-            name: ca.name || ca.id,
-            source: "cloud",
-            status: normalizeAgentState(ca.status),
-            model: ca.model,
-            cloudAgent: ca,
-            cloudClient: cc,
-            cloudAgentId: ca.id,
-            sourceUrl: `${CLOUD_BASE}/api/v1/milady/agents/${ca.id}`,
-            webUiUrl: ca.webUiUrl ? rewriteAgentUiUrl(ca.webUiUrl) : undefined,
-            billing: ca.billing,
-            region: ca.region,
-            createdAt: ca.createdAt,
-            uptime: ca.uptime,
-          });
-        }
-      } catch (err) {
-        // Cloud API failed — if 404, the milady agents endpoint isn't deployed
-        // on this cloud instance yet. Silently continue instead of showing an error.
-        const errMsg =
-          err instanceof Error ? err.message : "Cloud API request failed";
-        const isNotAvailable =
-          errMsg.includes("404") ||
-          (err instanceof Error && err.name === "CloudAgentsNotAvailableError");
-        if (!isNotAvailable) {
-          fetchError = `Cloud API: ${errMsg}`;
-        }
-      }
-    } else {
-      cloudClientRef.current = null;
-      cloudTokenRef.current = null;
-    }
-
-    // 2. Milady self-hosted agents (auto-discovery)
-    //    The public sandbox discovery endpoint returns ALL sandboxes across orgs.
-    //    On hosted milady.ai, never use that as an unauthenticated fallback.
-    //    Only use discovery there to enrich already-authenticated cloud agents.
     const discoveredIds = new Set<string>();
-    let sandboxes: DiscoveredSandbox[] = [];
-    const allowPublicSandboxFallback =
-      shouldAllowPublicSandboxDiscoveryFallback();
-    const shouldFetchSandboxes = cloudAuthOk || allowPublicSandboxFallback;
-
-    if (shouldFetchSandboxes) {
-      for (const url of getSandboxDiscoveryUrls()) {
-        try {
-          const sandboxRes = await fetch(url, {
-            signal: AbortSignal.timeout(DISCOVERY_TIMEOUT_MS),
-          });
-          if (sandboxRes.ok) {
-            sandboxes = await sandboxRes.json();
-            break; // Use first successful response
-          }
-        } catch {
-          // try next URL
-        }
-      }
-    }
-
-    // Build a set of cloud agent names/ids for cross-referencing.
-    // When cloud auth succeeds, sandbox discovery is only used to enrich or match
-    // the authenticated user's agents. Public hosted fallback is localhost-only.
-    const cloudAgentNames = new Set(
-      results
-        .filter((a) => a.source === "cloud")
-        .map((a) => a.name.toLowerCase()),
-    );
-    const cloudAgentIds = new Set(
-      results.filter((a) => a.source === "cloud").map((a) => a.cloudAgentId),
+    const { sandboxes, allowPublicSandboxFallback } =
+      await fetchSandboxesForDiscovery(cloudAuthOk);
+    const ownedSandboxes = selectOwnedSandboxes(
+      sandboxes,
+      cloudAuthOk,
+      allowPublicSandboxFallback,
+      results,
     );
 
-    if (sandboxes.length > 0) {
-      const ownedSandboxes = cloudAuthOk
-        ? sandboxes.filter((sb) => {
-            const nameMatch = cloudAgentNames.has(
-              (sb.agent_name || "").toLowerCase(),
-            );
-            const idMatch = cloudAgentIds.has(sb.id);
-            return nameMatch || idMatch;
-          })
-        : allowPublicSandboxFallback
-          ? sandboxes
-          : [];
+    addSandboxAgents(results, probeTargets, discoveredIds, ownedSandboxes);
+    const localClient = createLocalProbeClient();
+    addManualRemoteAgents(results, probeTargets, discoveredIds);
 
-      // Build a lookup from cloud agent name (lowercase) → index in results
-      const cloudAgentIndexByName = new Map<string, number>();
-      for (let i = 0; i < results.length; i++) {
-        if (results[i].source === "cloud") {
-          cloudAgentIndexByName.set(results[i].name.toLowerCase(), i);
-        }
-      }
-
-      for (const sb of ownedSandboxes) {
-        discoveredIds.add(sb.id);
-        // Each sandbox is accessible at https://{uuid}.milady.ai
-        const url = `https://${sb.id}.${AGENT_UI_BASE_DOMAIN}`;
-        const apiToken = sb.api_token;
-        const client = new CloudApiClient({
-          url,
-          type: "remote",
-          authToken: apiToken,
-        });
-
-        // Check if this sandbox matches an existing cloud agent (dedup by name)
-        const sbName = (sb.agent_name || "").toLowerCase();
-        const matchingCloudIdx = cloudAgentIndexByName.get(sbName);
-
-        if (matchingCloudIdx !== undefined) {
-          // Merge sandbox data INTO the existing cloud agent instead of creating a duplicate.
-          // Cloud agent is preferred (richer data), but sandbox provides live status + connectivity.
-          const cloudEntry = results[matchingCloudIdx];
-          cloudEntry.sourceUrl = url;
-          cloudEntry.client = client;
-          cloudEntry.nodeId = sb.node_id;
-          cloudEntry.lastHeartbeat = sb.last_heartbeat_at;
-          cloudEntry.apiToken = apiToken;
-          // Set webUiUrl to the sandbox's public URL (https://{uuid}.milady.ai)
-          cloudEntry.webUiUrl = url;
-          // Queue for health probe enrichment (done in parallel later)
-          probeTargets.push({
-            index: matchingCloudIdx,
-            client,
-            isCloudEnrich: true,
-          });
-          continue;
-        }
-
-        // No matching cloud agent — add as standalone remote agent with "checking..." status
-        const newIndex = results.length;
-        results.push({
-          id: `milady-${sb.id}`,
-          name: sb.agent_name || sb.id,
-          source: "remote",
-          status: "unknown", // Will be enriched by health probe
-          sourceUrl: url,
-          webUiUrl: url,
-          client,
-          nodeId: sb.node_id,
-          lastHeartbeat: sb.last_heartbeat_at,
-          apiToken,
-        });
-        // Queue for health probe
-        probeTargets.push({ index: newIndex, client });
-      }
-    }
-
-    // 3. Prepare local agent probe (will run in parallel)
-    const localClient = new CloudApiClient({
-      url: LOCAL_AGENT_BASE,
-      type: "local",
-    });
-    // We'll add local agent placeholder only if probe succeeds (handled in parallel probes)
-
-    // 4. Manually-added remote agents (via ConnectionModal)
-    //    Skip any that were already auto-discovered from milady sandboxes.
-    const remotes = getConnections().filter((c) => c.type === "remote");
-    for (const remote of remotes) {
-      // If this URL matches an auto-discovered milady agent, skip to avoid duplicates
-      const isMiladyDomain = remote.url.includes(AGENT_UI_BASE_DOMAIN);
-      if (isMiladyDomain) {
-        const uuidMatch = remote.url.match(
-          /([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/,
-        );
-        if (uuidMatch && discoveredIds.has(uuidMatch[1])) continue;
-      }
-
-      const client = new CloudApiClient({
-        url: remote.url,
-        type: "remote",
-        authToken: remote.authToken,
-      });
-      const newIndex = results.length;
-      results.push({
-        id: `remote-${remote.id}`,
-        name: remote.name,
-        source: "remote",
-        status: "unknown", // Will be enriched by health probe
-        sourceUrl: remote.url,
-        client,
-      });
-      // Queue for health probe
-      probeTargets.push({ index: newIndex, client });
-    }
-
-    // ===== PHASE 1: Show agents immediately (before health probes) =====
     if (isStale()) return;
     setAgents((prev) => (agentsEqual(prev, results) ? prev : [...results]));
-    // Mark initial load complete so UI shows something immediately
     hasLoadedOnceRef.current = true;
     setLoading(false);
 
-    // ===== PHASE 2: Parallel health probes with concurrency limit =====
     const semaphore = createSemaphore(MAX_CONCURRENT_PROBES);
-
-    // Helper to probe a single agent
-    const probeAgent = async (
-      target: ProbeTarget,
-    ): Promise<ProbeResult | null> => {
-      await semaphore.acquire();
-      try {
-        const health = await target.client.health({
-          signal: AbortSignal.timeout(HEALTH_TIMEOUT_MS),
-        });
-        if (!health.ready && !health.status) {
-          return { index: target.index, status: "unknown" };
-        }
-        // If health returned a synthetic response (agent is auth-gated),
-        // skip the status probe — we already know it's running and won't
-        // get real data without auth. This reduces network requests.
-        if (health._synthetic) {
-          return { index: target.index, status: "running" };
-        }
-        try {
-          const [status, streamSettings] = await Promise.all([
-            target.client.getAgentStatus({
-              signal: AbortSignal.timeout(STATUS_TIMEOUT_MS),
-            }),
-            target.client.getStreamSettings().catch(() => null),
-          ]);
-          return {
-            index: target.index,
-            status: status.state,
-            model: status.model,
-            uptime: status.uptime,
-            memories: status.memories,
-            agentName: status.agentName,
-            avatarIndex: streamSettings?.settings?.avatarIndex,
-          };
-        } catch {
-          // Health OK but no detailed status
-          return { index: target.index, status: "running" };
-        }
-      } catch {
-        // Health check failed
-        return target.isCloudEnrich
-          ? null // Keep cloud data as-is
-          : { index: target.index, status: "unknown" };
-      } finally {
-        semaphore.release();
-      }
-    };
-
-    // Probe local agent in parallel with everything else
-    const probeLocalAgent = async (): Promise<ManagedAgent | null> => {
-      await semaphore.acquire();
-      try {
-        const health = await localClient.health({
-          signal: AbortSignal.timeout(HEALTH_TIMEOUT_MS),
-        });
-        if (!health.ready && !health.status) return null;
-        // If health returned a synthetic response (agent is auth-gated),
-        // skip the status probe — we already know it's running.
-        if (health._synthetic) {
-          return {
-            id: "local-default",
-            name: "Local Agent",
-            source: "local",
-            status: "running",
-            sourceUrl: LOCAL_AGENT_BASE,
-            client: localClient,
-          };
-        }
-        try {
-          const status = await localClient.getAgentStatus({
-            signal: AbortSignal.timeout(STATUS_TIMEOUT_MS),
-          });
-          return {
-            id: "local-default",
-            name: status.agentName || "Local Agent",
-            source: "local",
-            status: status.state,
-            model: status.model,
-            uptime: status.uptime,
-            memories: status.memories,
-            sourceUrl: LOCAL_AGENT_BASE,
-            client: localClient,
-          };
-        } catch {
-          return {
-            id: "local-default",
-            name: "Local Agent",
-            source: "local",
-            status: "running",
-            sourceUrl: LOCAL_AGENT_BASE,
-            client: localClient,
-          };
-        }
-      } catch {
-        return null; // Local backend not running
-      } finally {
-        semaphore.release();
-      }
-    };
-
-    // Run all probes in parallel
     const [probeResults, localAgentResult] = await Promise.all([
-      Promise.allSettled(probeTargets.map(probeAgent)),
-      probeLocalAgent(),
+      Promise.allSettled(
+        probeTargets.map((target) => probeAgent(target, semaphore)),
+      ),
+      probeLocalAgent(localClient, semaphore),
     ]);
 
     if (isStale()) return;
 
-    // ===== PHASE 3: Merge probe results and update state =====
-    const enrichedResults = [...results];
-
-    // Apply probe results to their respective agents
-    for (const result of probeResults) {
-      if (result.status === "fulfilled" && result.value) {
-        const {
-          index,
-          status,
-          model,
-          uptime,
-          memories,
-          agentName,
-          avatarIndex,
-        } = result.value;
-        if (index < enrichedResults.length) {
-          const agent = enrichedResults[index];
-          if (status) agent.status = status;
-          if (model && model !== "—") agent.model = model;
-          if (uptime !== undefined) agent.uptime = uptime;
-          if (memories !== undefined) agent.memories = memories;
-          if (agentName && !agent.name) agent.name = agentName;
-          if (avatarIndex !== undefined) agent.avatarIndex = avatarIndex;
-        }
-      }
-    }
-
-    // Add local agent if probe succeeded
-    if (localAgentResult) {
-      enrichedResults.push(localAgentResult);
-    }
-
-    // Only update state if this is still the latest request
-    if (isStale()) return;
-
-    // Only update state if data actually changed (prevents unnecessary re-renders)
+    const enrichedResults = mergeProbeResults(
+      results,
+      probeResults,
+      localAgentResult,
+    );
     setAgents((prev) =>
       agentsEqual(prev, enrichedResults) ? prev : enrichedResults,
     );
-
-    // Update error state
     setError(fetchError);
     setIsRefreshing(false);
   }, []);

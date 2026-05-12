@@ -13,11 +13,12 @@ const repoRoot = resolveRepoRoot(import.meta.url);
  */
 
 const files = {
-  workflow: ".github/workflows/test.yml",
+  workflow: ".github/workflows/ci.yml",
   action: ".github/actions/setup-bun-workspace/action.yml",
   packageJson: "package.json",
   disableScript: "scripts/disable-local-eliza-workspace.mjs",
   restoreScript: "scripts/restore-local-eliza-workspace.mjs",
+  alignScript: "scripts/align-eliza-ci-node-modules.mjs",
   elizaCiPatchScript: "scripts/apply-eliza-ci-patches.mjs",
   elizaCiPatch:
     "eliza/patches/milady/eliza-ci-bootstrap/ci-release-contracts.patch",
@@ -29,10 +30,9 @@ const files = {
 };
 
 const workflows = [
-  ".github/workflows/test.yml",
   ".github/workflows/ci.yml",
   ".github/workflows/ci-fork.yml",
-  ".github/workflows/docker-ci-smoke.yml",
+  ".github/workflows/build-docker.yml",
 ];
 
 const allWorkflowPaths = fs
@@ -42,27 +42,46 @@ const allWorkflowPaths = fs
   .map((entry) => path.join(".github", "workflows", entry));
 
 const requiredWorkflowSnippets = [
-  "name: Regression Matrix Contract",
-  "run: node scripts/validate-ci-bootstrap-contract.mjs",
+  "name: CI",
   "uses: ./.github/actions/setup-bun-workspace",
   "install-command: bun install --ignore-scripts --no-frozen-lockfile",
   "run: node scripts/restore-local-eliza-workspace.mjs",
-  "run: bun run test:regression-matrix:pr",
+  "run: node scripts/align-eliza-ci-node-modules.mjs",
+  "run: bun run pre-review:local",
+  "run: bun run verify:typecheck",
 ];
 
 const requiredActionSnippets = [
   "disable-local-eliza-workspace:",
   "run: node scripts/disable-local-eliza-workspace.mjs",
-  "name: Apply Milady eliza CI patches",
+  "name: Apply elizaOS source CI patches",
   "run: node scripts/apply-eliza-ci-patches.mjs",
   "name: Validate published-only install mode",
   "disable-local-eliza-workspace requires an install-command with --no-frozen-lockfile",
+  "name: Generate local eliza protobuf types",
+  "inputs.prepare-local-eliza-runtime == 'true'",
+  "bunx @bufbuild/buf@1.67.0 generate",
   "run: bash scripts/install-published-workspace-fallback-deps.sh",
   "name: Build local eliza CI override packages",
   "run: node scripts/build-local-eliza-ci-overrides.mjs",
 ];
 
 const forbiddenActionSnippets = ["bun add --no-save --dev"];
+
+const requiredAlignScriptSnippets = [
+  "function resolveInstalledPackage(packageName)",
+  "function ensureBuiltLocalPackage",
+  'linkRootPackage(\n  "bun-types"',
+  'linkRootPackage(\n  "@types/react"',
+  '"@elizaos/plugin-agent-skills"',
+  '"@elizaos/plugin-browser-bridge"',
+  '"@elizaos/plugin-pdf"',
+  '"@elizaos/plugin-sql"',
+  '"@elizaos/plugin-streaming"',
+  '"@elizaos/cloud-routing"',
+  '"dist/node/index.node.js"',
+  '"typescript/dist/index.js"',
+];
 
 const disableMarkers = [
   "scripts/disable-local-eliza-workspace.mjs",
@@ -99,8 +118,13 @@ for (const relativePath of Object.values(files).filter((value) =>
 }
 const workflowText = readText(files.workflow, failures);
 const actionText = readText(files.action, failures);
+const alignScriptText = readText(files.alignScript, failures);
 const packageJson = readJson(files.packageJson, failures);
 const ciWorkflowText = readText(".github/workflows/ci.yml", failures);
+const buildDockerText = readText(
+  ".github/workflows/build-docker.yml",
+  failures,
+);
 
 assertContainsAll(
   workflowText,
@@ -109,12 +133,29 @@ assertContainsAll(
   failures,
 );
 assertCiPreReviewBootstrap(ciWorkflowText, failures);
+assertContainsNone(
+  ciWorkflowText,
+  ".github/workflows/ci.yml",
+  [
+    "bun install --cwd eliza --no-frozen-lockfile --ignore-scripts",
+    "bun install --cwd eliza/cloud --no-frozen-lockfile --ignore-scripts",
+  ],
+  failures,
+);
 assertContainsAll(actionText, files.action, requiredActionSnippets, failures);
 assertContainsNone(actionText, files.action, forbiddenActionSnippets, failures);
+assertContainsAll(
+  alignScriptText,
+  files.alignScript,
+  requiredAlignScriptSnippets,
+  failures,
+);
 assertOrdered(
   actionText,
   files.action,
   [
+    "name: Install dependencies",
+    "name: Generate local eliza protobuf types",
     "run: bash scripts/install-published-workspace-fallback-deps.sh",
     "run: node scripts/build-local-eliza-ci-overrides.mjs",
     "name: Run repository postinstall patches",
@@ -122,11 +163,38 @@ assertOrdered(
   failures,
 );
 assertDisabledWorkspaceInstallsUseNoFrozen(allWorkflowPaths, failures);
+assertAgentReviewAuthBootstrap(failures);
+assertContainsAll(
+  buildDockerText,
+  ".github/workflows/build-docker.yml",
+  [
+    'MILADY_SKIP_LOCAL_UPSTREAMS: "1"',
+    "- name: Apply elizaOS source CI patches",
+    "run: node scripts/apply-eliza-ci-patches.mjs",
+    "- name: Build @elizaos/core",
+    "- name: Build agent workspace",
+    "- name: Build @elizaos/shared",
+  ],
+  failures,
+);
+assertOrdered(
+  buildDockerText,
+  ".github/workflows/build-docker.yml",
+  [
+    "- name: Apply elizaOS source CI patches",
+    "- name: Run postinstall patches",
+    "- name: Build @elizaos/core",
+    "- name: Build agent workspace",
+    "- name: Build @elizaos/shared",
+    "- name: Build runtime (tsdown)",
+  ],
+  failures,
+);
 
 const regressionMatrixCommand =
   packageJson?.scripts?.["test:regression-matrix:pr"];
 if (
-  typeof regressionMatrixCommand !== "string" ||
+  typeof regressionMatrixCommand === "string" &&
   !regressionMatrixCommand.includes(files.regressionMatrixScript)
 ) {
   failures.push(
@@ -279,12 +347,20 @@ function assertCiPreReviewBootstrap(workflowText, targetFailures) {
 
   const preReviewBlock = preReviewBlockMatch[1];
   const requiredSnippets = [
-    "- name: Install submodule verification dependencies",
-    "bun install --cwd eliza --no-frozen-lockfile --ignore-scripts",
-    "bash eliza/cloud/packages/scripts/prepare-steward-workspaces.sh",
-    "bun install --cwd eliza/cloud --no-frozen-lockfile --ignore-scripts",
-    "- name: Ensure biome uses correct architecture",
-    `ln -s "\${{ github.workspace }}/node_modules/@biomejs" eliza/node_modules/@biomejs`,
+    "- name: Align nested eliza package resolution",
+    "run: node scripts/align-eliza-ci-node-modules.mjs",
+    "- name: Generate protobuf types",
+    "bunx @bufbuild/buf@1.67.0 generate",
+    "- name: Generate i18n keyword data",
+    "run: node packages/shared/scripts/generate-keywords.mjs --target ts",
+    "- name: Build eliza packages required for typecheck",
+    "(cd eliza/packages/core && bun run build)",
+    "(cd eliza/packages/skills && bun run build)",
+    "(cd eliza/packages/cloud-routing && bun run build)",
+    "(cd eliza/plugins/plugin-agent-skills && bun run build)",
+    "(cd eliza/plugins/plugin-pdf && bun run build)",
+    "(cd eliza/plugins/plugin-sql && bun run build)",
+    "(cd eliza/plugins/plugin-streaming && bun run build)",
     "- name: Run local pre-review gate",
     "run: bun run pre-review:local",
   ];
@@ -293,6 +369,41 @@ function assertCiPreReviewBootstrap(workflowText, targetFailures) {
     preReviewBlock,
     ".github/workflows/ci.yml pre-review job",
     requiredSnippets,
+    targetFailures,
+  );
+}
+
+function assertAgentReviewAuthBootstrap(targetFailures) {
+  const workflowText = readText(
+    ".github/workflows/agent-review.yml",
+    targetFailures,
+  );
+  const authBlockMatch = /\n {2}test-auth:\n([\s\S]*?)\n {2}review-pr:\n/.exec(
+    workflowText,
+  );
+
+  if (!authBlockMatch) {
+    targetFailures.push(
+      '.github/workflows/agent-review.yml is missing the "test-auth" job block',
+    );
+    return;
+  }
+
+  assertContainsAll(
+    authBlockMatch[1],
+    ".github/workflows/agent-review.yml test-auth job",
+    [
+      "- name: Setup workspace dependencies",
+      "- name: Align nested eliza package resolution",
+      "run: node scripts/align-eliza-ci-node-modules.mjs",
+      "- name: Generate protobuf types",
+      "- name: Build local eliza runtime plugins",
+      "(cd eliza/packages/core && bun run build)",
+      "(cd eliza/plugins/plugin-agent-skills && bun run build)",
+      "(cd eliza/plugins/plugin-pdf && bun run build)",
+      "(cd eliza/plugins/plugin-sql && bun run build)",
+      "- name: Run auth test suite",
+    ],
     targetFailures,
   );
 }

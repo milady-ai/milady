@@ -1,4 +1,0 @@
-[submodule "eliza"]
-	path = eliza
-	url = https://github.com/elizaOS/eliza.git
-	branch = develop

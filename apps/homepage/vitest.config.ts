@@ -8,14 +8,6 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   root: here,
   plugins: [react()],
-  resolve: {
-    alias: {
-      "@elizaos/app-core": path.resolve(
-        here,
-        "../../eliza/packages/app-core/src/index.ts",
-      ),
-    },
-  },
   test: {
     environment: "jsdom",
     globals: true,

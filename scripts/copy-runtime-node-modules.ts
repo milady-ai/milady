@@ -18,8 +18,17 @@ const target = path.resolve(
 
 const elizaAppCoreDir = path.resolve(repoRoot, "eliza", "packages", "app-core");
 const elizaPackagesDir = path.resolve(repoRoot, "eliza", "packages");
+const elizaElectrobunDir = path.resolve(
+  elizaAppCoreDir,
+  "platforms",
+  "electrobun",
+);
 const elizaAppCoreNodeModules = path.join(elizaAppCoreDir, "node_modules");
 const elizaPackagesNodeModules = path.join(elizaPackagesDir, "node_modules");
+const elizaElectrobunNodeModules = path.join(
+  elizaElectrobunDir,
+  "node_modules",
+);
 const miladyRootNodeModules = path.join(repoRoot, "node_modules");
 const miladyRootBunStore = path.join(miladyRootNodeModules, ".bun");
 
@@ -141,6 +150,7 @@ function ensureMirroredNodeModules() {
   for (const [containerDir, target] of [
     [elizaAppCoreDir, elizaAppCoreNodeModules],
     [elizaPackagesDir, elizaPackagesNodeModules],
+    [elizaElectrobunDir, elizaElectrobunNodeModules],
   ] as const) {
     if (!fs.existsSync(containerDir)) continue;
     const result = populateNodeModules(target);

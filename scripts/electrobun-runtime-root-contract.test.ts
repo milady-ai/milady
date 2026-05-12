@@ -1,6 +1,9 @@
 import fs from "node:fs";
 import { describe, expect, test } from "vitest";
 
+const electrobunConfigPath =
+  "eliza/packages/app-core/platforms/electrobun/electrobun.config.ts";
+
 describe("Electrobun release runtime root contract", () => {
   test("release workflow pins Electrobun copy resolution to the wrapper repo", () => {
     const workflow = fs.readFileSync(
@@ -35,14 +38,14 @@ describe("Electrobun release runtime root contract", () => {
     );
   });
 
-  test("Electrobun config exposes wrapper-aware repo root resolution", () => {
-    const config = fs.readFileSync(
-      "eliza/packages/app-core/platforms/electrobun/electrobun.config.ts",
-      "utf8",
-    );
+  test.skipIf(!fs.existsSync(electrobunConfigPath))(
+    "Electrobun config exposes wrapper-aware repo root resolution",
+    () => {
+      const config = fs.readFileSync(electrobunConfigPath, "utf8");
 
-    expect(config).toMatch(/ELIZA_ELECTROBUN_REPO_ROOT/);
-    expect(config).toMatch(/hasOuterElizaElectrobunCheckout/);
-    expect(config).toMatch(/export function resolveElectrobunRepoRoot/);
-  });
+      expect(config).toMatch(/ELIZA_ELECTROBUN_REPO_ROOT/);
+      expect(config).toMatch(/hasOuterElizaElectrobunCheckout/);
+      expect(config).toMatch(/export function resolveElectrobunRepoRoot/);
+    },
+  );
 });

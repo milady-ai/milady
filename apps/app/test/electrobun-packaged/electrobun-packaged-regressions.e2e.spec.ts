@@ -7,7 +7,12 @@ import {
   PackagedDesktopHarness,
   resolvePackagedLauncher,
 } from "./packaged-app-helpers";
-import { hasPackagedRendererBootstrapRequests } from "./windows-bootstrap";
+import {
+  getPackagedRendererBootstrapProbeScript,
+  hasPackagedRendererBootstrapRequests,
+  isPackagedRendererBootstrapProbeReady,
+  type PackagedRendererBootstrapProbe,
+} from "./windows-bootstrap";
 
 type EvalOk<T> = T & { ok: true };
 type EvalErr = { ok: false; error: string };
@@ -798,13 +803,36 @@ async function withPackagedHarness(
       shellReadyTimeoutMs: process.env.CI ? 120_000 : 60_000,
     });
     debugPackagedPhase("initial packaged launch ready");
-    await expect
-      .poll(() => hasPackagedRendererBootstrapRequests(api?.requests ?? []), {
-        timeout: process.env.CI ? 180_000 : 90_000,
-        message:
+    let lastProbe: PackagedRendererBootstrapProbe | null = null;
+    try {
+      await expect
+        .poll(
+          async () => {
+            lastProbe = await harness.eval<PackagedRendererBootstrapProbe>(
+              getPackagedRendererBootstrapProbeScript(),
+            );
+            return (
+              isPackagedRendererBootstrapProbeReady(lastProbe, api.baseUrl) &&
+              hasPackagedRendererBootstrapRequests(api.requests)
+            );
+          },
+          {
+            timeout: process.env.CI ? 180_000 : 90_000,
+            message:
+              "Expected the packaged renderer to reach its external API bootstrap requests before UI assertions.",
+          },
+        )
+        .toBe(true);
+    } catch (error) {
+      throw new Error(
+        [
           "Expected the packaged renderer to reach its external API bootstrap requests before UI assertions.",
-      })
-      .toBe(true);
+          `Last renderer probe: ${JSON.stringify(lastProbe)}`,
+          `Observed API requests: ${JSON.stringify(api.requests)}`,
+          error instanceof Error ? error.message : String(error),
+        ].join("\n"),
+      );
+    }
     debugPackagedPhase("initial bootstrap requests observed");
     await seedReturningInstallState(harness, api.baseUrl);
     debugPackagedPhase("seeded returning-install state");

@@ -73,7 +73,7 @@ test.describe("homepage - instance card menu", () => {
       agents: [RUNNING_CLOUD_AGENT],
     });
 
-    await page.goto("/");
+    await page.goto("/dashboard");
     await expect(
       page.getByRole("heading", { name: RUNNING_CLOUD_AGENT.name }),
     ).toBeVisible({ timeout: 10_000 });
@@ -112,7 +112,7 @@ test.describe("homepage - instance card menu", () => {
       body: JSON.stringify({ success: false, error: "internal explosion" }),
     });
 
-    await page.goto("/");
+    await page.goto("/dashboard");
     await expect(
       page.getByRole("heading", { name: RUNNING_CLOUD_AGENT.name }),
     ).toBeVisible({ timeout: 10_000 });
@@ -149,7 +149,7 @@ test.describe("homepage - instance card menu", () => {
       status: { state: "running", agentName: "forgettable" },
     });
 
-    await page.goto("/");
+    await page.goto("/dashboard");
     await expect(
       page.getByRole("heading", { name: "forgettable" }),
     ).toBeVisible({ timeout: 15_000 });
@@ -178,7 +178,7 @@ test.describe("homepage - instance card menu", () => {
       agents: [PROVISIONING_CLOUD_AGENT],
     });
 
-    await page.goto("/");
+    await page.goto("/dashboard");
     await expect(
       page.getByRole("heading", { name: PROVISIONING_CLOUD_AGENT.name }),
     ).toBeVisible({ timeout: 10_000 });

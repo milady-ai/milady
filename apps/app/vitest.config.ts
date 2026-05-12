@@ -1,254 +1,71 @@
-import fs from "node:fs";
-import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import type { Plugin } from "vite";
 import { defineConfig } from "vitest/config";
-import {
-  getAppCoreSourceRoot,
-  getAutonomousSourceRoot,
-  getUiSourceRoot,
-} from "../../eliza/test/eliza-package-paths";
-import {
-  getAppCoreBridgeStubPath,
-  getUiSourceAliases,
-  getWorkspaceAppAliases,
-} from "../../eliza/test/vitest/workspace-aliases";
-import { CAPACITOR_PLUGIN_NAMES } from "./scripts/capacitor-plugin-names.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const repoRoot = path.resolve(here, "../..");
-const _require = createRequire(import.meta.url);
-const nativePluginsRoot = path.join(
+const optionalElizaAppStub = path.join(
   here,
-  "../../eliza/packages/native-plugins",
+  "src",
+  "optional-eliza-app-stub.tsx",
 );
-const appCorePackageRoot = getAppCoreSourceRoot(here);
-const agentSourceRoot = getAutonomousSourceRoot(here);
-const uiSourceRoot = getUiSourceRoot(here);
-const bridgeStubPath = getAppCoreBridgeStubPath(repoRoot);
-const capacitorCoreEntry = _require.resolve("@capacitor/core");
-const nativePluginAliasMap = Object.fromEntries(
-  CAPACITOR_PLUGIN_NAMES.map((name) => [
-    `@elizaos/capacitor-${name}`,
-    path.join(nativePluginsRoot, `${name}/src/index.ts`),
-  ]),
+const nativePluginStub = path.join(here, "src", "native-plugin-stubs.ts");
+const appCoreBridgeStub = path.join(
+  here,
+  "test",
+  "stubs",
+  "app-core-bridge.ts",
 );
-const vitestInlineDeps = [
-  "@elizaos/agent",
-  "@elizaos/app-core",
-  "@elizaos/core",
-  "@testing-library/react",
-  "react",
-  "react-dom",
-  "react-test-renderer",
-  /^@elizaos\/plugin-/,
-  "zod",
-];
-
-/**
- * Redirects `@elizaos/app-core` bridge entrypoints to the test shim (matches
- * package exports: `./bridge`, `./bridge/electrobun-rpc`, `./bridge/electrobun-runtime`).
- * Legacy specifiers without `/bridge/` are still stubbed for older call sites.
- */
-function appCoreBridgeStubPlugin(): Plugin {
-  const stubbed = new Set([
-    "@elizaos/app-core",
-    "@elizaos/app-core/bridge",
-    "@elizaos/app-core/bridge/electrobun-rpc",
-    "@elizaos/app-core/bridge/electrobun-runtime",
-    "@elizaos/app-core/electrobun-rpc",
-    "@elizaos/app-core/electrobun-runtime",
-  ]);
-  return {
-    name: "app-core-bridge-stub",
-    enforce: "pre",
-    resolveId(source) {
-      if (stubbed.has(source)) {
-        return bridgeStubPath;
-      }
-      return null;
-    },
-  };
-}
 
 export default defineConfig({
-  plugins: [appCoreBridgeStubPlugin()],
   resolve: {
     alias: [
       {
-        find: /^react$/,
-        replacement: path.join(here, "node_modules/react"),
+        find: /^@elizaos\/app-(?!core$|core\/|hyperscape$|hyperscape\/)(.*)/,
+        replacement: optionalElizaAppStub,
       },
       {
-        find: /^react\/(.*)$/,
-        replacement: path.join(here, "node_modules/react", "$1"),
+        find: /^@clawville\/app-clawville(?:\/.*)?$/,
+        replacement: optionalElizaAppStub,
       },
       {
-        find: /^react-dom$/,
-        replacement: path.join(here, "node_modules/react-dom"),
+        find: /^@elizaos\/capacitor-(.*)/,
+        replacement: nativePluginStub,
       },
       {
-        find: /^react-dom\/(.*)$/,
-        replacement: path.join(here, "node_modules/react-dom", "$1"),
+        find: /^@elizaos\/app-core\/bridge(?:\/.*)?$/,
+        replacement: appCoreBridgeStub,
       },
       {
-        find: /^@capacitor\/core$/,
-        replacement: capacitorCoreEntry,
+        find: /^@elizaos\/app-core\/electrobun-(rpc|runtime)$/,
+        replacement: appCoreBridgeStub,
       },
-      {
-        find: /^@elizaos\/plugin-sql$/,
-        replacement: path.join(
-          repoRoot,
-          "eliza",
-          "plugins",
-          "plugin-sql",
-          "typescript",
-          "index.node.ts",
-        ),
-      },
-      ...(appCorePackageRoot
-        ? (() => {
-            const appCorePkgPath = path.resolve(
-              appCorePackageRoot,
-              "..",
-              "package.json",
-            );
-            const appCorePkg = JSON.parse(
-              fs.readFileSync(appCorePkgPath, "utf8"),
-            );
-            const generatedAliases = [];
-            for (const [key, value] of Object.entries(
-              appCorePkg.exports || {},
-            )) {
-              if (typeof value === "string") {
-                const aliasKey =
-                  key === "."
-                    ? "@elizaos/app-core"
-                    : `@elizaos/app-core/${key.replace(/^\.\//, "")}`;
-                const targetPath = path.resolve(
-                  appCorePackageRoot,
-                  "..",
-                  value,
-                );
-
-                generatedAliases.push({
-                  find: new RegExp(`^${aliasKey}$`),
-                  replacement: targetPath,
-                });
-                if (!aliasKey.endsWith(".js") && !aliasKey.endsWith(".css")) {
-                  generatedAliases.push({
-                    find: new RegExp(`^${aliasKey}\\.js$`),
-                    replacement: targetPath,
-                  });
-                }
-              }
-            }
-            // Catch-all: resolve any @elizaos/app-core sub-path imports
-            // not explicitly listed in the exports map directly to the
-            // source tree (e.g. components/Header → src/components/Header).
-            generatedAliases.push({
-              find: /^@miladyai\/app-core\/src\/(.*)/,
-              replacement: path.join(appCorePackageRoot, "$1"),
-            });
-            generatedAliases.push({
-              find: /^@miladyai\/app-core\/(.*)/,
-              replacement: path.join(appCorePackageRoot, "$1"),
-            });
-            return generatedAliases;
-          })()
-        : []),
-      ...getUiSourceAliases(uiSourceRoot),
-      // Resolve @elizaos/agent sub-path imports to the source tree
-      ...(agentSourceRoot
-        ? [
-            {
-              find: /^@elizaos\/agent\/(.*)/,
-              replacement: path.join(agentSourceRoot, "$1"),
-            },
-          ]
-        : []),
-      ...getWorkspaceAppAliases(repoRoot, [
-        "app-companion",
-        "app-task-coordinator",
-        "app-vincent",
-        "app-shopify",
-        "app-steward",
-        "app-lifeops",
-        "app-knowledge",
-      ]),
     ],
   },
   test: {
-    // apps/app test/vite/** alias/bridge regressions live here; the root
-    // default Vitest config intentionally does not glob apps/app/**.
-    // Use POSIX-style relative globs so test discovery works on Windows too.
-    include: [
-      "test/**/*.test.ts",
-      "test/**/*.test.tsx",
-      "../../eliza/packages/app-core/test/**/*.test.ts",
-      "../../eliza/packages/app-core/test/**/*.test.tsx",
-    ],
-    // Live/real QA browser checks are opt-in and should not run as part of the
-    // default app suite, even if the developer shell exports live-test env.
-    exclude: [
-      "../../eliza/packages/app-core/test/benchmarks/**",
-      "../../eliza/packages/app-core/test/**/*.e2e.test.ts",
-      "../../eliza/packages/app-core/test/**/*.e2e.test.tsx",
-      "../../eliza/packages/app-core/test/**/*-real.test.ts",
-      "../../eliza/packages/app-core/test/**/*-real.test.tsx",
-      "../../eliza/packages/app-core/test/**/*.real.test.ts",
-      "../../eliza/packages/app-core/test/**/*.real.test.tsx",
-      "../../eliza/packages/app-core/test/**/*.live.e2e.test.ts",
-      "../../eliza/packages/app-core/test/**/*.live.e2e.test.tsx",
-      "../../eliza/packages/app-core/test/**/*-live.test.ts",
-      "../../eliza/packages/app-core/test/**/*-live.test.tsx",
-      "../../eliza/packages/app-core/test/**/*.live.test.ts",
-      "../../eliza/packages/app-core/test/**/*.live.test.tsx",
-      "../../eliza/packages/app-core/test/**/*.real.e2e.test.ts",
-      "../../eliza/packages/app-core/test/**/*.real.e2e.test.tsx",
-      "test/**/*-live.test.ts",
-      "test/**/*-live.test.tsx",
-      "test/**/*.live.test.ts",
-      "test/**/*.live.test.tsx",
-      "test/**/*-live.e2e.test.ts",
-      "test/**/*-live.e2e.test.tsx",
-      "test/**/*.live.e2e.test.ts",
-      "test/**/*.live.e2e.test.tsx",
-      "test/**/*.real.e2e.test.ts",
-      "test/**/*.real.e2e.test.tsx",
-      "../../eliza/packages/app-core/test/**/*-live.test.ts",
-      "../../eliza/packages/app-core/test/**/*-live.test.tsx",
-      "../../eliza/packages/app-core/test/**/*.live.test.ts",
-      "../../eliza/packages/app-core/test/**/*.live.test.tsx",
-      "../../eliza/packages/app-core/test/**/*-live.e2e.test.ts",
-      "../../eliza/packages/app-core/test/**/*-live.e2e.test.tsx",
-      "../../eliza/packages/app-core/test/**/*.live.e2e.test.ts",
-      "../../eliza/packages/app-core/test/**/*.live.e2e.test.tsx",
-      "../../eliza/packages/app-core/test/**/*.real.e2e.test.ts",
-      "../../eliza/packages/app-core/test/**/*.real.e2e.test.tsx",
-    ],
-    setupFiles: [path.join(here, "test/setup.ts")],
-    environment: "node",
-    alias: {
-      "@elizaos/skills": path.join(
-        here,
-        "test",
-        "doubles",
-        "elizaos-skills.ts",
-      ),
-      ...nativePluginAliasMap,
-    },
-    testTimeout: 30000,
-    hookTimeout: 120000,
-    pool: "forks",
-    minWorkers: 1,
-    maxWorkers: 2,
-    execArgv: ["--max-old-space-size=4096"],
+    environment: "jsdom",
     globals: true,
+    setupFiles: [path.join(here, "test", "setup.ts")],
+    include: ["test/**/*.test.{ts,tsx}"],
+    exclude: [
+      "node_modules/**",
+      "dist/**",
+      "test/**/*.e2e.*",
+      "test/ui-smoke/**",
+      "test/design-review/**",
+    ],
     server: {
       deps: {
-        inline: vitestInlineDeps,
+        inline: [
+          "@elizaos/agent",
+          "@elizaos/app-core",
+          "@elizaos/core",
+          "@testing-library/react",
+          "react",
+          "react-dom",
+          "react-test-renderer",
+          /^@elizaos\/plugin-/,
+          "zod",
+        ],
       },
     },
   },

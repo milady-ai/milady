@@ -44,7 +44,7 @@ test.describe("homepage - provision agent modal", () => {
       jobStatuses: [{ status: "in_progress" }, { status: "completed" }],
     });
 
-    await page.goto("/");
+    await page.goto("/dashboard");
     await expect(page.locator(NEW_AGENT_BUTTON)).toBeVisible();
     await openProvisionModal(page);
 
@@ -73,7 +73,7 @@ test.describe("homepage - provision agent modal", () => {
     await loginViaPolling(page);
     await mockCloudApi(page.context(), { agents: [SEED_AGENT] });
 
-    await page.goto("/");
+    await page.goto("/dashboard");
     await openProvisionModal(page);
 
     const submit = page.getByRole("button", { name: "create agent" });
@@ -94,7 +94,7 @@ test.describe("homepage - provision agent modal", () => {
       jobStatuses: [{ status: "failed", error: "out of credits" }],
     });
 
-    await page.goto("/");
+    await page.goto("/dashboard");
     await openProvisionModal(page);
     await page.locator(NAME_INPUT_ID).fill("doomed-agent");
     await page.getByRole("button", { name: SUBMIT_BUTTON_TEXT }).click();
@@ -126,7 +126,7 @@ test.describe("homepage - provision agent modal", () => {
     });
 
     await page.clock.install();
-    await page.goto("/");
+    await page.goto("/dashboard");
     // Let React mount + initial useEffects fire under the fake clock.
     await page.clock.runFor(1000);
 

@@ -25,7 +25,7 @@
     {
       "packageName": "@elizaos/core",
       "version": "2.0.0-alpha.139",
-      "sourcePath": "eliza/packages/typescript",
+      "sourcePath": "eliza/packages/core",
       "sourceType": "core",
       "repoUrl": "https://github.com/elizaos/eliza.git",
       "pinnedCommit": "d358290e7a22",
@@ -52,7 +52,7 @@
     {
       "packageName": "@elizaos/plugin-agent-skills",
       "version": "2.0.0-alpha.71",
-      "sourcePath": "eliza/plugins/plugin-agent-skills/typescript",
+      "sourcePath": "eliza/plugins/plugin-agent-skills",
       "sourceType": "plugin",
       "repoUrl": "https://github.com/elizaos-plugins/plugin-agent-skills.git",
       "pinnedCommit": "3c074de",
@@ -61,7 +61,7 @@
     {
       "packageName": "@elizaos/plugin-anthropic",
       "version": "2.0.0-alpha.14",
-      "sourcePath": "eliza/plugins/plugin-anthropic/typescript",
+      "sourcePath": "eliza/plugins/plugin-anthropic",
       "sourceType": "plugin",
       "repoUrl": "https://github.com/elizaos-plugins/plugin-anthropic.git",
       "pinnedCommit": "5f9cadf",
@@ -70,7 +70,7 @@
     {
       "packageName": "@elizaos/plugin-bluebubbles",
       "version": "2.0.0-alpha.8",
-      "sourcePath": "eliza/plugins/plugin-bluebubbles/typescript",
+      "sourcePath": "eliza/plugins/plugin-bluebubbles",
       "sourceType": "plugin",
       "repoUrl": "https://github.com/elizaos-plugins/plugin-bluebubbles.git",
       "pinnedCommit": "d358290e7a",
@@ -79,7 +79,7 @@
     {
       "packageName": "@elizaos/plugin-cli",
       "version": "2.0.0-alpha.9",
-      "sourcePath": "eliza/plugins/plugin-cli/typescript",
+      "sourcePath": "eliza/plugins/plugin-cli",
       "sourceType": "plugin",
       "repoUrl": "https://github.com/elizaos-plugins/plugin-cli.git",
       "pinnedCommit": "d09303d",
@@ -88,7 +88,7 @@
     {
       "packageName": "@elizaos/plugin-commands",
       "version": "2.0.0-alpha.9",
-      "sourcePath": "eliza/plugins/plugin-commands/typescript",
+      "sourcePath": "eliza/plugins/plugin-commands",
       "sourceType": "plugin",
       "repoUrl": "https://github.com/elizaos-plugins/plugin-commands.git",
       "pinnedCommit": "6738be9",
@@ -97,7 +97,7 @@
     {
       "packageName": "@elizaos/plugin-cron",
       "version": "2.0.0-alpha.8",
-      "sourcePath": "eliza/plugins/plugin-cron/typescript",
+      "sourcePath": "eliza/plugins/plugin-cron",
       "sourceType": "plugin",
       "repoUrl": "https://github.com/elizaos-plugins/plugin-cron.git",
       "pinnedCommit": "bc6d3ba",
@@ -106,7 +106,7 @@
     {
       "packageName": "@elizaos/plugin-discord",
       "version": "2.0.0-alpha.12",
-      "sourcePath": "eliza/plugins/plugin-discord/typescript",
+      "sourcePath": "eliza/plugins/plugin-discord",
       "sourceType": "plugin",
       "repoUrl": "https://github.com/elizaos-plugins/plugin-discord.git",
       "pinnedCommit": "35afb4c",
@@ -115,7 +115,7 @@
     {
       "packageName": "@elizaos/plugin-edge-tts",
       "version": "2.0.0-alpha.12",
-      "sourcePath": "eliza/plugins/plugin-edge-tts/typescript",
+      "sourcePath": "eliza/plugins/plugin-edge-tts",
       "sourceType": "plugin",
       "repoUrl": "https://github.com/elizaos-plugins/plugin-edge-tts.git",
       "pinnedCommit": "b4d8949",
@@ -124,7 +124,7 @@
     {
       "packageName": "@elizaos/plugin-elizacloud",
       "version": "2.0.0-alpha.8",
-      "sourcePath": "eliza/plugins/plugin-elizacloud/typescript",
+      "sourcePath": "eliza/plugins/plugin-elizacloud",
       "sourceType": "plugin",
       "repoUrl": "https://github.com/elizaos-plugins/plugin-elizacloud.git",
       "pinnedCommit": "018c1df",
@@ -133,7 +133,7 @@
     {
       "packageName": "@elizaos/plugin-evm",
       "version": "2.0.0-alpha.8",
-      "sourcePath": "eliza/plugins/plugin-evm/typescript",
+      "sourcePath": "eliza/plugins/plugin-evm",
       "sourceType": "plugin",
       "repoUrl": "https://github.com/elizaos-plugins/plugin-evm.git",
       "pinnedCommit": "ec0e64b",
@@ -142,7 +142,7 @@
     {
       "packageName": "@elizaos/plugin-google-genai",
       "version": "2.0.0-alpha.12",
-      "sourcePath": "eliza/plugins/plugin-google-genai/typescript",
+      "sourcePath": "eliza/plugins/plugin-google-genai",
       "sourceType": "plugin",
       "repoUrl": "https://github.com/elizaos-plugins/plugin-google-genai.git",
       "pinnedCommit": "bbac126",
@@ -151,7 +151,7 @@
     {
       "packageName": "@elizaos/plugin-groq",
       "version": "2.0.0-alpha.8",
-      "sourcePath": "eliza/plugins/plugin-groq/typescript",
+      "sourcePath": "eliza/plugins/plugin-groq",
       "sourceType": "plugin",
       "repoUrl": "https://github.com/elizaos-plugins/plugin-groq.git",
       "pinnedCommit": "1d6e06f",
@@ -160,7 +160,7 @@
     {
       "packageName": "@elizaos/plugin-imessage",
       "version": "2.0.0-alpha.9",
-      "sourcePath": "eliza/plugins/plugin-imessage/typescript",
+      "sourcePath": "eliza/plugins/plugin-imessage",
       "sourceType": "plugin",
       "repoUrl": "https://github.com/elizaos-plugins/plugin-imessage.git",
       "pinnedCommit": "398d70e",
@@ -169,7 +169,7 @@
     {
       "packageName": "@elizaos/plugin-local-ai",
       "version": "2.0.0-alpha.7",
-      "sourcePath": "eliza/plugins/plugin-local-ai/typescript",
+      "sourcePath": "eliza/plugins/plugin-local-ai",
       "sourceType": "plugin",
       "repoUrl": "https://github.com/elizaos-plugins/plugin-local-ai.git",
       "pinnedCommit": "0018858",
@@ -178,7 +178,7 @@
     {
       "packageName": "@elizaos/plugin-local-embedding",
       "version": "2.0.0-alpha.12",
-      "sourcePath": "eliza/plugins/plugin-local-embedding/typescript",
+      "sourcePath": "eliza/plugins/plugin-local-embedding",
       "sourceType": "plugin",
       "repoUrl": "https://github.com/elizaos-plugins/plugin-local-embedding.git",
       "pinnedCommit": "5c06f17",
@@ -205,7 +205,7 @@
     {
       "packageName": "@elizaos/plugin-ollama",
       "version": "2.0.0-alpha.14",
-      "sourcePath": "eliza/plugins/plugin-ollama/typescript",
+      "sourcePath": "eliza/plugins/plugin-ollama",
       "sourceType": "plugin",
       "repoUrl": "https://github.com/elizaos-plugins/plugin-ollama.git",
       "pinnedCommit": "83b77e8",
@@ -214,7 +214,7 @@
     {
       "packageName": "@elizaos/plugin-openai",
       "version": "2.0.0-alpha.16",
-      "sourcePath": "eliza/plugins/plugin-openai/typescript",
+      "sourcePath": "eliza/plugins/plugin-openai",
       "sourceType": "plugin",
       "repoUrl": "https://github.com/elizaos-plugins/plugin-openai.git",
       "pinnedCommit": "1f12143",
@@ -223,7 +223,7 @@
     {
       "packageName": "@elizaos/plugin-openrouter",
       "version": "2.0.0-alpha.13",
-      "sourcePath": "eliza/plugins/plugin-openrouter/typescript",
+      "sourcePath": "eliza/plugins/plugin-openrouter",
       "sourceType": "plugin",
       "repoUrl": "https://github.com/elizaos-plugins/plugin-openrouter.git",
       "pinnedCommit": "64f4335",
@@ -232,7 +232,7 @@
     {
       "packageName": "@elizaos/plugin-pdf",
       "version": "2.0.0-alpha.18",
-      "sourcePath": "eliza/plugins/plugin-pdf/typescript",
+      "sourcePath": "eliza/plugins/plugin-pdf",
       "sourceType": "plugin",
       "repoUrl": "https://github.com/elizaos-plugins/plugin-pdf.git",
       "pinnedCommit": "bfc589f",
@@ -241,7 +241,7 @@
     {
       "packageName": "@elizaos/plugin-shell",
       "version": "2.0.0-alpha.10",
-      "sourcePath": "eliza/plugins/plugin-shell/typescript",
+      "sourcePath": "eliza/plugins/plugin-shell",
       "sourceType": "plugin",
       "repoUrl": "https://github.com/elizaos-plugins/plugin-shell.git",
       "pinnedCommit": "54ca429",
@@ -259,7 +259,7 @@
     {
       "packageName": "@elizaos/plugin-signal",
       "version": "2.0.0-alpha.7",
-      "sourcePath": "eliza/plugins/plugin-signal/typescript",
+      "sourcePath": "eliza/plugins/plugin-signal",
       "sourceType": "plugin",
       "repoUrl": "https://github.com/elizaos-plugins/plugin-signal.git",
       "pinnedCommit": "d358290e7a",
@@ -268,7 +268,7 @@
     {
       "packageName": "@elizaos/plugin-solana",
       "version": "2.0.0-alpha.6",
-      "sourcePath": "eliza/plugins/plugin-solana/typescript",
+      "sourcePath": "eliza/plugins/plugin-solana",
       "sourceType": "plugin",
       "repoUrl": "https://github.com/elizaos-plugins/plugin-solana.git",
       "pinnedCommit": "09a707d",
@@ -277,7 +277,7 @@
     {
       "packageName": "@elizaos/plugin-sql",
       "version": "2.0.0-alpha.19",
-      "sourcePath": "eliza/plugins/plugin-sql/typescript",
+      "sourcePath": "eliza/plugins/plugin-sql",
       "sourceType": "plugin",
       "repoUrl": "https://github.com/elizaos-plugins/plugin-sql.git",
       "pinnedCommit": "8b407b3",
@@ -295,7 +295,7 @@
     {
       "packageName": "@elizaos/plugin-whatsapp",
       "version": "2.0.0-alpha.10",
-      "sourcePath": "eliza/plugins/plugin-whatsapp/typescript",
+      "sourcePath": "eliza/plugins/plugin-whatsapp",
       "sourceType": "plugin",
       "repoUrl": "https://github.com/elizaos-plugins/plugin-whatsapp.git",
       "pinnedCommit": "20d1d12",

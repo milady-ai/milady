@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import mdx from "@mdx-js/rollup";
@@ -11,6 +12,23 @@ import { createHighlighter } from "shiki";
 import { defineConfig } from "vite";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
+const repoRoot = path.resolve(here, "../..");
+
+function shouldUseLocalElizaSource() {
+  const mode = (
+    process.env.MILADY_ELIZA_SOURCE ??
+    process.env.ELIZA_SOURCE ??
+    ""
+  ).toLowerCase();
+  return (
+    ["local", "source", "workspace"].includes(mode) &&
+    fs.existsSync(path.join(repoRoot, "eliza", "packages", "ui", "src"))
+  );
+}
+
+const localUiSourceRoot = shouldUseLocalElizaSource()
+  ? path.join(repoRoot, "eliza", "packages", "ui", "src")
+  : null;
 
 // Build-time Shiki highlighter shared across all MDX code blocks. Creating the
 // highlighter once and passing it into rehype keeps the Vite config hot-reload
@@ -75,16 +93,18 @@ export default defineConfig({
     react(),
   ],
   resolve: {
-    alias: [
-      {
-        find: /^@elizaos\/ui\//,
-        replacement: `${path.resolve(here, "../../eliza/packages/ui/src")}/`,
-      },
-      {
-        find: /^@elizaos\/ui$/,
-        replacement: path.resolve(here, "../../eliza/packages/ui/src/index.ts"),
-      },
-    ],
+    alias: localUiSourceRoot
+      ? [
+          {
+            find: /^@elizaos\/ui\//,
+            replacement: `${localUiSourceRoot}/`,
+          },
+          {
+            find: /^@elizaos\/ui$/,
+            replacement: path.join(localUiSourceRoot, "index.ts"),
+          },
+        ]
+      : [],
   },
   build: {
     outDir: path.resolve(here, "dist"),

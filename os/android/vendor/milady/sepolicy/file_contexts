@@ -19,9 +19,9 @@
 ###
 
 # Bundled binary tree (bun + musl loader + libstdc++ + libgcc + libllama).
-/data/data/com\.miladyai\.milady/files/agent/x86_64(/.*)?      u:object_r:milady_agent_exec:s0
-/data/data/com\.miladyai\.milady/files/agent/arm64-v8a(/.*)?   u:object_r:milady_agent_exec:s0
+/data/data/ai\.milady\.milady/files/agent/x86_64(/.*)?      u:object_r:milady_agent_exec:s0
+/data/data/ai\.milady\.milady/files/agent/arm64-v8a(/.*)?   u:object_r:milady_agent_exec:s0
 
 # Agent state + bundle (anything else under files/agent/ that isn't a binary).
-/data/data/com\.miladyai\.milady/files/agent(/.*)?             u:object_r:milady_agent_data:s0
-/data/data/com\.miladyai\.milady/files/\.milady(/.*)?          u:object_r:milady_agent_data:s0
+/data/data/ai\.milady\.milady/files/agent(/.*)?             u:object_r:milady_agent_data:s0
+/data/data/ai\.milady\.milady/files/\.milady(/.*)?          u:object_r:milady_agent_data:s0

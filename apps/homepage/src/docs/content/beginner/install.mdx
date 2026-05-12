@@ -29,13 +29,12 @@ Grab the right file from the [latest GitHub release](https://github.com/milady-a
 
 | Platform | File |
 | --- | --- |
-| macOS (Apple Silicon — M1/M2/M3/M4) | `Milady-arm64.dmg` |
-| macOS (Intel — pre-2020 Macs) | `Milady-x64.dmg` |
-| Windows 10 and 11 | `Milady-Setup.exe` |
-| Linux (AppImage, any distro) | `Milady.AppImage` |
-| Linux (Debian / Ubuntu) | `milady_*.deb` |
+| macOS (Apple Silicon — M1/M2/M3/M4) | Apple Silicon `.dmg` |
+| macOS (Intel — pre-2020 Macs) | Intel `.dmg` |
+| Windows 10 and 11 | Windows `.exe` installer |
+| Linux | Linux `.tar.gz`, AppImage, or `.deb` when published |
 | iOS | App Store (coming soon) |
-| Android | [Google Play](https://play.google.com/store/apps/details?id=ai.milady.app) or APK on GitHub |
+| Android | [Google Play](https://play.google.com/store/apps/details?id=ai.milady.app) or `Milady-Android.apk` on GitHub |
 
 <Callout kind="note">
 Every desktop build is code-signed and (on macOS) notarized. You shouldn't see a Gatekeeper "unidentified developer" warning. If you do, you downloaded a build from somewhere that isn't `github.com/milady-ai/milady` — delete it and grab the official one.
@@ -59,7 +58,7 @@ Every desktop build is code-signed and (on macOS) notarized. You shouldn't see a
 
 ### Linux
 
-Pick AppImage (works everywhere) or the `.deb` (for Debian, Ubuntu, Pop!_OS, and the like).
+Pick the Linux asset published on the latest release. When both are present, AppImage works everywhere and `.deb` is best for Debian, Ubuntu, Pop!_OS, and the like.
 
 <Steps>
   <li>Download the `.AppImage` or `.deb`.</li>

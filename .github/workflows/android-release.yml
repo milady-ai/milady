@@ -183,6 +183,20 @@ jobs:
              "Eliza-${VERSION}.aab"
           gh release upload "$TAG" "Eliza-${VERSION}.aab" --clobber
 
+      - name: Attach APK to GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.version.outputs.name }}"
+          TAG="v${VERSION}"
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            echo "::error::No GitHub release found for $TAG; cannot attach APK."
+            exit 1
+          fi
+          cp apps/app/android/app/build/outputs/apk/release/app-release.apk \
+             "Milady-Android.apk"
+          gh release upload "$TAG" "Milady-Android.apk" --clobber
+
       - name: Clean up keystore
         if: always()
         run: rm -f /tmp/elizaos-upload.jks

@@ -69,7 +69,7 @@ allow platform_app app_data_file:file { execute execute_no_trans };
 ### without a churn of attribute renames.
 ###
 ### Both types are referenced by file_contexts so a `restorecon -R`
-### invocation targeting /data/data/com.miladyai.milady/files/agent/
+### invocation targeting /data/data/ai.milady.milady/files/agent/
 ### finds them. Until the matching domain transition lands the labels
 ### are advisory — installd will overwrite them with `app_data_file` —
 ### but the declarations + file_contexts entries are the contract a

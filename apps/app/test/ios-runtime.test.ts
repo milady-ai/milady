@@ -1,10 +1,42 @@
+import fs from "node:fs";
+import { createRequire } from "node:module";
+import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
-import {
+
+type RuntimeEnv = Record<string, string | undefined>;
+type IosRuntimeModule = {
+  DEFAULT_ELIZA_CLOUD_BASE: string;
+  resolveCloudApiBase(env: RuntimeEnv): string;
+  apiBaseToDeviceBridgeUrl(apiBase: string): string;
+  resolveIosRuntimeConfig(env: RuntimeEnv): unknown;
+};
+
+const require = createRequire(import.meta.url);
+const appCoreRoot = path.dirname(
+  require.resolve("@elizaos/app-core/package.json"),
+);
+const iosRuntimePath = [
+  path.join(appCoreRoot, "src/platform/ios-runtime.js"),
+  path.join(appCoreRoot, "src/platform/ios-runtime.ts"),
+  path.join(appCoreRoot, "packages/app-core/src/platform/ios-runtime.js"),
+  path.join(appCoreRoot, "packages/app-core/src/platform/ios-runtime.ts"),
+].find((candidate) => fs.existsSync(candidate));
+
+if (!iosRuntimePath) {
+  throw new Error(`Unable to resolve app-core iOS runtime from ${appCoreRoot}`);
+}
+
+const iosRuntimeModule = (await import(
+  pathToFileURL(iosRuntimePath).href
+)) as IosRuntimeModule;
+
+const {
   apiBaseToDeviceBridgeUrl,
   DEFAULT_ELIZA_CLOUD_BASE,
   resolveCloudApiBase,
   resolveIosRuntimeConfig,
-} from "../src/ios-runtime";
+} = iosRuntimeModule;
 
 describe("iOS runtime config", () => {
   it("defaults to cloud mode on the canonical Eliza Cloud base", () => {

@@ -48,7 +48,7 @@ test.describe("homepage - sign-in flow", () => {
       window.open = (() => null) as typeof window.open;
     });
 
-    await page.goto("/");
+    await page.goto("/dashboard");
     await clickSignIn(page);
 
     await expect
@@ -70,7 +70,7 @@ test.describe("homepage - sign-in flow", () => {
       window.open = (() => null) as typeof window.open;
     });
 
-    await page.goto("/");
+    await page.goto("/dashboard");
     await clickSignIn(page);
 
     // useCloudLogin renders the error notice in App.tsx — match the literal
@@ -103,7 +103,7 @@ test.describe("homepage - sign-in flow", () => {
       window.open = (() => null) as typeof window.open;
     });
 
-    await page.goto("/");
+    await page.goto("/dashboard");
     // Let React mount and idle event listeners attach. Playwright's clock
     // pauses time, so we must advance it to give the page a chance to render.
     await page.clock.runFor(1000);
@@ -134,7 +134,7 @@ test.describe("homepage - sign-in flow", () => {
       ) => null) as typeof window.open;
     });
 
-    await page.goto("/");
+    await page.goto("/dashboard");
     await clickSignIn(page);
 
     // The error copy from useCloudLogin's popup-blocked branch.

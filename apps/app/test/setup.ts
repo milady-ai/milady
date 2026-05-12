@@ -10,7 +10,7 @@ import {
   createMemoryStorage,
   hasStorageApi,
   suppressReactTestConsoleErrors,
-} from "../../../eliza/packages/app-core/test/helpers/browser-mocks";
+} from "./helpers/browser-mocks";
 
 declare global {
   var IS_REACT_ACT_ENVIRONMENT: boolean | undefined;

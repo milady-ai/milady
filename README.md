@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/milady-ai/milady/actions/workflows/ci.yml/badge.svg)](https://github.com/milady-ai/milady/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![CodeFactor](https://www.codefactor.io/repository/github/milady-ai/milady/badge)](https://www.codefactor.io/repository/github/milady-ai/milady)
 
 > *your schizo AI waifu that actually respects your privacy*
 
@@ -168,7 +169,7 @@ milady setup
 
 ### Building from source (developers)
 
-Milady vendors [elizaOS](https://github.com/elizaOS/eliza) as a **git submodule** (with **nested** plugin submodules). Bun resolves root `workspace:*` dependencies **before** lifecycle scripts such as `preinstall`, so on a **fresh clone** a plain `bun install` can fail until those checkouts exist.
+Milady builds against the **published `@elizaos/*` npm packages** (`alpha` dist-tag) by default. The repo no longer tracks `eliza/` as a submodule — a fresh clone has no `eliza/` checkout and `bun install` resolves everything from npm.
 
 **First install after cloning:**
 
@@ -178,21 +179,57 @@ cd milady
 
 ./install                 # Unix / macOS — chmod +x install if needed
 # install.cmd on Windows
+# Both wrappers run `bun install` with MILADY_ELIZA_SOURCE=packages.
 
-# Both wrappers init the git submodules first, then run `bun install`.
-# This is required on a fresh clone: Bun resolves workspace globs
-# (eliza/packages/*, eliza/plugins/*) before running the preinstall
-# hook, so without submodules on disk the initial `bun install` fails.
-# Once the submodules exist, plain `bun install` is enough for updates.
+# Plain `bun install` also works once you've cloned.
 ```
 
-**Move eliza and all nested submodules to the latest remote branches** (see `eliza/.gitmodules` for each `branch =`):
+#### elizaOS source modes (eject / uneject)
+
+Milady has two source modes for `@elizaos/*` packages, selected via `MILADY_ELIZA_SOURCE`:
+
+| Mode | When to use | What resolves `@elizaos/*` |
+|---|---|---|
+| `packages` (default) | App development, builds, releases | npm registry (`alpha` dist-tag) |
+| `local` | Patching elizaOS upstream alongside Milady | A repo-local `eliza/` checkout linked into `node_modules/` |
+
+**Switch to local mode (uneject)** — clones `eliza/` if absent, links workspace packages, swaps the root tsconfig to source-priority paths:
 
 ```bash
-bun run workspace:bump-eliza-submodules
+bun run eliza:local            # clone (or restore) eliza/, link packages, run bun install
 ```
 
-Then, if `git status` inside `eliza/` shows updated submodule paths, commit there first, then `git add eliza` at the Milady root. Details: [CONTRIBUTING.md](CONTRIBUTING.md#local-clone-and-eliza-submodule-maintenance).
+**Switch back to packages mode (eject)** — rewrites the root `package.json` to pin npm versions, swaps the root tsconfig back to packages-mode-clean, and regenerates the lockfile:
+
+```bash
+bun run eliza:packages                  # default: alpha tag
+bun run eliza:packages:alpha            # explicit alpha
+bun run eliza:packages -- --tag beta    # any other dist-tag
+bun run eliza:packages -- --version 2.0.0-alpha.116   # pin an exact version
+bun run eliza:packages -- --rename      # also rename eliza/ → .eliza.ci-disabled/
+```
+
+**What each mode mutates** — both kept in sync by [scripts/lib/tsconfig-mode.mjs](scripts/lib/tsconfig-mode.mjs):
+
+- `tsconfig.json` — sourced from [scripts/templates/tsconfig.packages-mode.json](scripts/templates/tsconfig.packages-mode.json) (default) or [scripts/templates/tsconfig.local-mode.json](scripts/templates/tsconfig.local-mode.json) (local)
+- `package.json` — rewritten on eject (backup at `package.json.pre-disable-backup`); restored on uneject
+- `bun.lock` — regenerated on every mode switch
+- `eliza/` directory — left in place by default; renamed to `.eliza.ci-disabled/` only with `--rename`
+
+The checked-in `tsconfig.json` always matches the packages-mode template; the [standalone contract test](scripts/standalone-eliza-package-contract.test.ts) enforces this invariant. Run `bun run verify:standalone` to check.
+
+**Configuration env vars** (read by `scripts/lib/eliza-package-mode.mjs`):
+
+- `MILADY_ELIZA_SOURCE` — `local` or `packages` (default)
+- `MILADY_ELIZAOS_DIST_TAG` / `ELIZAOS_NPM_TAG` — npm dist-tag in packages mode (default `alpha`)
+- `MILADY_ELIZAOS_VERSION` — pin an exact version
+- `MILADY_ELIZA_GIT_URL` / `MILADY_ELIZA_BRANCH` — override the eliza source clone target
+- `MILADY_SKIP_LOCAL_UPSTREAMS=1` — legacy flag equivalent to `MILADY_ELIZA_SOURCE=packages`
+
+**Test coverage in each mode:**
+
+- `bun run test`, `bun run verify:typecheck`, `bun run verify:lint`, `bun run build:web`, `bun run build:desktop`, `bun run build:ios`, `bun run build:android` — all work in both modes.
+- The packaged-Electrobun E2E suite at `apps/app/test/electrobun-packaged/` requires **local mode** (it imports source-level test helpers from `eliza/packages/app-core/test/helpers/`).
 
 #### Windows: enable long paths
 
@@ -597,7 +634,7 @@ bun run build
 bun run milady start
 ```
 
-> `bun run build` runs the production build via Node (`eliza/packages/app-core/scripts/run-production-build.mjs`).
+> `bun run build` runs the production build via Node ([scripts/run-production-build.mjs](scripts/run-production-build.mjs) — forks between published `@elizaos/app-core` and the local `eliza/` checkout depending on `MILADY_ELIZA_SOURCE`).
 
 ### Dev mode (recommended for development)
 

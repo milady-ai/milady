@@ -21,10 +21,9 @@
  *
  *   3. Every workspace package.json that still pins
  *      `"@elizaos/core": "workspace:*"` must be rewritten to the same
- *      registry version that the root `overrides` block and
- *      `eliza/packages/app-core/deploy/cloud-agent-template` already use
- *      (`@elizaos/core@2.0.0-alpha.115` at time of writing). Without
- *      this rewrite, Bun hoists a registry-resolved `@elizaos/core`
+ *      registry version selected from root overrides, package metadata, or
+ *      the configured elizaOS npm dist-tag. Without this rewrite, Bun hoists
+ *      a registry-resolved `@elizaos/core`
  *      for the workspace:* callers AND a separate registry-resolved
  *      `@elizaos/core` for cloud-agent-template, emitting two
  *      top-level `"@elizaos/core"` entries in bun.lock's packages
@@ -47,15 +46,22 @@ import { execSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  getElizaosPackageExactVersion,
+  getElizaosPackageSpecifier,
+  getExplicitElizaosPackageDistTag,
+  isExactRegistryVersion,
+  isLocalElizaDisabled,
+  selectPublishedPackageVersion,
+  selectRegistryPackageVersion,
+} from "./lib/eliza-package-mode.mjs";
+import { applyTsconfigMode } from "./lib/tsconfig-mode.mjs";
 
 export const ELIZA_WORKSPACE_GLOB = "eliza/packages/*";
 export const PLUGIN_ROOT_WORKSPACE_GLOB = "eliza/plugins/*";
-export const PLUGIN_TYPESCRIPT_WORKSPACE_GLOB =
-  "eliza/plugins/plugin-*/typescript";
 export const DISABLED_WORKSPACE_GLOBS = [
   ELIZA_WORKSPACE_GLOB,
   PLUGIN_ROOT_WORKSPACE_GLOB,
-  PLUGIN_TYPESCRIPT_WORKSPACE_GLOB,
 ];
 export const LOCAL_ONLY_WORKSPACE_GLOBS = [
   "eliza/packages/native-plugins/*",
@@ -64,11 +70,18 @@ export const LOCAL_ONLY_WORKSPACE_GLOBS = [
 export const LOCAL_ONLY_ELIZA_PACKAGE_PATHS = {
   "@elizaos/plugin-agent-wallet": "plugins/plugin-agent-wallet",
   "@elizaos/plugin-browser-bridge": "plugins/plugin-browser-bridge",
-  "@elizaos/plugin-app-control": "plugins/plugin-app-control/typescript",
-  "@elizaos/plugin-signal": "plugins/plugin-signal/typescript",
+  "@elizaos/plugin-app-control": "plugins/plugin-app-control",
+  "@elizaos/plugin-signal": "plugins/plugin-signal",
   "@elizaos/plugin-wechat": "plugins/plugin-wechat",
   "@elizaos/skills": "packages/skills",
   "@elizaos/vault": "packages/vault",
+};
+export const LOCAL_ELIZA_CI_OVERRIDE_PACKAGE_PATHS = {
+  "@elizaos/agent": "packages/agent",
+  "@elizaos/shared": "packages/shared",
+  "@elizaos/ui": "packages/ui",
+  "@elizaos/app-core": "packages/app-core",
+  ...LOCAL_ONLY_ELIZA_PACKAGE_PATHS,
 };
 export const LOCAL_ONLY_WORKSPACE_PATHS = [
   "eliza/packages/shared",
@@ -91,7 +104,7 @@ export const CI_OVERRIDE_SPECIFIERS = {
 export const ELIZA_RUNTIME_CI_OVERRIDE_SPECIFIERS = {
   "@elizaos/ui": "file:./packages/ui",
   "@elizaos/plugin-browser-bridge": "file:./plugins/plugin-browser-bridge",
-  "@elizaos/plugin-signal": "file:./plugins/plugin-signal/typescript",
+  "@elizaos/plugin-signal": "file:./plugins/plugin-signal",
   "@elizaos/skills": "file:./packages/skills",
 };
 export const DEPENDENCY_FIELDS = [
@@ -129,7 +142,18 @@ export function resolveRootUiOverrideSpecifier(repoRoot = DEFAULT_REPO_ROOT) {
     return "file:./.eliza.ci-disabled/packages/ui";
   }
 
-  return "file:./eliza/packages/ui";
+  const localUiPackageJsonPath = path.join(
+    repoRoot,
+    "eliza",
+    "packages",
+    "ui",
+    "package.json",
+  );
+  if (fs.existsSync(localUiPackageJsonPath)) {
+    return "file:./eliza/packages/ui";
+  }
+
+  return null;
 }
 
 export function resolveRootElizaPackageOverrideSpecifier(
@@ -147,28 +171,40 @@ export function resolveRootElizaPackageOverrideSpecifier(
     return `file:./.eliza.ci-disabled/${elizaPackageRel}`;
   }
 
-  return `file:./eliza/${elizaPackageRel}`;
+  const localPackageJsonPath = path.join(
+    repoRoot,
+    "eliza",
+    elizaPackageRel,
+    "package.json",
+  );
+  if (fs.existsSync(localPackageJsonPath)) {
+    return `file:./eliza/${elizaPackageRel}`;
+  }
+
+  return null;
 }
 
 export function resolveCiOverrideSpecifiers(repoRoot = DEFAULT_REPO_ROOT) {
-  const localOnlyOverrides = Object.fromEntries(
-    Object.entries(LOCAL_ONLY_ELIZA_PACKAGE_PATHS).map(
-      ([packageName, packagePath]) => [
-        packageName,
-        resolveRootElizaPackageOverrideSpecifier(packagePath, repoRoot),
-      ],
-    ),
-  );
+  if (
+    isLocalElizaDisabled() &&
+    process.env.MILADY_DISABLE_LOCAL_UPSTREAMS_USE_FILE_OVERRIDES !== "1"
+  ) {
+    return {};
+  }
 
-  return {
-    ...CI_OVERRIDE_SPECIFIERS,
-    "@elizaos/app-core": resolveRootElizaPackageOverrideSpecifier(
-      "packages/app-core",
-      repoRoot,
-    ),
-    ...localOnlyOverrides,
-    "@elizaos/ui": resolveRootUiOverrideSpecifier(repoRoot),
-  };
+  const overrides = {};
+  for (const [packageName, packagePath] of Object.entries(
+    LOCAL_ELIZA_CI_OVERRIDE_PACKAGE_PATHS,
+  )) {
+    const specifier =
+      packageName === "@elizaos/ui"
+        ? resolveRootUiOverrideSpecifier(repoRoot)
+        : resolveRootElizaPackageOverrideSpecifier(packagePath, repoRoot);
+    if (specifier) {
+      overrides[packageName] = specifier;
+    }
+  }
+  return overrides;
 }
 
 /**
@@ -178,7 +214,7 @@ export function resolveCiOverrideSpecifiers(repoRoot = DEFAULT_REPO_ROOT) {
 /**
  * @typedef {object} RegistryPackageInfo
  * @property {string[] | string=} versions
- * @property {{ alpha?: string, latest?: string }=} dist-tags
+ * @property {Record<string, string>=} dist-tags
  * @property {string=} version
  */
 
@@ -247,8 +283,7 @@ function isPackageJsonRecord(value) {
 function isDistTags(value) {
   return (
     isRecord(value) &&
-    (value.alpha === undefined || typeof value.alpha === "string") &&
-    (value.latest === undefined || typeof value.latest === "string")
+    Object.values(value).every((entry) => typeof entry === "string")
   );
 }
 
@@ -284,10 +319,6 @@ function removeStaleLockfiles(
     );
   }
   return removed;
-}
-
-function isExactRegistryVersion(specifier) {
-  return typeof specifier === "string" && /^\d+\.\d+\.\d+/.test(specifier);
 }
 
 export function isWorkspaceProtocolSpecifier(specifier) {
@@ -330,42 +361,21 @@ export function readRegistryPackageInfo(
   return parseRegistryPackageInfo(rawValue);
 }
 
+export function selectRegistryDistTagVersion(registryInfo, options = {}) {
+  return selectRegistryPackageVersion(registryInfo, options);
+}
+
 /**
  * @param {string} preferredVersion
  * @param {RegistryPackageInfo | null} registryInfo
  * @returns {string}
  */
-export function selectPublishedRegistryVersion(preferredVersion, registryInfo) {
-  if (!isExactRegistryVersion(preferredVersion)) {
-    return preferredVersion;
-  }
-
-  const availableVersions = new Set(
-    Array.isArray(registryInfo?.versions)
-      ? registryInfo.versions.filter((value) => typeof value === "string")
-      : typeof registryInfo?.versions === "string"
-        ? [registryInfo.versions]
-        : [],
-  );
-  if (availableVersions.has(preferredVersion)) {
-    return preferredVersion;
-  }
-
-  const alphaTag = registryInfo?.["dist-tags"]?.alpha;
-  if (isExactRegistryVersion(alphaTag)) {
-    return alphaTag;
-  }
-
-  const latestTag = registryInfo?.["dist-tags"]?.latest;
-  if (isExactRegistryVersion(latestTag)) {
-    return latestTag;
-  }
-
-  if (isExactRegistryVersion(registryInfo?.version)) {
-    return registryInfo.version;
-  }
-
-  return preferredVersion;
+export function selectPublishedRegistryVersion(
+  preferredVersion,
+  registryInfo,
+  options = {},
+) {
+  return selectPublishedPackageVersion(preferredVersion, registryInfo, options);
 }
 
 /**
@@ -563,6 +573,51 @@ export function resolvePinnedWorkspaceVersions(
   }
 
   return pinnedVersions;
+}
+
+export function resolveMissingRegistryPinnedVersions(
+  dependencyNames,
+  pinnedVersions,
+  {
+    readRegistryInfo = readRegistryPackageInfo,
+    log = console.log,
+    warn = console.warn,
+  } = {},
+) {
+  const resolvedVersions = new Map(pinnedVersions);
+
+  for (const dependencyName of dependencyNames) {
+    if (resolvedVersions.has(dependencyName)) {
+      continue;
+    }
+    if (!dependencyName.startsWith("@elizaos/")) {
+      continue;
+    }
+
+    let registryInfo;
+    try {
+      registryInfo = readRegistryInfo(dependencyName);
+    } catch (error) {
+      warn(
+        `[disable-local-eliza-workspace] Could not read registry metadata for ${dependencyName}: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+      continue;
+    }
+
+    const registryVersion = selectRegistryDistTagVersion(registryInfo);
+    if (!registryVersion) {
+      continue;
+    }
+
+    resolvedVersions.set(dependencyName, registryVersion);
+    log(
+      `[disable-local-eliza-workspace] Resolved ${dependencyName} -> ${registryVersion} from npm dist-tags`,
+    );
+  }
+
+  return resolvedVersions;
 }
 
 /**
@@ -806,6 +861,124 @@ export function rewriteWorkspaceDependencySpecifiers(
   return mutated;
 }
 
+function shouldRewriteConfiguredElizaRegistrySpecifiers(env = process.env) {
+  return Boolean(
+    getElizaosPackageExactVersion(env) ?? getExplicitElizaosPackageDistTag(env),
+  );
+}
+
+function isRegistryDependencySpecifier(specifier) {
+  return (
+    typeof specifier === "string" &&
+    specifier.length > 0 &&
+    !isWorkspaceProtocolSpecifier(specifier) &&
+    !specifier.startsWith("file:") &&
+    !specifier.startsWith("link:") &&
+    !specifier.startsWith("portal:") &&
+    !specifier.startsWith("npm:")
+  );
+}
+
+function resolveConfiguredElizaRegistrySpecifier(
+  dependencyName,
+  {
+    env = process.env,
+    readRegistryInfo = readRegistryPackageInfo,
+    registryInfoCache = new Map(),
+    warn = console.warn,
+  } = {},
+) {
+  const exactVersion = getElizaosPackageExactVersion(env);
+  if (exactVersion) {
+    return exactVersion;
+  }
+
+  const explicitTag = getExplicitElizaosPackageDistTag(env);
+  if (!explicitTag) {
+    return null;
+  }
+
+  let registryInfo = registryInfoCache.get(dependencyName);
+  if (registryInfo === undefined) {
+    try {
+      registryInfo = readRegistryInfo(dependencyName);
+    } catch (error) {
+      warn(
+        `[disable-local-eliza-workspace] Could not read registry metadata for ${dependencyName}: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+      registryInfo = null;
+    }
+    registryInfoCache.set(dependencyName, registryInfo);
+  }
+
+  return (
+    selectRegistryPackageVersion(registryInfo, {
+      env,
+      includeLatestFallback: false,
+      includeVersionFallback: false,
+    }) ?? getElizaosPackageSpecifier(env)
+  );
+}
+
+export function rewriteConfiguredElizaRegistrySpecifiers(
+  pkg,
+  {
+    env = process.env,
+    localOnlyPackages = new Set(),
+    readRegistryInfo = readRegistryPackageInfo,
+    registryInfoCache = new Map(),
+    log = console.log,
+    warn = console.warn,
+  } = {},
+) {
+  if (!shouldRewriteConfiguredElizaRegistrySpecifiers(env)) {
+    return false;
+  }
+
+  const rewrites = [];
+  for (const field of [...DEPENDENCY_FIELDS, "overrides"]) {
+    const deps = pkg?.[field];
+    if (!isStringRecord(deps)) continue;
+    for (const [dependencyName, specifier] of Object.entries(deps)) {
+      if (
+        !dependencyName.startsWith("@elizaos/") ||
+        localOnlyPackages.has(dependencyName) ||
+        !isRegistryDependencySpecifier(specifier)
+      ) {
+        continue;
+      }
+
+      const configuredSpecifier = resolveConfiguredElizaRegistrySpecifier(
+        dependencyName,
+        {
+          env,
+          readRegistryInfo,
+          registryInfoCache,
+          warn,
+        },
+      );
+      if (
+        !configuredSpecifier ||
+        deps[dependencyName] === configuredSpecifier
+      ) {
+        continue;
+      }
+
+      deps[dependencyName] = configuredSpecifier;
+      rewrites.push(`${dependencyName} -> ${configuredSpecifier}`);
+    }
+  }
+
+  if (rewrites.length > 0) {
+    log(
+      `[disable-local-eliza-workspace] Rewrote ${rewrites.length} configured elizaOS registry specifier(s) (${rewrites.join(", ")})`,
+    );
+  }
+  return rewrites.length > 0;
+}
+
 function toPosixRelativePath(relativePath) {
   return relativePath.split(path.sep).join("/");
 }
@@ -906,81 +1079,49 @@ export function repairKnownElizaPatchFiles(
   return true;
 }
 
-export function disableLocalElizaWorkspace(
-  repoRoot = DEFAULT_REPO_ROOT,
-  { log = console.log, warn = console.warn, errorLog = console.error } = {},
-) {
-  const elizaRoot = path.join(repoRoot, "eliza");
-  const disabledElizaRoot = path.join(repoRoot, ".eliza.ci-disabled");
-  const shouldRenameElizaWorkspace =
-    process.env.MILADY_DISABLE_LOCAL_UPSTREAMS_RENAME === "1";
-  const packageJsonPath = path.join(repoRoot, "package.json");
-  const elizaPackageJsonPath = path.join(elizaRoot, "package.json");
-  const removedLockfiles = [];
+function preResolvePinnedWorkspaceVersions(repoRoot, packageJsonPath, { log }) {
+  let rootPackage = null;
+  let pinnedVersions = new Map();
+  const versionSources = new Map();
 
-  // Version resolution needs package.json files inside eliza/. When
-  // MILADY_SKIP_LOCAL_UPSTREAMS=1, init-submodules.mjs intentionally
-  // skips eliza, so the directory may be empty/absent. Shallow-init it
-  // here so we can read workspace package versions for the rewrite.
-  const elizaTypescriptPkg = path.join(
-    elizaRoot,
-    "packages",
-    "typescript",
-    "package.json",
-  );
-  if (
-    fs.existsSync(path.join(repoRoot, ".gitmodules")) &&
-    !fs.existsSync(elizaTypescriptPkg)
-  ) {
-    try {
-      execSync("git submodule update --init --depth=1 eliza", {
-        cwd: repoRoot,
-        stdio: "pipe",
-      });
+  if (!fs.existsSync(packageJsonPath)) {
+    return { rootPackage, pinnedVersions, versionSources };
+  }
+
+  try {
+    rootPackage = readPackageJson(packageJsonPath);
+    pinnedVersions = resolvePinnedWorkspaceVersions(repoRoot, {
+      rootPackage,
+      versionSources,
+    });
+    if (pinnedVersions.size > 0) {
       log(
-        "[disable-local-eliza-workspace] Shallow-initialized eliza submodule for version resolution",
-      );
-    } catch (err) {
-      warn(
-        `[disable-local-eliza-workspace] Could not shallow-init eliza submodule: ${err instanceof Error ? err.message : String(err)}`,
+        `[disable-local-eliza-workspace] Pre-resolved ${pinnedVersions.size} pinned version(s) before disabling workspace`,
       );
     }
+  } catch {
+    /* continue — will be read again below */
   }
 
-  repairKnownElizaPatchFiles(repoRoot, { log });
+  return { rootPackage, pinnedVersions, versionSources };
+}
 
-  const localOnlyPackagePaths = resolveLocalOnlyWorkspacePackagePaths(repoRoot);
-  const localOnlyPackages = new Set(localOnlyPackagePaths.keys());
-
-  // Resolve pinned versions BEFORE renaming eliza/ away, since the
-  // cloud-agent-template and local package.json files live inside it.
-  let earlyRootPkg = null;
-  let earlyPinnedVersions = new Map();
-  const earlyPinnedVersionSources = new Map();
-  if (fs.existsSync(packageJsonPath)) {
-    try {
-      earlyRootPkg = readPackageJson(packageJsonPath);
-      earlyPinnedVersions = resolvePinnedWorkspaceVersions(repoRoot, {
-        rootPackage: earlyRootPkg,
-        versionSources: earlyPinnedVersionSources,
-      });
-      if (earlyPinnedVersions.size > 0) {
-        log(
-          `[disable-local-eliza-workspace] Pre-resolved ${earlyPinnedVersions.size} pinned version(s) before disabling workspace`,
-        );
-      }
-    } catch {
-      /* continue — will be read again below */
-    }
-  }
-
+function reconcileElizaWorkspaceDirectory({
+  shouldRenameElizaWorkspace,
+  elizaRoot,
+  disabledElizaRoot,
+  log,
+}) {
   if (shouldRenameElizaWorkspace && fs.existsSync(elizaRoot)) {
     fs.rmSync(disabledElizaRoot, { recursive: true, force: true });
     fs.renameSync(elizaRoot, disabledElizaRoot);
     log(
       `[disable-local-eliza-workspace] Disabled repo-local eliza workspace at ${elizaRoot}`,
     );
-  } else if (
+    return;
+  }
+
+  if (
     !shouldRenameElizaWorkspace &&
     fs.existsSync(elizaRoot) &&
     fs.existsSync(disabledElizaRoot)
@@ -989,47 +1130,38 @@ export function disableLocalElizaWorkspace(
     log(
       `[disable-local-eliza-workspace] Removed stale disabled workspace at ${disabledElizaRoot}`,
     );
-  } else if (!shouldRenameElizaWorkspace && fs.existsSync(elizaRoot)) {
+    return;
+  }
+
+  if (!shouldRenameElizaWorkspace && fs.existsSync(elizaRoot)) {
     log(
       "[disable-local-eliza-workspace] Keeping eliza/ on disk (rewrite-only mode)",
     );
-  } else {
-    log(
-      "[disable-local-eliza-workspace] Repo-local eliza workspace already absent",
-    );
+    return;
   }
 
-  if (!fs.existsSync(packageJsonPath)) {
-    log(
-      "[disable-local-eliza-workspace] Root package.json not found; skipping workspace patch",
-    );
-    return {
-      rewrites: 0,
-      removedWorkspaceGlobs: [],
-      pinnedWorkspaceVersions: new Map(),
-    };
-  }
+  log(
+    "[disable-local-eliza-workspace] Repo-local eliza workspace already absent",
+  );
+}
 
-  const rawRootPkg = fs.readFileSync(packageJsonPath, "utf8");
-
-  // Back up the original root package.json so the restore script can put it
-  // back after the disable→install→restore cycle. Without this, mutations
-  // (e.g. dropping workspace:* deps with no pinned version) persist past
-  // restore, and downstream checks like release-check that read root
-  // dependencies see a stripped manifest and exit 1.
+function backupRootPackageJson(repoRoot, rawRootPkg, { log }) {
   const rootPackageBackupPath = path.join(
     repoRoot,
     "package.json.pre-disable-backup",
   );
-  if (!fs.existsSync(rootPackageBackupPath)) {
-    fs.writeFileSync(rootPackageBackupPath, rawRootPkg);
-    log(
-      `[disable-local-eliza-workspace] Wrote original package.json backup to ${path.relative(repoRoot, rootPackageBackupPath)}`,
-    );
+
+  if (fs.existsSync(rootPackageBackupPath)) {
+    return;
   }
 
-  /** @type {PackageJsonRecord} */
-  let rootPkg;
+  fs.writeFileSync(rootPackageBackupPath, rawRootPkg);
+  log(
+    `[disable-local-eliza-workspace] Wrote original package.json backup to ${path.relative(repoRoot, rootPackageBackupPath)}`,
+  );
+}
+
+function parseRootPackageJson(packageJsonPath, rawRootPkg, { errorLog }) {
   try {
     const parsedRootPkg = JSON.parse(rawRootPkg);
     if (!isPackageJsonRecord(parsedRootPkg)) {
@@ -1037,136 +1169,162 @@ export function disableLocalElizaWorkspace(
         `expected a package.json object with string-valued dependency maps`,
       );
     }
-    rootPkg = parsedRootPkg;
+    return parsedRootPkg;
   } catch (error) {
     errorLog(
       `[disable-local-eliza-workspace] Failed to parse ${packageJsonPath}: ${error instanceof Error ? error.message : String(error)}`,
     );
     throw error;
   }
+}
 
+function isDisabledWorkspaceEntry(entry) {
+  return (
+    DISABLED_WORKSPACE_GLOBS.includes(entry) ||
+    (typeof entry === "string" &&
+      entry.startsWith("eliza/") &&
+      !LOCAL_ONLY_WORKSPACE_GLOBS.includes(entry) &&
+      !LOCAL_ONLY_WORKSPACE_PATHS.includes(entry))
+  );
+}
+
+function patchRootWorkspaces(rootPkg, repoRoot, { log }) {
   const removedWorkspaceGlobs = [];
-  if (Array.isArray(rootPkg.workspaces)) {
-    const originalWorkspaces = rootPkg.workspaces;
-    const filteredWorkspaces = originalWorkspaces.filter((entry) => {
-      if (DISABLED_WORKSPACE_GLOBS.includes(entry)) {
-        removedWorkspaceGlobs.push(entry);
-        return false;
-      }
-      // Also strip any explicit eliza/ paths (e.g. electrobun, cloud-agent-template)
-      // that would vanish when eliza/ is renamed to .eliza.ci-disabled/
-      if (
-        typeof entry === "string" &&
-        entry.startsWith("eliza/") &&
-        !LOCAL_ONLY_WORKSPACE_GLOBS.includes(entry) &&
-        !LOCAL_ONLY_WORKSPACE_PATHS.includes(entry)
-      ) {
-        removedWorkspaceGlobs.push(entry);
-        return false;
-      }
+
+  if (!Array.isArray(rootPkg.workspaces)) {
+    return removedWorkspaceGlobs;
+  }
+
+  const filteredWorkspaces = rootPkg.workspaces.filter((entry) => {
+    if (!isDisabledWorkspaceEntry(entry)) {
       return true;
-    });
-
-    for (const workspacePath of LOCAL_ONLY_WORKSPACE_PATHS) {
-      const absoluteWorkspacePath = path.join(repoRoot, workspacePath);
-      if (
-        fs.existsSync(path.join(absoluteWorkspacePath, "package.json")) &&
-        !filteredWorkspaces.includes(workspacePath)
-      ) {
-        filteredWorkspaces.push(workspacePath);
-      }
     }
+    removedWorkspaceGlobs.push(entry);
+    return false;
+  });
 
-    if (removedWorkspaceGlobs.length === 0) {
-      log(
-        `[disable-local-eliza-workspace] Root package.json workspaces array does not include ${DISABLED_WORKSPACE_GLOBS.join(", ")}; nothing to patch`,
-      );
-    } else {
-      rootPkg.workspaces = filteredWorkspaces;
-      log(
-        `[disable-local-eliza-workspace] Removed ${removedWorkspaceGlobs.join(", ")} from root package.json workspaces`,
-      );
+  for (const workspacePath of LOCAL_ONLY_WORKSPACE_PATHS) {
+    const absoluteWorkspacePath = path.join(repoRoot, workspacePath);
+    if (
+      fs.existsSync(path.join(absoluteWorkspacePath, "package.json")) &&
+      !filteredWorkspaces.includes(workspacePath)
+    ) {
+      filteredWorkspaces.push(workspacePath);
     }
   }
 
-  // Strip patchedDependencies whose patch files live inside eliza/ when either:
-  // - eliza/ is intentionally renamed away (shouldRenameElizaWorkspace), OR
-  // - the patch file does not actually exist on disk (avoids bun install failure
-  //   with "Couldn't find patch file: 'eliza/packages/...'" when the submodule
-  //   is absent or not initialized).
-  if (isStringRecord(rootPkg.patchedDependencies)) {
-    const removedPatches = [];
-    for (const [dep, patchPath] of Object.entries(
-      rootPkg.patchedDependencies,
-    )) {
-      if (typeof patchPath === "string" && patchPath.startsWith("eliza/")) {
-        const absolutePatchPath = path.join(repoRoot, patchPath);
-        if (shouldRenameElizaWorkspace || !fs.existsSync(absolutePatchPath)) {
-          removedPatches.push(dep);
-        }
-      }
+  if (removedWorkspaceGlobs.length === 0) {
+    log(
+      `[disable-local-eliza-workspace] Root package.json workspaces array does not include ${DISABLED_WORKSPACE_GLOBS.join(", ")}; nothing to patch`,
+    );
+    return removedWorkspaceGlobs;
+  }
+
+  rootPkg.workspaces = filteredWorkspaces;
+  log(
+    `[disable-local-eliza-workspace] Removed ${removedWorkspaceGlobs.join(", ")} from root package.json workspaces`,
+  );
+  return removedWorkspaceGlobs;
+}
+
+function pruneElizaPatchedDependencies(
+  rootPkg,
+  repoRoot,
+  shouldRenameElizaWorkspace,
+  { log },
+) {
+  if (!isStringRecord(rootPkg.patchedDependencies)) {
+    return;
+  }
+
+  const removedPatches = [];
+  for (const [dep, patchPath] of Object.entries(rootPkg.patchedDependencies)) {
+    if (typeof patchPath !== "string" || !patchPath.startsWith("eliza/")) {
+      continue;
     }
-    for (const dep of removedPatches) {
-      delete rootPkg.patchedDependencies[dep];
-    }
-    if (removedPatches.length > 0) {
-      log(
-        `[disable-local-eliza-workspace] Removed ${removedPatches.length} patchedDependencies referencing eliza/ (${removedPatches.join(", ")})`,
-      );
+    const absolutePatchPath = path.join(repoRoot, patchPath);
+    if (shouldRenameElizaWorkspace || !fs.existsSync(absolutePatchPath)) {
+      removedPatches.push(dep);
     }
   }
 
-  // Stub scripts that reference eliza/ paths only when the directory has been
-  // renamed away.
-  if (shouldRenameElizaWorkspace && isStringRecord(rootPkg.scripts)) {
-    const stubbedScripts = [];
-    for (const [name, cmd] of Object.entries(rootPkg.scripts)) {
-      if (typeof cmd === "string" && cmd.includes("eliza/")) {
-        stubbedScripts.push(name);
-        rootPkg.scripts[name] =
-          "echo '[CI] script disabled — eliza/ workspace not present'";
-      }
-    }
-    if (stubbedScripts.length > 0) {
-      log(
-        `[disable-local-eliza-workspace] Stubbed ${stubbedScripts.length} scripts referencing eliza/ (${stubbedScripts.slice(0, 5).join(", ")}${stubbedScripts.length > 5 ? ", ..." : ""})`,
-      );
-    }
+  for (const dep of removedPatches) {
+    delete rootPkg.patchedDependencies[dep];
   }
 
-  applyCiOnlyOverrides(rootPkg, { log, repoRoot });
+  if (removedPatches.length > 0) {
+    log(
+      `[disable-local-eliza-workspace] Removed ${removedPatches.length} patchedDependencies referencing eliza/ (${removedPatches.join(", ")})`,
+    );
+  }
+}
 
-  writePackageJson(packageJsonPath, rawRootPkg, rootPkg);
+function stubElizaWorkspaceScripts(
+  rootPkg,
+  shouldRenameElizaWorkspace,
+  { log },
+) {
+  if (!shouldRenameElizaWorkspace || !isStringRecord(rootPkg.scripts)) {
+    return;
+  }
 
-  if (fs.existsSync(elizaPackageJsonPath)) {
-    try {
-      const rawElizaPkg = fs.readFileSync(elizaPackageJsonPath, "utf8");
-      const elizaPkg = parseJsonObject(rawElizaPkg);
-      if (!isPackageJsonRecord(elizaPkg)) {
-        warn(
-          `[disable-local-eliza-workspace] Skipping ${elizaPackageJsonPath}: package.json is malformed`,
-        );
-      } else if (
-        applyOverrideSpecifiers(
-          elizaPkg,
-          ELIZA_RUNTIME_CI_OVERRIDE_SPECIFIERS,
-          {
-            log,
-            label: "local eliza runtime override",
-          },
-        )
-      ) {
-        writePackageJson(elizaPackageJsonPath, rawElizaPkg, elizaPkg);
-      }
-    } catch (error) {
+  const stubbedScripts = [];
+  for (const [name, cmd] of Object.entries(rootPkg.scripts)) {
+    if (typeof cmd !== "string" || !cmd.includes("eliza/")) {
+      continue;
+    }
+    stubbedScripts.push(name);
+    rootPkg.scripts[name] =
+      "echo '[CI] script disabled — eliza/ workspace not present'";
+  }
+
+  if (stubbedScripts.length > 0) {
+    log(
+      `[disable-local-eliza-workspace] Stubbed ${stubbedScripts.length} scripts referencing eliza/ (${stubbedScripts.slice(0, 5).join(", ")}${stubbedScripts.length > 5 ? ", ..." : ""})`,
+    );
+  }
+}
+
+function patchLocalElizaPackage({
+  shouldTouchLocalElizaWorkspace,
+  elizaPackageJsonPath,
+  log,
+  warn,
+}) {
+  if (!shouldTouchLocalElizaWorkspace || !fs.existsSync(elizaPackageJsonPath)) {
+    return;
+  }
+
+  try {
+    const rawElizaPkg = fs.readFileSync(elizaPackageJsonPath, "utf8");
+    const elizaPkg = parseJsonObject(rawElizaPkg);
+    if (!isPackageJsonRecord(elizaPkg)) {
       warn(
-        `[disable-local-eliza-workspace] Failed to patch ${elizaPackageJsonPath}: ${error instanceof Error ? error.message : String(error)}`,
+        `[disable-local-eliza-workspace] Skipping ${elizaPackageJsonPath}: package.json is malformed`,
       );
+      return;
     }
+    if (
+      applyOverrideSpecifiers(elizaPkg, ELIZA_RUNTIME_CI_OVERRIDE_SPECIFIERS, {
+        log,
+        label: "local eliza runtime override",
+      })
+    ) {
+      writePackageJson(elizaPackageJsonPath, rawElizaPkg, elizaPkg);
+    }
+  } catch (error) {
+    warn(
+      `[disable-local-eliza-workspace] Failed to patch ${elizaPackageJsonPath}: ${error instanceof Error ? error.message : String(error)}`,
+    );
   }
+}
 
-  // Use early-resolved versions (captured before eliza/ was renamed away).
-  // Fall back to a post-rename resolution attempt for robustness.
+function resolvePinnedWorkspaceVersionState({
+  earlyPinnedVersions,
+  earlyPinnedVersionSources,
+  repoRoot,
+  rootPkg,
+}) {
   const latePinnedVersionSources = new Map();
   const pinnedWorkspaceVersions =
     earlyPinnedVersions.size > 0
@@ -1180,19 +1338,15 @@ export function disableLocalElizaWorkspace(
       ? earlyPinnedVersionSources
       : latePinnedVersionSources;
 
-  if (!pinnedWorkspaceVersions.has(ELIZAOS_CORE_NAME)) {
-    warn(
-      "[disable-local-eliza-workspace] Could not resolve a pinned @elizaos/core version from overrides or cloud-agent-template; leaving workspace:* specifiers in place",
-    );
-    // Still remove lockfiles so Bun regenerates without stale workspace entries
-    removedLockfiles.push(...removeStaleLockfiles(repoRoot, { log }));
-    return {
-      rewrites: 0,
-      removedWorkspaceGlobs,
-      pinnedWorkspaceVersions,
-    };
-  }
+  return { pinnedWorkspaceVersions, pinnedVersionSources };
+}
 
+function resolvePendingWorkspaceRewriteTargets({
+  rootPkg,
+  repoRoot,
+  removedWorkspaceGlobs,
+  shouldTouchLocalElizaWorkspace,
+}) {
   const seen = new Set();
   const pendingWorkspaceDirs = [];
   const nestedInstallablePackageDirs = new Set(
@@ -1202,25 +1356,35 @@ export function disableLocalElizaWorkspace(
   );
   const rewriteWorkspaceEntries = [
     ...(rootPkg.workspaces ?? []),
-    ...removedWorkspaceGlobs,
-    ...NESTED_INSTALLABLE_PACKAGE_GLOBS,
+    ...(shouldTouchLocalElizaWorkspace ? removedWorkspaceGlobs : []),
+    ...(shouldTouchLocalElizaWorkspace ? NESTED_INSTALLABLE_PACKAGE_GLOBS : []),
   ];
 
-  // In rewrite-only CI the eliza/ checkout stays on disk even after we remove
-  // its globs from the root workspace graph. Keep rewriting those package.json
-  // files too, because release-check still validates their pinned specs.
   for (const entry of rewriteWorkspaceEntries) {
     const expanded = expandGlob(entry, { rootDir: repoRoot });
     for (const match of expanded) {
-      if (!seen.has(match)) {
-        seen.add(match);
-        pendingWorkspaceDirs.push(match);
+      if (seen.has(match)) {
+        continue;
       }
+      seen.add(match);
+      pendingWorkspaceDirs.push(match);
     }
   }
 
-  const workspaceProtocolDependencyNames =
-    collectWorkspaceProtocolDependencyNames(rootPkg, { localOnlyPackages });
+  return { pendingWorkspaceDirs, nestedInstallablePackageDirs };
+}
+
+function collectPendingWorkspaceDependencyNames({
+  rootPkg,
+  pendingWorkspaceDirs,
+  repoRoot,
+  localOnlyPackages,
+  warn,
+}) {
+  const dependencyNames = collectWorkspaceProtocolDependencyNames(rootPkg, {
+    localOnlyPackages,
+  });
+
   for (const workspaceRel of pendingWorkspaceDirs) {
     const pkgPath = path.join(repoRoot, workspaceRel, "package.json");
     if (!fs.existsSync(pkgPath)) continue;
@@ -1234,11 +1398,9 @@ export function disableLocalElizaWorkspace(
       }
       for (const dependencyName of collectWorkspaceProtocolDependencyNames(
         pkg,
-        {
-          localOnlyPackages,
-        },
+        { localOnlyPackages },
       )) {
-        workspaceProtocolDependencyNames.add(dependencyName);
+        dependencyNames.add(dependencyName);
       }
     } catch (error) {
       warn(
@@ -1247,11 +1409,233 @@ export function disableLocalElizaWorkspace(
     }
   }
 
+  return dependencyNames;
+}
+
+function rewriteRootPackageDependencies({
+  rootPkg,
+  packageJsonPath,
+  rawRootPkg,
+  publishSafePinnedWorkspaceVersions,
+  localOnlyPackages,
+  registrySpecifierCache,
+  log,
+  warn,
+}) {
+  const rewroteRootWorkspaceDeps = rewriteWorkspaceDependencySpecifiers(
+    rootPkg,
+    publishSafePinnedWorkspaceVersions,
+    { localOnlyPackages },
+  );
+  const rewroteRootRegistryDeps = rewriteConfiguredElizaRegistrySpecifiers(
+    rootPkg,
+    {
+      localOnlyPackages,
+      registryInfoCache: registrySpecifierCache,
+      log,
+      warn,
+    },
+  );
+
+  if (!rewroteRootWorkspaceDeps && !rewroteRootRegistryDeps) {
+    return 0;
+  }
+
+  writePackageJson(packageJsonPath, rawRootPkg, rootPkg);
+  log("[disable-local-eliza-workspace]   patched .");
+  return 1;
+}
+
+function rewritePendingWorkspacePackage({
+  workspaceRel,
+  repoRoot,
+  publishSafePinnedWorkspaceVersions,
+  localOnlyPackages,
+  registrySpecifierCache,
+  nestedInstallablePackageDirs,
+  localOnlyPackagePaths,
+  log,
+  warn,
+}) {
+  const pkgPath = path.join(repoRoot, workspaceRel, "package.json");
+  if (!fs.existsSync(pkgPath)) {
+    return 0;
+  }
+
+  let originalRaw;
+  let parsedPkg;
+  try {
+    originalRaw = fs.readFileSync(pkgPath, "utf8");
+    parsedPkg = parseJsonObject(originalRaw);
+  } catch (error) {
+    warn(
+      `[disable-local-eliza-workspace]   skipped ${workspaceRel}: ${error instanceof Error ? error.message : String(error)}`,
+    );
+    return 0;
+  }
+
+  if (!isPackageJsonRecord(parsedPkg)) {
+    warn(
+      `[disable-local-eliza-workspace]   skipped ${workspaceRel}: package.json is malformed`,
+    );
+    return 0;
+  }
+
+  const rewrotePublishedWorkspaceDeps = rewriteWorkspaceDependencySpecifiers(
+    parsedPkg,
+    publishSafePinnedWorkspaceVersions,
+    { localOnlyPackages },
+  );
+  const rewroteConfiguredRegistryDeps =
+    rewriteConfiguredElizaRegistrySpecifiers(parsedPkg, {
+      localOnlyPackages,
+      registryInfoCache: registrySpecifierCache,
+      log,
+      warn,
+    });
+  const rewroteNestedLocalFileDeps =
+    nestedInstallablePackageDirs.has(workspaceRel) &&
+    rewriteNestedLocalFileDependencySpecifiers(
+      parsedPkg,
+      workspaceRel,
+      localOnlyPackagePaths,
+    );
+
+  if (
+    !rewrotePublishedWorkspaceDeps &&
+    !rewroteConfiguredRegistryDeps &&
+    !rewroteNestedLocalFileDeps
+  ) {
+    return 0;
+  }
+
+  if (!writePackageJson(pkgPath, originalRaw, parsedPkg)) {
+    return 0;
+  }
+
+  log(`[disable-local-eliza-workspace]   patched ${workspaceRel}`);
+  return 1;
+}
+
+export function disableLocalElizaWorkspace(
+  repoRoot = DEFAULT_REPO_ROOT,
+  { log = console.log, warn = console.warn, errorLog = console.error } = {},
+) {
+  const elizaRoot = path.join(repoRoot, "eliza");
+  const disabledElizaRoot = path.join(repoRoot, ".eliza.ci-disabled");
+  const shouldRenameElizaWorkspace =
+    process.env.MILADY_DISABLE_LOCAL_UPSTREAMS_RENAME === "1";
+  const shouldTouchLocalElizaWorkspace =
+    process.env.MILADY_DISABLE_LOCAL_UPSTREAMS_TOUCH_LOCAL_ELIZA === "1";
+  const packageJsonPath = path.join(repoRoot, "package.json");
+  const elizaPackageJsonPath = path.join(elizaRoot, "package.json");
+  const removedLockfiles = [];
+
+  if (shouldTouchLocalElizaWorkspace) {
+    repairKnownElizaPatchFiles(repoRoot, { log });
+  }
+
+  const localOnlyPackagePaths = resolveLocalOnlyWorkspacePackagePaths(repoRoot);
+  const localOnlyPackages = new Set(localOnlyPackagePaths.keys());
+
+  const {
+    pinnedVersions: earlyPinnedVersions,
+    versionSources: earlyPinnedVersionSources,
+  } = preResolvePinnedWorkspaceVersions(repoRoot, packageJsonPath, { log });
+
+  reconcileElizaWorkspaceDirectory({
+    shouldRenameElizaWorkspace,
+    elizaRoot,
+    disabledElizaRoot,
+    log,
+  });
+
+  applyTsconfigMode(repoRoot, "packages", { log });
+
+  if (!fs.existsSync(packageJsonPath)) {
+    log(
+      "[disable-local-eliza-workspace] Root package.json not found; skipping workspace patch",
+    );
+    return {
+      rewrites: 0,
+      removedWorkspaceGlobs: [],
+      pinnedWorkspaceVersions: new Map(),
+    };
+  }
+
+  const rawRootPkg = fs.readFileSync(packageJsonPath, "utf8");
+  backupRootPackageJson(repoRoot, rawRootPkg, { log });
+
+  const rootPkg = parseRootPackageJson(packageJsonPath, rawRootPkg, {
+    errorLog,
+  });
+  const removedWorkspaceGlobs = patchRootWorkspaces(rootPkg, repoRoot, {
+    log,
+  });
+  pruneElizaPatchedDependencies(rootPkg, repoRoot, shouldRenameElizaWorkspace, {
+    log,
+  });
+  stubElizaWorkspaceScripts(rootPkg, shouldRenameElizaWorkspace, { log });
+
+  applyCiOnlyOverrides(rootPkg, { log, repoRoot });
+
+  writePackageJson(packageJsonPath, rawRootPkg, rootPkg);
+
+  patchLocalElizaPackage({
+    shouldTouchLocalElizaWorkspace,
+    elizaPackageJsonPath,
+    log,
+    warn,
+  });
+
+  const { pinnedWorkspaceVersions, pinnedVersionSources } =
+    resolvePinnedWorkspaceVersionState({
+      earlyPinnedVersions,
+      earlyPinnedVersionSources,
+      repoRoot,
+      rootPkg,
+    });
+  const { pendingWorkspaceDirs, nestedInstallablePackageDirs } =
+    resolvePendingWorkspaceRewriteTargets({
+      rootPkg,
+      repoRoot,
+      removedWorkspaceGlobs,
+      shouldTouchLocalElizaWorkspace,
+    });
+  const workspaceProtocolDependencyNames =
+    collectPendingWorkspaceDependencyNames({
+      rootPkg,
+      pendingWorkspaceDirs,
+      repoRoot,
+      localOnlyPackages,
+      warn,
+    });
+
+  const registryResolvedPinnedWorkspaceVersions =
+    resolveMissingRegistryPinnedVersions(
+      workspaceProtocolDependencyNames,
+      pinnedWorkspaceVersions,
+      { log, warn },
+    );
+
+  if (!registryResolvedPinnedWorkspaceVersions.has(ELIZAOS_CORE_NAME)) {
+    warn(
+      "[disable-local-eliza-workspace] Could not resolve a pinned @elizaos/core version from overrides, cloud-agent-template, local workspace metadata, or npm dist-tags; leaving workspace:* specifiers in place",
+    );
+    // Still remove lockfiles so Bun regenerates without stale workspace entries
+    removedLockfiles.push(...removeStaleLockfiles(repoRoot, { log }));
+    return {
+      rewrites: 0,
+      removedWorkspaceGlobs,
+      pinnedWorkspaceVersions: registryResolvedPinnedWorkspaceVersions,
+    };
+  }
+
   const ciOverrideNames = new Set(
     Object.keys(resolveCiOverrideSpecifiers(repoRoot)),
   );
   const publishSafePinnedWorkspaceVersions = resolvePublishSafePinnedVersions(
-    pinnedWorkspaceVersions,
+    registryResolvedPinnedWorkspaceVersions,
     {
       dependencyNames: workspaceProtocolDependencyNames,
       versionSources: pinnedVersionSources,
@@ -1266,65 +1650,30 @@ export function disableLocalElizaWorkspace(
   );
 
   let rewrites = 0;
-  if (
-    rewriteWorkspaceDependencySpecifiers(
-      rootPkg,
-      publishSafePinnedWorkspaceVersions,
-      {
-        localOnlyPackages,
-      },
-    )
-  ) {
-    writePackageJson(packageJsonPath, rawRootPkg, rootPkg);
-    rewrites++;
-    log("[disable-local-eliza-workspace]   patched .");
-  }
+  const registrySpecifierCache = new Map();
+  rewrites += rewriteRootPackageDependencies({
+    rootPkg,
+    packageJsonPath,
+    rawRootPkg,
+    publishSafePinnedWorkspaceVersions,
+    localOnlyPackages,
+    registrySpecifierCache,
+    log,
+    warn,
+  });
 
   for (const workspaceRel of pendingWorkspaceDirs) {
-    const pkgPath = path.join(repoRoot, workspaceRel, "package.json");
-    if (!fs.existsSync(pkgPath)) continue;
-
-    let originalRaw;
-    let parsedPkg;
-    try {
-      originalRaw = fs.readFileSync(pkgPath, "utf8");
-      parsedPkg = parseJsonObject(originalRaw);
-    } catch (error) {
-      warn(
-        `[disable-local-eliza-workspace]   skipped ${workspaceRel}: ${error instanceof Error ? error.message : String(error)}`,
-      );
-      continue;
-    }
-    if (!isPackageJsonRecord(parsedPkg)) {
-      warn(
-        `[disable-local-eliza-workspace]   skipped ${workspaceRel}: package.json is malformed`,
-      );
-      continue;
-    }
-    const pkg = parsedPkg;
-
-    const rewrotePublishedWorkspaceDeps = rewriteWorkspaceDependencySpecifiers(
-      pkg,
+    rewrites += rewritePendingWorkspacePackage({
+      workspaceRel,
+      repoRoot,
       publishSafePinnedWorkspaceVersions,
-      {
-        localOnlyPackages,
-      },
-    );
-    const rewroteNestedLocalFileDeps =
-      nestedInstallablePackageDirs.has(workspaceRel) &&
-      rewriteNestedLocalFileDependencySpecifiers(
-        pkg,
-        workspaceRel,
-        localOnlyPackagePaths,
-      );
-
-    if (!rewrotePublishedWorkspaceDeps && !rewroteNestedLocalFileDeps) {
-      continue;
-    }
-    if (writePackageJson(pkgPath, originalRaw, pkg)) {
-      rewrites++;
-      log(`[disable-local-eliza-workspace]   patched ${workspaceRel}`);
-    }
+      localOnlyPackages,
+      registrySpecifierCache,
+      nestedInstallablePackageDirs,
+      localOnlyPackagePaths,
+      log,
+      warn,
+    });
   }
 
   if (rewrites === 0) {
@@ -1352,9 +1701,7 @@ const isMain =
   path.resolve(process.argv[1]) === path.resolve(SCRIPT_PATH);
 
 if (isMain) {
-  const skipLocalUpstreams =
-    process.env.MILADY_SKIP_LOCAL_UPSTREAMS === "1" ||
-    process.env.ELIZA_SKIP_LOCAL_UPSTREAMS === "1";
+  const skipLocalUpstreams = isLocalElizaDisabled();
   const runningInCi = process.env.GITHUB_ACTIONS === "true";
   const forced = process.env.MILADY_DISABLE_LOCAL_UPSTREAMS === "force";
 

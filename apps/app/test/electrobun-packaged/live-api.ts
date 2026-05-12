@@ -1,3 +1,7 @@
+// Local-mode only: this test helper imports from `eliza/packages/app-core/test/helpers/`,
+// which is not part of the published `@elizaos/app-core` package. Running the
+// packaged-Electrobun E2E suite requires `bun run eliza:local`. See the
+// "elizaOS source modes" section of README.md.
 import http from "node:http";
 import type { AddressInfo } from "node:net";
 import { startApiServer } from "../../../../eliza/packages/app-core/src/api/server.ts";

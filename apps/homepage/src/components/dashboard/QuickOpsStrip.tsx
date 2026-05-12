@@ -12,7 +12,12 @@ export function QuickOpsStrip({ onCopy }: QuickOpsStripProps) {
       ? releaseData.scripts.shell.command
       : releaseData.scripts.powershell.command;
   const label = platform === "shell" ? "Shell" : "PowerShell";
-  const downloads = releaseData.release.downloads.slice(0, 3);
+  const downloads: ReadonlyArray<{
+    id: string;
+    label: string;
+    sizeLabel: string;
+    url: string;
+  }> = releaseData.release.downloads;
 
   return (
     <section aria-labelledby="quickops-heading" className="space-y-4">
@@ -64,12 +69,12 @@ export function QuickOpsStrip({ onCopy }: QuickOpsStripProps) {
 
         <div className="min-w-0 rounded-lg border border-border bg-[#0a0a0d] p-3.5 sm:p-4">
           <div className="mb-3 font-mono text-[11px] lowercase tracking-[0.12em] text-white/45">
-            desktop
+            downloads
           </div>
           <div className="flex flex-col gap-1.5">
             {downloads.length === 0 ? (
               <span className="text-[12px] text-white/40">
-                no desktop builds available yet.
+                no builds available yet.
               </span>
             ) : (
               downloads.map((download) => (

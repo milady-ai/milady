@@ -78,7 +78,6 @@ concurrency:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: milady-ai/agent
-  DEPOT_PROJECT_ID: m89t0f0p08
 
 permissions:
   contents: read
@@ -94,7 +93,7 @@ jobs:
     steps:
       # ── 1. Checkout ─────────────────────────────────────────────────────────
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           ref: ${{ inputs.source_sha || github.event.release.tag_name || github.sha }}
@@ -102,7 +101,7 @@ jobs:
 
       # ── 2. Set up Node 22 ───────────────────────────────────────────────────
       - name: Setup Node.js 22
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "22"
 
@@ -114,23 +113,51 @@ jobs:
 
       # ── 4. Restore cached bun store ─────────────────────────────────────────
       - name: Cache bun store
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.bun/install/cache
           key: bun-store-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: |
             bun-store-${{ runner.os }}-
 
-      # ── 4.5. Init eliza submodule ──────────────────────────────────────────
-      # Prime the eliza checkout before init-submodules.mjs recurses into the
-      # nested cloud/steward/plugin submodules that the root workspace expects.
-      - name: Initialize eliza submodule
-        run: git submodule update --init --depth=1 eliza
+      # ── 4.5. Init eliza source checkout ───────────────────────────────────
+      # The Milady repo now defaults to published @elizaos packages and no
+      # longer tracks eliza/ as a gitlink. The image build still needs source
+      # artifacts, so hydrate the canonical eliza repo explicitly.
+      - name: Initialize eliza source checkout
+        run: |
+          if [ ! -f eliza/package.json ]; then
+            git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza
+          fi
 
       - name: Initialize tracked workspace submodules
         run: node scripts/init-submodules.mjs
         env:
           MILADY_SKIP_CLOUD_SUBMODULE: "1"
+
+      - name: Prepare eliza source workspace
+        run: |
+          if [ -f eliza/.gitmodules ]; then
+            git -C eliza submodule sync --recursive
+            git -C eliza \
+              -c submodule.cloud.update=none \
+              -c submodule.plugins/plugin-elizacloud.update=none \
+              submodule update --init --recursive --depth=1
+          fi
+          node --input-type=module <<'NODE'
+          import {
+            pruneDuplicateLegacyElizaPluginWorkspaces,
+            pruneSkippedCloudWorkspace,
+          } from "./scripts/init-submodules.mjs";
+
+          pruneSkippedCloudWorkspace({ rootDir: process.cwd() });
+          pruneDuplicateLegacyElizaPluginWorkspaces({ rootDir: process.cwd() });
+          NODE
+        env:
+          MILADY_SKIP_CLOUD_SUBMODULE: "1"
+
+      - name: Apply elizaOS source CI patches
+        run: node scripts/apply-eliza-ci-patches.mjs
 
       - name: Repair known eliza patch files
         run: |
@@ -142,12 +169,40 @@ jobs:
 
       # ── 5. Install dependencies ─────────────────────────────────────────────
       - name: Install dependencies
-        run: bun install --ignore-scripts
+        run: bun install --ignore-scripts --no-frozen-lockfile
+
+      - name: Install eliza source dependencies
+        run: |
+          install_cmd=(timeout 10m bun install --cwd eliza --no-frozen-lockfile --ignore-scripts)
+
+          for attempt in 1 2 3; do
+            if "${install_cmd[@]}"; then
+              exit 0
+            fi
+
+            if [ "$attempt" -eq 3 ]; then
+              echo "eliza bun install failed after ${attempt} attempts" >&2
+              exit 1
+            fi
+
+            echo "eliza bun install failed on attempt ${attempt}; retrying in 15 seconds" >&2
+            sleep 15
+          done
+
+      - name: Hydrate eliza Bun package postinstall
+        # bun is hoisted to top-level node_modules in some setups; only hydrate
+        # the eliza-nested copy when it actually exists.
+        run: |
+          if [ -f eliza/node_modules/bun/install.js ]; then
+            (cd eliza/node_modules/bun && node install.js)
+          else
+            echo "eliza/node_modules/bun not present (likely hoisted) — skipping hydration"
+          fi
 
       # ── 5b. Install build fallback dependencies ────────────────────────────
-      # setup-upstreams builds @elizaos/core during postinstall. Hydrate the
-      # published-only dependency fallback first so package-local builds can
-      # resolve @noble/*, @types/*, and other third-party deps.
+      # Hydrate published-only dependency fallbacks first so package-local builds
+      # can resolve @noble/*, @types/*, and other third-party deps while
+      # postinstall skips the expensive repo-local upstream setup.
       - name: Install published-workspace fallback dependencies
         run: bash scripts/install-published-workspace-fallback-deps.sh
 
@@ -157,20 +212,46 @@ jobs:
         env:
           SKIP_AVATAR_CLONE: "1"
           MILADY_NO_VISION_DEPS: "1"
+          MILADY_SKIP_LOCAL_UPSTREAMS: "1"
 
       # ── 6. Build Capacitor plugins ──────────────────────────────────────────
       # The Vite UI imports @elizaos/capacitor-* workspace packages which need
       # their dist/ built before vite can resolve them.
       - name: Build Capacitor plugins
         run: |
-          cd apps/app
-          bun scripts/plugin-build.mjs
+          node eliza/packages/app-core/scripts/build-native-plugins.mjs
+
+      # ── 6.4. Generate protobuf types ────────────────────────────────────────
+      # eliza/packages/app-core/scripts/ensure-generated-core-proto-js.mjs
+      # (invoked from the agent Dockerfile) errors out when the proto outputs
+      # under eliza/packages/core/src/types/generated/eliza/v1 are missing.
+      # Run buf generate when the v1 outputs are absent (an empty `generated/`
+      # parent directory still trips the script).
+      - name: Generate protobuf types
+        run: |
+          if [ -d eliza/packages/schemas ] && [ -f eliza/packages/schemas/buf.gen.yaml ] && [ ! -d eliza/packages/core/src/types/generated/eliza/v1 ]; then
+            cd eliza/packages/schemas
+            node node_modules/@bufbuild/buf/install.js 2>/dev/null || true
+            bunx @bufbuild/buf@1.67.0 generate
+          fi
+          ls -la eliza/packages/core/src/types/generated/eliza/v1 2>/dev/null || echo "WARN: proto generated dir still missing"
+
+      # ── 6.5. Build eliza runtime packages needed by the agent image ─────────
+      - name: Build @elizaos/core
+        run: |
+          cd eliza/packages/core
+          bun run build
 
       # ── 7. Build runtime workspace packages with source exports ─────────────
       - name: Build agent workspace
         run: |
           cd eliza/packages/agent
           bun run build:docker-dist
+
+      - name: Build @elizaos/shared
+        run: |
+          cd eliza/packages/shared
+          bun run build
 
       # ── 9. Build runtime (tsdown) ───────────────────────────────────────────
       - name: Build runtime (tsdown)
@@ -181,7 +262,7 @@ jobs:
           if [ -d node_modules/bun ] && [ -f node_modules/bun/install.js ]; then
             (cd node_modules/bun && node install.js) || true
           fi
-          npx tsdown
+          node scripts/run-tsdown.mjs
           echo '{"type":"module"}' > dist/package.json
           # write-build-info.ts may not exist on all branches — soft fail
           node --import tsx eliza/packages/app-core/scripts/write-build-info.ts 2>/dev/null || true
@@ -214,10 +295,12 @@ jobs:
             fi
           fi
 
-          echo "version=${VERSION}"             >> $GITHUB_OUTPUT
-          echo "version_clean=${VERSION_CLEAN}" >> $GITHUB_OUTPUT
-          echo "is_release=${IS_RELEASE}"       >> $GITHUB_OUTPUT
-          echo "tag_latest=${TAG_LATEST}"       >> $GITHUB_OUTPUT
+          {
+            echo "version=${VERSION}"
+            echo "version_clean=${VERSION_CLEAN}"
+            echo "is_release=${IS_RELEASE}"
+            echo "tag_latest=${TAG_LATEST}"
+          } >> "$GITHUB_OUTPUT"
 
           echo "Version:    ${VERSION}"
           echo "Clean:      ${VERSION_CLEAN}"
@@ -266,32 +349,22 @@ jobs:
       - name: Set up CI dockerignore
         run: cp eliza/packages/app-core/deploy/.dockerignore.ci .dockerignore
 
-      # ── 13. Set up Depot CLI ────────────────────────────────────────────────
-      # Docker builds run on Depot infrastructure (persistent cache, no GHA
-      # docker-daemon fragility). `DEPOT_TOKEN` secret must be set on the repo.
-      # Set repo variable DEPOT_ENABLED=false to skip Depot entirely and go
-      # straight to the Buildx fallback (e.g. when the Depot account is
-      # unavailable).
-      - name: Set up Depot CLI
-        if: vars.DEPOT_ENABLED != 'false'
-        uses: depot/setup-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
 
-      - name: Set up Docker Buildx fallback
-        uses: docker/setup-buildx-action@v3
-
-      # ── 14. Login to GHCR ───────────────────────────────────────────────────
+      # ── 13. Login to GHCR ───────────────────────────────────────────────────
       - name: Login to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         if: ${{ github.event_name == 'push' || inputs.push_image != false }}
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # ── 13. Docker image metadata ───────────────────────────────────────────
+      # ── 14. Docker image metadata ───────────────────────────────────────────
       - name: Docker metadata
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
@@ -299,46 +372,9 @@ jobs:
             type=raw,value=latest,enable=${{ steps.version.outputs.tag_latest == 'true' }}
             type=raw,value=dev,enable=${{ steps.version.outputs.is_release == 'false' }}
 
-      # ── 14. Build and push (on Depot, with Buildx fallback) ────────────────
-      # depot/build-push-action builds on Depot's BuildKit workers (persistent
-      # layer cache, no GHA daemon). Push goes directly from Depot to GHCR,
-      # sidestepping the GHA → GHCR 403 class of failures on restricted tokens.
-      - name: Build and push Docker image with Depot
-        id: depot-build
-        if: vars.DEPOT_ENABLED != 'false'
-        continue-on-error: true
-        uses: depot/build-push-action@v1
-        with:
-          project: ${{ env.DEPOT_PROJECT_ID }}
-          token: ${{ secrets.DEPOT_TOKEN }}
-          context: .
-          file: eliza/packages/app-core/deploy/Dockerfile.ci
-          platforms: linux/amd64
-          push: ${{ github.event_name == 'push' || inputs.push_image != false }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          build-args: |
-            APP_CORE_DIR=eliza/packages/app-core
-            AGENT_DIR=eliza/packages/agent
-            APP_DIR=apps/app
-            APP_ENTRYPOINT=${{ env.APP_ENTRYPOINT }}
-            APP_CMD_START=${{ env.APP_CMD_START }}
-            APP_PORT=${{ env.APP_PORT }}
-            APP_API_BIND=${{ env.APP_API_BIND }}
-            OCI_SOURCE=${{ env.OCI_SOURCE }}
-            OCI_TITLE=${{ env.OCI_TITLE }}
-            OCI_DESCRIPTION=${{ env.OCI_DESCRIPTION }}
-            OCI_LICENSES=${{ env.OCI_LICENSES }}
-            VERSION=${{ steps.version.outputs.version }}
-            VERSION_CLEAN=${{ steps.version.outputs.version_clean }}
-            REVISION=${{ github.sha }}
-            MILADY_RELEASE_TAG=${{ steps.version.outputs.is_release == 'true' && steps.version.outputs.version || '' }}
-          provenance: false
-          buildx-fallback: true
-
-      - name: Build and push Docker image with Buildx fallback
-        if: vars.DEPOT_ENABLED == 'false' || steps.depot-build.outcome == 'failure'
-        uses: docker/build-push-action@v6
+      # ── 15. Build and push Docker image ────────────────────────────────────
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: eliza/packages/app-core/deploy/Dockerfile.ci
@@ -364,26 +400,28 @@ jobs:
             MILADY_RELEASE_TAG=${{ steps.version.outputs.is_release == 'true' && steps.version.outputs.version || '' }}
           provenance: false
 
-      # ── 15. Build summary ───────────────────────────────────────────────────
+      # ── 16. Build summary ───────────────────────────────────────────────────
       - name: Build summary
         if: always()
         run: |
-          echo "## 🐳 Milady Docker Image" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Registry | \`${{ env.REGISTRY }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Image | \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Version | \`${{ steps.version.outputs.version }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Tagged latest | \`${{ steps.version.outputs.tag_latest }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Trigger | \`${{ github.event_name }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Requested SHA | \`${{ inputs.source_sha || github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Built SHA | \`$(git rev-parse HEAD)\` |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Pull commands" >> $GITHUB_STEP_SUMMARY
-          echo '```bash' >> $GITHUB_STEP_SUMMARY
-          echo "docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ steps.version.outputs.tag_latest }}" = "true" ]; then
-            echo "docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest" >> $GITHUB_STEP_SUMMARY
-          fi
-          echo '```' >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## 🐳 Milady Docker Image"
+            echo ""
+            echo "| Property | Value |"
+            echo "|----------|-------|"
+            echo "| Registry | \`${{ env.REGISTRY }}\` |"
+            echo "| Image | \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}\` |"
+            echo "| Version | \`${{ steps.version.outputs.version }}\` |"
+            echo "| Tagged latest | \`${{ steps.version.outputs.tag_latest }}\` |"
+            echo "| Trigger | \`${{ github.event_name }}\` |"
+            echo "| Requested SHA | \`${{ inputs.source_sha || github.sha }}\` |"
+            echo "| Built SHA | \`$(git rev-parse HEAD)\` |"
+            echo ""
+            echo "### Pull commands"
+            echo '```bash'
+            echo "docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}"
+            if [ "${{ steps.version.outputs.tag_latest }}" = "true" ]; then
+              echo "docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+            fi
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

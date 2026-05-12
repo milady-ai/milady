@@ -7,9 +7,9 @@
    Mono code. */
 @plugin "@tailwindcss/typography";
 
-/* Scan @elizaos/app-core source so Tailwind generates CSS for all UI package classes
+/* Scan @elizaos/ui package output so Tailwind generates CSS for all UI package classes
    (z-[160], z-[170], bg-black/80, bg-bg, text-muted, ring-ring, etc.) */
-@source "../../../eliza/packages/ui/src/**/*.{ts,tsx}";
+@source "../../../node_modules/@elizaos/ui/packages/ui/src/**/*.{js,ts,tsx}";
 /* Scan MDX doc content so Tailwind generates classes referenced inside .mdx files
    and the docs components. */
 @source "./src/docs/**/*.{ts,tsx,mdx}";

@@ -27,10 +27,10 @@ RUN set -x; \
     # @elizaos/core: delete symlink, copy package + compiled dist
     rm -rf node_modules/@elizaos/core; \
     mkdir -p node_modules/@elizaos/core; \
-    cp eliza/packages/typescript/package.json node_modules/@elizaos/core/; \
-    cp -a eliza/packages/typescript/dist node_modules/@elizaos/core/dist 2>/dev/null || true; \
+    cp eliza/packages/core/package.json node_modules/@elizaos/core/; \
+    cp -a eliza/packages/core/dist node_modules/@elizaos/core/dist 2>/dev/null || true; \
     # NOTE: Do NOT copy src/ - tsx will prefer raw .ts over compiled dist/
-    # cp -a eliza/packages/typescript/src node_modules/@elizaos/core/src 2>/dev/null || true; \
+    # cp -a eliza/packages/core/src node_modules/@elizaos/core/src 2>/dev/null || true; \
     ls node_modules/@elizaos/core/dist/node/index.node.js 2>/dev/null && echo "@elizaos/core dist OK" || echo "WARN: core dist/node missing"; \
     # @elizaos/agent: delete symlink, copy package + compiled dist
     rm -rf node_modules/@elizaos/agent; \
@@ -80,7 +80,7 @@ RUN find eliza -path '*/node_modules/@elizaos/core' -not -path '*/node_modules/.
 
 # Delete raw TypeScript source from eliza workspace packages.
 # tsx prefers .ts over compiled .js, causing cascading dep resolution failures.
-# eliza/packages/typescript/src is kept because tsx resolves @elizaos/core imports via
+# eliza/packages/core/src is kept because tsx resolves @elizaos/core imports via
 # tsconfig paths that point here (e.g. @elizaos/core/utils/context-catalog). Removing it
 # breaks agent startup even though the compiled dist is also present.
 
@@ -127,7 +127,7 @@ RUN CORE_DIR="node_modules/@elizaos/core"; \
 
 # Hoist missing deps from workspace packages to top-level node_modules
 # tsx resolves raw .ts source which imports packages not hoisted by bun
-RUN for pkg_dir in eliza/packages/typescript eliza/packages/shared eliza/packages/agent eliza/apps/app-companion eliza/apps/app-lifeops; do \
+RUN for pkg_dir in eliza/packages/core eliza/packages/shared eliza/packages/agent eliza/apps/app-companion eliza/apps/app-lifeops; do \
       if [ -d "$pkg_dir/node_modules" ]; then \
         for dep in $(ls "$pkg_dir/node_modules/" 2>/dev/null | grep -v '^\.'); do \
           if [ ! -e "node_modules/$dep" ] && [ -d "$pkg_dir/node_modules/$dep" ]; then \

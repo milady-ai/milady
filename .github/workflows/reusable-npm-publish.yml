@@ -31,12 +31,12 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "22"
           check-latest: false
@@ -52,27 +52,28 @@ jobs:
           skip-avatar-clone: "true"
           no-vision-deps: "true"
 
+      - name: Initialize eliza source checkout
+        run: |
+          if [ ! -f eliza/package.json ]; then
+            git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza
+          fi
+
       - name: Set version in package.json
         run: node eliza/packages/app-core/scripts/set-package-version.mjs
         env:
           RELEASE_VERSION: ${{ inputs.version }}
 
       - name: Generate eliza i18n keyword data
-        # @elizaos/shared stays workspace-local even with
-        # disable-local-eliza-workspace, and tsdown bundles its source.
-        # generated/validation-keyword-data.js is gitignored, so without
-        # this step the rolldown bundle fails to resolve it on a fresh
-        # checkout.
-        run: node eliza/packages/app-core/scripts/ensure-shared-i18n-data.mjs
+        run: node scripts/run-eliza-app-core-script.mjs ensure-shared-i18n-data.mjs
 
       - name: Build
         run: |
-          bunx tsdown
+          node scripts/run-tsdown.mjs
           node --import tsx scripts/write-build-info.ts
           echo '{"type":"module"}' > dist/package.json
 
       - name: Sanitize npm package metadata
-        run: node scripts/sanitize-npm-package-metadata.mjs
+        run: node "$GITHUB_WORKSPACE/eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs"
 
       - name: Validate package
         if: inputs.run_validation

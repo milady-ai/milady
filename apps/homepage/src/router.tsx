@@ -1,5 +1,5 @@
 import { Navigate, Outlet, Route, Routes } from "react-router-dom";
-import { Homepage } from "./App";
+import { Dashboard, Homepage } from "./App";
 import { DocsLanding } from "./components/docs/DocsLanding";
 import { DocsLayout } from "./components/docs/DocsLayout";
 import { DocsPage } from "./components/docs/DocsPage";
@@ -11,7 +11,7 @@ export function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Homepage />} />
-      <Route path="/dashboard" element={<Homepage />} />
+      <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/onboard" element={<Navigate to="/dashboard" replace />} />
       <Route element={<NavLayout />}>
         {/* Consumer docs at milady.ai/docs — see apps/homepage/src/docs/registry.ts */}

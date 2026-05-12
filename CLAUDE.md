@@ -29,7 +29,8 @@ Desktop dev rationale (signals, Quit, `detached` children): `docs/apps/desktop-l
 
 Optional — link a local elizaOS source checkout for live package development:
 ```bash
-bun run setup:upstreams   # initializes repo-local ./eliza and links local @elizaos/* packages
+bun run eliza:local       # clone ./eliza, link local @elizaos/* packages, swap tsconfig to local-mode (alias: setup:upstreams)
+bun run eliza:packages    # rewrite manifests for npm @elizaos/* packages, restore packages-mode tsconfig
 ```
 
 ## Environment variables
@@ -111,13 +112,15 @@ scripts/
   dev-ui.mjs            Dev orchestrator (API + Vite)
   eliza/packages/app-core/scripts/run-node.mjs   CLI runner (spawns entry.js with NODE_PATH)
   run-repo-setup.mjs    Postinstall sequencer
-  setup-upstreams.mjs   Initialize repo-local upstreams and link @elizaos packages
+  eliza-source-mode.mjs Switch between `local` (repo-local ./eliza) and `packages` (npm @elizaos/*) modes; backed by disable-local-eliza-workspace.mjs + restore-local-eliza-workspace.mjs
+  lib/tsconfig-mode.mjs Apply scripts/templates/tsconfig.{packages,local}-mode.json on mode switches
+  setup-upstreams.mjs   Initialize repo-local upstreams and link @elizaos packages (called by eliza:local)
   patch-deps.mjs        Post-install patches for broken upstream exports
 ```
 
 ### App and plugin scaffold templates
 
-Two scaffolds live under the `eliza/` submodule and are copied + customized when the orchestrator handles `APP create` or `PLUGIN create`:
+Two scaffolds live in the elizaOS source tree (`eliza/templates/...` in local mode, or under the published `@elizaos/app-core` package in packages mode) and are copied + customized when the orchestrator handles `APP create` or `PLUGIN create`:
 
 - `eliza/templates/min-app/` — minimal Eliza app (Vite + React entry, runtime `Plugin` with one trivial action, `package.json` with the `elizaos.app` metadata block, vitest smoke test, hero image placeholder, `SCAFFOLD.md` with the sub-agent contract).
 - `eliza/templates/min-plugin/` — minimal Eliza runtime plugin (one action, one provider, `package.json` with the `elizaos.plugin` metadata block, vitest smoke test, `SCAFFOLD.md` with the sub-agent contract).
@@ -132,7 +135,7 @@ Two distinct skill systems live in this repo. Don't conflate them.
 
 Bundled `@elizaos/skills` are the default knowledge base for the running Eliza agent and for any code agent working in this repo. Repo setup mirrors them into `skills/.defaults/` so workspace task agents (Claude, Codex) can read them directly from the checkout.
 
-- **Source of truth:** `eliza/packages/skills/skills/` (31 bundled skills).
+- **Source of truth:** `eliza/packages/skills/skills/` (33 bundled skills).
 - **Workspace mirror:** `skills/.defaults/` — refreshed by `scripts/sync-workspace-default-skills.mjs` during repo setup.
 - **Managed store seed:** `eliza/packages/app-core/scripts/ensure-skills.mjs` seeds the bundled skills into the user's managed skills store on first run.
 - **Runtime knowledge seed:** `eliza/packages/agent/src/runtime/default-knowledge.ts` seeds baseline runtime knowledge items (including Eliza Cloud guidance) into the agent.
@@ -145,10 +148,12 @@ Open the `SKILL.md` of any of these directly from the workspace mirror when rele
 - `elizaos` — runtime concepts, plugin abstractions, AgentRuntime, actions/providers/evaluators/services.
 - `eliza-cloud` — Cloud as managed backend, app registration, hosted APIs, billing, monetization, container deploys.
 - `build-monetized-app` — building a Cloud app that earns via inference markup; pairs with `eliza-cloud`.
+- `eliza-cloud-buy-domain` — registering a confirmed custom domain for an Eliza Cloud app.
+- `eliza-cloud-manage-domain` — listing, verifying, syncing, detaching, and editing DNS for app domains.
 
 **Agent-orchestration / authoring:**
 - `coding-agent` — spawning Codex / Claude Code / OpenCode / Pi via PTY-backed bash for sub-agent work.
-- `claude-subagent-milady-bridge` — read-only loopback endpoints (`/api/coding-agents/<sessionId>/...`) that give a spawned coding sub-agent access to parent runtime context.
+- `task-agent-eliza-bridge` — read-only loopback endpoints (`/api/coding-agents/<sessionId>/...`) that give a spawned coding task agent access to parent runtime context.
 - `skill-creator` — authoring new SKILL.md packages (frontmatter, scripts, references, progressive disclosure).
 
 **Connectors / OS / SaaS integrations** (use when the task touches that surface):
@@ -174,11 +179,18 @@ Cloud monetization is a first-class product constraint. App creators can earn th
 
 ## Dependencies on elizaOS
 
-All `@elizaos/*` packages use the `alpha` dist-tag. When developing locally, `bun run setup:upstreams` links packages from repo-local `./eliza` and `./plugins` so changes are picked up immediately. Set `MILADY_SKIP_LOCAL_UPSTREAMS=1` to use only npm-published versions.
+Milady builds against published `@elizaos/*` packages by default (`alpha` dist-tag). The `eliza/` directory is gitignored — a fresh clone has no local elizaOS checkout, and `bun install` resolves everything from npm.
 
-**`@elizaos/plugin-agent-orchestrator`:** Milady currently resolves this plugin from the repo-local `eliza/plugins/plugin-agent-orchestrator` submodule (nested under the `eliza/` submodule) via `workspace:*`. That submodule tracks upstream `alpha`, so updating the submodule updates the orchestrator used in local development checkouts. Set `MILADY_SKIP_LOCAL_UPSTREAMS=1` to force npm-published packages instead.
+Two source modes, switched by `bun run eliza:local` / `bun run eliza:packages` (full docs in [README — elizaOS source modes](README.md#elizaos-source-modes-eject--uneject)):
 
-All official elizaOS plugin repos live under [https://github.com/elizaOS-plugins](https://github.com/elizaOS-plugins). For plugin work, prefer adding the relevant plugin repo as a git submodule under `eliza/plugins/` (tracked in `eliza/.gitmodules`) so we keep a local checkout we can patch when needed, and depend on it via `workspace:*` so Milady resolves the local package directly during development. Publish new versions to npm when ready.
+- **`packages` (default):** `MILADY_ELIZA_SOURCE=packages`. Runtime resolves `@elizaos/*` from npm. Checked-in `tsconfig.json` matches [scripts/templates/tsconfig.packages-mode.json](scripts/templates/tsconfig.packages-mode.json). Enforced by [scripts/standalone-eliza-package-contract.test.ts](scripts/standalone-eliza-package-contract.test.ts).
+- **`local`:** `MILADY_ELIZA_SOURCE=local`. `bun run eliza:local` clones `eliza/` (default URL `https://github.com/elizaOS/eliza.git`), links workspace packages into `node_modules/@elizaos/*`, and swaps the root tsconfig to source-priority paths from [scripts/templates/tsconfig.local-mode.json](scripts/templates/tsconfig.local-mode.json). Use this when patching elizaOS upstream alongside Milady.
+
+`MILADY_SKIP_LOCAL_UPSTREAMS=1` is the legacy equivalent of `MILADY_ELIZA_SOURCE=packages` — still respected for back-compat. Other knobs: `MILADY_ELIZAOS_DIST_TAG`, `MILADY_ELIZAOS_VERSION`, `MILADY_ELIZA_GIT_URL`, `MILADY_ELIZA_BRANCH` (see [scripts/lib/eliza-package-mode.mjs](scripts/lib/eliza-package-mode.mjs)).
+
+**`@elizaos/plugin-agent-orchestrator`:** in packages mode, resolved from npm. In local mode, Milady resolves it from the repo-local `eliza/plugins/plugin-agent-orchestrator` checkout (nested under `eliza/`) via `workspace:*`. Updating the local checkout in local mode updates the orchestrator used in development.
+
+All official elizaOS plugin repos live under [https://github.com/elizaOS-plugins](https://github.com/elizaOS-plugins). For plugin work, prefer adding the plugin repo under `eliza/plugins/` in local mode and depending on it via `workspace:*`. Publish to npm when ready, then switch back to packages mode.
 
 ## File Operations
 
@@ -231,8 +243,10 @@ These rules govern all changes. If existing code conflicts with them, fix the co
 4. **BFF is auth + proxy. Nothing else.** Validate JWT, inject `userId`, forward request, `unwrapServerResponse()`. No field additions, no calculations, no transformations.
    - Violation: shadow API contract divergence.
 
-5. **Zero polymorphism for runtime game/content type branching.** Separate classes, methods, and routes per type. No `if (gameType === ...)`, no union parameters, no union return types where separate flows should exist.
-   - Violation: runtime type checks, hidden branches.
+5. **Zero polymorphism for runtime game/content type branching — in code, not in agent surfaces.** Separate classes, methods, and routes per type. No `if (gameType === ...)`, no union parameters, no union return types where separate flows should exist.
+   - **Scope:** This is a code-pattern rule about TypeScript/runtime classes, methods, and HTTP routes. It does **not** apply to elizaOS agent surfaces — Action / Provider / Evaluator / Service definitions, planner-visible action shapes, contextual Evaluators, or any LLM-facing JSON. Those are intentionally polymorphic by design — one `BROWSER` action that dispatches across registered targets is correct; one `BROWSER_NAVIGATE` + `BROWSER_CLICK` + … action per subaction is the antipattern. Same for Providers that gather from multiple sources, Evaluators that branch on context, and Services with target/adapter registries.
+   - Violation (code): runtime type checks, hidden branches in classes/methods/routes.
+   - Not a violation: an Action with a `subaction` / `target` parameter, a Provider that aggregates across registered sources, a Service that routes a command to a registered adapter.
 
 6. **CQRS: readers read, writers write.** Separate classes. Readers return domain objects. Writers return `void` or ID only. Mappers handle all DB-to-domain translation.
    - Violation: mixed concerns, untraceable mutations.

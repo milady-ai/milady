@@ -104,6 +104,9 @@ function noteForAsset(name) {
   if (/\.deb$/i.test(name)) {
     return "Debian package";
   }
+  if (/\.apk$/i.test(name)) {
+    return "Android APK";
+  }
   if (/\.tar\.gz$/i.test(name)) {
     return "tar.gz package";
   }
@@ -223,6 +226,15 @@ function buildRelease(release, stableReleases = []) {
       asset: pickAssetFromReleases(prioritizedReleases, [
         (asset) => /linux/i.test(asset.name) && /\.deb$/i.test(asset.name),
         (asset) => /\.deb$/i.test(asset.name),
+      ]),
+    },
+    {
+      id: "android-apk",
+      label: "Android",
+      asset: pickAssetFromReleases(prioritizedReleases, [
+        (asset) => /milady/i.test(asset.name) && /\.apk$/i.test(asset.name),
+        (asset) => /android/i.test(asset.name) && /\.apk$/i.test(asset.name),
+        (asset) => /\.apk$/i.test(asset.name),
       ]),
     },
   ]

@@ -21,8 +21,8 @@ PRODUCT_MANUFACTURER := Milady
 
 PRODUCT_PACKAGES += \
     Milady \
-    default-permissions-com.miladyai.milady.xml \
-    privapp-permissions-com.miladyai.milady.xml
+    default-permissions-ai.milady.milady.xml \
+    privapp-permissions-ai.milady.milady.xml
 
 # Strip every stock app whose role Milady owns. Trebuchet is LineageOS's
 # launcher; absent from AOSP but harmless to list. SetupWizard ships with
@@ -53,14 +53,15 @@ PRODUCT_PACKAGE_OVERLAYS += \
 
 PRODUCT_ARTIFACT_PATH_REQUIREMENT_ALLOWED_LIST += \
     system/priv-app/Milady/% \
-    system/etc/default-permissions/default-permissions-com.miladyai.milady.xml \
-    system/etc/permissions/privapp-permissions-com.miladyai.milady.xml \
+    system/etc/default-permissions/default-permissions-ai.milady.milady.xml \
+    system/etc/permissions/privapp-permissions-ai.milady.milady.xml \
     product/etc/init/init.milady.rc \
     product/media/bootanimation.zip
 
 PRODUCT_PRODUCT_PROPERTIES += \
     ro.miladyos.product=$(MILADY_PRODUCT_TAG) \
-    ro.miladyos.home=com.miladyai.milady \
+    ro.miladyos.home=ai.milady.milady \
+    ro.elizaos.product=$(MILADY_PRODUCT_TAG) \
     ro.setupwizard.mode=DISABLED \
     persist.sys.fflag.override.settings_provider_model=false
 

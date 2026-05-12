@@ -1,5 +1,7 @@
 import { render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it } from "vitest";
+import { Nav } from "../components/Nav";
 
 describe("homepage", () => {
   it("has a valid test setup with jsdom", () => {
@@ -7,11 +9,7 @@ describe("homepage", () => {
     expect(typeof window).toBe("object");
   });
 
-  it("renders the Nav component with navigation links", async () => {
-    // Nav uses react-router-dom, so wrap in a MemoryRouter
-    const { MemoryRouter } = await import("react-router-dom");
-    const { Nav } = await import("../components/Nav");
-
+  it("renders the Nav component with navigation links", () => {
     render(
       <MemoryRouter>
         <Nav />

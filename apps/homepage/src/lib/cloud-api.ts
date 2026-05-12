@@ -3,7 +3,11 @@ import type {
   BillingSettingsResponse,
   CreditsSummaryResponse,
 } from "./billing-types";
-import { CLOUD_BASE } from "./runtime-config";
+import {
+  CLOUD_AGENT_API_BASE_PATH,
+  CLOUD_BASE,
+  getCloudAgentApiPath,
+} from "./runtime-config";
 
 export type {
   StewardApprovalActionResponse,
@@ -12,7 +16,7 @@ export type {
   StewardStatusResponse,
   StewardTxRecord,
   StewardTxStatus,
-} from "@elizaos/app-steward/types";
+} from "@elizaos/app-core/api/client-types-steward";
 // ── Wallet types ───────────────────────────────────────────────────────
 export type {
   EvmChainBalance,
@@ -26,7 +30,7 @@ import type {
   StewardPendingApproval,
   StewardStatusResponse,
   StewardTxRecord,
-} from "@elizaos/app-steward/types";
+} from "@elizaos/app-core/api/client-types-steward";
 import type { WalletBalancesResponse } from "@elizaos/shared/contracts/wallet";
 
 // Wallet addresses response (same shape as WalletAddresses but with Response suffix for API clarity)
@@ -239,6 +243,11 @@ function unwrapListResponse<T>(
   return [];
 }
 
+function unwrapDataResponse<T>(data: unknown): T {
+  if (isJsonObject(data) && "data" in data) return data.data as T;
+  return data as T;
+}
+
 export interface CreateCloudAgentInput {
   name: string;
   characterId?: string;
@@ -319,10 +328,10 @@ export class CloudClient {
       if (clearAuthOnFailure && isCloudAuthFailure(res.status, errorMessage)) {
         clearToken();
       }
-      // 404 on milady agent endpoints means the cloud instance hasn't deployed
+      // 404 on cloud agent endpoints means the cloud instance hasn't deployed
       // the agent hosting feature yet — throw a specific error so callers can
       // show a "coming soon" message instead of a generic failure.
-      if (res.status === 404 && path.startsWith("/api/v1/milady/")) {
+      if (res.status === 404 && path.startsWith(CLOUD_AGENT_API_BASE_PATH)) {
         throw new CloudAgentsNotAvailableError();
       }
       throw new Error(
@@ -339,7 +348,7 @@ export class CloudClient {
     // listAgents is the canonical auth-checking endpoint: if this fails with
     // an auth error, the token is definitely invalid and should be cleared.
     const data = await this.request<unknown>(
-      "/api/v1/milady/agents",
+      getCloudAgentApiPath(),
       {
         method: "GET",
       },
@@ -361,7 +370,10 @@ export class CloudClient {
   }
 
   async getAgent(agentId: string): Promise<CloudAgentDetail> {
-    return this.request(`/api/v1/milady/agents/${agentId}`, { method: "GET" });
+    const data = await this.request<unknown>(getCloudAgentApiPath(agentId), {
+      method: "GET",
+    });
+    return unwrapDataResponse<CloudAgentDetail>(data);
   }
 
   async createAgent(
@@ -378,7 +390,7 @@ export class CloudClient {
     }
 
     const res = await this.request<CreateCloudAgentApiResponse>(
-      "/api/v1/milady/agents",
+      getCloudAgentApiPath(),
       {
         method: "POST",
         body: JSON.stringify(payload),
@@ -390,47 +402,55 @@ export class CloudClient {
   }
 
   async deleteAgent(agentId: string): Promise<void> {
-    await this.request(`/api/v1/milady/agents/${agentId}`, {
+    await this.request(getCloudAgentApiPath(agentId), {
       method: "DELETE",
     });
   }
 
   // Lifecycle
   async provisionAgent(agentId: string): Promise<{ jobId?: string }> {
-    return this.request(`/api/v1/milady/agents/${agentId}/provision`, {
+    const res = await this.request<{
+      jobId?: string;
+      data?: { jobId?: string };
+    }>(getCloudAgentApiPath(agentId, "provision"), {
       method: "POST",
     });
+    return { jobId: res.jobId ?? res.data?.jobId };
   }
 
   async suspendAgent(agentId: string): Promise<void> {
-    await this.request(`/api/v1/milady/agents/${agentId}/suspend`, {
+    await this.request(getCloudAgentApiPath(agentId, "suspend"), {
       method: "POST",
     });
   }
 
   async resumeAgent(agentId: string): Promise<{ jobId?: string }> {
-    return this.request(`/api/v1/milady/agents/${agentId}/resume`, {
+    const res = await this.request<{
+      jobId?: string;
+      data?: { jobId?: string };
+    }>(getCloudAgentApiPath(agentId, "resume"), {
       method: "POST",
     });
+    return { jobId: res.jobId ?? res.data?.jobId };
   }
 
   // Snapshots & backups
   async takeSnapshot(agentId: string): Promise<void> {
-    await this.request(`/api/v1/milady/agents/${agentId}/snapshot`, {
+    await this.request(getCloudAgentApiPath(agentId, "snapshot"), {
       method: "POST",
     });
   }
 
   async listBackups(agentId: string): Promise<CloudBackup[]> {
     const data = await this.request<unknown>(
-      `/api/v1/milady/agents/${agentId}/backups`,
+      getCloudAgentApiPath(agentId, "backups"),
       { method: "GET" },
     );
     return unwrapListResponse<CloudBackup>(data, "backups");
   }
 
   async restoreBackup(agentId: string, backupId?: string): Promise<void> {
-    await this.request(`/api/v1/milady/agents/${agentId}/restore`, {
+    await this.request(getCloudAgentApiPath(agentId, "restore"), {
       method: "POST",
       body: JSON.stringify(backupId ? { backupId } : {}),
     });
@@ -442,7 +462,7 @@ export class CloudClient {
     method: string,
     params?: object,
   ): Promise<BridgeResponse<T>> {
-    return this.request(`/api/v1/milady/agents/${agentId}/bridge`, {
+    return this.request(getCloudAgentApiPath(agentId, "bridge"), {
       method: "POST",
       body: JSON.stringify({
         jsonrpc: "2.0",
@@ -478,7 +498,10 @@ export class CloudClient {
 
   // Jobs (async operation polling)
   async getJobStatus(jobId: string): Promise<JobStatus> {
-    return this.request(`/api/v1/jobs/${jobId}`, { method: "GET" });
+    const data = await this.request<unknown>(`/api/v1/jobs/${jobId}`, {
+      method: "GET",
+    });
+    return unwrapDataResponse<JobStatus>(data);
   }
 
   async pollJobUntilDone(
@@ -561,7 +584,7 @@ export class CloudClient {
     const res = await this.request<
       | { token: string; redirectUrl: string; expiresIn: number }
       | { data: { token: string; redirectUrl: string; expiresIn: number } }
-    >(`/api/v1/milady/agents/${agentId}/pairing-token`, { method: "POST" });
+    >(getCloudAgentApiPath(agentId, "pairing-token"), { method: "POST" });
     // Backend may wrap in { data: ... } or return flat
     if ("data" in res && res.data?.redirectUrl) return res.data;
     return res as { token: string; redirectUrl: string; expiresIn: number };

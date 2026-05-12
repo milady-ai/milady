@@ -15,10 +15,25 @@ async function expectNoHorizontalOverflow(page: Page) {
     .poll(() =>
       page.evaluate(() => {
         const root = document.documentElement;
-        return root.scrollWidth <= window.innerWidth + 1;
+        const body = document.body;
+        const appRoot = document.getElementById("root");
+        const bottomNav = document.querySelector(
+          '[data-testid="header-mobile-bottom-nav"] > div',
+        );
+        return [root, body, appRoot, bottomNav].every(
+          (element) =>
+            !element || element.scrollWidth <= element.clientWidth + 1,
+        );
       }),
     )
     .toBe(true);
+}
+
+async function expectMobileViewportLocked(page: Page) {
+  await expect(page.locator('meta[name="viewport"]')).toHaveAttribute(
+    "content",
+    /maximum-scale=1\.0.*user-scalable=no/,
+  );
 }
 
 test("mobile shell keeps global navigation available through phone and tablet widths", async ({
@@ -27,6 +42,7 @@ test("mobile shell keeps global navigation available through phone and tablet wi
   await page.setViewportSize({ width: 390, height: 844 });
   await openAppPath(page, "/chat");
 
+  await expectMobileViewportLocked(page);
   await expect(page.getByTestId("header-mobile-bottom-nav")).toBeVisible();
   await expect(
     page.getByTestId("header-mobile-bottom-nav-button-chat"),

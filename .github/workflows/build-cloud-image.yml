@@ -63,7 +63,6 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: milady-ai/milady/agent
   MILADY_SKIP_LOCAL_UPSTREAMS: "1"
-  DEPOT_PROJECT_ID: m89t0f0p08
 
 permissions:
   contents: read
@@ -78,14 +77,14 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           ref: ${{ inputs.source_sha || github.sha }}
           submodules: false
 
       - name: Setup Node.js 22
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "22"
 
@@ -95,7 +94,7 @@ jobs:
           bun-version: "1.3.13"
 
       - name: Cache bun store
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.bun/install/cache
           key: bun-store-${{ runner.os }}-${{ hashFiles('bun.lock') }}
@@ -103,7 +102,10 @@ jobs:
             bun-store-${{ runner.os }}-
 
       - name: Init eliza checkout
-        run: git submodule update --init --depth=1 eliza
+        run: |
+          if [ ! -f eliza/package.json ]; then
+            git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza
+          fi
 
       - name: Init cloud image plugin manifests
         run: |
@@ -111,7 +113,7 @@ jobs:
             plugins/plugin-sql \
             plugins/plugin-elizacloud
 
-      - name: Apply Milady eliza CI patches
+      - name: Apply elizaOS source CI patches
         run: node scripts/apply-eliza-ci-patches.mjs
 
       - name: Init non-eliza submodules
@@ -120,7 +122,20 @@ jobs:
           node scripts/disable-local-eliza-workspace.mjs
 
       - name: Install dependencies
-        run: bun install --ignore-scripts --no-frozen-lockfile
+        run: bun install --ignore-scripts --frozen-lockfile
+
+      - name: Install eliza source dependencies
+        run: bun install --cwd eliza --no-frozen-lockfile --ignore-scripts
+
+      - name: Hydrate eliza Bun package postinstall
+        # bun is hoisted to top-level node_modules in some setups; only hydrate
+        # the eliza-nested copy when it actually exists.
+        run: |
+          if [ -f eliza/node_modules/bun/install.js ]; then
+            (cd eliza/node_modules/bun && node install.js)
+          else
+            echo "eliza/node_modules/bun not present (likely hoisted) — skipping hydration"
+          fi
 
       - name: Install published-workspace fallback dependencies
         run: bash scripts/install-published-workspace-fallback-deps.sh
@@ -133,41 +148,25 @@ jobs:
 
       - name: Build Capacitor plugins
         run: |
-          cd apps/app
-          bun scripts/plugin-build.mjs
+          node eliza/packages/app-core/scripts/build-native-plugins.mjs
 
       - name: Build agent workspace
         run: |
           cd eliza/packages/agent
           bun run build:docker-dist
 
-      - name: Install buf CLI
-        uses: bufbuild/buf-setup-action@v1
-        with:
-          version: "1.50.0"
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Build @elizaos/core (includes agent-orchestrator)
         run: |
+          export PATH="$GITHUB_WORKSPACE/eliza/node_modules/.bin:$GITHUB_WORKSPACE/eliza/packages/schemas/node_modules/.bin:$PATH"
           cd eliza/packages/schemas
           buf dep update && buf generate
-          cd ../typescript
+          cd ../core
           node ../shared/scripts/generate-keywords.mjs --target ts 2>/dev/null || echo "keyword gen skipped"
-          node <<'NODE'
-          const fs = require("node:fs");
-          const file = "tsconfig.declarations.json";
-          const config = JSON.parse(fs.readFileSync(file, "utf8"));
-          config.compilerOptions = {
-            ...(config.compilerOptions ?? {}),
-            ignoreDeprecations: "6.0",
-          };
-          fs.writeFileSync(file, JSON.stringify(config, null, 2) + "\n");
-          NODE
           bun run build:node
 
       - name: Build runtime (tsdown)
         run: |
-          npx tsdown
+          node scripts/run-tsdown.mjs
           echo '{"type":"module"}' > dist/package.json
           node --import tsx eliza/packages/app-core/scripts/write-build-info.ts 2>/dev/null || true
 
@@ -262,6 +261,9 @@ jobs:
           if [ ! -e plugins/plugin-selfcontrol ] && [ -d packages/plugin-selfcontrol ]; then
             cp -R packages/plugin-selfcontrol plugins/plugin-selfcontrol
           fi
+          rm -rf cloud-sdk
+          cp -R eliza/cloud/packages/sdk cloud-sdk
+          test -f cloud-sdk/package.json
           # Dockerfile.cloud is shared with the upstream elizaOS layout where
           # the built web app lives at packages/app. Milady's Vite app lives at
           # apps/app, so materialize the expected manifest and dist tree.
@@ -271,6 +273,7 @@ jobs:
           cp -R apps/app/dist packages/app/dist
           test -f packages/app/package.json
           test -d packages/app/dist
+          test -f scripts/cloud-image-prune-deps.mjs
           node <<'NODE'
           const fs = require("fs");
           const path = require("path");
@@ -331,6 +334,10 @@ jobs:
           };
           fs.writeFileSync("package.json", JSON.stringify(root, null, 2) + "\n");
           NODE
+          if [ ! -f bun.lock ]; then
+            git show HEAD:bun.lock > bun.lock
+          fi
+          test -f bun.lock
           for staged_path in patches scripts/docker-entrypoint.sh plugins/plugin-selfcontrol; do
             if [ -e "$staged_path" ]; then
               find "$staged_path" -maxdepth 2 -print | head -20
@@ -342,15 +349,11 @@ jobs:
       - name: Set up CI dockerignore
         run: cp eliza/packages/app-core/deploy/Dockerfile.cloud.dockerignore .dockerignore
 
-      - name: Set up Depot CLI
-        if: vars.DEPOT_ENABLED != 'false'
-        uses: depot/setup-action@v1
-
-      - name: Set up Docker Buildx fallback
-        uses: docker/setup-buildx-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
 
       - name: Login to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         if: ${{ github.event_name == 'push' || inputs.push_image != false }}
         with:
           registry: ${{ env.REGISTRY }}
@@ -359,7 +362,7 @@ jobs:
 
       - name: Docker metadata
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
@@ -367,36 +370,7 @@ jobs:
             type=raw,value=cloud-app-${{ steps.version.outputs.version_clean }}
 
       - name: Build and push cloud app image
-        id: depot-build
-        if: vars.DEPOT_ENABLED != 'false'
-        continue-on-error: true
-        uses: depot/build-push-action@v1
-        with:
-          project: ${{ env.DEPOT_PROJECT_ID }}
-          token: ${{ secrets.DEPOT_TOKEN }}
-          context: .
-          file: eliza/packages/app-core/deploy/Dockerfile.cloud
-          platforms: linux/amd64
-          push: ${{ github.event_name == 'push' || inputs.push_image != false }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          build-args: |
-            APP_ENTRYPOINT=${{ env.APP_ENTRYPOINT }}
-            APP_CMD_START=${{ env.APP_CMD_START }}
-            APP_PORT=${{ env.APP_PORT }}
-            APP_API_BIND=${{ env.APP_API_BIND }}
-            OCI_SOURCE=${{ env.OCI_SOURCE }}
-            OCI_TITLE=${{ env.OCI_TITLE }}
-            OCI_DESCRIPTION=${{ env.OCI_DESCRIPTION }}
-            OCI_LICENSES=${{ env.OCI_LICENSES }}
-            VERSION=${{ steps.version.outputs.version }}
-            VERSION_CLEAN=${{ steps.version.outputs.version_clean }}
-            REVISION=${{ github.sha }}
-          provenance: false
-
-      - name: Build and push cloud app image with Buildx fallback
-        if: vars.DEPOT_ENABLED == 'false' || steps.depot-build.outcome == 'failure'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: eliza/packages/app-core/deploy/Dockerfile.cloud

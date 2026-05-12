@@ -92,7 +92,7 @@ export interface MockCloudApiState {
 }
 
 export interface MockCloudApiOptions {
-  /** Initial cloud agents returned by GET /api/v1/milady/agents. Default: []. */
+  /** Initial cloud agents returned by GET /api/v1/eliza/agents. Default: []. */
   agents?: CloudAgentFixture[];
   /**
    * Pre-queued pairing-token responses. Drained in order; once empty the
@@ -207,7 +207,7 @@ export async function mockCloudApi(
     const method = request.method();
 
     // List cloud agents.
-    if (pathname === "/api/v1/milady/agents" && method === "GET") {
+    if (pathname === "/api/v1/eliza/agents" && method === "GET") {
       counts.listAgents += 1;
       if (!authActive) {
         await jsonResponse(route, 401, {
@@ -216,12 +216,15 @@ export async function mockCloudApi(
         });
         return;
       }
-      await jsonResponse(route, 200, { agents } as unknown as JsonBody);
+      await jsonResponse(route, 200, {
+        success: true,
+        data: agents,
+      } as unknown as JsonBody);
       return;
     }
 
     // Create cloud agent.
-    if (pathname === "/api/v1/milady/agents" && method === "POST") {
+    if (pathname === "/api/v1/eliza/agents" && method === "POST") {
       counts.createAgent += 1;
       const id = `created-${counts.createAgent}`;
       // Add to agents list so any subsequent listAgents reflects it.
@@ -249,7 +252,7 @@ export async function mockCloudApi(
     }
 
     // Delete cloud agent.
-    const deleteMatch = pathname.match(/^\/api\/v1\/milady\/agents\/([^/]+)$/);
+    const deleteMatch = pathname.match(/^\/api\/v1\/eliza\/agents\/([^/]+)$/);
     if (deleteMatch && method === "DELETE") {
       counts.deleteAgent += 1;
       const status = deleteOverride?.status ?? 200;
@@ -264,19 +267,20 @@ export async function mockCloudApi(
 
     // Provision cloud agent.
     const provisionMatch = pathname.match(
-      /^\/api\/v1\/milady\/agents\/([^/]+)\/provision$/,
+      /^\/api\/v1\/eliza\/agents\/([^/]+)\/provision$/,
     );
     if (provisionMatch && method === "POST") {
       counts.provisionAgent += 1;
-      await jsonResponse(route, 200, {
-        jobId: `job-${counts.provisionAgent}`,
+      await jsonResponse(route, 202, {
+        success: true,
+        data: { jobId: `job-${counts.provisionAgent}` },
       });
       return;
     }
 
     // Pairing token.
     const pairingMatch = pathname.match(
-      /^\/api\/v1\/milady\/agents\/([^/]+)\/pairing-token$/,
+      /^\/api\/v1\/eliza\/agents\/([^/]+)\/pairing-token$/,
     );
     if (pairingMatch && method === "POST") {
       counts.pairingToken += 1;
@@ -334,7 +338,7 @@ export async function mockCloudApi(
         ...(next?.result ? { result: next.result } : {}),
         ...(next?.error ? { error: next.error } : {}),
       };
-      await jsonResponse(route, 200, payload);
+      await jsonResponse(route, 200, { success: true, data: payload });
       return;
     }
 

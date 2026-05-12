@@ -16,22 +16,25 @@ import {
 } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  getElizaGitBranch,
+  getElizaGitUrl,
+  getElizaosPackageSpecifier,
+  isLocalElizaDisabled,
+  isLocalElizaForced,
+  LOCAL_UPSTREAM_FORCE_ENV_KEYS,
+  LOCAL_UPSTREAM_SKIP_ENV_KEYS,
+} from "./lib/eliza-package-mode.mjs";
 import { readPackageJson } from "./lib/read-package-json.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const DEFAULT_REPO_ROOT = path.resolve(__dirname, "..");
 
-export const LOCAL_UPSTREAM_SKIP_ENVS = [
-  "MILADY_SKIP_LOCAL_UPSTREAMS",
-  "ELIZA_SKIP_LOCAL_UPSTREAMS",
-];
-export const LOCAL_UPSTREAM_FORCE_ENVS = [
-  "MILADY_FORCE_LOCAL_UPSTREAMS",
-  "ELIZA_FORCE_LOCAL_UPSTREAMS",
-];
-export const ELIZA_GIT_URL = "https://github.com/elizaos/eliza.git";
-export const ELIZA_BRANCH = "develop";
+export const LOCAL_UPSTREAM_SKIP_ENVS = LOCAL_UPSTREAM_SKIP_ENV_KEYS;
+export const LOCAL_UPSTREAM_FORCE_ENVS = LOCAL_UPSTREAM_FORCE_ENV_KEYS;
+export const ELIZA_GIT_URL = getElizaGitUrl();
+export const ELIZA_BRANCH = getElizaGitBranch();
 export const ELIZA_REQUIRED_FILES = ["package.json"];
 export const ELIZA_BUILD_STEPS = [
   {
@@ -40,7 +43,7 @@ export const ELIZA_BUILD_STEPS = [
     // never typecheck against stale dist/ output after the submodule changes.
     check: path.join(
       "packages",
-      "typescript",
+      "core",
       "src",
       "types",
       "generated",
@@ -48,15 +51,31 @@ export const ELIZA_BUILD_STEPS = [
       "v1",
       "agent_pb.ts",
     ),
-    cwd: path.join("packages", "typescript"),
+    cwd: path.join("packages", "core"),
     args: ["run", "build"],
     label: "@elizaos/core",
     alwaysRun: true,
   },
   {
-    check: path.join("packages", "prompts", "dist", "typescript", "index.ts"),
+    check: path.join("packages", "shared", "dist", "index.js"),
+    cwd: path.join("packages", "shared"),
+    args: ["run", "build"],
+    label: "@elizaos/shared",
+  },
+  {
+    // @elizaos/prompts ships a node script package. Older versions exposed a
+    // `build:typescript` target that emitted dist/typescript/index.ts; the
+    // current source uses a single `build` script that regenerates the
+    // plugin-action spec + action docs. Detect the actual build outputs.
+    check: path.join(
+      "packages",
+      "prompts",
+      "specs",
+      "actions",
+      "plugins.generated.json",
+    ),
     cwd: path.join("packages", "prompts"),
-    args: ["run", "build:typescript"],
+    args: ["run", "build"],
     label: "@elizaos/prompts",
   },
   {
@@ -64,6 +83,22 @@ export const ELIZA_BUILD_STEPS = [
     cwd: path.join("packages", "skills"),
     args: ["run", "build"],
     label: "@elizaos/skills",
+  },
+  {
+    // plugin-elizacloud imports types from @elizaos/cloud-sdk; fresh CI
+    // checkouts need the SDK declarations before plugin builds run.
+    check: path.join("cloud", "packages", "sdk", "dist", "index.d.ts"),
+    cwd: path.join("cloud", "packages", "sdk"),
+    args: ["run", "build"],
+    label: "@elizaos/cloud-sdk",
+  },
+  {
+    // plugin-streaming imports isCloudConnected from @elizaos/cloud-routing;
+    // without dist its tsup --dts pass fails with TS2307.
+    check: path.join("packages", "cloud-routing", "dist", "index.js"),
+    cwd: path.join("packages", "cloud-routing"),
+    args: ["run", "build"],
+    label: "@elizaos/cloud-routing",
   },
 ];
 export const ELIZA_TYPESCRIPT_BUILD_DEPENDENCIES = [
@@ -75,7 +110,6 @@ const ELIZA_TYPESCRIPT_AMBIENT_DEPENDENCIES = new Set(
   ELIZA_TYPESCRIPT_BUILD_DEPENDENCIES,
 );
 
-const OPTIONAL_ELIZA_PLUGIN_FALLBACK_TAG = "alpha";
 const ELIZA_INSTALL_RETRY_DELAY_MS = 3_000;
 
 const OPTIONAL_ELIZA_PLUGIN_PACKAGES = [
@@ -104,7 +138,6 @@ const PACKAGE_LINK_ROOTS = [
   ["node_modules"],
   ["eliza", "node_modules"],
   ["apps", "app", "node_modules"],
-  ["apps", "home", "node_modules"],
 ];
 const MILADY_SINGLETON_DEPENDENCY_LINKS = [
   {
@@ -212,109 +245,6 @@ const ELIZA_REQUIRED_PLUGIN_BUILDS = [
   ELIZA_EDGE_TTS_PLUGIN_BUILD,
   ELIZA_LOCAL_EMBEDDING_PLUGIN_BUILD,
 ];
-const INBOX_REPLY_HINT_LEGACY =
-  "Sent through the connected {{source}} account on this Mac.";
-const INBOX_REPLY_HINT_PLATFORM_NEUTRAL =
-  "Sent through the connected {{source}} account on this device.";
-const MILADY_COPY_PATCH_RELATIVE_PATHS = [
-  path.join(
-    "packages",
-    "app-core",
-    "src",
-    "components",
-    "pages",
-    "ChatView.tsx",
-  ),
-  path.join("packages", "app-core", "src", "i18n", "locales", "en.json"),
-];
-const PLUGIN_ANTHROPIC_CLAUDE_CLI_RELATIVE_PATH = path.join(
-  "plugins",
-  "plugin-anthropic",
-  "typescript",
-  "utils",
-  "claude-cli.ts",
-);
-const PLUGIN_ANTHROPIC_INIT_RELATIVE_PATH = path.join(
-  "plugins",
-  "plugin-anthropic",
-  "typescript",
-  "init.ts",
-);
-const PLUGIN_ANTHROPIC_CLAUDE_CLI_REPLACEMENTS = [
-  [
-    "    inputTokens: number;\n    outputTokens: number;\n",
-    "    promptTokens: number;\n    completionTokens: number;\n",
-  ],
-  [
-    "    inputTokens: entry.inputTokens,\n    outputTokens: entry.outputTokens,\n",
-    "    promptTokens: entry.inputTokens,\n    completionTokens: entry.outputTokens,\n",
-  ],
-  [
-    "      promptTokens: usage.inputTokens,\n      completionTokens: usage.outputTokens,\n",
-    "      promptTokens: usage.promptTokens,\n      completionTokens: usage.completionTokens,\n",
-  ],
-  [
-    "                promptTokens: usage.inputTokens,\n                completionTokens: usage.outputTokens,\n",
-    "                promptTokens: usage.promptTokens,\n                completionTokens: usage.completionTokens,\n",
-  ],
-];
-const PLUGIN_ANTHROPIC_INIT_BUN_REPLACEMENTS = [
-  [
-    `        const result = Bun.spawnSync(["claude", "--version"], {\n          stdout: "pipe",\n          stderr: "pipe",\n        });\n        if (result.exitCode !== 0) throw new Error("claude not found");\n`,
-    `        const bunRuntime = (globalThis as typeof globalThis & {\n          Bun?: {\n            spawnSync(\n              args: string[],\n              options: { stdout: "pipe"; stderr: "pipe" },\n            ): { exitCode: number };\n          };\n        }).Bun;\n        const result = bunRuntime?.spawnSync(["claude", "--version"], {\n          stdout: "pipe",\n          stderr: "pipe",\n        });\n        if (!result || result.exitCode !== 0) throw new Error("claude not found");\n`,
-  ],
-];
-const PLUGIN_ANTHROPIC_CLAUDE_CLI_BUN_REPLACEMENTS = [
-  [
-    `function parseUsage(\n  modelUsage: Record<string, ClaudeCliModelUsage> | undefined,\n): CliGenerateResult["usage"] {\n  const entry = modelUsage ? Object.values(modelUsage)[0] : undefined;\n  if (!entry) return null;\n  return {\n    inputTokens: entry.inputTokens,\n    outputTokens: entry.outputTokens,\n    totalTokens: entry.inputTokens + entry.outputTokens,\n  };\n}\n\n/**\n * Run a prompt through \`claude -p\` (non-streaming).\n */\n`,
-    `function parseUsage(\n  modelUsage: Record<string, ClaudeCliModelUsage> | undefined,\n): CliGenerateResult["usage"] {\n  const entry = modelUsage ? Object.values(modelUsage)[0] : undefined;\n  if (!entry) return null;\n  return {\n    promptTokens: entry.inputTokens,\n    completionTokens: entry.outputTokens,\n    totalTokens: entry.inputTokens + entry.outputTokens,\n  };\n}\n\nfunction getBunRuntime() {\n  const bunRuntime = (globalThis as typeof globalThis & {\n    Bun?: {\n      spawn(\n        args: string[],\n        options: { stdout: "pipe"; stderr: "pipe" },\n      ): {\n        stdout: ReadableStream<Uint8Array>;\n        stderr: ReadableStream<Uint8Array>;\n        exited: Promise<number>;\n      };\n    };\n  }).Bun;\n\n  if (!bunRuntime) {\n    throw new Error("[Anthropic CLI] Bun runtime is required for CLI mode");\n  }\n\n  return bunRuntime;\n}\n\n/**\n * Run a prompt through \`claude -p\` (non-streaming).\n */\n`,
-  ],
-  [
-    `function parseUsage(\n  modelUsage: Record<string, ClaudeCliModelUsage> | undefined,\n): CliGenerateResult["usage"] {\n  const entry = modelUsage ? Object.values(modelUsage)[0] : undefined;\n  if (!entry) return null;\n  return {\n    promptTokens: entry.inputTokens,\n    completionTokens: entry.outputTokens,\n    totalTokens: entry.inputTokens + entry.outputTokens,\n  };\n}\n\n/**\n * Run a prompt through \`claude -p\` (non-streaming).\n */\n`,
-    `function parseUsage(\n  modelUsage: Record<string, ClaudeCliModelUsage> | undefined,\n): CliGenerateResult["usage"] {\n  const entry = modelUsage ? Object.values(modelUsage)[0] : undefined;\n  if (!entry) return null;\n  return {\n    promptTokens: entry.inputTokens,\n    completionTokens: entry.outputTokens,\n    totalTokens: entry.inputTokens + entry.outputTokens,\n  };\n}\n\nfunction getBunRuntime() {\n  const bunRuntime = (globalThis as typeof globalThis & {\n    Bun?: {\n      spawn(\n        args: string[],\n        options: { stdout: "pipe"; stderr: "pipe" },\n      ): {\n        stdout: ReadableStream<Uint8Array>;\n        stderr: ReadableStream<Uint8Array>;\n        exited: Promise<number>;\n      };\n    };\n  }).Bun;\n\n  if (!bunRuntime) {\n    throw new Error("[Anthropic CLI] Bun runtime is required for CLI mode");\n  }\n\n  return bunRuntime;\n}\n\n/**\n * Run a prompt through \`claude -p\` (non-streaming).\n */\n`,
-  ],
-  [
-    `const proc = Bun.spawn(args, { stdout: "pipe", stderr: "pipe" });`,
-    `const proc = getBunRuntime().spawn(args, { stdout: "pipe", stderr: "pipe" });`,
-  ],
-];
-const TS_IGNORE_DEPRECATIONS_COMPAT_FILES = [
-  path.join("packages", "typescript", "tsconfig.json"),
-  path.join("packages", "typescript", "tsconfig.declarations.json"),
-  path.join("packages", "shared", "tsconfig.json"),
-  path.join("packages", "interop", "tsconfig.json"),
-];
-const PLUGIN_TS_IGNORE_DEPRECATIONS_COMPAT_FILES = [
-  path.join("plugins", "plugin-agent-skills", "typescript", "tsconfig.json"),
-  path.join("plugins", "plugin-calendly", "tsconfig.json"),
-  path.join("plugins", "plugin-github", "tsconfig.json"),
-  path.join("plugins", "plugin-local-ai", "typescript", "tsconfig.json"),
-  path.join("plugins", "plugin-shopify", "tsconfig.json"),
-  path.join("plugins", "plugin-wechat", "tsconfig.json"),
-];
-const PLUGIN_TS_IGNORE_DEPRECATIONS_INSERT_FILES = [
-  path.join("plugins", "plugin-agent-skills", "typescript", "tsconfig.json"),
-  path.join("plugins", "plugin-signal", "typescript", "tsconfig.json"),
-  path.join("plugins", "plugin-telegram", "tsconfig.json"),
-  path.join("plugins", "plugin-telegram", "tsconfig.build.json"),
-];
-const LIFEOPS_SETTINGS_SECTION_RELATIVE_PATH = path.join(
-  "apps",
-  "app-lifeops",
-  "src",
-  "components",
-  "LifeOpsSettingsSection.tsx",
-);
-const LIFEOPS_LUCIDE_GITHUB_REPLACEMENTS = [
-  [
-    'import { Copy, ExternalLink, Github } from "lucide-react";',
-    'import { Copy, ExternalLink, GitBranch } from "lucide-react";',
-  ],
-  [
-    '<Github className="h-4 w-4 shrink-0" />',
-    '<GitBranch className="h-4 w-4 shrink-0" />',
-  ],
-];
 
 function toDisplayPath(targetPath) {
   return path.normalize(targetPath);
@@ -322,11 +252,15 @@ function toDisplayPath(targetPath) {
 
 function runCommand(command, args, { cwd, env = process.env, label } = {}) {
   const printable = label ?? `${command} ${args.join(" ")}`;
+  const childEnv = { ...env };
+  if (cwd && childEnv.npm_package_json) {
+    delete childEnv.npm_package_json;
+  }
 
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, {
       cwd,
-      env,
+      env: childEnv,
       stdio: "inherit",
     });
 
@@ -366,235 +300,6 @@ function writePackageJson(packagePath, raw, nextPackageJson) {
   writeFileSync(
     packagePath,
     `${JSON.stringify(nextPackageJson, null, indent)}\n`,
-  );
-}
-
-function parseFirstNumericVersionSegment(versionSpecifier) {
-  if (typeof versionSpecifier !== "string") {
-    return null;
-  }
-
-  const match = versionSpecifier.match(/(\d+)(?:\.\d+)?(?:\.\d+)?/);
-  if (!match) {
-    return null;
-  }
-
-  const major = Number.parseInt(match[1], 10);
-  return Number.isFinite(major) ? major : null;
-}
-
-export function resolveTypeScriptIgnoreDeprecationsTarget(
-  repoRoot = DEFAULT_REPO_ROOT,
-  { fallbackRoot } = {},
-) {
-  const candidateRoots = [repoRoot, fallbackRoot].filter(
-    (candidate) => typeof candidate === "string" && candidate.length > 0,
-  );
-  const versionSpecifiers = [];
-
-  for (const candidateRoot of candidateRoots) {
-    const rootPackageJson = readPackageJson(candidateRoot);
-    versionSpecifiers.push(
-      rootPackageJson?.devDependencies?.typescript,
-      rootPackageJson?.dependencies?.typescript,
-    );
-  }
-
-  const major = versionSpecifiers.reduce((highest, versionSpecifier) => {
-    const parsed = parseFirstNumericVersionSegment(versionSpecifier);
-    if (parsed === null) {
-      return highest;
-    }
-    return highest === null ? parsed : Math.max(highest, parsed);
-  }, null);
-
-  return major !== null && major >= 6 ? "6.0" : "5.0";
-}
-
-function buildIgnoreDeprecationsCompatibilityReplacements(targetVersion) {
-  const alternateVersion = targetVersion === "6.0" ? "5.0" : "6.0";
-  return [
-    [
-      `"ignoreDeprecations": "${alternateVersion}"`,
-      `"ignoreDeprecations": "${targetVersion}"`,
-    ],
-  ];
-}
-
-export function applyMiladyCopyPatches(elizaRoot) {
-  let patchedFiles = 0;
-  let staleFiles = 0;
-
-  for (const relativePath of MILADY_COPY_PATCH_RELATIVE_PATHS) {
-    const filePath = path.join(elizaRoot, relativePath);
-    if (!existsSync(filePath)) {
-      continue;
-    }
-
-    const raw = readFileSync(filePath, "utf8");
-    if (raw.includes(INBOX_REPLY_HINT_PLATFORM_NEUTRAL)) {
-      continue;
-    }
-
-    const next = raw
-      .split(INBOX_REPLY_HINT_LEGACY)
-      .join(INBOX_REPLY_HINT_PLATFORM_NEUTRAL);
-
-    if (next === raw) {
-      staleFiles += 1;
-      continue;
-    }
-
-    writeFileSync(filePath, next);
-    patchedFiles += 1;
-  }
-
-  if (patchedFiles > 0) {
-    console.log(
-      `[setup-upstreams] Applied ${patchedFiles} Milady copy patch(es) for inbox reply hint`,
-    );
-  } else if (staleFiles > 0) {
-    console.warn(
-      "[setup-upstreams] WARNING: inbox reply hint legacy string not found — patch may need updating",
-    );
-  }
-
-  return patchedFiles;
-}
-
-function applyTextReplacements(filePath, replacements, { label }) {
-  if (!existsSync(filePath)) {
-    return 0;
-  }
-
-  const raw = readFileSync(filePath, "utf8");
-  let next = raw;
-  let patchedReplacements = 0;
-  let staleReplacements = 0;
-
-  for (const [from, to] of replacements) {
-    if (next.includes(to)) {
-      continue;
-    }
-    if (!next.includes(from)) {
-      staleReplacements += 1;
-      continue;
-    }
-    const replacementsApplied = next.split(from).length - 1;
-    next = next.split(from).join(to);
-    patchedReplacements += replacementsApplied;
-  }
-
-  if (next !== raw) {
-    writeFileSync(filePath, next);
-    console.log(
-      `[setup-upstreams] Applied ${label} (${patchedReplacements} replacement${patchedReplacements === 1 ? "" : "s"})`,
-    );
-  } else if (staleReplacements > 0) {
-    console.warn(
-      `[setup-upstreams] WARNING: ${label} no longer matches upstream source`,
-    );
-  }
-
-  return patchedReplacements;
-}
-
-function applyCompilerOption(filePath, option, value, { label }) {
-  if (!existsSync(filePath)) {
-    return 0;
-  }
-
-  try {
-    const raw = readFileSync(filePath, "utf8");
-    const config = JSON.parse(raw);
-    const current = config.compilerOptions?.[option];
-    if (current === value) {
-      return 0;
-    }
-    config.compilerOptions = {
-      ...(config.compilerOptions ?? {}),
-      [option]: value,
-    };
-    writeFileSync(filePath, `${JSON.stringify(config, null, 2)}\n`);
-    console.log(`[setup-upstreams] Applied ${label}`);
-    return 1;
-  } catch (error) {
-    console.warn(
-      `[setup-upstreams] WARNING: ${label} failed: ${error instanceof Error ? error.message : String(error)}`,
-    );
-    return 0;
-  }
-}
-
-export function applyPluginAnthropicBunRuntimePatch(elizaRoot) {
-  let patchedReplacements = 0;
-  patchedReplacements += applyTextReplacements(
-    path.join(elizaRoot, PLUGIN_ANTHROPIC_INIT_RELATIVE_PATH),
-    PLUGIN_ANTHROPIC_INIT_BUN_REPLACEMENTS,
-    { label: "plugin-anthropic Bun runtime init patch" },
-  );
-  patchedReplacements += applyTextReplacements(
-    path.join(elizaRoot, PLUGIN_ANTHROPIC_CLAUDE_CLI_RELATIVE_PATH),
-    PLUGIN_ANTHROPIC_CLAUDE_CLI_BUN_REPLACEMENTS,
-    { label: "plugin-anthropic Bun runtime CLI patch" },
-  );
-  return patchedReplacements;
-}
-
-export function applyPluginAnthropicCliUsagePatch(elizaRoot) {
-  return applyTextReplacements(
-    path.join(elizaRoot, PLUGIN_ANTHROPIC_CLAUDE_CLI_RELATIVE_PATH),
-    PLUGIN_ANTHROPIC_CLAUDE_CLI_REPLACEMENTS,
-    { label: "plugin-anthropic Claude CLI usage patch" },
-  );
-}
-
-export function applyTypeScriptIgnoreDeprecationsCompatPatch(
-  elizaRoot,
-  { repoRoot = DEFAULT_REPO_ROOT } = {},
-) {
-  let patchedReplacements = 0;
-  const targetVersion = resolveTypeScriptIgnoreDeprecationsTarget(elizaRoot, {
-    fallbackRoot: repoRoot,
-  });
-  const tsConfigReplacements =
-    buildIgnoreDeprecationsCompatibilityReplacements(targetVersion);
-  for (const relativePath of TS_IGNORE_DEPRECATIONS_COMPAT_FILES) {
-    patchedReplacements += applyTextReplacements(
-      path.join(elizaRoot, relativePath),
-      tsConfigReplacements,
-      {
-        label: `TypeScript ignoreDeprecations compatibility patch (${relativePath})`,
-      },
-    );
-  }
-  for (const relativePath of PLUGIN_TS_IGNORE_DEPRECATIONS_COMPAT_FILES) {
-    patchedReplacements += applyTextReplacements(
-      path.join(elizaRoot, relativePath),
-      tsConfigReplacements,
-      {
-        label: `plugin ignoreDeprecations compatibility patch (${relativePath})`,
-      },
-    );
-  }
-  for (const relativePath of PLUGIN_TS_IGNORE_DEPRECATIONS_INSERT_FILES) {
-    patchedReplacements += applyCompilerOption(
-      path.join(elizaRoot, relativePath),
-      "ignoreDeprecations",
-      targetVersion,
-      {
-        label: `plugin ignoreDeprecations compatibility patch (${relativePath})`,
-      },
-    );
-  }
-  return patchedReplacements;
-}
-
-export function applyLifeOpsLucideCompatPatch(elizaRoot) {
-  return applyTextReplacements(
-    path.join(elizaRoot, LIFEOPS_SETTINGS_SECTION_RELATIVE_PATH),
-    LIFEOPS_LUCIDE_GITHUB_REPLACEMENTS,
-    { label: "LifeOps lucide-react icon compatibility patch" },
   );
 }
 
@@ -670,9 +375,22 @@ function getPresentOptionalElizaPlugins(
   elizaRoot,
   { pathExists = existsSync } = {},
 ) {
-  return OPTIONAL_ELIZA_PLUGIN_PACKAGES.filter(({ workspaceEntry }) => {
-    return pathExists(path.join(elizaRoot, workspaceEntry, "package.json"));
-  });
+  return OPTIONAL_ELIZA_PLUGIN_PACKAGES.filter(
+    ({ workspaceEntry, submodulePath }) => {
+      if (!pathExists(path.join(elizaRoot, workspaceEntry, "package.json"))) {
+        return false;
+      }
+      // After eliza's monorepo collapse, plugins/<name>/package.json is the
+      // canonical workspace and plugins/<name>/typescript/ is a legacy leftover
+      // that declares the same package name. Adding both makes bun fail with
+      // "Workspace name already exists". Skip the legacy entry when the flat
+      // layout is present.
+      if (pathExists(path.join(elizaRoot, submodulePath, "package.json"))) {
+        return false;
+      }
+      return true;
+    },
+  );
 }
 
 export function getTemporaryElizaWorkspaceEntries(
@@ -844,10 +562,7 @@ async function maybeInitOptionalElizaPluginSubmodules(elizaRoot) {
 }
 
 function shouldApplyOptionalElizaPluginFallback(env = process.env) {
-  const localUpstreamsDisabled = LOCAL_UPSTREAM_SKIP_ENVS.some(
-    (key) => env[key] === "1",
-  );
-  return env.CI === "true" && localUpstreamsDisabled;
+  return env.CI === "true" && isLocalElizaDisabled(env);
 }
 
 function applyOptionalElizaPluginFallback(elizaRoot, missingPlugins) {
@@ -901,7 +616,7 @@ function applyOptionalElizaPluginFallback(elizaRoot, missingPlugins) {
       }
       for (const packageName of missingPackageNames) {
         if (pkg[section][packageName] === "workspace:*") {
-          pkg[section][packageName] = OPTIONAL_ELIZA_PLUGIN_FALLBACK_TAG;
+          pkg[section][packageName] = getElizaosPackageSpecifier();
           changed = true;
         }
       }
@@ -934,10 +649,8 @@ export function getElizaWorkspaceSkipReason(
   repoRoot = DEFAULT_REPO_ROOT,
   { env = process.env, pathExists = existsSync } = {},
 ) {
-  const matchedSkipEnv =
-    LOCAL_UPSTREAM_SKIP_ENVS.find((key) => env[key] === "1") ?? null;
-  if (matchedSkipEnv) {
-    return `${matchedSkipEnv}=1`;
+  if (isLocalElizaDisabled(env)) {
+    return "elizaOS package mode";
   }
 
   const devWorkspaceMarkers = [
@@ -949,7 +662,7 @@ export function getElizaWorkspaceSkipReason(
   const isDevCheckout = devWorkspaceMarkers.every((marker) =>
     pathExists(marker),
   );
-  if (!isDevCheckout && !getForceEnvKey(env)) {
+  if (!isDevCheckout && !getForceEnvKey(env) && !isLocalElizaForced(env)) {
     return "non-development install";
   }
 
@@ -1067,7 +780,9 @@ function discoverElizaAppPackageDirs(elizaRoot) {
 function discoverElizaPackageDirs(elizaRoot) {
   return discoverElizaPackageDirsForParents(elizaRoot, [
     "apps",
+    path.join("cloud", "packages"),
     "packages",
+    path.join("packages", "native-plugins"),
     "plugins",
   ]);
 }
@@ -1247,10 +962,6 @@ export async function ensureRequiredElizaPluginBuilds(
   repoRoot = DEFAULT_REPO_ROOT,
   options = {},
 ) {
-  ensurePluginTelegramNodeTypes(getRepoPluginsRoot(repoRoot), {
-    pathExists: options.pathExists ?? existsSync,
-  });
-
   let builtAny = false;
   for (const buildConfig of ELIZA_REQUIRED_PLUGIN_BUILDS) {
     builtAny =
@@ -1491,10 +1202,10 @@ export function ensurePluginDependencyLinks(
     });
 
     const packageDependencies = {
-      ...(packageJson.peerDependencies ?? {}),
-      ...(packageJson.dependencies ?? {}),
-      ...(packageJson.optionalDependencies ?? {}),
-      ...(packageJson.devDependencies ?? {}),
+      ...packageJson.peerDependencies,
+      ...packageJson.dependencies,
+      ...packageJson.optionalDependencies,
+      ...packageJson.devDependencies,
     };
     const dependencyNames = Object.keys(packageDependencies);
     if (dependencyNames.length === 0) {
@@ -1723,7 +1434,7 @@ export function ensureElizaTypescriptDependencyLinks(
     dependencies = ELIZA_TYPESCRIPT_BUILD_DEPENDENCIES,
   } = {},
 ) {
-  const packageDir = path.join(elizaRoot, "packages", "typescript");
+  const packageDir = path.join(elizaRoot, "packages", "core");
   let linkedDependencies = 0;
 
   for (const dependency of dependencies) {
@@ -1770,7 +1481,7 @@ export function ensureElizaTypescriptDependencyLinks(
         linkedDependencies +
         " @elizaos/core build " +
         (linkedDependencies === 1 ? "dependency" : "dependencies") +
-        " into eliza/packages/typescript",
+        " into eliza/packages/core",
     );
   }
 
@@ -1976,181 +1687,28 @@ export async function ensureElizaBuildOutputs(
  *
  * Idempotent: only writes when the desired types list is not already present.
  */
-export function ensurePluginAnthropicBunTypes(
-  pluginsRoot,
-  { pathExists = existsSync } = {},
-) {
-  const buildConfigPath = path.join(
-    pluginsRoot,
-    "plugin-anthropic",
-    "typescript",
-    "tsconfig.build.json",
-  );
-
-  if (!pathExists(buildConfigPath)) {
-    return false;
-  }
-
-  const raw = readFileSync(buildConfigPath, "utf8");
-  let parsed;
-  try {
-    parsed = JSON.parse(raw);
-  } catch (error) {
-    console.warn(
-      `[setup-upstreams] Could not parse ${toDisplayPath(buildConfigPath)}: ${
-        error instanceof Error ? error.message : String(error)
-      }`,
-    );
-    return false;
-  }
-
-  const compilerOptions =
-    parsed && typeof parsed === "object" && parsed.compilerOptions
-      ? parsed.compilerOptions
-      : {};
-  const existingTypes = Array.isArray(compilerOptions.types)
-    ? compilerOptions.types
-    : null;
-
-  if (existingTypes?.includes("bun-types")) {
-    return false;
-  }
-
-  const nextTypes = existingTypes ? [...existingTypes] : ["node"];
-  if (!nextTypes.includes("bun-types")) {
-    nextTypes.push("bun-types");
-  }
-
-  const nextCompilerOptions = {
-    ...compilerOptions,
-    types: nextTypes,
-  };
-  const nextParsed = {
-    ...parsed,
-    compilerOptions: nextCompilerOptions,
-  };
-
-  const indent = raw.match(/^(\s+)"/m)?.[1] ?? "\t";
-  writeFileSync(
-    buildConfigPath,
-    `${JSON.stringify(nextParsed, null, indent)}\n`,
-  );
-  console.log(
-    `[setup-upstreams] Patched ${toDisplayPath(buildConfigPath)} to load Bun types`,
-  );
-  return true;
-}
-
-export function ensurePluginTelegramNodeTypes(
-  pluginsRoot,
-  { pathExists = existsSync } = {},
-) {
-  const configPaths = [
-    path.join(pluginsRoot, "plugin-telegram", "tsconfig.json"),
-    path.join(pluginsRoot, "plugin-telegram", "tsconfig.build.json"),
-  ];
-  let patchedFiles = 0;
-
-  for (const configPath of configPaths) {
-    if (!pathExists(configPath)) {
-      continue;
-    }
-
-    const raw = readFileSync(configPath, "utf8");
-    let parsed;
-    try {
-      parsed = JSON.parse(raw);
-    } catch (error) {
-      console.warn(
-        `[setup-upstreams] Could not parse ${toDisplayPath(configPath)}: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      );
-      continue;
-    }
-
-    const compilerOptions =
-      parsed && typeof parsed === "object" && parsed.compilerOptions
-        ? parsed.compilerOptions
-        : {};
-    const existingTypes = Array.isArray(compilerOptions.types)
-      ? compilerOptions.types
-      : [];
-
-    if (existingTypes.includes("node")) {
-      continue;
-    }
-
-    const nextParsed = {
-      ...parsed,
-      compilerOptions: {
-        ...compilerOptions,
-        types: [...existingTypes, "node"],
-      },
-    };
-    const indent = raw.match(/^(\s+)"/m)?.[1] ?? "  ";
-    writeFileSync(configPath, `${JSON.stringify(nextParsed, null, indent)}\n`);
-    patchedFiles += 1;
-  }
-
-  if (patchedFiles > 0) {
-    console.log(
-      `[setup-upstreams] Patched plugin-telegram Node type config (${patchedFiles} file${patchedFiles === 1 ? "" : "s"})`,
-    );
-  }
-
-  return patchedFiles;
-}
-
-export function patchPluginBuildTscBinPaths(
-  pluginsRoot,
-  { pathExists = existsSync } = {},
-) {
-  let patchedFiles = 0;
-  for (const packageDir of discoverPluginPackageDirs(pluginsRoot)) {
-    const buildScriptPath = path.join(packageDir, "build.ts");
-    if (!pathExists(buildScriptPath)) {
-      continue;
-    }
-
-    const original = readFileSync(buildScriptPath, "utf8");
-    const patched = original
-      .replaceAll(
-        'join(rootDir, "node_modules", ".bin", "tsc")',
-        'join(rootDir, "node_modules", ".bin", process.platform === "win32" ? "tsc.cmd" : "tsc")',
-      )
-      .replaceAll(
-        'join(ROOT, "node_modules", ".bin", "tsc")',
-        'join(ROOT, "node_modules", ".bin", process.platform === "win32" ? "tsc.cmd" : "tsc")',
-      );
-
-    if (patched === original) {
-      continue;
-    }
-
-    writeFileSync(buildScriptPath, patched);
-    patchedFiles += 1;
-  }
-
-  if (patchedFiles > 0) {
-    console.log(
-      `[setup-upstreams] Patched ${patchedFiles} plugin build script ${patchedFiles === 1 ? "tsc path" : "tsc paths"} for Windows bin shims`,
-    );
-  }
-
-  return patchedFiles;
-}
-
 export async function ensurePluginBuildOutputs(
   pluginsRoot,
-  { pathExists = existsSync, runCommandImpl = runCommand } = {},
+  {
+    pathExists = existsSync,
+    runCommandImpl = runCommand,
+    requiredPackageNames = new Set(),
+  } = {},
 ) {
-  ensurePluginAnthropicBunTypes(pluginsRoot, { pathExists });
-  ensurePluginTelegramNodeTypes(pluginsRoot, { pathExists });
-  patchPluginBuildTscBinPaths(pluginsRoot, { pathExists });
-  for (const packageDir of discoverPluginPackageDirs(pluginsRoot)) {
+  const packageDirs = discoverPluginPackageDirs(pluginsRoot).sort(
+    (left, right) => {
+      const leftName = readPackageJson(left)?.name;
+      const rightName = readPackageJson(right)?.name;
+      const leftRequired = requiredPackageNames.has(leftName) ? 0 : 1;
+      const rightRequired = requiredPackageNames.has(rightName) ? 0 : 1;
+      return leftRequired - rightRequired || left.localeCompare(right);
+    },
+  );
+
+  for (const packageDir of packageDirs) {
     const packageJson = readPackageJson(packageDir);
-    if (!packageJson?.name?.startsWith("@elizaos/")) {
+    const packageName = packageJson?.name;
+    if (!packageName?.startsWith("@elizaos/")) {
       continue;
     }
 
@@ -2160,11 +1718,20 @@ export async function ensurePluginBuildOutputs(
       continue;
     }
 
-    console.log(`[setup-upstreams] Building ${packageJson.name}`);
-    await runCommandImpl("bun", ["run", "build"], {
-      cwd: packageDir,
-      label: `bun run build (${packageJson.name})`,
-    });
+    console.log(`[setup-upstreams] Building ${packageName}`);
+    try {
+      await runCommandImpl("bun", ["run", "build"], {
+        cwd: packageDir,
+        label: `bun run build (${packageName})`,
+      });
+    } catch (error) {
+      if (requiredPackageNames.has(packageName)) {
+        throw error;
+      }
+      console.warn(
+        `[setup-upstreams] WARNING: Skipping optional upstream plugin ${packageName}; build failed (${error instanceof Error ? error.message : String(error)})`,
+      );
+    }
   }
 }
 
@@ -2217,9 +1784,6 @@ export async function setupUpstreams(repoRoot = DEFAULT_REPO_ROOT) {
             );
           }
         }
-        applyMiladyCopyPatches(elizaRoot);
-        applyTypeScriptIgnoreDeprecationsCompatPatch(elizaRoot);
-        applyLifeOpsLucideCompatPatch(elizaRoot);
       }
     }
     console.log(`[setup-upstreams] Skipping: ${skipReason}`);
@@ -2240,21 +1804,24 @@ export async function setupUpstreams(repoRoot = DEFAULT_REPO_ROOT) {
 
   const elizaRoot = await ensureRepoLocalEliza(repoRoot);
   const pluginsRoot = getRepoPluginsRoot(repoRoot);
-  applyMiladyCopyPatches(elizaRoot);
-  applyTypeScriptIgnoreDeprecationsCompatPatch(elizaRoot);
-  applyLifeOpsLucideCompatPatch(elizaRoot);
-  ensurePluginTelegramNodeTypes(pluginsRoot);
+  const requiredPluginPackageNames = new Set(
+    getPublishedElizaPackageSpecs(repoRoot)
+      .map(([packageName]) => packageName)
+      .filter((packageName) => packageName.startsWith("@elizaos/plugin-")),
+  );
+  requiredPluginPackageNames.add("@elizaos/plugin-zai");
+
   await ensureElizaDependencies(elizaRoot);
   await ensureElizaBuildOutputs(elizaRoot);
 
   ensurePluginDependencyLinks(repoRoot, pluginsRoot);
   ensureMiladySingletonDependencyLinks(repoRoot);
-  applyPluginAnthropicBunRuntimePatch(elizaRoot);
-  applyPluginAnthropicCliUsagePatch(elizaRoot);
-  await ensurePluginBuildOutputs(pluginsRoot);
   const updatedLinks = linkUpstreamPackages(repoRoot, {
     elizaRoot,
     pluginsRoot,
+  });
+  await ensurePluginBuildOutputs(pluginsRoot, {
+    requiredPackageNames: requiredPluginPackageNames,
   });
 
   if (updatedLinks === 0) {

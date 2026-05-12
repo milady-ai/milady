@@ -234,12 +234,45 @@ const MAPPING = [
 // ---------------------------------------------------------------------------
 
 function opRead(itemTitle, fieldLabel) {
-  const ref = `op://${vault}/${itemTitle}/${fieldLabel}`;
   try {
-    return execFileSync("op", ["read", ref], { encoding: "utf8" }).trim();
-  } catch (_err) {
+    const output = execFileSync(
+      "op",
+      [
+        "item",
+        "get",
+        itemTitle,
+        "--vault",
+        vault,
+        "--fields",
+        `label=${fieldLabel}`,
+        "--reveal",
+        "--format",
+        "json",
+      ],
+      { encoding: "utf8" },
+    );
+    const field = JSON.parse(output);
+    if (Array.isArray(field)) {
+      return String(field[0]?.value ?? "").trim();
+    }
+    return String(field?.value ?? "").trim();
+  } catch (err) {
+    if (
+      err.stderr?.includes("isn't an item") ||
+      err.stderr?.includes("not found") ||
+      err.stderr?.includes("could not find")
+    ) {
+      return null;
+    }
+    throw err;
+  }
+}
+
+function ensureServiceAccount() {
+  if (!process.env.OP_SERVICE_ACCOUNT_TOKEN) {
     return null;
   }
+  return process.env.OP_SERVICE_ACCOUNT_TOKEN;
 }
 
 async function ensureOp() {
@@ -248,6 +281,12 @@ async function ensureOp() {
   } catch {
     console.error(
       "❌ 1Password CLI (`op`) is not installed or not on PATH. See https://developer.1password.com/docs/cli/get-started/",
+    );
+    process.exit(1);
+  }
+  if (!ensureServiceAccount()) {
+    console.error(
+      "OP_SERVICE_ACCOUNT_TOKEN is required to read the milady-e2e 1Password vault.",
     );
     process.exit(1);
   }

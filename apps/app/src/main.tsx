@@ -1,10 +1,12 @@
 import { App, ErrorBoundary } from "@elizaos/app-core";
-import "@elizaos/app-core/styles/styles.css";
-import "@elizaos/app-core/styles/brand-gold.css";
+// Styles bundled via the @elizaos/ui barrel. The Wave A refactor (eliza
+// commit 5a6f5f337) moved CSS out of @elizaos/app-core/styles/ but
+// didn't update this consumer; the new shape is a single subpath.
+import "@elizaos/ui/styles";
 
 import { App as CapacitorApp } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";
-import { Keyboard } from "@capacitor/keyboard";
+import { Keyboard, KeyboardResize } from "@capacitor/keyboard";
 import { Preferences } from "@capacitor/preferences";
 import { client } from "@elizaos/app-core";
 import {
@@ -13,11 +15,11 @@ import {
   initializeStorageBridge,
   isElectrobunRuntime,
 } from "@elizaos/app-core";
-import { PhoneCompanionApp } from "@elizaos/app-phone";
 import type { BrandingConfig } from "@elizaos/app-core";
 import {
   type AppBootConfig,
   getBootConfig,
+  ANDROID_LOCAL_AGENT_API_BASE,
   MOBILE_RUNTIME_MODE_STORAGE_KEY,
   normalizeMobileRuntimeMode,
   preSeedAndroidLocalRuntimeIfFresh,
@@ -50,10 +52,9 @@ import {
 } from "@elizaos/app-core";
 import { AppWindowRenderer } from "@elizaos/app-core";
 import { dispatchQueuedLifeOpsGithubCallbackFromUrl } from "@elizaos/app-lifeops/platform";
-import type { ShareTargetPayload } from "@elizaos/ui";
+import type { ShareTargetPayload } from "@elizaos/app-core/platform";
 import {
   DESKTOP_TRAY_MENU_ITEMS,
-  DesktopOnboardingRuntime,
   DesktopSurfaceNavigationRuntime,
   DesktopTrayRuntime,
   DetachedShellRoot,
@@ -119,6 +120,8 @@ import "@elizaos/app-polymarket/register";
 import "@elizaos/app-vincent/client";
 import { useVincentState } from "@elizaos/app-vincent/ui";
 import "@elizaos/app-vincent/register";
+import "@elizaos/app-wallet/register";
+import "@elizaos/app-workflow-builder/register";
 import { shouldUseCloudOnlyBranding } from "@elizaos/app-core";
 import {
   APP_BRANDING_BASE,
@@ -129,24 +132,27 @@ import {
 } from "./app-config";
 import { APP_ENV_ALIASES, APP_ENV_PREFIX } from "./brand-env";
 import { APP_CHARACTER_CATALOG } from "./character-catalog";
+import { bootIosLocalRuntimeIfApplicable } from "./ios-local-runtime-boot";
 import {
   apiBaseToDeviceBridgeUrl,
   type IosRuntimeConfig,
   type IosRuntimeMode,
   resolveIosRuntimeConfig,
-} from "./ios-runtime";
-import { bootIosLocalRuntimeIfApplicable } from "./ios-local-runtime-boot";
+} from "@elizaos/app-core";
 
-// CharacterEditor is statically re-exported by `@elizaos/app-core/browser`,
-// so the previous `lazy()` wrapper here was eagerly merged back into the
-// main chunk by Rollup. Static import keeps the load path honest.
-import { CharacterEditor } from "@elizaos/app-core/components/character/CharacterEditor";
+// CharacterEditor moved to @elizaos/ui in the Wave A refactor.
+// Static import keeps the load path honest (the previous lazy() wrapper
+// was being eagerly merged back into the main chunk by Rollup anyway).
+import { CharacterEditor } from "@elizaos/ui/components/character/CharacterEditor";
 
 declare global {
   interface Window {
     __ELIZA_APP_SHARE_QUEUE__?: ShareTargetPayload[];
     __ELIZA_APP_CHARACTER_EDITOR__?: typeof CharacterEditor;
     __ELIZA_APP_API_BASE__?: string;
+    __ELIZA_API_BASE__?: string;
+    __ELIZAOS_APP_BOOT_CONFIG__?: AppBootConfig;
+    __ELIZA_APP_BOOT_CONFIG__?: AppBootConfig;
   }
 }
 
@@ -161,6 +167,9 @@ type AppCompatWindow = Window &
     __ELIZA_APP_SHARE_QUEUE__?: ShareTargetPayload[];
     __ELIZA_APP_CHARACTER_EDITOR__?: typeof CharacterEditor;
     __ELIZA_APP_API_BASE__?: string;
+    __ELIZA_API_BASE__?: string;
+    __ELIZAOS_APP_BOOT_CONFIG__?: AppBootConfig;
+    __ELIZA_APP_BOOT_CONFIG__?: AppBootConfig;
   };
 
 function getAppWindow(): AppCompatWindow {
@@ -170,7 +179,7 @@ function getAppWindow(): AppCompatWindow {
 // True when the APK is running on the AOSP MiladyOS variant. Detection:
 // MainActivity.applyMiladyOSUserAgentSuffix appends `MiladyOS/<tag>` to the
 // WebView user-agent when `ro.miladyos.product` is set by the AOSP product
-// config. The upstream eliza framework reads its own `ElizaOS/<tag>` marker
+// config. The upstream elizaOS layer reads its own `ElizaOS/<tag>` marker
 // from the same place; this helper only cares about the Milady-brand layer.
 function isMiladyOS(): boolean {
   if (typeof navigator === "undefined") return false;
@@ -180,9 +189,14 @@ function isMiladyOS(): boolean {
 function getInjectedAppApiBase(): string | undefined {
   const appWindow = getAppWindow();
   const brandedApiBase = appWindow[BRANDED_WINDOW_KEYS.apiBase];
+  const bootConfig =
+    appWindow.__ELIZAOS_APP_BOOT_CONFIG__ ??
+    appWindow.__ELIZA_APP_BOOT_CONFIG__;
   return (
     appWindow.__ELIZA_APP_API_BASE__ ??
-    (typeof brandedApiBase === "string" ? brandedApiBase : undefined)
+    (typeof brandedApiBase === "string" ? brandedApiBase : undefined) ??
+    bootConfig?.apiBase ??
+    appWindow.__ELIZA_API_BASE__
   );
 }
 
@@ -210,6 +224,7 @@ const IOS_RUNTIME_ENV_CONFIG = resolveIosRuntimeConfig(import.meta.env);
 const DEVICE_BRIDGE_ID_KEY = "milady_device_bridge_id";
 
 let mobileDeviceBridgeClient: DeviceBridgeClient | null = null;
+let mobileDeviceBridgeStartPromise: Promise<void> | null = null;
 let mobileRuntimeModeListenerInstalled = false;
 
 async function registerMiladyOsSystemApps(): Promise<void> {
@@ -267,6 +282,7 @@ const APP_VRM_ASSETS = APP_STYLE_PRESETS.slice()
   .map((p) => ({ title: p.name, slug: `${APP_NAMESPACE}-${p.avatarIndex}` }));
 
 const appBootConfig: AppBootConfig = {
+  ...getBootConfig(),
   branding: APP_BRANDING,
   defaultApps: APP_CONFIG.defaultApps,
   assetBaseUrl:
@@ -356,68 +372,8 @@ try {
       client.setToken(bootstrapToken);
     } catch {}
   }
-
-  // AOSP / branded native shells inject a per-boot bearer token via
-  // window.ElizaNative.getLocalAgentToken(). Apply it immediately to
-  // the boot config so the first /api/auth/status fetch authenticates
-  // without a pair-code prompt. Stock Capacitor builds and web don't
-  // register this bridge, so the lookup resolves to null and falls
-  // through to the normal self-hosted token path above.
-  try {
-    const elizaNative = (
-      globalThis as unknown as {
-        ElizaNative?: { getLocalAgentToken?: () => string | null };
-      }
-    ).ElizaNative;
-    if (elizaNative && typeof elizaNative.getLocalAgentToken === "function") {
-      const nativeToken = elizaNative.getLocalAgentToken();
-      if (typeof nativeToken === "string" && nativeToken.trim()) {
-        appBootConfig.apiToken ??= nativeToken.trim();
-        try {
-          client.setToken(nativeToken.trim());
-        } catch {}
-      }
-    }
-  } catch {}
 } catch {}
 setBootConfig(appBootConfig);
-
-// Bearer-token watchdog for AOSP local-runtime: the per-boot bearer is
-// generated inside ElizaAgentService.startAgentProcess() on a background
-// thread, so getLocalAgentToken() may still be null when the JS bundle
-// first evaluates. Poll the bridge for up to 30 s and apply the token
-// the moment the service writes it.
-void (function watchElizaNativeToken() {
-  if (typeof globalThis === "undefined") return;
-  const bridge = (
-    globalThis as unknown as {
-      ElizaNative?: { getLocalAgentToken?: () => string | null };
-    }
-  ).ElizaNative;
-  if (!bridge || typeof bridge.getLocalAgentToken !== "function") return;
-  // If a token was already captured above, don't start the interval.
-  if (appBootConfig.apiToken) return;
-  let tries = 0;
-  const iv = setInterval(() => {
-    if (++tries > 120) {
-      clearInterval(iv);
-      return;
-    }
-    try {
-      const t = bridge.getLocalAgentToken?.();
-      if (typeof t === "string" && t.trim()) {
-        appBootConfig.apiToken = t.trim();
-        setBootConfig({ ...appBootConfig });
-        try {
-          client.setToken(t.trim());
-        } catch {}
-        clearInterval(iv);
-      }
-    } catch {
-      // swallow
-    }
-  }, 250);
-})();
 
 function getShareQueue(): ShareTargetPayload[] {
   const appWindow = getAppWindow();
@@ -471,7 +427,7 @@ async function initializePlatform(): Promise<void> {
     await initializeKeyboard();
     initializeAppLifecycle();
     initializeMobileRuntimeModeListener();
-    await initializeMobileDeviceBridge();
+    void initializeMobileDeviceBridge();
     // iOS local runtime: when ios-runtime mode resolves to "local", the
     // on-device JS runtime (@elizaos/capacitor-bun-runtime) is started
     // here. No-ops on Android, on iOS cloud/cloud-hybrid/remote-mac, and
@@ -488,6 +444,8 @@ async function initializePlatform(): Promise<void> {
 
 async function initializeKeyboard(): Promise<void> {
   if (isIOS) {
+    await Keyboard.setResizeMode({ mode: KeyboardResize.None });
+    await Keyboard.setScroll({ isDisabled: true });
     await Keyboard.setAccessoryBarVisible({ isVisible: true });
   }
 
@@ -572,6 +530,13 @@ function handleDeepLink(url: string): void {
       break;
     case "contacts":
       setHashRoute("contacts", parsed.searchParams);
+      break;
+    case "wallet":
+    case "inventory":
+      setHashRoute("wallet", parsed.searchParams);
+      break;
+    case "browser":
+      setHashRoute("browser", parsed.searchParams);
       break;
     case "lifeops":
       window.location.hash = "#lifeops";
@@ -693,7 +658,7 @@ async function initializeDesktopShell(): Promise<void> {
   subscribeDesktopBridgeEvent({
     rpcMessage: "shareTargetReceived",
     ipcChannel: "desktop:shareTargetReceived",
-    listener: (payload: unknown) => {
+    listener: (payload) => {
       const url = (payload as { url?: string } | null | undefined)?.url;
       if (typeof url !== "string" || url.trim().length === 0) {
         return;
@@ -722,20 +687,6 @@ function setupPlatformStyles(): void {
     "env(safe-area-inset-right, 0px)",
   );
   root.style.setProperty("--keyboard-height", "0px");
-
-  // Sizing on native: pin the React mount to the full visual viewport
-  // so the chat composer + keyboard-resize interaction stays clamped.
-  // We deliberately do NOT set `paddingTop / paddingLeft / paddingRight`
-  // here — the @elizaos/ui shell components apply their own safe-area padding.
-  // Adding a second layer on `#root` doubles the top inset.
-  if (isNative) {
-    const reactRoot = document.getElementById("root");
-    if (reactRoot) {
-      reactRoot.style.boxSizing = "border-box";
-      reactRoot.style.minHeight = "100dvh";
-      reactRoot.style.maxHeight = "100dvh";
-    }
-  }
 }
 
 function isPhoneCompanionMode(): boolean {
@@ -773,19 +724,20 @@ function mountReactApp(): void {
       <StrictMode>
         <AppProvider branding={APP_BRANDING}>
           {phoneCompanion ? (
-            <PhoneCompanionApp />
+            <CompanionShell tab="companion" actionNotice={null} />
           ) : detachedShell ? (
-            <div className="flex h-screen min-h-0 w-screen flex-col overflow-hidden">
-              {/* @ts-expect-error browser stub doesn't declare route prop */}
+            <div className="flex h-[100dvh] min-h-0 w-full max-w-full flex-col overflow-hidden">
               <DetachedShellRoot route={windowShellRoute} />
             </div>
           ) : appWindowSlug ? (
-            <div className="flex h-screen min-h-0 w-screen flex-col overflow-hidden">
+            <div className="flex h-[100dvh] min-h-0 w-full max-w-full flex-col overflow-hidden">
               <AppWindowRenderer slug={appWindowSlug} />
             </div>
           ) : (
             <>
-              <DesktopOnboardingRuntime />
+              {/* DesktopOnboardingRuntime was deleted upstream but main.tsx
+                  still referenced it. The surface-navigation + tray runtimes
+                  cover the desktop chrome bits we still need. */}
               <DesktopSurfaceNavigationRuntime />
               <DesktopTrayRuntime />
               <LifeOpsActivitySignalsEffect />
@@ -862,7 +814,10 @@ function injectDetachedShellApiBase(): void {
 function mobileModeToIosRuntimeMode(
   mode: ReturnType<typeof normalizeMobileRuntimeMode>,
 ): IosRuntimeMode | null {
-  return mode === "remote-mac" || mode === "cloud" || mode === "cloud-hybrid"
+  return mode === "remote-mac" ||
+    mode === "cloud" ||
+    mode === "cloud-hybrid" ||
+    mode === "local"
     ? mode
     : null;
 }
@@ -875,9 +830,7 @@ function getCurrentIosRuntimeConfig(): IosRuntimeConfig {
         window.localStorage.getItem(MOBILE_RUNTIME_MODE_STORAGE_KEY),
       ),
     );
-    // MobileRuntimeMode includes "local" but IosRuntimeConfig.mode does not —
-    // the local-agent runtime is Android-only. Drop "local" before assigning.
-    if (!mode || mode === "local") return IOS_RUNTIME_ENV_CONFIG;
+    if (!mode) return IOS_RUNTIME_ENV_CONFIG;
     return { ...IOS_RUNTIME_ENV_CONFIG, mode };
   } catch {
     return IOS_RUNTIME_ENV_CONFIG;
@@ -907,9 +860,10 @@ async function getOrCreateDeviceBridgeId(): Promise<string> {
   const existing = await Preferences.get({ key: DEVICE_BRIDGE_ID_KEY });
   if (existing.value?.trim()) return existing.value.trim();
 
+  const prefix = isAndroid ? "android" : isIOS ? "ios" : "mobile";
   const generated =
     globalThis.crypto?.randomUUID?.() ??
-    `ios-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+    `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
   await Preferences.set({ key: DEVICE_BRIDGE_ID_KEY, value: generated });
   return generated;
 }
@@ -919,9 +873,15 @@ function resolveDeviceBridgeUrl(config: IosRuntimeConfig): string | null {
     return config.deviceBridgeUrl;
   }
   // cloud-hybrid: paired phone dials a remote agent via the cloud apiBase.
-  // local: the agent runs in-process on the same device (Android foreground
-  // service, future iOS variants), so the WebView's @elizaos/capacitor-llama
-  // dials the bridge over loopback at the locally bound apiBase.
+  // Android local: the foreground agent service owns the loopback API and the
+  // WebView dials its device bridge for native llama.cpp calls.
+  // iOS local: requests are handled by the in-process ITTP route kernel, so a
+  // loopback WebSocket bridge is both unnecessary and unsafe in simulator runs
+  // where host-level adb port forwarding can expose another device's agent.
+  if (config.mode === "local" && isIOS) return null;
+  if (config.mode === "local" && isAndroid) {
+    return apiBaseToDeviceBridgeUrl(ANDROID_LOCAL_AGENT_API_BASE);
+  }
   if (config.mode !== "cloud-hybrid" && config.mode !== "local") return null;
   const apiBase = getBootConfig().apiBase?.trim();
   if (!apiBase) return null;
@@ -941,25 +901,38 @@ async function initializeMobileDeviceBridge(): Promise<void> {
     return;
   }
   if (mobileDeviceBridgeClient) return;
+  if (mobileDeviceBridgeStartPromise) return;
 
   const agentUrl = resolveDeviceBridgeUrl(runtimeConfig);
   if (!agentUrl) return;
 
-  try {
-    const deviceId = await getOrCreateDeviceBridgeId();
-    mobileDeviceBridgeClient = startDeviceBridgeClient({
-      agentUrl,
-      ...(runtimeConfig.deviceBridgeToken
-        ? { pairingToken: runtimeConfig.deviceBridgeToken }
-        : {}),
-      deviceId,
-    });
-  } catch (error) {
-    console.warn(
-      `${APP_LOG_PREFIX} Device bridge unavailable:`,
-      error instanceof Error ? error.message : error,
-    );
-  }
+  mobileDeviceBridgeStartPromise = (async () => {
+    try {
+      const deviceId = await getOrCreateDeviceBridgeId();
+      mobileDeviceBridgeClient = startDeviceBridgeClient({
+        agentUrl,
+        ...(runtimeConfig.deviceBridgeToken
+          ? { pairingToken: runtimeConfig.deviceBridgeToken }
+          : {}),
+        deviceId,
+        onStateChange: (state, detail) => {
+          console.info(
+            `${APP_LOG_PREFIX} Device bridge ${state}`,
+            detail ?? "",
+          );
+        },
+      });
+    } catch (error) {
+      console.warn(
+        `${APP_LOG_PREFIX} Device bridge unavailable:`,
+        error instanceof Error ? error.message : error,
+      );
+    } finally {
+      mobileDeviceBridgeStartPromise = null;
+    }
+  })();
+
+  await mobileDeviceBridgeStartPromise;
 }
 
 function stopMobileDeviceBridge(): void {
@@ -973,6 +946,7 @@ function initializeMobileRuntimeModeListener(): void {
   document.addEventListener(MOBILE_RUNTIME_MODE_CHANGED_EVENT, () => {
     const mode = getCurrentIosRuntimeConfig().mode;
     if (mode === "cloud-hybrid" || mode === "local") {
+      stopMobileDeviceBridge();
       void initializeMobileDeviceBridge();
       return;
     }

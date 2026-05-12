@@ -22,6 +22,11 @@ on:
         required: false
         type: boolean
         default: true
+      snap_release:
+        description: "Snap Store release channel"
+        required: false
+        type: string
+        default: stable
       flatpak:
         description: "Publish Flatpak"
         required: false
@@ -53,6 +58,15 @@ on:
         description: "Publish to Snap Store"
         type: boolean
         default: true
+      snap_release:
+        description: "Snap Store release channel"
+        type: choice
+        default: stable
+        options:
+          - edge
+          - beta
+          - candidate
+          - stable
       flatpak:
         description: "Publish Flatpak"
         type: boolean
@@ -79,6 +93,7 @@ jobs:
       pypi_version: ${{ steps.ver.outputs.pypi_version }}
       deb_version: ${{ steps.ver.outputs.deb_version }}
       is_prerelease: ${{ steps.ver.outputs.is_prerelease }}
+      snap_release: ${{ steps.ver.outputs.snap_release }}
       snap_store_ready: ${{ steps.registry_credentials.outputs.snap_store_ready }}
       apt_repo_ready: ${{ steps.registry_credentials.outputs.apt_repo_ready }}
     steps:
@@ -87,28 +102,32 @@ jobs:
         run: |
           VERSION="${{ inputs.version }}"
 
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "npm_version=$VERSION" >> "$GITHUB_OUTPUT"
-
           # PEP 440 conversion: 2.0.0-alpha.7 → 2.0.0a7
           PYPI_VERSION=$(echo "$VERSION" | sed -E 's/-alpha\.?/a/; s/-beta\.?/b/; s/-rc\.?/rc/')
-          echo "pypi_version=$PYPI_VERSION" >> "$GITHUB_OUTPUT"
 
           # Debian version: 2.0.0-alpha.7 → 2.0.0~alpha7-1
           DEB_VERSION=$(echo "$VERSION" | sed -E 's/-alpha\./~alpha/; s/-beta\./~beta/; s/-rc\./~rc/')
-          echo "deb_version=${DEB_VERSION}-1" >> "$GITHUB_OUTPUT"
 
           # Pre-release detection
           if echo "$VERSION" | grep -qE '(alpha|beta|rc)'; then
-            echo "is_prerelease=true" >> "$GITHUB_OUTPUT"
+            IS_PRERELEASE="true"
           else
-            echo "is_prerelease=false" >> "$GITHUB_OUTPUT"
+            IS_PRERELEASE="false"
           fi
+
+          {
+            echo "version=$VERSION"
+            echo "npm_version=$VERSION"
+            echo "snap_release=${{ inputs.snap_release }}"
+            echo "pypi_version=$PYPI_VERSION"
+            echo "deb_version=${DEB_VERSION}-1"
+            echo "is_prerelease=$IS_PRERELEASE"
+          } >> "$GITHUB_OUTPUT"
 
           echo "Version: $VERSION"
           echo "PyPI: $PYPI_VERSION"
           echo "Debian: ${DEB_VERSION}-1"
-          echo "Pre-release: $(echo "$VERSION" | grep -qE '(alpha|beta|rc)' && echo true || echo false)"
+          echo "Pre-release: $IS_PRERELEASE"
 
       - name: Check registry credentials
         id: registry_credentials
@@ -263,7 +282,7 @@ jobs:
           SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAP_STORE_CREDENTIALS }}
         with:
           snap: ${{ steps.snapcraft.outputs.snap }}
-          release: ${{ needs.prepare.outputs.is_prerelease == 'true' && 'edge,beta' || 'stable,candidate' }}
+          release: ${{ needs.prepare.outputs.snap_release }}
 
   # ── Debian / apt ───────────────────────────────────────────────────────
   build-deb:

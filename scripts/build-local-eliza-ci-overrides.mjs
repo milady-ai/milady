@@ -16,7 +16,7 @@ export const LOCAL_ELIZA_CI_OVERRIDE_PACKAGES = [
   },
   {
     name: "@elizaos/plugin-signal",
-    packageDir: "eliza/plugins/plugin-signal/typescript",
+    packageDir: "eliza/plugins/plugin-signal",
     entrypoint: "dist/index.js",
   },
 ];
@@ -76,9 +76,10 @@ export async function buildLocalElizaCiOverrides({
     const entrypointPath = path.join(packageDir, packageInfo.entrypoint);
 
     if (!fs.existsSync(packageJsonPath)) {
-      throw new Error(
-        `${packageInfo.name} is required for published-only CI but ${packageInfo.packageDir}/package.json is missing.`,
+      log(
+        `[local-eliza-ci-overrides] ${packageInfo.name} source is absent; using the published package installed by fallback dependencies.`,
       );
+      continue;
     }
 
     readPackageJson(packageJsonPath);

@@ -38,12 +38,17 @@ const resolveCommit = () => {
   if (envCommit) {
     return envCommit;
   }
-  return execSync("git rev-parse HEAD", {
-    cwd: rootDir,
-    stdio: ["ignore", "pipe", "ignore"],
-  })
-    .toString()
-    .trim();
+  try {
+    const gitCommit = execSync("git rev-parse HEAD", {
+      cwd: rootDir,
+      stdio: ["ignore", "pipe", "ignore"],
+    })
+      .toString()
+      .trim();
+    return gitCommit || "unknown";
+  } catch {
+    return "unknown";
+  }
 };
 
 const detectChannel = (version: string): string => {

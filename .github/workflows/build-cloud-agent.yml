@@ -47,7 +47,6 @@ env:
   IMAGE_NAME: milady-ai/agent
   SOURCE_REF: ${{ github.event_name == 'push' && github.ref_name || (github.ref_name == 'cloud/staging' && 'cloud/staging' || 'cloud/main') }}
   CLOUD_DEPLOY_WEBHOOK_URL: http://89.167.63.246:9876/deploy
-  DEPOT_PROJECT_ID: m89t0f0p08
 
 permissions:
   contents: read
@@ -63,7 +62,7 @@ jobs:
     steps:
       # ── 1. Checkout ─────────────────────────────────────────────────────────
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ env.SOURCE_REF }}
           fetch-depth: 0
@@ -71,18 +70,18 @@ jobs:
 
       # ── 2. Set up Node + Bun ────────────────────────────────────────────────
       - name: Setup Node.js 22
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "22"
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: "1.3.11"
+          bun-version: "1.3.13"
 
       # ── 3. Cache bun store ──────────────────────────────────────────────────
       - name: Cache bun store
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.bun/install/cache
           key: bun-store-cloud-${{ runner.os }}-${{ hashFiles('bun.lock') }}
@@ -197,7 +196,7 @@ jobs:
 
       # ── 4. Install dependencies ─────────────────────────────────────────────
       - name: Install dependencies
-        run: bun install --ignore-scripts --no-frozen-lockfile
+        run: bun install --ignore-scripts --frozen-lockfile
 
       - name: Hoist missing runtime deps
         run: |
@@ -209,7 +208,7 @@ jobs:
           const path = require("path");
           const { execSync } = require("child_process");
           const pkgPaths = [
-            "eliza/packages/typescript/package.json",
+            "eliza/packages/core/package.json",
             "eliza/packages/agent/package.json",
           ];
           const missing = new Set();
@@ -247,23 +246,17 @@ jobs:
       # ── 5. Build Capacitor plugins ──────────────────────────────────────────
       - name: Build Capacitor plugins
         run: |
-          cd apps/app
-          bun scripts/plugin-build.mjs
+          node eliza/packages/app-core/scripts/build-native-plugins.mjs
 
       # ── 5.5. Build @elizaos/core + agent (needed for tsx runtime) ───────
-      - name: Install buf CLI
-        uses: bufbuild/buf-setup-action@v1
-        with:
-          version: "1.50.0"
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Build @elizaos/core
         run: |
+          export PATH="$GITHUB_WORKSPACE/eliza/node_modules/.bin:$GITHUB_WORKSPACE/eliza/packages/schemas/node_modules/.bin:$PATH"
           # Proto generation
           cd eliza/packages/schemas
           buf dep update && buf generate
           # i18n keyword generation (needs @elizaos/shared scripts)
-          cd ../typescript
+          cd ../core
           node ../shared/scripts/generate-keywords.mjs --target ts 2>/dev/null || echo "keyword gen skipped"
           # Build core
           bun run build.ts 2>&1 || echo "core build had errors"
@@ -282,7 +275,7 @@ jobs:
       # ── 6. Build runtime (tsdown) ───────────────────────────────────────────
       - name: Build runtime (tsdown)
         run: |
-          npx tsdown
+          node scripts/run-tsdown.mjs
           echo '{"type":"module"}' > dist/package.json
           node --import tsx eliza/packages/app-core/scripts/write-build-info.ts 2>/dev/null || true
 
@@ -385,59 +378,22 @@ jobs:
           echo '!eliza/apps/app-companion' >> .dockerignore
           echo '!eliza/apps/app-lifeops' >> .dockerignore
 
-      # ── 10. Set up Depot builder ────────────────────────────────
-      # Set repo variable DEPOT_ENABLED=false to skip Depot and use the
-      # Buildx fallback below (e.g. when the Depot account is unavailable).
-      - name: Set up Depot CLI
-        if: vars.DEPOT_ENABLED != 'false'
-        uses: depot/setup-action@v1
-
-      - name: Set up Docker Buildx fallback
-        if: vars.DEPOT_ENABLED == 'false'
-        uses: docker/setup-buildx-action@v3
+      # ── 10. Set up Docker Buildx ────────────────────────────────
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
 
       # ── 11. Login to GHCR ──────────────────────────────────────────────────
       - name: Login to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         if: ${{ github.event_name == 'push' || inputs.push_image != false }}
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # ── 12. Build and push via Depot (persistent layer cache + Depot infra) ──
-      - name: Build and push Docker image with Depot
-        id: depot-build
-        if: vars.DEPOT_ENABLED != 'false'
-        continue-on-error: true
-        uses: depot/build-push-action@v1
-        with:
-          project: ${{ env.DEPOT_PROJECT_ID }}
-          token: ${{ secrets.DEPOT_TOKEN }}
-          context: .
-          file: deploy/Dockerfile.ci
-          platforms: linux/amd64
-          push: ${{ github.event_name == 'push' || inputs.push_image != false }}
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.latest_tag }}
-          build-args: |
-            APP_ENTRYPOINT=${{ env.APP_ENTRYPOINT }}
-            APP_CMD_START=${{ env.APP_CMD_START }}
-            APP_PORT=${{ env.APP_PORT }}
-            APP_API_BIND=${{ env.APP_API_BIND }}
-            OCI_SOURCE=${{ env.OCI_SOURCE }}
-            OCI_TITLE=${{ env.OCI_TITLE }}
-            OCI_DESCRIPTION=${{ env.OCI_DESCRIPTION }}
-            OCI_LICENSES=${{ env.OCI_LICENSES }}
-            VERSION=${{ steps.version.outputs.version }}
-            VERSION_CLEAN=${{ steps.version.outputs.version_clean }}
-            REVISION=${{ github.sha }}
-          provenance: false
-
-      - name: Build and push Docker image with Buildx fallback
-        if: vars.DEPOT_ENABLED == 'false' || steps.depot-build.outcome == 'failure'
-        uses: docker/build-push-action@v6
+      # ── 12. Build and push Docker image ────────────────────────────────────
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: deploy/Dockerfile.ci

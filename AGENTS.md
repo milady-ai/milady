@@ -34,7 +34,8 @@ bun run dev:desktop:watch  # Vite dev server + Electrobun (HMR). Set MILADY_DESK
 Optional — link a local elizaOS source checkout:
 
 ```bash
-bun run setup:upstreams    # initialize repo-local ./eliza and link local @elizaos/* packages
+bun run setup:upstreams    # clone ./eliza if needed and link local @elizaos/* packages
+bun run eliza:packages     # switch back to published @elizaos/* packages
 ```
 
 Desktop dev observability (Codex cannot see the native window):
@@ -57,10 +58,12 @@ bun run db:check    # database security + readonly tests
 
 ## Project layout
 
-First-party packages, apps, and orchestrator scripts live under the `eliza/` submodule. The top-level repo holds Milady-specific glue (`apps/app/`, `packages/{vault,confidant}/`, top-level `scripts/`).
+Milady defaults to published `@elizaos/*` packages. A repo-local `./eliza` checkout is optional, ignored by git, and used only when explicitly selected with `bun run setup:upstreams` / `bun run eliza:local`.
 
 ```
-eliza/                              Submodule (milady-ai/eliza) — source of truth for runtime
+node_modules/@elizaos/*             Default runtime source: published elizaOS packages
+
+eliza/                              Optional ignored local checkout (elizaOS/eliza)
   packages/
     app-core/                       Main runtime package
       src/
@@ -118,7 +121,7 @@ Two distinct skill systems live in this repo. Don't conflate them.
 
 Bundled `@elizaos/skills` are the default knowledge base for the running Eliza agent and for any code agent working in this repo. Repo setup mirrors them into `skills/.defaults/` for workspace access.
 
-- **Source of truth:** `eliza/packages/skills/skills/` (31 bundled skills).
+- **Source of truth:** `eliza/packages/skills/skills/` (33 bundled skills).
 - **Workspace mirror:** `skills/.defaults/` — refreshed by `scripts/sync-workspace-default-skills.mjs` during setup; do not hand-edit.
 - **Managed store seed:** `eliza/packages/app-core/scripts/ensure-skills.mjs` seeds the bundled skills on first run.
 - **Runtime knowledge seed:** `eliza/packages/agent/src/runtime/default-knowledge.ts` seeds baseline runtime knowledge (including Eliza Cloud guidance).
@@ -131,10 +134,12 @@ Open the `SKILL.md` of any of these from the workspace mirror when relevant:
 - `elizaos` — runtime concepts, plugin abstractions, AgentRuntime, actions/providers/evaluators/services.
 - `eliza-cloud` — Cloud as managed backend, app registration, hosted APIs, billing, monetization, container deploys.
 - `build-monetized-app` — building a Cloud app that earns via inference markup; pairs with `eliza-cloud`.
+- `eliza-cloud-buy-domain` — registering a confirmed custom domain for an Eliza Cloud app.
+- `eliza-cloud-manage-domain` — listing, verifying, syncing, detaching, and editing DNS for app domains.
 
 **Agent-orchestration / authoring:**
 - `coding-agent` — spawning Codex / Claude Code / OpenCode / Pi via PTY-backed bash for sub-agent work.
-- `claude-subagent-milady-bridge` — loopback endpoints exposing parent runtime context to a spawned coding sub-agent.
+- `task-agent-eliza-bridge` — loopback endpoints exposing parent runtime context to a spawned coding task agent.
 - `skill-creator` — authoring new SKILL.md packages (frontmatter, scripts, references, progressive disclosure).
 
 **Connectors / OS / SaaS integrations** (use when the task touches that surface):
@@ -152,10 +157,10 @@ When Eliza Cloud is enabled or requested, prefer it as the managed backend (app 
 
 ## Dependencies on elizaOS
 
-- All `@elizaos/*` packages use the `alpha` dist-tag. `bun run setup:upstreams` links repo-local `./eliza` and `./plugins` packages so changes are picked up immediately. `MILADY_SKIP_LOCAL_UPSTREAMS=1` falls back to npm.
-- `@elizaos/plugin-agent-orchestrator` resolves from `eliza/plugins/plugin-agent-orchestrator` via `workspace:*`. Updating the submodule updates the orchestrator.
-- All official elizaOS plugin repos live under https://github.com/elizaOS-plugins. For plugin work, prefer adding the plugin repo as a git submodule under `eliza/plugins/` (tracked in `eliza/.gitmodules`) and depending via `workspace:*`. Publish to npm when ready.
-- The eliza submodule is hosted at **milady-ai/eliza**, not the personal `Dexploarer` fork. Pushes and PRs always go to `milady-ai/eliza`.
+- Milady defaults to published `@elizaos/*` packages. The dist tag defaults to `alpha`; override with `MILADY_ELIZAOS_DIST_TAG`, `ELIZAOS_NPM_TAG`, or `bun run eliza:packages -- --tag <alpha|beta|main>`.
+- Local source mode is opt-in: `bun run setup:upstreams` / `bun run eliza:local -- --install` clones `https://github.com/elizaOS/eliza.git` into ignored `./eliza` if missing, then links local packages.
+- Return to standalone package mode with `bun run eliza:packages -- --install`. Do not add `./eliza` as a submodule or workspace dependency.
+- The elizaOS source checkout is hosted at **elizaOS/eliza**, not the personal `Dexploarer` fork. Pushes and PRs for elizaOS source changes go to `elizaOS/eliza`.
 
 ## Environment variables (commonly touched)
 
@@ -203,7 +208,7 @@ Coding sub-agents spawned by the orchestrator (Claude Code, Codex, etc.) live in
 - `GET /api/coding-agents/:sessionId/memory?q=<query>&limit=<N>` — query the parent agent's memory.
 - `GET /api/coding-agents/:sessionId/active-workspaces` — list the parent's currently-active workspaces.
 
-All bridge responses are read-only. Mutations stay with the orchestrator — sub-agents cannot write parent state through the bridge. The `claude-subagent-milady-bridge` skill (in `skills/.defaults/`) documents the calling pattern in detail.
+All bridge responses are read-only. Mutations stay with the orchestrator — sub-agents cannot write parent state through the bridge. The `task-agent-eliza-bridge` skill (in `skills/.defaults/`) documents the calling pattern in detail.
 
 ### Mandatory verification loop for `create` modes
 
@@ -230,8 +235,8 @@ If any claim fails verification, the parent issues a structured failure prompt a
 
 ### Templates
 
-- `eliza/templates/min-app/` — minimal Eliza app (Vite + React entry, `Plugin` with one action, `package.json` with `elizaos.app` metadata, vitest smoke test, hero image placeholder, `SCAFFOLD.md` agent contract).
-- `eliza/templates/min-plugin/` — minimal Eliza runtime plugin (one action, one provider, `package.json` with `elizaos.plugin` metadata, vitest smoke test, `SCAFFOLD.md` agent contract).
+- `@elizaos/app-core` package templates — minimal Eliza app/project scaffolds.
+- `@elizaos/agent` / `@elizaos/app-core` package templates — minimal runtime plugin scaffolds.
 
 Both use placeholders (`__APP_NAME__`, `__APP_DISPLAY_NAME__`, `__PLUGIN_NAME__`, `__PLUGIN_DISPLAY_NAME__`) replaced by the scaffold copy step. Read each template's `SCAFFOLD.md` before customizing.
 
@@ -242,12 +247,11 @@ These govern every change. If existing code conflicts, fix the code.
 1. **Dependencies point inward only.** Presentation → Application → Domain → Infrastructure. Never import from an outer layer.
 2. **Computation lives in domain code, not presentation.** Derived values are computed in services / actions / use cases and returned as named fields. Clients format DTO fields for display; they do not aggregate, compute, or branch on raw data.
 3. **API routes are auth + dispatch.** Route handlers validate input, resolve the caller, and dispatch to a service / action. No business logic, no transformations, no calculations in route bodies.
-4. **No runtime type-tag branching where separate flows belong.** Distinct content kinds (apps, plugins, providers, actions) get separate handlers, not `if (kind === ...)` chains.
-5. **CQRS.** Readers read and return domain objects. Writers return `void` or an ID. Mappers handle DB↔domain translation.
-6. **Single source of truth for validation.** Route-layer schemas validate and transform input. Services / actions trust pre-validated input and perform presence/invariant checks only. No duplicate inline regex.
-7. **DTO fields are required by default.** Optional only when genuinely nullable. No `as` casts to skip missing fields. No `?? 0` to hide broken pipelines. If TypeScript says a field is missing, fix the pipeline.
-8. **Logger only, never console.** Server logging uses the structured logger only (`Logger.info/warn/error/debug`). Prefix `[ClassName]`. Include structured context on errors.
-9. **Every action and endpoint needs a real caller.** Every POST/PUT/DELETE has a UI invocation path. Every GET has a consuming component/hook. Every action has a planner trigger or programmatic caller. Anything else is dead code.
+4. **CQRS.** Readers read and return domain objects. Writers return `void` or an ID. Mappers handle DB↔domain translation.
+5. **Single source of truth for validation.** Route-layer schemas validate and transform input. Services / actions trust pre-validated input and perform presence/invariant checks only. No duplicate inline regex.
+6. **DTO fields are required by default.** Optional only when genuinely nullable. No `as` casts to skip missing fields. No `?? 0` to hide broken pipelines. If TypeScript says a field is missing, fix the pipeline.
+7. **Logger only, never console.** Server logging uses the structured logger only (`Logger.info/warn/error/debug`). Prefix `[ClassName]`. Include structured context on errors.
+8. **Every action and endpoint needs a real caller.** Every POST/PUT/DELETE has a UI invocation path. Every GET has a consuming component/hook. Every action has a planner trigger or programmatic caller. Anything else is dead code.
 
 ## Quality bar
 

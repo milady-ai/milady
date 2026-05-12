@@ -3,33 +3,28 @@
  * Bridge patch — apply Milady-local fixes to @elizaos/plugin-elizacloud
  * dist files in node_modules. These patches are also being upstreamed
  * (see https://github.com/elizaos-plugins/plugin-elizacloud/pull/15).
- * Once that PR merges and a new alpha is published, delete this script,
+ * Once that PR merges and a compatible package is published, delete this script,
  * the eliza/patches/milady/elizacloud-patchset/ directory, and the postinstall hook entry.
  *
- * Pinned to @elizaos/plugin-elizacloud@2.0.0-alpha.8 — refuses to apply
- * to other versions because the patch context lines may have shifted.
- *
- * The alpha.8 registry artifact and the repo-local alpha.8 workspace package
- * have diverged in the wild. The static patch targets the repo-local
- * `/responses` implementation. Published-only CI can still install an older
- * AI SDK based artifact under the same version; that implementation has its
- * own JSON response path and fence repair, so this bridge patch should skip it
- * instead of failing postinstall before CI can run.
+ * The static patch targets the repo-local `/responses` implementation. Package
+ * artifacts can move independently across alpha/beta/main channels, so this
+ * script detects the installed dist shape instead of pinning a single version.
+ * If the local patch file is unavailable in package-only mode, postinstall skips
+ * this optional bridge patch instead of requiring the elizaOS source checkout.
  */
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const PINNED_VERSION = "2.0.0-alpha.8";
 const PATCH_REL_PATH =
   "eliza/patches/milady/elizacloud-patchset/0001-json-output-enforcement-and-fence-strip.patch";
 const DIST_ENTRYPOINTS = ["dist/node/index.node.js", "dist/cjs/index.node.cjs"];
-const REQUIRED_DIST_MARKERS = [
+const REQUIRED_DIST_MARKER_GROUPS = [
   'format: { type: "json_object" }',
   "let jsonText = extractResponsesOutputText(data);",
-  "```(?:json)?",
-  '.replace(/\\n?```\\s*$/i, "")',
+  ["```(?:json)?", "`{1,}(?:json)?"],
+  ['.replace(/\\n?```\\s*$/i, "")', "extractFirstBalancedJsonValue(jsonText)"],
 ];
 const LEGACY_AI_SDK_OBJECT_MARKERS = [
   "const openai = createOpenAIClient(runtime);",
@@ -66,12 +61,16 @@ function distHasMarkers(pluginRoot, markers) {
       return false;
     }
     const source = fs.readFileSync(entrypointPath, "utf8");
-    return markers.every((marker) => source.includes(marker));
+    return markers.every((marker) =>
+      Array.isArray(marker)
+        ? marker.some((candidate) => source.includes(candidate))
+        : source.includes(marker),
+    );
   });
 }
 
 export function distAlreadyHasBridgeFixes(pluginRoot) {
-  return distHasMarkers(pluginRoot, REQUIRED_DIST_MARKERS);
+  return distHasMarkers(pluginRoot, REQUIRED_DIST_MARKER_GROUPS);
 }
 
 export function distUsesLegacyAiSdkObjectGeneration(pluginRoot) {
@@ -97,40 +96,24 @@ export function main() {
   const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, "utf8"));
   const usesLegacyAiSdkObjectGeneration =
     distUsesLegacyAiSdkObjectGeneration(pluginRoot);
-  if (pkg.version !== PINNED_VERSION) {
-    if (distAlreadyHasBridgeFixes(pluginRoot)) {
-      log(
-        `installed version ${pkg.version} already contains the bridge fixes - skipping`,
-      );
-      return;
-    }
-    if (usesLegacyAiSdkObjectGeneration) {
-      log(
-        `installed version ${pkg.version} uses legacy AI SDK object generation - skipping direct /responses bridge patch`,
-      );
-      return;
-    }
-    fail(
-      `version mismatch — patch was authored against @elizaos/plugin-elizacloud@${PINNED_VERSION}, ` +
-        `but installed version is ${pkg.version}. Regenerate the patch against the new version, ` +
-        `or update PINNED_VERSION in this script if the patch still applies cleanly.`,
-    );
-  }
-
-  if (usesLegacyAiSdkObjectGeneration) {
-    log(
-      "legacy AI SDK object generation detected - skipping direct /responses bridge patch",
-    );
-    return;
-  }
 
   if (distAlreadyHasBridgeFixes(pluginRoot)) {
-    log("bridge fixes already present in built dist - skipping patch");
+    log(
+      `installed version ${pkg.version} already contains the bridge fixes - skipping`,
+    );
     return;
   }
-
+  if (usesLegacyAiSdkObjectGeneration) {
+    log(
+      `installed version ${pkg.version} uses legacy AI SDK object generation - skipping direct /responses bridge patch`,
+    );
+    return;
+  }
   if (!fs.existsSync(patchPath)) {
-    fail(`patch file missing: ${path.relative(repoRoot, patchPath)}`);
+    log(
+      `local bridge patch file missing for installed version ${pkg.version} - skipping optional patch`,
+    );
+    return;
   }
 
   // Reverse-check first: if patches are already applied, exit cleanly.
@@ -170,7 +153,13 @@ export function main() {
       log("bridge fixes already present in built dist - skipping patch");
       return;
     }
-    fail(`patch no longer applies cleanly:\n${forwardCheck.stderr.trim()}`);
+    if (process.env.MILADY_REQUIRE_ELIZACLOUD_BRIDGE_PATCH === "1") {
+      fail(`patch no longer applies cleanly:\n${forwardCheck.stderr.trim()}`);
+    }
+    log(
+      `bridge patch no longer applies to installed version ${pkg.version} - skipping optional patch`,
+    );
+    return;
   }
 
   // Apply
@@ -189,6 +178,7 @@ export function main() {
 
 const isDirectRun =
   typeof process.argv[1] === "string" &&
+  fs.existsSync(process.argv[1]) &&
   fs.realpathSync(scriptPath) === fs.realpathSync(process.argv[1]);
 
 if (isDirectRun) {

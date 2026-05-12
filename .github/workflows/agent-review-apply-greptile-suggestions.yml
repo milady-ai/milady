@@ -59,7 +59,7 @@ jobs:
     steps:
       - name: Detect actionable Greptile review
         id: check
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             // Unified event handling — this workflow supports both issue_comment
@@ -171,7 +171,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout PR head
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           ref: ${{ needs.detect.outputs.pr_head_ref }}
@@ -180,7 +180,7 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: 1.3.10
+          bun-version: 1.3.13
 
       - name: Collect all Greptile findings
         id: collect

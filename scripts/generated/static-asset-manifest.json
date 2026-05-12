@@ -14,6 +14,7 @@
     "apps/app/public/app-heroes/runtime-debugger.png",
     "apps/app/public/app-heroes/skills-viewer.png",
     "apps/app/public/app-heroes/trajectory-viewer.png",
+    "apps/app/public/app-heroes/workflow-builder.svg",
     "apps/app/public/apple-touch-icon.png",
     "apps/app/public/favicon-16x16.png",
     "apps/app/public/favicon-256x256.png",
@@ -40,6 +41,7 @@
     "apps/app/public/logos/zai-icon-white.png",
     "apps/app/public/logos/zai-icon.png",
     "apps/app/public/og-image.png",
+    "apps/app/public/splash-bg-dark.png",
     "apps/app/public/splash-bg.png"
   ],
   "homepage": [

@@ -51,7 +51,7 @@ test.describe("homepage - attach-remote connection modal", () => {
       status: { state: "running", agentName: "remote-buddy" },
     });
 
-    await page.goto("/");
+    await page.goto("/dashboard");
     await openAttachRemoteModal(page);
 
     await page.locator("#connect-name").fill("remote-buddy");
@@ -83,7 +83,7 @@ test.describe("homepage - attach-remote connection modal", () => {
   test("invalid URL: empty submit stays disabled", async ({ page }) => {
     await mockCloudApi(page.context(), { agents: [] });
 
-    await page.goto("/");
+    await page.goto("/dashboard");
     await openAttachRemoteModal(page);
 
     const submit = page.getByRole("button", { name: "attach", exact: true });
@@ -110,7 +110,7 @@ test.describe("homepage - attach-remote connection modal", () => {
     const remoteUrl = "https://secured-remote.example.test";
     const remoteState = await mockRemoteAgent(page.context(), remoteUrl);
 
-    await page.goto("/");
+    await page.goto("/dashboard");
     await openAttachRemoteModal(page);
 
     await page.locator("#connect-name").fill("with-token");

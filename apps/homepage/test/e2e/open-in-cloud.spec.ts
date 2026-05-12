@@ -25,6 +25,7 @@ const REDIRECT_URL_AFTER_LOGIN =
 const CLOUD_BUTTON_SELECTOR = 'button[aria-label="Open Milady in the cloud"]';
 const CANCEL_BUTTON_SELECTOR =
   'button[aria-label="Cancel opening Milady in the cloud"]';
+const WEB_PLATFORM_SELECTOR = 'button[aria-label="Open Milady web"]';
 
 async function clickOpenInCloud(page: Page): Promise<Page> {
   const popupPromise = page.context().waitForEvent("page");
@@ -46,6 +47,23 @@ test.describe("homepage - open in cloud", () => {
     await expect(page.locator(CLOUD_BUTTON_SELECTOR)).toBeVisible();
 
     const popup = await clickOpenInCloud(page);
+    await popup.waitForURL(REDIRECT_URL_HAPPY, { timeout: 15_000 });
+    expect(popup.url()).toBe(REDIRECT_URL_HAPPY);
+  });
+
+  test("top WEB platform control opens cloud", async ({ page }) => {
+    await loginViaPolling(page);
+    await mockCloudApi(page.context(), {
+      agents: [RUNNING_AGENT],
+      pairingResponses: [{ kind: "ready", redirectUrl: REDIRECT_URL_HAPPY }],
+    });
+
+    await page.goto("/");
+    await expect(page.locator(WEB_PLATFORM_SELECTOR)).toBeVisible();
+
+    const popupPromise = page.context().waitForEvent("page");
+    await page.locator(WEB_PLATFORM_SELECTOR).click();
+    const popup = await popupPromise;
     await popup.waitForURL(REDIRECT_URL_HAPPY, { timeout: 15_000 });
     expect(popup.url()).toBe(REDIRECT_URL_HAPPY);
   });

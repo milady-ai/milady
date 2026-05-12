@@ -1,5 +1,9 @@
 import { getToken } from "./auth";
-import { CLOUD_BASE, rewriteAgentUiUrl } from "./runtime-config";
+import {
+  CLOUD_BASE,
+  getCloudAgentApiPath,
+  rewriteAgentUiUrl,
+} from "./runtime-config";
 
 const PAIRING_POLL_MAX_ATTEMPTS = 60;
 const PAIRING_POLL_MAX_WALL_MS = 120_000;
@@ -31,7 +35,7 @@ async function requestPairingToken(
   apiKey: string,
 ): Promise<PairingPollResult> {
   const res = await fetch(
-    `${CLOUD_BASE}/api/v1/milady/agents/${agentId}/pairing-token`,
+    `${CLOUD_BASE}${getCloudAgentApiPath(agentId, "pairing-token")}`,
     {
       method: "POST",
       headers: {

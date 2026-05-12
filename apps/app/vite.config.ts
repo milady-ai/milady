@@ -2,6 +2,22 @@ import fs from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  parseAllowedHostEnv,
+  toViteAllowedHosts,
+} from "@elizaos/shared/config/allowed-hosts";
+import { colorizeDevSettingsStartupBanner } from "@elizaos/shared/dev-settings-banner-style";
+import { prependDevSubsystemFigletHeading } from "@elizaos/shared/dev-settings-figlet-heading";
+import {
+  type DevSettingsRow,
+  formatDevSettingsTable,
+} from "@elizaos/shared/dev-settings-table";
+import {
+  resolveDesktopApiPort,
+  resolveDesktopApiPortPreference,
+  resolveDesktopUiPort,
+  resolveDesktopUiPortPreference,
+} from "@elizaos/shared/runtime-env";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react-swc";
 import {
@@ -12,44 +28,83 @@ import {
   type ServerOptions,
   transformWithEsbuild,
 } from "vite";
-import { resolveAppBranding } from "../../eliza/packages/app-core/src/config/app-config.ts";
-// Keep workspace-relative TS imports in this config so Vite transpiles them
-// while bundling the config instead of asking Node to load package-exported
-// .ts files directly in CI.
-import { colorizeDevSettingsStartupBanner } from "../../eliza/packages/shared/src/dev-settings-banner-style.ts";
-import { prependDevSubsystemFigletHeading } from "../../eliza/packages/shared/src/dev-settings-figlet-heading.ts";
-import {
-  type DevSettingsRow,
-  formatDevSettingsTable,
-} from "../../eliza/packages/shared/src/dev-settings-table.ts";
-import {
-  resolveDesktopApiPort,
-  resolveDesktopApiPortPreference,
-  resolveDesktopUiPort,
-  resolveDesktopUiPortPreference,
-} from "../../eliza/packages/shared/src/runtime-env.ts";
 import { syncElizaEnvAliases } from "../../scripts/lib/sync-eliza-env-aliases.mjs";
-import { parseAllowedHostEnv, toViteAllowedHosts } from "./allowed-hosts.ts";
 import appConfig from "./app.config";
-import { CAPACITOR_PLUGIN_NAMES } from "./scripts/capacitor-plugin-names.mjs";
 import { resolveViteDevServerRuntime } from "./vite-dev-origin.ts";
 
 const _require = createRequire(import.meta.url);
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const miladyRoot = path.resolve(here, "../..");
-const nativePluginsRoot = path.join(
-  miladyRoot,
-  "eliza/packages/native-plugins",
-);
-const appCoreSrcRoot = path.join(miladyRoot, "eliza/packages/app-core/src");
-const appCoreNativePluginEntrypoints = path.join(
-  appCoreSrcRoot,
-  "platform/native-plugin-entrypoints.ts",
-);
-const uiPkgRoot = path.join(miladyRoot, "eliza/packages/ui");
 const capacitorCoreEntry = _require.resolve("@capacitor/core");
 const patheEntry = _require.resolve("pathe");
+const optionalElizaAppStubEntry = path.join(
+  here,
+  "src/optional-eliza-app-stub.tsx",
+);
+const nativePluginStubEntry = path.join(here, "src/native-plugin-stubs.ts");
+
+function requireResolve(id: string): string {
+  try {
+    return _require.resolve(id);
+  } catch (cause) {
+    const detail = cause instanceof Error ? ` ${cause.message}` : "";
+    throw new Error(
+      `[milady][vite] Could not resolve ${id}.${detail} Run bun install so the published elizaOS package is available.`,
+    );
+  }
+}
+
+function shouldUseLocalElizaSource(): boolean {
+  const sourceMode = (
+    process.env.MILADY_ELIZA_SOURCE ??
+    process.env.ELIZA_SOURCE ??
+    ""
+  ).toLowerCase();
+  if (["local", "source", "workspace"].includes(sourceMode)) return true;
+  if (["package", "packages", "published", "npm"].includes(sourceMode)) {
+    return false;
+  }
+  if (
+    process.env.MILADY_FORCE_LOCAL_UPSTREAMS === "1" ||
+    process.env.ELIZA_FORCE_LOCAL_UPSTREAMS === "1"
+  ) {
+    return true;
+  }
+  // Auto-detect: when env is unset, fall back to local mode if the
+  // workspace checkout actually exists with linked sources. This lets
+  // `bun run build` succeed after `bun run eliza:local` without
+  // requiring callers to also export MILADY_ELIZA_SOURCE=local.
+  return fs.existsSync(
+    path.join(
+      path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../.."),
+      "eliza",
+      "packages",
+      "app-core",
+      "src",
+      "platform",
+      "native-plugin-entrypoints.ts",
+    ),
+  );
+}
+
+const localElizaRoot = path.join(miladyRoot, "eliza");
+const hasLocalElizaWorkspace =
+  shouldUseLocalElizaSource() &&
+  fs.existsSync(path.join(localElizaRoot, "package.json"));
+const nativePluginsRoot = path.join(localElizaRoot, "packages/native-plugins");
+const appCoreSrcRoot = hasLocalElizaWorkspace
+  ? path.join(localElizaRoot, "packages/app-core/src")
+  : null;
+const appCoreNativePluginEntrypoints = appCoreSrcRoot
+  ? path.join(appCoreSrcRoot, "platform/native-plugin-entrypoints.ts")
+  : requireResolve("@elizaos/app-core/platform/native-plugin-entrypoints");
+const emptyNodeModuleEntry = appCoreSrcRoot
+  ? path.join(appCoreSrcRoot, "platform/empty-node-module.ts")
+  : requireResolve("@elizaos/app-core/platform/empty-node-module");
+const uiPkgRoot = hasLocalElizaWorkspace
+  ? path.join(localElizaRoot, "packages/ui")
+  : null;
 // Other Capacitor packages imported by eliza/packages/app-core sources.
 // Resolved here (apps/app scope) so Rollup can find them when bundling
 // files from within the eliza submodule tree where bun may not hoist them.
@@ -63,6 +118,43 @@ function tryResolve(id: string): string | undefined {
 const capacitorKeyboardEntry = tryResolve("@capacitor/keyboard");
 const capacitorPreferencesEntry = tryResolve("@capacitor/preferences");
 const capacitorAppEntry = tryResolve("@capacitor/app");
+// `@elizaos/app-core` is always real. `@elizaos/app-wallet` is required by
+// onboarding callbacks + AppContext (useWalletState), so resolve it real
+// when present. `app-hyperscape` is real when its package is present.
+// Auto-detect by walking node_modules/@elizaos/* directly (don't follow
+// symlinks via require.resolve — those land at the real source path,
+// which can be in eliza/packages/ instead of eliza/plugins/, missing
+// plugin-only apps like app-wallet).
+const directElizaScope = path.join(miladyRoot, "node_modules", "@elizaos");
+function elizaAppPackageExists(name: string): boolean {
+  if (
+    hasLocalElizaWorkspace &&
+    fs.existsSync(path.join(localElizaRoot, "apps", name, "package.json"))
+  ) {
+    return true;
+  }
+  if (
+    hasLocalElizaWorkspace &&
+    fs.existsSync(path.join(localElizaRoot, "plugins", name, "package.json"))
+  ) {
+    return true;
+  }
+  if (
+    fs.existsSync(directElizaScope) &&
+    fs.existsSync(path.join(directElizaScope, name, "package.json"))
+  ) {
+    return true;
+  }
+  return tryResolve(`@elizaos/${name}/package.json`) !== undefined;
+}
+const shouldResolveRealHyperscapeApp = elizaAppPackageExists("app-hyperscape");
+const shouldResolveRealWalletApp = elizaAppPackageExists("app-wallet");
+const optionalElizaAppAliasPattern = (() => {
+  const realApps = ["core"];
+  if (shouldResolveRealHyperscapeApp) realApps.push("hyperscape");
+  if (shouldResolveRealWalletApp) realApps.push("wallet");
+  return new RegExp(`^@elizaos\\/app-(?!(${realApps.join("|")})(\\/|$)).+$`);
+})();
 
 function isExpectedWsProxySocketError(
   message: unknown,
@@ -112,8 +204,265 @@ function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+function resolveNativePluginAliasEntries(): Alias[] {
+  if (!hasLocalElizaWorkspace || !fs.existsSync(nativePluginsRoot)) return [];
+
+  return fs
+    .readdirSync(nativePluginsRoot, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .filter(
+      (name) =>
+        fs.existsSync(path.join(nativePluginsRoot, name, "package.json")) &&
+        fs.existsSync(path.join(nativePluginsRoot, name, "src/index.ts")),
+    )
+    .sort((a, b) => a.localeCompare(b))
+    .map((name) => ({
+      find: new RegExp(`^@elizaos/capacitor-${escapeRegExp(name)}$`),
+      replacement: path.join(nativePluginsRoot, `${name}/src/index.ts`),
+    }));
+}
+
+function resolveLocalUiAliases(): Alias[] {
+  if (!uiPkgRoot || !fs.existsSync(path.join(uiPkgRoot, "package.json"))) {
+    return [];
+  }
+
+  return [
+    {
+      find: /^@elizaos\/ui$/,
+      replacement: path.join(uiPkgRoot, "src/index.ts"),
+    },
+    {
+      find: /^@elizaos\/ui\/components\/ui\/(.*)$/,
+      replacement: `${uiPkgRoot}/src/components/ui/$1.tsx`,
+      customResolver: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/components\/composites\/([^/]+)$/,
+      replacement: `${uiPkgRoot}/src/components/composites/$1/index.ts`,
+    },
+    {
+      find: /^@elizaos\/ui\/components\/composites\/(.+)\/([^/]+)$/,
+      replacement: `${uiPkgRoot}/src/components/composites/$1/$2.tsx`,
+      customResolver: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/components\/(.+)\/([^/]+)$/,
+      replacement: `${uiPkgRoot}/src/components/$1/$2.tsx`,
+      customResolver: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/hooks$/,
+      replacement: path.join(uiPkgRoot, "src/hooks/index.ts"),
+    },
+    {
+      find: /^@elizaos\/ui\/hooks\/(.*)$/,
+      replacement: `${uiPkgRoot}/src/hooks/$1.ts`,
+    },
+    {
+      find: /^@elizaos\/ui\/layouts$/,
+      replacement: path.join(uiPkgRoot, "src/layouts/index.ts"),
+    },
+    {
+      find: /^@elizaos\/ui\/layouts\/([^/]+)$/,
+      replacement: `${uiPkgRoot}/src/layouts/$1/index.ts`,
+    },
+    {
+      find: /^@elizaos\/ui\/layouts\/(.+)\/([^/]+)$/,
+      replacement: `${uiPkgRoot}/src/layouts/$1/$2.tsx`,
+    },
+    {
+      find: /^@elizaos\/ui\/lib\/(.*)$/,
+      replacement: `${uiPkgRoot}/src/lib/$1.ts`,
+    },
+  ];
+}
+
+function resolveLocalElizaAppAliases(): Alias[] {
+  if (!hasLocalElizaWorkspace) return [];
+
+  function resolveExportTarget(value: unknown): string | null {
+    if (typeof value === "string") return value;
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+      return null;
+    }
+    const record = value as Record<string, unknown>;
+    // Never include "types" — that's a TypeScript-only condition
+    // pointing at .d.ts declaration files, which aren't executable
+    // modules. Vite's load-fallback then crashes trying to read them.
+    for (const condition of ["source", "import", "default"]) {
+      const target = record[condition];
+      if (typeof target === "string") return target;
+    }
+    return null;
+  }
+
+  const aliases: Alias[] = [];
+  const packageRoots = [
+    { dir: path.join(localElizaRoot, "plugins"), appPrefixOnly: true },
+    { dir: path.join(localElizaRoot, "apps"), appPrefixOnly: false },
+  ];
+
+  for (const packageRoot of packageRoots) {
+    if (!fs.existsSync(packageRoot.dir)) continue;
+
+    for (const entry of fs.readdirSync(packageRoot.dir, {
+      withFileTypes: true,
+    })) {
+      if (!entry.isDirectory()) continue;
+      if (packageRoot.appPrefixOnly && !entry.name.startsWith("app-")) {
+        continue;
+      }
+      const pkgPath = path.join(packageRoot.dir, entry.name, "package.json");
+      if (!fs.existsSync(pkgPath)) continue;
+      const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8")) as {
+        name?: string;
+        exports?: Record<string, unknown>;
+      };
+      const pkgName = pkg.name;
+      if (!pkgName) continue;
+      const pkgDir = path.dirname(pkgPath);
+
+      for (const [key, value] of Object.entries(pkg.exports || {})) {
+        const exportTarget = resolveExportTarget(value);
+        if (!exportTarget) continue;
+        const aliasKey =
+          key === "." ? pkgName : `${pkgName}/${key.replace(/^\.\//, "")}`;
+        aliases.push({
+          find: new RegExp(`^${escapeRegExp(aliasKey)}$`),
+          replacement: path.resolve(pkgDir, exportTarget),
+        });
+      }
+
+      aliases.push({
+        find: new RegExp(`^${escapeRegExp(pkgName)}/(.*)`),
+        replacement: path.resolve(pkgDir, "src/$1"),
+      });
+    }
+  }
+
+  return aliases;
+}
+
+function resolveLocalSharedAliases(): Alias[] {
+  if (!hasLocalElizaWorkspace) return [];
+
+  const sharedPkgPath = path.join(
+    localElizaRoot,
+    "packages/shared/package.json",
+  );
+  if (!fs.existsSync(sharedPkgPath)) return [];
+
+  const sharedPkgDir = path.dirname(sharedPkgPath);
+  const sharedPkg = JSON.parse(fs.readFileSync(sharedPkgPath, "utf8")) as {
+    exports?: Record<string, unknown>;
+  };
+  const aliases: Alias[] = [];
+  for (const [key, value] of Object.entries(sharedPkg.exports || {})) {
+    if (typeof value !== "string") continue;
+    const aliasKey =
+      key === "."
+        ? "@elizaos/shared"
+        : `@elizaos/shared/${key.replace(/^\.\//, "")}`;
+    aliases.push({
+      find: new RegExp(`^${escapeRegExp(aliasKey)}$`),
+      replacement: path.resolve(sharedPkgDir, value),
+    });
+  }
+  return aliases;
+}
+
+function resolveLocalAppCoreAliases(): Alias[] {
+  const packageAgnosticAliases: Alias[] = [
+    {
+      find: /^@elizaos\/agent$/,
+      replacement: emptyNodeModuleEntry,
+    },
+    {
+      find: /^@elizaos\/core$/,
+      replacement: resolveElizaCoreBundlePath(),
+    },
+  ];
+
+  const appCorePkgPath = path.join(
+    localElizaRoot,
+    "packages/app-core/package.json",
+  );
+  if (!appCoreSrcRoot || !fs.existsSync(appCorePkgPath)) {
+    return packageAgnosticAliases;
+  }
+
+  const appCorePkgDir = path.dirname(appCorePkgPath);
+  const appCoreBrowserEntry = path.join(appCorePkgDir, "src/browser.ts");
+  const appCorePkg = JSON.parse(fs.readFileSync(appCorePkgPath, "utf8")) as {
+    exports?: Record<string, unknown>;
+  };
+
+  const generatedAliases: Alias[] = [];
+
+  for (const [key, value] of Object.entries(appCorePkg.exports || {})) {
+    if (typeof value !== "string") continue;
+    const aliasKey =
+      key === "."
+        ? "@elizaos/app-core"
+        : `@elizaos/app-core/${key.replace(/^\.\//, "")}`;
+    const targetPath =
+      key === "." ? appCoreBrowserEntry : path.resolve(appCorePkgDir, value);
+
+    generatedAliases.push({
+      find: new RegExp(`^${escapeRegExp(aliasKey)}$`),
+      replacement: targetPath,
+    });
+    if (!aliasKey.endsWith(".js") && !aliasKey.endsWith(".css")) {
+      generatedAliases.push({
+        find: new RegExp(`^${escapeRegExp(aliasKey)}\\.js$`),
+        replacement: targetPath,
+      });
+    }
+  }
+
+  const uiSource = path.join(appCoreSrcRoot, "ui");
+
+  return [
+    ...generatedAliases,
+    {
+      find: /^@elizaos\/app-core\/(.+)$/,
+      replacement: `${appCorePkgDir}/src/$1`,
+    },
+    {
+      find: /^@miladyai\/ui$/,
+      replacement: path.join(uiSource, "index.ts"),
+    },
+    {
+      find: /^@miladyai\/ui\/(.*)$/,
+      replacement: `${uiSource}/$1/index.ts`,
+    },
+    {
+      find: /^@elizaos\/agent\/(.+)$/,
+      replacement: path.join(localElizaRoot, "packages/agent/src/$1"),
+    },
+    ...packageAgnosticAliases,
+  ];
+}
+
+function resolveAppBrandingForViteConfig() {
+  return {
+    appName: appConfig.appName,
+    orgName: appConfig.orgName,
+    repoName: appConfig.repoName,
+    docsUrl: "https://docs.elizaos.ai",
+    appUrl: "https://app.elizaos.ai",
+    bugReportUrl: "https://github.com/elizaOS/eliza/issues/new",
+    hashtag: "#elizaOS",
+    fileExtension: ".eliza-agent",
+    packageScope: "elizaos",
+    ...appConfig.branding,
+  };
+}
+
 function resolveAppShellMetadata() {
-  const branding = resolveAppBranding(appConfig);
+  const branding = resolveAppBrandingForViteConfig();
   const themeColor = appConfig.web?.themeColor?.trim() || "#08080a";
   const backgroundColor = appConfig.web?.backgroundColor?.trim() || "#0a0a0a";
   const shareImagePath =
@@ -150,14 +499,7 @@ const BRANDED_ENV = {
   viteOrigin: `${APP_ENV_PREFIX}_VITE_ORIGIN`,
   viteSettingsDebug: `VITE_${APP_ENV_PREFIX}_SETTINGS_DEBUG`,
 };
-const DEFAULT_APP_ROUTE_PLUGIN_MODULES = [
-  "@elizaos/app-hyperliquid/register-routes",
-  "@elizaos/app-polymarket/register-routes",
-  "@elizaos/app-vincent/register-routes",
-  "@elizaos/app-shopify/register-routes",
-  "@elizaos/app-steward/register-routes",
-  "@elizaos/app-lifeops/register-routes",
-];
+const DEFAULT_APP_ROUTE_PLUGIN_MODULES: string[] = [];
 
 // Mirror branded app env into ELIZA_* before the shared runtime helpers resolve ports.
 syncElizaEnvAliases({
@@ -175,16 +517,17 @@ const viteAllowedHosts: Exclude<
   ...toViteAllowedHosts(parseAllowedHostEnv(process.env.ELIZA_ALLOWED_HOSTS)),
 ];
 
-const NATIVE_PLUGIN_ALIAS_ENTRIES = CAPACITOR_PLUGIN_NAMES.map((name) => ({
-  find: new RegExp(`^@elizaos/capacitor-${escapeRegExp(name)}$`),
-  replacement: path.join(nativePluginsRoot, `${name}/src/index.ts`),
-}));
+const NATIVE_PLUGIN_ALIAS_ENTRIES = resolveNativePluginAliasEntries();
+const LOCAL_ELIZA_APP_ALIAS_ENTRIES = resolveLocalElizaAppAliases();
 const CAPACITOR_BUILD_TARGET =
   process.env.MILADY_CAPACITOR_BUILD_TARGET ??
   process.env.ELIZA_CAPACITOR_BUILD_TARGET ??
   "";
 const IS_CAPACITOR_MOBILE_BUILD =
   CAPACITOR_BUILD_TARGET === "ios" || CAPACITOR_BUILD_TARGET === "android";
+const ELIZA_CAPACITOR_PLUGIN_STUB_PATTERN = IS_CAPACITOR_MOBILE_BUILD
+  ? /^@elizaos\/capacitor-(?!(agent|llama)(?:$|\/)).+$/
+  : /^@elizaos\/capacitor-.+$/;
 
 function appShellMetadataPlugin(): Plugin {
   const manifest = `${JSON.stringify(
@@ -373,10 +716,8 @@ function isElizaCoreBrowserDistId(id: string | undefined): boolean {
     normalized.endsWith(
       "/node_modules/@elizaos/core/dist/browser/index.browser.js",
     ) ||
-    normalized.endsWith("/eliza/packages/typescript/dist/index.browser.js") ||
-    normalized.endsWith(
-      "/eliza/packages/typescript/dist/browser/index.browser.js",
-    )
+    normalized.endsWith("/eliza/packages/core/dist/index.browser.js") ||
+    normalized.endsWith("/eliza/packages/core/dist/browser/index.browser.js")
   );
 }
 
@@ -403,7 +744,7 @@ function resolveElizaCoreBundlePath(): string {
     if (fs.existsSync(nodeEntry)) {
       console.warn(
         "[milady][vite] @elizaos/core dist/browser is missing; using dist/node for the client bundle. " +
-          "For a linked eliza workspace, run `bun run build` in that checkout (e.g. packages/typescript). " +
+          "For a linked eliza workspace, run `bun run build` in that checkout (e.g. packages/core). " +
           "Or reinstall with ELIZA_SKIP_LOCAL_ELIZA=1 to use the published npm package.",
       );
       return nodeEntry;
@@ -838,6 +1179,384 @@ function generateNodeBuiltinStub(moduleId: string, req = _require): string {
   return lines.join("\n");
 }
 
+const SQL_TABLE_EXPORT_NAMES = [
+  "agentTable",
+  "approvalRequestTable",
+  "authAuditEventTable",
+  "authBootstrapJtiSeenTable",
+  "authIdentityCreatedAtDefault",
+  "authIdentityTable",
+  "authOwnerBindingTable",
+  "authOwnerLoginTokenTable",
+  "authSessionTable",
+  "cacheTable",
+  "channelTable",
+  "channelParticipantsTable",
+  "componentTable",
+  "embeddingTable",
+  "entityTable",
+  "entityIdentityTable",
+  "entityMergeCandidateTable",
+  "factCandidateTable",
+  "logTable",
+  "longTermMemories",
+  "memoryTable",
+  "memoryAccessLogs",
+  "messageTable",
+  "messageServerTable",
+  "messageServerAgentsTable",
+  "pairingAllowlistTable",
+  "pairingRequestTable",
+  "participantTable",
+  "relationshipTable",
+  "roomTable",
+  "serverTable",
+  "sessionSummaries",
+  "taskTable",
+  "worldTable",
+];
+
+function generatePluginSqlStub(strippedId: string): string | null {
+  if (
+    strippedId !== "@elizaos/plugin-sql/schema" &&
+    strippedId !== "@elizaos/plugin-sql"
+  ) {
+    return null;
+  }
+
+  return [
+    "const handler = { get: () => table, apply: () => table };",
+    "const table = new Proxy(function table() {}, handler);",
+    ...SQL_TABLE_EXPORT_NAMES.map((name) => `export const ${name} = table;`),
+    ...(strippedId === "@elizaos/plugin-sql"
+      ? [
+          "export const PGLITE_ERROR_CODES = Object.freeze({ ACTIVE_LOCK: 'ACTIVE_LOCK', CORRUPT_DATA: 'CORRUPT_DATA', MANUAL_RESET_REQUIRED: 'MANUAL_RESET_REQUIRED' });",
+          "export const getPgliteErrorCode = () => null;",
+          "export const createPgliteInitError = (_code, message) => new Error(message);",
+          "export const plugin = table;",
+        ]
+      : []),
+    "export default table;",
+  ].join("\n");
+}
+
+function generateNodeLlamaCppStub(): string {
+  return [
+    "const handler = { get: (_, p) => (p === Symbol.toPrimitive ? () => 0 : typeof p === 'string' ? (() => {}) : undefined) };",
+    "const stub = new Proxy({}, handler);",
+    "export default stub;",
+    "export const getLlama = () => Promise.resolve(stub);",
+    "export const LlamaLogLevel = Object.freeze({ error: 0, warn: 1, info: 2, debug: 3 });",
+    "export const Llama = stub;",
+    "export const LlamaModel = stub;",
+    "export const LlamaEmbeddingContext = stub;",
+    "export const LlamaContext = stub;",
+    "export const LlamaChatSession = stub;",
+    "export const LlamaGrammar = stub;",
+    "export const LlamaJsonSchemaGrammar = stub;",
+  ].join("\n");
+}
+
+function generateFsExtraStub(): string {
+  return [
+    "const noop = () => {};",
+    "const stub = new Proxy({}, { get: () => noop });",
+    "export default stub;",
+    ...[
+      "copy",
+      "copySync",
+      "move",
+      "moveSync",
+      "remove",
+      "removeSync",
+      "ensureDir",
+      "ensureDirSync",
+      "ensureFile",
+      "ensureFileSync",
+      "mkdirs",
+      "mkdirsSync",
+      "readJson",
+      "readJsonSync",
+      "writeJson",
+      "writeJsonSync",
+      "pathExists",
+      "pathExistsSync",
+      "outputFile",
+      "outputFileSync",
+      "outputJson",
+      "outputJsonSync",
+      "emptyDir",
+      "emptyDirSync",
+    ].map((n) => `export const ${n} = noop;`),
+  ].join("\n");
+}
+
+function generateTelegramStub(strippedId: string): string {
+  if (strippedId.startsWith("telegram/sessions")) {
+    return [
+      "export class StringSession { constructor(value = '') { this.value = value; } }",
+      "export default { StringSession };",
+    ].join("\n");
+  }
+
+  return [
+    "const noop = () => {};",
+    "class SignIn { constructor(input = {}) { Object.assign(this, input); } }",
+    "class Authorization { constructor(input = {}) { Object.assign(this, input); } }",
+    "const Api = Object.freeze({ auth: Object.freeze({ SignIn, Authorization }) });",
+    "class TelegramClient {}",
+    "export { Api, TelegramClient };",
+    "export default { Api, TelegramClient, noop };",
+  ].join("\n");
+}
+
+function generateEventsStub(): string {
+  return [
+    "function EventEmitter() {}",
+    "EventEmitter.prototype.on = function() { return this; };",
+    "EventEmitter.prototype.off = function() { return this; };",
+    "EventEmitter.prototype.emit = function() { return false; };",
+    "EventEmitter.prototype.addListener = EventEmitter.prototype.on;",
+    "EventEmitter.prototype.removeListener = EventEmitter.prototype.off;",
+    "export { EventEmitter };",
+    "export default EventEmitter;",
+  ].join("\n");
+}
+
+function generateUndiciStub(): string {
+  return [
+    "export const fetch = globalThis.fetch;",
+    "export const Request = globalThis.Request;",
+    "export const Response = globalThis.Response;",
+    "export const Headers = globalThis.Headers;",
+    "export const FormData = globalThis.FormData;",
+    "export const WebSocket = globalThis.WebSocket;",
+    "export const EventSource = globalThis.EventSource || class {};",
+    "export const AbortController = globalThis.AbortController;",
+    "export const File = globalThis.File;",
+    "export const Blob = globalThis.Blob;",
+    "export class Agent {}",
+    "export class Pool {}",
+    "export class Client {}",
+    "export class Dispatcher {}",
+    "export const setGlobalDispatcher = () => {};",
+    "export const getGlobalDispatcher = () => ({});",
+    "export default { fetch, Request, Response, Headers, WebSocket };",
+  ].join("\n");
+}
+
+function generateAsyncHooksStub(): string {
+  return [
+    "function AsyncLocalStorage() {} AsyncLocalStorage.prototype.getStore = function() { return undefined; }; AsyncLocalStorage.prototype.run = function(store, fn) { return fn.apply(void 0, [].slice.call(arguments, 2)); }; AsyncLocalStorage.prototype.enterWith = function() {}; AsyncLocalStorage.prototype.disable = function() {};",
+    "export { AsyncLocalStorage };",
+    "export function executionAsyncId() { return 0; }",
+    "export function triggerAsyncId() { return 0; }",
+    "export function executionAsyncResource() { return {}; }",
+    "function AsyncResource() {} AsyncResource.prototype.runInAsyncScope = function(fn) { return fn.apply(void 0, [].slice.call(arguments, 1)); }; AsyncResource.prototype.emitDestroy = function() { return this; }; AsyncResource.prototype.asyncId = function() { return 0; }; AsyncResource.prototype.triggerAsyncId = function() { return 0; };",
+    "export { AsyncResource };",
+    "export function createHook() { return { enable: function(){}, disable: function(){} }; }",
+    "export default { AsyncLocalStorage: AsyncLocalStorage, AsyncResource: AsyncResource, executionAsyncId: executionAsyncId, triggerAsyncId: triggerAsyncId, executionAsyncResource: executionAsyncResource, createHook: createHook };",
+  ].join("\n");
+}
+
+function generateSharpStub(): string {
+  return [
+    "function mk() {",
+    "  const c = {",
+    "    rotate() { return c; },",
+    "    resize() { return c; },",
+    "    greyscale() { return c; },",
+    "    png() { return c; },",
+    "    jpeg() { return c; },",
+    "    async toBuffer() { return new Uint8Array(0); },",
+    "    async raw() { return { data: new Uint8Array(0), info: { width: 1, height: 1, channels: 1 } }; },",
+    "  };",
+    "  return c;",
+    "}",
+    "export default function sharp() { return mk(); }",
+  ].join("\n");
+}
+
+function generatePluginSqlDrizzleStub(): string {
+  return [
+    "const expr = {};",
+    "export const and = () => expr;",
+    "export const desc = () => expr;",
+    "export const eq = () => expr;",
+    "export const isNull = () => expr;",
+    "export const lte = () => expr;",
+    "export const ne = () => expr;",
+    "export default expr;",
+  ].join("\n");
+}
+
+function generateCapacitorHapticsStub(): string {
+  return [
+    "const noop = () => {};const noopObj = new Proxy({}, { get: () => noop });",
+    "export const Haptics = noopObj;",
+    "export const ImpactStyle = Object.freeze({ Heavy: 'HEAVY', Medium: 'MEDIUM', Light: 'LIGHT' });",
+    "export const NotificationType = Object.freeze({ Success: 'SUCCESS', Warning: 'WARNING', Error: 'ERROR' });",
+    "export default noopObj;",
+  ].join("\n");
+}
+
+function generateCapacitorKeyboardStub(): string {
+  return [
+    "const noop = () => {};const noopObj = new Proxy({}, { get: () => noop });",
+    "export const Keyboard = noopObj;",
+    "export default noopObj;",
+  ].join("\n");
+}
+
+function generateCapacitorPreferencesStub(): string {
+  return [
+    "const noop = () => Promise.resolve({ value: null });const noopObj = new Proxy({}, { get: () => noop });",
+    "export const Preferences = noopObj;",
+    "export default noopObj;",
+  ].join("\n");
+}
+
+function generateCapacitorPushNotificationsStub(): string {
+  return [
+    "const asyncNoop = async () => {};",
+    "const listenerHandle = { remove: asyncNoop };",
+    "export const PushNotifications = {",
+    "  requestPermissions: async () => ({ receive: 'denied' }),",
+    "  addListener: async () => listenerHandle,",
+    "  register: asyncNoop,",
+    "  removeAllListeners: asyncNoop,",
+    "};",
+    "export default PushNotifications;",
+  ].join("\n");
+}
+
+function generateCapacitorBarcodeScannerStub(): string {
+  return [
+    "const asyncNoop = async () => ({ ScanResult: '' });",
+    "export const CapacitorBarcodeScanner = { scanBarcode: asyncNoop };",
+    "export const CapacitorBarcodeScannerTypeHint = Object.freeze({ QR_CODE: 'QR_CODE' });",
+    "export default CapacitorBarcodeScanner;",
+  ].join("\n");
+}
+
+const CAPACITOR_NATIVE_STUB_GENERATORS = new Map<string, () => string>([
+  ["@capacitor/haptics", generateCapacitorHapticsStub],
+  ["@capacitor/keyboard", generateCapacitorKeyboardStub],
+  ["@capacitor/preferences", generateCapacitorPreferencesStub],
+  ["@capacitor/push-notifications", generateCapacitorPushNotificationsStub],
+  ["@capacitor/barcode-scanner", generateCapacitorBarcodeScannerStub],
+]);
+
+function generateCapacitorNativeStub(strippedId: string): string {
+  const capPkg = strippedId.split("/").slice(0, 2).join("/");
+  const stubGenerator = CAPACITOR_NATIVE_STUB_GENERATORS.get(capPkg);
+  if (stubGenerator) return stubGenerator();
+
+  return [
+    "const noop = () => {};const stub = new Proxy({}, { get: () => noop });",
+    "export default stub;",
+  ].join("\n");
+}
+
+/**
+ * Build a stub module with explicit named exports for every name a
+ * server-only @elizaos plugin's consumers reference. Named imports must
+ * resolve statically; a default-export Proxy doesn't satisfy them.
+ * Renderer never invokes these — the API child owns the real impls —
+ * so each export is a benign noop.
+ */
+function generateNamedExportStub(names: readonly string[]): string {
+  const lines: string[] = [
+    "const noop = () => undefined;",
+    "const asyncNoop = async () => undefined;",
+  ];
+  for (const name of names) {
+    lines.push(`export const ${name} = noop;`);
+  }
+  lines.push("export default new Proxy(noop, { get: () => noop });");
+  // Quiet "unused" in case the noop branches aren't referenced.
+  lines.push("void asyncNoop;");
+  return `${lines.join("\n")}\n`;
+}
+
+// Names enumerated from `eliza/packages/app-core/dist/**` static imports
+// of each server-only @elizaos plugin. Update when a build error shows
+// a new MISSING_EXPORT in this scope.
+const PLUGIN_ELIZACLOUD_STUB_NAMES = [
+  "__resetCloudBaseUrlCache",
+  "clearCloudSecrets",
+  "elizaOSCloudPlugin",
+  "ensureCloudTtsApiKeyAlias",
+  "getCloudSecret",
+  "handleCloudTtsPreviewRoute",
+  "isCloudProvisionedContainer",
+  "mirrorCompatHeaders",
+  "normalizeCloudSiteUrl",
+  "resolveCloudApiBaseUrl",
+  "resolveCloudApiKey",
+  "resolveCloudTtsBaseUrl",
+  "resolveElevenLabsApiKeyForCloudMode",
+  "validateCloudBaseUrl",
+] as const;
+
+function generatePluginElizacloudStub(): string {
+  return generateNamedExportStub(PLUGIN_ELIZACLOUD_STUB_NAMES);
+}
+
+const NATIVE_MODULE_STUB_GENERATORS = new Map<
+  string,
+  (strippedId: string) => string
+>([
+  ["node-llama-cpp", generateNodeLlamaCppStub],
+  ["fs-extra", generateFsExtraStub],
+  ["telegram", generateTelegramStub],
+  ["events", generateEventsStub],
+  ["undici", generateUndiciStub],
+  ["node:async_hooks", generateAsyncHooksStub],
+  ["async_hooks", generateAsyncHooksStub],
+  ["@elizaos/plugin-elizacloud", generatePluginElizacloudStub],
+  // @node-rs/argon2's server-side Rust binding is referenced by
+  // app-core's password-hashing helpers. Renderer never executes them
+  // (auth happens in the API child); stub the named exports.
+  [
+    "@node-rs/argon2",
+    () => generateNamedExportStub(["hash", "verify", "Algorithm"]),
+  ],
+]);
+
+function isSharpStubId(strippedId: string): boolean {
+  return (
+    strippedId === "sharp" ||
+    strippedId.startsWith("sharp/") ||
+    strippedId.startsWith("@img/sharp")
+  );
+}
+
+function generateNativeModuleStub(
+  strippedId: string,
+  capacitorNativeScopeRe: RegExp,
+): string {
+  // Scoped packages (@scope/name) have a slash in the bare specifier;
+  // treat the @scope/name as the lookup key so per-package stub
+  // generators register against the real package id.
+  const modName = strippedId.startsWith("@")
+    ? strippedId.split("/").slice(0, 2).join("/")
+    : strippedId.split("/")[0];
+  const stubGenerator = NATIVE_MODULE_STUB_GENERATORS.get(modName);
+  if (stubGenerator) return stubGenerator(strippedId);
+  if (modName.startsWith("node:")) return generateNodeBuiltinStub(strippedId);
+  if (isSharpStubId(strippedId)) return generateSharpStub();
+  if (strippedId === "@elizaos/plugin-sql/drizzle")
+    return generatePluginSqlDrizzleStub();
+
+  const pluginSqlStub = generatePluginSqlStub(strippedId);
+  if (pluginSqlStub) return pluginSqlStub;
+  if (capacitorNativeScopeRe.test(strippedId))
+    return generateCapacitorNativeStub(strippedId);
+
+  return "export default {};\n";
+}
+
 /**
  * Dev-mode plugin that stubs native-only packages.  In production builds
  * rollupOptions.external handles this, but the Vite dev server still tries
@@ -878,6 +1597,25 @@ function nativeModuleStubPlugin(): Plugin {
     "@elizaos/plugin-sql",
     "@elizaos/plugin-agent-skills",
     "@elizaos/plugin-agent-orchestrator",
+    // The agent runtime is server-only — it lives in the API child
+    // process, not in the renderer. app-core/dist code can leak agent
+    // imports (account-pool etc.); stub them so Rollup doesn't try to
+    // pull Node-only auth/credential code into the browser bundle.
+    "@elizaos/agent",
+    // Cloud helper module — server-only (handles cloud credentials,
+    // tts proxy routes). Renderer references the exported names but
+    // never executes the code; named-export stub registered above.
+    "@elizaos/plugin-elizacloud",
+    // @node-rs/argon2 has a wasm32-wasi variant that browser builds
+    // surface via dynamic import. The browser can't resolve the bare
+    // specifier at runtime; stub it so the bundle loads. Real hashing
+    // happens server-side in the API child anyway.
+    "@node-rs/argon2-wasm32-wasi",
+    "@node-rs/argon2",
+    // OS keychain bridge — Node-only native addon (.node binary). Pulled
+    // transitively by @elizaos/vault. Vite's commonjs--resolver chokes on
+    // the platform-specific .node files; stub it for the renderer.
+    "@napi-rs/keyring",
   ]);
   if (!IS_CAPACITOR_MOBILE_BUILD) {
     // Mobile-only Capacitor llama.cpp runtime. Web/Electrobun builds stub it,
@@ -886,6 +1624,10 @@ function nativeModuleStubPlugin(): Plugin {
     nativePackages.add("llama-cpp-capacitor");
   }
   const nativeScopeRe = /^@node-llama-cpp\//;
+  // @napi-rs/keyring fans out into platform packages
+  // (@napi-rs/keyring-darwin-arm64, -darwin-x64, -win32-x64-msvc, etc.).
+  // Stub the entire scope so we don't have to enumerate every triple.
+  const napiRsKeyringScopeRe = /^@napi-rs\/keyring(-.+)?$/;
   // Capacitor native plugins — mobile-only, must never run in the browser.
   // Stubbing prevents Rollup from failing when bun workspaces don't hoist them.
   const capacitorNativeScopeRe = /^@capacitor\/(?!core)(.+)$/;
@@ -938,6 +1680,8 @@ function nativeModuleStubPlugin(): Plugin {
         : id.split("/")[0];
       // Scoped: @node-llama-cpp/*
       if (nativeScopeRe.test(id)) return VIRTUAL_PREFIX + id;
+      // Scoped: @napi-rs/keyring + platform binaries
+      if (napiRsKeyringScopeRe.test(id)) return VIRTUAL_PREFIX + id;
       // Capacitor native plugins (@capacitor/* except @capacitor/core)
       if (capacitorNativeScopeRe.test(id) && !IS_CAPACITOR_MOBILE_BUILD) {
         return VIRTUAL_PREFIX + id;
@@ -956,326 +1700,7 @@ function nativeModuleStubPlugin(): Plugin {
       if (!id.startsWith(VIRTUAL_PREFIX)) return null;
 
       const strippedId = id.slice(VIRTUAL_PREFIX.length);
-      const modName = strippedId.split("/")[0];
-      // node-llama-cpp is the most import-heavy native module — its consumers
-      // use many named exports (LlamaLogLevel, getLlama, etc.).  Return a
-      // module whose default export is a Proxy that returns no-op stubs for
-      // any property access, AND re-export that proxy as every known name so
-      // static `import { X }` statements resolve without error.
-      if (modName === "node-llama-cpp") {
-        return [
-          "const handler = { get: (_, p) => (p === Symbol.toPrimitive ? () => 0 : typeof p === 'string' ? (() => {}) : undefined) };",
-          "const stub = new Proxy({}, handler);",
-          "export default stub;",
-          // Known named exports used by @elizaos/plugin-local-embedding and
-          // other consumers — extend as needed:
-          "export const getLlama = () => Promise.resolve(stub);",
-          "export const LlamaLogLevel = Object.freeze({ error: 0, warn: 1, info: 2, debug: 3 });",
-          "export const Llama = stub;",
-          "export const LlamaModel = stub;",
-          "export const LlamaEmbeddingContext = stub;",
-          "export const LlamaContext = stub;",
-          "export const LlamaChatSession = stub;",
-          "export const LlamaGrammar = stub;",
-          "export const LlamaJsonSchemaGrammar = stub;",
-        ].join("\n");
-      }
-
-      // fs-extra: CJS module with default + named exports
-      if (modName === "fs-extra") {
-        return [
-          "const noop = () => {};",
-          "const stub = new Proxy({}, { get: () => noop });",
-          "export default stub;",
-          // Re-export common fs-extra named exports so static imports work:
-          ...[
-            "copy",
-            "copySync",
-            "move",
-            "moveSync",
-            "remove",
-            "removeSync",
-            "ensureDir",
-            "ensureDirSync",
-            "ensureFile",
-            "ensureFileSync",
-            "mkdirs",
-            "mkdirsSync",
-            "readJson",
-            "readJsonSync",
-            "writeJson",
-            "writeJsonSync",
-            "pathExists",
-            "pathExistsSync",
-            "outputFile",
-            "outputFileSync",
-            "outputJson",
-            "outputJsonSync",
-            "emptyDir",
-            "emptyDirSync",
-          ].map((n) => `export const ${n} = noop;`),
-        ].join("\n");
-      }
-
-      // Telegram's MTProto client is server-only. If it reaches this virtual
-      // native stub path, preserve the static exports used by account auth.
-      if (modName === "telegram") {
-        if (strippedId.startsWith("telegram/sessions")) {
-          return [
-            "export class StringSession { constructor(value = '') { this.value = value; } }",
-            "export default { StringSession };",
-          ].join("\n");
-        }
-
-        return [
-          "const noop = () => {};",
-          "class SignIn { constructor(input = {}) { Object.assign(this, input); } }",
-          "class Authorization { constructor(input = {}) { Object.assign(this, input); } }",
-          "const Api = Object.freeze({ auth: Object.freeze({ SignIn, Authorization }) });",
-          "class TelegramClient {}",
-          "export { Api, TelegramClient };",
-          "export default { Api, TelegramClient, noop };",
-        ].join("\n");
-      }
-
-      // events: CJS module, consumers use `import { EventEmitter } from "events"`
-      if (modName === "events") {
-        return [
-          "function EventEmitter() {}",
-          "EventEmitter.prototype.on = function() { return this; };",
-          "EventEmitter.prototype.off = function() { return this; };",
-          "EventEmitter.prototype.emit = function() { return false; };",
-          "EventEmitter.prototype.addListener = EventEmitter.prototype.on;",
-          "EventEmitter.prototype.removeListener = EventEmitter.prototype.off;",
-          "export { EventEmitter };",
-          "export default EventEmitter;",
-        ].join("\n");
-      }
-
-      // undici: Node HTTP client — re-export browser globals (fetch, WebSocket, etc.)
-      if (modName === "undici") {
-        return [
-          "export const fetch = globalThis.fetch;",
-          "export const Request = globalThis.Request;",
-          "export const Response = globalThis.Response;",
-          "export const Headers = globalThis.Headers;",
-          "export const FormData = globalThis.FormData;",
-          "export const WebSocket = globalThis.WebSocket;",
-          "export const EventSource = globalThis.EventSource || class {};",
-          "export const AbortController = globalThis.AbortController;",
-          "export const File = globalThis.File;",
-          "export const Blob = globalThis.Blob;",
-          "export class Agent {}",
-          "export class Pool {}",
-          "export class Client {}",
-          "export class Dispatcher {}",
-          "export const setGlobalDispatcher = () => {};",
-          "export const getGlobalDispatcher = () => ({});",
-          "export default { fetch, Request, Response, Headers, WebSocket };",
-        ].join("\n");
-      }
-
-      // async_hooks — AsyncLocalStorage must be a real constructor because
-      // langsmith and @elizaos packages do `new AsyncLocalStorage()` at the
-      // top level. Uses function-constructor syntax (not class expressions)
-      // for maximum WebView compatibility. The renderChunk plugin
-      // (asyncLocalStoragePatchPlugin) also patches the final bundle output
-      // as a safety net for patterns inlined by Rollup.
-      if (modName === "node:async_hooks" || modName === "async_hooks") {
-        return [
-          "function AsyncLocalStorage() {} AsyncLocalStorage.prototype.getStore = function() { return undefined; }; AsyncLocalStorage.prototype.run = function(store, fn) { return fn.apply(void 0, [].slice.call(arguments, 2)); }; AsyncLocalStorage.prototype.enterWith = function() {}; AsyncLocalStorage.prototype.disable = function() {};",
-          "export { AsyncLocalStorage };",
-          "export function executionAsyncId() { return 0; }",
-          "export function triggerAsyncId() { return 0; }",
-          "export function executionAsyncResource() { return {}; }",
-          "function AsyncResource() {} AsyncResource.prototype.runInAsyncScope = function(fn) { return fn.apply(void 0, [].slice.call(arguments, 1)); }; AsyncResource.prototype.emitDestroy = function() { return this; }; AsyncResource.prototype.asyncId = function() { return 0; }; AsyncResource.prototype.triggerAsyncId = function() { return 0; };",
-          "export { AsyncResource };",
-          "export function createHook() { return { enable: function(){}, disable: function(){} }; }",
-          "export default { AsyncLocalStorage: AsyncLocalStorage, AsyncResource: AsyncResource, executionAsyncId: executionAsyncId, triggerAsyncId: triggerAsyncId, executionAsyncResource: executionAsyncResource, createHook: createHook };",
-        ].join("\n");
-      }
-
-      // node:* builtins — return a Proxy-based module that provides any
-      // named export as a no-op function.  This handles @elizaos/core's node
-      // entry which uses createRequire, randomUUID, fs, etc. at the top level.
-      if (modName.startsWith("node:")) {
-        // Dynamic: read the real Node module's export names at config time
-        // and generate matching no-op stubs so esbuild's static analysis passes.
-        return generateNodeBuiltinStub(id.slice(VIRTUAL_PREFIX.length));
-      }
-
-      // libvips native / wasm bindings — only used server-side for LifeOps screen sampling
-      if (
-        strippedId === "sharp" ||
-        strippedId.startsWith("sharp/") ||
-        strippedId.startsWith("@img/sharp")
-      ) {
-        return [
-          "function mk() {",
-          "  const c = {",
-          "    rotate() { return c; },",
-          "    resize() { return c; },",
-          "    greyscale() { return c; },",
-          "    png() { return c; },",
-          "    jpeg() { return c; },",
-          "    async toBuffer() { return new Uint8Array(0); },",
-          "    async raw() { return { data: new Uint8Array(0), info: { width: 1, height: 1, channels: 1 } }; },",
-          "  };",
-          "  return c;",
-          "}",
-          "export default function sharp() { return mk(); }",
-        ].join("\n");
-      }
-
-      if (strippedId === "@elizaos/plugin-sql/schema") {
-        return [
-          "const handler = { get: () => table, apply: () => table };",
-          "const table = new Proxy(function table() {}, handler);",
-          ...[
-            "agentTable",
-            "approvalRequestTable",
-            "authAuditEventTable",
-            "authBootstrapJtiSeenTable",
-            "authIdentityCreatedAtDefault",
-            "authIdentityTable",
-            "authOwnerBindingTable",
-            "authOwnerLoginTokenTable",
-            "authSessionTable",
-            "cacheTable",
-            "channelTable",
-            "channelParticipantsTable",
-            "componentTable",
-            "embeddingTable",
-            "entityTable",
-            "entityIdentityTable",
-            "entityMergeCandidateTable",
-            "factCandidateTable",
-            "logTable",
-            "longTermMemories",
-            "memoryTable",
-            "memoryAccessLogs",
-            "messageTable",
-            "messageServerTable",
-            "messageServerAgentsTable",
-            "pairingAllowlistTable",
-            "pairingRequestTable",
-            "participantTable",
-            "relationshipTable",
-            "roomTable",
-            "serverTable",
-            "sessionSummaries",
-            "taskTable",
-            "worldTable",
-          ].map((name) => `export const ${name} = table;`),
-          "export default table;",
-        ].join("\n");
-      }
-
-      if (strippedId === "@elizaos/plugin-sql") {
-        return [
-          "const handler = { get: () => table, apply: () => table };",
-          "const table = new Proxy(function table() {}, handler);",
-          ...[
-            "agentTable",
-            "approvalRequestTable",
-            "authAuditEventTable",
-            "authBootstrapJtiSeenTable",
-            "authIdentityCreatedAtDefault",
-            "authIdentityTable",
-            "authOwnerBindingTable",
-            "authOwnerLoginTokenTable",
-            "authSessionTable",
-            "cacheTable",
-            "channelTable",
-            "channelParticipantsTable",
-            "componentTable",
-            "embeddingTable",
-            "entityTable",
-            "entityIdentityTable",
-            "entityMergeCandidateTable",
-            "factCandidateTable",
-            "logTable",
-            "longTermMemories",
-            "memoryTable",
-            "memoryAccessLogs",
-            "messageTable",
-            "messageServerTable",
-            "messageServerAgentsTable",
-            "pairingAllowlistTable",
-            "pairingRequestTable",
-            "participantTable",
-            "relationshipTable",
-            "roomTable",
-            "serverTable",
-            "sessionSummaries",
-            "taskTable",
-            "worldTable",
-          ].map((name) => `export const ${name} = table;`),
-          "export const PGLITE_ERROR_CODES = Object.freeze({ ACTIVE_LOCK: 'ACTIVE_LOCK', CORRUPT_DATA: 'CORRUPT_DATA', MANUAL_RESET_REQUIRED: 'MANUAL_RESET_REQUIRED' });",
-          "export const getPgliteErrorCode = () => null;",
-          "export const createPgliteInitError = (_code, message) => new Error(message);",
-          "export const plugin = table;",
-          "export default table;",
-        ].join("\n");
-      }
-
-      // Capacitor native plugins — mobile-only, cloud builds stub them.
-      // Must export the exact named identifiers used in app-core sources.
-      if (capacitorNativeScopeRe.test(strippedId)) {
-        const capPkg = strippedId.split("/").slice(0, 2).join("/");
-        if (capPkg === "@capacitor/haptics") {
-          return [
-            "const noop = () => {};const noopObj = new Proxy({}, { get: () => noop });",
-            "export const Haptics = noopObj;",
-            "export const ImpactStyle = Object.freeze({ Heavy: 'HEAVY', Medium: 'MEDIUM', Light: 'LIGHT' });",
-            "export const NotificationType = Object.freeze({ Success: 'SUCCESS', Warning: 'WARNING', Error: 'ERROR' });",
-            "export default noopObj;",
-          ].join("\n");
-        }
-        if (capPkg === "@capacitor/keyboard") {
-          return [
-            "const noop = () => {};const noopObj = new Proxy({}, { get: () => noop });",
-            "export const Keyboard = noopObj;",
-            "export default noopObj;",
-          ].join("\n");
-        }
-        if (capPkg === "@capacitor/preferences") {
-          return [
-            "const noop = () => Promise.resolve({ value: null });const noopObj = new Proxy({}, { get: () => noop });",
-            "export const Preferences = noopObj;",
-            "export default noopObj;",
-          ].join("\n");
-        }
-        if (capPkg === "@capacitor/push-notifications") {
-          return [
-            "const asyncNoop = async () => {};",
-            "const listenerHandle = { remove: asyncNoop };",
-            "export const PushNotifications = {",
-            "  requestPermissions: async () => ({ receive: 'denied' }),",
-            "  addListener: async () => listenerHandle,",
-            "  register: asyncNoop,",
-            "  removeAllListeners: asyncNoop,",
-            "};",
-            "export default PushNotifications;",
-          ].join("\n");
-        }
-        if (capPkg === "@capacitor/barcode-scanner") {
-          return [
-            "const asyncNoop = async () => ({ ScanResult: '' });",
-            "export const CapacitorBarcodeScanner = { scanBarcode: asyncNoop };",
-            "export const CapacitorBarcodeScannerTypeHint = Object.freeze({ QR_CODE: 'QR_CODE' });",
-            "export default CapacitorBarcodeScanner;",
-          ].join("\n");
-        }
-        // Generic Capacitor plugin stub
-        return [
-          "const noop = () => {};const stub = new Proxy({}, { get: () => noop });",
-          "export default stub;",
-        ].join("\n");
-      }
-
-      // Generic fallback for other native modules
-      return "export default {};\n";
+      return generateNativeModuleStub(strippedId, capacitorNativeScopeRe);
     },
     // Patch @elizaos/core browser entry at transform time to add missing
     // exports and fix browser-incompatible patterns.
@@ -1285,7 +1710,7 @@ function nativeModuleStubPlugin(): Plugin {
       const normId = id.split(path.sep).join("/");
       const isCorePackagePath =
         normId.includes("/node_modules/@elizaos/core/") ||
-        normId.includes("packages/typescript/dist/");
+        normId.includes("packages/core/dist/");
       if (!isCoreDistFile || !isCorePackagePath) return null;
 
       // Fix AsyncLocalStorage: the browser entry has a try/catch that does
@@ -1366,8 +1791,13 @@ function watchWorkspacePackagesPlugin(): Plugin {
   return {
     name: "watch-workspace-packages",
     configureServer(server) {
-      server.watcher.add(path.resolve(miladyRoot, "packages"));
-      server.watcher.add(nativePluginsRoot);
+      const workspacePackagesRoot = path.resolve(miladyRoot, "packages");
+      if (fs.existsSync(workspacePackagesRoot)) {
+        server.watcher.add(workspacePackagesRoot);
+      }
+      if (fs.existsSync(nativePluginsRoot)) {
+        server.watcher.add(nativePluginsRoot);
+      }
       server.watcher.on("change", (file) => {
         if (file.includes("/packages/")) {
           if (file.endsWith("package.json")) {
@@ -1382,15 +1812,24 @@ function watchWorkspacePackagesPlugin(): Plugin {
   };
 }
 
+function resolveOptionalPackagePublicDir(packageName: string): string | null {
+  try {
+    return path.join(
+      path.dirname(_require.resolve(`${packageName}/package.json`)),
+      "public",
+    );
+  } catch {
+    return null;
+  }
+}
+
 /**
- * Serve @elizaos/app-companion's public/ assets alongside the app's own
- * public/ directory. In dev the companion dir is served as a fallback
- * middleware; in build the files are copied into the output.
+ * Serve @elizaos/app-companion's public/ assets when that optional package is
+ * installed. The decoupled Milady shell does not require the package.
  */
 function companionAssetsPlugin(): Plugin {
-  const companionPublic = path.resolve(
-    miladyRoot,
-    "eliza/apps/app-companion/public",
+  const companionPublic = resolveOptionalPackagePublicDir(
+    "@elizaos/app-companion",
   );
   return {
     name: "companion-assets",
@@ -1399,6 +1838,7 @@ function companionAssetsPlugin(): Plugin {
       server.middlewares.use((req, res, next) => {
         if (!req.url) return next();
         const clean = req.url.split("?")[0];
+        if (!companionPublic) return next();
         const filePath = path.join(companionPublic, clean);
         if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
           res.setHeader(
@@ -1417,7 +1857,7 @@ function companionAssetsPlugin(): Plugin {
     },
     closeBundle() {
       // Copy companion public to dist at build time
-      if (fs.existsSync(companionPublic)) {
+      if (companionPublic && fs.existsSync(companionPublic)) {
         const outDir = path.resolve(here, "dist");
         fs.cpSync(companionPublic, outDir, { recursive: true, force: false });
       }
@@ -1426,7 +1866,9 @@ function companionAssetsPlugin(): Plugin {
 }
 
 function workspaceJsxInJsPlugin(): Plugin {
-  const normalizedAppCoreSrcRoot = appCoreSrcRoot.split(path.sep).join("/");
+  const normalizedAppCoreSrcRoot = appCoreSrcRoot
+    ? appCoreSrcRoot.split(path.sep).join("/")
+    : null;
 
   return {
     name: "workspace-jsx-in-js",
@@ -1435,6 +1877,7 @@ function workspaceJsxInJsPlugin(): Plugin {
       const cleanId = id.split("?")[0];
       const normalizedId = cleanId.split(path.sep).join("/");
       if (!cleanId.endsWith(".js")) return null;
+      if (!normalizedAppCoreSrcRoot) return null;
       if (!normalizedId.startsWith(`${normalizedAppCoreSrcRoot}/`)) return null;
 
       return transformWithEsbuild(code, cleanId, {
@@ -1541,231 +1984,59 @@ export default defineConfig({
       ...["util/types", "stream/promises", "stream/web"].flatMap((sub) => [
         {
           find: `node:${sub}`,
-          replacement: path.join(
-            appCoreSrcRoot,
-            "platform/empty-node-module.ts",
-          ),
+          replacement: emptyNodeModuleEntry,
         },
         {
           find: sub,
-          replacement: path.join(
-            appCoreSrcRoot,
-            "platform/empty-node-module.ts",
-          ),
+          replacement: emptyNodeModuleEntry,
         },
       ]),
       {
         find: /^telegram(\/.*)?$/,
-        replacement: path.join(appCoreSrcRoot, "platform/empty-node-module.ts"),
+        replacement: emptyNodeModuleEntry,
       },
-      // Capacitor plugins — resolve to local plugin sources
+      // Local app-package aliases must run before optional stubs so local mode
+      // actually exercises eliza/plugins/app-* packages.
+      ...LOCAL_ELIZA_APP_ALIAS_ENTRIES,
+      // @napi-rs/keyring is the OS keychain bridge used by @elizaos/vault.
+      // It's strictly server-side (Node-only native bindings to libsecret /
+      // Keychain / Credential Manager) and is never invoked in the WebView,
+      // but vault.ts still has a static type import + dynamic `await import`
+      // that Rollup follows into the .node binary, exploding the web build
+      // with `Unexpected "\x7f"` (the ELF magic). Stub for browser bundles —
+      // the runtime code path that would call openKeyring() doesn't run on
+      // Capacitor/Electrobun renderers.
+      {
+        find: /^@napi-rs\/keyring(\/.*)?$/,
+        replacement: emptyNodeModuleEntry,
+      },
+      {
+        find: /^@napi-rs\/keyring-/,
+        replacement: emptyNodeModuleEntry,
+      },
+      {
+        find: /^@clawville\/app-clawville(\/.*)?$/,
+        replacement: optionalElizaAppStubEntry,
+      },
+      {
+        find: /^@elizaos\/app-hyperscape\/ui(\/.*)?$/,
+        replacement: optionalElizaAppStubEntry,
+      },
+      {
+        find: optionalElizaAppAliasPattern,
+        replacement: optionalElizaAppStubEntry,
+      },
+      // Capacitor plugins — resolve to local plugin sources when present.
       ...NATIVE_PLUGIN_ALIAS_ENTRIES,
-      // Force local @elizaos/ui source paths when the app bundles linked
-      // @elizaos/app-core sources directly.
       {
-        find: /^@elizaos\/ui$/,
-        replacement: path.join(uiPkgRoot, "src/index.ts"),
+        find: ELIZA_CAPACITOR_PLUGIN_STUB_PATTERN,
+        replacement: nativePluginStubEntry,
       },
-      {
-        find: /^@elizaos\/ui\/components\/ui\/(.*)$/,
-        replacement: `${uiPkgRoot}/src/components/ui/$1.tsx`,
-        customResolver: resolveExistingUiSourceModule,
-      },
-      {
-        find: /^@elizaos\/ui\/components\/composites\/([^/]+)$/,
-        replacement: `${uiPkgRoot}/src/components/composites/$1/index.ts`,
-      },
-      {
-        find: /^@elizaos\/ui\/components\/composites\/(.+)\/([^/]+)$/,
-        replacement: `${uiPkgRoot}/src/components/composites/$1/$2.tsx`,
-        customResolver: resolveExistingUiSourceModule,
-      },
-      {
-        find: /^@elizaos\/ui\/components\/(.+)\/([^/]+)$/,
-        replacement: `${uiPkgRoot}/src/components/$1/$2.tsx`,
-        customResolver: resolveExistingUiSourceModule,
-      },
-      {
-        find: /^@elizaos\/ui\/hooks$/,
-        replacement: path.join(uiPkgRoot, "src/hooks/index.ts"),
-      },
-      {
-        find: /^@elizaos\/ui\/hooks\/(.*)$/,
-        replacement: `${uiPkgRoot}/src/hooks/$1.ts`,
-      },
-      {
-        find: /^@elizaos\/ui\/layouts$/,
-        replacement: path.join(uiPkgRoot, "src/layouts/index.ts"),
-      },
-      {
-        find: /^@elizaos\/ui\/layouts\/([^/]+)$/,
-        replacement: `${uiPkgRoot}/src/layouts/$1/index.ts`,
-      },
-      {
-        find: /^@elizaos\/ui\/layouts\/(.+)\/([^/]+)$/,
-        replacement: `${uiPkgRoot}/src/layouts/$1/$2.tsx`,
-      },
-      {
-        find: /^@elizaos\/ui\/lib\/(.*)$/,
-        replacement: `${uiPkgRoot}/src/lib/$1.ts`,
-      },
-      // Dynamic aliases for all eliza/apps/* packages
-      ...(() => {
-        const appsDir = path.resolve(miladyRoot, "eliza/apps");
-        const aliases: Alias[] = [];
-        for (const entry of fs.readdirSync(appsDir, { withFileTypes: true })) {
-          if (!entry.isDirectory()) continue;
-          const pkgPath = path.join(appsDir, entry.name, "package.json");
-          if (!fs.existsSync(pkgPath)) continue;
-          const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
-          const pkgName = pkg.name;
-          if (!pkgName) continue;
-          const pkgDir = path.dirname(pkgPath);
-          // Generate export-map aliases
-          for (const [key, value] of Object.entries(pkg.exports || {})) {
-            if (typeof value !== "string") continue;
-            const aliasKey =
-              key === "." ? pkgName : `${pkgName}/${key.replace(/^\.\//, "")}`;
-            aliases.push({
-              find: new RegExp(
-                `^${aliasKey.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`,
-              ),
-              replacement: path.resolve(pkgDir, value),
-            });
-          }
-          // Catch-all subpath for direct src/ access
-          aliases.push({
-            find: new RegExp(
-              `^${pkgName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}/(.*)`,
-            ),
-            replacement: path.resolve(pkgDir, "src/$1"),
-          });
-        }
-        return aliases;
-      })(),
-      ...(() => {
-        const sharedPkgPath = path.resolve(
-          miladyRoot,
-          "eliza/packages/shared/package.json",
-        );
-        const sharedPkgDir = path.dirname(sharedPkgPath);
-        const sharedPkg = JSON.parse(fs.readFileSync(sharedPkgPath, "utf8"));
-        const aliases: Alias[] = [];
-        for (const [key, value] of Object.entries(sharedPkg.exports || {})) {
-          if (typeof value === "string") {
-            const aliasKey =
-              key === "."
-                ? "@elizaos/shared"
-                : `@elizaos/shared/${key.replace(/^\.\//, "")}`;
-            aliases.push({
-              find: new RegExp(
-                `^${aliasKey.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`,
-              ),
-              replacement: path.resolve(sharedPkgDir, value),
-            });
-          }
-        }
-        return aliases;
-      })(),
-      // Force local @elizaos/app-core when workspace-linked (prevents stale
-      // bun cache copies from overriding the symlinked local source).
-      ...(() => {
-        const appCorePkgPath = path.resolve(
-          miladyRoot,
-          "eliza/packages/app-core/package.json",
-        );
-        const appCorePkgDir = path.dirname(appCorePkgPath);
-        const appCoreBrowserEntry = path.resolve(
-          appCorePkgDir,
-          "src/browser.ts",
-        );
-        const appCorePkg = JSON.parse(fs.readFileSync(appCorePkgPath, "utf8"));
-
-        const generatedAliases: Alias[] = [];
-
-        for (const [key, value] of Object.entries(appCorePkg.exports || {})) {
-          if (typeof value === "string") {
-            const aliasKey =
-              key === "."
-                ? "@elizaos/app-core"
-                : `@elizaos/app-core/${key.replace(/^\.\//, "")}`;
-            // Keep the renderer on a browser-safe entry. The package root barrel
-            // re-exports server modules that pull Node-only code like sharp into
-            // the Vite client graph.
-            const targetPath =
-              key === "."
-                ? appCoreBrowserEntry
-                : path.resolve(appCorePkgDir, value);
-
-            generatedAliases.push({
-              find: new RegExp(`^${aliasKey}$`),
-              replacement: targetPath,
-            });
-            // Also map .js extension for users importing it as .js
-            if (!aliasKey.endsWith(".js") && !aliasKey.endsWith(".css")) {
-              generatedAliases.push({
-                find: new RegExp(`^${aliasKey}\\.js$`),
-                replacement: targetPath,
-              });
-            }
-          }
-        }
-
-        const uiSource = path.resolve(
-          miladyRoot,
-          "eliza/packages/app-core/src/ui",
-        );
-
-        return [
-          ...generatedAliases,
-          // Fallback: catch any @elizaos/app-core sub-path not covered by the
-          // dynamic export-map aliases above (e.g. when the published package
-          // uses conditional exports objects and the `typeof value === "string"`
-          // guard skips them).  Maps directly to the local src/ tree.
-          {
-            find: /^@elizaos\/app-core\/(.+)$/,
-            replacement: `${appCorePkgDir}/src/$1`,
-          },
-          {
-            find: /^@miladyai\/ui$/,
-            replacement: path.join(uiSource, "index.ts"),
-          },
-          {
-            find: /^@miladyai\/ui\/(.*)$/,
-            replacement: `${uiSource}/$1/index.ts`, // assumes subpaths are directories
-          },
-          // NOTE: App and UI code should import `@elizaos/agent/<subpath>` only.
-          // The package root still resolves to `./src/index.ts`, which pulls in
-          // server-only modules. Map the bare specifier to a no-op so the client
-          // bundle never traverses that graph.
-          {
-            find: /^@elizaos\/agent$/,
-            replacement: path.join(
-              appCoreSrcRoot,
-              "platform/empty-node-module.ts",
-            ),
-          },
-          // Fallback for @elizaos/agent sub-path imports (e.g. /autonomy,
-          // /contracts/onboarding). The npm-published package may not include
-          // all export entries that the local workspace source provides, so
-          // resolve sub-paths directly from the local agent source tree.
-          {
-            find: /^@elizaos\/agent\/(.+)$/,
-            replacement: path.resolve(
-              miladyRoot,
-              "eliza/packages/agent/src/$1",
-            ),
-          },
-          // @elizaos/core — force ALL copies (including nested ones in plugins
-          // that bundle their own older core) to the
-          // main workspace copy's browser entry.  The browser entry has all
-          // needed exports and avoids pulling in createRequire/node:fs/etc.
-          {
-            find: /^@elizaos\/core$/,
-            replacement: resolveElizaCoreBundlePath(),
-          },
-        ];
-      })(),
+      // Local source aliases are only installed when the eliza checkout exists.
+      // Published-only builds should resolve normal @elizaos package exports.
+      ...resolveLocalUiAliases(),
+      ...resolveLocalSharedAliases(),
+      ...resolveLocalAppCoreAliases(),
     ],
   },
   optimizeDeps: {
@@ -1794,11 +2065,14 @@ export default defineConfig({
           name: "workspace-jsx-in-js",
           setup(build) {
             const normalizedAppCoreSrcRoot = appCoreSrcRoot
-              .split(path.sep)
-              .join("/");
+              ? appCoreSrcRoot.split(path.sep).join("/")
+              : null;
 
             build.onLoad({ filter: /\.js$/ }, (args) => {
               const normalizedPath = args.path.split(path.sep).join("/");
+              if (!normalizedAppCoreSrcRoot) {
+                return null;
+              }
               if (!normalizedPath.startsWith(`${normalizedAppCoreSrcRoot}/`)) {
                 return null;
               }
@@ -1873,6 +2147,8 @@ export default defineConfig({
       "socks",
       // Native LLM embedding — uses node-llama-cpp, never runs in browser
       "@elizaos/plugin-local-embedding",
+      // OS keychain binding is desktop/server-only and pulls native .node assets.
+      "@napi-rs/keyring",
     ],
   },
   build: {
@@ -1920,7 +2196,12 @@ export default defineConfig({
           ].includes(id)
         )
           return true;
+        // OS keychain native addon. Renderer never calls keyring directly —
+        // it goes through the API. Externalize the umbrella + platform
+        // binaries so Rollup doesn't try to bundle the .node files.
+        if (/^@napi-rs\/keyring(-.+)?$/.test(id)) return true;
         if (/^@node-llama-cpp\//.test(id)) return true;
+        if (/^@napi-rs\/keyring/.test(id)) return true;
         return false;
       },
       input: {

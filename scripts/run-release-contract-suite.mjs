@@ -17,19 +17,43 @@ const canonicalElectrobunDir = path.join(
   "platforms",
   "electrobun",
 );
-export const releaseContractTests = [
-  "scripts/release-workflow-path-contract.test.ts",
+const rootReleaseContractTests = [
   "scripts/electrobun-runtime-root-contract.test.ts",
-  "scripts/run-release-contract-suite.test.ts",
-  "scripts/build-local-eliza-ci-overrides.test.ts",
-  "scripts/disable-local-eliza-workspace.test.ts",
-  "scripts/patch-mobile-build-release-compat.test.ts",
-  "scripts/patch-release-check-pack-fallback.test.ts",
-  "scripts/electrobun-pr-workflow-contract.test.ts",
+  "scripts/standalone-eliza-package-contract.test.ts",
+  "scripts/release-workflow-contract.test.mjs",
+];
+const appCoreReleaseContractTests = [
   "eliza/packages/app-core/scripts/electrobun-release-workflow-drift.test.ts",
   "eliza/packages/app-core/scripts/release-check.test.ts",
   "eliza/packages/app-core/scripts/static-asset-manifest.test.ts",
 ];
+export const releaseContractTests = [
+  ...rootReleaseContractTests,
+  ...appCoreReleaseContractTests,
+];
+const packageModeReleaseContractTests = rootReleaseContractTests;
+
+function hasLocalElizaAppCore(root = repoRoot) {
+  return fs.existsSync(path.join(root, "eliza", "packages", "app-core"));
+}
+
+function selectReleaseContractTests(root = repoRoot) {
+  if (hasLocalElizaAppCore(root)) {
+    const missingAppCoreTests = appCoreReleaseContractTests.filter(
+      (testPath) => !fs.existsSync(path.join(root, testPath)),
+    );
+    if (missingAppCoreTests.length > 0) {
+      console.warn(
+        `run-release-contract-suite: local eliza checkout is missing app-core release tests; running root release contracts only:\n${missingAppCoreTests
+          .map((testPath) => `- ${testPath}`)
+          .join("\n")}`,
+      );
+      return rootReleaseContractTests;
+    }
+    return releaseContractTests;
+  }
+  return packageModeReleaseContractTests;
+}
 
 export function run(command, args, cwd = repoRoot) {
   const result = spawnSync(command, args, {
@@ -388,6 +412,8 @@ function pruneGeneratedLegacyElectrobunEntries(targetPath, trackedPaths) {
 export function main() {
   let exitCode = 0;
   let createdCompatDir = false;
+  const hasLocalEliza = hasLocalElizaAppCore();
+  const selectedReleaseContractTests = selectReleaseContractTests();
   const shouldRestoreElizaChanges = isElizaWorktreeClean();
   const initialElizaUntrackedFiles = shouldRestoreElizaChanges
     ? listElizaUntrackedFiles()
@@ -395,35 +421,41 @@ export function main() {
   try {
     run("node", ["scripts/init-submodules.mjs"]);
     createdCompatDir = ensureLegacyElectrobunCompatDir();
-    assertReleaseContractTestsExist();
+    assertReleaseContractTestsExist(selectedReleaseContractTests);
     run("node", ["scripts/apply-eliza-ci-patches.mjs"]);
 
     run("bunx", [
       "vitest",
       "run",
       "--passWithNoTests",
-      ...releaseContractTests,
+      ...selectedReleaseContractTests,
     ]);
-    run("bunx", [
-      "vitest",
-      "run",
-      "--passWithNoTests",
-      "eliza/packages/app-core/scripts/startup-integration-script-drift.test.ts",
-    ]);
+    if (!hasLocalEliza) {
+      console.warn(
+        "run-release-contract-suite: local eliza/ checkout absent; skipping local release-check contract steps.",
+      );
+    } else {
+      run("bunx", [
+        "vitest",
+        "run",
+        "--passWithNoTests",
+        "eliza/packages/app-core/scripts/startup-integration-script-drift.test.ts",
+      ]);
 
-    // tsdown and release:check resolve repo-root-relative entries/config.
-    run("bunx", ["tsdown", "--fail-on-warn", "false"]);
-    fs.mkdirSync(path.join(repoRoot, "dist"), { recursive: true });
-    fs.writeFileSync(
-      path.join(repoRoot, "dist", "package.json"),
-      '{"type":"module"}\n',
-    );
-    run("node", ["--import", "tsx", "scripts/write-build-info.ts"]);
-    run("node", ["scripts/generate-static-asset-manifest.mjs"], appCoreRoot);
-    // Published-only CI runs against an upstream eliza checkout whose pack
-    // fallback path still needs the generic npm->bun retry patch.
-    run("node", ["scripts/patch-release-check-pack-fallback.mjs"]);
-    run("bun", ["run", "release:check"]);
+      // tsdown and release:check resolve repo-root-relative entries/config.
+      run("node", [
+        "eliza/packages/app-core/scripts/ensure-shared-i18n-data.mjs",
+      ]);
+      run("node", ["scripts/run-tsdown.mjs", "--fail-on-warn", "false"]);
+      fs.mkdirSync(path.join(repoRoot, "dist"), { recursive: true });
+      fs.writeFileSync(
+        path.join(repoRoot, "dist", "package.json"),
+        '{"type":"module"}\n',
+      );
+      run("node", ["--import", "tsx", "scripts/write-build-info.ts"]);
+      run("node", ["scripts/generate-static-asset-manifest.mjs"], appCoreRoot);
+      run("bun", ["run", "release:check"]);
+    }
   } catch (err) {
     console.error(err.message ?? err);
     exitCode = 1;

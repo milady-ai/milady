@@ -3,11 +3,6 @@
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import {
-  findReleaseCheckFile,
-  findReleaseCheckPackDryRunFile,
-  patchReleaseCheckPackFallbackFiles,
-} from "./patch-release-check-pack-fallback.mjs";
-import {
   isElizaWorktreeClean,
   listElizaUntrackedFiles,
   restoreGeneratedElizaChanges,
@@ -23,7 +18,6 @@ const shouldRestoreElizaChanges = isElizaWorktreeClean();
 const initialElizaUntrackedFiles = shouldRestoreElizaChanges
   ? listElizaUntrackedFiles()
   : [];
-const originalContents = new Map();
 let exitStatus = 1;
 let exitSignal = null;
 
@@ -52,19 +46,6 @@ try {
     );
   }
 
-  const electrobunMacosStagePatchCheck = spawnSync(
-    "node",
-    ["scripts/patch-eliza-electrobun-macos-stage-entitlements.mjs"],
-    { stdio: "inherit" },
-  );
-  if (electrobunMacosStagePatchCheck.status !== 0) {
-    exitStatus = electrobunMacosStagePatchCheck.status ?? 1;
-    exitSignal = electrobunMacosStagePatchCheck.signal;
-    throw new Error(
-      "run-release-check: Electrobun macOS staging overlay drifted",
-    );
-  }
-
   const releaseWorkflow = fs.readFileSync(releaseWorkflowPath, "utf8");
   const missingReleaseWorkflowNeedles = releaseWorkflowNeedles.filter(
     (needle) => !releaseWorkflow.includes(needle),
@@ -78,23 +59,6 @@ try {
       ].join("\n"),
     );
   }
-
-  const releaseCheckFilePath = findReleaseCheckFile();
-  const packDryRunFilePath = findReleaseCheckPackDryRunFile();
-  for (const filePath of [releaseCheckFilePath, packDryRunFilePath]) {
-    if (typeof filePath === "string" && fs.existsSync(filePath)) {
-      originalContents.set(filePath, fs.readFileSync(filePath, "utf8"));
-    }
-  }
-
-  if (!releaseCheckFilePath) {
-    throw new Error("run-release-check: could not find release-check.ts");
-  }
-
-  patchReleaseCheckPackFallbackFiles({
-    releaseCheckFilePath,
-    packDryRunFilePath,
-  });
 
   const buildInfoResult = spawnSync(
     "node",
@@ -124,9 +88,6 @@ try {
     exitStatus = 1;
   }
 } finally {
-  for (const [filePath, contents] of originalContents) {
-    fs.writeFileSync(filePath, contents);
-  }
   restoreGeneratedElizaChanges(
     shouldRestoreElizaChanges,
     undefined,

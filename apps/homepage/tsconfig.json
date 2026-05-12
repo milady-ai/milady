@@ -24,76 +24,35 @@
       "../../node_modules",
       "../../node_modules/.bun/node_modules"
     ],
-    "baseUrl": "../..",
     "paths": {
-      "@elizaos/app-core": ["./eliza/packages/app-core/src/index.ts"],
-      "@elizaos/app-core/*": ["./eliza/packages/app-core/src/*"],
-      "@elizaos/app-task-coordinator": [
-        "./eliza/apps/app-task-coordinator/src/index.ts"
-      ],
-      "@elizaos/app-task-coordinator/*": [
-        "./eliza/apps/app-task-coordinator/src/*"
-      ],
-      "@elizaos/app-companion": ["./eliza/apps/app-companion/src/index.ts"],
-      "@elizaos/app-companion/*": ["./eliza/apps/app-companion/src/*"],
-      "@elizaos/app-lifeops": ["./eliza/apps/app-lifeops/src/index.ts"],
-      "@elizaos/app-lifeops/*": ["./eliza/apps/app-lifeops/src/*"],
-      "@elizaos/app-shopify": ["./eliza/apps/app-shopify/src/index.ts"],
-      "@elizaos/app-shopify/*": ["./eliza/apps/app-shopify/src/*"],
-      "@elizaos/app-hyperliquid": ["./eliza/apps/app-hyperliquid/src/index.ts"],
-      "@elizaos/app-hyperliquid/*": ["./eliza/apps/app-hyperliquid/src/*"],
-      "@elizaos/app-polymarket": ["./eliza/apps/app-polymarket/src/index.ts"],
-      "@elizaos/app-polymarket/*": ["./eliza/apps/app-polymarket/src/*"],
-      "@elizaos/app-steward": ["./eliza/plugins/app-steward/src/index.ts"],
-      "@elizaos/app-steward/*": ["./eliza/plugins/app-steward/src/*"],
-      "@elizaos/app-screenshare": ["./eliza/apps/app-screenshare/src/index.ts"],
-      "@elizaos/app-screenshare/*": ["./eliza/apps/app-screenshare/src/*"],
-      "@elizaos/app-training": ["./eliza/apps/app-training/src/index.ts"],
-      "@elizaos/app-training/*": ["./eliza/apps/app-training/src/*"],
-      "@elizaos/app-vincent": ["./eliza/apps/app-vincent/src/index.ts"],
-      "@elizaos/app-vincent/*": ["./eliza/apps/app-vincent/src/*"],
-      "@elizaos/agent": ["./eliza/packages/agent/src/index.ts"],
-      "@elizaos/agent/*": ["./eliza/packages/agent/src/*"],
+      "@elizaos/app-core": ["../../node_modules/@elizaos/app-core"],
+      "@elizaos/app-core/*": ["../../node_modules/@elizaos/app-core/*"],
+      "@elizaos/agent": ["../../node_modules/@elizaos/agent"],
+      "@elizaos/agent/*": ["../../node_modules/@elizaos/agent/*"],
       "@elizaos/plugin-browser-bridge": [
-        "./eliza/plugins/plugin-browser-bridge/src/index.ts"
+        "../../node_modules/@elizaos/plugin-browser-bridge"
       ],
       "@elizaos/plugin-browser-bridge/*": [
-        "./eliza/plugins/plugin-browser-bridge/src/*"
+        "../../node_modules/@elizaos/plugin-browser-bridge/*"
       ],
-      "@elizaos/core": ["./eliza/packages/typescript/src/index.ts"],
-      "@elizaos/core/*": ["./eliza/packages/typescript/src/*"],
-      "@elizaos/shared": ["./eliza/packages/shared/src/index.ts"],
-      "@elizaos/shared/*": ["./eliza/packages/shared/src/*"],
-      "@elizaos/capacitor-mobile-signals": [
-        "./eliza/packages/native-plugins/mobile-signals/src/index.ts"
-      ],
-      "@elizaos/ui": ["./eliza/packages/ui/src/index.ts"],
-      "@elizaos/ui/*": ["./eliza/packages/ui/src/*"],
-      "react": ["./eliza/node_modules/@types/react/index.d.ts"],
-      "react/jsx-runtime": [
-        "./eliza/node_modules/@types/react/jsx-runtime.d.ts"
-      ],
-      "react/jsx-dev-runtime": [
-        "./eliza/node_modules/@types/react/jsx-dev-runtime.d.ts"
-      ],
-      "react-dom": ["./eliza/node_modules/@types/react-dom/index.d.ts"],
-      "@elizaos/*": ["./node_modules/@elizaos/*"]
+      "@elizaos/core": ["../../node_modules/@elizaos/core"],
+      "@elizaos/core/*": ["../../node_modules/@elizaos/core/*"],
+      "@elizaos/shared": ["../../node_modules/@elizaos/shared"],
+      "@elizaos/shared/*": ["../../node_modules/@elizaos/shared/*"],
+      "@elizaos/*": ["../../node_modules/@elizaos/*"]
     },
     "strict": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
-    "forceConsistentCasingInFileNames": true,
-    "ignoreDeprecations": "6.0"
+    "forceConsistentCasingInFileNames": true
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
     "test/**/*.ts",
     "test/**/*.tsx",
-    "playwright.config.ts",
-    "../../eliza/packages/app-core/src/ambient-modules.d.ts",
-    "../../eliza/packages/agent/src/external-modules.d.ts"
+    "playwright.config.ts"
   ],
   "exclude": ["node_modules", "dist", "test-results", "playwright-report"]
 }

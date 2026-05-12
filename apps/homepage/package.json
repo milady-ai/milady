@@ -15,8 +15,9 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
-    "@elizaos/shared": "workspace:*",
-    "@elizaos/app-core": "workspace:*",
+    "@elizaos/shared": "alpha",
+    "@elizaos/app-core": "alpha",
+    "@elizaos/ui": "alpha",
     "dompurify": "^3.4.0",
     "mermaid": "^11.14.0",
     "react": "^19.0.0",

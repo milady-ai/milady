@@ -66,7 +66,7 @@ adb shell ps -A | grep milady
 ```
 
 emit no `audit: type=1326` lines (seccomp violations) and the
-`com.miladyai.milady` process is visible in `ps -A`. Static checks
+`ai.milady.milady` process is visible in `ps -A`. Static checks
 against the policy files themselves run via:
 
 ```bash
@@ -114,8 +114,8 @@ service, network stats, and so on. Far broader than the agent needs.
 `file_contexts` in this directory lists patterns like:
 
 ```
-/data/data/com\.miladyai\.milady/files/agent/bin(/.*)?  u:object_r:milady_agent_exec:s0
-/data/data/com\.miladyai\.milady/files/agent(/.*)?      u:object_r:milady_agent_data:s0
+/data/data/ai\.milady\.milady/files/agent/bin(/.*)?  u:object_r:milady_agent_exec:s0
+/data/data/ai\.milady\.milady/files/agent(/.*)?      u:object_r:milady_agent_data:s0
 ```
 
 But Android's `installd` does NOT consult `file_contexts` for files it
@@ -123,7 +123,7 @@ creates inside an app's data dir — it labels them via
 `seapp_contexts` (which only knows `privapp_data_file`). For
 `milady_agent_exec` to actually stick to the bun binary on disk, the
 `MiladyAgentService` Java code must explicitly invoke
-`SELinux.restoreconRecursive("/data/data/com.miladyai.milady/files/agent")`
+`SELinux.restoreconRecursive("/data/data/ai.milady.milady/files/agent")`
 after copying `assets/agent/` into place. That's the contract Phase B
 (the foreground service) has to honour.
 

@@ -2,20 +2,24 @@
  * Tests for the pairing-token client polling helper in `lib/open-web-ui.ts`.
  *
  * Covers the new 202 → poll → 200 flow that pairs with the server-side
- * auto-resume change in `apps/api/v1/milady/agents/[agentId]/pairing-token`.
+ * auto-resume change in `apps/api/v1/eliza/agents/[agentId]/pairing-token`.
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("../lib/runtime-config", () => ({
   CLOUD_BASE: "https://cloud.test",
+  getCloudAgentApiPath: (agentId?: string, suffix?: string) =>
+    `/api/v1/eliza/agents${agentId ? `/${agentId}` : ""}${
+      suffix ? `/${suffix}` : ""
+    }`,
   rewriteAgentUiUrl: (url: string) => url,
 }));
 
 import { redirectPopupToCloudAgent } from "../lib/open-web-ui";
 
 const AGENT_ID = "11111111-1111-4111-8111-111111111111";
-const TOKEN_URL = `https://cloud.test/api/v1/milady/agents/${AGENT_ID}/pairing-token`;
+const TOKEN_URL = `https://cloud.test/api/v1/eliza/agents/${AGENT_ID}/pairing-token`;
 
 interface FakePopup {
   closed: boolean;

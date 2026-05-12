@@ -86,12 +86,15 @@ if (
     env.MILADY_UI_SMOKE_API_PORT = String(apiPort);
     env.MILADY_API_PORT = env.MILADY_API_PORT || String(apiPort);
   }
+  env.ELIZA_UI_SMOKE_API_PORT =
+    env.ELIZA_UI_SMOKE_API_PORT || env.MILADY_UI_SMOKE_API_PORT;
 
   if (!env.MILADY_UI_SMOKE_PORT) {
     const uiPort = await getFreePort();
     env.MILADY_UI_SMOKE_PORT = String(uiPort);
     env.MILADY_PORT = env.MILADY_PORT || String(uiPort);
   }
+  env.ELIZA_UI_SMOKE_PORT = env.ELIZA_UI_SMOKE_PORT || env.MILADY_UI_SMOKE_PORT;
 }
 
 const child = spawn(resolvePlaywrightCommand(), ["test", ...playwrightArgs], {

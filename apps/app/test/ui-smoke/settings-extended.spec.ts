@@ -215,31 +215,9 @@ test("Appearance section lets the user pick a theme mode", async ({ page }) => {
     .toBe(false);
 });
 
-test("Permissions section exercises browser and local website permission controls", async ({
+test("Permissions section exercises browser permission controls", async ({
   page,
 }) => {
-  let websiteBlockingRequestHits = 0;
-  await page.route(
-    "**/api/permissions/website-blocking/request",
-    async (route) => {
-      if (route.request().method() !== "POST") {
-        await route.fallback();
-        return;
-      }
-      websiteBlockingRequestHits += 1;
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          id: "website-blocking",
-          status: "granted",
-          canRequest: false,
-          lastChecked: Date.now(),
-        }),
-      });
-    },
-  );
-
   await openSettings(page);
   await openSettingsSection(page, /^Permissions\b/);
 
@@ -250,13 +228,7 @@ test("Permissions section exercises browser and local website permission control
   await expect(
     permissions.getByRole("button", { name: "Grant Camera" }),
   ).toBeVisible();
-
-  const websiteBlockingRequestButton = permissions.getByRole("button", {
-    name: "Request Approval",
-  });
-  await expect(websiteBlockingRequestButton).toBeVisible();
-  await websiteBlockingRequestButton.click();
-  await expect
-    .poll(() => websiteBlockingRequestHits, { timeout: 5_000 })
-    .toBe(1);
+  await expect(
+    permissions.getByRole("button", { name: "Grant Microphone" }),
+  ).toBeVisible();
 });

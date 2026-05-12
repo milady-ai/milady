@@ -4,6 +4,7 @@ import { spawnSync } from "node:child_process";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
+import { isLocalElizaDisabled } from "./lib/eliza-package-mode.mjs";
 import { resolveRepoRoot } from "./lib/repo-root.mjs";
 
 const repoRoot = resolveRepoRoot(import.meta.url);
@@ -38,7 +39,7 @@ export const miladyTypecheckSteps = [
     command: "bun",
     args: ["run", "--cwd", "apps/homepage", "typecheck"],
   },
-  ...miladyElizaTypecheckSteps,
+  ...(isLocalElizaDisabled() ? [] : miladyElizaTypecheckSteps),
 ];
 
 // The repo-local eliza checkout includes a much larger upstream Rust/Python
@@ -49,6 +50,16 @@ export const miladyTypecheckSteps = [
 export const miladyElizaCrossLanguageChecks = [];
 export const miladyCloudTypecheckSteps = [];
 export const miladySidecarTypecheckSteps = [];
+const packageMode = isLocalElizaDisabled();
+const i18nLintSteps = packageMode
+  ? []
+  : [
+      {
+        label: "i18n translation coverage",
+        command: "bun",
+        args: ["run", "verify:i18n"],
+      },
+    ];
 
 // Keep repo-wide checks focused on the upstream packages Milady actually ships
 // against; the full eliza workspace includes unrelated plugin packages that can
@@ -58,6 +69,11 @@ export const miladySidecarTypecheckSteps = [];
 // the vendored eliza tree and turns CI into an upstream monorepo sweep.
 export const suites = {
   lint: [
+    {
+      label: "Submodule contract",
+      command: "node",
+      args: ["scripts/check-submodule-contract.mjs"],
+    },
     {
       label: "Repo Biome",
       command: "bun",
@@ -73,11 +89,7 @@ export const suites = {
       command: "bun",
       args: ["run", "--cwd", "apps/homepage", "lint"],
     },
-    {
-      label: "i18n translation coverage",
-      command: "bun",
-      args: ["run", "verify:i18n"],
-    },
+    ...i18nLintSteps,
     ...miladyElizaCrossLanguageChecks,
   ],
   typecheck: [...miladyTypecheckSteps],

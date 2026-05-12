@@ -34,6 +34,10 @@ inputs:
     description: "Disable repo-local eliza workspace in CI when local upstreams are skipped"
     required: false
     default: "false"
+  skip-local-upstreams-postinstall:
+    description: "Set MILADY_SKIP_LOCAL_UPSTREAMS=1 only while running repository postinstall patches"
+    required: false
+    default: "false"
   prepare-local-eliza-runtime:
     description: "Install repo-local eliza dependencies needed by jobs that execute local eliza scripts after published-only setup"
     required: false
@@ -65,7 +69,7 @@ runs:
         df -h /
 
     - name: Setup Python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ inputs.python-version }}
 
@@ -104,7 +108,7 @@ runs:
         bun-version: ${{ inputs.bun-version }}
 
     - name: Cache Bun install
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ~/.bun/install/cache
         key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
@@ -114,6 +118,7 @@ runs:
       shell: bash
       run: node scripts/init-submodules.mjs
       env:
+        MILADY_SKIP_LOCAL_UPSTREAMS: ${{ inputs.disable-local-eliza-workspace == 'true' && '1' || '' }}
         MILADY_SKIP_CLOUD_SUBMODULE: ${{ inputs.skip-cloud-submodule == 'true' && '1' || '' }}
 
     - name: Initialize local eliza workspace
@@ -128,22 +133,22 @@ runs:
       env:
         MILADY_SKIP_CLOUD_SUBMODULE: ${{ inputs.skip-cloud-submodule == 'true' && '1' || '' }}
 
-    # Hydrate eliza/ when prepare-local-eliza-runtime is set. Combines:
-    # 1. Shallow-init for disable-local-eliza-workspace version resolution
-    # 2. Full hydration for jobs that execute local eliza scripts
-    - name: Hydrate local eliza runtime checkout
-      if: ${{ inputs.prepare-local-eliza-runtime == 'true' }}
+    # Some review jobs still execute local eliza runtime scripts after the
+    # published-only install rewrite. Hydrate eliza only for those jobs; normal
+    # published-only CI resolves @elizaos/* versions from npm dist-tags.
+    - name: Shallow-init eliza submodule for version resolution
+      if: ${{ inputs.disable-local-eliza-workspace == 'true' && inputs.prepare-local-eliza-runtime == 'true' }}
       shell: bash
       run: |
-        git submodule sync -- eliza
-        git submodule update --init --depth=1 eliza
-        # Skip eliza/cloud submodule — fork CI jobs don't need cloud source
-        # and the nested checkout adds significant CI setup time.
-        git -C eliza config submodule.cloud.update none || true
+        if [ ! -f eliza/package.json ]; then
+          git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza
+        fi
 
-    - name: Apply Milady eliza CI patches
+    - name: Apply elizaOS source CI patches
       shell: bash
       run: node scripts/apply-eliza-ci-patches.mjs
+      env:
+        MILADY_SKIP_LOCAL_UPSTREAMS: ${{ inputs.disable-local-eliza-workspace == 'true' && '1' || '' }}
 
     # IMPORTANT: This mode is for published-only CI jobs. Do not enable it for
     # jobs that execute repo-local paths under eliza/ after dependency setup.
@@ -179,20 +184,26 @@ runs:
       if: ${{ inputs.disable-local-eliza-workspace != 'true' && inputs.skip-cloud-submodule != 'true' }}
       shell: bash
       run: |
+        if [ ! -d eliza ]; then
+          echo "eliza checkout absent; skipping nested cloud submodule init"
+          exit 0
+        fi
+        if ! git -C eliza rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+          echo "eliza/ is not a git worktree; skipping cloud hydration."
+          exit 0
+        fi
         git -C eliza submodule update --init cloud
         test -d eliza/cloud/packages/sdk
         test -d eliza/cloud/packages/billing
 
     # eliza/cloud/package.json declares Steward packages under
-    # `.external/steward/packages/*` as workspaces. Those directories are
-    # populated for real later by `prepare-steward-workspaces.sh`, but Bun
-    # resolves the cloud workspace graph as soon as it walks into
-    # `eliza/cloud/packages/sdk` (a workspace member of milady root and of
-    # eliza). Without these dirs on disk, `bun install` aborts with
-    # "Workspace not found .external/steward/packages/api". Pre-create
-    # minimal stub package.json files so workspace validation passes; the
-    # real Steward checkout overwrites them when `prepare-steward-workspaces.sh`
-    # runs in workflows that actually need the Steward source.
+    # `.external/steward/packages/*` as workspaces. Bun resolves the cloud
+    # workspace graph as soon as it walks into `eliza/cloud/packages/sdk` (a
+    # workspace member of milady root and of eliza). Without these dirs on
+    # disk, `bun install` aborts with "Workspace not found
+    # .external/steward/packages/api". Pre-create minimal stub package.json
+    # files so workspace validation passes in CI jobs that only need install
+    # and type/build verification.
     - name: Stub Steward workspace dirs for nested cloud workspace
       if: ${{ hashFiles('eliza/cloud/package.json') != '' }}
       shell: bash
@@ -208,6 +219,32 @@ runs:
     - name: Install dependencies
       shell: bash
       run: |
+        clean_bun_install_cache() {
+          node --input-type=module <<'NODE'
+        import fs from "node:fs";
+        import os from "node:os";
+        import path from "node:path";
+
+        const candidates = [
+          path.join(os.homedir(), ".bun", "install", "cache"),
+          process.env.BUN_INSTALL
+            ? path.join(process.env.BUN_INSTALL, "install", "cache")
+            : null,
+          process.env.LOCALAPPDATA
+            ? path.join(process.env.LOCALAPPDATA, "bun", "install", "cache")
+            : null,
+          process.env.XDG_CACHE_HOME
+            ? path.join(process.env.XDG_CACHE_HOME, "bun", "install", "cache")
+            : null,
+        ].filter(Boolean);
+
+        for (const cacheDir of new Set(candidates)) {
+          fs.rmSync(cacheDir, { recursive: true, force: true });
+          console.log(`Removed Bun install cache: ${cacheDir}`);
+        }
+        NODE
+        }
+
         for attempt in 1 2; do
           if ${{ inputs.install-command }}; then
             exit 0
@@ -215,17 +252,29 @@ runs:
           if [ "$attempt" -eq 2 ]; then
             exit 1
           fi
-          echo "Dependency install failed; retrying once after cleaning Bun's install cache."
-          rm -rf ~/.bun/install/cache
+          echo "Dependency install failed; retrying once after cleaning Bun install caches."
+          clean_bun_install_cache
           sleep 5
         done
       env:
         npm_config_python: ${{ env.pythonLocation }}/bin/python3
 
+    - name: Generate local eliza protobuf types
+      if: ${{ inputs.prepare-local-eliza-runtime == 'true' }}
+      shell: bash
+      run: |
+        if [ -d eliza/packages/schemas ] && [ -f eliza/packages/schemas/buf.gen.yaml ] && [ ! -f eliza/packages/core/src/types/generated/eliza/v1/agent_pb.ts ]; then
+          cd eliza/packages/schemas
+          node node_modules/@bufbuild/buf/install.js 2>/dev/null || true
+          bunx @bufbuild/buf@1.67.0 generate
+        fi
+
     - name: Install published-workspace fallback dependencies
       if: ${{ inputs.disable-local-eliza-workspace == 'true' }}
       shell: bash
       run: bash scripts/install-published-workspace-fallback-deps.sh
+      env:
+        MILADY_SKIP_LOCAL_UPSTREAMS: "1"
 
     - name: Build local eliza CI override packages
       if: ${{ inputs.disable-local-eliza-workspace == 'true' }}
@@ -239,22 +288,16 @@ runs:
       env:
         SKIP_AVATAR_CLONE: ${{ inputs.skip-avatar-clone == 'true' && '1' || '' }}
         MILADY_NO_VISION_DEPS: ${{ inputs.no-vision-deps == 'true' && '1' || '' }}
-        MILADY_SKIP_LOCAL_UPSTREAMS: ${{ inputs.disable-local-eliza-workspace == 'true' && '1' || '' }}
+        MILADY_SKIP_LOCAL_UPSTREAMS: ${{ (inputs.disable-local-eliza-workspace == 'true' || inputs.skip-local-upstreams-postinstall == 'true') && '1' || '' }}
 
     - name: Install local eliza runtime dependencies
-      if: ${{ inputs.prepare-local-eliza-runtime == 'true' && hashFiles('eliza/package.json') != '' }}
+      if: ${{ inputs.prepare-local-eliza-runtime == 'true' && inputs.disable-local-eliza-workspace == 'true' }}
       shell: bash
       run: |
         bun install --cwd eliza --no-frozen-lockfile --ignore-scripts
 
-    - name: Hydrate local eliza Bun package postinstall
-      if: ${{ inputs.prepare-local-eliza-runtime == 'true' && hashFiles('eliza/node_modules/bun/install.js') != '' }}
-      shell: bash
-      run: |
-        cd eliza/node_modules/bun && node install.js
-
     - name: Generate local eliza keyword data
-      if: ${{ inputs.prepare-local-eliza-runtime == 'true' && hashFiles('eliza/package.json') != '' }}
+      if: ${{ inputs.prepare-local-eliza-runtime == 'true' && inputs.disable-local-eliza-workspace == 'true' }}
       shell: bash
       run: |
         if [ -f eliza/packages/shared/scripts/generate-keywords.mjs ]; then

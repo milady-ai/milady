@@ -2,7 +2,7 @@
   "brand": "milady",
   "appName": "Milady",
   "distroName": "MiladyOS",
-  "packageName": "com.miladyai.milady",
+  "packageName": "ai.milady.milady",
   "classPrefix": "Milady",
   "productName": "milady_cf_x86_64_phone",
   "lunchTarget": "milady_cf_x86_64_phone-trunk_staging-userdebug",

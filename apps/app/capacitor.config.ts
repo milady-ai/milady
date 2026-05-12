@@ -2,7 +2,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
 import {
   parseAllowedHostEnv,
   toCapacitorAllowNavigation,
-} from "./allowed-hosts";
+} from "@elizaos/app-core/config/allowed-hosts";
 import appConfig from "./app.config";
 
 type CapacitorAllowNavigation = NonNullable<
@@ -53,6 +53,9 @@ const config: CapacitorConfig = {
       : {}),
   },
   plugins: {
+    CapacitorHttp: {
+      enabled: true,
+    },
     Keyboard: {
       resize: "body",
       resizeOnFullScreen: true,

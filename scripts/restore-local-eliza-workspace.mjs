@@ -5,6 +5,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { applyCiOnlyOverrides } from "./disable-local-eliza-workspace.mjs";
+import { applyTsconfigMode } from "./lib/tsconfig-mode.mjs";
 
 function getNestedElizaSubmoduleSkipArgs() {
   const skipped = ["plugin-openrouter"];
@@ -162,11 +163,13 @@ export function restoreLocalElizaWorkspace(
         "restore-local-eliza-workspace: .eliza.ci-disabled not present and eliza/ is missing; skipping restore.",
       );
       restoreRootPackageJson(repoRoot, { log, errorLog });
+      applyTsconfigMode(repoRoot, "local", { log });
       return false;
     }
     ensureNestedElizaSubmodules(repoRoot, { log, errorLog });
     restoreRootPackageJson(repoRoot, { log, errorLog });
     restoreRootCiOverrides(repoRoot, { log, errorLog });
+    applyTsconfigMode(repoRoot, "local", { log });
     log(
       "restore-local-eliza-workspace: eliza/ already present; nothing to restore.",
     );
@@ -177,6 +180,7 @@ export function restoreLocalElizaWorkspace(
     ensureNestedElizaSubmodules(repoRoot, { log, errorLog });
     restoreRootPackageJson(repoRoot, { log, errorLog });
     restoreRootCiOverrides(repoRoot, { log, errorLog });
+    applyTsconfigMode(repoRoot, "local", { log });
     log("restore-local-eliza-workspace: eliza/ already present; skipping.");
     return false;
   }
@@ -186,6 +190,7 @@ export function restoreLocalElizaWorkspace(
     ensureNestedElizaSubmodules(repoRoot, { log, errorLog });
     restoreRootPackageJson(repoRoot, { log, errorLog });
     restoreRootCiOverrides(repoRoot, { log, errorLog });
+    applyTsconfigMode(repoRoot, "local", { log });
     log(
       "restore-local-eliza-workspace: restored eliza/ from .eliza.ci-disabled/.",
     );

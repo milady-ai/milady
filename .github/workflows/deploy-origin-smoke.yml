@@ -45,10 +45,10 @@ jobs:
       EXPECT_GMAIL_TRIAGE: ${{ github.event.inputs.expect_gmail_triage || github.event.client_payload.expect_gmail_triage || 'false' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "22"
           check-latest: false
@@ -56,7 +56,7 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: "1.3.10"
+          bun-version: "1.3.13"
 
       - name: Run deploy smoke checks
         env:
@@ -75,10 +75,12 @@ jobs:
       - name: Summarize checked origins
         if: always()
         run: |
-          echo "## Deploy Origin Smoke" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Marketing origin: \`$MARKETING_ORIGIN\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "- App origin: \`$APP_ORIGIN\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Expect Google connected: \`$EXPECT_GOOGLE_CONNECTED\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Expect Gmail triage: \`$EXPECT_GMAIL_TRIAGE\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Runbooks: \`docs/DEPLOY_ORIGIN_SMOKE.md\`, \`docs/lifeops-production-runbook.md\`" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "## Deploy Origin Smoke"
+            echo ""
+            echo "- Marketing origin: \`$MARKETING_ORIGIN\`"
+            echo "- App origin: \`$APP_ORIGIN\`"
+            echo "- Expect Google connected: \`$EXPECT_GOOGLE_CONNECTED\`"
+            echo "- Expect Gmail triage: \`$EXPECT_GMAIL_TRIAGE\`"
+            echo "- Runbooks: \`docs/DEPLOY_ORIGIN_SMOKE.md\`, \`docs/lifeops-production-runbook.md\`"
+          } >> "$GITHUB_STEP_SUMMARY"

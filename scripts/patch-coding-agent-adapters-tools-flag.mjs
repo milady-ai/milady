@@ -18,12 +18,18 @@
  *
  * Remove this script once the upstream package exposes a config knob to
  * disable the --tools cliFlag (or the claude.ai tier ships dev-tier tool
- * names — whichever comes first).
+ * names — whichever comes first). Upstream PR adding the
+ * `disableToolsFlag` config option:
+ *   https://github.com/HaruHunab1320/parallax/pull/43
+ * Once that PR lands and a new alpha of coding-agent-adapters is published,
+ * switch Milady to set `disableToolsFlag: true` on the Claude preset
+ * options and delete this script.
  */
 import fs from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { isLocalElizaDisabled } from "./lib/eliza-package-mode.mjs";
 
 const PINNED_VERSION = "0.16.3";
 const OLD = `    const allTools = Object.keys(CLAUDE_TOOL_CATEGORIES);\n    cliFlags.push("--tools", allTools.join(","));`;
@@ -41,7 +47,11 @@ function candidatePaths(repoRoot = resolveRepoRootFromScriptUrl()) {
     }
   };
 
-  for (const root of [repoRoot, path.join(repoRoot, "eliza")]) {
+  const roots = isLocalElizaDisabled()
+    ? [repoRoot]
+    : [repoRoot, path.join(repoRoot, "eliza")];
+
+  for (const root of roots) {
     const requireFromRoot = createRequire(path.join(root, "package.json"));
     try {
       const entry = requireFromRoot.resolve("coding-agent-adapters");

@@ -18,9 +18,12 @@
  */
 
 import { Capacitor } from "@capacitor/core";
-import { AGENT_READY_EVENT, dispatchAppEvent } from "@elizaos/app-core";
+import {
+  AGENT_READY_EVENT,
+  dispatchAppEvent,
+  resolveIosRuntimeConfig,
+} from "@elizaos/app-core";
 import { APP_LOG_PREFIX } from "./app-config";
-import { resolveIosRuntimeConfig } from "./ios-runtime";
 
 const LOG_PREFIX = `${APP_LOG_PREFIX} [ios-local-runtime]`;
 
@@ -87,7 +90,7 @@ function isApplicable(): boolean {
 async function loadPlugin(): Promise<BunRuntimePlugin | null> {
   try {
     const mod = await import("@elizaos/capacitor-bun-runtime");
-    const plugin = (mod as { ElizaBunRuntime?: BunRuntimePlugin })
+    const plugin = (mod as unknown as { ElizaBunRuntime?: BunRuntimePlugin })
       .ElizaBunRuntime;
     if (!plugin) {
       console.warn(

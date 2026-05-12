@@ -22,78 +22,188 @@
     "types": ["vite/client", "bun-types"],
     "baseUrl": "../..",
     "paths": {
-      "@elizaos/app-core": ["./eliza/packages/app-core/dist/browser.d.ts"],
+      "@elizaos/app-core": ["./node_modules/@elizaos/app-core"],
       "@elizaos/app-core/platform/native-plugin-entrypoints": [
-        "./eliza/packages/app-core/src/platform/native-plugin-entrypoints.ts"
+        "./node_modules/@elizaos/app-core/platform/native-plugin-entrypoints"
       ],
-      "@elizaos/app-core/*": ["./eliza/packages/app-core/dist/*"],
-      "@elizaos/app-task-coordinator": [
-        "./eliza/node_modules/@elizaos/app-task-coordinator"
+      "@elizaos/app-core/*": ["./node_modules/@elizaos/app-core/*"],
+      "@elizaos/app-hyperscape": [
+        "./node_modules/@elizaos/app-hyperscape",
+        "./apps/app/src/optional-eliza-app-stub.tsx"
       ],
-      "@elizaos/app-contacts": ["./eliza/plugins/app-contacts/src/index.ts"],
-      "@elizaos/app-contacts/*": ["./eliza/plugins/app-contacts/src/*"],
-      "@elizaos/app-phone": ["./eliza/plugins/app-phone/src/index.ts"],
-      "@elizaos/app-phone/*": ["./eliza/plugins/app-phone/src/*"],
-      "@elizaos/app-wifi": ["./eliza/plugins/app-wifi/src/index.ts"],
-      "@elizaos/app-wifi/*": ["./eliza/plugins/app-wifi/src/*"],
-      "@elizaos/agent": [
-        "./eliza/packages/agent/dist/packages/agent/src/index.d.ts"
+      "@elizaos/app-hyperscape/*": [
+        "./node_modules/@elizaos/app-hyperscape/*",
+        "./apps/app/src/optional-eliza-app-stub.tsx"
       ],
-      "@elizaos/agent/*": ["./eliza/packages/agent/dist/packages/agent/src/*"],
+      "@elizaos/agent": ["./node_modules/@elizaos/agent"],
+      "@elizaos/agent/*": ["./node_modules/@elizaos/agent/*"],
       "@elizaos/plugin-browser-bridge": [
-        "./eliza/plugins/plugin-browser-bridge/src/index.ts"
+        "./node_modules/@elizaos/plugin-browser-bridge"
       ],
       "@elizaos/plugin-browser-bridge/*": [
-        "./eliza/plugins/plugin-browser-bridge/src/*"
+        "./node_modules/@elizaos/plugin-browser-bridge/*"
       ],
-      "@elizaos/core": ["./eliza/packages/typescript/src/index.ts"],
-      "@elizaos/core/*": ["./eliza/packages/typescript/src/*"],
-      "@elizaos/shared": ["./eliza/packages/shared/src/index.ts"],
-      "@elizaos/shared/*": ["./eliza/packages/shared/src/*"],
-      "@elizaos/capacitor-agent": [
-        "./eliza/packages/native-plugins/agent/src/index.ts"
+      "@elizaos/core": ["./node_modules/@elizaos/core"],
+      "@elizaos/core/*": ["./node_modules/@elizaos/core/*"],
+      "@elizaos/shared": ["./node_modules/@elizaos/shared"],
+      "@elizaos/shared/*": ["./node_modules/@elizaos/shared/*"],
+      "@elizaos/skills": ["./node_modules/@elizaos/skills"],
+      "@elizaos/skills/*": ["./node_modules/@elizaos/skills/*"],
+      "@elizaos/ui": ["./node_modules/@elizaos/ui"],
+      "@elizaos/ui/*": ["./node_modules/@elizaos/ui/*"],
+      "react": ["./node_modules/@types/react/index.d.ts"],
+      "react/jsx-runtime": ["./node_modules/@types/react/jsx-runtime.d.ts"],
+      "react/jsx-dev-runtime": [
+        "./node_modules/@types/react/jsx-dev-runtime.d.ts"
       ],
-      "@elizaos/capacitor-contacts": [
-        "./eliza/packages/native-plugins/contacts/src/index.ts"
+      "react-dom": ["./node_modules/@types/react-dom/index.d.ts"],
+      "react-dom/client": ["./node_modules/@types/react-dom/client.d.ts"],
+      "@elizaos/*": ["./node_modules/@elizaos/*"],
+      "@elizaos/app-2004scape": ["./apps/app/src/optional-eliza-app-stub.tsx"],
+      "@elizaos/app-2004scape/*": [
+        "./apps/app/src/optional-eliza-app-stub.tsx"
       ],
-      "@elizaos/capacitor-desktop": [
-        "./eliza/packages/native-plugins/desktop/src/index.ts"
+      "@elizaos/app-babylon": ["./apps/app/src/optional-eliza-app-stub.tsx"],
+      "@elizaos/app-babylon/*": ["./apps/app/src/optional-eliza-app-stub.tsx"],
+      "@elizaos/app-elizamaker": ["./apps/app/src/optional-eliza-app-stub.tsx"],
+      "@elizaos/app-elizamaker/*": [
+        "./apps/app/src/optional-eliza-app-stub.tsx"
       ],
-      "@elizaos/capacitor-phone": [
-        "./eliza/packages/native-plugins/phone/src/index.ts"
+      "@elizaos/app-task-coordinator": [
+        "./apps/app/src/optional-eliza-app-stub.tsx"
       ],
-      "@elizaos/capacitor-wifi": [
-        "./eliza/packages/native-plugins/wifi/src/index.ts"
+      "@elizaos/app-task-coordinator/*": [
+        "./apps/app/src/optional-eliza-app-stub.tsx"
       ],
-      "@elizaos/capacitor-llama": [
-        "./eliza/packages/native-plugins/llama/src/index.ts"
+      "@elizaos/app-companion": ["./apps/app/src/optional-eliza-app-stub.tsx"],
+      "@elizaos/app-companion/*": [
+        "./apps/app/src/optional-eliza-app-stub.tsx"
       ],
+      "@elizaos/app-contacts": ["./apps/app/src/optional-eliza-app-stub.tsx"],
+      "@elizaos/app-contacts/*": ["./apps/app/src/optional-eliza-app-stub.tsx"],
+      "@elizaos/app-defense-of-the-agents": [
+        "./apps/app/src/optional-eliza-app-stub.tsx"
+      ],
+      "@elizaos/app-defense-of-the-agents/*": [
+        "./apps/app/src/optional-eliza-app-stub.tsx"
+      ],
+      "@elizaos/app-lifeops": ["./apps/app/src/optional-eliza-app-stub.tsx"],
+      "@elizaos/app-lifeops/*": ["./apps/app/src/optional-eliza-app-stub.tsx"],
+      "@elizaos/app-scape": ["./apps/app/src/optional-eliza-app-stub.tsx"],
+      "@elizaos/app-scape/*": ["./apps/app/src/optional-eliza-app-stub.tsx"],
+      "@elizaos/app-shopify": ["./apps/app/src/optional-eliza-app-stub.tsx"],
+      "@elizaos/app-shopify/*": ["./apps/app/src/optional-eliza-app-stub.tsx"],
+      "@elizaos/app-hyperliquid": [
+        "./apps/app/src/optional-eliza-app-stub.tsx"
+      ],
+      "@elizaos/app-hyperliquid/*": [
+        "./apps/app/src/optional-eliza-app-stub.tsx"
+      ],
+      "@elizaos/app-polymarket": ["./apps/app/src/optional-eliza-app-stub.tsx"],
+      "@elizaos/app-polymarket/*": [
+        "./apps/app/src/optional-eliza-app-stub.tsx"
+      ],
+      "@elizaos/app-phone": ["./apps/app/src/optional-eliza-app-stub.tsx"],
+      "@elizaos/app-phone/*": ["./apps/app/src/optional-eliza-app-stub.tsx"],
+      "@elizaos/app-steward": ["./apps/app/src/optional-eliza-app-stub.tsx"],
+      "@elizaos/app-steward/*": ["./apps/app/src/optional-eliza-app-stub.tsx"],
+      "@elizaos/app-screenshare": [
+        "./apps/app/src/optional-eliza-app-stub.tsx"
+      ],
+      "@elizaos/app-screenshare/*": [
+        "./apps/app/src/optional-eliza-app-stub.tsx"
+      ],
+      "@elizaos/app-training": ["./apps/app/src/optional-eliza-app-stub.tsx"],
+      "@elizaos/app-training/*": ["./apps/app/src/optional-eliza-app-stub.tsx"],
+      "@elizaos/app-trajectory-logger": [
+        "./apps/app/src/optional-eliza-app-stub.tsx"
+      ],
+      "@elizaos/app-trajectory-logger/*": [
+        "./apps/app/src/optional-eliza-app-stub.tsx"
+      ],
+      "@elizaos/app-vincent": ["./apps/app/src/optional-eliza-app-stub.tsx"],
+      "@elizaos/app-vincent/*": ["./apps/app/src/optional-eliza-app-stub.tsx"],
+      "@elizaos/app-wallet": ["./apps/app/src/optional-eliza-app-stub.tsx"],
+      "@elizaos/app-wallet/*": ["./apps/app/src/optional-eliza-app-stub.tsx"],
+      "@elizaos/app-wifi": ["./apps/app/src/optional-eliza-app-stub.tsx"],
+      "@elizaos/app-wifi/*": ["./apps/app/src/optional-eliza-app-stub.tsx"],
+      "@elizaos/app-workflow-builder": [
+        "./apps/app/src/optional-eliza-app-stub.tsx"
+      ],
+      "@elizaos/app-workflow-builder/*": [
+        "./apps/app/src/optional-eliza-app-stub.tsx"
+      ],
+      "@clawville/app-clawville": [
+        "./apps/app/src/optional-eliza-app-stub.tsx"
+      ],
+      "@clawville/app-clawville/*": [
+        "./apps/app/src/optional-eliza-app-stub.tsx"
+      ],
+      "@elizaos/capacitor-agent": ["./apps/app/src/native-plugin-stubs.ts"],
+      "@elizaos/capacitor-agent/*": ["./apps/app/src/native-plugin-stubs.ts"],
+      "@elizaos/capacitor-contacts": ["./apps/app/src/native-plugin-stubs.ts"],
+      "@elizaos/capacitor-contacts/*": [
+        "./apps/app/src/native-plugin-stubs.ts"
+      ],
+      "@elizaos/capacitor-desktop": ["./apps/app/src/native-plugin-stubs.ts"],
+      "@elizaos/capacitor-desktop/*": ["./apps/app/src/native-plugin-stubs.ts"],
+      "@elizaos/capacitor-phone": ["./apps/app/src/native-plugin-stubs.ts"],
+      "@elizaos/capacitor-phone/*": ["./apps/app/src/native-plugin-stubs.ts"],
+      "@elizaos/capacitor-wifi": ["./apps/app/src/native-plugin-stubs.ts"],
+      "@elizaos/capacitor-wifi/*": ["./apps/app/src/native-plugin-stubs.ts"],
+      "@elizaos/capacitor-llama": ["./apps/app/src/native-plugin-stubs.ts"],
+      "@elizaos/capacitor-llama/*": ["./apps/app/src/native-plugin-stubs.ts"],
       "@elizaos/capacitor-mobile-signals": [
-        "./eliza/packages/native-plugins/mobile-signals/src/index.ts"
+        "./apps/app/src/native-plugin-stubs.ts"
+      ],
+      "@elizaos/capacitor-mobile-signals/*": [
+        "./apps/app/src/native-plugin-stubs.ts"
+      ],
+      "@elizaos/capacitor-appblocker": [
+        "./apps/app/src/native-plugin-stubs.ts"
+      ],
+      "@elizaos/capacitor-appblocker/*": [
+        "./apps/app/src/native-plugin-stubs.ts"
+      ],
+      "@elizaos/capacitor-camera": ["./apps/app/src/native-plugin-stubs.ts"],
+      "@elizaos/capacitor-camera/*": ["./apps/app/src/native-plugin-stubs.ts"],
+      "@elizaos/capacitor-canvas": ["./apps/app/src/native-plugin-stubs.ts"],
+      "@elizaos/capacitor-canvas/*": ["./apps/app/src/native-plugin-stubs.ts"],
+      "@elizaos/capacitor-gateway": ["./apps/app/src/native-plugin-stubs.ts"],
+      "@elizaos/capacitor-gateway/*": ["./apps/app/src/native-plugin-stubs.ts"],
+      "@elizaos/capacitor-location": ["./apps/app/src/native-plugin-stubs.ts"],
+      "@elizaos/capacitor-location/*": [
+        "./apps/app/src/native-plugin-stubs.ts"
+      ],
+      "@elizaos/capacitor-messages": ["./apps/app/src/native-plugin-stubs.ts"],
+      "@elizaos/capacitor-messages/*": [
+        "./apps/app/src/native-plugin-stubs.ts"
+      ],
+      "@elizaos/capacitor-screencapture": [
+        "./apps/app/src/native-plugin-stubs.ts"
+      ],
+      "@elizaos/capacitor-screencapture/*": [
+        "./apps/app/src/native-plugin-stubs.ts"
+      ],
+      "@elizaos/capacitor-swabble": ["./apps/app/src/native-plugin-stubs.ts"],
+      "@elizaos/capacitor-swabble/*": ["./apps/app/src/native-plugin-stubs.ts"],
+      "@elizaos/capacitor-system": ["./apps/app/src/native-plugin-stubs.ts"],
+      "@elizaos/capacitor-system/*": ["./apps/app/src/native-plugin-stubs.ts"],
+      "@elizaos/capacitor-talkmode": ["./apps/app/src/native-plugin-stubs.ts"],
+      "@elizaos/capacitor-talkmode/*": [
+        "./apps/app/src/native-plugin-stubs.ts"
+      ],
+      "@elizaos/capacitor-websiteblocker": [
+        "./apps/app/src/native-plugin-stubs.ts"
+      ],
+      "@elizaos/capacitor-websiteblocker/*": [
+        "./apps/app/src/native-plugin-stubs.ts"
       ],
       "@elizaos/native-activity-tracker": [
-        "./eliza/packages/native-plugins/activity-tracker/src/index.ts"
-      ],
-      "@elizaos/ui": ["./eliza/packages/ui/dist/index.d.ts"],
-      "@elizaos/ui/*": ["./eliza/packages/ui/dist/*"],
-      "react": ["./eliza/node_modules/@types/react/index.d.ts"],
-      "react/jsx-runtime": [
-        "./eliza/node_modules/@types/react/jsx-runtime.d.ts"
-      ],
-      "react/jsx-dev-runtime": [
-        "./eliza/node_modules/@types/react/jsx-dev-runtime.d.ts"
-      ],
-      "react-dom": ["./eliza/node_modules/@types/react-dom/index.d.ts"],
-      "react-dom/client": ["./eliza/node_modules/@types/react-dom/client.d.ts"],
-      "@elizaos/*": ["./node_modules/@elizaos/*"]
+        "./apps/app/src/native-plugin-stubs.ts"
+      ]
     }
   },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "../../eliza/packages/app-core/src/ambient-modules.d.ts",
-    "../../eliza/packages/agent/src/external-modules.d.ts"
-  ],
-  "files": ["src/ambient-eliza-apps.d.ts"],
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules", "dist", "ios", "android", "electrobun"]
 }

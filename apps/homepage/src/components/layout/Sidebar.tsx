@@ -1,10 +1,11 @@
 import type { ReactNode } from "react";
 import { releaseData } from "../../generated/release-data";
 import type { ManagedAgent } from "../../lib/AgentProvider";
-import { resolveHomepageAssetUrl } from "../../lib/asset-url";
 import { SessionTile } from "./SessionTile";
 
 const GITHUB_URL = "https://github.com/milady-ai/milady";
+const LATEST_RELEASE_URL =
+  "https://github.com/milady-ai/milady/releases/latest";
 
 export type LocalRuntimeState = "ready" | "probing" | "offline";
 
@@ -40,11 +41,6 @@ export function Sidebar({
           className="flex items-center gap-2.5"
           onClick={onClose}
         >
-          <img
-            src={resolveHomepageAssetUrl("logo.png")}
-            alt="Milady"
-            className="h-8 w-8 rounded-md border border-white/10 object-cover"
-          />
           <span className="text-[15px] font-semibold tracking-tight">
             milady
           </span>
@@ -97,7 +93,7 @@ export function Sidebar({
           <NavItemExternal href="/docs" label="docs" internal />
           <NavItemExternal href={GITHUB_URL} label="github" />
           <NavItemExternal
-            href={releaseData.release.url}
+            href={LATEST_RELEASE_URL}
             label={`release ${releaseData.release.tagName}`}
           />
         </NavGroup>

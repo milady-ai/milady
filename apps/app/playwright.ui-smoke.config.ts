@@ -12,8 +12,14 @@ const uiSmokeLiveStack = path.join(
   "scripts",
   "playwright-ui-live-stack.ts",
 );
-const uiSmokeApiPort = Number(process.env.MILADY_UI_SMOKE_API_PORT || "31337");
-const uiSmokePort = Number(process.env.MILADY_UI_SMOKE_PORT || "2138");
+const uiSmokeApiPort = Number(
+  process.env.MILADY_UI_SMOKE_API_PORT ||
+    process.env.ELIZA_UI_SMOKE_API_PORT ||
+    "31337",
+);
+const uiSmokePort = Number(
+  process.env.MILADY_UI_SMOKE_PORT || process.env.ELIZA_UI_SMOKE_PORT || "2138",
+);
 const reuseExistingServer = process.env.MILADY_UI_SMOKE_REUSE_SERVER === "1";
 
 // Keep the app's API port env aligned with the live stack when the suite runs
@@ -21,6 +27,10 @@ const reuseExistingServer = process.env.MILADY_UI_SMOKE_REUSE_SERVER === "1";
 if (!process.env.MILADY_API_PORT) {
   process.env.MILADY_API_PORT = String(uiSmokeApiPort);
 }
+process.env.ELIZA_UI_SMOKE_API_PORT =
+  process.env.ELIZA_UI_SMOKE_API_PORT || String(uiSmokeApiPort);
+process.env.ELIZA_UI_SMOKE_PORT =
+  process.env.ELIZA_UI_SMOKE_PORT || String(uiSmokePort);
 
 export default defineConfig({
   testDir: "./test/ui-smoke",
@@ -45,7 +55,7 @@ export default defineConfig({
     },
     {
       name: "mobile-chromium",
-      testMatch: /mobile-routes\.spec\.ts/,
+      testMatch: /(?:backgrounds|mobile-routes)\.spec\.ts/,
       use: { ...devices["Pixel 7"] },
     },
   ],
