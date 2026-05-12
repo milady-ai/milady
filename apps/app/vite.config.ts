@@ -323,18 +323,33 @@ function resolveLocalElizaAppAliases(): Alias[] {
       for (const [key, value] of Object.entries(pkg.exports || {})) {
         const exportTarget = resolveExportTarget(value);
         if (!exportTarget) continue;
+        const resolvedTarget = path.resolve(pkgDir, exportTarget);
+        // Only create an alias when the target file actually exists on disk.
+        // In a fresh local clone, dist/ may not be built yet. Skipping the
+        // alias lets the import fall through to the stub or npm package.
+        if (!fs.existsSync(resolvedTarget)) continue;
         const aliasKey =
           key === "." ? pkgName : `${pkgName}/${key.replace(/^\.\//, "")}`;
         aliases.push({
           find: new RegExp(`^${escapeRegExp(aliasKey)}$`),
-          replacement: path.resolve(pkgDir, exportTarget),
+          replacement: resolvedTarget,
         });
       }
 
-      aliases.push({
-        find: new RegExp(`^${escapeRegExp(pkgName)}/(.*)`),
-        replacement: path.resolve(pkgDir, "src/$1"),
+      // Only add the src catch-all if at least one export target exists (i.e.
+      // the package has been built). Otherwise skip to avoid resolving src/
+      // imports for packages that are stubs or not yet compiled.
+      const hasSrcDir = fs.existsSync(path.join(pkgDir, "src"));
+      const hasBuiltExport = aliases.some((a) => {
+        const re = a.find;
+        return re instanceof RegExp && re.test(pkgName);
       });
+      if (hasSrcDir && hasBuiltExport) {
+        aliases.push({
+          find: new RegExp(`^${escapeRegExp(pkgName)}/(.*)`),
+          replacement: path.resolve(pkgDir, "src/$1"),
+        });
+      }
     }
   }
 
