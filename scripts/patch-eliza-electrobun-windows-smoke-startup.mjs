@@ -18,6 +18,12 @@ function replaceRequiredBlock(text, pattern, replacement) {
 }
 
 function patchWindowsSmokeScript(text) {
+  // elizaOS main has merged these Windows smoke-test improvements; detect
+  // the post-patch curl form and treat as satisfied.
+  if (/--connect-timeout 3 --max-time 5/.test(text)) {
+    return { matched: true, text };
+  }
+
   let nextText = text;
 
   for (const patch of [

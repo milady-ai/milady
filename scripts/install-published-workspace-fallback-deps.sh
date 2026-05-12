@@ -128,7 +128,10 @@ ensure_eliza_submodule_manifest() {
 # are no longer installed at root, but the build still bundles them.
 #
 # Skips any spec that starts with `workspace:` or `file:` since those only
-# resolve in-workspace.
+# resolve in-workspace. Also skips first-party @elizaos/* scopes — those are
+# installed via append_versioned_package using the dist-tag; pinning them here
+# with a literal version (e.g. 2.0.0-beta.1 for an unpublished plugin) causes
+# 404 errors from the registry.
 append_third_party_dependencies_from_manifest() {
   local manifest="$1"
   [[ -f "$manifest" ]] || return 0
@@ -141,6 +144,10 @@ append_third_party_dependencies_from_manifest() {
     for (const [name, spec] of Object.entries(deps)) {
       if (typeof spec !== "string" || spec.length === 0) continue;
       if (spec.startsWith("workspace:") || spec.startsWith("file:")) continue;
+      // Skip first-party scopes — installed separately via append_versioned_package
+      // with the canonical dist-tag. Literal version specs here (e.g. 2.0.0-beta.1)
+      // may point to packages that are not yet published and cause registry 404s.
+      if (name.startsWith("@elizaos/") || name.startsWith("@milady/") || name.startsWith("@clawville/")) continue;
       process.stdout.write(name + "\t" + spec + "\n");
     }
   ' "$manifest")"

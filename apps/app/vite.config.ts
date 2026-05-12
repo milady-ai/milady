@@ -1484,13 +1484,27 @@ function generateNamedExportStub(names: readonly string[]): string {
 const PLUGIN_ELIZACLOUD_STUB_NAMES = [
   "__resetCloudBaseUrlCache",
   "clearCloudSecrets",
+  "CloudOnboardingResult",
+  "CloudRouteState",
+  "CloudWalletDescriptor",
+  "CloudWalletProvider",
+  "ElizaCloudClient",
   "elizaOSCloudPlugin",
   "ensureCloudTtsApiKeyAlias",
   "getCloudSecret",
+  "getOrCreateClientAddressKey",
+  "handleCloudBillingRoute",
+  "handleCloudCompatRoute",
+  "handleCloudRelayRoute",
+  "handleCloudRoute",
+  "handleCloudStatusRoutes",
   "handleCloudTtsPreviewRoute",
   "isCloudProvisionedContainer",
   "mirrorCompatHeaders",
+  "normalizeCloudSecret",
   "normalizeCloudSiteUrl",
+  "persistCloudWalletCache",
+  "provisionCloudWalletsBestEffort",
   "resolveCloudApiBaseUrl",
   "resolveCloudApiKey",
   "resolveCloudTtsBaseUrl",
@@ -1500,6 +1514,43 @@ const PLUGIN_ELIZACLOUD_STUB_NAMES = [
 
 function generatePluginElizacloudStub(): string {
   return generateNamedExportStub(PLUGIN_ELIZACLOUD_STUB_NAMES);
+}
+
+// Names actually imported from @elizaos/plugin-local-inference by server-only
+// agent runtime modules. The renderer never enters those code paths; the
+// stub satisfies Rollup's static analysis and trees away at module init.
+const PLUGIN_LOCAL_INFERENCE_STUB_NAMES = [
+  "getLocalInferenceActiveModelId",
+  "getLocalInferenceActiveSnapshot",
+  "getLocalInferenceChatStatus",
+  "handleLocalInferenceChatCommand",
+  "handleLocalInferenceRoutes",
+] as const;
+
+function generatePluginLocalInferenceStub(): string {
+  return generateNamedExportStub(PLUGIN_LOCAL_INFERENCE_STUB_NAMES);
+}
+
+// esbuild is a server-only build-time dep that drizzle-kit pulls in; the
+// agent's plugin-compiler imports it as a namespace. Stub the surface
+// the renderer's transitive imports might touch.
+const ESBUILD_STUB_NAMES = [
+  "build",
+  "buildSync",
+  "context",
+  "transform",
+  "transformSync",
+  "formatMessages",
+  "formatMessagesSync",
+  "analyzeMetafile",
+  "analyzeMetafileSync",
+  "initialize",
+  "stop",
+  "version",
+] as const;
+
+function generateEsbuildStub(): string {
+  return generateNamedExportStub(ESBUILD_STUB_NAMES);
 }
 
 // Named exports referenced from @elizaos/agent/* subpaths by the
@@ -1560,12 +1611,24 @@ const NATIVE_MODULE_STUB_GENERATORS = new Map<
   ["async_hooks", generateAsyncHooksStub],
   ["@elizaos/agent", generateElizaosAgentStub],
   ["@elizaos/plugin-elizacloud", generatePluginElizacloudStub],
+  ["@elizaos/plugin-local-inference", generatePluginLocalInferenceStub],
+  ["esbuild", generateEsbuildStub],
   // @node-rs/argon2's server-side Rust binding is referenced by
   // app-core's password-hashing helpers. Renderer never executes them
   // (auth happens in the API child); stub the named exports.
   [
     "@node-rs/argon2",
     () => generateNamedExportStub(["hash", "verify", "Algorithm"]),
+  ],
+  [
+    "qrcode-terminal",
+    () =>
+      // plugin-whatsapp imports { generate } at module scope; provide the
+      // named export so Rollup's static analysis succeeds. The renderer
+      // never paints a terminal QR; this is a no-op shim.
+      "export const generate = (_text: unknown, _opts: unknown, cb?: (s: string) => void) => { if (cb) cb(''); };\n" +
+      "export const setErrorLevel = () => {};\n" +
+      "export default { generate, setErrorLevel };\n",
   ],
 ]);
 
@@ -1632,11 +1695,20 @@ function nativeModuleStubPlugin(): Plugin {
     // into the renderer graph, stub it before socksclient extends node:net.
     "telegram",
     "socks",
+    // Terminal QR code printer — Node-only, ships legacy CJS with strict-mode
+    // -illegal octal escapes (\033 ANSI codes). Rollup's parser rejects it.
+    // The renderer never paints to a terminal; stub so the server-side OAuth
+    // QR helper that imports it doesn't blow up the browser bundle.
+    "qrcode-terminal",
     // Server-only plugins statically imported from the @elizaos/agent runtime.
     // Their exports maps nest browser/node conditional exports that Vite 6's
     // commonjs--resolver cannot walk. Stubbing returns an empty Proxy virtual
     // module so the browser bundle never tries to execute server-only code.
     "@elizaos/plugin-local-embedding",
+    // plugin-local-inference creates a Node dns.Resolver at module load
+    // (mobileDnsResolver) — server-only side effect. Stub so the renderer
+    // never evaluates that initializer.
+    "@elizaos/plugin-local-inference",
     "@elizaos/plugin-anthropic",
     "@elizaos/plugin-pdf",
     "@elizaos/plugin-sql",
@@ -1657,6 +1729,11 @@ function nativeModuleStubPlugin(): Plugin {
     // happens server-side in the API child anyway.
     "@node-rs/argon2-wasm32-wasi",
     "@node-rs/argon2",
+    // esbuild is a build-time dep that drizzle-kit and friends pull in
+    // transitively. Its `lib/main.js` does `process.versions.node.split(".")`
+    // at module init, which throws in the renderer (process.versions.node
+    // is undefined in browsers). Stub so the bundle never evaluates that.
+    "esbuild",
     // OS keychain bridge — Node-only native addon (.node binary). Pulled
     // transitively by @elizaos/vault. Vite's commonjs--resolver chokes on
     // the platform-specific .node files; stub it for the renderer.
@@ -1673,6 +1750,11 @@ function nativeModuleStubPlugin(): Plugin {
   // (@napi-rs/keyring-darwin-arm64, -darwin-x64, -win32-x64-msvc, etc.).
   // Stub the entire scope so we don't have to enumerate every triple.
   const napiRsKeyringScopeRe = /^@napi-rs\/keyring(-.+)?$/;
+  // @snazzah/davey (Discord voice native bridge) and its platform binaries.
+  // The renderer never enters the voice-relay path; bare-specifier externals
+  // would leak `import "@snazzah/davey"` into the browser output where it
+  // can't resolve, so we stub the entire scope.
+  const snazzahDaveyScopeRe = /^@snazzah\/davey(-.+)?$/;
   // Capacitor native plugins — mobile-only, must never run in the browser.
   // Stubbing prevents Rollup from failing when bun workspaces don't hoist them.
   const capacitorNativeScopeRe = /^@capacitor\/(?!core)(.+)$/;
@@ -1727,6 +1809,8 @@ function nativeModuleStubPlugin(): Plugin {
       if (nativeScopeRe.test(id)) return VIRTUAL_PREFIX + id;
       // Scoped: @napi-rs/keyring + platform binaries
       if (napiRsKeyringScopeRe.test(id)) return VIRTUAL_PREFIX + id;
+      // Scoped: @snazzah/davey + platform binaries (Discord voice native bridge)
+      if (snazzahDaveyScopeRe.test(id)) return VIRTUAL_PREFIX + id;
       // Capacitor native plugins (@capacitor/* except @capacitor/core)
       if (capacitorNativeScopeRe.test(id) && !IS_CAPACITOR_MOBILE_BUILD) {
         return VIRTUAL_PREFIX + id;
