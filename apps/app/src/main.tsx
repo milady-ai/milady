@@ -1,8 +1,6 @@
 import { App, ErrorBoundary } from "@elizaos/app-core";
-// Styles bundled via the @elizaos/ui barrel. The Wave A refactor (eliza
-// commit 5a6f5f337) moved CSS out of @elizaos/app-core/styles/ but
-// didn't update this consumer; the new shape is a single subpath.
-import "@elizaos/ui/styles";
+import "@elizaos/app-core/styles/styles.css";
+import "@elizaos/app-core/styles/brand-gold.css";
 
 import { App as CapacitorApp } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";
@@ -140,10 +138,7 @@ import {
   resolveIosRuntimeConfig,
 } from "@elizaos/app-core";
 
-// CharacterEditor moved to @elizaos/ui in the Wave A refactor.
-// Static import keeps the load path honest (the previous lazy() wrapper
-// was being eagerly merged back into the main chunk by Rollup anyway).
-import { CharacterEditor } from "@elizaos/ui/components/character/CharacterEditor";
+import { CharacterEditor } from "@elizaos/app-core/components/character/CharacterEditor";
 
 declare global {
   interface Window {
