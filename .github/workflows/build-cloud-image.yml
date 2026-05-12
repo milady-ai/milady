@@ -158,9 +158,16 @@ jobs:
       - name: Build @elizaos/core (includes agent-orchestrator)
         run: |
           export PATH="$GITHUB_WORKSPACE/eliza/node_modules/.bin:$GITHUB_WORKSPACE/eliza/packages/schemas/node_modules/.bin:$PATH"
-          cd eliza/packages/schemas
-          buf dep update && buf generate
-          cd ../core
+          # Proto generation — eliza/packages/schemas was removed from
+          # upstream eliza in a recent restructure. Guard against its
+          # absence so the cloud image build works against current eliza
+          # develop. The pattern mirrors build-docker.yml's guard.
+          if [ -d eliza/packages/schemas ] && [ -f eliza/packages/schemas/buf.gen.yaml ]; then
+            (cd eliza/packages/schemas && buf dep update && buf generate)
+          else
+            echo "eliza/packages/schemas not present in this eliza checkout — skipping proto generation"
+          fi
+          cd eliza/packages/core
           node ../shared/scripts/generate-keywords.mjs --target ts 2>/dev/null || echo "keyword gen skipped"
           bun run build:node
 
