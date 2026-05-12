@@ -384,7 +384,17 @@ function resolveLocalSharedAliases(): Alias[] {
   return aliases;
 }
 
+function resolveLocalSharedDist(): string | null {
+  const localDist = path.join(localElizaRoot, "packages/shared/dist/index.js");
+  return fs.existsSync(localDist) ? localDist : null;
+}
+
 function resolveLocalAppCoreAliases(): Alias[] {
+  const sharedDist = resolveLocalSharedDist();
+  const sharedDistDir = sharedDist
+    ? path.join(localElizaRoot, "packages/shared/dist")
+    : null;
+
   const packageAgnosticAliases: Alias[] = [
     {
       find: /^@elizaos\/agent$/,
@@ -394,6 +404,21 @@ function resolveLocalAppCoreAliases(): Alias[] {
       find: /^@elizaos\/core$/,
       replacement: resolveElizaCoreBundlePath(),
     },
+    // When a local eliza workspace is present and @elizaos/shared has been
+    // built, prefer the local dist over the bun-store published copy which
+    // may lag behind and miss exports added in the local workspace.
+    ...(sharedDist
+      ? [
+          {
+            find: /^@elizaos\/shared$/,
+            replacement: sharedDist,
+          } as Alias,
+          {
+            find: /^@elizaos\/shared\/(.+)$/,
+            replacement: `${sharedDistDir}/$1`,
+          } as Alias,
+        ]
+      : []),
   ];
 
   const appCorePkgPath = path.join(
