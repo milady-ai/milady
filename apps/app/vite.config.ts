@@ -1748,6 +1748,21 @@ const NATIVE_MODULE_STUB_GENERATORS = new Map<
       "export const setErrorLevel = () => {};\n" +
       "export default { generate, setErrorLevel };\n",
   ],
+  // @elizaos/vault — OS keychain / encrypted SQLite secrets store.
+  // Server-only; the renderer never accesses vault directly. app-core/dist
+  // re-exports these names so Rollup needs them declared to avoid "not
+  // exported" static-analysis errors in the browser build.
+  [
+    "@elizaos/vault",
+    () =>
+      generateNamedExportStub([
+        "createManager",
+        "setEntryMeta",
+        "VaultMissError",
+        "SecretsManager",
+        "Vault",
+      ]),
+  ],
 ]);
 
 function isSharpStubId(strippedId: string): boolean {
@@ -1856,6 +1871,10 @@ function nativeModuleStubPlugin(): Plugin {
     // transitively by @elizaos/vault. Vite's commonjs--resolver chokes on
     // the platform-specific .node files; stub it for the renderer.
     "@napi-rs/keyring",
+    // Secrets vault — purely server-side (OS keychain / encrypted SQLite).
+    // app-core/dist re-exports vault symbols that the renderer never calls;
+    // stub so Vite doesn't choke when the local vault/dist is absent.
+    "@elizaos/vault",
   ]);
   if (!IS_CAPACITOR_MOBILE_BUILD) {
     // Mobile-only Capacitor llama.cpp runtime. Web/Electrobun builds stub it,
