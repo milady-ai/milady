@@ -1235,7 +1235,27 @@ function generateNodeBuiltinStub(moduleId: string, req = _require): string {
   const lines = [
     // noop: returns itself (for chained calls like createRequire(url)(id)),
     // and is a valid class base (so `class X extends noop` works).
-    "const handler = { get(t, p) { if (typeof p === 'symbol') return undefined; if (p === '__esModule') return true; if (p === 'default') return t; if (p === 'prototype') return {}; if (p in t) return t[p]; return noop; }, set(t, p, v) { try { t[p] = v; } catch {} return true; }, apply() { return noop; }, construct() { return noop; }, defineProperty(t, p, d) { try { Object.defineProperty(t, p, { configurable: true, writable: true, enumerable: true, ...d }); } catch {} return true; } };",
+    //
+    // Traps:
+    //   get/set/apply/construct/defineProperty — handle attribute access,
+    //     mutation, invocation, instantiation, and defineProperty on the
+    //     stub.
+    //   has/getOwnPropertyDescriptor — close reflection holes so
+    //     `'foo' in noop` and `Object.getOwnPropertyDescriptor(noop, 'foo')`
+    //     return predictable values. Without these, consumer code that
+    //     probes the stub (feature detection, fs-extra's top-level
+    //     `typeof fs.realpath.native === 'function'` check, esbuild
+    //     interop helpers) can throw `Cannot read properties of undefined`
+    //     at IIFE evaluation time before React mounts.
+    //     `getOwnPropertyDescriptor` falls through to the target's real
+    //     descriptor when the key exists on it — required to satisfy the
+    //     Proxy invariant that non-configurable target keys must be
+    //     reported with matching descriptors. `ownKeys` is intentionally
+    //     omitted: the default behavior already yields
+    //     `Object.keys(noop) === []` (target keys are non-enumerable) and
+    //     a custom trap would risk violating the invariant that
+    //     non-configurable target keys must appear in the result.
+    "const handler = { get(t, p) { if (typeof p === 'symbol') return undefined; if (p === '__esModule') return true; if (p === 'default') return t; if (p === 'prototype') return {}; if (p in t) return t[p]; return noop; }, set(t, p, v) { try { t[p] = v; } catch {} return true; }, apply() { return noop; }, construct() { return noop; }, defineProperty(t, p, d) { try { Object.defineProperty(t, p, { configurable: true, writable: true, enumerable: true, ...d }); } catch {} return true; }, has() { return true; }, getOwnPropertyDescriptor(t, p) { var own = Object.getOwnPropertyDescriptor(t, p); if (own) return own; return { configurable: true, enumerable: true, writable: true, value: noop }; } };",
     "const noop = new Proxy(function noop(){}, handler);",
     "const stub = new Proxy({}, handler);",
     "export default stub;",
