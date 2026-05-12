@@ -128,16 +128,18 @@ runs:
       env:
         MILADY_SKIP_CLOUD_SUBMODULE: ${{ inputs.skip-cloud-submodule == 'true' && '1' || '' }}
 
-    # disable-local-eliza-workspace.mjs needs eliza/ on disk to read package
-    # versions from workspace package.json files (overrides use workspace:*,
-    # not pinned versions). Shallow-init the submodule so version resolution
-    # succeeds, then the disable script rewrites workspace:* to registry versions.
-    - name: Shallow-init eliza submodule for version resolution
-      if: ${{ inputs.disable-local-eliza-workspace == 'true' }}
+    # Hydrate eliza/ when prepare-local-eliza-runtime is set. Combines:
+    # 1. Shallow-init for disable-local-eliza-workspace version resolution
+    # 2. Full hydration for jobs that execute local eliza scripts
+    - name: Hydrate local eliza runtime checkout
+      if: ${{ inputs.prepare-local-eliza-runtime == 'true' }}
       shell: bash
       run: |
         git submodule sync -- eliza
         git submodule update --init --depth=1 eliza
+        # Skip eliza/cloud submodule — fork CI jobs don't need cloud source
+        # and the nested checkout adds significant CI setup time.
+        git -C eliza config submodule.cloud.update none || true
 
     - name: Apply Milady eliza CI patches
       shell: bash
@@ -240,13 +242,19 @@ runs:
         MILADY_SKIP_LOCAL_UPSTREAMS: ${{ inputs.disable-local-eliza-workspace == 'true' && '1' || '' }}
 
     - name: Install local eliza runtime dependencies
-      if: ${{ inputs.prepare-local-eliza-runtime == 'true' && inputs.disable-local-eliza-workspace == 'true' }}
+      if: ${{ inputs.prepare-local-eliza-runtime == 'true' && hashFiles('eliza/package.json') != '' }}
       shell: bash
       run: |
         bun install --cwd eliza --no-frozen-lockfile --ignore-scripts
 
+    - name: Hydrate local eliza Bun package postinstall
+      if: ${{ inputs.prepare-local-eliza-runtime == 'true' && hashFiles('eliza/node_modules/bun/install.js') != '' }}
+      shell: bash
+      run: |
+        cd eliza/node_modules/bun && node install.js
+
     - name: Generate local eliza keyword data
-      if: ${{ inputs.prepare-local-eliza-runtime == 'true' && inputs.disable-local-eliza-workspace == 'true' }}
+      if: ${{ inputs.prepare-local-eliza-runtime == 'true' && hashFiles('eliza/package.json') != '' }}
       shell: bash
       run: |
         if [ -f eliza/packages/shared/scripts/generate-keywords.mjs ]; then

@@ -60,7 +60,7 @@ Install from the Skills Marketplace in the app, or ask your agent to install it.
 
 ### Wallet
 
-Milady auto-generates EVM and Solana wallet addresses on startup. For BSC trading you need to import your own private key (see above). If connected to **Eliza Cloud**, managed wallets via Privy are available without local key management.
+Milady auto-generates EVM and Solana wallet addresses on startup. For BSC trading you need to import your own private key (see above). If connected to **Eliza Cloud**, managed wallets via Steward are available without local key management.
 
 View your agent's wallet addresses in the Settings tab or ask: *"what's my wallet address?"*
 

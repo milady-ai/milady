@@ -358,8 +358,64 @@ try {
       client.setToken(bootstrapToken);
     } catch {}
   }
+
+  // AOSP / branded native shells inject a per-boot bearer token via
+  // window.ElizaNative.getLocalAgentToken(). Apply it immediately to
+  // the boot config so the first /api/auth/status fetch authenticates
+  // without a pair-code prompt. Stock Capacitor builds and web don't
+  // register this bridge, so the lookup resolves to null and falls
+  // through to the normal self-hosted token path above.
+  try {
+    const elizaNative = (
+      globalThis as unknown as { ElizaNative?: { getLocalAgentToken?: () => string | null } }
+    ).ElizaNative;
+    if (elizaNative && typeof elizaNative.getLocalAgentToken === "function") {
+      const nativeToken = elizaNative.getLocalAgentToken();
+      if (typeof nativeToken === "string" && nativeToken.trim()) {
+        appBootConfig.apiToken ??= nativeToken.trim();
+        try {
+          client.setToken(nativeToken.trim());
+        } catch {}
+      }
+    }
+  } catch {}
 } catch {}
 setBootConfig(appBootConfig);
+
+// Bearer-token watchdog for AOSP local-runtime: the per-boot bearer is
+// generated inside ElizaAgentService.startAgentProcess() on a background
+// thread, so getLocalAgentToken() may still be null when the JS bundle
+// first evaluates. Poll the bridge for up to 30 s and apply the token
+// the moment the service writes it.
+void (function watchElizaNativeToken() {
+  if (typeof globalThis === "undefined") return;
+  const bridge = (
+    globalThis as unknown as { ElizaNative?: { getLocalAgentToken?: () => string | null } }
+  ).ElizaNative;
+  if (!bridge || typeof bridge.getLocalAgentToken !== "function") return;
+  // If a token was already captured above, don't start the interval.
+  if (appBootConfig.apiToken) return;
+  let tries = 0;
+  const iv = setInterval(() => {
+    if (++tries > 120) {
+      clearInterval(iv);
+      return;
+    }
+    try {
+      const t = bridge.getLocalAgentToken?.();
+      if (typeof t === "string" && t.trim()) {
+        appBootConfig.apiToken = t.trim();
+        setBootConfig({ ...appBootConfig });
+        try {
+          client.setToken(t.trim());
+        } catch {}
+        clearInterval(iv);
+      }
+    } catch {
+      // swallow
+    }
+  }, 250);
+})();
 
 function getShareQueue(): ShareTargetPayload[] {
   const appWindow = getAppWindow();
@@ -664,6 +720,20 @@ function setupPlatformStyles(): void {
     "env(safe-area-inset-right, 0px)",
   );
   root.style.setProperty("--keyboard-height", "0px");
+
+  // Sizing on native: pin the React mount to the full visual viewport
+  // so the chat composer + keyboard-resize interaction stays clamped.
+  // We deliberately do NOT set `paddingTop / paddingLeft / paddingRight`
+  // here — the @elizaos/ui shell components apply their own safe-area padding.
+  // Adding a second layer on `#root` doubles the top inset.
+  if (isNative) {
+    const reactRoot = document.getElementById("root");
+    if (reactRoot) {
+      reactRoot.style.boxSizing = "border-box";
+      reactRoot.style.minHeight = "100dvh";
+      reactRoot.style.maxHeight = "100dvh";
+    }
+  }
 }
 
 function isPhoneCompanionMode(): boolean {

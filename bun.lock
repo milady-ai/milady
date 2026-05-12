@@ -2613,6 +2613,8 @@
     "@noble/curves@2.0.1": "eliza/packages/app-core/patches/@noble%2Fcurves@2.0.1.patch",
     "proper-lockfile@4.1.2": "eliza/packages/app-core/patches/proper-lockfile@4.1.2.patch",
     "@pixiv/three-vrm@3.5.2": "eliza/packages/app-core/patches/@pixiv%2Fthree-vrm@3.5.2.patch",
+    "@elizaos/agent@2.0.0-alpha.537": "patches/@elizaos%2Fagent@2.0.0-alpha.537.patch",
+    "@elizaos/app-core@2.0.0-alpha.537": "patches/@elizaos%2Fapp-core@2.0.0-alpha.537.patch",
   },
   "overrides": {
     "@ai-sdk/groq": "3.0.31",

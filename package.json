@@ -436,6 +436,8 @@
     "electrobun@1.16.0": "eliza/packages/app-core/patches/electrobun@1.16.0.patch",
     "pty-manager@1.11.0": "eliza/packages/app-core/patches/pty-manager@1.11.0.patch",
     "coding-agent-adapters@0.16.3": "eliza/packages/app-core/patches/coding-agent-adapters@0.16.3.patch",
-    "llama-cpp-capacitor@0.1.5": "eliza/packages/app-core/patches/llama-cpp-capacitor@0.1.5.patch"
+    "llama-cpp-capacitor@0.1.5": "eliza/packages/app-core/patches/llama-cpp-capacitor@0.1.5.patch",
+    "@elizaos/agent@2.0.0-alpha.537": "patches/@elizaos%2Fagent@2.0.0-alpha.537.patch",
+    "@elizaos/app-core@2.0.0-alpha.537": "patches/@elizaos%2Fapp-core@2.0.0-alpha.537.patch"
   }
 }
