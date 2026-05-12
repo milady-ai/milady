@@ -55,7 +55,9 @@ interface BunRuntimeListenerHandle {
 }
 
 interface BunRuntimePlugin {
-  start(opts: { bundlePath?: string }): Promise<{ ok: boolean; error?: string }>;
+  start(opts: {
+    bundlePath?: string;
+  }): Promise<{ ok: boolean; error?: string }>;
   sendMessage(opts: {
     message: string;
     conversationId?: string;

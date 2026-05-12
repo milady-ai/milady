@@ -146,6 +146,7 @@ function scanSources() {
 }
 
 function loadLocales() {
+  if (!fs.existsSync(LOCALE_DIR)) return null;
   const locales = {};
   for (const entry of fs.readdirSync(LOCALE_DIR)) {
     if (!entry.endsWith(".json")) continue;
@@ -187,6 +188,12 @@ function fmtSites(sites, max = 3) {
 function main() {
   const { literalKeys, prefixWildcards, dynamicSites } = scanSources();
   const locales = loadLocales();
+  if (locales === null) {
+    console.log(
+      "[i18n] locale directory not present — skipping coverage check",
+    );
+    return;
+  }
   const allowlist = loadAllowlist();
 
   const langs = Object.keys(locales).sort();

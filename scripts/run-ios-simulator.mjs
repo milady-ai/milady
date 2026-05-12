@@ -64,7 +64,7 @@ const POLYFILL_DIR = path.join(REPO_ROOT, "native/ios-bun-port/polyfill");
 const POLYFILL_DIST = path.join(POLYFILL_DIR, "dist/polyfill-prefix.js");
 
 const IOS_APP_DIR = path.join(REPO_ROOT, "apps/app/ios/App");
-const IOS_WORKSPACE = path.join(IOS_APP_DIR, "App.xcworkspace");
+const _IOS_WORKSPACE = path.join(IOS_APP_DIR, "App.xcworkspace");
 const IOS_AGENT_RESOURCE_DIR = path.join(IOS_APP_DIR, "App/agent");
 const IOS_MODELS_DIR = path.join(IOS_AGENT_RESOURCE_DIR, "models");
 
@@ -107,7 +107,11 @@ function run(cmd, args, opts = {}) {
   if (result.error) {
     fail(`failed to spawn '${cmd}': ${result.error.message}`);
   }
-  if (typeof result.status === "number" && result.status !== 0 && !opts.allowFailure) {
+  if (
+    typeof result.status === "number" &&
+    result.status !== 0 &&
+    !opts.allowFailure
+  ) {
     fail(`'${cmd}' exited ${result.status}`, result.status);
   }
   return result;
@@ -174,7 +178,9 @@ function verifyModel() {
     process.exit(1);
   }
   const size = fs.statSync(modelPath).size;
-  info(`model present at ${path.relative(REPO_ROOT, modelPath)} (${size} bytes)`);
+  info(
+    `model present at ${path.relative(REPO_ROOT, modelPath)} (${size} bytes)`,
+  );
 }
 
 function ensureWorkspaceInstalled() {
@@ -183,7 +189,9 @@ function ensureWorkspaceInstalled() {
     info("node_modules missing — running `bun install`.");
     run("bun", ["install"]);
   } else {
-    info("node_modules present — skipping `bun install` (run manually if stale).");
+    info(
+      "node_modules present — skipping `bun install` (run manually if stale).",
+    );
   }
 }
 
@@ -225,7 +233,10 @@ function buildPolyfillIfPresent() {
   const prefix = fs.readFileSync(POLYFILL_DIST, "utf8");
   const bundle = fs.readFileSync(bundlePath, "utf8");
   const polyfillSentinel = "// @milady/ios-jsc-polyfill prefix";
-  if (bundle.startsWith(polyfillSentinel) || bundle.includes(polyfillSentinel)) {
+  if (
+    bundle.startsWith(polyfillSentinel) ||
+    bundle.includes(polyfillSentinel)
+  ) {
     info("polyfill prefix already present in bundle — leaving as-is.");
     return;
   }
@@ -239,13 +250,10 @@ function buildPolyfillIfPresent() {
 
 function overlayIos() {
   step("Overlaying iOS Capacitor project...");
-  run(
-    "node",
-    [
-      "eliza/packages/app-core/scripts/run-mobile-build.mjs",
-      "ios-overlay",
-    ],
-  );
+  run("node", [
+    "eliza/packages/app-core/scripts/run-mobile-build.mjs",
+    "ios-overlay",
+  ]);
 }
 
 function stageAgentResources() {
@@ -434,5 +442,5 @@ async function main() {
 }
 
 main().catch((err) => {
-  fail(err instanceof Error ? err.stack ?? err.message : String(err));
+  fail(err instanceof Error ? (err.stack ?? err.message) : String(err));
 });

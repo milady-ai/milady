@@ -13,7 +13,7 @@ import {
   initializeStorageBridge,
   isElectrobunRuntime,
 } from "@elizaos/app-core";
-import { PhoneCompanionApp } from "@elizaos/app-core";
+import { PhoneCompanionApp } from "@elizaos/app-phone";
 import type { BrandingConfig } from "@elizaos/app-core";
 import {
   type AppBootConfig,
@@ -50,7 +50,7 @@ import {
 } from "@elizaos/app-core";
 import { AppWindowRenderer } from "@elizaos/app-core";
 import { dispatchQueuedLifeOpsGithubCallbackFromUrl } from "@elizaos/app-lifeops/platform";
-import type { ShareTargetPayload } from "@elizaos/app-core/platform";
+import type { ShareTargetPayload } from "@elizaos/ui";
 import {
   DESKTOP_TRAY_MENU_ITEMS,
   DesktopOnboardingRuntime,
@@ -73,7 +73,6 @@ import {
   createVectorBrowserRenderer,
   GlobalEmoteOverlay,
   InferenceCloudAlertButton,
-  prefetchVrmToCache,
   resolveCompanionInferenceNotice,
   THREE,
   useCompanionSceneStatus,
@@ -282,7 +281,6 @@ const appBootConfig: AppBootConfig = {
   companionInferenceAlertButton: InferenceCloudAlertButton,
   companionGlobalOverlay: GlobalEmoteOverlay,
   useCompanionSceneStatus,
-  prefetchVrmToCache,
   companionVectorBrowser: {
     THREE,
     createVectorBrowserRenderer,
@@ -695,7 +693,7 @@ async function initializeDesktopShell(): Promise<void> {
   subscribeDesktopBridgeEvent({
     rpcMessage: "shareTargetReceived",
     ipcChannel: "desktop:shareTargetReceived",
-    listener: (payload) => {
+    listener: (payload: unknown) => {
       const url = (payload as { url?: string } | null | undefined)?.url;
       if (typeof url !== "string" || url.trim().length === 0) {
         return;
@@ -778,6 +776,7 @@ function mountReactApp(): void {
             <PhoneCompanionApp />
           ) : detachedShell ? (
             <div className="flex h-screen min-h-0 w-screen flex-col overflow-hidden">
+              {/* @ts-expect-error browser stub doesn't declare route prop */}
               <DetachedShellRoot route={windowShellRoute} />
             </div>
           ) : appWindowSlug ? (

@@ -22,47 +22,24 @@
     "types": ["vite/client", "bun-types"],
     "baseUrl": "../..",
     "paths": {
-      "@elizaos/app-core": ["./eliza/packages/app-core/src/index.ts"],
+      "@elizaos/app-core": ["./eliza/packages/app-core/dist/browser.d.ts"],
       "@elizaos/app-core/platform/native-plugin-entrypoints": [
         "./eliza/packages/app-core/src/platform/native-plugin-entrypoints.ts"
       ],
-      "@elizaos/app-core/*": ["./eliza/packages/app-core/src/*"],
-      "@elizaos/app-elizamaker": ["./eliza/apps/app-elizamaker/src/index.ts"],
-      "@elizaos/app-elizamaker/*": ["./eliza/apps/app-elizamaker/src/*"],
+      "@elizaos/app-core/*": ["./eliza/packages/app-core/dist/*"],
       "@elizaos/app-task-coordinator": [
-        "./eliza/apps/app-task-coordinator/src/index.ts"
+        "./eliza/node_modules/@elizaos/app-task-coordinator"
       ],
-      "@elizaos/app-task-coordinator/*": [
-        "./eliza/apps/app-task-coordinator/src/*"
+      "@elizaos/app-contacts": ["./eliza/plugins/app-contacts/src/index.ts"],
+      "@elizaos/app-contacts/*": ["./eliza/plugins/app-contacts/src/*"],
+      "@elizaos/app-phone": ["./eliza/plugins/app-phone/src/index.ts"],
+      "@elizaos/app-phone/*": ["./eliza/plugins/app-phone/src/*"],
+      "@elizaos/app-wifi": ["./eliza/plugins/app-wifi/src/index.ts"],
+      "@elizaos/app-wifi/*": ["./eliza/plugins/app-wifi/src/*"],
+      "@elizaos/agent": [
+        "./eliza/packages/agent/dist/packages/agent/src/index.d.ts"
       ],
-      "@elizaos/app-companion": ["./eliza/apps/app-companion/src/index.ts"],
-      "@elizaos/app-companion/*": ["./eliza/apps/app-companion/src/*"],
-      "@elizaos/app-contacts": ["./eliza/apps/app-contacts/src/index.ts"],
-      "@elizaos/app-contacts/*": ["./eliza/apps/app-contacts/src/*"],
-      "@clawville/app-clawville": ["./eliza/apps/app-clawville/src/index.ts"],
-      "@clawville/app-clawville/*": ["./eliza/apps/app-clawville/src/*"],
-      "@elizaos/app-lifeops": ["./eliza/apps/app-lifeops/src/index.ts"],
-      "@elizaos/app-lifeops/*": ["./eliza/apps/app-lifeops/src/*"],
-      "@elizaos/app-shopify": ["./eliza/apps/app-shopify/src/index.ts"],
-      "@elizaos/app-shopify/*": ["./eliza/apps/app-shopify/src/*"],
-      "@elizaos/app-hyperliquid": ["./eliza/apps/app-hyperliquid/src/index.ts"],
-      "@elizaos/app-hyperliquid/*": ["./eliza/apps/app-hyperliquid/src/*"],
-      "@elizaos/app-polymarket": ["./eliza/apps/app-polymarket/src/index.ts"],
-      "@elizaos/app-polymarket/*": ["./eliza/apps/app-polymarket/src/*"],
-      "@elizaos/app-phone": ["./eliza/apps/app-phone/src/index.ts"],
-      "@elizaos/app-phone/*": ["./eliza/apps/app-phone/src/*"],
-      "@elizaos/app-steward": ["./eliza/apps/app-steward/src/index.ts"],
-      "@elizaos/app-steward/*": ["./eliza/apps/app-steward/src/*"],
-      "@elizaos/app-screenshare": ["./eliza/apps/app-screenshare/src/index.ts"],
-      "@elizaos/app-screenshare/*": ["./eliza/apps/app-screenshare/src/*"],
-      "@elizaos/app-training": ["./eliza/apps/app-training/src/index.ts"],
-      "@elizaos/app-training/*": ["./eliza/apps/app-training/src/*"],
-      "@elizaos/app-vincent": ["./eliza/apps/app-vincent/src/index.ts"],
-      "@elizaos/app-vincent/*": ["./eliza/apps/app-vincent/src/*"],
-      "@elizaos/app-wifi": ["./eliza/apps/app-wifi/src/index.ts"],
-      "@elizaos/app-wifi/*": ["./eliza/apps/app-wifi/src/*"],
-      "@elizaos/agent": ["./eliza/packages/agent/src/index.ts"],
-      "@elizaos/agent/*": ["./eliza/packages/agent/src/*"],
+      "@elizaos/agent/*": ["./eliza/packages/agent/dist/packages/agent/src/*"],
       "@elizaos/plugin-browser-bridge": [
         "./eliza/plugins/plugin-browser-bridge/src/index.ts"
       ],
@@ -97,8 +74,8 @@
       "@elizaos/native-activity-tracker": [
         "./eliza/packages/native-plugins/activity-tracker/src/index.ts"
       ],
-      "@elizaos/ui": ["./eliza/packages/ui/src/index.ts"],
-      "@elizaos/ui/*": ["./eliza/packages/ui/src/*"],
+      "@elizaos/ui": ["./eliza/packages/ui/dist/index.d.ts"],
+      "@elizaos/ui/*": ["./eliza/packages/ui/dist/*"],
       "react": ["./eliza/node_modules/@types/react/index.d.ts"],
       "react/jsx-runtime": [
         "./eliza/node_modules/@types/react/jsx-runtime.d.ts"
@@ -117,5 +94,6 @@
     "../../eliza/packages/app-core/src/ambient-modules.d.ts",
     "../../eliza/packages/agent/src/external-modules.d.ts"
   ],
+  "files": ["src/ambient-eliza-apps.d.ts"],
   "exclude": ["node_modules", "dist", "ios", "android", "electrobun"]
 }
