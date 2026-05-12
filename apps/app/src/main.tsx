@@ -325,11 +325,66 @@ const appBootConfig: AppBootConfig = {
 // (#token=...), so it never reaches the server, access log, or Referer
 // headers. Once read, it persists in localStorage scoped to this origin.
 const SELF_HOSTED_TOKEN_KEY = "milady:self-hosted-api-token";
+const ACTIVE_SERVER_STORAGE_KEY = "elizaos:active-server";
+const API_BASE_STORAGE_KEY = "elizaos_api_base";
 const STALE_BOOTSTRAP_KEYS = [
   "elizaos:agent-profiles",
-  "elizaos:active-server",
+  ACTIVE_SERVER_STORAGE_KEY,
   MOBILE_RUNTIME_MODE_STORAGE_KEY,
 ] as const;
+
+function isLoopbackApiBase(value: unknown): boolean {
+  if (typeof value !== "string" || !value.trim()) return false;
+  try {
+    const host = new URL(value).hostname.toLowerCase();
+    return host === "127.0.0.1" || host === "localhost" || host === "::1";
+  } catch {
+    return false;
+  }
+}
+
+// In desktop dev, persisted active-server pairings from a previous session
+// can point at a remote agent (cloud, a different machine, or a packaged
+// build on the same host). On a fresh `bun run dev:desktop` we want the
+// renderer to talk to the local agent that orchestrator just spawned, not
+// re-resume a stale pairing. Reset to the local embedded server unless
+// the persisted value is already local/loopback.
+//
+// DEV-only + desktop-only by design. Production desktop and web bundles
+// preserve user pairings as-is.
+function forceDesktopDevLocalActiveServer(): void {
+  if (!import.meta.env.DEV || !isDesktopPlatform()) return;
+
+  try {
+    const raw = window.localStorage.getItem(ACTIVE_SERVER_STORAGE_KEY);
+    if (!raw) return;
+    const activeServer = JSON.parse(raw) as {
+      kind?: unknown;
+      apiBase?: unknown;
+    };
+    if (
+      activeServer?.kind === "local" ||
+      isLoopbackApiBase(activeServer?.apiBase)
+    ) {
+      return;
+    }
+
+    window.localStorage.setItem(
+      ACTIVE_SERVER_STORAGE_KEY,
+      JSON.stringify({
+        id: "local:embedded",
+        kind: "local",
+        label: "This device",
+      }),
+    );
+    window.localStorage.removeItem(API_BASE_STORAGE_KEY);
+    window.sessionStorage.removeItem(API_BASE_STORAGE_KEY);
+    client.setBaseUrl(null);
+    console.warn(
+      `${APP_LOG_PREFIX} Desktop dev ignored stale remote active server; using local agent.`,
+    );
+  } catch {}
+}
 try {
   const url = new URL(window.location.href);
   const hash = url.hash.startsWith("#") ? url.hash.slice(1) : url.hash;
@@ -391,7 +446,20 @@ try {
     } catch {}
   }
 } catch {}
+// On desktop, the Electrobun shell injects the local agent's HTTP origin
+// (e.g. `http://127.0.0.1:31337`) onto window before the renderer mounts.
+// Push it into the boot config so the React shell talks to that origin
+// rather than falling back to `window.location.origin` (which on
+// Electrobun is a custom scheme like `electrobun://`).
+// `getInjectedAppApiBase()` reads all four canonical window globals
+// (`__ELIZA_APP_API_BASE__`, the branded key, `__ELIZA{,OS}_APP_BOOT_CONFIG__`,
+// and legacy `__ELIZA_API_BASE__`) with the correct priority.
+if (isDesktopPlatform()) {
+  const desktopApiBase = getInjectedAppApiBase();
+  if (desktopApiBase) appBootConfig.apiBase ??= desktopApiBase;
+}
 setBootConfig(appBootConfig);
+forceDesktopDevLocalActiveServer();
 
 // On AOSP/Milady, ElizaNativeBridge.getLocalAgentToken() returns null
 // for the first ~30-50s of app launch — the on-device agent process is
