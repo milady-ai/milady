@@ -465,12 +465,11 @@ function resolveLocalAppCoreAliases(): Alias[] {
       const uiCssPath = uiPkgRoot
         ? path.join(uiPkgRoot, "src/styles", baseName)
         : null;
-      const resolvedPath =
-        fs.existsSync(distCssPath)
-          ? distCssPath
-          : uiCssPath && fs.existsSync(uiCssPath)
-            ? uiCssPath
-            : null;
+      const resolvedPath = fs.existsSync(distCssPath)
+        ? distCssPath
+        : uiCssPath && fs.existsSync(uiCssPath)
+          ? uiCssPath
+          : null;
       if (resolvedPath) {
         generatedAliases.push({
           find: new RegExp(`^${escapeRegExp(aliasKey)}$`),
@@ -525,9 +524,7 @@ function resolveLocalAppCoreAliases(): Alias[] {
   // Wave A moved several components/types from @elizaos/app-core to @elizaos/ui.
   // The catch-all maps to app-core/src/* which may not have them. Use a custom
   // resolver to fall back to the ui source when the app-core path doesn't exist.
-  const uiComponentsSourceDir = uiPkgRoot
-    ? path.join(uiPkgRoot, "src")
-    : null;
+  const uiComponentsSourceDir = uiPkgRoot ? path.join(uiPkgRoot, "src") : null;
 
   function resolveAppCoreWithUiFallback(id: string): string {
     if (fs.existsSync(id)) return id;
