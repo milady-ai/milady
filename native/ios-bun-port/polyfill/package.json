@@ -1,0 +1,15 @@
+{
+  "name": "@milady/ios-jsc-polyfill",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "description": "Bun + Node API polyfill for iOS JSContext over __MILADY_BRIDGE__",
+  "main": "dist/polyfill-prefix.js",
+  "scripts": {
+    "build": "bun run build.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}

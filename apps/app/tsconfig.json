@@ -141,6 +141,12 @@
       ],
       "@elizaos/capacitor-agent": ["./apps/app/src/native-plugin-stubs.ts"],
       "@elizaos/capacitor-agent/*": ["./apps/app/src/native-plugin-stubs.ts"],
+      "@elizaos/capacitor-bun-runtime": [
+        "./apps/app/src/native-plugin-stubs.ts"
+      ],
+      "@elizaos/capacitor-bun-runtime/*": [
+        "./apps/app/src/native-plugin-stubs.ts"
+      ],
       "@elizaos/capacitor-contacts": ["./apps/app/src/native-plugin-stubs.ts"],
       "@elizaos/capacitor-contacts/*": [
         "./apps/app/src/native-plugin-stubs.ts"

@@ -50,6 +50,11 @@ function patchFile(filePath, patcher) {
 }
 
 function writeFileIfChanged(filePath, contents) {
+  const parentDir = path.dirname(filePath);
+  if (!fs.existsSync(filePath) && !fs.existsSync(parentDir)) {
+    return false;
+  }
+
   const original = fs.existsSync(filePath)
     ? fs.readFileSync(filePath, "utf8")
     : null;

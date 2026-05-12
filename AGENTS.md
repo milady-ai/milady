@@ -189,6 +189,21 @@ Port env vars (never hardcoded — the dev orchestrator auto-shifts to the next 
 - Auto-training defaults: 100 trajectories per task, 12h cooldown. Adjust via `/api/training/auto/config` or Settings → Auto-Training.
 - The privacy filter at `eliza/apps/app-training/src/core/privacy-filter.ts` is mandatory on every write path that touches real user trajectories — both the nightly export cron and the on-demand training orchestrator run it before any JSONL is written.
 
+## Background execution
+
+Scheduled tasks (`heartbeats`, workflow triggers, autonomy ticks) share a single scheduler. Treat the items below as load-bearing facts when working on triggers, mobile background, or anything that fires "later":
+
+- **Canonical scheduler:** `ScheduledTaskRunner` in `packages/core/src/services/task-scheduler.ts` — single source of truth after the post-Wave-2 consolidation. Older per-feature timers (workflow `TimerHeartbeatService`, etc.) have been collapsed onto this one runner. New code MUST schedule through it; do not introduce parallel timers.
+- **Serverless seam:** when `runtime.serverless = true`, the runner skips its own internal timer and waits to be ticked by the host. `@elizaos/plugin-background-runner` sets this flag and drives `runDueTasks()` from OS-level wakes (BGTaskScheduler / WorkManager). Desktop / server hosts leave `serverless = false` and the runner ticks on its own.
+- **Execution profiles** (Wave 4): each scheduled task is tagged with one of:
+  - `foreground` — must run while the app is in foreground (UI thread access, push surfaces).
+  - `bg-light-30s` — safe to run inside an iOS BGAppRefreshTask's ~30s budget; preferred default for short prompts.
+  - `bg-heavy-fgs` — needs the longer wake budget (iOS BGProcessingTask) or an Android foreground service. Surfaces a persistent notification on Android.
+  - `notify-only` — fires a local notification instead of running anything; the task body runs when the user taps in.
+- **Mobile reality:** iOS background wakes are opportunistic — typically once per ~1-4 hours, ~30s budget per wake. Android WorkManager has a 15-minute floor on periodic work and can defer further under Doze / App Standby; the FGS profile is the only way to guarantee persistence short of the user opening the app. Force-quit on either platform halts background wakes until the user reopens the app. These constraints are surfaced to users by `packages/ui/src/components/pages/HeartbeatForm.tsx` (cadence warning) and `HeartbeatsView.tsx` (long-running host banner).
+- **Host capability detection:** `plugins/plugin-workflow/src/utils/host-capabilities.ts` is the canonical detection (engine-side); `packages/ui/src/utils/host-capabilities.ts` mirrors it for UI banners. The workflow engine refuses activation of nodes whose `requires` set the current host can't satisfy and emits an actionable error pointing at the remediation (paired Eliza Cloud, `plugin-tunnel`, or running on a server).
+- **Plugin wiring:** `plugins/plugin-background-runner/INSTALL.md` is the operator-level checklist for the native side (Info.plist identifiers, WorkManager unique work name, capacitor.config.ts block, `/api/internal/wake` device-secret contract). `docs/background-execution.md` is the user-facing one-pager.
+
 ## App and plugin primitives
 
 The runtime exposes two unified action surfaces — `APP` and `PLUGIN` — that replace the older single-purpose actions. New code MUST call `APP` / `PLUGIN`. Legacy actions (`LAUNCH_APP`, `RELAUNCH_APP`, `LIST_APPS`, `INSTALL_PLUGIN`, `UNINSTALL_PLUGIN`, `EJECT_PLUGIN`, `SYNC_PLUGINS`, `REINJECT_PLUGINS`, `LIST_PLUGINS`, `SEARCH_PLUGINS`, `CORE_STATUS`, etc.) remain as similes but are no longer canonical.

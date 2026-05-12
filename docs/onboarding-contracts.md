@@ -2,7 +2,7 @@
 
 The wire contract for first-run flow in Milady. Anything here changing is a breaking change — bump tests and the QA matrix in lockstep.
 
-All file paths are relative to the Milady repo root. Source lives under `eliza/` when running in `local` mode and under the published `@elizaos/*` packages in `packages` mode; line numbers here reference the `eliza/` checkout used to author this doc (2026-05-10).
+All file paths are relative to the Milady repo root. Source lives under `eliza/` when running in `local` mode and under the published `@elizaos/*` packages in `packages` mode; line numbers here reference the `eliza/` checkout used to author this doc (2026-05-10) and refreshed during the 2026-05-11 TBD-resolution pass. Note: in 2026-05-11 the five `-compat`-suffixed files in `eliza/packages/app-core/src/api/` were renamed to drop the misleading `compat` token (`auth-pairing-compat-routes.ts` → `auth-pairing-routes.ts`, `onboarding-compat-routes.ts` → `onboarding-routes.ts`, `plugins-compat-routes.ts` → `plugins-routes.ts`, `server-onboarding-compat.ts` → `server-onboarding-helpers.ts`). All citations below use the new filenames.
 
 ## 1. State keys
 
@@ -30,14 +30,14 @@ Mirror of `eliza:mobile-runtime-mode` is written through `@capacitor/preferences
 - `firstRunPending: boolean` — surfaced in `values` by [plugins/app-lifeops/src/providers/first-run.ts:108-112](../eliza/plugins/app-lifeops/src/providers/first-run.ts#L108). Goes `false` (the `QUIET_RESULT` constant at [first-run.ts:33-37](../eliza/plugins/app-lifeops/src/providers/first-run.ts#L33)) once `createFirstRunStateStore(runtime).read()` returns `status === "complete"` ([first-run.ts:94-96](../eliza/plugins/app-lifeops/src/providers/first-run.ts#L94)). Position `-10`, planner-only — exposes no action.
 - `firstRunStatus` and `firstRunPath` are emitted alongside when pending ([first-run.ts:110-111](../eliza/plugins/app-lifeops/src/providers/first-run.ts#L110)).
 
-Backing store path / file: // TBD verify against `plugins/app-lifeops/src/lifeops/first-run/state.js` (`createFirstRunStateStore`).
+Backing store: not a filesystem path. `createFirstRunStateStore(runtime)` at [plugins/app-lifeops/src/lifeops/first-run/state.ts:122-202](../eliza/plugins/app-lifeops/src/lifeops/first-run/state.ts#L122) persists the `FirstRunRecord` (`{ status, path?, partialAnswers, startedAt?, completedAt?, completionCount }`) through `runtime.setCache/getCache` under the key `"eliza:lifeops:first-run:v1"` ([state.ts:55](../eliza/plugins/app-lifeops/src/lifeops/first-run/state.ts#L55)). The cache adapter is the canonical owner of physical persistence (runtime DB), so the lifecycle outlives a process restart but is not a stand-alone JSON file. Earlier audit notes referenced `state.js` — the actual source file is `state.ts`.
 
 ### Filesystem
 
 - `~/.eliza/eliza.json` — primary on-disk config. Written via `saveElizaConfig(...)` from `@elizaos/agent`. Cloud routes log the path explicitly at [cloud-routes.ts:217](../eliza/plugins/plugin-elizacloud/src/routes/cloud-routes.ts#L217).
-- `meta.onboardingComplete = true` is set on this config by [onboarding-compat-routes.ts:238](../eliza/packages/app-core/src/api/onboarding-compat-routes.ts#L238).
+- `meta.onboardingComplete = true` is set on this config by [onboarding-routes.ts:238](../eliza/packages/app-core/src/api/onboarding-routes.ts#L238).
 - `config.cloud.apiKey` — cloud API key in cleartext; warning logged at [cloud-routes.ts:216-219](../eliza/plugins/plugin-elizacloud/src/routes/cloud-routes.ts#L216).
-- `<stateDir>/config.env` — `persistConfigEnv()` at [plugins/plugin-elizacloud/src/lib/config-env.ts:123](../eliza/plugins/plugin-elizacloud/src/lib/config-env.ts#L123) writes key/value pairs atomically (0600). Keys must match `/^[A-Z][A-Z0-9_]*$/` ([config-env.ts:8](../eliza/plugins/plugin-elizacloud/src/lib/config-env.ts#L8)) and are blocked if in `BLOCKED_CONFIG_ENV_KEYS` ([config-env.ts:10-32](../eliza/plugins/plugin-elizacloud/src/lib/config-env.ts#L10)) — `PATH`, `NODE_OPTIONS`, dynamic-linker hijack vectors, proxy vars, etc. Cloud-related writes use this for `ELIZAOS_CLOUD_API_KEY`, `ELIZAOS_CLOUD_ENABLED`, `ELIZA_CLOUD_USER_ID`, `ELIZA_CLOUD_ORGANIZATION_ID` (and their `ELIZAOS_*` aliases). // TBD verify the full set of keys against the call sites of `persistConfigEnv` — `lib/config-env.ts` itself does not enumerate them.
+- `<stateDir>/config.env` — `persistConfigEnv()` at [plugins/plugin-elizacloud/src/lib/config-env.ts:123](../eliza/plugins/plugin-elizacloud/src/lib/config-env.ts#L123) writes key/value pairs atomically (0600). Keys must match `/^[A-Z][A-Z0-9_]*$/` ([config-env.ts:8](../eliza/plugins/plugin-elizacloud/src/lib/config-env.ts#L8)) and are blocked if in `BLOCKED_CONFIG_ENV_KEYS` ([config-env.ts:10-32](../eliza/plugins/plugin-elizacloud/src/lib/config-env.ts#L10)) — `PATH`, `NODE_OPTIONS`, dynamic-linker hijack vectors, proxy vars, etc. The full set of literals actually written through this code path is wallet/EVM-scoped: `ELIZA_CLOUD_EVM_ADDRESS` / `ELIZA_CLOUD_SOLANA_ADDRESS` / `WALLET_SOURCE_EVM` / `WALLET_SOURCE_SOLANA` / `ENABLE_EVM_PLUGIN` / `ENABLE_CLOUD_WALLET` ([cloud-routes-autonomous.ts:656-675](../eliza/plugins/plugin-elizacloud/src/routes/cloud-routes-autonomous.ts#L656), [agent/src/api/wallet-routes.ts:1399-1507](../eliza/packages/agent/src/api/wallet-routes.ts#L1399), [agent/src/runtime/first-time-setup.ts:245-262](../eliza/packages/agent/src/runtime/first-time-setup.ts#L245)), plus `ELIZA_CLOUD_CLIENT_ADDRESS_KEY_ENV` for the cloud-wallet bridge ([cloud/cloud-wallet.ts:109](../eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts#L109)) and vault-ref overwrites of existing sensitive keys ([app-core/src/services/vault-bootstrap.ts:182](../eliza/packages/app-core/src/services/vault-bootstrap.ts#L182)). The cloud-side `ELIZAOS_CLOUD_API_KEY` / `ELIZAOS_CLOUD_ENABLED` / `ELIZA_CLOUD_USER_ID` / `ELIZA_CLOUD_ORGANIZATION_ID` settings are NOT written through `persistConfigEnv` — `persistCloudLoginStatus()` writes them only to `process.env`, `runtime.character.secrets`, and `runtime.setSetting(...)` ([cloud-routes.ts:230-302](../eliza/plugins/plugin-elizacloud/src/routes/cloud-routes.ts#L230)), and persists the API key onto `config.cloud.apiKey` in `eliza.json` via `saveElizaConfig()` rather than into the env file.
 - `<stateDir>` is resolved by `resolveStateDir()` (Milady override defaults to `~/.milady`; elizaOS default is `~/.eliza`). See top-level CLAUDE.md for `MILADY_STATE_DIR` / `ELIZA_STATE_DIR`.
 
 ## 2. Step definitions
@@ -69,9 +69,9 @@ All routes below are served by the local Eliza API (default port `31337`, env `M
 
 ### `POST /api/onboarding` — submit onboarding payload
 
-Handler: [packages/app-core/src/api/onboarding-compat-routes.ts:160](../eliza/packages/app-core/src/api/onboarding-compat-routes.ts#L160) (`handleOnboardingCompatRoute`).
+Handler: [packages/app-core/src/api/onboarding-routes.ts:160](../eliza/packages/app-core/src/api/onboarding-routes.ts#L160) (`handleOnboardingCompatRoute`).
 
-Request body (JSON; legacy keys rejected with 400 — `LEGACY_ONBOARDING_REQUEST_KEYS` at [server-onboarding-compat.ts:86-95](../eliza/packages/app-core/src/api/server-onboarding-compat.ts#L86)):
+Request body (JSON; legacy keys rejected with 400 — `LEGACY_ONBOARDING_REQUEST_KEYS` at [server-onboarding-helpers.ts:86-95](../eliza/packages/app-core/src/api/server-onboarding-helpers.ts#L86)):
 
 ```ts
 interface OnboardingRequestBody {
@@ -102,11 +102,11 @@ interface OnboardingRequestBody {
 
 Response: `200 { ok: true }` on success; `400 { error }` for legacy bodies / parse failures.
 
-Side effects: `extractAndPersistOnboardingApiKey()` + `persistCompatOnboardingDefaults()` mutate `eliza.json`; `meta.onboardingComplete = true` is forced ([onboarding-compat-routes.ts:235-238](../eliza/packages/app-core/src/api/onboarding-compat-routes.ts#L235)). A loopback `PUT /api/config` sync follows.
+Side effects: `extractAndPersistOnboardingApiKey()` + `persistCompatOnboardingDefaults()` mutate `eliza.json`; `meta.onboardingComplete = true` is forced ([onboarding-routes.ts:235-238](../eliza/packages/app-core/src/api/onboarding-routes.ts#L235)). A loopback `PUT /api/config` sync follows.
 
 ### `GET /api/onboarding/status`
 
-Handler: [auth-pairing-compat-routes.ts:209-222](../eliza/packages/app-core/src/api/auth-pairing-compat-routes.ts#L209).
+Handler: [auth-pairing-routes.ts:209-222](../eliza/packages/app-core/src/api/auth-pairing-routes.ts#L209).
 
 Response shape:
 
@@ -117,11 +117,11 @@ Response shape:
 }
 ```
 
-Auth: requires `ensureRouteAuthorized`. The historical "cloud-provisioned skips auth" bypass has been removed (see comment at [auth-pairing-compat-routes.ts:206-208](../eliza/packages/app-core/src/api/auth-pairing-compat-routes.ts#L206)).
+Auth: requires `ensureRouteAuthorized`. The historical "cloud-provisioned skips auth" bypass has been removed (see comment at [auth-pairing-routes.ts:206-208](../eliza/packages/app-core/src/api/auth-pairing-routes.ts#L206)).
 
 ### `GET /api/auth/status` — public probe
 
-Handler: [auth-pairing-compat-routes.ts:228-280](../eliza/packages/app-core/src/api/auth-pairing-compat-routes.ts#L228).
+Handler: [auth-pairing-routes.ts:228-280](../eliza/packages/app-core/src/api/auth-pairing-routes.ts#L228).
 
 Response shape:
 
@@ -140,17 +140,17 @@ Response shape:
 
 ### `GET /api/auth/pair-code` — loopback-only
 
-Handler: [auth-pairing-compat-routes.ts:285-297](../eliza/packages/app-core/src/api/auth-pairing-compat-routes.ts#L285). Returns `{ code, expiresAt }`. `403` for non-loopback callers, `503` if pairing not enabled.
+Handler: [auth-pairing-routes.ts:285-297](../eliza/packages/app-core/src/api/auth-pairing-routes.ts#L285). Returns `{ code, expiresAt }`. `403` for non-loopback callers, `503` if pairing not enabled.
 
 ### `POST /api/auth/pair`
 
-Handler: [auth-pairing-compat-routes.ts:300-388](../eliza/packages/app-core/src/api/auth-pairing-compat-routes.ts#L300).
+Handler: [auth-pairing-routes.ts:300-387](../eliza/packages/app-core/src/api/auth-pairing-routes.ts#L300).
 
-Request: `{ code: string }`. Codes accepted in the `XXXX-XXXX-XXXX` form generated at [auth-pairing-compat-routes.ts:74-80](../eliza/packages/app-core/src/api/auth-pairing-compat-routes.ts#L74); normalized to uppercase alphanumeric before comparison ([auth-pairing-compat-routes.ts:70](../eliza/packages/app-core/src/api/auth-pairing-compat-routes.ts#L70)).
+Request: `{ code: string }`. Codes accepted in the `XXXX-XXXX-XXXX` form generated at [auth-pairing-routes.ts:74-79](../eliza/packages/app-core/src/api/auth-pairing-routes.ts#L74); normalized to uppercase alphanumeric before comparison ([auth-pairing-routes.ts:70](../eliza/packages/app-core/src/api/auth-pairing-routes.ts#L70)).
 
 Response: `200 { token: string }` (session id bearer; static-token fallback only when DB unavailable). Errors: `400`, `403`, `410` (expired), `429` (rate-limited), `500`.
 
-Rate limit: 5 attempts per remote address per 10 min window ([auth-pairing-compat-routes.ts:35-36](../eliza/packages/app-core/src/api/auth-pairing-compat-routes.ts#L35)).
+Rate limit: 5 attempts per remote address per 10 min window ([auth-pairing-routes.ts:33-36](../eliza/packages/app-core/src/api/auth-pairing-routes.ts#L33)).
 
 ### `POST /api/auth/bootstrap/exchange`
 
@@ -168,13 +168,23 @@ Cookies set on success: `serializeSessionCookie(session)` + `serializeCsrfCookie
 
 Failure: `400` `missing_token`, `401` `auth_required` (with `reason` from `VerifyBootstrapFailureReason`), `429` `rate_limited`, `503` `db_unavailable` / `missing_issuer_env` / `missing_container_env`.
 
+`VerifyBootstrapFailureReason` is defined at [auth/bootstrap-token.ts:41-54](../eliza/packages/app-core/src/api/auth/bootstrap-token.ts#L41) as the union: `"missing_issuer_env" | "missing_container_env" | "missing_token" | "jwks_fetch_failed" | "signature_invalid" | "alg_not_allowed" | "issuer_mismatch" | "claims_invalid" | "scope_mismatch" | "container_mismatch" | "expired" | "replay" | "store_error"`. Re-exported via [auth/index.ts:31](../eliza/packages/app-core/src/api/auth/index.ts#L31).
+
 Session TTL: 12 h sliding (`BROWSER_SESSION_TTL_MS` at [auth-bootstrap-routes.ts:38](../eliza/packages/app-core/src/api/auth-bootstrap-routes.ts#L38)).
 
 ### `POST /api/cloud/login` — initiate cloud login session
 
 Handler: [routes/cloud-routes-autonomous.ts:310-360](../eliza/plugins/plugin-elizacloud/src/routes/cloud-routes-autonomous.ts#L310). Plugin route registration at [plugins/plugin-elizacloud/src/plugin.ts:188](../eliza/plugins/plugin-elizacloud/src/plugin.ts#L188).
 
-Behavior: server-side generates a `sessionId`, POSTs to the cloud `/api/auth/cli-session`, returns the browser URL to open. // TBD verify success-response shape against [cloud-routes-autonomous.ts](../eliza/plugins/plugin-elizacloud/src/routes/cloud-routes-autonomous.ts) (only the request side was read).
+Behavior: server-side generates a `sessionId`, POSTs to the cloud `/api/auth/cli-session`, returns the browser URL to open.
+
+Success response ([cloud-routes-autonomous.ts:369-373](../eliza/plugins/plugin-elizacloud/src/routes/cloud-routes-autonomous.ts#L369)):
+
+```ts
+{ ok: true; sessionId: string; browserUrl: string }
+```
+
+`browserUrl` is `${baseUrl}/auth/cli-login?session=<sessionId>`. Errors: `502` (unreachable / redirected), `504` (timeout), `400` (invalid base URL).
 
 ### `GET /api/cloud/login/status?sessionId=<uuid>`
 
@@ -189,7 +199,19 @@ Disconnect-race guard: a monotonic `cloudDisconnectEpoch` ([cloud-routes.ts:113-
 
 Errors: `400` (missing `sessionId` or invalid base URL), `502` (unreachable / redirect), `504` (timeout).
 
-Response shape (success path): // TBD verify against [cloud-routes.ts:480+](../eliza/plugins/plugin-elizacloud/src/routes/cloud-routes.ts#L480) — the success branch was below the read window.
+Success response — when the cloud poll returns `status === "authenticated"` with an `apiKey`, the local route persists the credentials (see `persistCloudLoginStatus()` above) and replies ([cloud-routes.ts:555-565](../eliza/plugins/plugin-elizacloud/src/routes/cloud-routes.ts#L555)):
+
+```ts
+{
+  status: "authenticated";
+  token: string;             // the cloud apiKey, surfaced to the loopback renderer
+  keyPrefix?: string;
+  organizationId?: string;
+  userId?: string;
+}
+```
+
+Non-authenticated polls reply `{ status }` echoing whatever the cloud returned (`"pending"`, `"expired"`, etc.) ([cloud-routes.ts:569-571](../eliza/plugins/plugin-elizacloud/src/routes/cloud-routes.ts#L569)). The autonomous mirror has the same shape ([cloud-routes-autonomous.ts:764-772](../eliza/plugins/plugin-elizacloud/src/routes/cloud-routes-autonomous.ts#L764)).
 
 ### `POST /api/cloud/login/persist`
 
@@ -235,7 +257,8 @@ Helpers in [services/cloud-auth.ts](../eliza/plugins/plugin-elizacloud/src/servi
 
 - `getSsoRedirectUrl()` ([cloud-auth.ts:215](../eliza/plugins/plugin-elizacloud/src/services/cloud-auth.ts#L215)) — builds `${ELIZA_CLOUD_ISSUER}/oauth/authorize?response_type=code&client_id=…&redirect_uri=…&scope=openid%20profile&state=…[&eliza_return_to=…]`.
 - `exchangeCodeForSession()` ([cloud-auth.ts:322](../eliza/plugins/plugin-elizacloud/src/services/cloud-auth.ts#L322)) — POSTs `${issuer}/oauth/token` with `grant_type=authorization_code`, verifies the returned `id_token` via JWKS (RS256 only).
-- Callback URL: `${scheme}://${bindHost}:${port}/api/auth/login/sso/callback` ([cloud-auth.ts:185-196](../eliza/plugins/plugin-elizacloud/src/services/cloud-auth.ts#L185)). // TBD verify the local callback route handler against `app-core/src/api/auth/cloud-sso.ts` (referenced in the file's preamble but not read).
+- Callback URL: `${scheme}://${bindHost}:${port}/api/auth/login/sso/callback` ([cloud-auth.ts:185-196](../eliza/plugins/plugin-elizacloud/src/services/cloud-auth.ts#L185)).
+- **Callback handler location: not yet wired in `app-core`.** The comment at [cloud-auth.ts:13-18](../eliza/plugins/plugin-elizacloud/src/services/cloud-auth.ts#L13) says the callback is meant to live in `app-core/src/api/auth/cloud-sso.ts`, but a directory listing of [`packages/app-core/src/api/auth/`](../eliza/packages/app-core/src/api/auth/) (audit.ts, auth-context.ts, bootstrap-token.ts, index.ts, passwords.ts, sensitive-rate-limit.ts, sessions.ts, tokens.ts) confirms `cloud-sso.ts` does not exist. No route handler matching `/api/auth/login/sso/callback` is registered in any of `auth-pairing-routes.ts`, `auth-bootstrap-routes.ts`, `auth-session-routes.ts`, or `server.ts`. The only artifact tying into this flow today is the rate-limiter slot named `auth.login.sso.start` referenced at [auth/sensitive-rate-limit.ts:12-13](../eliza/packages/app-core/src/api/auth/sensitive-rate-limit.ts#L12). Conclusion: `exchangeCodeForSession()` is currently dead code on the local side — `getSsoRedirectUrl()` / `exchangeCodeForSession()` are exported from `plugin-elizacloud` but nothing in `app-core` consumes them. Stage 1.6 / Stage 2 should either wire the callback or remove the orphan helpers.
 - Required env: `ELIZA_CLOUD_CLIENT_ID`, `ELIZA_CLOUD_CLIENT_SECRET`. Throws if either is missing.
 
 ## 4. Cloud pairing state machine
@@ -316,7 +339,11 @@ QR-pair pattern — `/pair` / `/pair/stop` semantics; status is also patched int
 - Path prefix is per-plugin (`/api/discord-local/`, `/api/telegram-setup/`, `/api/signal/`). No shared `/api/connectors/<id>/...` namespace.
 - Discord exposes resource enumeration (`/guilds`, `/channels`, `/subscriptions`); Telegram and Signal don't.
 - Signal exposes a pair lifecycle (`/pair`, `/pair/stop`); Discord and Telegram don't.
-- All three define their own status response shape. No common `ConnectorStatus` DTO. // TBD verify by reading the handler return shapes — only the route declarations were inspected here.
+- All three define their own status response shape. No common `ConnectorStatus` DTO. Verified handler return shapes:
+  - **Discord** `handleStatus` ([plugins/plugin-discord/setup-routes.ts:139-146](../eliza/plugins/plugin-discord/setup-routes.ts#L139)) returns either `service.getStatus()` or the fallback `getUnregisteredStatus()` at [:124-137](../eliza/plugins/plugin-discord/setup-routes.ts#L124): `{ available: boolean; connected: boolean; authenticated: boolean; currentUser: null | …; subscribedChannelIds: string[]; configuredChannelIds: string[]; scopes: string[]; lastError: string | null; ipcPath: string | null; reason: string }`. Other handlers reply `{ ok: true }` for disconnect, `{ guilds, count }` / `{ channels, count }` for the resource-list endpoints, and `{ error }` for failures.
+  - **Telegram** `handleStatus` ([plugins/plugin-telegram/src/setup-routes.ts:199-203](../eliza/plugins/plugin-telegram/src/setup-routes.ts#L199)) returns `{ available: true; hasToken: boolean; connected: boolean }`. `handleValidateToken` returns `{ ok: false; error }` on failure and (per [:155-167](../eliza/plugins/plugin-telegram/src/setup-routes.ts#L155)) `{ ok: true; bot: { id, username, firstName, … } }` on success. `handleDisconnect` returns `{ ok: true }`.
+  - **Signal** `handleStatus` ([plugins/plugin-signal/src/setup-routes.ts:258-313](../eliza/plugins/plugin-signal/src/setup-routes.ts#L258)) returns the shape from `resolveSignalStatusResponse()` at [:89-108](../eliza/plugins/plugin-signal/src/setup-routes.ts#L89): `{ accountId: string; status: "idle" | "connected" | "pairing" | "disconnected" | "timeout" | "error" | …; authExists: boolean; serviceConnected: boolean; qrDataUrl: string | null; phoneNumber: string | null; error: string | null }`. `handlePair` wraps this in `{ ok: true, …status }`; `handlePairStop` returns `{ ok: true; accountId; status: "idle" }`; `handleDisconnect` returns `{ ok: true; accountId }`.
+  - Cross-plugin normalization to `/api/setup/<connector>/{status,start,cancel}` is tracked as followup item 18 and pinned by `eliza/plugins/__tests__/setup-routes-contract.test.ts`.
 - All three rely on `rawPath: true`, i.e. the plugin owns the URL.
 
 ## 6. Completion markers — invariants
@@ -324,11 +351,11 @@ QR-pair pattern — `/pair` / `/pair/stop` semantics; status is also patched int
 When onboarding "completes", all of the following must be true:
 
 - **localStorage `eliza:onboarding-complete = "1"`** — key constant at [persistence.ts:374](../eliza/packages/ui/src/state/persistence.ts#L374); writer `savePersistedOnboardingComplete()` at [persistence.ts:391-407](../eliza/packages/ui/src/state/persistence.ts#L391); reader `loadPersistedOnboardingComplete()` checks for `"1"` at [persistence.ts:380-382](../eliza/packages/ui/src/state/persistence.ts#L380). No writer in the repo writes `"true"`.
-- **`meta.onboardingComplete === true`** in `~/.eliza/eliza.json` — forced on by [onboarding-compat-routes.ts:235-238](../eliza/packages/app-core/src/api/onboarding-compat-routes.ts#L235). `hasCompatPersistedOnboardingState(config)` (used by `GET /api/onboarding/status` at [auth-pairing-compat-routes.ts:215](../eliza/packages/app-core/src/api/auth-pairing-compat-routes.ts#L215)) consumes this. // TBD verify the full predicate against `compat-route-shared.ts`.
-- **`firstRunProvider` → `firstRunPending: false`** — provider returns `QUIET_RESULT` once `createFirstRunStateStore(runtime).read().status === "complete"` ([first-run.ts:94-96](../eliza/plugins/app-lifeops/src/providers/first-run.ts#L94)). The transition to `"complete"` happens in the lifeops first-run state store. // TBD verify against `plugins/app-lifeops/src/lifeops/first-run/state.js` (not read).
-- **Selected character persisted** — `persistCompatOnboardingDefaults` writes `config.agents.list[0].name | bio | system | style | adjectives | topics | postExamples | messageExamples` and `config.agents.defaults.adminEntityId` ([server-onboarding-compat.ts:202-313](../eliza/packages/app-core/src/api/server-onboarding-compat.ts#L202)). UI mirror lands in `config.ui.assistant.name`, `config.ui.language`, `config.ui.avatarIndex`, `config.ui.presetId`. Path: `~/.eliza/eliza.json` (`saveElizaConfig(config)` at [server-onboarding-compat.ts:311](../eliza/packages/app-core/src/api/server-onboarding-compat.ts#L311)).
-- **Selected provider credentials persisted** — `extractAndPersistOnboardingApiKey()` ([server-onboarding-compat.ts:108-200](../eliza/packages/app-core/src/api/server-onboarding-compat.ts#L108)) calls `applyOnboardingCredentialPersistence()` then `saveElizaConfig()`. For cloud-linked installs, `config.cloud.apiKey` is resolved via [onboarding-compat-routes.ts:134-158](../eliza/packages/app-core/src/api/onboarding-compat-routes.ts#L134) (request body → sealed secret → env). `process.env.ELIZAOS_CLOUD_API_KEY` and `process.env.ELIZAOS_CLOUD_ENABLED` are also set when cloud inference is chosen ([cloud-routes.ts:229-234](../eliza/plugins/plugin-elizacloud/src/routes/cloud-routes.ts#L229)).
-- **Persisted active server** — localStorage `elizaos:active-server` carries `{ kind, apiBase?, accessToken? }` so subsequent boots route directly through the chosen server ([useOnboardingState.ts:146-196](../eliza/packages/ui/src/state/useOnboardingState.ts#L146)).
+- **`meta.onboardingComplete === true`** in `~/.eliza/eliza.json` — forced on by [onboarding-routes.ts:235-238](../eliza/packages/app-core/src/api/onboarding-routes.ts#L235). `hasCompatPersistedOnboardingState(config)` (used by `GET /api/onboarding/status` at [auth-pairing-routes.ts:215](../eliza/packages/app-core/src/api/auth-pairing-routes.ts#L215)) consumes this. The full predicate at [compat-route-shared.ts:316-354](../eliza/packages/app-core/src/api/compat-route-shared.ts#L316) returns `true` if **any** of: `meta.onboardingComplete === true`; or canonical service routing is complete — `transport === "direct"` with a non-`elizacloud` backend, or `transport === "remote"` with a `remoteApiBase`, or `transport === "cloud-proxy"` with `backend === "elizacloud"` and both `smallModel`/`largeModel` set, or `deploymentTarget.runtime === "remote"` with a `remoteApiBase`; or `config.agents.list` is non-empty; or `config.agents.defaults.workspace` / `adminEntityId` is set. Note the predicate is intentionally permissive — old configs without `meta.onboardingComplete` still resolve as "complete" once any agent is configured.
+- **`firstRunProvider` → `firstRunPending: false`** — provider returns `QUIET_RESULT` once `createFirstRunStateStore(runtime).read().status === "complete"` ([first-run.ts:94-96](../eliza/plugins/app-lifeops/src/providers/first-run.ts#L94)). The lifeops first-run state store lives at [plugins/app-lifeops/src/lifeops/first-run/state.ts](../eliza/plugins/app-lifeops/src/lifeops/first-run/state.ts) — note the file is `.ts` (TypeScript source), not `.js` as the original audit notes claimed. The state machine is `pending | in_progress | complete` ([state.ts:40](../eliza/plugins/app-lifeops/src/lifeops/first-run/state.ts#L40)) and the `.complete()` transition is at [state.ts:181-190](../eliza/plugins/app-lifeops/src/lifeops/first-run/state.ts#L181). The record is **not** filesystem-backed; it is persisted through `runtime.setCache/getCache` under the key `eliza:lifeops:first-run:v1` ([state.ts:55](../eliza/plugins/app-lifeops/src/lifeops/first-run/state.ts#L55), persist path at [state.ts:127-130](../eliza/plugins/app-lifeops/src/lifeops/first-run/state.ts#L127)), which the underlying cache adapter eventually writes through to the runtime DB.
+- **Selected character persisted** — `persistCompatOnboardingDefaults` writes `config.agents.list[0].name | bio | system | style | adjectives | topics | postExamples | messageExamples` and `config.agents.defaults.adminEntityId` ([server-onboarding-helpers.ts:202-313](../eliza/packages/app-core/src/api/server-onboarding-helpers.ts#L202)). UI mirror lands in `config.ui.assistant.name`, `config.ui.language`, `config.ui.avatarIndex`, `config.ui.presetId`. Path: `~/.eliza/eliza.json` (`saveElizaConfig(config)` at [server-onboarding-helpers.ts:311](../eliza/packages/app-core/src/api/server-onboarding-helpers.ts#L311)).
+- **Selected provider credentials persisted** — `extractAndPersistOnboardingApiKey()` ([server-onboarding-helpers.ts:108-200](../eliza/packages/app-core/src/api/server-onboarding-helpers.ts#L108)) calls `applyOnboardingCredentialPersistence()` then `saveElizaConfig()`. For cloud-linked installs, `config.cloud.apiKey` is resolved via [onboarding-routes.ts:134-158](../eliza/packages/app-core/src/api/onboarding-routes.ts#L134) (request body → sealed secret → env). `process.env.ELIZAOS_CLOUD_API_KEY` and `process.env.ELIZAOS_CLOUD_ENABLED` are also set when cloud inference is chosen ([cloud-routes.ts:230-234](../eliza/plugins/plugin-elizacloud/src/routes/cloud-routes.ts#L230)).
+- **Persisted active server** — localStorage `elizaos:active-server` carries `PersistedActiveServer` ([persistence.ts:807-818](../eliza/packages/ui/src/state/persistence.ts#L807)): `{ id: string; kind: "local" | "cloud" | "remote"; label: string; apiBase?: string; accessToken?: string }`. Loaded by `loadPersistedActiveServer()` at [persistence.ts:945-952](../eliza/packages/ui/src/state/persistence.ts#L945); created by `createPersistedActiveServer()` at [persistence.ts:859](../eliza/packages/ui/src/state/persistence.ts#L859); consumed at [useOnboardingState.ts:146-196](../eliza/packages/ui/src/state/useOnboardingState.ts#L146) so subsequent boots route directly through the chosen server.
 - **Step storage cleared / advanced** — `eliza:onboarding:step` reflects the wizard's terminal step until the dashboard transitions away. Setter for `ONBOARDING_COMPLETE_STORAGE_KEY` is `savePersistedOnboardingComplete()` at [persistence.ts:391-407](../eliza/packages/ui/src/state/persistence.ts#L391).
 
 ## 7. Mobile runtime mode
@@ -354,7 +381,7 @@ Mapping (`mobileRuntimeModeForServerTarget` at [mobile-runtime-mode.ts:40-55](..
 
 ### Android (`"local"` pre-seed)
 
-Constants `ANDROID_LOCAL_AGENT_API_BASE`, `ANDROID_LOCAL_AGENT_SERVER_ID = "local:android"`, `ANDROID_LOCAL_AGENT_LABEL` ([mobile-runtime-mode.ts:15-17](../eliza/packages/ui/src/onboarding/mobile-runtime-mode.ts#L15)) alias the mobile defaults and are pre-seeded so the device routes through loopback to the bundled APK agent on `127.0.0.1:31337`. Pre-seed implementation: // TBD verify against [packages/ui/src/onboarding/pre-seed-local-runtime.ts](../eliza/packages/ui/src/onboarding/pre-seed-local-runtime.ts) (file listed but not read).
+Constants `ANDROID_LOCAL_AGENT_API_BASE`, `ANDROID_LOCAL_AGENT_SERVER_ID = "local:android"`, `ANDROID_LOCAL_AGENT_LABEL` ([mobile-runtime-mode.ts:15-17](../eliza/packages/ui/src/onboarding/mobile-runtime-mode.ts#L15)) alias the mobile defaults and are pre-seeded so the device routes through loopback to the bundled APK agent on `127.0.0.1:31337`. Pre-seed implementation: [packages/ui/src/onboarding/pre-seed-local-runtime.ts](../eliza/packages/ui/src/onboarding/pre-seed-local-runtime.ts). The user-agent check `isAospElizaUserAgent(ua)` at [pre-seed-local-runtime.ts:96-100](../eliza/packages/ui/src/onboarding/pre-seed-local-runtime.ts#L96) accepts only `\bElizaOS\/\S` or `\bMiladyOS\/\S` (the trailing `/<tag>` is required — a bare `ElizaOS` token does not match) so stock-Android Capacitor APKs without the AOSP user-agent marker skip the pre-seed.
 
 ### iOS
 
@@ -379,11 +406,13 @@ Same URL shape (`http://127.0.0.1:31337`) is used as a stable client identity. T
 - `packages/ui/src/onboarding/flow.ts`
 - `packages/ui/src/onboarding/mobile-runtime-mode.ts`
 - `packages/shared/src/onboarding-presets.ts`
-- `packages/app-core/src/api/server-onboarding-compat.ts`
-- `packages/app-core/src/api/onboarding-compat-routes.ts`
+- `packages/app-core/src/api/server-onboarding-helpers.ts`
+- `packages/app-core/src/api/onboarding-routes.ts`
 - `packages/app-core/src/api/auth-bootstrap-routes.ts`
-- `packages/app-core/src/api/auth-pairing-compat-routes.ts`
-- `packages/app-core/src/api/plugins-compat-routes.ts`
+- `packages/app-core/src/api/auth/bootstrap-token.ts`
+- `packages/app-core/src/api/auth-pairing-routes.ts`
+- `packages/app-core/src/api/plugins-routes.ts`
+- `packages/app-core/src/api/compat-route-shared.ts`
 - `plugins/plugin-elizacloud/src/onboarding.ts`
 - `plugins/plugin-elizacloud/src/cloud/auth.ts`
 - `plugins/plugin-elizacloud/src/services/cloud-auth.ts`
@@ -405,14 +434,18 @@ Resolved during the 2026-05-10 onboarding QA campaign:
 3. ✅ Android pre-seed lives in [`packages/ui/src/onboarding/pre-seed-local-runtime.ts`](../eliza/packages/ui/src/onboarding/pre-seed-local-runtime.ts), gated by `ElizaOS/<tag>` user-agent detection from the AOSP product build. Stock-Android Capacitor APKs MUST NOT pre-seed (would dead-end on 127.0.0.1:31337).
 4. ✅ Setter for `ONBOARDING_COMPLETE_STORAGE_KEY` is `savePersistedOnboardingComplete()` at [persistence.ts:391-407](../eliza/packages/ui/src/state/persistence.ts#L391).
 
+Resolved during the 2026-05-11 follow-up pass:
+
+5. ✅ `firstRunStateStore` is cache-backed, not filesystem-backed. `createFirstRunStateStore(runtime)` at [plugins/app-lifeops/src/lifeops/first-run/state.ts:122-202](../eliza/plugins/app-lifeops/src/lifeops/first-run/state.ts#L122) persists the record through `runtime.setCache/getCache` under the key `"eliza:lifeops:first-run:v1"` ([state.ts:55](../eliza/plugins/app-lifeops/src/lifeops/first-run/state.ts#L55)). The earlier reference to `state.js` was wrong — the file is `state.ts`.
+6. ✅ `persistConfigEnv()` is used exclusively for wallet/EVM-scoped keys. Concrete literals written: `ELIZA_CLOUD_EVM_ADDRESS`, `ELIZA_CLOUD_SOLANA_ADDRESS`, `WALLET_SOURCE_EVM`, `WALLET_SOURCE_SOLANA`, `ENABLE_EVM_PLUGIN`, `ENABLE_CLOUD_WALLET` ([cloud-routes-autonomous.ts:656-675](../eliza/plugins/plugin-elizacloud/src/routes/cloud-routes-autonomous.ts#L656), [agent/src/api/wallet-routes.ts:1399-1507](../eliza/packages/agent/src/api/wallet-routes.ts#L1399), [agent/src/runtime/first-time-setup.ts:245-262](../eliza/packages/agent/src/runtime/first-time-setup.ts#L245)), plus `ELIZA_CLOUD_CLIENT_ADDRESS_KEY_ENV` for the cloud-wallet bridge ([cloud/cloud-wallet.ts:109](../eliza/plugins/plugin-elizacloud/src/cloud/cloud-wallet.ts#L109)) and vault-ref overwrites of existing sensitive keys ([app-core/src/services/vault-bootstrap.ts:182](../eliza/packages/app-core/src/services/vault-bootstrap.ts#L182)). The cloud-auth keys `ELIZAOS_CLOUD_API_KEY` / `ELIZAOS_CLOUD_ENABLED` / `ELIZA_CLOUD_USER_ID` / `ELIZA_CLOUD_ORGANIZATION_ID` are NOT written through `persistConfigEnv` — they live only in `process.env`, `runtime.character.secrets`, and `runtime.setSetting`, with the API key persisted onto `config.cloud.apiKey` in `eliza.json` via `saveElizaConfig()`.
+7. ✅ Cloud SSO callback handler does not exist locally. `services/cloud-auth.ts` references `app-core/src/api/auth/cloud-sso.ts` at [cloud-auth.ts:13-18](../eliza/plugins/plugin-elizacloud/src/services/cloud-auth.ts#L13), but a directory listing of [`packages/app-core/src/api/auth/`](../eliza/packages/app-core/src/api/auth/) confirms the file does not exist (only `audit.ts`, `auth-context.ts`, `bootstrap-token.ts`, `index.ts`, `passwords.ts`, `sensitive-rate-limit.ts`, `sessions.ts`, `tokens.ts` are present). No route in `auth-pairing-routes.ts`, `auth-bootstrap-routes.ts`, `auth-session-routes.ts`, or `server.ts` matches `/api/auth/login/sso/callback`. The only artifact of this flow is the named rate-limiter slot `auth.login.sso.start` at [auth/sensitive-rate-limit.ts:12-13](../eliza/packages/app-core/src/api/auth/sensitive-rate-limit.ts#L12). `getSsoRedirectUrl()` / `exchangeCodeForSession()` are therefore orphan helpers today; tracked as a Stage 1.6 / Stage 2 cleanup decision (wire-or-remove).
+8. ✅ `POST /api/cloud/login` success shape: `{ ok: true; sessionId: string; browserUrl: string }` ([cloud-routes-autonomous.ts:369-373](../eliza/plugins/plugin-elizacloud/src/routes/cloud-routes-autonomous.ts#L369)). Documented inline in §3 above.
+9. ✅ `GET /api/cloud/login/status` success shape: `{ status: "authenticated"; token: string; keyPrefix?: string; organizationId?: string; userId?: string }` ([cloud-routes.ts:555-565](../eliza/plugins/plugin-elizacloud/src/routes/cloud-routes.ts#L555); autonomous mirror at [cloud-routes-autonomous.ts:764-772](../eliza/plugins/plugin-elizacloud/src/routes/cloud-routes-autonomous.ts#L764)). Non-authenticated polls reply `{ status }` with the cloud's status verbatim. Documented inline in §3 above.
+10. ✅ `hasCompatPersistedOnboardingState(config)` predicate at [compat-route-shared.ts:316-354](../eliza/packages/app-core/src/api/compat-route-shared.ts#L316). Returns `true` when any of: `meta.onboardingComplete === true`; canonical service routing is complete; `config.agents.list` is non-empty; or `config.agents.defaults.workspace`/`adminEntityId` is set. Documented inline in §6 above.
+11. ✅ Connector setup handler return shapes documented inline in §5. Discord exposes `{ available, connected, authenticated, currentUser, subscribedChannelIds, configuredChannelIds, scopes, lastError, ipcPath, reason }` from `service.getStatus()`; Telegram returns `{ available: true, hasToken, connected }`; Signal returns `{ accountId, status, authExists, serviceConnected, qrDataUrl, phoneNumber, error }`. Normalization tracked by followup item 18 + `plugins/__tests__/setup-routes-contract.test.ts`.
+12. ✅ `VerifyBootstrapFailureReason` defined at [auth/bootstrap-token.ts:41-54](../eliza/packages/app-core/src/api/auth/bootstrap-token.ts#L41) as the 13-arm union: `"missing_issuer_env" | "missing_container_env" | "missing_token" | "jwks_fetch_failed" | "signature_invalid" | "alg_not_allowed" | "issuer_mismatch" | "claims_invalid" | "scope_mismatch" | "container_mismatch" | "expired" | "replay" | "store_error"`. Re-exported via [auth/index.ts:31](../eliza/packages/app-core/src/api/auth/index.ts#L31). Documented inline in §3 above.
+13. ✅ `loadPersistedActiveServer()` returns `PersistedActiveServer | null` ([persistence.ts:945-952](../eliza/packages/ui/src/state/persistence.ts#L945)). `PersistedActiveServer` is `{ id: string; kind: "local" | "cloud" | "remote"; label: string; apiBase?: string; accessToken?: string }` ([persistence.ts:807-818](../eliza/packages/ui/src/state/persistence.ts#L807)). Note the `kind` is the 3-element union, not the longer list earlier audit notes claimed.
+
 Still unverified:
 
-5. The `firstRunStateStore` backing path/file — `plugins/app-lifeops/src/lifeops/first-run/state.js` was not read.
-6. The full set of keys written through `persistConfigEnv()` — file enumerates only the blocklist; the cloud-side set was inferred from `persistCloudLoginStatus`.
-7. The cloud SSO callback handler location — `app-core/src/api/auth/cloud-sso.ts` was referenced but not read.
-8. The success-response shape of `POST /api/cloud/login` (initiate) — only the request-side block was read.
-9. The success-response shape of `GET /api/cloud/login/status` — only failure branches were in the read window.
-10. The full predicate of `hasCompatPersistedOnboardingState(config)` — used by `/api/onboarding/status` but its body was not read.
-11. The connector setup handler return shapes (Discord / Telegram / Signal) — only the route tables were inspected. Cross-plugin normalization tracked by `plugins/__tests__/setup-routes-contract.test.ts` (Stage 1.6).
-12. The exact `VerifyBootstrapFailureReason` union for `POST /api/auth/bootstrap/exchange` — referenced via `verifyBootstrapToken(...)` but its file (`auth/index`) was not read.
-13. The `loadPersistedActiveServer` return shape — only the location of the storage key was confirmed.
+_(none)_

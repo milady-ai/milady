@@ -1,0 +1,9 @@
+# Pinned WebKit revision for the iOS Bun port.
+# Format: single line — a git SHA or tag from https://github.com/WebKit/WebKit.
+# Update this and add a patch under patches/ when bumping WebKit.
+#
+# TODO(M01): pick a revision. Recommended starting point: take whatever
+# revision NativeScript/webkit's main branch ships with — they keep up with
+# upstream WebKit and have already done the no-JIT iOS work for app embedding.
+
+PLACEHOLDER-FILL-IN-AT-M01

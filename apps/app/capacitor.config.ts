@@ -1,8 +1,15 @@
 import type { CapacitorConfig } from "@capacitor/cli";
+// Import directly from @elizaos/shared (the canonical owner of the
+// allowed-hosts helper) so the import resolves identically in both
+// MILADY_ELIZA_SOURCE=packages (npm-published @elizaos/*) and
+// MILADY_ELIZA_SOURCE=local (workspace-linked eliza/packages/*) modes.
+// @elizaos/app-core re-exports this subpath in published builds but not
+// in the local source's package.json exports map, which would otherwise
+// break `bun run build:android` under local mode.
 import {
   parseAllowedHostEnv,
   toCapacitorAllowNavigation,
-} from "@elizaos/app-core/config/allowed-hosts";
+} from "@elizaos/shared/config/allowed-hosts";
 import appConfig from "./app.config";
 
 type CapacitorAllowNavigation = NonNullable<
@@ -27,6 +34,9 @@ const allowNavigation: CapacitorAllowNavigation = [
   ),
 ];
 
+const liveReloadUrl = process.env.MILADY_LIVE_RELOAD_URL?.trim();
+const liveReloadEnabled = !!liveReloadUrl;
+
 const config: CapacitorConfig = {
   appId: appConfig.appId,
   appName: appConfig.appName,
@@ -37,6 +47,17 @@ const config: CapacitorConfig = {
     // Self-hosters add their own domains via MILADY_ALLOWED_HOSTS
     // (build-time env, comma-separated). Listed entries are baseline.
     allowNavigation,
+    // Live-reload dev mode: MILADY_LIVE_RELOAD_URL=http://<host>:<port>
+    // points the on-device WebView at a running vite dev server on the
+    // host machine. The APK native layer (agent, llama, bridge) stays
+    // on-device; only the React renderer is served remotely. Build with
+    // `MILADY_LIVE_RELOAD_URL=http://192.168.x.x:5173 bun run build:android`.
+    ...(liveReloadEnabled
+      ? {
+          url: liveReloadUrl,
+          cleartext: true,
+        }
+      : {}),
   },
   plugins: {
     CapacitorHttp: {
@@ -55,9 +76,13 @@ const config: CapacitorConfig = {
   },
   android: {
     backgroundColor: "#0a0a0a",
-    allowMixedContent: false,
+    // Allow mixed content when doing live-reload dev (vite serves over plain
+    // HTTP from the host LAN; the APK shell loads it over cleartext).
+    allowMixedContent: liveReloadEnabled,
     captureInput: true,
-    webContentsDebuggingEnabled: false,
+    // Enable WebContents debugging in live-reload mode so Chrome DevTools can
+    // attach to the on-device WebView while developing.
+    webContentsDebuggingEnabled: liveReloadEnabled,
   },
 };
 

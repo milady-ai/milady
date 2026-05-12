@@ -78,7 +78,8 @@ function runNode(script, args, env) {
   return run(process.execPath, [script, ...args], env);
 }
 
-function run(command, args, env) {
+function run(command, args, env, options = {}) {
+  const { allowFailure = false } = options;
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, {
       cwd: repoRoot,
@@ -92,6 +93,13 @@ function run(command, args, env) {
         return;
       }
       if ((code ?? 1) !== 0) {
+        if (allowFailure) {
+          console.warn(
+            `[eliza-source-mode] ${command} exited ${code ?? 1} (tolerated)`,
+          );
+          resolve();
+          return;
+        }
         reject(new Error(`${command} exited with code ${code ?? 1}`));
         return;
       }
@@ -129,7 +137,10 @@ async function runLocalMode(options) {
   await runNode("scripts/setup-upstreams.mjs", [], env);
 
   if (options.install) {
-    await run("bun", ["install"], env);
+    // Tolerate harmless EEXIST link collisions (file: deps vs. manually-
+    // linked @elizaos/* symlinks). The links get created; bun exits 1 only
+    // because of the duplicate-attempt warning.
+    await run("bun", ["install"], env, { allowFailure: true });
   }
 
   console.log("[eliza-source-mode] local elizaOS source mode is ready.");

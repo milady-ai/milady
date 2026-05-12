@@ -14,8 +14,8 @@ Severity scale:
 Current ledger state (open items only, after 2026-05-11 sweep):
 
 - **P0** open: **0**
-- **P1** open: **3** (items 11, 13, 14)
-- **P2** open: **5** (items 9, 10, 12, 15, 17, plus the new connector-normalization tracking item 18 — counted under P1 below since it gates item 14)
+- **P1** open: **1** (item 14)
+- **P2** open: **2** (items 12 — desktop half only, and 17; plus the new connector-normalization tracking item 18 — counted under P1 below since it gates item 14)
 - **P3** open: **0**
 
 ---
@@ -85,46 +85,49 @@ Pinned by `eliza/plugins/plugin-elizacloud/__tests__/onboarding-failures.test.ts
 - **Summary:** Three distinct "no usable agent" states encoded as `null | undefined | { agentId, bridgeUrl?: undefined }`. Callers had to disambiguate by inspecting both the outer return and the inner field.
 - **Status:** DONE 2026-05-11. Cloud-smells agent reworked the provisioning timeout path so it now surfaces an explicit failure message instead of silently returning `{ agentId }`, collapsing the ambiguous shape. The remaining "successful provision" / "explicit failure" split is now a clean binary at the call site. Verified by the new "Provisioning timeout surfaces explicit failure" test case in `onboarding-failures.test.ts`.
 
-#### 9. `openBrowser` failures swallowed silently — PENDING
+#### 9. `openBrowser` failures swallowed silently — DONE 2026-05-11
 
-- **Severity:** P2
+- **Severity:** P2 → resolved
 - **Citation:** `eliza/plugins/plugin-elizacloud/src/onboarding.ts:107-110,378-395`
 - **Summary:** `openBrowser(url).catch(() => {})` and the `onError` callback inside `openBrowser` swallow the failure. If `open` / `xdg-open` / `cmd.exe` aren't on PATH the user sees only the printed URL in the terminal — fine for a CLI, but the same code is hit by the desktop/web onboarding wrapper where there is no terminal.
-- **Recommended action:** Emit a `CloudOnboardingEvent` (or call the `clack.log.warn(...)` already in scope) so the GUI surface can show "Could not open browser automatically — visit <url>" inline rather than relying on the terminal output.
-- **Note 2026-05-11:** Doc misattribution against the 2026-05-10 audit was cleared in Stage 4.1 (the smell itself remains real; only the originally-misattributed citation was corrected). The fix is still pending — the underlying swallow is unchanged.
+- **Status:** DONE 2026-05-11. Refactored alongside item 10. The `openBrowser` helper now rejects with the underlying `Error` instead of swallowing; the `runCloudAuth` wrapper routes that error through `CloudOnboardingObserver.onAuthBrowserOpenFailed(loginUrl, error)`. The CLI-backed `ClackObserver` renders a `log.warn` containing the URL and the OS-level error so the user can recover; desktop/web wrappers can render the same data as an inline GUI affordance. New test case C8 in `onboarding-failures.test.ts` pins the observer call site (mocks `node:child_process.execFile` to reject and asserts the observer receives the URL + the `Error`).
 
-#### 10. UI module (`@clack/prompts`) is threaded as a parameter through the orchestration layer — PENDING
+#### 10. UI module (`@clack/prompts`) is threaded as a parameter through the orchestration layer — DONE 2026-05-11
 
-- **Severity:** P2
+- **Severity:** P2 → resolved
 - **Citation:** `eliza/plugins/plugin-elizacloud/src/onboarding.ts:23-24` (type alias), `:92, :140, :238, :310` (signatures).
 - **Summary:** `runCloudOnboarding` is supposed to be transport-agnostic but takes a `ClackModule` typed parameter, which couples it to the CLI library. This is why the web/desktop onboarding cannot reuse this orchestrator (the smells in #9 above are a downstream symptom).
-- **Recommended action:** Define a `CloudOnboardingObserver` interface (`onAvailability(reason)`, `onAuthStart(url)`, `onPoll(status)`, `onProvisionStart`, `onProvisionStatus(status)`, `confirm(prompt)`) and inject that instead. CLI provides a clack-backed implementation; web/desktop provides an event-bridge implementation. Lets `RuntimeGate.cloud-provisioning.test.tsx` and the CLI tests share the same orchestrator.
-- **Note 2026-05-11:** Doc misattribution against the 2026-05-10 audit was cleared in Stage 4.1 (the smell itself remains real). The structural fix is still pending — items 9 and 10 are coupled; address them together in a single refactor.
+- **Status:** DONE 2026-05-11. `CloudOnboardingObserver` defined in `eliza/plugins/plugin-elizacloud/src/cloud/onboarding-observer.ts` — covers every availability/auth/provision lifecycle event plus `confirm` / `selectChoice` prompts. `runCloudOnboarding(observer, agentName, preset?, baseUrl?)` is the new entry shape. CLI provides `ClackObserver` (`src/cloud/clack-observer.ts`); test/headless callers use `NullCloudOnboardingObserver` (`src/cloud/null-observer.ts`). `eliza/packages/agent/src/runtime/first-time-setup.ts` was updated to wrap its lazily-loaded clack module in `new ClackObserver(clack)` before calling `runCloudOnboarding`. The legacy `ClackModule` parameter is gone — single codepath only. New test case C9 in `onboarding-failures.test.ts` runs a full availability-false path through `NullCloudOnboardingObserver` without throwing.
 
 ---
 
 ## P1 — truly missing coverage uncovered during this campaign
 
-### 11. iOS deep-link entry (`milady://onboard/...`) — PENDING
+### 11. iOS deep-link entry (`milady://onboard/...`) — DONE 2026-05-11
 
-- **Severity:** P1
-- **Citation:** Referenced in `docs/QA-onboarding.md` M4 row; no automated coverage. Sandbox-mode entitlements live in `docs/sandbox-mode.md` but the deep-link handler implementation is not in scope of any existing test.
-- **Summary:** Mobile users hitting a `milady://onboard/step/provider` URL should land on the provider sub-view of the chooser. No unit, integration, or e2e test asserts this.
-- **Recommended action:** Add a Capacitor `App.addListener("appUrlOpen", ...)` unit test that asserts `RuntimeGate` opens the local-runtime sub-view with `localStage = "config"` when the deep-link payload requests it.
+- **Severity:** P1 → resolved
+- **Citation:** Referenced in `docs/QA-onboarding.md` M4 row; previously no automated coverage. Sandbox-mode entitlements live in `docs/sandbox-mode.md`.
+- **Summary:** Mobile users hitting a `milady://onboard/step/provider` URL should land on the provider sub-view of the chooser; no test asserted this.
+- **Fix applied:** Added `eliza/packages/ui/src/onboarding/deep-link-handler.ts` — a platform-agnostic URL parser (`routeOnboardingDeepLink`) plus a Capacitor wrapper (`installOnboardingDeepLinkListener`) that wires `App.addListener("appUrlOpen", ...)` and `App.getLaunchUrl()`. The parser translates `milady://onboard/step/<id>` into the `?runtime=picker&runtimeTarget=<choice>` query contract that `RuntimeGate` already consumes (`provider` and `local` → `local` sub-view; `cloud` → `cloud`; `remote` → `remote`; unknown step → default chooser without crash). The wrapper resolves to a no-op when the Capacitor bridge is unavailable. `@capacitor/app` is dynamically imported and mocked in tests — no new runtime dependency was added to `@elizaos/ui`.
+- **Test:** `eliza/packages/ui/src/onboarding/__tests__/deep-link-entry.test.ts` (17 PASS, vitest + jsdom). Covers all 7 cases from the original brief (provider / local / cloud / remote / unknown step / malformed URL / wrong scheme) plus listener-layer coverage for "right scheme but non-onboard host", "right scheme + onboard host but wrong inner segment", existing-search-params preservation, runtimeTarget overwrite, cold-launch URL via `App.getLaunchUrl()`, `onUnmatched` fall-through for non-onboarding URLs, `addListener` rejection (Capacitor bridge unavailable), and `getLaunchUrl` rejection.
+- **Verification:** `bun run --cwd eliza/packages/ui test -- deep-link-entry` → 17/17 PASS. `bun run --cwd eliza/packages/ui test -- onboarding/__tests__/` → 160/160 PASS across 4 onboarding test files. `bun run --cwd eliza/packages/ui typecheck` clean. No new lint errors.
+- **Follow-up not in scope:** Wiring `installOnboardingDeepLinkListener` into `apps/app/src/main.tsx`'s `initializeAppLifecycle()` so the deep link reaches RuntimeGate in production. The handler module is fully tested and ready to import; the host wiring is a small change tracked separately if a future onboarding stage requires it. The 12 `routeOnboardingDeepLink` unit cases plus the 5 listener cases are independently meaningful regression guards.
 
-### 12. OS-native permission prompts (notifications, file access, camera) — PENDING
+### 12. OS-native permission prompts (notifications, file access, camera) — DONE 2026-05-11 (mobile scaffold); desktop part still PENDING
 
 - **Severity:** P2
 - **Citation:** `docs/QA-onboarding.md` M5 row notes "Playwright CANNOT reach native dialogs". No coverage at all today.
 - **Summary:** Permissions are now requested lazily (per `DesktopOnboardingRuntime.tsx` doc-comment, since deleted — lazy-permissions path is now in `installDesktopPermissionsClientPatch` / `desktop-permissions-client.ts`) but there is no automated harness driving the lazy request → grant → success path.
-- **Recommended action:** For mobile, add a `scripts/qa/mobile-permission-walkthrough.mjs` that drives the computer-use MCP through the permission cascade and captures each prompt. For desktop, add an Electrobun spec that exercises `tccutil`-mediated permission resets between runs.
+- **Status:** DONE 2026-05-11 for the mobile half. Added `scripts/qa/mobile-permission-walkthrough.mjs` — an MCP-driven scaffold + manifest writer mirroring the `mobile-screenshot-walkthrough.mjs` pattern. `--init` scaffolds `reports/qa/<date>/mobile-permissions/<surface>/` with a P1-P6 `CHECKLIST.md` (P6 Bluetooth/Local Network is Android-only; iOS gets P1-P5). Operator drives each prompt via `mcp__computer-use__screenshot` + `mcp__computer-use__left_click` inside a Claude Code session and saves PNGs into the scaffolded directory. `--finalize` validates the directory and emits `SUMMARY.md` with per-prompt size + sha256, exiting 0 on partial capture (local-dev tolerant). M5 row in `docs/QA-onboarding.md` updated to point to the new --init/--finalize workflow. Desktop side (an Electrobun spec exercising `tccutil`-mediated permission resets between runs) is still PENDING and tracked here.
 
-### 13. App relaunch after cloud agent provisioning — PENDING
+### 13. App relaunch after cloud agent provisioning — DONE 2026-05-11
 
-- **Severity:** P1
-- **Citation:** `RuntimeGate.cloud-provisioning.test.tsx` covers the provisioning bridge handoff and `setPendingRestart` at the unit level. The actual native relaunch path is not exercised in CI.
-- **Summary:** Production cloud-onboarding ends with a "Restart Milady" CTA that triggers the Electrobun native relaunch. The relaunch handler can crash on platforms where `process.execPath` resolves to a packaged binary not on PATH; no automated test catches this.
-- **Recommended action:** Extend `packages/app/test/electrobun-packaged/electrobun-packaged-regressions.e2e.spec.ts` with a relaunch scenario, gated on the host being macOS or Windows (where the packaged binary is available in CI).
+- **Severity:** P1 → resolved (with documented gap)
+- **Citation:** `RuntimeGate.cloud-provisioning.test.tsx` covers the provisioning bridge handoff and `setPendingRestart` at the unit level. The actual native relaunch path is now exercised in CI via the new packaged spec.
+- **Summary:** Production cloud-onboarding ends with a "Restart Milady" CTA whose path resolves to `DesktopManager.relaunch()` (`eliza/packages/app-core/platforms/electrobun/src/native/desktop.ts:1439`). The handler calls `Bun.spawn([process.execPath, ...process.argv.slice(1)], { detached: true, ... })` and then `Utils.quit()`. If `process.execPath` resolves to a packaged binary that is missing/unspawnable, the spawn fails — the handler logs `[DesktopManager] relaunch: failed to spawn new instance: ...` and the parent still exits, but no new instance comes up.
+- **Status:** DONE 2026-05-11. Added `eliza/packages/app/test/electrobun-packaged/electrobun-relaunch.e2e.spec.ts` — a single packaged e2e (gated on macOS/Windows where the launcher binary is built) that boots the real packaged shell via the existing `PackagedDesktopHarness`, drives `harness.menuAction("relaunch")` (the same code path the cloud-onboarding "Restart Milady" CTA + `relaunchDesktop()` lands in — `eliza/packages/ui/src/state/useChatLifecycle.ts:447`), waits for the parent process to exit naturally, and asserts (a) the relaunch handler did not log a spawn-failure marker, (b) no crash markers (SIGSEGV/SIGBUS/SIGABRT/"Fatal error during startup"/"panic:"/"core dumped") appeared in stdout/stderr, and (c) the exit code is 0 or the signal is a clean SIGTERM/SIGINT/SIGHUP (never a crash signal). The test is picked up automatically by `playwright.electrobun.packaged.config.ts` (matches `**/*.e2e.spec.ts`) and runs in serial mode alongside the existing regression specs.
+- **Known gap:** A second test ("relaunch handler reports a clean error when execPath is invalid") was scoped out — `DesktopManager.relaunch()` reads `process.execPath` directly with no env-override hook, and Electrobun's launcher controls `argv[0]` before Bun starts, so there is no clean way to inject a bad `execPath` from outside. The bad-execPath case must be covered at the unit level by mocking `Bun.spawn` in a future `native/desktop.test.ts`; the e2e test in this commit only covers the happy path (parent exits cleanly with no crash markers) but does so against the real native binary.
+- **Operator runbook:** `bun run --cwd eliza/packages/app build` (or download a packaged tarball under `eliza/packages/app-core/platforms/electrobun/artifacts/`), then `bunx playwright test --config eliza/packages/app/playwright.electrobun.packaged.config.ts test/electrobun-packaged/electrobun-relaunch.e2e.spec.ts` on a macOS or Windows host. Skips on Linux because no packaged launcher is built there.
 
 ### 14. Connector-specific OAuth flows (Discord, Telegram, Signal) — PENDING
 
@@ -133,12 +136,12 @@ Pinned by `eliza/plugins/plugin-elizacloud/__tests__/onboarding-failures.test.ts
 - **Summary:** Each connector exposes its own setup namespace (`/api/discord-local/...`, `/api/telegram-setup/...`, `/api/signal/...`) with bespoke status / pair / disconnect shapes. The contract test documents the gap; no test drives an actual OAuth handshake.
 - **Recommended action:** Item 18 (below) tracks the normalization work; once each connector is migrated to `/api/setup/<connector>/{status,start,cancel}` the 30 expected-fail blocks in `setup-routes-contract.test.ts` flip to real PASS assertions and a single contract test can drive every connector's `start → status → complete` cycle against a mocked OAuth provider.
 
-### 15. Sandbox / store distribution onboarding variants — PENDING
+### 15. Sandbox / store distribution onboarding variants — DONE 2026-05-11
 
-- **Severity:** P2
-- **Citation:** `docs/sandbox-mode.md` describes AOSP ElizaOS variant detection (`ElizaOS/<tag>` user-agent marker), App Store sandboxed entitlements, and AOSP terminal-access surface. AOSP pre-seed at `eliza/packages/ui/src/onboarding/pre-seed-local-runtime.ts` is the only one with any test coverage (indirectly via `mobile-runtime-mode-hardening.test.ts`, now 33 PASS as of 2026-05-11).
-- **Summary:** Variant detection logic is untested. A regression that mis-classifies a stock-Android Capacitor APK as AOSP-branded would dead-end boot on the 127.0.0.1:31337 pre-seed.
-- **Recommended action:** Add a focused unit test for the user-agent detection function in `pre-seed-local-runtime.ts` covering: (a) AOSP marker present → pre-seed runs, (b) marker absent → pre-seed skipped, (c) malformed marker → pre-seed skipped.
+- **Severity:** P2 → resolved
+- **Citation:** `docs/sandbox-mode.md` describes AOSP ElizaOS variant detection (`ElizaOS/<tag>` user-agent marker), App Store sandboxed entitlements, and AOSP terminal-access surface. AOSP pre-seed at `eliza/packages/ui/src/onboarding/pre-seed-local-runtime.ts` was previously only covered indirectly via `mobile-runtime-mode-hardening.test.ts` (33 PASS as of 2026-05-11).
+- **Summary:** Variant detection logic was untested. A regression that mis-classifies a stock-Android Capacitor APK as AOSP-branded would dead-end boot on the 127.0.0.1:31337 pre-seed.
+- **Status:** DONE 2026-05-11. Extracted the pure user-agent test into a new exported helper `isAospElizaUserAgent` at `eliza/packages/ui/src/onboarding/pre-seed-local-runtime.ts:92` (small source change: the helper was previously inlined into `isBrandedAndroidDevice` and not exported, making it untestable in isolation). Tightened the regex from `\bElizaOS\//` to `\bElizaOS\/\S/` so a malformed marker without a version (e.g. `ElizaOS/` or bare `ElizaOS`) no longer triggers the pre-seed. New focused unit test at `eliza/packages/ui/src/onboarding/__tests__/sandbox-variant-detection.test.ts` covers 14 cases: 10 pure detection (AOSP marker present, MiladyOS white-label marker, mid-string with pre-release tag, stock-Android UA, stock-iOS UA, malformed marker no version, marker with trailing slash but no version, empty string, null, undefined, leading-word-boundary violation `NotElizaOS/...`) and 3 wrapper integration cases (`preSeedAndroidLocalRuntimeIfFresh` via `navigator.userAgent` injection for AOSP marker present → pre-seeds, absent → skipped, malformed → skipped). Verified 14 PASS; no regression in `mobile-runtime-mode-hardening.test.ts` (33 PASS) or `mobile-runtime-mode.test.ts` (2 PASS).
 
 ---
 
@@ -192,10 +195,10 @@ No code was deleted in this pass; the renames are pure naming cleanup. `audit/la
 
 - **All P0 items resolved.** (Items 1, 2: DONE.)
 - **All P1 dead-code items resolved.** (Items 3, 4: DONE.)
-- **All P2 cloud source smells with verifiable, testable fixes resolved.** (Items 5, 6, 7, 8: DONE 2026-05-11 by the cloud-smells agent. Items 9, 10 remain — they are the structural `openBrowser` / `ClackModule` items that need a coordinated refactor.)
+- **All P2 cloud source smells resolved.** Items 5, 6, 7, 8 DONE by the cloud-smells agent. Items 9 and 10 DONE 2026-05-11 in the structural `openBrowser` / `ClackModule` refactor — `runCloudOnboarding` now takes a `CloudOnboardingObserver` instead of a clack module, and the OS browser-open failure surfaces through `observer.onAuthBrowserOpenFailed(url, error)` instead of being swallowed at debug-level.
 - **Knip dead-code rename pass complete.** All 5 `-compat`-suffixed files renamed; no code deleted (none were dead).
 - **Audit doc citations refreshed.** `audit/layer-4-api.md` and `audit/layer-8-state-config.md` now reference the new filenames.
 
-**Open items:** 8 total — items 9, 10, 11, 12, 13, 14, 15, 17, 18.
+**Open items:** 4 total — items 12 (desktop half), 14, 17, 18.
 
-**Tests passing as of 2026-05-11 sweep:** 17 (`onboarding-failures`) + 96 (`flow.test`) + 33 (`mobile-runtime-mode-hardening`) + 5 (`auth-pairing-routes`) + 5 skipped without `MILADY_DESKTOP_QA=1` (`dev-stack-probe`) + 12 PASS / 30 expected-fail (`setup-routes-contract`) = **193 covering cases, 30 documented gaps**.
+**Tests passing as of 2026-05-11 sweep:** 19 (`onboarding-failures` — up from 17 with the new C8 + C9 observer cases) + 96 (`flow.test`) + 33 (`mobile-runtime-mode-hardening`) + 14 (`sandbox-variant-detection`) + 17 (`deep-link-entry` — new for item 11) + 5 (`auth-pairing-routes`) + 5 skipped without `MILADY_DESKTOP_QA=1` (`dev-stack-probe`) + 12 PASS / 30 expected-fail (`setup-routes-contract`) = **226 covering cases, 30 documented gaps**.

@@ -253,6 +253,14 @@ jobs:
           cd eliza/packages/shared
           bun run build
 
+      # ── 7.5. Build @elizaos/app-core ────────────────────────────────────────
+      # browser.ts (the Vite alias target for @elizaos/app-core) re-exports
+      # from ../dist/index.js. Build the dist first so Vite can resolve it.
+      - name: Build @elizaos/app-core
+        run: |
+          cd eliza/packages/app-core
+          bun run build
+
       # ── 9. Build runtime (tsdown) ───────────────────────────────────────────
       - name: Build runtime (tsdown)
         run: |

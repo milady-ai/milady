@@ -31,6 +31,12 @@ env:
 
 jobs:
   sweep:
+    # The sweeper needs MILADY_E2E_* secrets scoped to the canonical org.
+    # On forks the secrets are absent and every matrix entry fails on every
+    # cron tick, generating daily noise. Manual workflow_dispatch from a
+    # fork still works for the operator who triggered it (they can supply
+    # the secrets via their own org/repo settings).
+    if: github.repository_owner == 'milady-ai' || github.event_name == 'workflow_dispatch'
     name: Sweep ${{ matrix.service }}
     strategy:
       fail-fast: false

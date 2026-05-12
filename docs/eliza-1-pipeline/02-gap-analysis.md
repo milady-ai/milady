@@ -21,6 +21,56 @@ Status taxonomy:
 
 ---
 
+## 0. Landings progress — Wave 1
+
+Branches pushed and ready for merge / cherry-pick. None merged into `develop` yet.
+
+### Critical gaps closed
+
+| Gap | Job   | Branch                                                  |
+|-----|-------|---------------------------------------------------------|
+| C1 Claude  | W1-T1 | `feat/orchestrator-claude-code-trajectory-merge`        |
+| C1 Codex   | W1-T2 | `feat/orchestrator-codex-trajectory-merge`              |
+| C2  | W0-X2 | `chore/training-remove-atropos`                         |
+| C6 (partial 4/10) | W1-B1 | `feat/benchmarks-standard-llm-adapters`       |
+| C8  | W1-D1 | `feat/training-vast-launcher-grpo-pipeline`             |
+| C9  | W1-T11| `feat/training-enforce-privacy-filter-in-format`        |
+
+### Major gaps closed
+
+| Gap | Job   | Branch                                                  |
+|-----|-------|---------------------------------------------------------|
+| M2 scaffold | W0-X5 | `feat/benchmarks-trending-results-store-scaffold` |
+| M4  | W1-P3 | `feat/prompt-optim-rollback`                            |
+| M5  | W1-S1 | `feat/synth-multi-turn-project-simulator`               |
+| M5 replay | W1-B4 | `worktree-agent-a490b05daa80fe463` (needs rename)    |
+| M7  | W1-S3 | `feat/synth-llm-judge-filter`                           |
+| M9  | W1-D3 | `feat/training-vast-budget-surface`                     |
+| M12 | W1-T4 | `feat/trajectories-action-exec-io`                      |
+| M21 | W1-P4 | `chore/training-remove-tinker`                          |
+| M24 | W1-I5 | `worktree-agent-ae9c3a54bc49012c4` (needs rename)       |
+| M35 | W1-D6 | `fix/training-27b-seq-len-default`                      |
+| M37 | W0-X2 | `chore/training-remove-nebius`                          |
+| M40 | W1-X1 | `feat/trajectories-cost-annotation`                     |
+| A5  | W1-R2 | `feat/runtime-per-action-model-routing`                 |
+
+### Pending re-dispatch (rate-limited in Batch R2)
+
+`W0-X3` promotion scaffold · `W1-P1` wire 4 optimized prompts · `W1-P2` A/B
+promotion gate · `W1-R1` main-agent local-only · `W1-T5` skill I/O · `W1-T6`
+evaluator step type · `W1-T7` trajectory search · `W1-T8` user feedback ·
+`W1-T9` trajectory steps table · `W1-I1` LM Studio plugin · `W1-I2` MLX plugin.
+
+### Pending dispatch (dependency-cleared)
+
+`W1-T3` OpenCode capture · `W1-T10` sub-agent cost · `W1-S2` adaptive synth ·
+`W1-S4` synth sub-agent spawning · `W1-B2` unified harness · `W1-B3` trending
+dashboard · `W1-B5` CI gates · `W1-D2` CheckpointSyncAgent · `W1-D4` Vast
+serving · `W1-H1` PromotionService logic · `W1-H2` dynamic HF catalog ·
+`W1-I3` hardware detection · `W1-I4` speculative decoding.
+
+---
+
 ## 1. Critical gaps (block the loop)
 
 ### C1. Sub-agent reasoning capture is stdout-only [partial → critical]

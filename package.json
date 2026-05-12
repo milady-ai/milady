@@ -113,8 +113,11 @@
     "dev": "node scripts/run-eliza-app-core-script.mjs dev-ui.mjs --name=milady",
     "dev:web:ui": "node scripts/run-eliza-app-core-script.mjs dev-ui.mjs --name=milady",
     "dev:ui": "node scripts/run-eliza-app-core-script.mjs dev-ui.mjs --name=milady --ui-only",
-    "dev:desktop": "MILADY_ELIZA_SOURCE=local ELIZA_NAMESPACE=milady node scripts/run-eliza-app-core-script.mjs dev-platform.mjs",
-    "dev:desktop:watch": "MILADY_ELIZA_SOURCE=local ELIZA_NAMESPACE=milady MILADY_DESKTOP_VITE_WATCH=1 node scripts/run-eliza-app-core-script.mjs dev-platform.mjs",
+    "dev:desktop:preflight": "node scripts/cleanup-desktop-orphans.mjs && MILADY_ELIZA_SOURCE=local node scripts/check-eliza-git-freshness.mjs && MILADY_ELIZA_SOURCE=local node scripts/check-plugin-dist-staleness.mjs",
+    "predev:desktop": "bun run dev:desktop:preflight",
+    "predev:desktop:watch": "bun run dev:desktop:preflight",
+    "dev:desktop": "MILADY_ELIZA_SOURCE=local ELIZA_NAMESPACE=milady ELIZA_DISABLE_LOCAL_EMBEDDINGS=1 node scripts/run-eliza-app-core-script.mjs dev-platform.mjs",
+    "dev:desktop:watch": "MILADY_ELIZA_SOURCE=local ELIZA_NAMESPACE=milady ELIZA_DISABLE_LOCAL_EMBEDDINGS=1 MILADY_DESKTOP_VITE_WATCH=1 node scripts/run-eliza-app-core-script.mjs dev-platform.mjs",
     "dev:guard": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev-guard.ps1 -Typecheck",
     "dev:guard:fast": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev-guard.ps1",
     "dev:guard:full": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev-guard.ps1 -Format -Typecheck -Build",
@@ -353,6 +356,8 @@
     "pty-manager@1.11.0": "patches/pty-manager@1.11.0.patch",
     "coding-agent-adapters@0.16.3": "patches/coding-agent-adapters@0.16.3.patch",
     "llama-cpp-capacitor@0.1.5": "patches/llama-cpp-capacitor@0.1.5.patch",
-    "tsup@8.5.1": "patches/tsup@8.5.1.patch"
+    "tsup@8.5.1": "patches/tsup@8.5.1.patch",
+    "@elizaos/capacitor-llama@0.1.0": "patches/@elizaos%2Fcapacitor-llama@0.1.0.patch",
+    "@elizaos/core@2.0.0-alpha.537": "patches/@elizaos%2Fcore@2.0.0-alpha.537.patch"
   }
 }

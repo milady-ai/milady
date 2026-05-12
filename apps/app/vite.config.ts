@@ -2,10 +2,6 @@ import fs from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import {
-  parseAllowedHostEnv,
-  toViteAllowedHosts,
-} from "@elizaos/app-core/config/allowed-hosts";
 import { colorizeDevSettingsStartupBanner } from "@elizaos/shared/dev-settings-banner-style";
 import { prependDevSubsystemFigletHeading } from "@elizaos/shared/dev-settings-figlet-heading";
 import {
@@ -59,12 +55,42 @@ function shouldUseLocalElizaSource(): boolean {
   const sourceMode = (
     process.env.MILADY_ELIZA_SOURCE ??
     process.env.ELIZA_SOURCE ??
-    "packages"
+    ""
   ).toLowerCase();
-  return (
-    ["local", "source", "workspace"].includes(sourceMode) ||
+  if (["local", "source", "workspace"].includes(sourceMode)) return true;
+  if (["package", "packages", "published", "npm"].includes(sourceMode)) {
+    return false;
+  }
+  // Legacy skip flag — set by CI when running in packages mode (e.g. the
+  // setup-bun-workspace action with disable-local-eliza-workspace=true).
+  // Mirrors isLocalElizaDisabled() in scripts/lib/eliza-package-mode.mjs so
+  // vite agrees with the rest of the toolchain about which mode it is in.
+  if (
+    process.env.MILADY_SKIP_LOCAL_UPSTREAMS === "1" ||
+    process.env.ELIZA_SKIP_LOCAL_UPSTREAMS === "1"
+  ) {
+    return false;
+  }
+  if (
     process.env.MILADY_FORCE_LOCAL_UPSTREAMS === "1" ||
     process.env.ELIZA_FORCE_LOCAL_UPSTREAMS === "1"
+  ) {
+    return true;
+  }
+  // Auto-detect: when env is unset, fall back to local mode if the
+  // workspace checkout actually exists with linked sources. This lets
+  // `bun run build` succeed after `bun run eliza:local` without
+  // requiring callers to also export MILADY_ELIZA_SOURCE=local.
+  return fs.existsSync(
+    path.join(
+      path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../.."),
+      "eliza",
+      "packages",
+      "app-core",
+      "src",
+      "platform",
+      "native-plugin-entrypoints.ts",
+    ),
   );
 }
 
@@ -268,7 +294,10 @@ function resolveLocalElizaAppAliases(): Alias[] {
       return null;
     }
     const record = value as Record<string, unknown>;
-    for (const condition of ["source", "types", "import", "default"]) {
+    // Never include "types" — that's a TypeScript-only condition
+    // pointing at .d.ts declaration files, which aren't executable
+    // modules. Vite's load-fallback then crashes trying to read them.
+    for (const condition of ["source", "import", "default"]) {
       const target = record[condition];
       if (typeof target === "string") return target;
     }
@@ -304,18 +333,33 @@ function resolveLocalElizaAppAliases(): Alias[] {
       for (const [key, value] of Object.entries(pkg.exports || {})) {
         const exportTarget = resolveExportTarget(value);
         if (!exportTarget) continue;
+        const resolvedTarget = path.resolve(pkgDir, exportTarget);
+        // Only create an alias when the target file actually exists on disk.
+        // In a fresh local clone, dist/ may not be built yet. Skipping the
+        // alias lets the import fall through to the stub or npm package.
+        if (!fs.existsSync(resolvedTarget)) continue;
         const aliasKey =
           key === "." ? pkgName : `${pkgName}/${key.replace(/^\.\//, "")}`;
         aliases.push({
           find: new RegExp(`^${escapeRegExp(aliasKey)}$`),
-          replacement: path.resolve(pkgDir, exportTarget),
+          replacement: resolvedTarget,
         });
       }
 
-      aliases.push({
-        find: new RegExp(`^${escapeRegExp(pkgName)}/(.*)`),
-        replacement: path.resolve(pkgDir, "src/$1"),
+      // Only add the src catch-all if at least one export target exists (i.e.
+      // the package has been built). Otherwise skip to avoid resolving src/
+      // imports for packages that are stubs or not yet compiled.
+      const hasSrcDir = fs.existsSync(path.join(pkgDir, "src"));
+      const hasBuiltExport = aliases.some((a) => {
+        const re = a.find;
+        return re instanceof RegExp && re.test(pkgName);
       });
+      if (hasSrcDir && hasBuiltExport) {
+        aliases.push({
+          find: new RegExp(`^${escapeRegExp(pkgName)}/(.*)`),
+          replacement: path.resolve(pkgDir, "src/$1"),
+        });
+      }
     }
   }
 
@@ -350,7 +394,17 @@ function resolveLocalSharedAliases(): Alias[] {
   return aliases;
 }
 
+function resolveLocalSharedDist(): string | null {
+  const localDist = path.join(localElizaRoot, "packages/shared/dist/index.js");
+  return fs.existsSync(localDist) ? localDist : null;
+}
+
 function resolveLocalAppCoreAliases(): Alias[] {
+  const sharedDist = resolveLocalSharedDist();
+  const sharedDistDir = sharedDist
+    ? path.join(localElizaRoot, "packages/shared/dist")
+    : null;
+
   const packageAgnosticAliases: Alias[] = [
     {
       find: /^@elizaos\/agent$/,
@@ -360,6 +414,21 @@ function resolveLocalAppCoreAliases(): Alias[] {
       find: /^@elizaos\/core$/,
       replacement: resolveElizaCoreBundlePath(),
     },
+    // When a local eliza workspace is present and @elizaos/shared has been
+    // built, prefer the local dist over the bun-store published copy which
+    // may lag behind and miss exports added in the local workspace.
+    ...(sharedDist
+      ? [
+          {
+            find: /^@elizaos\/shared$/,
+            replacement: sharedDist,
+          } as Alias,
+          {
+            find: /^@elizaos\/shared\/(.+)$/,
+            replacement: `${sharedDistDir}/$1`,
+          } as Alias,
+        ]
+      : []),
   ];
 
   const appCorePkgPath = path.join(
@@ -379,19 +448,60 @@ function resolveLocalAppCoreAliases(): Alias[] {
   const generatedAliases: Alias[] = [];
 
   for (const [key, value] of Object.entries(appCorePkg.exports || {})) {
-    if (typeof value !== "string") continue;
+    // "." always maps to appCoreBrowserEntry regardless of export shape (string
+    // or conditional-exports object). Other keys must be simple string values.
+    if (key !== "." && typeof value !== "string") continue;
     const aliasKey =
       key === "."
         ? "@elizaos/app-core"
         : `@elizaos/app-core/${key.replace(/^\.\//, "")}`;
+
+    // Resolve the string value, handling both plain strings and conditional exports.
+    const resolvedValue: string | null =
+      typeof value === "string"
+        ? value
+        : typeof value === "object" && value !== null
+          ? ((value as Record<string, string>).import ??
+            (value as Record<string, string>).default ??
+            null)
+          : null;
+
+    // CSS files in app-core exports point to dist paths (e.g. ./styles/styles.css).
+    // In Wave A these moved to @elizaos/ui. If the dist path doesn't exist locally,
+    // redirect to the UI source CSS so a fresh local clone builds without errors.
+    if (aliasKey.endsWith(".css") && resolvedValue) {
+      const distCssPath = path.resolve(appCorePkgDir, resolvedValue);
+      const baseName = path.basename(resolvedValue);
+      const uiCssPath = uiPkgRoot
+        ? path.join(uiPkgRoot, "src/styles", baseName)
+        : null;
+      const resolvedPath = fs.existsSync(distCssPath)
+        ? distCssPath
+        : uiCssPath && fs.existsSync(uiCssPath)
+          ? uiCssPath
+          : null;
+      if (resolvedPath) {
+        generatedAliases.push({
+          find: new RegExp(`^${escapeRegExp(aliasKey)}$`),
+          replacement: resolvedPath,
+        });
+      }
+      continue;
+    }
+
     const targetPath =
-      key === "." ? appCoreBrowserEntry : path.resolve(appCorePkgDir, value);
+      key === "."
+        ? appCoreBrowserEntry
+        : resolvedValue
+          ? path.resolve(appCorePkgDir, resolvedValue)
+          : null;
+    if (!targetPath) continue;
 
     generatedAliases.push({
       find: new RegExp(`^${escapeRegExp(aliasKey)}$`),
       replacement: targetPath,
     });
-    if (!aliasKey.endsWith(".js") && !aliasKey.endsWith(".css")) {
+    if (!aliasKey.endsWith(".js")) {
       generatedAliases.push({
         find: new RegExp(`^${escapeRegExp(aliasKey)}\\.js$`),
         replacement: targetPath,
@@ -401,11 +511,61 @@ function resolveLocalAppCoreAliases(): Alias[] {
 
   const uiSource = path.join(appCoreSrcRoot, "ui");
 
+  // Wave A moved styles from @elizaos/app-core to @elizaos/ui. The npm
+  // @elizaos/app-core package still includes them for packages-mode compat,
+  // but the local source no longer has ./styles/*.css or the exports entries.
+  // Add an explicit redirect before the catch-all so local builds find the CSS.
+  const uiStylesSourceDir = uiPkgRoot
+    ? path.join(uiPkgRoot, "src/styles")
+    : null;
+  const appCoreStylesLocalDir = path.join(appCoreSrcRoot, "styles");
+  const cssRedirectAlias: Alias[] =
+    uiStylesSourceDir &&
+    fs.existsSync(path.join(uiStylesSourceDir, "styles.css")) &&
+    !fs.existsSync(path.join(appCoreStylesLocalDir, "styles.css"))
+      ? [
+          {
+            find: /^@elizaos\/app-core\/styles\/(.+\.css)$/,
+            replacement: `${uiStylesSourceDir}/$1`,
+          },
+        ]
+      : [];
+
+  // Wave A moved several components/types from @elizaos/app-core to @elizaos/ui.
+  // The catch-all maps to app-core/src/* which may not have them. Use a custom
+  // resolver to fall back to the ui source when the app-core path doesn't exist.
+  const uiComponentsSourceDir = uiPkgRoot ? path.join(uiPkgRoot, "src") : null;
+
+  function resolveAppCoreWithUiFallback(id: string): string {
+    if (fs.existsSync(id)) return id;
+    const withTsx = id.endsWith(".tsx") ? id : `${id}.tsx`;
+    if (fs.existsSync(withTsx)) return withTsx;
+    const withTs = id.endsWith(".ts") ? id : `${id}.ts`;
+    if (fs.existsSync(withTs)) return withTs;
+    // Try the equivalent path under @elizaos/ui source
+    if (uiComponentsSourceDir) {
+      const relativeToSrc = id.includes(`${appCoreSrcRoot}/`)
+        ? id.slice(appCoreSrcRoot.length + 1)
+        : null;
+      if (relativeToSrc) {
+        const uiEquiv = path.join(uiComponentsSourceDir, relativeToSrc);
+        if (fs.existsSync(uiEquiv)) return uiEquiv;
+        const uiEquivTsx = `${uiEquiv}.tsx`;
+        if (fs.existsSync(uiEquivTsx)) return uiEquivTsx;
+        const uiEquivTs = `${uiEquiv}.ts`;
+        if (fs.existsSync(uiEquivTs)) return uiEquivTs;
+      }
+    }
+    return id;
+  }
+
   return [
+    ...cssRedirectAlias,
     ...generatedAliases,
     {
       find: /^@elizaos\/app-core\/(.+)$/,
-      replacement: `${appCorePkgDir}/src/$1`,
+      replacement: `${appCoreSrcRoot}/$1`,
+      customResolver: resolveAppCoreWithUiFallback,
     },
     {
       find: /^@miladyai\/ui$/,
@@ -491,7 +651,10 @@ const viteAllowedHosts: Exclude<
 > = [
   "localhost",
   "127.0.0.1",
-  ...toViteAllowedHosts(parseAllowedHostEnv(process.env.ELIZA_ALLOWED_HOSTS)),
+  ...(process.env.ELIZA_ALLOWED_HOSTS ?? "")
+    .split(",")
+    .map((h) => h.trim())
+    .filter(Boolean),
 ];
 
 const NATIVE_PLUGIN_ALIAS_ENTRIES = resolveNativePluginAliasEntries();
@@ -672,6 +835,15 @@ function normalizeModuleId(id: string | undefined): string {
 }
 
 function tryResolveElizaCorePkgDir(): string | null {
+  // Prefer the local workspace checkout — _require.resolve would otherwise
+  // land on the npm-installed bun store copy (older published build) and miss
+  // exports that only exist in the local source or a freshly-built dist.
+  if (hasLocalElizaWorkspace) {
+    const localCoreDir = path.join(localElizaRoot, "packages/core");
+    if (fs.existsSync(path.join(localCoreDir, "package.json"))) {
+      return localCoreDir;
+    }
+  }
   try {
     return path.dirname(_require.resolve("@elizaos/core/package.json"));
   } catch {
@@ -1063,9 +1235,28 @@ function generateNodeBuiltinStub(moduleId: string, req = _require): string {
   const lines = [
     // noop: returns itself (for chained calls like createRequire(url)(id)),
     // and is a valid class base (so `class X extends noop` works).
-    "function noop() { return noop; }",
-    "const asyncNoop = () => Promise.resolve();",
-    "const handler = { get(t, p) { if (typeof p === 'symbol') return undefined; if (p === '__esModule') return true; if (p === 'default') return t; if (p === 'prototype') return {}; return noop; }, has() { return true; }, ownKeys() { return []; }, getOwnPropertyDescriptor() { return { configurable: true, enumerable: true }; } };",
+    //
+    // Traps:
+    //   get/set/apply/construct/defineProperty — handle attribute access,
+    //     mutation, invocation, instantiation, and defineProperty on the
+    //     stub.
+    //   has/getOwnPropertyDescriptor — close reflection holes so
+    //     `'foo' in noop` and `Object.getOwnPropertyDescriptor(noop, 'foo')`
+    //     return predictable values. Without these, consumer code that
+    //     probes the stub (feature detection, fs-extra's top-level
+    //     `typeof fs.realpath.native === 'function'` check, esbuild
+    //     interop helpers) can throw `Cannot read properties of undefined`
+    //     at IIFE evaluation time before React mounts.
+    //     `getOwnPropertyDescriptor` falls through to the target's real
+    //     descriptor when the key exists on it — required to satisfy the
+    //     Proxy invariant that non-configurable target keys must be
+    //     reported with matching descriptors. `ownKeys` is intentionally
+    //     omitted: the default behavior already yields
+    //     `Object.keys(noop) === []` (target keys are non-enumerable) and
+    //     a custom trap would risk violating the invariant that
+    //     non-configurable target keys must appear in the result.
+    "const handler = { get(t, p) { if (typeof p === 'symbol') return undefined; if (p === '__esModule') return true; if (p === 'default') return t; if (p === 'prototype') return {}; if (p in t) return t[p]; return noop; }, set(t, p, v) { try { t[p] = v; } catch {} return true; }, apply() { return noop; }, construct() { return noop; }, defineProperty(t, p, d) { try { Object.defineProperty(t, p, { configurable: true, writable: true, enumerable: true, ...d }); } catch {} return true; }, has() { return true; }, getOwnPropertyDescriptor(t, p) { var own = Object.getOwnPropertyDescriptor(t, p); if (own) return own; return { configurable: true, enumerable: true, writable: true, value: noop }; } };",
+    "const noop = new Proxy(function noop(){}, handler);",
     "const stub = new Proxy({}, handler);",
     "export default stub;",
   ];
@@ -1436,6 +1627,147 @@ function generateCapacitorNativeStub(strippedId: string): string {
   ].join("\n");
 }
 
+/**
+ * Build a stub module with explicit named exports for every name a
+ * server-only @elizaos plugin's consumers reference. Named imports must
+ * resolve statically; a default-export Proxy doesn't satisfy them.
+ * Renderer never invokes these — the API child owns the real impls —
+ * so each export is a benign noop.
+ */
+function generateNamedExportStub(names: readonly string[]): string {
+  const lines: string[] = [
+    "const noop = () => undefined;",
+    "const asyncNoop = async () => undefined;",
+  ];
+  for (const name of names) {
+    lines.push(`export const ${name} = noop;`);
+  }
+  lines.push("export default new Proxy(noop, { get: () => noop });");
+  // Quiet "unused" in case the noop branches aren't referenced.
+  lines.push("void asyncNoop;");
+  return `${lines.join("\n")}\n`;
+}
+
+// Names enumerated from `eliza/packages/app-core/dist/**` static imports
+// of each server-only @elizaos plugin. Update when a build error shows
+// a new MISSING_EXPORT in this scope.
+const PLUGIN_ELIZACLOUD_STUB_NAMES = [
+  "__resetCloudBaseUrlCache",
+  "clearCloudSecrets",
+  "CloudOnboardingResult",
+  "CloudRouteState",
+  "CloudWalletDescriptor",
+  "CloudWalletProvider",
+  "ElizaCloudClient",
+  "elizaOSCloudPlugin",
+  "ensureCloudTtsApiKeyAlias",
+  "getCloudSecret",
+  "getOrCreateClientAddressKey",
+  "handleCloudBillingRoute",
+  "handleCloudCompatRoute",
+  "handleCloudRelayRoute",
+  "handleCloudRoute",
+  "handleCloudStatusRoutes",
+  "handleCloudTtsPreviewRoute",
+  "isCloudProvisionedContainer",
+  "mirrorCompatHeaders",
+  "normalizeCloudSecret",
+  "normalizeCloudSiteUrl",
+  "persistCloudWalletCache",
+  "provisionCloudWalletsBestEffort",
+  "resolveCloudApiBaseUrl",
+  "resolveCloudApiKey",
+  "resolveCloudTtsBaseUrl",
+  "resolveElevenLabsApiKeyForCloudMode",
+  "validateCloudBaseUrl",
+] as const;
+
+function generatePluginElizacloudStub(): string {
+  return generateNamedExportStub(PLUGIN_ELIZACLOUD_STUB_NAMES);
+}
+
+// Names actually imported from @elizaos/plugin-local-inference by server-only
+// agent runtime modules. The renderer never enters those code paths; the
+// stub satisfies Rollup's static analysis and trees away at module init.
+const PLUGIN_LOCAL_INFERENCE_STUB_NAMES = [
+  "getLocalInferenceActiveModelId",
+  "getLocalInferenceActiveSnapshot",
+  "getLocalInferenceChatStatus",
+  "handleLocalInferenceChatCommand",
+  "handleLocalInferenceRoutes",
+] as const;
+
+function generatePluginLocalInferenceStub(): string {
+  return generateNamedExportStub(PLUGIN_LOCAL_INFERENCE_STUB_NAMES);
+}
+
+// esbuild is a server-only build-time dep that drizzle-kit pulls in; the
+// agent's plugin-compiler imports it as a namespace. Stub the surface
+// the renderer's transitive imports might touch.
+const ESBUILD_STUB_NAMES = [
+  "build",
+  "buildSync",
+  "context",
+  "transform",
+  "transformSync",
+  "formatMessages",
+  "formatMessagesSync",
+  "analyzeMetafile",
+  "analyzeMetafileSync",
+  "initialize",
+  "stop",
+  "version",
+] as const;
+
+function generateEsbuildStub(): string {
+  return generateNamedExportStub(ESBUILD_STUB_NAMES);
+}
+
+// Named exports referenced from @elizaos/agent/* subpaths by the
+// @elizaos/app-core npm package. All are server-only; browser bundle
+// gets stubs so Rollup resolves static named imports without executing
+// the server code. Enumerated from app-core's .js source imports.
+const ELIZAOS_AGENT_STUB_NAMES = [
+  "applyCloudConfigToEnv",
+  "applyN8nConfigToEnv",
+  "applyPluginAutoEnable",
+  "applyPluginSelfDeclaredAutoEnable",
+  "AUTH_PROVIDER_PLUGINS",
+  "bootElizaRuntime",
+  "CHANNEL_PLUGIN_MAP",
+  "collectPluginNames",
+  "configureLocalEmbeddingPlugin",
+  "CONNECTOR_PLUGINS",
+  "executeTriggerTask",
+  "extractConversationMetadataFromRoom",
+  "formatVaultRef",
+  "getAccessToken",
+  "getLastFailedPluginNames",
+  "isAutomationConversationMetadata",
+  "isConnectorConfigured",
+  "isStreamingDestinationConfigured",
+  "isVaultRef",
+  "listProviderAccounts",
+  "listTriggerTasks",
+  "loadElizaConfig",
+  "parseVaultRef",
+  "persistConfigEnv",
+  "readConfigEnv",
+  "readTriggerConfig",
+  "resolveStateDir",
+  "saveElizaConfig",
+  "shutdownRuntime",
+  "startEliza",
+  "STREAMING_PLUGINS",
+  "taskToTriggerSummary",
+  "toWorkbenchTask",
+  "triggersFeatureEnabled",
+] as const;
+
+function generateElizaosAgentStub(_strippedId: string): string {
+  return generateNamedExportStub(ELIZAOS_AGENT_STUB_NAMES);
+}
+
 const NATIVE_MODULE_STUB_GENERATORS = new Map<
   string,
   (strippedId: string) => string
@@ -1447,6 +1779,89 @@ const NATIVE_MODULE_STUB_GENERATORS = new Map<
   ["undici", generateUndiciStub],
   ["node:async_hooks", generateAsyncHooksStub],
   ["async_hooks", generateAsyncHooksStub],
+  ["@elizaos/agent", generateElizaosAgentStub],
+  ["@elizaos/plugin-elizacloud", generatePluginElizacloudStub],
+  ["@elizaos/plugin-local-inference", generatePluginLocalInferenceStub],
+  ["esbuild", generateEsbuildStub],
+  // @node-rs/argon2's server-side Rust binding is referenced by
+  // app-core's password-hashing helpers. Renderer never executes them
+  // (auth happens in the API child); stub the named exports.
+  [
+    "@node-rs/argon2",
+    () => generateNamedExportStub(["hash", "verify", "Algorithm"]),
+  ],
+  [
+    "qrcode-terminal",
+    () =>
+      // plugin-whatsapp imports { generate } at module scope; provide the
+      // named export so Rollup's static analysis succeeds. The renderer
+      // never paints a terminal QR; this is a no-op shim.
+      "export const generate = (_text: unknown, _opts: unknown, cb?: (s: string) => void) => { if (cb) cb(''); };\n" +
+      "export const setErrorLevel = () => {};\n" +
+      "export default { generate, setErrorLevel };\n",
+  ],
+  // @elizaos/vault — OS keychain / encrypted SQLite secrets store.
+  // Server-only; the renderer never accesses vault directly. app-core/dist
+  // re-exports these names so Rollup needs them declared to avoid "not
+  // exported" static-analysis errors in the browser build.
+  // Names sourced from eliza/packages/vault/src/index.ts (all value exports).
+  [
+    "@elizaos/vault",
+    () =>
+      generateNamedExportStub([
+        "createVault",
+        "VaultMissError",
+        "PgliteVaultImpl",
+        "defaultPgliteVaultDataDir",
+        "defaultMasterKey",
+        "inMemoryMasterKey",
+        "MasterKeyUnavailableError",
+        "osKeychainMasterKey",
+        "passphraseMasterKey",
+        "passphraseMasterKeyFromEnv",
+        "encrypt",
+        "decrypt",
+        "generateMasterKey",
+        "KEY_BYTES",
+        "CryptoError",
+        "PasswordManagerError",
+        "resolveReference",
+        "createManager",
+        "DEFAULT_PREFERENCES",
+        "BackendNotSignedInError",
+        "defaultExecFn",
+        "listBitwardenLogins",
+        "listOnePasswordLogins",
+        "revealBitwardenLogin",
+        "revealOnePasswordLogin",
+        "BACKEND_INSTALL_SPECS",
+        "buildInstallCommand",
+        "currentPlatform",
+        "detectPackageManagers",
+        "resetInstallerCache",
+        "resolveRunnableMethods",
+        "deleteSavedLogin",
+        "getAutofillAllowed",
+        "getSavedLogin",
+        "listSavedLogins",
+        "setAutofillAllowed",
+        "setSavedLogin",
+        "categorizeKey",
+        "inferProviderId",
+        "listVaultInventory",
+        "META_PREFIX",
+        "profileStorageKey",
+        "PROFILE_SEGMENT",
+        "readEntryMeta",
+        "removeEntryMeta",
+        "ROUTING_KEY",
+        "setEntryMeta",
+        "readRoutingConfig",
+        "resolveActiveValue",
+        "writeRoutingConfig",
+        "createTestVault",
+      ]),
+  ],
 ]);
 
 function isSharpStubId(strippedId: string): boolean {
@@ -1461,7 +1876,12 @@ function generateNativeModuleStub(
   strippedId: string,
   capacitorNativeScopeRe: RegExp,
 ): string {
-  const modName = strippedId.split("/")[0];
+  // Scoped packages (@scope/name) have a slash in the bare specifier;
+  // treat the @scope/name as the lookup key so per-package stub
+  // generators register against the real package id.
+  const modName = strippedId.startsWith("@")
+    ? strippedId.split("/").slice(0, 2).join("/")
+    : strippedId.split("/")[0];
   const stubGenerator = NATIVE_MODULE_STUB_GENERATORS.get(modName);
   if (stubGenerator) return stubGenerator(strippedId);
   if (modName.startsWith("node:")) return generateNodeBuiltinStub(strippedId);
@@ -1507,20 +1927,53 @@ function nativeModuleStubPlugin(): Plugin {
     // into the renderer graph, stub it before socksclient extends node:net.
     "telegram",
     "socks",
+    // Terminal QR code printer — Node-only, ships legacy CJS with strict-mode
+    // -illegal octal escapes (\033 ANSI codes). Rollup's parser rejects it.
+    // The renderer never paints to a terminal; stub so the server-side OAuth
+    // QR helper that imports it doesn't blow up the browser bundle.
+    "qrcode-terminal",
     // Server-only plugins statically imported from the @elizaos/agent runtime.
     // Their exports maps nest browser/node conditional exports that Vite 6's
     // commonjs--resolver cannot walk. Stubbing returns an empty Proxy virtual
     // module so the browser bundle never tries to execute server-only code.
     "@elizaos/plugin-local-embedding",
+    // plugin-local-inference creates a Node dns.Resolver at module load
+    // (mobileDnsResolver) — server-only side effect. Stub so the renderer
+    // never evaluates that initializer.
+    "@elizaos/plugin-local-inference",
     "@elizaos/plugin-anthropic",
     "@elizaos/plugin-pdf",
     "@elizaos/plugin-sql",
     "@elizaos/plugin-agent-skills",
     "@elizaos/plugin-agent-orchestrator",
+    // The agent runtime is server-only — it lives in the API child
+    // process, not in the renderer. app-core/dist code can leak agent
+    // imports (account-pool etc.); stub them so Rollup doesn't try to
+    // pull Node-only auth/credential code into the browser bundle.
+    "@elizaos/agent",
+    // Cloud helper module — server-only (handles cloud credentials,
+    // tts proxy routes). Renderer references the exported names but
+    // never executes the code; named-export stub registered above.
+    "@elizaos/plugin-elizacloud",
+    // @node-rs/argon2 has a wasm32-wasi variant that browser builds
+    // surface via dynamic import. The browser can't resolve the bare
+    // specifier at runtime; stub it so the bundle loads. Real hashing
+    // happens server-side in the API child anyway.
+    "@node-rs/argon2-wasm32-wasi",
+    "@node-rs/argon2",
+    // esbuild is a build-time dep that drizzle-kit and friends pull in
+    // transitively. Its `lib/main.js` does `process.versions.node.split(".")`
+    // at module init, which throws in the renderer (process.versions.node
+    // is undefined in browsers). Stub so the bundle never evaluates that.
+    "esbuild",
     // OS keychain bridge — Node-only native addon (.node binary). Pulled
     // transitively by @elizaos/vault. Vite's commonjs--resolver chokes on
     // the platform-specific .node files; stub it for the renderer.
     "@napi-rs/keyring",
+    // Secrets vault — purely server-side (OS keychain / encrypted SQLite).
+    // app-core/dist re-exports vault symbols that the renderer never calls;
+    // stub so Vite doesn't choke when the local vault/dist is absent.
+    "@elizaos/vault",
   ]);
   if (!IS_CAPACITOR_MOBILE_BUILD) {
     // Mobile-only Capacitor llama.cpp runtime. Web/Electrobun builds stub it,
@@ -1533,6 +1986,11 @@ function nativeModuleStubPlugin(): Plugin {
   // (@napi-rs/keyring-darwin-arm64, -darwin-x64, -win32-x64-msvc, etc.).
   // Stub the entire scope so we don't have to enumerate every triple.
   const napiRsKeyringScopeRe = /^@napi-rs\/keyring(-.+)?$/;
+  // @snazzah/davey (Discord voice native bridge) and its platform binaries.
+  // The renderer never enters the voice-relay path; bare-specifier externals
+  // would leak `import "@snazzah/davey"` into the browser output where it
+  // can't resolve, so we stub the entire scope.
+  const snazzahDaveyScopeRe = /^@snazzah\/davey(-.+)?$/;
   // Capacitor native plugins — mobile-only, must never run in the browser.
   // Stubbing prevents Rollup from failing when bun workspaces don't hoist them.
   const capacitorNativeScopeRe = /^@capacitor\/(?!core)(.+)$/;
@@ -1587,6 +2045,8 @@ function nativeModuleStubPlugin(): Plugin {
       if (nativeScopeRe.test(id)) return VIRTUAL_PREFIX + id;
       // Scoped: @napi-rs/keyring + platform binaries
       if (napiRsKeyringScopeRe.test(id)) return VIRTUAL_PREFIX + id;
+      // Scoped: @snazzah/davey + platform binaries (Discord voice native bridge)
+      if (snazzahDaveyScopeRe.test(id)) return VIRTUAL_PREFIX + id;
       // Capacitor native plugins (@capacitor/* except @capacitor/core)
       if (capacitorNativeScopeRe.test(id) && !IS_CAPACITOR_MOBILE_BUILD) {
         return VIRTUAL_PREFIX + id;
@@ -1998,9 +2458,13 @@ export default defineConfig({
             const polyfills: Record<string, string> = {};
             for (const [nodeId, pkg, entry] of [
               ["node:events", "events", "events.js"],
+              ["events", "events", "events.js"],
               ["node:buffer", "buffer", "index.js"],
+              ["buffer", "buffer", "index.js"],
               ["node:util", "util", "util.js"],
+              ["util", "util", "util.js"],
               ["node:process", "process", "browser.js"],
+              ["process", "process", "browser.js"],
               ["node:stream", "stream-browserify", "index.js"],
               ["stream", "stream-browserify", "index.js"],
             ] as const) {
@@ -2137,6 +2601,7 @@ export default defineConfig({
       "/api": {
         target: `http://127.0.0.1:${apiPort}`,
         changeOrigin: true,
+        xfwd: true,
         configure: (proxy) => {
           proxy.on("error", (_err, _req, res) => {
             if (!res.headersSent) {
