@@ -428,6 +428,7 @@ async function initializePlatform(): Promise<void> {
     initializeAppLifecycle();
     initializeMobileRuntimeModeListener();
     void initializeMobileDeviceBridge();
+    void initializeMobileAgentTunnel();
   }
 
   if (isDesktopPlatform()) {
@@ -810,7 +811,8 @@ function mobileModeToIosRuntimeMode(
   return mode === "remote-mac" ||
     mode === "cloud" ||
     mode === "cloud-hybrid" ||
-    mode === "local"
+    mode === "local" ||
+    mode === "tunnel-to-mobile"
     ? mode
     : null;
 }
@@ -933,6 +935,58 @@ function stopMobileDeviceBridge(): void {
   mobileDeviceBridgeClient = null;
 }
 
+/**
+ * Inbound-tunnel bridge: when the phone is in `tunnel-to-mobile` mode,
+ * it hosts the on-device agent (the same `local`-mode codepath) and
+ * holds an outbound connection to a relay so an external Mac client can
+ * reach the agent. Implementation lives in
+ * `@elizaos/capacitor-mobile-agent-bridge`. The native side is currently
+ * a stub — see `docs/reverse-direction-tunneling.md` for the phased
+ * plan. We invoke it best-effort here so the runtime-mode plumbing is
+ * exercised today even while the transport is being built out.
+ */
+let mobileAgentTunnelStarted = false;
+async function initializeMobileAgentTunnel(): Promise<void> {
+  const runtimeConfig = getCurrentIosRuntimeConfig();
+  if (!isNative || runtimeConfig.mode !== "tunnel-to-mobile") return;
+  if (mobileAgentTunnelStarted) return;
+  if (!runtimeConfig.tunnelRelayUrl) {
+    console.info(
+      `${APP_LOG_PREFIX} Tunnel-to-mobile mode active but no relay URL configured`,
+    );
+    return;
+  }
+  try {
+    const { MobileAgentBridge } = await import(
+      "@elizaos/capacitor-mobile-agent-bridge"
+    );
+    const deviceId = await getOrCreateDeviceBridgeId();
+    await MobileAgentBridge.startInboundTunnel({
+      relayUrl: runtimeConfig.tunnelRelayUrl,
+      deviceId,
+      ...(runtimeConfig.tunnelPairingToken
+        ? { pairingToken: runtimeConfig.tunnelPairingToken }
+        : {}),
+    });
+    mobileAgentTunnelStarted = true;
+  } catch (error) {
+    console.warn(
+      `${APP_LOG_PREFIX} Mobile agent tunnel unavailable:`,
+      error instanceof Error ? error.message : error,
+    );
+  }
+}
+
+function stopMobileAgentTunnel(): void {
+  if (!mobileAgentTunnelStarted) return;
+  mobileAgentTunnelStarted = false;
+  void import("@elizaos/capacitor-mobile-agent-bridge")
+    .then(({ MobileAgentBridge }) => MobileAgentBridge.stopInboundTunnel())
+    .catch(() => {
+      /* tunnel was best-effort; nothing to clean up if the plugin is absent */
+    });
+}
+
 function initializeMobileRuntimeModeListener(): void {
   if (!isNative || mobileRuntimeModeListenerInstalled) return;
   mobileRuntimeModeListenerInstalled = true;
@@ -940,10 +994,18 @@ function initializeMobileRuntimeModeListener(): void {
     const mode = getCurrentIosRuntimeConfig().mode;
     if (mode === "cloud-hybrid" || mode === "local") {
       stopMobileDeviceBridge();
+      stopMobileAgentTunnel();
       void initializeMobileDeviceBridge();
       return;
     }
+    if (mode === "tunnel-to-mobile") {
+      stopMobileDeviceBridge();
+      stopMobileAgentTunnel();
+      void initializeMobileAgentTunnel();
+      return;
+    }
     stopMobileDeviceBridge();
+    stopMobileAgentTunnel();
   });
 }
 

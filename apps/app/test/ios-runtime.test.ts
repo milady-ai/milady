@@ -93,4 +93,32 @@ describe("iOS runtime config", () => {
       "ws://10.0.0.12:31337/api/local-inference/device-bridge",
     );
   });
+
+  it("normalizes tunnel-to-mobile mode and surfaces relay configuration", () => {
+    expect(
+      resolveIosRuntimeConfig({
+        VITE_MILADY_IOS_RUNTIME_MODE: "tunnel-to-mobile",
+        VITE_MILADY_TUNNEL_RELAY_URL:
+          "wss://relay.example.test/v1/agent-tunnel ",
+        VITE_MILADY_TUNNEL_PAIRING_TOKEN: " device-pair-token ",
+      }),
+    ).toMatchObject({
+      mode: "tunnel-to-mobile",
+      tunnelRelayUrl: "wss://relay.example.test/v1/agent-tunnel",
+      tunnelPairingToken: "device-pair-token",
+    });
+  });
+
+  it("accepts mobile-tunnel / host-with-tunnel aliases for tunnel-to-mobile", () => {
+    expect(
+      resolveIosRuntimeConfig({
+        VITE_MILADY_IOS_RUNTIME_MODE: "mobile-tunnel",
+      }).mode,
+    ).toBe("tunnel-to-mobile");
+    expect(
+      resolveIosRuntimeConfig({
+        VITE_MILADY_IOS_RUNTIME_MODE: "host-with-tunnel",
+      }).mode,
+    ).toBe("tunnel-to-mobile");
+  });
 });
