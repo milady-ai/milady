@@ -786,6 +786,15 @@ function normalizeModuleId(id: string | undefined): string {
 }
 
 function tryResolveElizaCorePkgDir(): string | null {
+  // Prefer the local workspace checkout — _require.resolve would otherwise
+  // land on the npm-installed bun store copy (older published build) and miss
+  // exports that only exist in the local source or a freshly-built dist.
+  if (hasLocalElizaWorkspace) {
+    const localCoreDir = path.join(localElizaRoot, "packages/core");
+    if (fs.existsSync(path.join(localCoreDir, "package.json"))) {
+      return localCoreDir;
+    }
+  }
   try {
     return path.dirname(_require.resolve("@elizaos/core/package.json"));
   } catch {
