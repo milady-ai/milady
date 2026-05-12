@@ -1474,7 +1474,27 @@ const NATIVE_MODULE_STUB_GENERATORS = new Map<
   ["undici", generateUndiciStub],
   ["node:async_hooks", generateAsyncHooksStub],
   ["async_hooks", generateAsyncHooksStub],
+  ["@node-rs/argon2", generateArgon2Stub],
 ]);
+
+// `@node-rs/argon2` is a Node-only N-API password-hashing addon used by
+// app-core's `api/auth/passwords.js`. The renderer never invokes those
+// server-side routes, but rollup's static analysis still needs `hash`
+// and `verify` to be valid named exports. Provide noop async stubs +
+// the `Algorithm`/`Version` const enums the module ships.
+function generateArgon2Stub(): string {
+  return [
+    "const noop = () => { throw new Error('@node-rs/argon2 is server-only'); };",
+    "export const hash = async () => { throw new Error('@node-rs/argon2 is server-only'); };",
+    "export const verify = async () => false;",
+    "export const hashSync = noop;",
+    "export const verifySync = () => false;",
+    "export const Algorithm = { Argon2d: 0, Argon2i: 1, Argon2id: 2 };",
+    "export const Version = { V0x10: 0x10, V0x13: 0x13 };",
+    "export default { hash, verify, hashSync, verifySync, Algorithm, Version };",
+    "",
+  ].join("\n");
+}
 
 function isSharpStubId(strippedId: string): boolean {
   return (
@@ -1488,7 +1508,11 @@ function generateNativeModuleStub(
   strippedId: string,
   capacitorNativeScopeRe: RegExp,
 ): string {
-  const modName = strippedId.split("/")[0];
+  // Scoped packages need both segments to match the generator map keys
+  // (e.g. `@node-rs/argon2` not just `@node-rs`).
+  const modName = strippedId.startsWith("@")
+    ? strippedId.split("/").slice(0, 2).join("/")
+    : strippedId.split("/")[0];
   const stubGenerator = NATIVE_MODULE_STUB_GENERATORS.get(modName);
   if (stubGenerator) return stubGenerator(strippedId);
   if (modName.startsWith("node:")) return generateNodeBuiltinStub(strippedId);
@@ -1548,6 +1572,11 @@ function nativeModuleStubPlugin(): Plugin {
     // transitively by @elizaos/vault. Vite's commonjs--resolver chokes on
     // the platform-specific .node files; stub it for the renderer.
     "@napi-rs/keyring",
+    // Password hashing native addon. Server-only (api/auth/passwords
+    // route). Externalizing it leaves a bare `@node-rs/argon2` import in
+    // the bundle output that the browser cannot resolve at runtime
+    // (TypeError "Failed to resolve module specifier"); stub instead.
+    "@node-rs/argon2",
   ]);
   if (!IS_CAPACITOR_MOBILE_BUILD) {
     // Mobile-only Capacitor llama.cpp runtime. Web/Electrobun builds stub it,
@@ -2188,10 +2217,6 @@ export default defineConfig({
         if (/^@napi-rs\/keyring(-.+)?$/.test(id)) return true;
         if (/^@node-llama-cpp\//.test(id)) return true;
         if (/^@napi-rs\/keyring/.test(id)) return true;
-        // @node-rs/argon2 is server-only (Node N-API + WASM fallback). The
-        // renderer never touches password hashing directly — that flow runs
-        // server-side in @elizaos/app-core's api/auth/passwords route.
-        if (/^@node-rs\/argon2/.test(id)) return true;
         return false;
       },
       input: {
