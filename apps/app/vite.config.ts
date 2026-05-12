@@ -2,10 +2,6 @@ import fs from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import {
-  parseAllowedHostEnv,
-  toViteAllowedHosts,
-} from "@elizaos/shared/config/allowed-hosts";
 import { colorizeDevSettingsStartupBanner } from "@elizaos/shared/dev-settings-banner-style";
 import { prependDevSubsystemFigletHeading } from "@elizaos/shared/dev-settings-figlet-heading";
 import {
@@ -514,7 +510,10 @@ const viteAllowedHosts: Exclude<
 > = [
   "localhost",
   "127.0.0.1",
-  ...toViteAllowedHosts(parseAllowedHostEnv(process.env.ELIZA_ALLOWED_HOSTS)),
+  ...(process.env.ELIZA_ALLOWED_HOSTS ?? "")
+    .split(",")
+    .map((h) => h.trim())
+    .filter(Boolean),
 ];
 
 const NATIVE_PLUGIN_ALIAS_ENTRIES = resolveNativePluginAliasEntries();
