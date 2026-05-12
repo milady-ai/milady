@@ -1502,24 +1502,49 @@ function generatePluginElizacloudStub(): string {
   return generateNamedExportStub(PLUGIN_ELIZACLOUD_STUB_NAMES);
 }
 
-// Names imported from @elizaos/agent/config/plugin-auto-enable by the
-// Milady-patched app-core plugin-auto-enable.js. The renderer never runs
-// plugin auto-enable (server-side only); stubs satisfy the import graph.
-const AGENT_PLUGIN_AUTO_ENABLE_STUB_NAMES = [
+// Named exports referenced from @elizaos/agent/* subpaths by the
+// @elizaos/app-core npm package. All are server-only; browser bundle
+// gets stubs so Rollup resolves static named imports without executing
+// the server code. Enumerated from app-core's .js source imports.
+const ELIZAOS_AGENT_STUB_NAMES = [
+  "applyCloudConfigToEnv",
+  "applyN8nConfigToEnv",
   "applyPluginAutoEnable",
   "applyPluginSelfDeclaredAutoEnable",
   "AUTH_PROVIDER_PLUGINS",
+  "bootElizaRuntime",
+  "CHANNEL_PLUGIN_MAP",
+  "collectPluginNames",
+  "configureLocalEmbeddingPlugin",
   "CONNECTOR_PLUGINS",
+  "executeTriggerTask",
+  "extractConversationMetadataFromRoom",
+  "formatVaultRef",
+  "getAccessToken",
+  "getLastFailedPluginNames",
+  "isAutomationConversationMetadata",
   "isConnectorConfigured",
   "isStreamingDestinationConfigured",
+  "isVaultRef",
+  "listProviderAccounts",
+  "listTriggerTasks",
+  "loadElizaConfig",
+  "parseVaultRef",
+  "persistConfigEnv",
+  "readConfigEnv",
+  "readTriggerConfig",
+  "resolveStateDir",
+  "saveElizaConfig",
+  "shutdownRuntime",
+  "startEliza",
   "STREAMING_PLUGINS",
+  "taskToTriggerSummary",
+  "toWorkbenchTask",
+  "triggersFeatureEnabled",
 ] as const;
 
-function generateElizaosAgentStub(strippedId: string): string {
-  if (strippedId === "@elizaos/agent/config/plugin-auto-enable") {
-    return generateNamedExportStub(AGENT_PLUGIN_AUTO_ENABLE_STUB_NAMES);
-  }
-  return "export default {};\n";
+function generateElizaosAgentStub(_strippedId: string): string {
+  return generateNamedExportStub(ELIZAOS_AGENT_STUB_NAMES);
 }
 
 const NATIVE_MODULE_STUB_GENERATORS = new Map<
