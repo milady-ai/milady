@@ -360,6 +360,27 @@ try {
       if (saved) bootstrapToken = saved;
     } catch {}
   }
+  // On AOSP/Milady the agent runs in the same APK and exposes its
+  // per-boot bearer through `window.ElizaNative.getLocalAgentToken()`
+  // (see `os/android/.../ElizaNativeBridge.java`). Pull it before the
+  // first auth-status poll so the React shell never hits PairingView
+  // for the loopback case where the device IS the agent.
+  if (!bootstrapToken) {
+    try {
+      const native = (
+        window as unknown as {
+          ElizaNative?: { getLocalAgentToken?: () => string | null };
+        }
+      ).ElizaNative;
+      const nativeToken = native?.getLocalAgentToken?.()?.trim();
+      if (nativeToken) {
+        bootstrapToken = nativeToken;
+        try {
+          window.localStorage.setItem(SELF_HOSTED_TOKEN_KEY, nativeToken);
+        } catch {}
+      }
+    } catch {}
+  }
   if (bootstrapToken) {
     appBootConfig.apiToken = bootstrapToken;
     appBootConfig.apiBase ??= window.location.origin;
@@ -369,6 +390,44 @@ try {
   }
 } catch {}
 setBootConfig(appBootConfig);
+
+// On AOSP/Milady, ElizaNativeBridge.getLocalAgentToken() returns null
+// for the first ~30-50s of app launch — the on-device agent process is
+// still booting and hasn't written its per-boot bearer to its volatile
+// static yet. The synchronous bootstrap above fires BEFORE the agent is
+// up, so it sees null and the React shell falls into PairingView even
+// though the bearer is in fact about to be available.
+//
+// Poll the bridge for up to 90s after launch; the first non-null read
+// applies the bearer to the client + localStorage and stops. Stock
+// Capacitor builds never expose `window.ElizaNative` so the watchdog
+// exits immediately.
+(function installOnDeviceBearerWatchdog() {
+  if (typeof window === "undefined") return;
+  const bridge = (
+    window as unknown as {
+      ElizaNative?: { getLocalAgentToken?: () => string | null };
+    }
+  ).ElizaNative;
+  if (!bridge?.getLocalAgentToken) return;
+
+  const deadline = Date.now() + 90_000;
+  const tick = () => {
+    try {
+      if (client.hasToken()) return;
+      const token = bridge.getLocalAgentToken?.()?.trim();
+      if (token) {
+        client.setToken(token);
+        try {
+          window.localStorage.setItem(SELF_HOSTED_TOKEN_KEY, token);
+        } catch {}
+        return;
+      }
+    } catch {}
+    if (Date.now() < deadline) setTimeout(tick, 500);
+  };
+  setTimeout(tick, 500);
+})();
 
 function getShareQueue(): ShareTargetPayload[] {
   const appWindow = getAppWindow();
