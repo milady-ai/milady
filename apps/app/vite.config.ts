@@ -403,6 +403,31 @@ function resolveLocalAppCoreAliases(): Alias[] {
       key === "."
         ? "@elizaos/app-core"
         : `@elizaos/app-core/${key.replace(/^\.\//, "")}`;
+
+    // CSS files in app-core exports point to dist paths (e.g. ./styles/styles.css).
+    // In Wave A these moved to @elizaos/ui. If the dist path doesn't exist locally,
+    // redirect to the UI source CSS so a fresh local clone builds without errors.
+    if (aliasKey.endsWith(".css")) {
+      const distCssPath = path.resolve(appCorePkgDir, value);
+      const baseName = path.basename(value);
+      const uiCssPath = uiPkgRoot
+        ? path.join(uiPkgRoot, "src/styles", baseName)
+        : null;
+      const resolvedPath =
+        fs.existsSync(distCssPath)
+          ? distCssPath
+          : uiCssPath && fs.existsSync(uiCssPath)
+            ? uiCssPath
+            : null;
+      if (resolvedPath) {
+        generatedAliases.push({
+          find: new RegExp(`^${escapeRegExp(aliasKey)}$`),
+          replacement: resolvedPath,
+        });
+      }
+      continue;
+    }
+
     const targetPath =
       key === "." ? appCoreBrowserEntry : path.resolve(appCorePkgDir, value);
 
@@ -410,7 +435,7 @@ function resolveLocalAppCoreAliases(): Alias[] {
       find: new RegExp(`^${escapeRegExp(aliasKey)}$`),
       replacement: targetPath,
     });
-    if (!aliasKey.endsWith(".js") && !aliasKey.endsWith(".css")) {
+    if (!aliasKey.endsWith(".js")) {
       generatedAliases.push({
         find: new RegExp(`^${escapeRegExp(aliasKey)}\\.js$`),
         replacement: targetPath,
