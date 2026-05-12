@@ -231,6 +231,10 @@ eliza/apps/app-companion/public/vrms/*.jpg
 # run-mobile-build.mjs copies them into these dirs at build time.
 apps/app/ios/
 apps/app/android/
+# Defensive: on-device GGUF models are ~500 MB. Even if apps/app/ios/ is ever
+# un-ignored for selective tracking, this directory must stay out of git.
+# Populated by native/ios-bun-port/models/download-first-light.sh + stage-into-xcode.mjs.
+apps/app/ios/App/App/agent/models/
 
 # Ignored caches
 .ruff_cache/

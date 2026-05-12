@@ -131,6 +131,7 @@
     "dev:cloud:local": "node scripts/dev-local-cloud.mjs",
     "seed:cloud:local": "node scripts/seed-local-cloud.mjs",
     "dev:ios": "bun run build:ios && cd apps/app && bun x capacitor open ios",
+    "ios:simulator": "node scripts/run-ios-simulator.mjs",
     "dev:ios:remote-mac": "node scripts/ios-runtime-mode.mjs remote-mac --open",
     "dev:ios:cloud": "node scripts/ios-runtime-mode.mjs cloud --open",
     "dev:ios:cloud-hybrid": "node scripts/ios-runtime-mode.mjs cloud-hybrid --open",

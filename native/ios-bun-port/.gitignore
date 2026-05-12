@@ -1,0 +1,31 @@
+# build outputs
+build/
+build-*/
+dist/
+*.xcframework/
+*.framework/
+*.a
+*.dylib
+*.tbd
+
+# submodule contents (tracked via gitmodules)
+src-bun-fork/
+vendor-webkit/WebKit/
+
+# fetched sources
+vendor-deps/*/src/
+vendor-deps/*/build/
+
+# Xcode
+*.xcuserdata/
+xcuserdata/
+*.xcworkspace/xcuserdata/
+
+# logs
+*.log
+
+# downloaded model cache (first-light.gguf is ~491 MB; downloaded by
+# models/download-first-light.sh and copied into Xcode bundle separately)
+models/.cache/
+models/*.gguf
+models/*.gguf.partial

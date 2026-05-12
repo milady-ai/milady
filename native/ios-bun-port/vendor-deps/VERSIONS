@@ -1,0 +1,31 @@
+# Pinned versions for native dependencies cross-built for iOS.
+# Format: <name>=<git_sha_or_tag>
+#
+# Update these when bumping a dep. Each entry should match the version Bun
+# upstream pins for desktop, unless we have a specific reason to diverge.
+
+boringssl=PLACEHOLDER-FILL-IN-AT-M02
+c-ares=PLACEHOLDER-FILL-IN-AT-M02
+lol-html=PLACEHOLDER-FILL-IN-AT-M02
+mimalloc=PLACEHOLDER-FILL-IN-AT-M02
+zstd=PLACEHOLDER-FILL-IN-AT-M02
+brotli=PLACEHOLDER-FILL-IN-AT-M02
+
+# llama.cpp pin for on-device inference (consumed by
+# vendor-deps/llama.cpp/build-ios.sh). Track upstream release tags from
+# https://github.com/ggml-org/llama.cpp/releases — bump deliberately, not
+# on every release. b4404 (2025-01-08) is the first release where the
+# sampler-chain API stabilized to the symbols our Swift bridge binds against.
+llama.cpp=b4404
+
+# sqlite-vec pin — vector storage + KNN extension that replaces pgvector
+# for the on-device SQLite backend (PGlite cannot run in JSContext on
+# iOS 16.4+ because WebAssembly is gated off). Track upstream release tags
+# from https://github.com/asg017/sqlite-vec/releases. v0.1.6 is the first
+# release that builds cleanly with the iOS toolchain (no AVX assumptions
+# in the default config; NEON path tested on iPhone 12+).
+sqlite-vec=v0.1.6
+
+# Excluded from iOS build entirely:
+# tinycc — runtime executable-page allocation forbidden on iOS
+# libuv — Bun uses kqueue directly on Darwin (incl. iOS)

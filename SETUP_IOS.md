@@ -1,157 +1,149 @@
 # Milady iOS — Build Map
 
-The iOS app is a **cloud-hybrid** Capacitor build: Apple forbids
-running a JIT-enabled JavaScript runtime (bun, JavaScriptCore at
-runtime, etc.) inside an App Store-shipped app, so there is no
-on-device bun process. Local inference goes through the
-`@elizaos/llama-cpp-capacitor` plugin's iOS framework via the
-DeviceBridge JSON-RPC over loopback; everything else is delegated to
-Eliza Cloud.
+The Milady iOS app runs **on-device, local-first**. The agent runtime lives inside a Capacitor plugin (`@elizaos/capacitor-bun-runtime`) that hosts a `JavaScriptCore` `JSContext` with a Bun-shape API surface installed by a Swift bridge. The same agent JS bundle that runs on desktop/Android runs here, just through a different host. Inference runs against a statically-linked `libllama.a` (Metal-accelerated). Persistence runs against the system `libsqlite3` (PGlite cannot work because `WebAssembly` is disabled in `JSContext` on iOS 16.4+).
 
-| Build path     | Where the agent runs                                | LLM inference                                                                          |
-| -------------- | --------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| iOS (Capacitor) | Eliza Cloud (managed agent endpoint)                | `LlamaCppCapacitor` Pod — JSC binding to `libllama.dylib` shipped inside the app       |
-| Android (AOSP) | bundled bun, /system/priv-app/, ELIZA_LOCAL_LLAMA=1 | bun:ffi against `libllama.so` (static-bundled) via the `eliza_llama_*` shim            |
-| Android (Capacitor) | Eliza Cloud OR local — user picks at onboarding | `llama-cpp-capacitor` jniLibs over loopback DeviceBridge                                |
+No cloud is required to chat. Cloud is opt-in.
 
-## Generating the iOS project
+## Architecture (current)
 
-The project at `apps/app/ios/` is **regenerated from the upstream eliza
-template every build** — it's gitignored. The flow is:
-
-```bash
-# From the repo root:
-node eliza/packages/app-core/scripts/run-mobile-build.mjs ios-overlay
+```
+┌─────────────── iOS .app (Milady) ────────────────────────────┐
+│                                                              │
+│  AppDelegate.swift                                           │
+│   └─ on launch → ElizaBunRuntime.start()                    │
+│                                                              │
+│  WKWebView (React UI, full WebKit JIT)                       │
+│   └─ Capacitor bridge to plugins                             │
+│                                                              │
+│  @elizaos/capacitor-bun-runtime  ◀── agent runtime host      │
+│   ├─ JSContext (LLInt, no JIT — Apple restriction)           │
+│   │   ├─ polyfill-prefix.js                                  │
+│   │   │   - installs globalThis.Bun, node:* modules          │
+│   │   │   - all I/O routed via __MILADY_BRIDGE__             │
+│   │   └─ agent-bundle-ios.js                                 │
+│   │       - the actual elizaOS agent — planner, plugins      │
+│   │                                                          │
+│   └─ Swift bridge implementations                            │
+│       ├─ FSBridge          (FileManager)                     │
+│       ├─ PathsBridge       (sandbox dirs)                    │
+│       ├─ CryptoBridge      (CryptoKit + CommonCrypto)        │
+│       ├─ HTTPBridge        (URLSession)                      │
+│       ├─ HTTPServerBridge  (Network.framework NWListener)    │
+│       ├─ SqliteBridge      (libsqlite3 + sqlite-vec)         │
+│       ├─ LlamaBridge       (llama.cpp xcframework, Metal)    │
+│       ├─ LogBridge         (os_log)                          │
+│       └─ UIBridge          (Capacitor notifyListeners)       │
+│                                                              │
+│  Other Capacitor plugins (camera, location, talkmode, ...)   │
+│                                                              │
+│  Statically linked frameworks (in app binary)                │
+│   ├─ llama.cpp (Metal-enabled, arm64-ios + simulator)        │
+│   ├─ sqlite-vec (optional, for embeddings)                   │
+│   └─ libsqlite3.tbd (system framework — no extra ship cost)  │
+└──────────────────────────────────────────────────────────────┘
 ```
 
-Effects (all idempotent):
+## How an iOS local chat request flows
 
-1. `syncPlatformTemplateFiles("ios")` — copies 37 files from
-   `eliza/packages/app-core/platforms/ios/` into `apps/app/ios/`,
-   including `App.xcworkspace`, `App.xcodeproj`, the Swift sources
-   (`AppDelegate`, `ElizaIntentPlugin`), `Info.plist`,
-   `App.entitlements`, `PrivacyInfo.xcprivacy`, the
-   WebsiteBlockerContentExtension, and the Podfile / fastlane / Gemfile.
-2. `overlayIos()` —
-   - Merges Milady-specific permission strings into `Info.plist`
-     (camera, microphone, location, contacts, etc.).
-   - Rewrites `App.entitlements` to use `group.com.miladyai.milady` as
-     the App Group ID.
-   - Patches xcconfigs to include the Pods xcconfig.
-3. `generatePodfile()` — emits `apps/app/ios/App/Podfile` referencing
-   the Capacitor core, every `@elizaos/capacitor-*` plugin under
-   `eliza/packages/native-plugins/`, and `LlamaCppCapacitor` from the
-   workspace.
-4. `applyIosAppIdentity()` — rewrites bundle IDs in
-   `App.xcodeproj/project.pbxproj` to `com.miladyai.milady` (and
-   `com.miladyai.milady.WebsiteBlockerContentExtension` for the
-   content-blocker extension).
+1. User types in chat input (WKWebView, React UI).
+2. React calls `ElizaBunRuntime.sendMessage({ message })` via Capacitor.
+3. Capacitor dispatches to the Swift plugin on the agent's serial DispatchQueue.
+4. Swift invokes a registered JS handler on the `JSContext` ("sendMessage" registered by the agent during boot).
+5. Agent JS runs the planner loop. It calls `bridge.llama_generate(...)` for the LLM step, `bridge.sqlite_query(...)` for memory recall, etc.
+6. Tokens stream back via `llama_register_stream_callback`. Each token is `bridge.ui_post_message`'d to the WebView as it arrives.
+7. React UI receives the streamed events and renders them.
 
-After the overlay completes (Linux-friendly, pure file ops), the
-remaining steps require macOS + Xcode + CocoaPods:
+No HTTP server, no loopback, no network. Pure in-process Swift↔JS via JSContext.
+
+## Build tiers
+
+| Tier              | Channel              | Model bundled?    | Cloud opt-in default | Notes                              |
+|-------------------|----------------------|-------------------|----------------------|------------------------------------|
+| **App Store**     | Apple App Store      | No (download on first launch) | Off | <200 MB IPA. Privacy-first messaging |
+| **TestFlight**    | App Store Connect    | No                | Off | Same binary as App Store           |
+| **Dev (Xcode)**   | Direct install       | Yes (~400 MB)     | On  | All plugins enabled, web inspector |
+| **Sideload**      | AltStore / SideStore | Yes               | Off | Same as Dev minus the dev plugins  |
+
+Switch tiers via `MILADY_DISTRIBUTION_TIER=appstore|dev|sideload` env at build time. See `run-mobile-build.mjs`.
+
+## Quick start: end-to-end iOS Simulator
+
+Prereqs: Mac with Apple Silicon, Xcode installed, `bun` available, repo cloned with `bun install` complete.
 
 ```bash
-# Mac only:
-cd apps/app/ios/App
-pod install
-open App.xcworkspace
-# In Xcode: select a development team, choose a target device,
-# Product → Build / Run.
+# 1. Download the first-light model (~400 MB, one-time)
+bun native/ios-bun-port/models/download-first-light.sh
+
+# 2. End-to-end: build agent bundle, build polyfill, build iOS app, install, launch
+bun run ios:simulator
 ```
 
-## On-Demand Resources for GGUFs (planned, mirrors Android DFM)
+The `ios:simulator` script:
+1. Overlays the iOS Capacitor project template into `apps/app/ios/`
+2. Builds the agent bundle: `cd eliza/packages/agent && bun run build:ios-jsc`
+3. Builds the polyfill prefix: `cd native/ios-bun-port/polyfill && bun run build`
+4. Concatenates polyfill + agent into `agent-bundle-ios.js`
+5. Stages assets into the Xcode project resources
+6. `pod install` in `apps/app/ios/App/`
+7. `xcodebuild` for `iPhone 15 Pro` Simulator (Apple Silicon)
+8. `xcrun simctl install` + `launch --console-pty`
+9. Streams the console so you see agent logs as they happen
 
-iOS App Store imposes a **200 MB cellular download limit** per app and
-a **4 GB total limit**; the bundled `Llama-3.2-1B-Q4_K_M.gguf` weighs
-~770 MB, and the production checkpoint can run several GB. Apple's
-recommended pattern for shipping on-demand large assets is **On-Demand
-Resources (ODR)** — the iOS equivalent of the Android Dynamic Feature
-Module that `scripts/miladyos/stage-models-dfm.mjs` already uses for
-the AAB build:
+First-time cost: ~10 minutes (pod install + Xcode build).
+Warm-build cost: ~30 seconds.
 
-| Concept                | Android (AAB)             | iOS (ODR)                                  |
-| ---------------------- | ------------------------- | ------------------------------------------ |
-| Resource container     | `:models` dynamic feature | Tagged ODR with `NSODRTag`                 |
-| Initial install policy | `dist:install-time`       | `Initial install tags`                     |
-| Background prefetch    | (always installed)        | `Prefetch tag order`                       |
-| On-demand              | `dist:onDemand="true"`    | `Download only on demand`                  |
-| Runtime accessor       | `getAssets().open(...)`   | `NSBundleResourceRequest(tags:)`           |
+## Background: why this architecture
 
-The script `scripts/miladyos/stage-models-odr.mjs` (TODO) should:
+We considered three paths:
 
-1. Move staged GGUFs from
-   `apps/app/ios/App/App/agent/models/` (or wherever the iOS staging
-   places them) into an ODR-tagged group inside `App.xcodeproj`.
-2. Write the ODR tags into `project.pbxproj` so the Asset Catalog
-   builder packages them as separate downloadable bundles.
-3. Default tag policy: `Prefetch tag order: 1` for the small bundled
-   model so it downloads in the background after first launch, no
-   user prompt. Larger models (production checkpoint) default to
-   `Download only on demand` and require the runtime to explicitly
-   request them via `NSBundleResourceRequest`.
+1. **Port Bun (Zig codebase) to iOS** — 4–6 months, fork-rebase tax, perf-bound by LLInt anyway. Documented at `eliza/docs/audits/mobile-2026-05-11/IOS_BUN_PORT.md` as a future option; not pursued now.
+2. **`nodejs-mobile`** — V8-jitless, +10–15 MB binary, dormant upstream (last release Oct 2024, Node 18 EOL April 2025).
+3. **System `JSContext` + Bun-shape Swift bridge** — Apple-blessed surface, zero engine ship cost, ~7× LLInt slowdown vs JIT (we don't get JIT either way), bridge code is ~6–10k LOC of Swift + JS. **This is what we built.**
 
-The capacitor-llama runtime side already supports model-path
-parameterization, so the swap from "look in app bundle" to "look in
-ODR-resolved path" is a Swift-side change in
-`LlamaCppCapacitor.swift` (call `NSBundleResourceRequest.beginAccessingResources`
-before `LLamaContext(modelPath:)` and release once inference is
-done).
+JSContext is the same engine WKWebView uses; Apple ships it on every iOS device. Embedding it in an app means "interpreter only" (no JIT entitlement for non-WebKit apps), but interpreter-only is the only mode any embedded JS runtime gets on iOS App Store, so we're not paying a perf tax compared to the alternatives.
+
+The `WebAssembly` finding (disabled in non-WebKit JSC since iOS 16.4) eliminates PGlite. We replaced it with native SQLite via the system `libsqlite3`, exposed through a PGlite-shape wrapper in the polyfill so agent code that imports `@electric-sql/pglite` keeps working unchanged.
 
 ## OAuth flows (Anthropic + Codex on iOS)
 
-The CodingAgent + Anthropic onboarding flows assume a system browser
-hand-off. iOS WebView (WKWebView) can't share cookies with Safari, so
-the OAuth callback must use either:
+Local mode does not need them. Cloud-hybrid mode does. When/if the user opts in to cloud:
+- **Universal Link** (preferred): `https://milady.app/oauth/callback` declared as associated domain in `App.entitlements`; `AppDelegate.application(_:continue:restorationHandler:)` dispatches to the registered OAuth handler.
+- **Custom URL scheme** (fallback): `milady://oauth/callback` declared in `CFBundleURLTypes`. Less secure (other apps can register the same scheme).
 
-- **Universal Link** (preferred) — the Anthropic / Codex OAuth client
-  is registered against `https://milady.app/oauth/callback`, the iOS
-  app declares the associated domain in `App.entitlements`, and the
-  redirect re-opens the app via the Universal Link handler in
-  `AppDelegate.swift`'s `application(_:continue:restorationHandler:)`.
-- **Custom URL scheme** (fallback) — `milady://oauth/callback` with
-  `CFBundleURLTypes` declaration in `Info.plist`. Less secure (any
-  other app can register the same scheme) but doesn't require an
-  Apple-approved associated domain.
-
-Status: not yet wired. The Universal Link entitlement and
-`CFBundleURLTypes` slot exist in the `Info.plist` template; the
-`AppDelegate.swift` handler still needs the OAuth callback dispatch.
-Both Anthropic Console and Codex (Cloud Code) use redirect URIs, so
-once the iOS callback is wired and registered, the existing
-onboarding flows should round-trip.
+Status: not yet wired. Open item from the original (cloud-hybrid-only) plan.
 
 ## Required env / build
 
-| Env / Build flag        | Effect                                                           |
-| ----------------------- | ---------------------------------------------------------------- |
-| `ELIZA_DISPLAY_NAME`    | Substituted into `CFBundleDisplayName` at build time             |
-| `MILADY_BUILD_FORMAT=aab` (Android) | Triggers `stage-models-dfm.mjs` — no iOS equivalent yet |
-| `ELIZA_DEVICE_BRIDGE_ENABLED=1` | Already on by default; the Capacitor llama plugin uses it     |
-| `ELIZA_REQUIRE_LOCAL_AUTH` | Off by default for parity with Android Capacitor build path     |
+| Env / Build flag                        | Effect                                                           |
+|-----------------------------------------|------------------------------------------------------------------|
+| `MILADY_DISTRIBUTION_TIER`              | `appstore` / `dev` / `sideload` — gates plugins, entitlements, model bundling |
+| `ELIZA_DISPLAY_NAME`                    | Substituted into `CFBundleDisplayName` at build time             |
+| `ELIZA_IOS_RUNTIME_MODE`                | `local` (default for ios-jsc) / `cloud` / `cloud-hybrid`         |
+| `MILADY_FIRST_LIGHT_MODEL`              | Override model name (default `qwen2.5-0.5b-instruct-q4_k_m`)     |
+| `MILADY_SKIP_MODEL_CHECK`               | Set to `1` to skip the GGUF-present check in the simulator script |
 
-## Open items (Task #29)
+## Reference docs
 
-The iOS overlay step is now reproducible from Linux. Remaining work
-needs macOS:
+- Audit + 3-tier feature matrix: `eliza/docs/audits/mobile-2026-05-11/REPORT.md`
+- Hypothetical Bun-port plan (not pursued): `eliza/docs/audits/mobile-2026-05-11/IOS_BUN_PORT.md`
+- Bridge contract: `native/ios-bun-port/BRIDGE_CONTRACT.md`
+- Platform matrix (what works / throws): `native/ios-bun-port/PLATFORM_MATRIX.md`
+- SQLite bridge details: `native/ios-bun-port/SQLITE_BRIDGE.md`
+- First-light model details: `native/ios-bun-port/models/README.md`
+- Current project status: `native/ios-bun-port/STATUS.md`
 
-- [ ] `cd apps/app/ios/App && pod install` — verify
-      `LlamaCppCapacitor`, `ElizaosCapacitorAgent`, and the rest of
-      the Pods resolve.
-- [ ] Open `App.xcworkspace`, configure a development team, build
-      against an iOS 15+ simulator and a real device.
-- [ ] Wire the OAuth callback in `AppDelegate.swift` and add the
-      `applinks:milady.app` associated domain in
-      `App.entitlements`.
-- [ ] Implement `scripts/miladyos/stage-models-odr.mjs` (mirrors
-      `stage-models-dfm.mjs`) and update
-      `LlamaCppCapacitor.swift` to call
-      `NSBundleResourceRequest.beginAccessingResources(completionHandler:)`
-      before model load.
-- [ ] Test the full Anthropic + Codex OAuth round-trips on a real
-      device (needs sandbox API keys + the Universal Link domain
-      configured).
+## Open items
 
-Pair this with `SETUP_AOSP.md` for the Android side — the Capacitor
-build path is shared between iOS and Android (just the pod / jniLib
-binary differs), so most of the runtime code paths are exercised on
-both platforms simultaneously.
+- [x] iOS overlay step (Linux-friendly file ops) — already done by `run-mobile-build.mjs ios-overlay`.
+- [x] Capacitor plugin `@elizaos/capacitor-bun-runtime` — landed in this session.
+- [x] Polyfill bundle — landed in this session.
+- [x] Agent bundle for ios-jsc target — landed in this session.
+- [x] First-light model download script — landed in this session.
+- [x] `bun run ios:simulator` runner — landed in this session.
+- [ ] llama.cpp xcframework cross-built and linked. In progress; see `native/ios-bun-port/vendor-deps/llama.cpp/`.
+- [ ] sqlite-vec for pgvector compatibility (optional; agent works without it for simple queries).
+- [ ] Universal Link OAuth wiring (only matters for cloud-hybrid mode).
+- [ ] `BGTaskScheduler` for trajectory rotation and auto-training.
+- [ ] App Intents + Siri shortcuts.
+- [ ] Privacy manifest audit for App Store submission.
+- [ ] First device test (not just Simulator).

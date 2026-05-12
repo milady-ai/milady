@@ -7,6 +7,10 @@ declare module "@elizaos/capacitor-appblocker" {
   export * from "../../../eliza/packages/native-plugins/appblocker/src/index";
 }
 
+declare module "@elizaos/capacitor-bun-runtime" {
+  export * from "../../../eliza/packages/native-plugins/bun-runtime/src/index";
+}
+
 declare module "@elizaos/capacitor-camera" {
   export * from "../../../eliza/packages/native-plugins/camera/src/index";
 }

@@ -52,6 +52,7 @@
     "@elizaos/shared": "workspace:*",
     "@elizaos/capacitor-agent": "workspace:*",
     "@elizaos/capacitor-appblocker": "workspace:*",
+    "@elizaos/capacitor-bun-runtime": "workspace:*",
     "@elizaos/capacitor-camera": "workspace:*",
     "@elizaos/capacitor-canvas": "workspace:*",
     "@elizaos/capacitor-contacts": "workspace:*",

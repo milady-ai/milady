@@ -136,6 +136,7 @@ import {
   type IosRuntimeMode,
   resolveIosRuntimeConfig,
 } from "./ios-runtime";
+import { bootIosLocalRuntimeIfApplicable } from "./ios-local-runtime-boot";
 
 // CharacterEditor is statically re-exported by `@elizaos/app-core/browser`,
 // so the previous `lazy()` wrapper here was eagerly merged back into the
@@ -413,6 +414,11 @@ async function initializePlatform(): Promise<void> {
     initializeAppLifecycle();
     initializeMobileRuntimeModeListener();
     await initializeMobileDeviceBridge();
+    // iOS local runtime: when ios-runtime mode resolves to "local", the
+    // on-device JS runtime (@elizaos/capacitor-bun-runtime) is started
+    // here. No-ops on Android, on iOS cloud/cloud-hybrid/remote-mac, and
+    // when the native plugin isn't compiled into the binary.
+    void bootIosLocalRuntimeIfApplicable();
   }
 
   if (isDesktopPlatform()) {
