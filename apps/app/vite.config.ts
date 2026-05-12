@@ -413,18 +413,30 @@ function resolveLocalAppCoreAliases(): Alias[] {
   const generatedAliases: Alias[] = [];
 
   for (const [key, value] of Object.entries(appCorePkg.exports || {})) {
-    if (typeof value !== "string") continue;
+    // "." always maps to appCoreBrowserEntry regardless of export shape (string
+    // or conditional-exports object). Other keys must be simple string values.
+    if (key !== "." && typeof value !== "string") continue;
     const aliasKey =
       key === "."
         ? "@elizaos/app-core"
         : `@elizaos/app-core/${key.replace(/^\.\//, "")}`;
 
+    // Resolve the string value, handling both plain strings and conditional exports.
+    const resolvedValue: string | null =
+      typeof value === "string"
+        ? value
+        : typeof value === "object" && value !== null
+          ? ((value as Record<string, string>).import ??
+            (value as Record<string, string>).default ??
+            null)
+          : null;
+
     // CSS files in app-core exports point to dist paths (e.g. ./styles/styles.css).
     // In Wave A these moved to @elizaos/ui. If the dist path doesn't exist locally,
     // redirect to the UI source CSS so a fresh local clone builds without errors.
-    if (aliasKey.endsWith(".css")) {
-      const distCssPath = path.resolve(appCorePkgDir, value);
-      const baseName = path.basename(value);
+    if (aliasKey.endsWith(".css") && resolvedValue) {
+      const distCssPath = path.resolve(appCorePkgDir, resolvedValue);
+      const baseName = path.basename(resolvedValue);
       const uiCssPath = uiPkgRoot
         ? path.join(uiPkgRoot, "src/styles", baseName)
         : null;
@@ -444,7 +456,12 @@ function resolveLocalAppCoreAliases(): Alias[] {
     }
 
     const targetPath =
-      key === "." ? appCoreBrowserEntry : path.resolve(appCorePkgDir, value);
+      key === "."
+        ? appCoreBrowserEntry
+        : resolvedValue
+          ? path.resolve(appCorePkgDir, resolvedValue)
+          : null;
+    if (!targetPath) continue;
 
     generatedAliases.push({
       find: new RegExp(`^${escapeRegExp(aliasKey)}$`),
