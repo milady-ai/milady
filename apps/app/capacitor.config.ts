@@ -1,8 +1,15 @@
 import type { CapacitorConfig } from "@capacitor/cli";
+// Import directly from @elizaos/shared (the canonical owner of the
+// allowed-hosts helper) so the import resolves identically in both
+// MILADY_ELIZA_SOURCE=packages (npm-published @elizaos/*) and
+// MILADY_ELIZA_SOURCE=local (workspace-linked eliza/packages/*) modes.
+// @elizaos/app-core re-exports this subpath in published builds but not
+// in the local source's package.json exports map, which would otherwise
+// break `bun run build:android` under local mode.
 import {
   parseAllowedHostEnv,
   toCapacitorAllowNavigation,
-} from "@elizaos/app-core/config/allowed-hosts";
+} from "@elizaos/shared/config/allowed-hosts";
 import appConfig from "./app.config";
 
 type CapacitorAllowNavigation = NonNullable<
