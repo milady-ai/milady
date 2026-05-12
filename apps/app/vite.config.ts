@@ -1502,6 +1502,26 @@ function generatePluginElizacloudStub(): string {
   return generateNamedExportStub(PLUGIN_ELIZACLOUD_STUB_NAMES);
 }
 
+// Names imported from @elizaos/agent/config/plugin-auto-enable by the
+// Milady-patched app-core plugin-auto-enable.js. The renderer never runs
+// plugin auto-enable (server-side only); stubs satisfy the import graph.
+const AGENT_PLUGIN_AUTO_ENABLE_STUB_NAMES = [
+  "applyPluginAutoEnable",
+  "applyPluginSelfDeclaredAutoEnable",
+  "AUTH_PROVIDER_PLUGINS",
+  "CONNECTOR_PLUGINS",
+  "isConnectorConfigured",
+  "isStreamingDestinationConfigured",
+  "STREAMING_PLUGINS",
+] as const;
+
+function generateElizaosAgentStub(strippedId: string): string {
+  if (strippedId === "@elizaos/agent/config/plugin-auto-enable") {
+    return generateNamedExportStub(AGENT_PLUGIN_AUTO_ENABLE_STUB_NAMES);
+  }
+  return "export default {};\n";
+}
+
 const NATIVE_MODULE_STUB_GENERATORS = new Map<
   string,
   (strippedId: string) => string
@@ -1513,6 +1533,7 @@ const NATIVE_MODULE_STUB_GENERATORS = new Map<
   ["undici", generateUndiciStub],
   ["node:async_hooks", generateAsyncHooksStub],
   ["async_hooks", generateAsyncHooksStub],
+  ["@elizaos/agent", generateElizaosAgentStub],
   ["@elizaos/plugin-elizacloud", generatePluginElizacloudStub],
   // @node-rs/argon2's server-side Rust binding is referenced by
   // app-core's password-hashing helpers. Renderer never executes them
