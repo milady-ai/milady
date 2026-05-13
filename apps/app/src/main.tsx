@@ -132,6 +132,7 @@ import {
 import { APP_ENV_ALIASES, APP_ENV_PREFIX } from "./brand-env";
 import { APP_CHARACTER_CATALOG } from "./character-catalog";
 import { bootIosLocalRuntimeIfApplicable } from "./ios-local-runtime-boot";
+import { bootAndroidLocalRuntimeIfApplicable } from "./android-local-runtime-boot";
 import {
   apiBaseToDeviceBridgeUrl,
   type IosRuntimeConfig,
@@ -558,6 +559,11 @@ async function initializePlatform(): Promise<void> {
     // here. No-ops on Android, on iOS cloud/cloud-hybrid/remote-mac, and
     // when the native plugin isn't compiled into the binary.
     void bootIosLocalRuntimeIfApplicable();
+    // Android local runtime: when mobile-runtime-mode is "local", calls
+    // ElizaBunRuntimePlugin.start() which triggers ElizaAgentService to
+    // start the Bun backend and polls until /api/health reports ready.
+    // No-ops on iOS and when the plugin isn't compiled into the APK.
+    void bootAndroidLocalRuntimeIfApplicable();
   }
 
   if (isDesktopPlatform()) {
