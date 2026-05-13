@@ -25,7 +25,7 @@
     "scripts/lib/eliza-package-mode.mjs",
     "scripts/lib/resolve-eliza-app-core-script.mjs",
     "scripts/milady-postinstall-repo-setup.mjs",
-    "scripts/patch-elizaos-app-core-native-browser-package.mjs",
+    "scripts/patch-coding-agent-adapters-codex-full-auto.mjs",
     "scripts/patch-coding-agent-adapters-tools-flag.mjs",
     "scripts/patch-eliza-electrobun-windows-smoke-startup.mjs",
     "scripts/patch-elizaos-package-styles.mjs",
