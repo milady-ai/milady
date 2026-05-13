@@ -140,8 +140,11 @@ to detect availability at runtime, so:
   DB during `sqlite_open`.
 
 Build instructions for the static lib live in
-`vendor-deps/sqlite-vec/README.md`. The pinned version is in
-`vendor-deps/VERSIONS`.
+[`eliza/packages/ios-native-deps/sqlite-vec/README.md`](../../eliza/packages/ios-native-deps/sqlite-vec/README.md).
+The pinned version is in
+[`eliza/packages/ios-native-deps/VERSIONS`](../../eliza/packages/ios-native-deps/VERSIONS).
+(Both moved out of `native/ios-bun-port/vendor-deps/` on 2026-05-13.
+npm: `@elizaos/ios-native-deps`.)
 
 ## Threading model
 
@@ -223,7 +226,8 @@ as `REAL`. This preserves exact IDs and Unix-epoch timestamps.
    `BRIDGE_CONTRACT.md` (bump version if breaking), update the bridge
    interface in `polyfill/src/bridge.ts`, implement the Swift side in
    `SqliteBridge.swift`, and surface it through `sqlite.ts`.
-4. **Link sqlite-vec**: follow `vendor-deps/sqlite-vec/README.md`.
+4. **Link sqlite-vec**: follow
+   [`eliza/packages/ios-native-deps/sqlite-vec/README.md`](../../eliza/packages/ios-native-deps/sqlite-vec/README.md).
    The Swift loader auto-detects at startup.
 
 ## File index
@@ -232,10 +236,14 @@ as `REAL`. This preserves exact IDs and Unix-epoch timestamps.
 native/ios-bun-port/
 ├── BRIDGE_CONTRACT.md                          # authoritative contract (v1)
 ├── SQLITE_BRIDGE.md                            # this file
-├── vendor-deps/
-│   ├── VERSIONS                                # pinned sqlite-vec tag
-│   └── sqlite-vec/README.md                    # build + link instructions
 └── polyfill/src/modules/
+
+# Build harness has moved to eliza:
+eliza/packages/ios-native-deps/                 # @elizaos/ios-native-deps
+├── VERSIONS                                    # pinned sqlite-vec tag
+└── sqlite-vec/README.md                        # build + link instructions
+
+native/ios-bun-port/polyfill/src/modules/
     ├── sqlite.ts                               # Database + Statement TS API
     ├── pglite-shim.ts                          # @electric-sql/pglite shim
     ├── sqlite-vec.ts                           # KNN helper

@@ -140,7 +140,7 @@ Status: not yet wired. Open item from the original (cloud-hybrid-only) plan.
 - [x] Agent bundle for ios-jsc target — landed in this session.
 - [x] First-light model download script — landed in this session.
 - [x] `bun run ios:simulator` runner — landed in this session.
-- [ ] llama.cpp xcframework cross-built and linked. In progress; see `native/ios-bun-port/vendor-deps/llama.cpp/`.
+- [ ] llama.cpp xcframework cross-built and linked. In progress; build harness lives in eliza at [`eliza/packages/ios-native-deps/llama.cpp/`](eliza/packages/ios-native-deps/llama.cpp/) (npm: `@elizaos/ios-native-deps`). Migrated out of `native/ios-bun-port/vendor-deps/` on 2026-05-13 — milady consumes via the eliza submodule.
 - [ ] sqlite-vec for pgvector compatibility (optional; agent works without it for simple queries).
 - [ ] Universal Link OAuth wiring (only matters for cloud-hybrid mode).
 - [ ] `BGTaskScheduler` for trajectory rotation and auto-training.
