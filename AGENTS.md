@@ -4,23 +4,9 @@ Milady is a local-first AI assistant built on [elizaOS](https://github.com/eliza
 
 ## elizaOS naming
 
-
 - Write the framework name as **elizaOS** in prose, comments, user-facing strings, and docs — never `ElizaOS`. The npm scope remains **`@elizaos/*`** (lowercase).
-## Wallet + trading architecture (locked)
-
-The wallet and trading stack is governed by `docs/architecture/wallet-and-trading.md`. The non-negotiable shape:
-
-- **Steward is cloud-only.** Eliza Cloud (web) and mobile (Capacitor) route signing through the multi-tenant Steward service. Desktop defaults to `LocalEoaBackend` (keys hydrated from the OS keychain). No Vincent, no Lit Protocol — Steward is the only custody primitive in cloud, full stop.
-- **One canonical surface: action + provider + validate.** Roughly 9 canonical planner-visible actions (`TRADE`, `MANAGE_POSITION`, `QUERY_MARKET`, `QUERY_PORTFOLIO`, `LEND`, `MANAGE_LP`, `TRANSFER`, `SET_AUTOMATION`, `MANAGE_AUTOMATION`) plus 13 typed providers. Adding a new venue means adding a provider, **not** a new planner verb. Validate is a strict 6-step gate (zod parse → plugin enabled → provider health → wallet capability → policy → preconditions); handlers trust pre-validated input. Read-only `QUERY_*` actions skip wallet + policy.
-- **No fallback sludge.** Silent autogen of EVM/Solana keys is removed. `POST /api/wallet/export` is removed. Steward unreachable = fail loud, not silent fallback to local. Local policy is absolute (no human approval loop) except the explicit `prompt_user_first` rule kind, which surfaces a chat-surface confirmation above a configurable USD threshold (default $50).
-- **Hyperliquid live mainnet only**, agent-key delegation auto-registered on first use. **Polymarket** has both reads (lifted from otaku) and writes (CLOB place/cancel + on-chain `redeemPositions`). Geographic restrictions surface as `VENUE_GEO_RESTRICTED` at validate based on a client-supplied region.
-- **Audit log is evidence-grade.** Append-only Postgres / PGLite table with row-chained sha256, verified at boot, 90-day rolling retention with checkpoint hashes every 1000 rows. Privacy filter is mandatory on every write.
-- **Ships everywhere.** Desktop (Electrobun + LocalEoaBackend), Eliza Cloud (web + StewardBackend), mobile (Capacitor + cloud-routed StewardBackend).
-
-Implementation order is `docs/architecture/wallet-and-trading.md` §I. Coordinator routes by phase; specialists implement against the spec, not against narrative.
-
-### elizaOS naming (agents & editors)
-
+- Say **Eliza agents** (not "elizaOS agents") in plain language.
+- The **Eliza Classic** plugin name is the one exception (Eliza = the 1966 chatbot).
 
 ## Quick start (dev)
 
@@ -34,8 +20,7 @@ bun run dev:desktop:watch  # Vite dev server + Electrobun (HMR). Set MILADY_DESK
 Optional — link a local elizaOS source checkout:
 
 ```bash
-bun run setup:upstreams    # clone ./eliza if needed and link local @elizaos/* packages
-bun run eliza:packages     # switch back to published @elizaos/* packages
+bun run setup:upstreams    # initialize repo-local ./eliza and link local @elizaos/* packages
 ```
 
 Desktop dev observability (Codex cannot see the native window):
@@ -58,12 +43,10 @@ bun run db:check    # database security + readonly tests
 
 ## Project layout
 
-Milady defaults to published `@elizaos/*` packages. A repo-local `./eliza` checkout is optional, ignored by git, and used only when explicitly selected with `bun run setup:upstreams` / `bun run eliza:local`.
+First-party packages, apps, and orchestrator scripts live under the `eliza/` submodule. The top-level repo holds Milady-specific glue (`apps/app/`, `packages/{vault,confidant}/`, top-level `scripts/`).
 
 ```
-node_modules/@elizaos/*             Default runtime source: published elizaOS packages
-
-eliza/                              Optional ignored local checkout (elizaOS/eliza)
+eliza/                              Submodule (milady-ai/eliza) — source of truth for runtime
   packages/
     app-core/                       Main runtime package
       src/
@@ -121,7 +104,7 @@ Two distinct skill systems live in this repo. Don't conflate them.
 
 Bundled `@elizaos/skills` are the default knowledge base for the running Eliza agent and for any code agent working in this repo. Repo setup mirrors them into `skills/.defaults/` for workspace access.
 
-- **Source of truth:** `eliza/packages/skills/skills/` (33 bundled skills).
+- **Source of truth:** `eliza/packages/skills/skills/` (31 bundled skills).
 - **Workspace mirror:** `skills/.defaults/` — refreshed by `scripts/sync-workspace-default-skills.mjs` during setup; do not hand-edit.
 - **Managed store seed:** `eliza/packages/app-core/scripts/ensure-skills.mjs` seeds the bundled skills on first run.
 - **Runtime knowledge seed:** `eliza/packages/agent/src/runtime/default-knowledge.ts` seeds baseline runtime knowledge (including Eliza Cloud guidance).
@@ -134,12 +117,10 @@ Open the `SKILL.md` of any of these from the workspace mirror when relevant:
 - `elizaos` — runtime concepts, plugin abstractions, AgentRuntime, actions/providers/evaluators/services.
 - `eliza-cloud` — Cloud as managed backend, app registration, hosted APIs, billing, monetization, container deploys.
 - `build-monetized-app` — building a Cloud app that earns via inference markup; pairs with `eliza-cloud`.
-- `eliza-cloud-buy-domain` — registering a confirmed custom domain for an Eliza Cloud app.
-- `eliza-cloud-manage-domain` — listing, verifying, syncing, detaching, and editing DNS for app domains.
 
 **Agent-orchestration / authoring:**
 - `coding-agent` — spawning Codex / Claude Code / OpenCode / Pi via PTY-backed bash for sub-agent work.
-- `task-agent-eliza-bridge` — loopback endpoints exposing parent runtime context to a spawned coding task agent.
+- `claude-subagent-milady-bridge` — loopback endpoints exposing parent runtime context to a spawned coding sub-agent.
 - `skill-creator` — authoring new SKILL.md packages (frontmatter, scripts, references, progressive disclosure).
 
 **Connectors / OS / SaaS integrations** (use when the task touches that surface):
@@ -157,10 +138,10 @@ When Eliza Cloud is enabled or requested, prefer it as the managed backend (app 
 
 ## Dependencies on elizaOS
 
-- Milady defaults to published `@elizaos/*` packages. The dist tag defaults to `alpha`; override with `MILADY_ELIZAOS_DIST_TAG`, `ELIZAOS_NPM_TAG`, or `bun run eliza:packages -- --tag <alpha|beta|main>`.
-- Local source mode is opt-in: `bun run setup:upstreams` / `bun run eliza:local -- --install` clones `https://github.com/elizaOS/eliza.git` into ignored `./eliza` if missing, then links local packages.
-- Return to standalone package mode with `bun run eliza:packages -- --install`. Do not add `./eliza` as a submodule or workspace dependency.
-- The elizaOS source checkout is hosted at **elizaOS/eliza**, not the personal `Dexploarer` fork. Pushes and PRs for elizaOS source changes go to `elizaOS/eliza`.
+- All `@elizaos/*` packages use the `alpha` dist-tag. `bun run setup:upstreams` links repo-local `./eliza` and `./plugins` packages so changes are picked up immediately. `MILADY_SKIP_LOCAL_UPSTREAMS=1` falls back to npm.
+- `@elizaos/plugin-agent-orchestrator` resolves from `eliza/plugins/plugin-agent-orchestrator` via `workspace:*`. Updating the submodule updates the orchestrator.
+- All official elizaOS plugin repos live under https://github.com/elizaOS-plugins. For plugin work, prefer adding the plugin repo as a git submodule under `eliza/plugins/` (tracked in `eliza/.gitmodules`) and depending via `workspace:*`. Publish to npm when ready.
+- The eliza submodule is hosted at **milady-ai/eliza**, not the personal `Dexploarer` fork. Pushes and PRs always go to `milady-ai/eliza`.
 
 ## Environment variables (commonly touched)
 
@@ -189,21 +170,6 @@ Port env vars (never hardcoded — the dev orchestrator auto-shifts to the next 
 - Auto-training defaults: 100 trajectories per task, 12h cooldown. Adjust via `/api/training/auto/config` or Settings → Auto-Training.
 - The privacy filter at `eliza/apps/app-training/src/core/privacy-filter.ts` is mandatory on every write path that touches real user trajectories — both the nightly export cron and the on-demand training orchestrator run it before any JSONL is written.
 
-## Background execution
-
-Scheduled tasks (`heartbeats`, workflow triggers, autonomy ticks) share a single scheduler. Treat the items below as load-bearing facts when working on triggers, mobile background, or anything that fires "later":
-
-- **Canonical scheduler:** `ScheduledTaskRunner` in `packages/core/src/services/task-scheduler.ts` — single source of truth after the post-Wave-2 consolidation. Older per-feature timers (workflow `TimerHeartbeatService`, etc.) have been collapsed onto this one runner. New code MUST schedule through it; do not introduce parallel timers.
-- **Serverless seam:** when `runtime.serverless = true`, the runner skips its own internal timer and waits to be ticked by the host. `@elizaos/plugin-background-runner` sets this flag and drives `runDueTasks()` from OS-level wakes (BGTaskScheduler / WorkManager). Desktop / server hosts leave `serverless = false` and the runner ticks on its own.
-- **Execution profiles** (Wave 4): each scheduled task is tagged with one of:
-  - `foreground` — must run while the app is in foreground (UI thread access, push surfaces).
-  - `bg-light-30s` — safe to run inside an iOS BGAppRefreshTask's ~30s budget; preferred default for short prompts.
-  - `bg-heavy-fgs` — needs the longer wake budget (iOS BGProcessingTask) or an Android foreground service. Surfaces a persistent notification on Android.
-  - `notify-only` — fires a local notification instead of running anything; the task body runs when the user taps in.
-- **Mobile reality:** iOS background wakes are opportunistic — typically once per ~1-4 hours, ~30s budget per wake. Android WorkManager has a 15-minute floor on periodic work and can defer further under Doze / App Standby; the FGS profile is the only way to guarantee persistence short of the user opening the app. Force-quit on either platform halts background wakes until the user reopens the app. These constraints are surfaced to users by `packages/ui/src/components/pages/HeartbeatForm.tsx` (cadence warning) and `HeartbeatsView.tsx` (long-running host banner).
-- **Host capability detection:** `plugins/plugin-workflow/src/utils/host-capabilities.ts` is the canonical detection (engine-side); `packages/ui/src/utils/host-capabilities.ts` mirrors it for UI banners. The workflow engine refuses activation of nodes whose `requires` set the current host can't satisfy and emits an actionable error pointing at the remediation (paired Eliza Cloud, `plugin-tunnel`, or running on a server).
-- **Plugin wiring:** `plugins/plugin-background-runner/INSTALL.md` is the operator-level checklist for the native side (Info.plist identifiers, WorkManager unique work name, capacitor.config.ts block, `/api/internal/wake` device-secret contract). `docs/background-execution.md` is the user-facing one-pager.
-
 ## App and plugin primitives
 
 The runtime exposes two unified action surfaces — `APP` and `PLUGIN` — that replace the older single-purpose actions. New code MUST call `APP` / `PLUGIN`. Legacy actions (`LAUNCH_APP`, `RELAUNCH_APP`, `LIST_APPS`, `INSTALL_PLUGIN`, `UNINSTALL_PLUGIN`, `EJECT_PLUGIN`, `SYNC_PLUGINS`, `REINJECT_PLUGINS`, `LIST_PLUGINS`, `SEARCH_PLUGINS`, `CORE_STATUS`, etc.) remain as similes but are no longer canonical.
@@ -223,7 +189,7 @@ Coding sub-agents spawned by the orchestrator (Claude Code, Codex, etc.) live in
 - `GET /api/coding-agents/:sessionId/memory?q=<query>&limit=<N>` — query the parent agent's memory.
 - `GET /api/coding-agents/:sessionId/active-workspaces` — list the parent's currently-active workspaces.
 
-All bridge responses are read-only. Mutations stay with the orchestrator — sub-agents cannot write parent state through the bridge. The `task-agent-eliza-bridge` skill (in `skills/.defaults/`) documents the calling pattern in detail.
+All bridge responses are read-only. Mutations stay with the orchestrator — sub-agents cannot write parent state through the bridge. The `claude-subagent-milady-bridge` skill (in `skills/.defaults/`) documents the calling pattern in detail.
 
 ### Mandatory verification loop for `create` modes
 
@@ -250,8 +216,8 @@ If any claim fails verification, the parent issues a structured failure prompt a
 
 ### Templates
 
-- `@elizaos/app-core` package templates — minimal Eliza app/project scaffolds.
-- `@elizaos/agent` / `@elizaos/app-core` package templates — minimal runtime plugin scaffolds.
+- `eliza/templates/min-app/` — minimal Eliza app (Vite + React entry, `Plugin` with one action, `package.json` with `elizaos.app` metadata, vitest smoke test, hero image placeholder, `SCAFFOLD.md` agent contract).
+- `eliza/templates/min-plugin/` — minimal Eliza runtime plugin (one action, one provider, `package.json` with `elizaos.plugin` metadata, vitest smoke test, `SCAFFOLD.md` agent contract).
 
 Both use placeholders (`__APP_NAME__`, `__APP_DISPLAY_NAME__`, `__PLUGIN_NAME__`, `__PLUGIN_DISPLAY_NAME__`) replaced by the scaffold copy step. Read each template's `SCAFFOLD.md` before customizing.
 
@@ -262,11 +228,12 @@ These govern every change. If existing code conflicts, fix the code.
 1. **Dependencies point inward only.** Presentation → Application → Domain → Infrastructure. Never import from an outer layer.
 2. **Computation lives in domain code, not presentation.** Derived values are computed in services / actions / use cases and returned as named fields. Clients format DTO fields for display; they do not aggregate, compute, or branch on raw data.
 3. **API routes are auth + dispatch.** Route handlers validate input, resolve the caller, and dispatch to a service / action. No business logic, no transformations, no calculations in route bodies.
-4. **CQRS.** Readers read and return domain objects. Writers return `void` or an ID. Mappers handle DB↔domain translation.
-5. **Single source of truth for validation.** Route-layer schemas validate and transform input. Services / actions trust pre-validated input and perform presence/invariant checks only. No duplicate inline regex.
-6. **DTO fields are required by default.** Optional only when genuinely nullable. No `as` casts to skip missing fields. No `?? 0` to hide broken pipelines. If TypeScript says a field is missing, fix the pipeline.
-7. **Logger only, never console.** Server logging uses the structured logger only (`Logger.info/warn/error/debug`). Prefix `[ClassName]`. Include structured context on errors.
-8. **Every action and endpoint needs a real caller.** Every POST/PUT/DELETE has a UI invocation path. Every GET has a consuming component/hook. Every action has a planner trigger or programmatic caller. Anything else is dead code.
+4. **No runtime type-tag branching where separate flows belong.** Distinct content kinds (apps, plugins, providers, actions) get separate handlers, not `if (kind === ...)` chains.
+5. **CQRS.** Readers read and return domain objects. Writers return `void` or an ID. Mappers handle DB↔domain translation.
+6. **Single source of truth for validation.** Route-layer schemas validate and transform input. Services / actions trust pre-validated input and perform presence/invariant checks only. No duplicate inline regex.
+7. **DTO fields are required by default.** Optional only when genuinely nullable. No `as` casts to skip missing fields. No `?? 0` to hide broken pipelines. If TypeScript says a field is missing, fix the pipeline.
+8. **Logger only, never console.** Server logging uses the structured logger only (`Logger.info/warn/error/debug`). Prefix `[ClassName]`. Include structured context on errors.
+9. **Every action and endpoint needs a real caller.** Every POST/PUT/DELETE has a UI invocation path. Every GET has a consuming component/hook. Every action has a planner trigger or programmatic caller. Anything else is dead code.
 
 ## Quality bar
 
@@ -275,56 +242,6 @@ What good changes look like: fewer codepaths, fewer special cases, fewer fallbac
 Remove on sight: unused code, near-duplicate types, legacy / migration leftovers, AI slop and fake TODO implementations, comments describing churn, "temporary" fallbacks that became permanent, broad `try/catch` that just swallows or replaces errors with defaults, `any` / `unknown` / unsafe casts used to avoid thinking.
 
 Constraints: do not preserve bad patterns "for compat" without a documented, verified live caller. Do not add abstractions unless they reduce total complexity. Do not DRY code that should remain separate because the domains differ. Do not centralize unlike concepts. Do not hide uncertainty with fallback values. Do not keep both old and new paths unless a live migration explicitly requires it.
-
-## QA & Testing Protocol
-
-### Required test coverage for any onboarding-touching change
-- Any PR that touches `packages/ui/src/onboarding/**`, `packages/ui/src/state/onboarding-*`, `packages/ui/src/components/onboarding/**`, `packages/app-core/src/api/*onboarding*`, `packages/app-core/src/api/auth-bootstrap-routes.ts`, `packages/app-core/src/api/auth-pairing-compat-routes.ts`, or `plugins/plugin-elizacloud/src/onboarding.ts` MUST ship with:
-  1. A unit test for any state-machine change in `flow.ts`
-  2. A Playwright spec entry in `packages/app/test/ui-smoke/onboarding-*.spec.ts` covering the new path
-  3. A contract test if API shape changed
-  4. A visual snapshot baseline if UI rendering changed
-
-### Test lanes
-- `TEST_LANE=pr` (default in CI) — mocked APIs, no real cloud spend. Excludes `*.real.test.ts` and `*.real.e2e.test.ts`. Runs on every PR.
-- `TEST_LANE=post-merge` — live APIs, full suite. Runs on develop after merge.
-- `MILADY_DESKTOP_QA=1` — opt-in for desktop-stack assertions that require a running `bun run dev:desktop` instance.
-- `ELIZA_LIVE_TEST=1` — gates the live onboarding test in `packages/app-core/test/app/onboarding-companion.live.e2e.test.ts`. Requires a real provider API key.
-
-### Dev observability for QA harnesses
-- `GET /api/dev/stack` returns canonical port/path/renderer-URL discovery. Use this from any QA harness instead of hardcoding 31337/2138.
-- `GET /api/dev/cursor-screenshot` returns a PNG of the Electrobun desktop (OS-level capture). Use this for visual regression of native desktop chrome.
-- `GET /api/dev/console-log?maxLines=400` returns aggregated dev logs (Vite + API + Electrobun child).
-- `bun run desktop:stack-status -- --json` is the single-shot status probe for an entire dev stack.
-
-### Surfaces and how to test each
-| Surface | Primary harness | Visual proof | Failure modes to cover |
-|---|---|---|---|
-| Web (browser) | Playwright in `packages/app/test/ui-smoke/` | Playwright screenshot | Provider auth failure, validation errors, resume from partial state |
-| Desktop (Electrobun) | Playwright + `/api/dev/cursor-screenshot` | OS-level screenshot via dev endpoint | First-launch pre-seed, pairing token TTL, reset-via-query-param |
-| Mobile (Capacitor) | iOS sim + Android emulator (local dev only) | `scripts/qa/mobile-screenshot-walkthrough.mjs` via computer-use MCP | Deep-link entry, Android local-agent pre-seed, permission prompts |
-| Cloud pairing | Mocked cloud endpoints in `plugins/plugin-elizacloud/__tests__/onboarding-failures.test.ts` | API trace, fixture replay | availability=false, auth timeout, provisioning timeout, token revocation |
-
-### Required commands before claiming an onboarding-touching change is done
-```bash
-bun run verify                            # typecheck + lint
-bun run test                              # unit + contract
-bun run --cwd packages/app test:e2e       # Playwright UI smoke (includes onboarding-full-flow.spec.ts)
-bun run desktop:stack-status -- --json    # if changes touched desktop
-```
-
-For changes that touched cloud pairing, additionally run with `TEST_LANE=post-merge` against the staging cloud (do NOT run live cloud tests from CI unless explicitly gated).
-
-### Manual QA — when automation can't reach
-See [docs/QA-onboarding.md](docs/QA-onboarding.md) for the full manual walkthrough matrix per surface. The TL;DR: AI agents can drive web/desktop via Playwright and mobile via the computer-use MCP. For native iOS/Android first-launch dialogs (permission grants, biometric prompts) computer-use is required — Playwright cannot reach those.
-
-### Evidence requirements
-Every reported QA pass must include either:
-- A green test run output, OR
-- A captured screenshot from `/api/dev/cursor-screenshot` or computer-use, OR
-- A network trace from `GET /api/dev/console-log` for backend-only changes.
-
-A bare "I clicked through and it worked" is not acceptable evidence.
 
 ## Git workflow
 

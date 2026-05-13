@@ -8,7 +8,13 @@ Architecture commandments, QA protocol, git workflow: [AGENTS.md](AGENTS.md). Sa
 
 Write **elizaOS** (not `ElizaOS`). npm scope `@elizaos/*`. Plain language: **Eliza agents**. Exception: **Eliza Classic** plugin keeps `Eliza` (the 1966 chatbot).
 
-## Quick start
+## Scope Discipline
+
+- Do NOT invent features, grace periods, or product behaviors not explicitly requested or documented.
+- Before adding new capabilities, verify they align with the existing product model by reading docs/README first.
+- When unsure about product semantics (e.g., SOL-only vs SPL, community vs custom flows), ASK before implementing.
+
+## Quick Start (Dev)
 
 ```bash
 bun install                # postinstall hooks
@@ -119,7 +125,7 @@ Other knobs: `MILADY_ELIZAOS_DIST_TAG`, `MILADY_ELIZAOS_VERSION`, `MILADY_ELIZA_
 
 In local mode, `@elizaos/plugin-agent-orchestrator` resolves to `eliza/plugins/plugin-agent-orchestrator` via `workspace:*`. Official plugin repos: [github.com/elizaOS-plugins](https://github.com/elizaOS-plugins).
 
-## Working style
+Two distinct skill systems live in this repo. Don't conflate them.
 
 ### 1. elizaOS runtime skills (knowledge base for the Eliza agent)
 
@@ -141,7 +147,7 @@ Open the `SKILL.md` of any of these directly from the workspace mirror when rele
 
 **Agent-orchestration / authoring:**
 - `coding-agent` — spawning Codex / Claude Code / OpenCode / Pi via PTY-backed bash for sub-agent work.
-- `task-agent-eliza-bridge` — read-only loopback endpoints (`/api/coding-agents/<sessionId>/...`) that give a spawned coding task agent access to parent runtime context.
+- `claude-subagent-milady-bridge` — read-only loopback endpoints (`/api/coding-agents/<sessionId>/...`) that give a spawned coding sub-agent access to parent runtime context.
 - `skill-creator` — authoring new SKILL.md packages (frontmatter, scripts, references, progressive disclosure).
 
 **Connectors / OS / SaaS integrations** (use when the task touches that surface):
