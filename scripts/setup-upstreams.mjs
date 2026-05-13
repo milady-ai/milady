@@ -408,11 +408,13 @@ export function getTemporaryElizaWorkspaceEntries(
     cloudBillingWorkspace,
     "package.json",
   );
+  // Only add billing if the cloud workspace is fully set up. The cloud
+  // workspace config (cloud/package.json) references .external/steward
+  // packages. When those don't exist (CI shallow checkout, fresh clone),
+  // bun's workspace resolver fails on transitive @smithy/* deps.
   const cloudWorkspaceReady =
     pathExists(cloudBillingPackageJson) &&
-    pathExists(
-      path.join(elizaRoot, "cloud", ".external", "steward", "packages"),
-    );
+    pathExists(path.join(elizaRoot, "cloud", ".external", "steward", "packages"));
   const cloudBillingWorkspaceEntry =
     cloudWorkspaceReady &&
     !optionalPluginWorkspaceEntries.includes(cloudBillingWorkspace)
