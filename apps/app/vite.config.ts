@@ -43,6 +43,7 @@ const optionalElizaAppStubEntry = path.join(
   "src/optional-eliza-app-stub.tsx",
 );
 const nativePluginStubEntry = path.join(here, "src/native-plugin-stubs.ts");
+const localElizaRoot = path.join(miladyRoot, "eliza");
 
 function requireResolve(id: string): string {
   try {
@@ -56,49 +57,39 @@ function requireResolve(id: string): string {
 }
 
 function shouldUseLocalElizaSource(): boolean {
-  const sourceMode = (
-    process.env.MILADY_ELIZA_SOURCE ??
-    process.env.ELIZA_SOURCE ??
-    ""
-  ).toLowerCase();
-  if (["local", "source", "workspace"].includes(sourceMode)) return true;
-  if (["package", "packages", "published", "npm"].includes(sourceMode)) {
-    return false;
+  const explicitSourceMode = (
+    process.env.MILADY_ELIZA_SOURCE ?? process.env.ELIZA_SOURCE
+  )
+    ?.trim()
+    .toLowerCase();
+  if (explicitSourceMode) {
+    return ["local", "source", "workspace"].includes(explicitSourceMode);
   }
-  // Legacy skip flag — set by CI when running in packages mode (e.g. the
-  // setup-bun-workspace action with disable-local-eliza-workspace=true).
-  // Mirrors isLocalElizaDisabled() in scripts/lib/eliza-package-mode.mjs so
-  // vite agrees with the rest of the toolchain about which mode it is in.
   if (
     process.env.MILADY_SKIP_LOCAL_UPSTREAMS === "1" ||
     process.env.ELIZA_SKIP_LOCAL_UPSTREAMS === "1"
   ) {
     return false;
   }
-  if (
+  return (
     process.env.MILADY_FORCE_LOCAL_UPSTREAMS === "1" ||
-    process.env.ELIZA_FORCE_LOCAL_UPSTREAMS === "1"
-  ) {
-    return true;
-  }
-  // Auto-detect: when env is unset, fall back to local mode if the
-  // workspace checkout actually exists with linked sources. This lets
-  // `bun run build` succeed after `bun run eliza:local` without
-  // requiring callers to also export MILADY_ELIZA_SOURCE=local.
-  return fs.existsSync(
-    path.join(
-      path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../.."),
-      "eliza",
-      "packages",
-      "app-core",
-      "src",
-      "platform",
-      "native-plugin-entrypoints.ts",
-    ),
+    process.env.ELIZA_FORCE_LOCAL_UPSTREAMS === "1" ||
+    resolvesInsideLocalElizaWorkspace("@elizaos/app-core/package.json")
   );
 }
 
-const localElizaRoot = path.join(miladyRoot, "eliza");
+function resolvesInsideLocalElizaWorkspace(id: string): boolean {
+  try {
+    const localRoot = fs.realpathSync(localElizaRoot);
+    const resolved = fs.realpathSync(_require.resolve(id));
+    return (
+      resolved === localRoot || resolved.startsWith(`${localRoot}${path.sep}`)
+    );
+  } catch {
+    return false;
+  }
+}
+
 const hasLocalElizaWorkspace =
   shouldUseLocalElizaSource() &&
   fs.existsSync(path.join(localElizaRoot, "package.json"));
@@ -107,8 +98,11 @@ const appCoreSrcRoot = hasLocalElizaWorkspace
   ? path.join(localElizaRoot, "packages/app-core/src")
   : null;
 const appCoreNativePluginEntrypoints = appCoreSrcRoot
-  ? path.join(appCoreSrcRoot, "platform/native-plugin-entrypoints.ts")
-  : requireResolve("@elizaos/app-core/platform/native-plugin-entrypoints");
+  ? path.join(
+      localElizaRoot,
+      "packages/ui/src/platform/native-plugin-entrypoints.ts",
+    )
+  : requireResolve("@elizaos/ui/platform/native-plugin-entrypoints");
 const emptyNodeModuleEntry = appCoreSrcRoot
   ? path.join(appCoreSrcRoot, "platform/empty-node-module.ts")
   : requireResolve("@elizaos/app-core/platform/empty-node-module");
@@ -311,14 +305,32 @@ function resolveLocalElizaAppAliases(): Alias[] {
       return null;
     }
     const record = value as Record<string, unknown>;
-    // Never include "types" — that's a TypeScript-only condition
-    // pointing at .d.ts declaration files, which aren't executable
-    // modules. Vite's load-fallback then crashes trying to read them.
-    for (const condition of ["source", "import", "default"]) {
+    for (const condition of ["source", "import", "default", "types"]) {
       const target = record[condition];
       if (typeof target === "string") return target;
     }
     return null;
+  }
+
+  function resolveRuntimeTarget(pkgDir: string, exportTarget: string): string {
+    if (exportTarget.startsWith("./dist/")) {
+      const sourceTarget = exportTarget
+        .replace(/^\.\/dist\//, "./src/")
+        .replace(/\.js$/, ".ts");
+      const sourcePath = resolveExistingUiSourceModule(
+        path.resolve(pkgDir, sourceTarget),
+      );
+      if (fs.existsSync(sourcePath)) {
+        return sourcePath;
+      }
+    }
+
+    const distPath = path.resolve(pkgDir, exportTarget);
+    if (fs.existsSync(distPath)) {
+      return distPath;
+    }
+
+    return distPath;
   }
 
   const aliases: Alias[] = [];
@@ -359,7 +371,7 @@ function resolveLocalElizaAppAliases(): Alias[] {
           key === "." ? pkgName : `${pkgName}/${key.replace(/^\.\//, "")}`;
         aliases.push({
           find: new RegExp(`^${escapeRegExp(aliasKey)}$`),
-          replacement: resolvedTarget,
+          replacement: resolveRuntimeTarget(pkgDir, exportTarget),
         });
       }
 
@@ -539,6 +551,69 @@ function resolveLocalAppCoreAliases(): Alias[] {
   }
 
   const uiSource = path.join(appCoreSrcRoot, "ui");
+  const uiPkgSrcRoot = uiPkgRoot ? path.join(uiPkgRoot, "src") : null;
+  const legacyAppCoreUiAliases: Alias[] = uiPkgSrcRoot
+    ? [
+        {
+          find: /^@elizaos\/app-core$/,
+          replacement: appCoreBrowserEntry,
+        },
+        {
+          find: /^@elizaos\/app-core\.js$/,
+          replacement: appCoreBrowserEntry,
+        },
+        {
+          find: /^@elizaos\/app-core\/styles\/(.*)$/,
+          replacement: `${uiPkgSrcRoot}/styles/$1`,
+        },
+        {
+          find: /^@elizaos\/app-core\/api$/,
+          replacement: path.join(uiPkgSrcRoot, "api/index.ts"),
+        },
+        {
+          find: /^@elizaos\/app-core\/components\/character\/CharacterEditor$/,
+          replacement: path.join(
+            uiPkgSrcRoot,
+            "components/character/CharacterEditor.tsx",
+          ),
+        },
+        {
+          find: /^@elizaos\/app-core\/components\/chat\/widgets\/types$/,
+          replacement: path.join(
+            uiPkgSrcRoot,
+            "components/chat/widgets/types.ts",
+          ),
+        },
+        {
+          find: /^@elizaos\/app-core\/components\/(.+)$/,
+          replacement: `${uiPkgSrcRoot}/components/$1`,
+          customResolver: resolveExistingUiSourceModule,
+        },
+        {
+          find: /^@elizaos\/app-core\/platform$/,
+          replacement: path.join(uiPkgSrcRoot, "platform/index.ts"),
+        },
+        {
+          find: /^@elizaos\/app-core\/state\/(.+)$/,
+          replacement: `${uiPkgSrcRoot}/state/$1.ts`,
+          customResolver: resolveExistingUiSourceModule,
+        },
+        {
+          find: /^@elizaos\/app-core\/utils$/,
+          replacement: path.join(uiPkgSrcRoot, "utils/index.ts"),
+        },
+        {
+          find: /^@elizaos\/app-core\/utils\/(.+)$/,
+          replacement: `${uiPkgSrcRoot}/utils/$1.ts`,
+          customResolver: resolveExistingUiSourceModule,
+        },
+        {
+          find: /^@elizaos\/app-core\/widgets\/(.+)$/,
+          replacement: `${uiPkgSrcRoot}/widgets/$1.ts`,
+          customResolver: resolveExistingUiSourceModule,
+        },
+      ]
+    : [];
 
   // Wave A moved styles from @elizaos/app-core to @elizaos/ui. The npm
   // @elizaos/app-core package still includes them for packages-mode compat,
@@ -591,6 +666,7 @@ function resolveLocalAppCoreAliases(): Alias[] {
   return [
     ...cssRedirectAlias,
     ...generatedAliases,
+    ...legacyAppCoreUiAliases,
     {
       find: /^@elizaos\/app-core\/(.+)$/,
       replacement: `${appCoreSrcRoot}/$1`,
@@ -800,18 +876,24 @@ function elizaCoreAlphaPrerelease(dir: string): number {
 }
 
 function resolveExistingUiSourceModule(id: string) {
-  if (fs.existsSync(id)) {
-    return id;
+  const candidates = [id];
+  if (id.endsWith(".tsx")) {
+    candidates.push(`${id.slice(0, -4)}.ts`);
+  } else if (id.endsWith(".ts")) {
+    candidates.push(`${id.slice(0, -3)}.tsx`);
+  } else if (!path.extname(id)) {
+    candidates.push(
+      `${id}.ts`,
+      `${id}.tsx`,
+      path.join(id, "index.ts"),
+      path.join(id, "index.tsx"),
+    );
   }
 
-  const alternate = id.endsWith(".tsx")
-    ? `${id.slice(0, -4)}.ts`
-    : id.endsWith(".ts")
-      ? `${id.slice(0, -3)}.tsx`
-      : null;
-
-  if (alternate && fs.existsSync(alternate)) {
-    return alternate;
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) {
+      return candidate;
+    }
   }
 
   return id;
