@@ -558,6 +558,9 @@ jobs:
           mkdir -p eliza/packages/node_modules
           ln -sfn "$(realpath "$whisper_pkg")" eliza/packages/node_modules/whisper-node
 
+      - name: Apply Electrobun release compatibility patches
+        run: node scripts/patch-electrobun-release-compat.mjs
+
       - name: Cache Whisper models and binaries
         if: matrix.platform.os == 'macos' || matrix.platform.os == 'linux'
         uses: actions/cache@v5
@@ -1196,8 +1199,8 @@ jobs:
           # Extracting the 758MB installer into ~1.5GB exceeds CI runner disk.
           # Use a short path under runner.temp to avoid MAX_PATH issues with
           # deeply nested node_modules while staying in a user-writable location.
-          ELIZA_TEST_WINDOWS_INSTALL_DIR: ${{ runner.temp }}\el-smoke
-          MILADY_TEST_WINDOWS_INSTALL_DIR: ${{ runner.temp }}\el-smoke
+          ELIZA_TEST_WINDOWS_INSTALL_DIR: ${{ runner.temp }}\el
+          MILADY_TEST_WINDOWS_INSTALL_DIR: ${{ runner.temp }}\el
           ELIZA_TEST_WINDOWS_LAUNCHER_DIR: ${{ runner.temp }}\eliza-windows-ui-launcher
           MILADY_TEST_WINDOWS_LAUNCHER_DIR: ${{ runner.temp }}\eliza-windows-ui-launcher
           ELIZA_TEST_WINDOWS_LAUNCHER_PATH_FILE: ${{ runner.temp }}\eliza-windows-ui-launcher.txt
@@ -1570,11 +1573,7 @@ jobs:
           $diagnosticsDir = Join-Path $PWD "eliza/packages/app-core/platforms/electrobun/artifacts/windows-smoke-diagnostics"
           $appDataRoot = if ($env:MILADY_TEST_WINDOWS_APPDATA_PATH) { $env:MILADY_TEST_WINDOWS_APPDATA_PATH } elseif ($env:ELIZA_TEST_WINDOWS_APPDATA_PATH) { $env:ELIZA_TEST_WINDOWS_APPDATA_PATH } else { $env:APPDATA }
           $localAppDataRoot = if ($env:MILADY_TEST_WINDOWS_LOCALAPPDATA_PATH) { $env:MILADY_TEST_WINDOWS_LOCALAPPDATA_PATH } elseif ($env:ELIZA_TEST_WINDOWS_LOCALAPPDATA_PATH) { $env:ELIZA_TEST_WINDOWS_LOCALAPPDATA_PATH } else { $env:LOCALAPPDATA }
-          $wrapperRoots = @(@(
-            (Join-Path $localAppDataRoot "ai.milady.milady"),
-            (Join-Path $localAppDataRoot "ai.elizaos.Eliza"),
-            (Join-Path $localAppDataRoot "ai.elizaos.app")
-          ) | Select-Object -Unique)
+          $wrapperRoot = Join-Path $localAppDataRoot "ai.elizaos.Eliza"
 
           Write-Host "Diagnostics roots:"
           Write-Host "  appDataRoot      = $appDataRoot"

@@ -36,6 +36,30 @@ describe("Electrobun release runtime root contract", () => {
     expect(workflow).toMatch(
       /ELIZA_TEST_WINDOWS_BUILD_DIR: \$\{\{ github\.workspace \}\}\\eliza\\packages\\app-core\\platforms\\electrobun\\build/,
     );
+    expect(workflow).toMatch(
+      /MILADY_TEST_WINDOWS_INSTALL_DIR: \$\{\{ runner\.temp \}\}\\el/,
+    );
+    expect(workflow).toMatch(
+      /name: Apply Electrobun release compatibility patches/,
+    );
+    expect(workflow).toMatch(
+      /node scripts\/patch-electrobun-release-compat\.mjs/,
+    );
+    expect(workflow).toMatch(/MILADY_TEST_WINDOWS_APPDATA_PATH/);
+    expect(workflow).toMatch(
+      /elseif \(\$env:ELIZA_TEST_WINDOWS_APPDATA_PATH\)/,
+    );
+    expect(workflow.indexOf("ELIZA_TEST_WINDOWS_INSTALL_DIR")).toBeLessThan(
+      workflow.indexOf("MILADY_TEST_WINDOWS_INSTALL_DIR"),
+    );
+
+    const compatPatch = fs.readFileSync(
+      "scripts/patch-electrobun-release-compat.mjs",
+      "utf8",
+    );
+    expect(compatPatch).toMatch(/ai\.elizaos\.app/);
+    expect(compatPatch).toMatch(/Find-SelfExtractedLauncher/);
+    expect(compatPatch).toMatch(/Relaunching self-extracted launcher directly/);
   });
 
   test.skipIf(!fs.existsSync(electrobunConfigPath))(
