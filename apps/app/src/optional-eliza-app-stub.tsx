@@ -64,6 +64,8 @@ export function resolveCompanionInferenceNotice(): null {
   return null;
 }
 
+export async function prefetchVrmToCache(): Promise<void> {}
+
 // Stubs for @elizaos/app-wallet — the canonical wallet UI ships in
 // eliza/plugins/app-wallet, but the host app sometimes aliases the
 // whole package to this no-op stub (Capacitor / minimal builds without
@@ -493,17 +495,12 @@ export interface TaskCompletionSummary {
 
 export { THREE };
 
-// ── @elizaos/app-wallet/wallet-rpc helpers ─────────────────────────────
-// `buildWalletRpcUpdateRequest` is already declared earlier in this file
-// (typed against WalletRpcCredentialKey/WalletRpcSelections); upstream
-// 49778114a5 accidentally re-added an `_args: unknown` copy that broke the
-// renderer build with "Multiple exports with the same name". The two helpers
-// below are the unique additions from that commit and stay.
-export function normalizeWalletRpcSelections(
-  _selections: unknown,
-): Record<string, never> {
-  return {};
-}
+// ── @elizaos/app-wallet/wallet-rpc stubs ───────────────────────────────
+// Real wallet RPC builder lives in `eliza/plugins/app-wallet`. When milady
+// is in npm-package mode (no local link), stub satisfies imports from
+// useOnboardingCallbacks and the wallet onboarding flow degrades to a
+// no-op RPC update. With `bun run eliza:local`, the alias auto-detect in
+// vite.config.ts routes through the real package instead.
 
 export function collectSelectedCredentialKeys(_selections: unknown): string[] {
   return [];
