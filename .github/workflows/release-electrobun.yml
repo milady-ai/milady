@@ -1183,6 +1183,10 @@ jobs:
           Write-Host "=== Disk after smoke cleanup ==="
           Get-Volume | Where-Object { $_.DriveLetter } | Format-Table DriveLetter, @{N='FreeGB';E={[math]::Round($_.SizeRemaining/1GB,1)}}, @{N='TotalGB';E={[math]::Round($_.Size/1GB,1)}}
 
+      - name: Reapply Windows smoke asset patch
+        if: matrix.platform.os == 'windows' && steps.build-electrobun-app.outputs.fallback != 'true'
+        run: node scripts/apply-eliza-ci-patches.mjs
+
       - name: Smoke test packaged Windows app
         if: matrix.platform.os == 'windows' && steps.build-electrobun-app.outputs.fallback != 'true'
         continue-on-error: true
@@ -1194,13 +1198,13 @@ jobs:
           # initialize — without it, startApiServer() can fail before
           # server.listen() and the health endpoint never becomes reachable.
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          # Smoke runs against the build tree, not the installer extraction.
-          # The installer is verified separately by the installer proof step.
-          # Extracting the 758MB installer into ~1.5GB exceeds CI runner disk.
-          # Use a short path under runner.temp to avoid MAX_PATH issues with
+          ELIZA_WINDOWS_SMOKE_REQUIRE_INSTALLER: "1"
+          # Smoke runs through the public installer so release validation
+          # exercises the same standalone artifact users download. Use a short
+          # path under runner.temp to avoid MAX_PATH issues with
           # deeply nested node_modules while staying in a user-writable location.
-          ELIZA_TEST_WINDOWS_INSTALL_DIR: ${{ runner.temp }}\el
-          MILADY_TEST_WINDOWS_INSTALL_DIR: ${{ runner.temp }}\el
+          ELIZA_TEST_WINDOWS_INSTALL_DIR: ${{ runner.temp }}\el-smoke
+          MILADY_TEST_WINDOWS_INSTALL_DIR: ${{ runner.temp }}\el-smoke
           ELIZA_TEST_WINDOWS_LAUNCHER_DIR: ${{ runner.temp }}\eliza-windows-ui-launcher
           MILADY_TEST_WINDOWS_LAUNCHER_DIR: ${{ runner.temp }}\eliza-windows-ui-launcher
           ELIZA_TEST_WINDOWS_LAUNCHER_PATH_FILE: ${{ runner.temp }}\eliza-windows-ui-launcher.txt
@@ -1248,7 +1252,7 @@ jobs:
         env:
           ELIZA_DISABLE_LOCAL_EMBEDDINGS: "1"
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          ELIZA_TEST_WINDOWS_PROOF_INSTALL_DIR: ${{ runner.temp }}\el-proof
+          ELIZA_TEST_WINDOWS_PROOF_INSTALL_DIR: ${{ runner.temp }}\el-smoke-proof
         run: |
           Remove-Item $env:ELIZA_TEST_WINDOWS_PROOF_INSTALL_DIR -Recurse -Force -ErrorAction SilentlyContinue
           pwsh -File eliza/packages/app-core/platforms/electrobun/scripts/verify-windows-installer-proof.ps1 `

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import { test } from "vitest";
+import { DEFAULT_ELIZAOS_PACKAGE_DIST_TAG } from "./lib/eliza-package-mode.mjs";
 
 function readJson(path: string) {
   return JSON.parse(fs.readFileSync(path, "utf8"));
@@ -56,9 +57,18 @@ test("package manifests default to published elizaOS alpha packages", () => {
   }
 
   const rootPackage = readJson("package.json");
-  assert.equal(rootPackage.dependencies["@elizaos/app-core"], "alpha");
-  assert.equal(rootPackage.dependencies["@elizaos/core"], "alpha");
-  assert.equal(rootPackage.dependencies["@elizaos/agent"], "alpha");
+  assert.equal(
+    rootPackage.dependencies["@elizaos/app-core"],
+    DEFAULT_ELIZAOS_PACKAGE_DIST_TAG,
+  );
+  assert.equal(
+    rootPackage.dependencies["@elizaos/core"],
+    DEFAULT_ELIZAOS_PACKAGE_DIST_TAG,
+  );
+  assert.equal(
+    rootPackage.dependencies["@elizaos/agent"],
+    DEFAULT_ELIZAOS_PACKAGE_DIST_TAG,
+  );
 
   const appPackage = readJson("apps/app/package.json");
   assert.equal(
@@ -77,8 +87,14 @@ test("package manifests default to published elizaOS alpha packages", () => {
     appPackage.scripts["build:ios"],
     /MILADY_ELIZA_SOURCE=local/,
   );
-  assert.equal(appPackage.dependencies["@elizaos/app-core"], "alpha");
-  assert.equal(appPackage.dependencies["@elizaos/shared"], "alpha");
+  assert.equal(
+    appPackage.dependencies["@elizaos/app-core"],
+    DEFAULT_ELIZAOS_PACKAGE_DIST_TAG,
+  );
+  assert.equal(
+    appPackage.dependencies["@elizaos/shared"],
+    DEFAULT_ELIZAOS_PACKAGE_DIST_TAG,
+  );
 
   for (const packageName of [
     "@elizaos/capacitor-agent",
@@ -198,7 +214,10 @@ test("elizaOS package channel is configurable instead of alpha-only", () => {
     "scripts/install-published-workspace-fallback-deps.sh",
   );
 
-  assert.match(helper, /DEFAULT_ELIZAOS_PACKAGE_DIST_TAG = "alpha"/);
+  assert.match(
+    helper,
+    /DEFAULT_ELIZAOS_PACKAGE_DIST_TAG = "(?:alpha|beta|main)"/,
+  );
   assert.match(helper, /MILADY_ELIZAOS_DIST_TAG/);
   assert.match(helper, /ELIZAOS_NPM_TAG/);
   assert.match(helper, /MILADY_ELIZAOS_VERSION/);

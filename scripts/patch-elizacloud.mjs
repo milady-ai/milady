@@ -21,6 +21,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+const PINNED_VERSION = "2.0.0-alpha.8";
 const PATCH_REL_PATH =
   "eliza/patches/milady/elizacloud-patchset/0001-json-output-enforcement-and-fence-strip.patch";
 const DIST_ENTRYPOINTS = ["dist/node/index.node.js", "dist/cjs/index.node.cjs"];

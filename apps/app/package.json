@@ -65,9 +65,9 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "three": "^0.182.0",
-    "@elizaos/app-core": "file:../../eliza/packages/app-core",
-    "@elizaos/app-hyperscape": "file:../../eliza/plugins/app-hyperscape",
-    "@elizaos/shared": "file:../../eliza/packages/shared"
+    "@elizaos/app-core": "beta",
+    "@elizaos/app-hyperscape": "beta",
+    "@elizaos/shared": "beta"
   },
   "devDependencies": {
     "@capacitor/cli": "8.3.1",
