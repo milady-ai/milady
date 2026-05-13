@@ -12,7 +12,7 @@ This is the home of the iOS-Bun-port project. See `eliza/docs/audits/mobile-2026
 |-------------------|--------------------------------------------------------------------|
 | `toolchain/`      | CMake toolchain files for `aarch64-ios` and `aarch64-ios-simulator`; Zig build target additions |
 | `vendor-webkit/`  | WebKit/JSC fork pin + patches + cross-build script for no-JIT JSC iOS static lib |
-| `vendor-deps/`    | Cross-build scripts for BoringSSL, c-ares, lolhtml, mimalloc, zstd |
+| ~~`vendor-deps/`~~ | **Moved 2026-05-13 to [`eliza/packages/ios-native-deps/`](../../eliza/packages/ios-native-deps/)** (npm: `@elizaos/ios-native-deps`). Milady is being migrated to consume the build harness from the eliza submodule / npm rather than duplicate it locally; cross-build scripts for llama.cpp + sqlite-vec live there. The remaining vendor-deps work (BoringSSL, c-ares, lolhtml, mimalloc, zstd, brotli — pending M01/M02) will land in that same eliza package. |
 | `src-bun-fork/`   | Git submodule → our fork of `oven-sh/bun` (not yet checked out)    |
 | `stubs/`          | iOS-specific runtime stubs (`child_process` → ENOTSUP, FFI allow-list, `os.homedir` → sandbox) |
 | `ios-embed/`      | Swift host code that calls `bun_embedded_run()` from `AppDelegate` |
