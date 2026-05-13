@@ -64,8 +64,6 @@ export function resolveCompanionInferenceNotice(): null {
   return null;
 }
 
-export async function prefetchVrmToCache(): Promise<void> {}
-
 // Stubs for @elizaos/app-wallet — the canonical wallet UI ships in
 // eliza/plugins/app-wallet, but the host app sometimes aliases the
 // whole package to this no-op stub (Capacitor / minimal builds without

@@ -1,6 +1,17 @@
 declare module "@elizaos/signal-native";
 declare module "qrcode";
 
+declare module "@elizaos/capacitor-mobile-agent-bridge" {
+  export const MobileAgentBridge: {
+    startInboundTunnel(args: {
+      relayUrl: string;
+      deviceId: string;
+      pairingToken?: string;
+    }): Promise<void>;
+    stopInboundTunnel(): Promise<void>;
+  };
+}
+
 declare module "three/examples/jsm/libs/meshopt_decoder.module.js" {
   export const MeshoptDecoder: {
     supported: boolean;
