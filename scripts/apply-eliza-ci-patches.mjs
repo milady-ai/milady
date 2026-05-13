@@ -360,6 +360,13 @@ function patchN8nCharacterKnowledge(raw) {
   );
 }
 
+function patchSqlRawConnectionReturnType(raw, managerTypeName) {
+  return raw.replace(
+    "  getRawConnection() {\n    return this.manager.getConnection();\n  }",
+    `  getRawConnection(): ReturnType<${managerTypeName}["getConnection"]> {\n    return this.manager.getConnection();\n  }`,
+  );
+}
+
 function applyReleaseSourcePatches() {
   replaceFileText(
     path.join(
@@ -514,6 +521,45 @@ function applyReleaseSourcePatches() {
     ),
     patchN8nCharacterKnowledge,
     "agent n8n explicit knowledge gate",
+  );
+
+  replaceFileText(
+    path.join(
+      elizaDir,
+      "plugins",
+      "plugin-sql",
+      "typescript",
+      "pg",
+      "adapter.ts",
+    ),
+    (raw) => patchSqlRawConnectionReturnType(raw, "PostgresConnectionManager"),
+    "plugin-sql pg raw connection return type",
+  );
+
+  replaceFileText(
+    path.join(
+      elizaDir,
+      "plugins",
+      "plugin-sql",
+      "typescript",
+      "pglite",
+      "adapter.ts",
+    ),
+    (raw) => patchSqlRawConnectionReturnType(raw, "PGliteClientManager"),
+    "plugin-sql pglite raw connection return type",
+  );
+
+  replaceFileText(
+    path.join(
+      elizaDir,
+      "plugins",
+      "plugin-sql",
+      "typescript",
+      "neon",
+      "adapter.ts",
+    ),
+    (raw) => patchSqlRawConnectionReturnType(raw, "NeonConnectionManager"),
+    "plugin-sql neon raw connection return type",
   );
 }
 

@@ -142,6 +142,30 @@ assertContainsNone(
   ],
   failures,
 );
+const ciForkWorkflowText = readText(".github/workflows/ci-fork.yml", failures);
+assertContainsNone(
+  ciForkWorkflowText,
+  ".github/workflows/ci-fork.yml",
+  [
+    "bun install --cwd eliza --no-frozen-lockfile --ignore-scripts",
+    "bun install --cwd eliza/cloud --no-frozen-lockfile --ignore-scripts",
+  ],
+  failures,
+);
+assertCount(
+  ciForkWorkflowText,
+  ".github/workflows/ci-fork.yml",
+  'prepare-local-eliza-runtime: "true"',
+  4,
+  failures,
+);
+assertCount(
+  ciForkWorkflowText,
+  ".github/workflows/ci-fork.yml",
+  'skip-cloud-submodule: "true"',
+  4,
+  failures,
+);
 assertContainsAll(actionText, files.action, requiredActionSnippets, failures);
 assertContainsNone(actionText, files.action, forbiddenActionSnippets, failures);
 assertContainsAll(
@@ -155,6 +179,8 @@ assertOrdered(
   files.action,
   [
     "name: Install dependencies",
+    "name: Install local eliza runtime dependencies",
+    "name: Hydrate local eliza Bun package postinstall",
     "name: Generate local eliza protobuf types",
     "run: bash scripts/install-published-workspace-fallback-deps.sh",
     "run: node scripts/build-local-eliza-ci-overrides.mjs",
@@ -310,6 +336,21 @@ function assertContainsNone(text, relativePath, snippets, targetFailures) {
         `${relativePath} still contains forbidden bootstrap snippet: ${snippet}`,
       );
     }
+  }
+}
+
+function assertCount(
+  text,
+  relativePath,
+  snippet,
+  expectedCount,
+  targetFailures,
+) {
+  const actualCount = text.split(snippet).length - 1;
+  if (actualCount !== expectedCount) {
+    targetFailures.push(
+      `${relativePath} expected ${expectedCount} occurrence(s) of ${snippet}, found ${actualCount}`,
+    );
   }
 }
 
