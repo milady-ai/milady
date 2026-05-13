@@ -1,5 +1,13 @@
 # Android release signing for Milady
 
+> **Status (2026-05-13):** This doc describes the signing-config shape the
+> Capacitor Android project should adopt. The `apps/app/android/` Gradle
+> tree itself has not been generated/committed yet — `bunx cap add
+> android` is the next step (per @dutchiono's review on #2136). Once the
+> scaffolding lands, the `build.gradle` block below drops in unchanged.
+> Operators following this doc today need to also create the Capacitor
+> Android shell first; a follow-up issue tracks the sequencing.
+
 The `release` build type in `apps/app/android/app/build.gradle` is wired
 for one-time keystore configuration via env vars or gradle `-P` properties.
 When the env vars are absent the release build falls back to debug signing
