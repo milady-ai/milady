@@ -18,13 +18,6 @@
 #   start             Start cuttlefish-host-resources and launch a fresh cvd
 #   reset             Stop, reset, then start (clean slate)
 #   open              Open the WebRTC UI in your default browser
-#   live              Build a live-reload APK + start vite host dev server.
-#                     The on-device WebView loads UI from the host vite, so
-#                     editing apps/app/src/*.tsx HMRs onto the running cvd or
-#                     real device in ~200 ms. Agent stays on device, real bridge
-#                     and llama unchanged. Stop with `stop-live` or Ctrl-C the
-#                     vite process.
-#   stop-live         Kill the host vite + restore the production-bundled APK.
 #
 # Requires: adb, cvd (cuttlefish-base+user installed), bun, AOSP at ~/aosp.
 
@@ -119,58 +112,28 @@ cmd_push_agent() {
   cmd_restart_app
 }
 
+cmd_stage_models() {
+  # Stage the bundled chat + embedding GGUF models into the APK assets so
+  # the on-device agent boots offline and binds the API on port 31337.
+  # Without these, runAutonomousCli's startEliza() throws on the missing
+  # embedding model and bun exits before serving — UI gets stuck on
+  # "CONNECTING TO BACKEND…". Idempotent (skipped when files match by
+  # size). Pass MILADYOS_DEV_SKIP_MODELS=1 to opt out (~837 MB APK saving
+  # at the cost of needing a runtime download path).
+  if [[ "${MILADYOS_DEV_SKIP_MODELS:-0}" = "1" ]]; then
+    say "skipping bundled-model staging (MILADYOS_DEV_SKIP_MODELS=1)"
+    return
+  fi
+  say "staging default chat + embedding GGUF models into APK assets…"
+  ( cd "$MILADY_ROOT" && node eliza/packages/app-core/scripts/aosp/stage-default-models.mjs )
+}
+
 cmd_rebuild_apk() {
+  cmd_stage_models
   say "rebuilding privileged Milady APK (vite + capacitor + gradle, ~3-10 min)…"
   cd "$MILADY_ROOT"
   MILADY_AOSP_BUILD=1 MILADY_GRADLE_AOSP_BUILD=true bun run build:android:system
   ls -la "$MILADY_ROOT/os/android/vendor/milady/apps/Milady/Milady.apk"
-}
-
-# Push the most recently staged APK at os/android/vendor/milady/apps/Milady/Milady.apk
-# to /system/priv-app on the running cvd. Used by `live` and `stop-live` to swap
-# the on-device APK without going through a full reflash.
-push_staged_apk_to_running_cvd() {
-  local apk="$MILADY_ROOT/os/android/vendor/milady/apps/Milady/Milady.apk"
-  [[ -f "$apk" ]] || fail "no staged APK at $apk — run rebuild-apk first"
-  adb -s "$CVD_DEVICE" root >/dev/null 2>&1 || true
-  adb -s "$CVD_DEVICE" wait-for-device
-  adb -s "$CVD_DEVICE" remount >/dev/null 2>&1 || true
-  say "pushing APK ($(du -h "$apk" | awk '{print $1}')) to /system/priv-app/Milady/Milady.apk…"
-  adb -s "$CVD_DEVICE" push "$apk" /system/priv-app/Milady/Milady.apk
-  adb -s "$CVD_DEVICE" shell am force-stop ai.milady.milady
-  adb -s "$CVD_DEVICE" shell pm clear ai.milady.milady >/dev/null 2>&1 || true
-  adb -s "$CVD_DEVICE" shell am start -W -n ai.milady.milady/.MainActivity
-}
-
-# Vite HMR dev loop. The on-device WebView loads the React UI from
-# `http://<host-lan>:5173` instead of the bundled APK assets, so editing
-# `apps/app/src/*.tsx` shows up in 200 ms via Vite HMR. The agent stays on
-# the device on `127.0.0.1:31337`, so the ElizaNativeBridge + AOSP plugins
-# + on-device llama all stay real. Only the renderer comes from the host.
-cmd_live() {
-  [[ -n "${LAN_IP:-}" ]] || fail "could not detect host LAN IP for live-reload"
-  local port="${MILADY_VITE_PORT:-5173}"
-  local url="http://${LAN_IP}:${port}"
-
-  say "building APK with MILADY_LIVE_RELOAD_URL=${url}…"
-  ( cd "$MILADY_ROOT" && MILADY_LIVE_RELOAD_URL="$url" \
-      MILADY_AOSP_BUILD=1 MILADY_GRADLE_AOSP_BUILD=true \
-      bun run build:android:system )
-  push_staged_apk_to_running_cvd
-
-  say "starting vite host dev server on 0.0.0.0:${port}…"
-  say "edit apps/app/src/*.tsx and the WebView reloads in ~200 ms."
-  say "stop with Ctrl-C; then run 'miladyos-dev.sh stop-live' to restore prod APK."
-  ( cd "$MILADY_ROOT/apps/app" && bunx vite --host 0.0.0.0 --port "$port" )
-}
-
-cmd_stop_live() {
-  say "rebuilding production APK (no live-reload URL)…"
-  cd "$MILADY_ROOT"
-  unset MILADY_LIVE_RELOAD_URL
-  MILADY_AOSP_BUILD=1 MILADY_GRADLE_AOSP_BUILD=true bun run build:android:system
-  push_staged_apk_to_running_cvd
-  say "production APK restored. Run 'miladyos-dev.sh live' to re-enter dev mode."
 }
 
 cmd_reflash() {
@@ -182,11 +145,8 @@ cmd_reflash() {
     --brand-config "$MILADY_ROOT/os/android/brand.milady.json" \
     --source-vendor "$MILADY_ROOT/os/android/vendor/milady" \
     "$AOSP_ROOT"
-  # Default parallelism is light (-j3) so the host stays usable for other
-  # work; override with `MILADYOS_AOSP_J=6` if you have spare CPU.
-  local j_flag="${MILADYOS_AOSP_J:-3}"
-  say "running incremental m -j${j_flag} (~5-15 min)…"
-  ( cd "$AOSP_ROOT" && nice -n 19 ionice -c 3 bash -lc "source build/envsetup.sh && lunch $LUNCH_TARGET && m -j${j_flag}" )
+  say "running incremental m -j6 (~5-15 min)…"
+  ( cd "$AOSP_ROOT" && bash -lc "source build/envsetup.sh && lunch $LUNCH_TARGET && m -j6" )
   cmd_reset
 }
 
@@ -197,18 +157,8 @@ cmd_stop() {
 
 cmd_start() {
   ensure_host_resources
-  # Default to half the host's cores and ~40% of RAM so the VM can run
-  # llama at workable speeds without locking up the laptop. Override via
-  # MILADYOS_CVD_CPUS / MILADYOS_CVD_MEM_MB. nproc fallback to 4, RAM
-  # fallback to 4 GB if /proc/meminfo isn't readable.
-  local host_cores host_mem_mb cvd_cpus cvd_mem_mb
-  host_cores=$(nproc 2>/dev/null || echo 4)
-  host_mem_mb=$(awk '/^MemTotal:/ { printf "%d", $2 / 1024 }' /proc/meminfo 2>/dev/null)
-  : "${host_mem_mb:=4096}"
-  cvd_cpus="${MILADYOS_CVD_CPUS:-$(( host_cores > 2 ? host_cores - 2 : host_cores ))}"
-  cvd_mem_mb="${MILADYOS_CVD_MEM_MB:-$(( host_mem_mb * 4 / 10 ))}"
-  say "launching MiladyOS in cuttlefish (cvd create --daemon, cpus=${cvd_cpus} mem=${cvd_mem_mb}MB)…"
-  sg cvdnetwork -c "cd $AOSP_ROOT && source build/envsetup.sh >/dev/null 2>&1 && lunch $LUNCH_TARGET >/dev/null 2>&1 && cvd create --host_path=\$ANDROID_HOST_OUT --product_path=\$ANDROID_PRODUCT_OUT --daemon --report_anonymous_usage_stats=n --gpu_mode=gfxstream_guest_angle_host_swiftshader --cpus=${cvd_cpus} --memory_mb=${cvd_mem_mb}"
+  say "launching MiladyOS in cuttlefish (cvd create --daemon)…"
+  sg cvdnetwork -c "cd $AOSP_ROOT && source build/envsetup.sh >/dev/null 2>&1 && lunch $LUNCH_TARGET >/dev/null 2>&1 && cvd create --host_path=\$ANDROID_HOST_OUT --product_path=\$ANDROID_PRODUCT_OUT --daemon --report_anonymous_usage_stats=n --gpu_mode=gfxstream_guest_angle_host_swiftshader"
   say "waiting for sys.boot_completed…"
   for _ in $(seq 1 90); do
     [[ "$(adb -s "$CVD_DEVICE" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" == "1" ]] && break
@@ -234,12 +184,11 @@ main() {
     restart-app)    cmd_restart_app ;;
     push-agent)     cmd_push_agent ;;
     rebuild-apk)    cmd_rebuild_apk ;;
+    stage-models)   cmd_stage_models ;;
     reflash)        cmd_reflash ;;
     stop)           cmd_stop ;;
     start)          cmd_start ;;
     reset)          cmd_reset ;;
-    live)           cmd_live ;;
-    stop-live)      cmd_stop_live ;;
     -h|--help|help) sed -n '2,/^set -/p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//; /^set -/d' ;;
     *) fail "unknown command: ${1:-}. run 'miladyos-dev.sh help' for list." ;;
   esac
