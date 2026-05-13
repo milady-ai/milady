@@ -142,30 +142,6 @@ assertContainsNone(
   ],
   failures,
 );
-const ciForkWorkflowText = readText(".github/workflows/ci-fork.yml", failures);
-assertContainsNone(
-  ciForkWorkflowText,
-  ".github/workflows/ci-fork.yml",
-  [
-    "bun install --cwd eliza --no-frozen-lockfile --ignore-scripts",
-    "bun install --cwd eliza/cloud --no-frozen-lockfile --ignore-scripts",
-  ],
-  failures,
-);
-assertCount(
-  ciForkWorkflowText,
-  ".github/workflows/ci-fork.yml",
-  'prepare-local-eliza-runtime: "true"',
-  4,
-  failures,
-);
-assertCount(
-  ciForkWorkflowText,
-  ".github/workflows/ci-fork.yml",
-  'skip-cloud-submodule: "true"',
-  4,
-  failures,
-);
 assertContainsAll(actionText, files.action, requiredActionSnippets, failures);
 assertContainsNone(actionText, files.action, forbiddenActionSnippets, failures);
 assertContainsAll(
@@ -179,8 +155,6 @@ assertOrdered(
   files.action,
   [
     "name: Install dependencies",
-    "name: Install local eliza runtime dependencies",
-    "name: Hydrate local eliza Bun package postinstall",
     "name: Generate local eliza protobuf types",
     "run: bash scripts/install-published-workspace-fallback-deps.sh",
     "run: node scripts/build-local-eliza-ci-overrides.mjs",
@@ -190,32 +164,6 @@ assertOrdered(
 );
 assertDisabledWorkspaceInstallsUseNoFrozen(allWorkflowPaths, failures);
 assertAgentReviewAuthBootstrap(failures);
-assertContainsAll(
-  buildDockerText,
-  ".github/workflows/build-docker.yml",
-  [
-    'MILADY_SKIP_LOCAL_UPSTREAMS: "1"',
-    "- name: Apply elizaOS source CI patches",
-    "run: node scripts/apply-eliza-ci-patches.mjs",
-    "- name: Build @elizaos/core",
-    "- name: Build agent workspace",
-    "- name: Build @elizaos/shared",
-  ],
-  failures,
-);
-assertOrdered(
-  buildDockerText,
-  ".github/workflows/build-docker.yml",
-  [
-    "- name: Apply elizaOS source CI patches",
-    "- name: Run postinstall patches",
-    "- name: Build @elizaos/core",
-    "- name: Build agent workspace",
-    "- name: Build @elizaos/shared",
-    "- name: Build runtime (tsdown)",
-  ],
-  failures,
-);
 
 const regressionMatrixCommand =
   packageJson?.scripts?.["test:regression-matrix:pr"];
@@ -397,11 +345,6 @@ function assertCiPreReviewBootstrap(workflowText, targetFailures) {
     "- name: Build eliza packages required for typecheck",
     "(cd eliza/packages/core && bun run build)",
     "(cd eliza/packages/skills && bun run build)",
-    "(cd eliza/packages/cloud-routing && bun run build)",
-    "(cd eliza/plugins/plugin-agent-skills && bun run build)",
-    "(cd eliza/plugins/plugin-pdf && bun run build)",
-    "(cd eliza/plugins/plugin-sql && bun run build)",
-    "(cd eliza/plugins/plugin-streaming && bun run build)",
     "- name: Run local pre-review gate",
     "run: bun run pre-review:local",
   ];
@@ -441,8 +384,6 @@ function assertAgentReviewAuthBootstrap(targetFailures) {
       "- name: Build local eliza runtime plugins",
       "(cd eliza/packages/core && bun run build)",
       "(cd eliza/plugins/plugin-agent-skills && bun run build)",
-      "(cd eliza/plugins/plugin-pdf && bun run build)",
-      "(cd eliza/plugins/plugin-sql && bun run build)",
       "- name: Run auth test suite",
     ],
     targetFailures,

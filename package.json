@@ -218,6 +218,7 @@
     "@elizaos/plugin-anthropic": "workspace:*",
     "@elizaos/plugin-app-control": "workspace:*",
     "@elizaos/plugin-edge-tts": "workspace:*",
+    "@elizaos/plugin-elizacloud": "workspace:*",
     "@elizaos/plugin-google-genai": "workspace:*",
     "@elizaos/plugin-bluebubbles": "workspace:*",
     "@elizaos/plugin-local-embedding": "workspace:*",

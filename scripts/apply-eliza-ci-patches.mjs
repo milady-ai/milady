@@ -102,28 +102,26 @@ function tryApplyPatchChunk(chunk) {
   }
 }
 
-function replaceFileText(filePath, transform, label) {
-  if (!fs.existsSync(filePath)) return;
-  const raw = fs.readFileSync(filePath, "utf8");
-  const next = transform(raw);
-  if (next === raw) return;
-  fs.writeFileSync(filePath, next);
-  console.log(`[apply-eliza-ci-patches] patched ${label}`);
-}
-
-function patchCloudDockerfile(raw) {
-  let next = raw;
-  if (!next.includes("COPY patches ./patches")) {
-    next = next.replace(
-      "COPY package.json bun.lock ./\n",
-      "COPY package.json bun.lock ./\nCOPY patches ./patches\n",
+function main() {
+  if (!fs.existsSync(path.join(elizaDir, "package.json"))) {
+    if (process.env.MILADY_SKIP_LOCAL_UPSTREAMS === "1") {
+      console.log(
+        "[apply-eliza-ci-patches] eliza checkout is absent in published-only mode; skipping local patch overlay",
+      );
+      return;
+    }
+    throw new Error(
+      "eliza submodule is not initialized; run scripts/init-submodules.mjs first",
     );
   }
-  if (!next.includes("COPY cloud-sdk ./eliza/cloud/packages/sdk")) {
-    next = next.replace(
-      "COPY eliza/plugins/plugin-elizacloud/package.json ./eliza/plugins/plugin-elizacloud/package.json\n",
-      "COPY eliza/plugins/plugin-elizacloud/package.json ./eliza/plugins/plugin-elizacloud/package.json\nCOPY cloud-sdk ./eliza/cloud/packages/sdk\n",
+  const patchPath =
+    patchPathCandidates.find((candidate) => fs.existsSync(candidate)) ??
+    patchPathCandidates[0];
+  if (!fs.existsSync(patchPath)) {
+    console.log(
+      `[apply-eliza-ci-patches] no eliza CI patch file found at ${path.relative(repoRoot, patchPath)}; assuming current eliza checkout carries the required CI contracts`,
     );
+    return;
   }
 
   const match = next.match(

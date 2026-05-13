@@ -155,21 +155,11 @@ jobs:
 
       - name: Build local eliza runtime plugins
         run: |
-          if [ ! -d eliza/packages/core ]; then
-            echo "eliza app-core checkout absent; skipping local runtime plugin builds"
-            exit 0
-          fi
           if [ ! -f eliza/packages/core/dist/index.node.js ] || [ ! -f eliza/packages/core/dist/index.d.ts ]; then
             (cd eliza/packages/core && bun run build)
           fi
           if [ -f eliza/plugins/plugin-agent-skills/package.json ] && [ ! -f eliza/plugins/plugin-agent-skills/dist/index.js ]; then
             (cd eliza/plugins/plugin-agent-skills && bun run build)
-          fi
-          if [ -f eliza/plugins/plugin-pdf/package.json ] && [ ! -f eliza/plugins/plugin-pdf/dist/node/index.node.js ]; then
-            (cd eliza/plugins/plugin-pdf && bun run build)
-          fi
-          if [ -f eliza/plugins/plugin-sql/package.json ] && [ ! -f eliza/plugins/plugin-sql/typescript/dist/index.js ]; then
-            (cd eliza/plugins/plugin-sql && bun run build)
           fi
 
       - name: Run auth test suite
