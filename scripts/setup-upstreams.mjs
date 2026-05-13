@@ -414,7 +414,9 @@ export function getTemporaryElizaWorkspaceEntries(
   // bun's workspace resolver fails on transitive @smithy/* deps.
   const cloudWorkspaceReady =
     pathExists(cloudBillingPackageJson) &&
-    pathExists(path.join(elizaRoot, "cloud", ".external", "steward", "packages"));
+    pathExists(
+      path.join(elizaRoot, "cloud", ".external", "steward", "packages"),
+    );
   const cloudBillingWorkspaceEntry =
     cloudWorkspaceReady &&
     !optionalPluginWorkspaceEntries.includes(cloudBillingWorkspace)

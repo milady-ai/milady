@@ -824,8 +824,6 @@ let changed = 0;
 let verified = 0;
 let skipped = 0;
 
-let skipped = 0;
-
 for (const replacement of replacements) {
   const absolutePath = path.join(repoRoot, replacement.file);
 

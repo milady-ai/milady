@@ -102,7 +102,7 @@ function tryApplyPatchChunk(chunk) {
   }
 }
 
-function main() {
+function _main() {
   if (!fs.existsSync(path.join(elizaDir, "package.json"))) {
     if (process.env.MILADY_SKIP_LOCAL_UPSTREAMS === "1") {
       console.log(

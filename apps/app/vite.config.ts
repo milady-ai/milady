@@ -2,10 +2,6 @@ import fs from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import {
-  parseAllowedHostEnv,
-  toViteAllowedHosts,
-} from "@elizaos/shared/config/allowed-hosts";
 import { colorizeDevSettingsStartupBanner } from "@elizaos/shared/dev-settings-banner-style";
 import { prependDevSubsystemFigletHeading } from "@elizaos/shared/dev-settings-figlet-heading";
 import {
@@ -97,12 +93,6 @@ const nativePluginsRoot = path.join(localElizaRoot, "packages/native-plugins");
 const appCoreSrcRoot = hasLocalElizaWorkspace
   ? path.join(localElizaRoot, "packages/app-core/src")
   : null;
-const appCoreNativePluginEntrypoints = appCoreSrcRoot
-  ? path.join(
-      localElizaRoot,
-      "packages/ui/src/platform/native-plugin-entrypoints.ts",
-    )
-  : requireResolve("@elizaos/ui/platform/native-plugin-entrypoints");
 const emptyNodeModuleEntry = appCoreSrcRoot
   ? path.join(appCoreSrcRoot, "platform/empty-node-module.ts")
   : requireResolve("@elizaos/app-core/platform/empty-node-module");
@@ -422,11 +412,6 @@ function resolveLocalSharedAliases(): Alias[] {
     });
   }
   return aliases;
-}
-
-function resolveLocalSharedDist(): string | null {
-  const localDist = path.join(localElizaRoot, "packages/shared/dist/index.js");
-  return fs.existsSync(localDist) ? localDist : null;
 }
 
 function resolveLocalAppCoreAliases(): Alias[] {
@@ -1972,7 +1957,10 @@ function nativeModuleStubPlugin(): Plugin {
       // re-exports; stub the entire surface so static named-import scans pass.
       if (id === "@elizaos/plugin-elizacloud") {
         return appCoreSrcRoot
-          ? path.join(appCoreSrcRoot, "platform/elizaos-plugin-elizacloud-browser-stub.ts")
+          ? path.join(
+              appCoreSrcRoot,
+              "platform/elizaos-plugin-elizacloud-browser-stub.ts",
+            )
           : elizaosAgentBrowserStubEntry;
       }
       // Intercept ALL node: builtins before Vite externalizes them.
@@ -2101,7 +2089,8 @@ function nativeModuleStubPlugin(): Plugin {
         createUniqueUuid: "function(){return ''}",
         DEFAULT_BUILD_VARIANT: "''",
         defaultSensitiveRequestPolicy: "{}",
-        elizaLogger: "{info:function(){},warn:function(){},error:function(){},debug:function(){}}",
+        elizaLogger:
+          "{info:function(){},warn:function(){},error:function(){},debug:function(){}}",
         EventPayload: "function(){}",
         EventType: "{}",
         GenerateTextParams: "function(){}",
@@ -2113,7 +2102,8 @@ function nativeModuleStubPlugin(): Plugin {
         isStoreBuild: "function(){return false}",
         lifeOpsPassiveConnectorsEnabled: "function(){return false}",
         listAppRoutePluginLoaders: "function(){return []}",
-        ModelType: "{TEXT_SMALL:'TEXT_SMALL',TEXT_LARGE:'TEXT_LARGE',TEXT_EMBEDDING:'TEXT_EMBEDDING'}",
+        ModelType:
+          "{TEXT_SMALL:'TEXT_SMALL',TEXT_LARGE:'TEXT_LARGE',TEXT_EMBEDDING:'TEXT_EMBEDDING'}",
         ModelTypeName: "function(){}",
         PluginManagerService: "function(){}",
         redactSensitiveRequestMetadata: "function(x){return x}",

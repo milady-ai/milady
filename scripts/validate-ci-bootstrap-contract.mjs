@@ -121,7 +121,7 @@ const actionText = readText(files.action, failures);
 const alignScriptText = readText(files.alignScript, failures);
 const packageJson = readJson(files.packageJson, failures);
 const ciWorkflowText = readText(".github/workflows/ci.yml", failures);
-const buildDockerText = readText(
+const _buildDockerText = readText(
   ".github/workflows/build-docker.yml",
   failures,
 );
@@ -287,7 +287,7 @@ function assertContainsNone(text, relativePath, snippets, targetFailures) {
   }
 }
 
-function assertCount(
+function _assertCount(
   text,
   relativePath,
   snippet,

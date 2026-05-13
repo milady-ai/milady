@@ -11,7 +11,6 @@ import type {
   WalletExportResult,
   WhitelistStatus,
 } from "@elizaos/app-core/api";
-import type { InventoryChainFilters } from "@elizaos/ui/state/types";
 import type {
   WalletAddresses,
   WalletBalancesResponse,
@@ -25,6 +24,7 @@ import type {
   WalletRpcCredentialKey,
   WalletRpcSelections,
 } from "@elizaos/shared";
+import type { InventoryChainFilters } from "@elizaos/ui/state/types";
 import type { ComponentType } from "react";
 import * as THREE from "three";
 

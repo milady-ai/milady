@@ -49,7 +49,9 @@ export interface LocalAgentReply {
 }
 
 interface BunRuntimePlugin {
-  start(opts: Record<string, unknown>): Promise<{ ok: boolean; error?: string }>;
+  start(
+    opts: Record<string, unknown>,
+  ): Promise<{ ok: boolean; error?: string }>;
   sendMessage(opts: {
     message: string;
     conversationId?: string;
@@ -82,9 +84,8 @@ function isApplicable(): boolean {
 async function loadPlugin(): Promise<BunRuntimePlugin | null> {
   try {
     const mod = await import("@elizaos/capacitor-bun-runtime");
-    const plugin = (
-      mod as unknown as { ElizaBunRuntime?: BunRuntimePlugin }
-    ).ElizaBunRuntime;
+    const plugin = (mod as unknown as { ElizaBunRuntime?: BunRuntimePlugin })
+      .ElizaBunRuntime;
     if (!plugin) {
       console.warn(
         `${LOG_PREFIX} plugin module loaded but ElizaBunRuntime export missing`,

@@ -43,7 +43,7 @@ const REPO_ROOT = fileURLToPath(new URL("..", import.meta.url));
 const READY_TIMEOUT_MS = 180_000;
 const CHAT_TIMEOUT_MS = 60_000;
 const RESET_ATTEMPT_TIMEOUT_MS = 30_000;
-const RESET_MAX_ATTEMPTS = 3;
+const _RESET_MAX_ATTEMPTS = 3;
 const PROVIDER_ISSUE_TEXT = "Sorry, I'm having a provider issue";
 const OOB_SKIP_PLUGINS = [
   "@elizaos/plugin-n8n-workflow",
@@ -138,7 +138,7 @@ function debugLog(message) {
   if (debug) log("debug", message);
 }
 
-function resolveDevServerEntry() {
+function _resolveDevServerEntry() {
   const appCoreRoot = resolveElizaAppCoreRoot({ repoRoot: REPO_ROOT });
   const candidates = [
     join(appCoreRoot, "src", "runtime", "dev-server.ts"),
@@ -339,12 +339,14 @@ async function reset(baseUrl) {
   });
   if (!res.ok && res.status !== 405) {
     const text = await res.text();
-    throw new Error(`/api/agent/reset HTTP ${res.status}: ${text.slice(0, 200)}`);
+    throw new Error(
+      `/api/agent/reset HTTP ${res.status}: ${text.slice(0, 200)}`,
+    );
   }
   throw lastErr instanceof Error ? lastErr : new Error(String(lastErr));
 }
 
-async function requestReset(baseUrl) {
+async function _requestReset(baseUrl) {
   return await postJson(baseUrl, "/api/agent/reset");
 }
 
@@ -384,7 +386,7 @@ async function postJson(baseUrl, pathname) {
   });
 }
 
-function spawnApi(devServerEntry, stateDir, port) {
+function _spawnApi(devServerEntry, stateDir, port) {
   const child = spawn("bun", [devServerEntry], {
     cwd: REPO_ROOT,
     env: createSmokeChildEnv(stateDir, port),
@@ -511,33 +513,28 @@ async function main() {
   // state dir, known port. Boot exercises the same vault bootstrap,
   // SECRET_SALT persistence, and route registration paths a real boot
   // hits — just without the renderer/static-server side.
-  const devServerEntry =
-    "eliza/packages/app-core/src/runtime/dev-server.ts";
-  const child = spawn(
-    "bun",
-    [devServerEntry],
-    {
-      cwd: REPO_ROOT,
-      env: buildIsolatedEnv({
-        MILADY_STATE_DIR: stateDir,
-        ELIZA_STATE_DIR: stateDir,
-        MILADY_API_PORT: String(port),
-        ELIZA_API_PORT: String(port),
-        ELIZA_HEADLESS: "1",
-        FORCE_COLOR: "0",
-        // Block applySubscriptionCredentials() from re-importing OAuth tokens
-        // out of ~/.codex/auth.json or ~/.claude into process.env. Without
-        // this, stripping OPENAI_API_KEY above is wasted: the agent reads
-        // the codex CLI token from disk, sets process.env.OPENAI_API_KEY,
-        // auto-enables plugin-openai, and chat tries to call the upstream
-        // (we then watch retries time out instead of seeing the OOB
-        // no-provider fallback).
-        ELIZA_DISABLE_SUBSCRIPTION_CREDENTIALS: "1",
-      }),
-      stdio: ["ignore", debug ? "inherit" : "pipe", debug ? "inherit" : "pipe"],
-      detached: process.platform !== "win32",
-    },
-  );
+  const devServerEntry = "eliza/packages/app-core/src/runtime/dev-server.ts";
+  const child = spawn("bun", [devServerEntry], {
+    cwd: REPO_ROOT,
+    env: buildIsolatedEnv({
+      MILADY_STATE_DIR: stateDir,
+      ELIZA_STATE_DIR: stateDir,
+      MILADY_API_PORT: String(port),
+      ELIZA_API_PORT: String(port),
+      ELIZA_HEADLESS: "1",
+      FORCE_COLOR: "0",
+      // Block applySubscriptionCredentials() from re-importing OAuth tokens
+      // out of ~/.codex/auth.json or ~/.claude into process.env. Without
+      // this, stripping OPENAI_API_KEY above is wasted: the agent reads
+      // the codex CLI token from disk, sets process.env.OPENAI_API_KEY,
+      // auto-enables plugin-openai, and chat tries to call the upstream
+      // (we then watch retries time out instead of seeing the OOB
+      // no-provider fallback).
+      ELIZA_DISABLE_SUBSCRIPTION_CREDENTIALS: "1",
+    }),
+    stdio: ["ignore", debug ? "inherit" : "pipe", debug ? "inherit" : "pipe"],
+    detached: process.platform !== "win32",
+  });
   // If we asked for piped stdio (non-debug), still capture stderr so
   // boot failures aren't silently swallowed.
   if (!debug && child.stderr) {

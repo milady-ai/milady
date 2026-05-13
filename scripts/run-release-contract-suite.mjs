@@ -17,8 +17,10 @@ const canonicalElectrobunDir = path.join(
   "platforms",
   "electrobun",
 );
-export const releaseContractTests = [
+const rootReleaseContractTests = [
   "scripts/electrobun-runtime-root-contract.test.ts",
+];
+const appCoreReleaseContractTests = [
   "eliza/packages/app-core/scripts/electrobun-release-workflow-drift.test.ts",
   "eliza/packages/app-core/scripts/release-check.test.ts",
   "eliza/packages/app-core/scripts/static-asset-manifest.test.ts",
