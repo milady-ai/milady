@@ -1,8 +1,12 @@
 # llama.cpp — iOS xcframework build
 
-This directory cross-builds [llama.cpp](https://github.com/ggml-org/llama.cpp)
-into `LlamaCpp.xcframework` for iOS (device + simulator slices) with Metal
-acceleration baked in.
+This directory cross-builds the milady-controlled
+[elizaOS/llama.cpp](https://github.com/elizaOS/llama.cpp) fork into
+`LlamaCpp.xcframework` for iOS (device + simulator slices) with Metal
+acceleration baked in. The fork carries the elizaOS kernels (Q4_POLAR /
+QJL1_256 / TBQ4_0 / TBQ3_0 GGML types + Metal/Vulkan/CUDA kernels) and
+DFlash spec-decode on top of stock upstream — the iOS Metal slice picks
+up the same kernel surface the desktop Metal build uses.
 
 The output is consumed by `@elizaos/capacitor-bun-runtime`'s Swift
 `LlamaBridgeImpl.swift` via direct C symbol bindings — no module map or Swift
@@ -39,13 +43,22 @@ Building from source costs ~5 minutes on a current Mac and gives us:
 
 ## Pinned version
 
-See `../VERSIONS` (`llama.cpp=<tag>`). Default if unpinned: `b4404`. Bump by
-editing that file and re-running `./build-ios.sh`.
+See `../VERSIONS` (`llama.cpp=<ref>`). The pin may be a tag, branch name,
+or raw commit SHA — anything `git fetch` accepts. Fallback if unset:
+`main` (tracks elizaOS fork tip). Bump by editing that file and
+re-running `./build-ios.sh`.
 
-To verify the tag exists upstream:
+To verify the ref exists on the fork:
 
 ```bash
-git ls-remote --tags https://github.com/ggml-org/llama.cpp | grep <tag>
+git ls-remote https://github.com/elizaOS/llama.cpp | grep <ref>
+```
+
+Override the source repo for an A/B parity check (e.g. point at stock
+upstream `ggml-org/llama.cpp` to bisect a fork-specific regression):
+
+```bash
+LLAMA_CPP_REPO=https://github.com/ggml-org/llama.cpp ./build-ios.sh
 ```
 
 ## Build
@@ -137,11 +150,11 @@ The first command should list two directories (`ios-arm64`,
 
 ## Updating
 
-1. Bump the tag in `../VERSIONS` (`llama.cpp=<new-tag>`).
+1. Bump the ref in `../VERSIONS` (`llama.cpp=<new-sha-or-tag>`).
 2. Delete `src/` (or let `build-ios.sh` re-clone after wiping).
 3. `./build-ios.sh clean && ./build-ios.sh`.
 4. Spot-check that the symbols `LlamaBridgeImpl.swift` calls are still
-   present in `dist/ios-arm64/libllama.a` (use `nm -gU`). If the upstream
+   present in `dist/ios-arm64/libllama.a` (use `nm -gU`). If the fork
    API changed (e.g. a sampler function renamed), update both the
    `@_silgen_name` declarations in `LlamaBridgeImpl.swift` and the shim.
 
@@ -151,8 +164,11 @@ The first command should list two directories (`ios-arm64`,
 - **"no .a files produced"** — typically caused by an Xcode SDK mismatch.
   Run `sudo xcode-select -s /Applications/Xcode.app/Contents/Developer`
   and try again.
-- **"git clone failed"** — the pinned tag in `../VERSIONS` doesn't exist
-  upstream. Check `git ls-remote --tags https://github.com/ggml-org/llama.cpp`
-  and update the pin.
+- **"fetch/checkout failed"** — the pinned ref in `../VERSIONS` doesn't
+  exist on the fork. Check
+  `git ls-remote https://github.com/elizaOS/llama.cpp` and update the
+  pin. If you actually want stock upstream for this build, set
+  `LLAMA_CPP_REPO=https://github.com/ggml-org/llama.cpp` and use a tag
+  like `b4404`.
 - **xcframework lipo error** — usually means the slices have overlapping
   architectures. Clean (`./build-ios.sh clean`) and rebuild.

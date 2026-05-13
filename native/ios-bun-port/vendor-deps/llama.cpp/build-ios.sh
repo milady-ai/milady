@@ -34,14 +34,20 @@ BUILD_ROOT="$ROOT_DIR/build"
 
 LLAMA_CPP_VERSION_FILE="$ROOT_DIR/../VERSIONS"
 
-# Read pinned version (line starting with `llama.cpp=`).
-PINNED_TAG=""
+# Read pinned ref (line starting with `llama.cpp=`). May be a tag,
+# branch name, or commit SHA — anything `git fetch` accepts.
+PINNED_REF=""
 if [[ -f "$LLAMA_CPP_VERSION_FILE" ]]; then
-  PINNED_TAG="$(grep -E '^llama\.cpp=' "$LLAMA_CPP_VERSION_FILE" | head -1 | cut -d= -f2 || true)"
+  PINNED_REF="$(grep -E '^llama\.cpp=' "$LLAMA_CPP_VERSION_FILE" | head -1 | cut -d= -f2 || true)"
 fi
-if [[ -z "$PINNED_TAG" || "$PINNED_TAG" == PLACEHOLDER* ]]; then
-  PINNED_TAG="b4404"   # fallback default, override in VERSIONS
+if [[ -z "$PINNED_REF" || "$PINNED_REF" == PLACEHOLDER* ]]; then
+  PINNED_REF="main"   # fallback: track elizaOS fork tip; override in VERSIONS
 fi
+
+# Source repo. Defaults to the milady-controlled fork (carries the
+# elizaOS kernels + DFlash); override with LLAMA_CPP_REPO env var if you
+# need to point at stock upstream (e.g. for an A/B parity check).
+LLAMA_CPP_REPO="${LLAMA_CPP_REPO:-https://github.com/elizaOS/llama.cpp}"
 
 iOS_DEPLOYMENT_TARGET="${MILADY_IOS_MIN_VERSION:-15.0}"
 
@@ -60,11 +66,17 @@ ensure_source_checkout() {
     log "llama.cpp source present at $SRC_DIR"
     return
   fi
-  log "Cloning llama.cpp@$PINNED_TAG into $SRC_DIR …"
-  mkdir -p "$ROOT_DIR"
-  git clone --depth 1 --branch "$PINNED_TAG" \
-    https://github.com/ggml-org/llama.cpp "$SRC_DIR" \
-    || die "git clone failed; check that tag '$PINNED_TAG' exists at https://github.com/ggml-org/llama.cpp"
+  log "Cloning $LLAMA_CPP_REPO @ $PINNED_REF into $SRC_DIR …"
+  mkdir -p "$SRC_DIR"
+  # Init-then-fetch lets us resolve $PINNED_REF whether it's a tag, a
+  # branch name, or a raw commit SHA. `git clone --branch` would refuse
+  # a SHA, and the elizaOS fork pins by SHA, not by upstream-style tag.
+  ( cd "$SRC_DIR" \
+    && git init -q \
+    && git remote add origin "$LLAMA_CPP_REPO" \
+    && git fetch --depth 1 origin "$PINNED_REF" \
+    && git checkout --quiet FETCH_HEAD ) \
+    || die "fetch/checkout failed; verify '$PINNED_REF' exists at $LLAMA_CPP_REPO"
 }
 
 clean_all() {
