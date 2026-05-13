@@ -79,20 +79,15 @@ diff --git a/android/src/main/java/ai/annadata/plugin/capacitor/LlamaCpp.java b/
 index b037159..862fced 100644
 --- a/android/src/main/java/ai/annadata/plugin/capacitor/LlamaCpp.java
 +++ b/android/src/main/java/ai/annadata/plugin/capacitor/LlamaCpp.java
-@@ -315,11 +315,58 @@ public class LlamaCpp {
+@@ -315,11 +315,55 @@ public class LlamaCpp {
              System.loadLibrary(libraryName);
              Log.i(TAG, "Successfully loaded llama-cpp native library: " + libraryName);
          } catch (UnsatisfiedLinkError e) {
--            Log.e(TAG, "Failed to load llama-cpp native library: " + e.getMessage());
--            throw e;
-+            // Don't re-throw — the plugin's static initializer would crash
-+            // the entire host app even when llama-cpp isn't actually used.
-+            // Native API calls will fail later with their own errors; that's
-+            // the appropriate failure surface, not a process-level kill.
-+            Log.e(TAG, "Failed to load llama-cpp native library (continuing without on-device inference): " + e.getMessage());
+             Log.e(TAG, "Failed to load llama-cpp native library: " + e.getMessage());
+             throw e;
          }
      }
- 
+
 +    /**
 +     * Probe the kernels manifest shipped alongside the fork-built native
 +     * library. The buun-llama-cpp build script writes
