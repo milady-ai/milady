@@ -852,17 +852,14 @@ jobs:
         if: matrix.platform.os == 'windows'
         shell: pwsh
         run: |
-          Write-Host "=== Disk space before cleanup ==="
+          Write-Host "=== Disk before cleanup ==="
           Get-Volume | Where-Object { $_.DriveLetter } | Format-Table DriveLetter, @{N='FreeGB';E={[math]::Round($_.SizeRemaining/1GB,1)}}, @{N='TotalGB';E={[math]::Round($_.Size/1GB,1)}}
-          # Remove Bun install cache to free space for packaging
           Remove-Item "$env:LOCALAPPDATA\bun\install\cache" -Recurse -Force -ErrorAction SilentlyContinue
-          # Remove stale Electrobun cache artifacts from prior runs
           Remove-Item "eliza\packages\app-core\platforms\electrobun\node_modules\.electrobun-cache" -Recurse -Force -ErrorAction SilentlyContinue
-          # Remove npm/nuget/pip caches the runner pre-installs
           Remove-Item "$env:LOCALAPPDATA\npm-cache" -Recurse -Force -ErrorAction SilentlyContinue
           Remove-Item "$env:LOCALAPPDATA\pip\Cache" -Recurse -Force -ErrorAction SilentlyContinue
           Remove-Item "$env:USERPROFILE\.nuget\packages" -Recurse -Force -ErrorAction SilentlyContinue
-          Write-Host "=== Disk space after cleanup ==="
+          Write-Host "=== Disk after cleanup ==="
           Get-Volume | Where-Object { $_.DriveLetter } | Format-Table DriveLetter, @{N='FreeGB';E={[math]::Round($_.SizeRemaining/1GB,1)}}, @{N='TotalGB';E={[math]::Round($_.Size/1GB,1)}}
 
       - name: Build Electrobun app
@@ -1172,19 +1169,15 @@ jobs:
         if: matrix.platform.os == 'windows' && steps.build-electrobun-app.outputs.fallback != 'true'
         shell: pwsh
         run: |
-          Write-Host "=== Disk space before smoke test cleanup ==="
+          Write-Host "=== Disk before smoke cleanup ==="
           Get-Volume | Where-Object { $_.DriveLetter } | Format-Table DriveLetter, @{N='FreeGB';E={[math]::Round($_.SizeRemaining/1GB,1)}}, @{N='TotalGB';E={[math]::Round($_.Size/1GB,1)}}
-          # Free space but keep the build tree — the smoke test uses it
-          # directly when REQUIRE_INSTALLER is off. This avoids extracting
-          # the 758MB installer into ~1.5GB of files on a disk-constrained
-          # runner (which caused every previous release run to fail).
           Remove-Item "dist" -Recurse -Force -ErrorAction SilentlyContinue
           Remove-Item "eliza\node_modules" -Recurse -Force -ErrorAction SilentlyContinue
           Remove-Item "eliza\packages\app-core\platforms\electrobun\node_modules" -Recurse -Force -ErrorAction SilentlyContinue
           Remove-Item "$env:LOCALAPPDATA\bun\install\cache" -Recurse -Force -ErrorAction SilentlyContinue
           Remove-Item "node_modules\.bun" -Recurse -Force -ErrorAction SilentlyContinue
           Remove-Item "node_modules\.cache" -Recurse -Force -ErrorAction SilentlyContinue
-          Write-Host "=== Disk space after cleanup ==="
+          Write-Host "=== Disk after smoke cleanup ==="
           Get-Volume | Where-Object { $_.DriveLetter } | Format-Table DriveLetter, @{N='FreeGB';E={[math]::Round($_.SizeRemaining/1GB,1)}}, @{N='TotalGB';E={[math]::Round($_.Size/1GB,1)}}
 
       - name: Smoke test packaged Windows app
@@ -1198,11 +1191,9 @@ jobs:
           # initialize — without it, startApiServer() can fail before
           # server.listen() and the health endpoint never becomes reachable.
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          # Use the build tree directly instead of extracting the installer.
-          # The installer is verified separately by "Verify Windows public
-          # installer looks complete". Extracting the 758MB installer into
-          # ~1.5GB of files exceeds the CI runner's available disk space.
-          # ELIZA_WINDOWS_SMOKE_REQUIRE_INSTALLER: "1"
+          # Smoke runs against the build tree, not the installer extraction.
+          # The installer is verified separately by the installer proof step.
+          # Extracting the 758MB installer into ~1.5GB exceeds CI runner disk.
           # Use a short path under runner.temp to avoid MAX_PATH issues with
           # deeply nested node_modules while staying in a user-writable location.
           ELIZA_TEST_WINDOWS_INSTALL_DIR: ${{ runner.temp }}\el-smoke
