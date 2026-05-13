@@ -51,7 +51,6 @@ Full code in `references/sdk-flow.md`. The skill assumes you have:
 Every cloud-SDK call your deployed app makes on behalf of a user MUST carry:
 
 - `Authorization: Bearer <user_jwt>` — the JWT from the app-auth OAuth redirect
-- App identity from the route path, for example `POST /api/v1/apps/<appId>/chat`
 - Optional `x-affiliate-code: <your_affiliate_code>` when the owner has configured an affiliate code
 
 This pattern is shared with the [`eliza-cloud`](../eliza-cloud/SKILL.md) skill; see that skill for the auth flow itself. This skill assumes you've already read it.
@@ -60,8 +59,8 @@ This pattern is shared with the [`eliza-cloud`](../eliza-cloud/SKILL.md) skill; 
 
 Some old/local apps are static frontends served by an existing host instead of
 Cloud containers. They are still real Eliza Cloud apps when they use AI
-inference, but this is not the production default for agent-built Cloud apps.
-New production apps should deploy as their own Eliza Cloud container.
+inference, but this is not the production default for Nubilio builds. New
+production apps should deploy as their own Eliza Cloud container.
 
 For a static-hosted AI app:
 
@@ -69,7 +68,7 @@ For a static-hosted AI app:
 2. Register the app with `/api/v1/apps` using the public URL and `skipGitHubRepo:true`.
 3. Enable monetization with `PUT /api/v1/apps/<appId>/monetization` and the current markup/share schema:
    `{"monetizationEnabled":true,"inferenceMarkupPercentage":100,"purchaseSharePercentage":10}`.
-4. Store only non-secret app config next to the frontend: `appId`, `cloudUrl`, `apiBase`, optional `affiliateCode`, and a model such as `openai/gpt-5-mini`. `cloudUrl` is the browser-facing Cloud frontend/OAuth base that serves `/app-auth/authorize`; `apiBase` is the Cloud API base. Use `ELIZA_CLOUD_PUBLIC_URL` if set, otherwise `ELIZA_CLOUD_URL`, otherwise use `ELIZA_CLOUD_BASE_URL` only when that origin also serves the frontend. In local testing, if `apiBase` is `http://localhost:8787/api/v1` and no `ELIZA_CLOUD_PUBLIC_URL` is configured, `cloudUrl` must be `http://127.0.0.1:3000`. Do not point OAuth at an API-only local worker such as `:8787`, and do not silently mix a localhost API base with production OAuth.
+4. Write `data/apps/<slug>/cloud.json` with only non-secret config: `appId`, `cloudUrl`, `apiBase`, optional `affiliateCode`, and a model such as `openai/gpt-4o-mini`. `cloudUrl` is the browser-facing Cloud frontend/OAuth base that serves `/app-auth/authorize`; `apiBase` is the Cloud API base. Use `ELIZA_CLOUD_PUBLIC_URL` if set, otherwise `ELIZA_CLOUD_URL`, otherwise use `ELIZA_CLOUD_BASE_URL` only when that origin also serves the frontend. In local testing, if `apiBase` is `http://localhost:8787/api/v1`, `cloudUrl` must be `http://127.0.0.1:3000`. Do not point OAuth at an API-only local worker such as `:8787`, and do not silently mix a localhost API base with production OAuth.
 5. The browser must use app auth: fetch config, redirect to `/app-auth/authorize`, verify `state`, store the returned user token, and send it as `x-user-token`.
 6. The browser must call a same-origin proxy that forwards to Eliza Cloud `/api/v1/apps/<appId>/chat` with `Authorization: Bearer <user_jwt>`. Do not put owner API keys in frontend code and do not fake model responses in local JavaScript.
 7. Verify the app route, config route, that `${cloudUrl}/app-auth/authorize?...` returns the Cloud frontend HTML/redirect rather than JSON `resource_not_found`, and that chat without a user token returns `401 not_signed_in`. If the upstream provider fails, report that as a Cloud provider issue instead of replacing it with a mock assistant.

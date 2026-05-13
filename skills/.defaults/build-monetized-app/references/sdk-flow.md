@@ -48,7 +48,7 @@ image must:
 
 - Listen on `$PORT` (cloud sets this at runtime)
 - Expose a `GET /health` endpoint that returns 200 quickly (the cloud's deploy step polls it before flipping the load balancer)
-- For chat-style apps, expose a server route that forwards user-bearing requests upstream to cloud's `/api/v1/apps/<appId>/chat` with the user's bearer token
+- For chat-style apps, expose a server route that forwards user-bearing requests upstream to cloud's app-specific chat endpoint, `/api/v1/apps/<appId>/chat`, with the user's bearer token AND your affiliate code. That endpoint is the monetized path: it applies app credits, markup, analytics, and creator earnings.
 
 The canonical reference for this shape is [`apps/edad-chat/server.ts` and `apps/edad-chat/api/proxy.ts`](https://github.com/elizaOS/cloud-mini-apps/tree/main/apps/edad-chat) in `elizaOS/cloud-mini-apps`. Copy that pattern when your app is a chat shell.
 
@@ -59,6 +59,8 @@ import { ElizaCloudClient } from "@elizaos/cloud-sdk";
 
 const cloud = new ElizaCloudClient({ apiKey: process.env.ELIZAOS_CLOUD_API_KEY });
 const AFFILIATE = process.env.ELIZA_AFFILIATE_CODE!; // your owner's affiliate code
+const API_BASE = (process.env.ELIZA_CLOUD_API_BASE_URL ??
+  `${process.env.ELIZA_CLOUD_BASE_URL}/api/v1`).replace(/\/+$/, "");
 
 export async function handleChat(req: Request): Promise<Response> {
   const userToken = req.headers.get("authorization") ?? req.headers.get("x-user-token");
@@ -66,12 +68,12 @@ export async function handleChat(req: Request): Promise<Response> {
 
   const body = await req.json();
 
-  // Forward to the app-scoped chat endpoint with the user's token.
+  // Forward to the app-specific chat route with the user's token and optional affiliate code.
   // The user's app balance is debited; the app's configured markup credits us.
-  const appId = process.env.ELIZA_APP_ID!;
-  const upstream = await cloud.routes.postApiV1AppsByIdChatRaw({
-    pathParams: { id: appId },
+  const upstream = await fetch(`${API_BASE}/apps/${process.env.ELIZA_APP_ID}/chat`, {
+    method: "POST",
     headers: {
+      "content-type": "application/json",
       authorization: userToken.startsWith("Bearer ") ? userToken : `Bearer ${userToken}`,
       ...(AFFILIATE ? { "x-affiliate-code": AFFILIATE } : {}),
     },
@@ -89,12 +91,14 @@ That's the full server-side surface. Add a `/health` route that returns 200 and 
 
 For frontend, ship a page that:
 
-1. Starts the Eliza Cloud app-auth flow with `/app-auth/authorize`
-2. Stores the returned user token after validating `state`
-3. Posts user prompts to your same-origin chat route with the user token
-4. Renders streaming responses
+1. Reads non-secret config from your own backend or static config: `appId`, browser-facing `cloudUrl`, API/proxy path, and default model.
+2. Sends users to `${cloudUrl}/app-auth/authorize?app_id=<appId>&redirect_uri=<app-url>&state=<random>`, verifies the returned `state`, and stores only the returned user token.
+3. Posts user prompts to your same-origin chat route with `x-user-token: <token>` from browser code. The server-side proxy converts that to the upstream `Authorization: Bearer <token>` header.
+4. Renders streaming responses or a clear upstream error. Never fake fallback model answers locally.
 
 The frontend can be served by the same container or by any static host pointing at the same domain — the cloud doesn't care.
+
+For local development, keep frontend/OAuth and API bases distinct when they are distinct services. `cloudUrl` must be the browser-facing Cloud frontend that serves `/app-auth/authorize`; `apiBase` must be the API worker base ending in `/api/v1`. In the local Cloud stack, `apiBase` is `http://localhost:8787/api/v1` and `cloudUrl` is `http://127.0.0.1:3000`. Do not point OAuth at an API-only worker such as local `:8787`, and do not silently mix local API with production OAuth.
 
 ## 3. Deploy the container
 

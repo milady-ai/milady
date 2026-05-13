@@ -9,22 +9,17 @@ Use this skill once the user already has at least one domain attached to one of 
 
 It does NOT register new domains — that's `eliza-cloud-buy-domain`. It does not modify DNS on external (user-owned-elsewhere) domains — those records live at the user's existing DNS provider.
 
-For live status checks, use the Cloud API plus direct HTTP/DNS/RDAP requests.
-Do not use web search snippets or registrar-search pages to decide whether a
-domain is bought, attached, or serving an app; those results can be stale.
-
 ## What this skill can do
 
 | User intent | Endpoint | Notes |
 |---|---|---|
 | "list my domains" / "what domains do I own" | `GET /api/v1/domains` | org-wide across all their apps |
 | "what domains does {app} have" | `GET /api/v1/apps/{appId}/domains` | per-app |
-| "did myapp.com get bought" / "is it active" | `POST /api/v1/apps/{appId}/domains/status` | one attached domain's live registrar status |
 | "show dns records for myapp.com" | `GET /api/v1/apps/{appId}/domains/{domain}/dns` | cloudflare zones only |
 | "add a CNAME pointing www.myapp.com to ..." | `POST /api/v1/apps/{appId}/domains/{domain}/dns` | cloudflare zones only |
 | "change the A record for myapp.com to ..." | `PATCH /api/v1/apps/{appId}/domains/{domain}/dns/{recordId}` | get the recordId from the list call first |
 | "delete that record" | `DELETE /api/v1/apps/{appId}/domains/{domain}/dns/{recordId}` | irreversible; warn the user |
-| "sync my domains" / "refresh domain status" | `POST /api/v1/apps/{appId}/domains/sync` | refresh all attached cloudflare domains into managed_domains |
+| "is myapp.com still pointing at my app" | `POST /api/v1/apps/{appId}/domains/sync` | refresh from cloudflare into the managed_domains row |
 | "I added the verification record, check it" | `POST /api/v1/apps/{appId}/domains/verify` | external domains: re-check the TXT challenge |
 | "remove this domain from my app" | `DELETE /api/v1/apps/{appId}/domains` | detach only; the cloudflare registration remains until expiry |
 
@@ -48,19 +43,13 @@ if (!target) {
 }
 const appId = target.appId; // the app the domain is attached to
 
-// 2. read live status for a domain status question
-const status = await cloud.routes.postApiV1AppsByIdDomainsStatus({
-	appId,
-	json: { domain: "myapp.com" },
-});
-
-// 3. list current dns records (cloudflare-managed zones only)
+// 2. list current dns records (cloudflare-managed zones only)
 const records = await cloud.routes.getApiV1AppsByIdDomainsByDomainDns({
-	appId,
-	domain: "myapp.com",
+  appId,
+  domain: "myapp.com",
 });
 
-// 4. add / edit / delete a record
+// 3. add / edit / delete a record
 const created = await cloud.routes.postApiV1AppsByIdDomainsByDomainDns({
   appId,
   domain: "myapp.com",
