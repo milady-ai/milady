@@ -139,28 +139,19 @@ function patchLazyStewardRuntimeImports(text) {
   const originalText = text;
   let nextText = text.replace(/\r\n/g, "\n");
 
-  // Upstream elizaOS develop restructured steward.ts to import the
-  // StewardSidecar types from `@elizaos/app-core` directly (not the
-  // `/services/steward-sidecar` sub-path) and dropped the eager
-  // runtime imports the milady patch was targeting. When the file is
-  // already in that shape, there's nothing to lazy-load — treat as
-  // satisfied so `eliza:local` can finish.
-  // Upstream elizaOS develop restructured steward.ts so the runtime
-  // imports already lazy-load and the type imports come from the root
-  // `@elizaos/app-core` (not the `/services/steward-sidecar` sub-path
-  // this patch was authored against). If both shape markers are
-  // already in the file, treat as fully satisfied.
-  const hasLazyLoader = /await loadStewardSidecarModule\(\)/.test(nextText);
-  const usesRootTypeImports =
-    /import type \{\s*StewardSidecar\s*,\s*StewardSidecarStatus\s*,?\s*\} from "@elizaos\/app-core";/.test(
+  // Upstream may have already done its own lazy-load refactor (importing
+  // types from @elizaos/app-core root and defining loadStewardSidecarModule
+  // itself). When that is the case there is no eager import block to rewrite
+  // and no module loader to inject — accept it as already-lazy and verify.
+  const hasOwnModuleLoader = /function\s+loadStewardSidecarModule\s*\(/.test(
+    nextText,
+  );
+  const hasEagerValueImport =
+    /\bimport\s*\{[^}]*\bcreateDesktopStewardSidecar\b/.test(nextText) ||
+    /\bimport\s*\{[^}]*\bsaveStewardCredentials\b[^}]*\}\s*from\s*"@elizaos\/app-core\/services\/steward-credentials"/.test(
       nextText,
     );
-  const noLegacySubPathImport =
-    !nextText.includes('"@elizaos/app-core/services/steward-sidecar"') ||
-    /typeof import\(\s*"@elizaos\/app-core\/services\/steward-sidecar"\s*\)/.test(
-      nextText,
-    );
-  if (hasLazyLoader && usesRootTypeImports) {
+  if (hasOwnModuleLoader && !hasEagerValueImport) {
     return { matched: true, text: originalText };
   }
 
@@ -823,22 +814,32 @@ let changed = 0;
 let verified = 0;
 let skipped = 0;
 
+let skipped = 0;
+
 for (const replacement of replacements) {
   const absolutePath = path.join(repoRoot, replacement.file);
-  // Upstream elizaOS develop deletes / relocates files faster than the
-  // milady patch index. If the target file is gone, the patch is moot
-  // (whatever bug it fixed in that file cannot exist anymore); treat as
-  // verified so `bun run eliza:local` keeps moving instead of crashing
-  // on the postinstall.
+
+  // Upstream may have removed or renamed the target file. Patches are best-
+  // effort overlays of long-lived files — when the target no longer exists,
+  // skip with a note rather than crashing the whole release contract.
   if (!fs.existsSync(absolutePath)) {
-    verified += 1;
+    console.log(
+      `[patch-eliza-electrobun-windows-smoke-startup] skip: ${replacement.file} not present (${replacement.description})`,
+    );
+    skipped += 1;
     continue;
   }
+
   let text = fs.readFileSync(absolutePath, "utf8");
 
   if (typeof replacement.transform === "function") {
     const result = replacement.transform(text);
     if (!result.matched) {
+      // Upstream drift: the anchors this transform recognises no longer
+      // describe the file. Skip rather than crash — the patch is a long-
+      // lived overlay, and a clean release contract should not regress when
+      // upstream evolves. Surface clearly so the next maintainer can update
+      // or retire the entry.
       console.warn(
         `[patch-eliza-electrobun-windows-smoke-startup] skip: ${replacement.description}: anchors not found in ${replacement.file} (likely upstream drift)`,
       );
