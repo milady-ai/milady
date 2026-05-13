@@ -1738,147 +1738,6 @@ function generateCapacitorNativeStub(strippedId: string): string {
   ].join("\n");
 }
 
-/**
- * Build a stub module with explicit named exports for every name a
- * server-only @elizaos plugin's consumers reference. Named imports must
- * resolve statically; a default-export Proxy doesn't satisfy them.
- * Renderer never invokes these — the API child owns the real impls —
- * so each export is a benign noop.
- */
-function generateNamedExportStub(names: readonly string[]): string {
-  const lines: string[] = [
-    "const noop = () => undefined;",
-    "const asyncNoop = async () => undefined;",
-  ];
-  for (const name of names) {
-    lines.push(`export const ${name} = noop;`);
-  }
-  lines.push("export default new Proxy(noop, { get: () => noop });");
-  // Quiet "unused" in case the noop branches aren't referenced.
-  lines.push("void asyncNoop;");
-  return `${lines.join("\n")}\n`;
-}
-
-// Names enumerated from `eliza/packages/app-core/dist/**` static imports
-// of each server-only @elizaos plugin. Update when a build error shows
-// a new MISSING_EXPORT in this scope.
-const PLUGIN_ELIZACLOUD_STUB_NAMES = [
-  "__resetCloudBaseUrlCache",
-  "clearCloudSecrets",
-  "CloudOnboardingResult",
-  "CloudRouteState",
-  "CloudWalletDescriptor",
-  "CloudWalletProvider",
-  "ElizaCloudClient",
-  "elizaOSCloudPlugin",
-  "ensureCloudTtsApiKeyAlias",
-  "getCloudSecret",
-  "getOrCreateClientAddressKey",
-  "handleCloudBillingRoute",
-  "handleCloudCompatRoute",
-  "handleCloudRelayRoute",
-  "handleCloudRoute",
-  "handleCloudStatusRoutes",
-  "handleCloudTtsPreviewRoute",
-  "isCloudProvisionedContainer",
-  "mirrorCompatHeaders",
-  "normalizeCloudSecret",
-  "normalizeCloudSiteUrl",
-  "persistCloudWalletCache",
-  "provisionCloudWalletsBestEffort",
-  "resolveCloudApiBaseUrl",
-  "resolveCloudApiKey",
-  "resolveCloudTtsBaseUrl",
-  "resolveElevenLabsApiKeyForCloudMode",
-  "validateCloudBaseUrl",
-] as const;
-
-function generatePluginElizacloudStub(): string {
-  return generateNamedExportStub(PLUGIN_ELIZACLOUD_STUB_NAMES);
-}
-
-// Names actually imported from @elizaos/plugin-local-inference by server-only
-// agent runtime modules. The renderer never enters those code paths; the
-// stub satisfies Rollup's static analysis and trees away at module init.
-const PLUGIN_LOCAL_INFERENCE_STUB_NAMES = [
-  "getLocalInferenceActiveModelId",
-  "getLocalInferenceActiveSnapshot",
-  "getLocalInferenceChatStatus",
-  "handleLocalInferenceChatCommand",
-  "handleLocalInferenceRoutes",
-] as const;
-
-function generatePluginLocalInferenceStub(): string {
-  return generateNamedExportStub(PLUGIN_LOCAL_INFERENCE_STUB_NAMES);
-}
-
-// esbuild is a server-only build-time dep that drizzle-kit pulls in; the
-// agent's plugin-compiler imports it as a namespace. Stub the surface
-// the renderer's transitive imports might touch.
-const ESBUILD_STUB_NAMES = [
-  "build",
-  "buildSync",
-  "context",
-  "transform",
-  "transformSync",
-  "formatMessages",
-  "formatMessagesSync",
-  "analyzeMetafile",
-  "analyzeMetafileSync",
-  "initialize",
-  "stop",
-  "version",
-] as const;
-
-function generateEsbuildStub(): string {
-  return generateNamedExportStub(ESBUILD_STUB_NAMES);
-}
-
-// Named exports referenced from @elizaos/agent/* subpaths by the
-// @elizaos/app-core npm package. All are server-only; browser bundle
-// gets stubs so Rollup resolves static named imports without executing
-// the server code. Enumerated from app-core's .js source imports.
-const ELIZAOS_AGENT_STUB_NAMES = [
-  "applyCloudConfigToEnv",
-  "applyN8nConfigToEnv",
-  "applyPluginAutoEnable",
-  "applyPluginSelfDeclaredAutoEnable",
-  "AUTH_PROVIDER_PLUGINS",
-  "bootElizaRuntime",
-  "CHANNEL_PLUGIN_MAP",
-  "collectPluginNames",
-  "configureLocalEmbeddingPlugin",
-  "CONNECTOR_PLUGINS",
-  "executeTriggerTask",
-  "extractConversationMetadataFromRoom",
-  "formatVaultRef",
-  "getAccessToken",
-  "getLastFailedPluginNames",
-  "isAutomationConversationMetadata",
-  "isConnectorConfigured",
-  "isStreamingDestinationConfigured",
-  "isVaultRef",
-  "listProviderAccounts",
-  "listTriggerTasks",
-  "loadElizaConfig",
-  "parseVaultRef",
-  "persistConfigEnv",
-  "readConfigEnv",
-  "readTriggerConfig",
-  "resolveStateDir",
-  "saveElizaConfig",
-  "shutdownRuntime",
-  "startEliza",
-  "STREAMING_PLUGINS",
-  "taskToTriggerSummary",
-  "toWorkbenchTask",
-  "triggersFeatureEnabled",
-] as const;
-
-function generateElizaosAgentStub(_strippedId: string): string {
-  return generateNamedExportStub(ELIZAOS_AGENT_STUB_NAMES);
-}
-
 const NATIVE_MODULE_STUB_GENERATORS = new Map<
   string,
   (strippedId: string) => string
@@ -1890,27 +1749,7 @@ const NATIVE_MODULE_STUB_GENERATORS = new Map<
   ["undici", generateUndiciStub],
   ["node:async_hooks", generateAsyncHooksStub],
   ["async_hooks", generateAsyncHooksStub],
-  ["@node-rs/argon2", generateArgon2Stub],
 ]);
-
-// `@node-rs/argon2` is a Node-only N-API password-hashing addon used by
-// app-core's `api/auth/passwords.js`. The renderer never invokes those
-// server-side routes, but rollup's static analysis still needs `hash`
-// and `verify` to be valid named exports. Provide noop async stubs +
-// the `Algorithm`/`Version` const enums the module ships.
-function generateArgon2Stub(): string {
-  return [
-    "const noop = () => { throw new Error('@node-rs/argon2 is server-only'); };",
-    "export const hash = async () => { throw new Error('@node-rs/argon2 is server-only'); };",
-    "export const verify = async () => false;",
-    "export const hashSync = noop;",
-    "export const verifySync = () => false;",
-    "export const Algorithm = { Argon2d: 0, Argon2i: 1, Argon2id: 2 };",
-    "export const Version = { V0x10: 0x10, V0x13: 0x13 };",
-    "export default { hash, verify, hashSync, verifySync, Algorithm, Version };",
-    "",
-  ].join("\n");
-}
 
 function isSharpStubId(strippedId: string): boolean {
   return (
@@ -1924,11 +1763,7 @@ function generateNativeModuleStub(
   strippedId: string,
   capacitorNativeScopeRe: RegExp,
 ): string {
-  // Scoped packages need both segments to match the generator map keys
-  // (e.g. `@node-rs/argon2` not just `@node-rs`).
-  const modName = strippedId.startsWith("@")
-    ? strippedId.split("/").slice(0, 2).join("/")
-    : strippedId.split("/")[0];
+  const modName = strippedId.split("/")[0];
   const stubGenerator = NATIVE_MODULE_STUB_GENERATORS.get(modName);
   if (stubGenerator) return stubGenerator(strippedId);
   if (modName.startsWith("node:")) return generateNodeBuiltinStub(strippedId);
