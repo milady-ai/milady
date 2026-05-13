@@ -1,6 +1,6 @@
 import { App, ErrorBoundary } from "@elizaos/app-core";
-import "@elizaos/app-core/styles/styles.css";
-import "@elizaos/app-core/styles/brand-gold.css";
+import "@elizaos/ui/dist/styles/styles.css";
+import "@elizaos/ui/dist/styles/brand-gold.css";
 
 import { App as CapacitorApp } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";
@@ -140,7 +140,10 @@ import {
   resolveIosRuntimeConfig,
 } from "@elizaos/app-core";
 
-import { CharacterEditor } from "@elizaos/app-core/components/character/CharacterEditor";
+// CharacterEditor is statically re-exported by `@elizaos/app-core/browser`,
+// so the previous `lazy()` wrapper here was eagerly merged back into the
+// main chunk by Rollup. Static import keeps the load path honest.
+import { CharacterEditor } from "@elizaos/ui/components/character/CharacterEditor";
 
 declare global {
   interface Window {
@@ -433,6 +436,9 @@ try {
       const nativeToken = native?.getLocalAgentToken?.()?.trim();
       if (nativeToken) {
         bootstrapToken = nativeToken;
+        // Persist to the same key the fragment-token path uses so any
+        // later re-load through localStorage finds it without needing
+        // the bridge to be available at that moment.
         try {
           window.localStorage.setItem(SELF_HOSTED_TOKEN_KEY, nativeToken);
         } catch {}
@@ -473,6 +479,45 @@ forceDesktopDevLocalActiveServer();
 // applies the bearer to the client + localStorage and stops. Stock
 // Capacitor builds never expose `window.ElizaNative` so the watchdog
 // exits immediately.
+(function installOnDeviceBearerWatchdog() {
+  if (typeof window === "undefined") return;
+  const bridge = (
+    window as unknown as {
+      ElizaNative?: { getLocalAgentToken?: () => string | null };
+    }
+  ).ElizaNative;
+  if (!bridge?.getLocalAgentToken) return;
+
+  const deadline = Date.now() + 90_000;
+  const tick = () => {
+    try {
+      if (client.hasToken()) return;
+      const token = bridge.getLocalAgentToken?.()?.trim();
+      if (token) {
+        client.setToken(token);
+        try {
+          window.localStorage.setItem(SELF_HOSTED_TOKEN_KEY, token);
+        } catch {}
+        return;
+      }
+    } catch {}
+    if (Date.now() < deadline) setTimeout(tick, 500);
+  };
+  setTimeout(tick, 500);
+})();
+
+// On AOSP/Milady, ElizaNativeBridge.getLocalAgentToken() returns null
+// for the first ~30-50s of app launch (the on-device agent process is
+// still booting and hasn't written its per-boot bearer to its volatile
+// static yet). The synchronous bootstrap above + the upstream
+// applyRestoredConnection both fire BEFORE the agent is up, so they
+// see null and the React shell falls into PairingView even though the
+// bearer is in fact about to be available.
+//
+// Poll the bridge for up to 90s after launch; the first non-null read
+// applies the bearer to the boot config + client and stops. Stock
+// Capacitor builds never expose `window.ElizaNative` so the watchdog
+// exits immediately on the first tick.
 (function installOnDeviceBearerWatchdog() {
   if (typeof window === "undefined") return;
   const bridge = (
@@ -818,6 +863,23 @@ function setupPlatformStyles(): void {
     "env(safe-area-inset-right, 0px)",
   );
   root.style.setProperty("--keyboard-height", "0px");
+
+  // Sizing on native: pin the React mount to the full visual viewport
+  // so the chat composer + keyboard-resize interaction stays clamped.
+  // We deliberately do NOT set `paddingTop / paddingLeft / paddingRight`
+  // here — the @elizaos/ui shell components (StartupShell, RuntimeGate,
+  // Header, page-layout-mobile-drawer, dialog, drawer-sheet) all apply
+  // their own `var(--safe-area-*)` padding from the CSS variables set
+  // a few lines above. Adding a second layer on `#root` doubles the
+  // top inset and leaves a visible black band below the status bar.
+  if (isNative) {
+    const reactRoot = document.getElementById("root");
+    if (reactRoot) {
+      reactRoot.style.boxSizing = "border-box";
+      reactRoot.style.minHeight = "100dvh";
+      reactRoot.style.maxHeight = "100dvh";
+    }
+  }
 }
 
 function isPhoneCompanionMode(): boolean {

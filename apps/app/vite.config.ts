@@ -2,6 +2,10 @@ import fs from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  parseAllowedHostEnv,
+  toViteAllowedHosts,
+} from "@elizaos/shared/config/allowed-hosts";
 import { colorizeDevSettingsStartupBanner } from "@elizaos/shared/dev-settings-banner-style";
 import { prependDevSubsystemFigletHeading } from "@elizaos/shared/dev-settings-figlet-heading";
 import {
@@ -108,6 +112,19 @@ const appCoreNativePluginEntrypoints = appCoreSrcRoot
 const emptyNodeModuleEntry = appCoreSrcRoot
   ? path.join(appCoreSrcRoot, "platform/empty-node-module.ts")
   : requireResolve("@elizaos/app-core/platform/empty-node-module");
+// Renderer-side stub for `@elizaos/agent`. The server runtime exports
+// dozens of symbols (75+ named exports across services/account-pool,
+// onboarding, runtime boot, etc.) that get referenced by `app-core`'s
+// own browser-bundled files. Pointing bare `@elizaos/agent` at
+// `empty-node-module` was insufficient because Rollup's named-import
+// resolver couldn't statically find symbols like
+// `ACCOUNT_CREDENTIAL_PROVIDER_IDS`. This stub exports every known name
+// as a noop/empty and adds a Proxy default so any future addition is
+// resolved automatically. Regenerate via:
+//   grep -rh 'from "@elizaos/agent"' eliza/packages/app-core/dist | ...
+const elizaosAgentBrowserStubEntry = appCoreSrcRoot
+  ? path.join(appCoreSrcRoot, "platform/elizaos-agent-browser-stub.ts")
+  : emptyNodeModuleEntry;
 const uiPkgRoot = hasLocalElizaWorkspace
   ? path.join(localElizaRoot, "packages/ui")
   : null;
@@ -408,7 +425,7 @@ function resolveLocalAppCoreAliases(): Alias[] {
   const packageAgnosticAliases: Alias[] = [
     {
       find: /^@elizaos\/agent$/,
-      replacement: emptyNodeModuleEntry,
+      replacement: elizaosAgentBrowserStubEntry,
     },
     {
       find: /^@elizaos\/core$/,
@@ -447,10 +464,22 @@ function resolveLocalAppCoreAliases(): Alias[] {
 
   const generatedAliases: Alias[] = [];
 
+  // Bare `@elizaos/app-core` resolves to `src/browser.ts` which now
+  // re-exports the full `dist/index.js` surface (so milady's `main.tsx`
+  // sees `DesktopOnboardingRuntime`, `AppProvider`, etc.) plus the
+  // hand-written browser shims on top. The server-only re-exports
+  // inside dist (account-pool, onboarding-routes, …) are kept
+  // renderer-safe by aliasing the underlying `@elizaos/agent` and
+  // `@elizaos/plugin-elizacloud` server packages to their browser-side
+  // stubs in `nativeModuleStubPlugin` + the empty-node-module bake-in.
+  generatedAliases.push({
+    find: /^@elizaos\/app-core$/,
+    replacement: appCoreBrowserEntry,
+  });
+
   for (const [key, value] of Object.entries(appCorePkg.exports || {})) {
-    // "." always maps to appCoreBrowserEntry regardless of export shape (string
-    // or conditional-exports object). Other keys must be simple string values.
-    if (key !== "." && typeof value !== "string") continue;
+    if (key === ".") continue; // handled by the explicit bare alias above
+    if (typeof value !== "string") continue;
     const aliasKey =
       key === "."
         ? "@elizaos/app-core"
@@ -1779,90 +1808,27 @@ const NATIVE_MODULE_STUB_GENERATORS = new Map<
   ["undici", generateUndiciStub],
   ["node:async_hooks", generateAsyncHooksStub],
   ["async_hooks", generateAsyncHooksStub],
-  ["@elizaos/agent", generateElizaosAgentStub],
-  ["@elizaos/plugin-elizacloud", generatePluginElizacloudStub],
-  ["@elizaos/plugin-local-inference", generatePluginLocalInferenceStub],
-  ["esbuild", generateEsbuildStub],
-  // @node-rs/argon2's server-side Rust binding is referenced by
-  // app-core's password-hashing helpers. Renderer never executes them
-  // (auth happens in the API child); stub the named exports.
-  [
-    "@node-rs/argon2",
-    () => generateNamedExportStub(["hash", "verify", "Algorithm"]),
-  ],
-  [
-    "qrcode-terminal",
-    () =>
-      // plugin-whatsapp imports { generate } at module scope; provide the
-      // named export so Rollup's static analysis succeeds. The renderer
-      // never paints a terminal QR; this is a no-op shim.
-      "export const generate = (_text: unknown, _opts: unknown, cb?: (s: string) => void) => { if (cb) cb(''); };\n" +
-      "export const setErrorLevel = () => {};\n" +
-      "export default { generate, setErrorLevel };\n",
-  ],
-  // @elizaos/vault — OS keychain / encrypted SQLite secrets store.
-  // Server-only; the renderer never accesses vault directly. app-core/dist
-  // re-exports these names so Rollup needs them declared to avoid "not
-  // exported" static-analysis errors in the browser build.
-  // Names sourced from eliza/packages/vault/src/index.ts (all value exports).
-  [
-    "@elizaos/vault",
-    () =>
-      generateNamedExportStub([
-        "createVault",
-        "VaultMissError",
-        "PgliteVaultImpl",
-        "defaultPgliteVaultDataDir",
-        "defaultMasterKey",
-        "inMemoryMasterKey",
-        "MasterKeyUnavailableError",
-        "osKeychainMasterKey",
-        "passphraseMasterKey",
-        "passphraseMasterKeyFromEnv",
-        "encrypt",
-        "decrypt",
-        "generateMasterKey",
-        "KEY_BYTES",
-        "CryptoError",
-        "PasswordManagerError",
-        "resolveReference",
-        "createManager",
-        "DEFAULT_PREFERENCES",
-        "BackendNotSignedInError",
-        "defaultExecFn",
-        "listBitwardenLogins",
-        "listOnePasswordLogins",
-        "revealBitwardenLogin",
-        "revealOnePasswordLogin",
-        "BACKEND_INSTALL_SPECS",
-        "buildInstallCommand",
-        "currentPlatform",
-        "detectPackageManagers",
-        "resetInstallerCache",
-        "resolveRunnableMethods",
-        "deleteSavedLogin",
-        "getAutofillAllowed",
-        "getSavedLogin",
-        "listSavedLogins",
-        "setAutofillAllowed",
-        "setSavedLogin",
-        "categorizeKey",
-        "inferProviderId",
-        "listVaultInventory",
-        "META_PREFIX",
-        "profileStorageKey",
-        "PROFILE_SEGMENT",
-        "readEntryMeta",
-        "removeEntryMeta",
-        "ROUTING_KEY",
-        "setEntryMeta",
-        "readRoutingConfig",
-        "resolveActiveValue",
-        "writeRoutingConfig",
-        "createTestVault",
-      ]),
-  ],
+  ["@node-rs/argon2", generateArgon2Stub],
 ]);
+
+// `@node-rs/argon2` is a Node-only N-API password-hashing addon used by
+// app-core's `api/auth/passwords.js`. The renderer never invokes those
+// server-side routes, but rollup's static analysis still needs `hash`
+// and `verify` to be valid named exports. Provide noop async stubs +
+// the `Algorithm`/`Version` const enums the module ships.
+function generateArgon2Stub(): string {
+  return [
+    "const noop = () => { throw new Error('@node-rs/argon2 is server-only'); };",
+    "export const hash = async () => { throw new Error('@node-rs/argon2 is server-only'); };",
+    "export const verify = async () => false;",
+    "export const hashSync = noop;",
+    "export const verifySync = () => false;",
+    "export const Algorithm = { Argon2d: 0, Argon2i: 1, Argon2id: 2 };",
+    "export const Version = { V0x10: 0x10, V0x13: 0x13 };",
+    "export default { hash, verify, hashSync, verifySync, Algorithm, Version };",
+    "",
+  ].join("\n");
+}
 
 function isSharpStubId(strippedId: string): boolean {
   return (
@@ -1876,9 +1842,8 @@ function generateNativeModuleStub(
   strippedId: string,
   capacitorNativeScopeRe: RegExp,
 ): string {
-  // Scoped packages (@scope/name) have a slash in the bare specifier;
-  // treat the @scope/name as the lookup key so per-package stub
-  // generators register against the real package id.
+  // Scoped packages need both segments to match the generator map keys
+  // (e.g. `@node-rs/argon2` not just `@node-rs`).
   const modName = strippedId.startsWith("@")
     ? strippedId.split("/").slice(0, 2).join("/")
     : strippedId.split("/")[0];
@@ -1970,10 +1935,11 @@ function nativeModuleStubPlugin(): Plugin {
     // transitively by @elizaos/vault. Vite's commonjs--resolver chokes on
     // the platform-specific .node files; stub it for the renderer.
     "@napi-rs/keyring",
-    // Secrets vault — purely server-side (OS keychain / encrypted SQLite).
-    // app-core/dist re-exports vault symbols that the renderer never calls;
-    // stub so Vite doesn't choke when the local vault/dist is absent.
-    "@elizaos/vault",
+    // Password hashing native addon. Server-only (api/auth/passwords
+    // route). Externalizing it leaves a bare `@node-rs/argon2` import in
+    // the bundle output that the browser cannot resolve at runtime
+    // (TypeError "Failed to resolve module specifier"); stub instead.
+    "@node-rs/argon2",
   ]);
   if (!IS_CAPACITOR_MOBILE_BUILD) {
     // Mobile-only Capacitor llama.cpp runtime. Web/Electrobun builds stub it,
@@ -1999,6 +1965,23 @@ function nativeModuleStubPlugin(): Plugin {
     name: "native-module-stub",
     enforce: "pre",
     resolveId(id) {
+      // Server-only `@elizaos/agent` is aliased via packageAgnosticAliases
+      // to `elizaos-agent-browser-stub.ts`. The resolve.alias step runs
+      // AFTER `commonjs--resolver` in some rollup paths, which causes
+      // dist-side static-named-import scans to fail before the alias
+      // fires. Intercept it here with enforce:"pre" so Rollup gets the
+      // stub from the start.
+      if (id === "@elizaos/agent") {
+        return elizaosAgentBrowserStubEntry;
+      }
+      // Plugin-elizacloud is server-only (cloud secrets, TTS routing).
+      // The renderer reaches it transitively through `dist/api/onboarding-routes.js`
+      // re-exports; stub the entire surface so static named-import scans pass.
+      if (id === "@elizaos/plugin-elizacloud") {
+        return appCoreSrcRoot
+          ? path.join(appCoreSrcRoot, "platform/elizaos-plugin-elizacloud-browser-stub.ts")
+          : elizaosAgentBrowserStubEntry;
+      }
       // Intercept ALL node: builtins before Vite externalizes them.
       // The @elizaos/core node entry uses many Node APIs (crypto, fs, module,
       // etc.) at the top level.  Rather than stubbing each one individually,
@@ -2068,15 +2051,21 @@ function nativeModuleStubPlugin(): Plugin {
       return generateNativeModuleStub(strippedId, capacitorNativeScopeRe);
     },
     // Patch @elizaos/core browser entry at transform time to add missing
-    // exports and fix browser-incompatible patterns.
+    // exports and fix browser-incompatible patterns. Local-mode builds
+    // hit `src/index.browser.ts` (TS source) directly — packages mode
+    // hit the published dist `.js`. Cover both.
     transform(code, id) {
-      const isCoreDistFile =
-        id.endsWith("index.browser.js") || id.endsWith("index.node.js");
+      const isCoreBrowserOrNodeFile =
+        id.endsWith("index.browser.js") ||
+        id.endsWith("index.node.js") ||
+        id.endsWith("index.browser.ts") ||
+        id.endsWith("index.node.ts");
       const normId = id.split(path.sep).join("/");
       const isCorePackagePath =
         normId.includes("/node_modules/@elizaos/core/") ||
-        normId.includes("packages/core/dist/");
-      if (!isCoreDistFile || !isCorePackagePath) return null;
+        normId.includes("packages/core/dist/") ||
+        normId.includes("packages/core/src/");
+      if (!isCoreBrowserOrNodeFile || !isCorePackagePath) return null;
 
       // Fix AsyncLocalStorage: the browser entry has a try/catch that does
       //   let {AsyncLocalStorage:$} = (() => {throw new Error(...)})()
@@ -2097,6 +2086,41 @@ function nativeModuleStubPlugin(): Plugin {
         AgentEventService: "function(){}",
         AutonomyService: "function(){}",
         createBasicCapabilitiesPlugin: "function(){return{name:'stub'}}",
+        // Additions for local-mode `index.browser.ts` — these live in
+        // node-only modules (cloud-routing, runtime, etc.) so the
+        // browser entry omits them. The renderer never invokes them,
+        // but app-core's dist re-exports reach them statically.
+        toRuntimeSettings: "function(){return{}}",
+        AgentRuntime: "function(){}",
+        AppRoutePluginLoader: "function(){}",
+        AppRoutePluginRegistryEntry: "function(){}",
+        ActionEventPayload: "function(){}",
+        buildStoreVariantBlockedMessage: "function(){return ''}",
+        BUILD_VARIANTS: "[]",
+        ChannelType: "{}",
+        classifySensitiveRequestSource: "function(){return 'unknown'}",
+        createCharacter: "function(){return{}}",
+        createMessageMemory: "function(){return{}}",
+        createUniqueUuid: "function(){return ''}",
+        DEFAULT_BUILD_VARIANT: "''",
+        defaultSensitiveRequestPolicy: "{}",
+        elizaLogger: "{info:function(){},warn:function(){},error:function(){},debug:function(){}}",
+        EventPayload: "function(){}",
+        EventType: "{}",
+        GenerateTextParams: "function(){}",
+        getBuildVariant: "function(){return ''}",
+        getDirectDownloadUrl: "function(){return null}",
+        IAgentRuntime: "function(){}",
+        isDirectBuild: "function(){return false}",
+        isLocalCodeExecutionAllowed: "function(){return false}",
+        isStoreBuild: "function(){return false}",
+        lifeOpsPassiveConnectorsEnabled: "function(){return false}",
+        listAppRoutePluginLoaders: "function(){return []}",
+        ModelType: "{TEXT_SMALL:'TEXT_SMALL',TEXT_LARGE:'TEXT_LARGE',TEXT_EMBEDDING:'TEXT_EMBEDDING'}",
+        ModelTypeName: "function(){}",
+        PluginManagerService: "function(){}",
+        redactSensitiveRequestMetadata: "function(x){return x}",
+        registerAppCoreRuntimeHooks: "function(){}",
       };
       // Check which are actually missing from the existing export block
       const needed = Object.keys(missingExports).filter((n) => {

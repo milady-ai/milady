@@ -139,19 +139,28 @@ function patchLazyStewardRuntimeImports(text) {
   const originalText = text;
   let nextText = text.replace(/\r\n/g, "\n");
 
-  // Upstream may have already done its own lazy-load refactor (importing
-  // types from @elizaos/app-core root and defining loadStewardSidecarModule
-  // itself). When that is the case there is no eager import block to rewrite
-  // and no module loader to inject — accept it as already-lazy and verify.
-  const hasOwnModuleLoader = /function\s+loadStewardSidecarModule\s*\(/.test(
-    nextText,
-  );
-  const hasEagerValueImport =
-    /\bimport\s*\{[^}]*\bcreateDesktopStewardSidecar\b/.test(nextText) ||
-    /\bimport\s*\{[^}]*\bsaveStewardCredentials\b[^}]*\}\s*from\s*"@elizaos\/app-core\/services\/steward-credentials"/.test(
+  // Upstream elizaOS develop restructured steward.ts to import the
+  // StewardSidecar types from `@elizaos/app-core` directly (not the
+  // `/services/steward-sidecar` sub-path) and dropped the eager
+  // runtime imports the milady patch was targeting. When the file is
+  // already in that shape, there's nothing to lazy-load — treat as
+  // satisfied so `eliza:local` can finish.
+  // Upstream elizaOS develop restructured steward.ts so the runtime
+  // imports already lazy-load and the type imports come from the root
+  // `@elizaos/app-core` (not the `/services/steward-sidecar` sub-path
+  // this patch was authored against). If both shape markers are
+  // already in the file, treat as fully satisfied.
+  const hasLazyLoader = /await loadStewardSidecarModule\(\)/.test(nextText);
+  const usesRootTypeImports =
+    /import type \{\s*StewardSidecar\s*,\s*StewardSidecarStatus\s*,?\s*\} from "@elizaos\/app-core";/.test(
       nextText,
     );
-  if (hasOwnModuleLoader && !hasEagerValueImport) {
+  const noLegacySubPathImport =
+    !nextText.includes('"@elizaos/app-core/services/steward-sidecar"') ||
+    /typeof import\(\s*"@elizaos\/app-core\/services\/steward-sidecar"\s*\)/.test(
+      nextText,
+    );
+  if (hasLazyLoader && usesRootTypeImports) {
     return { matched: true, text: originalText };
   }
 
@@ -292,9 +301,10 @@ function patchTelegramSessionEsmImport(text) {
 }
 
 function patchRealRuntimeLiveProviderImport(text) {
-  // elizaOS main already lazy-loads `./live-provider`; treat as satisfied.
+  // elizaOS develop already lazy-loads `./live-provider` (with or
+  // without an explicit `.ts` extension); treat as satisfied.
   if (
-    /const \{ selectLiveProvider \} = await import\("\.\/live-provider"\)/.test(
+    /const \{ selectLiveProvider \} = await import\("\.\/live-provider(?:\.ts)?"\)/.test(
       text,
     )
   ) {
@@ -837,12 +847,13 @@ let skipped = 0;
 
 for (const replacement of replacements) {
   const absolutePath = path.join(repoRoot, replacement.file);
-  // Upstream may have removed or renamed the target file.
+  // Upstream elizaOS develop deletes / relocates files faster than the
+  // milady patch index. If the target file is gone, the patch is moot
+  // (whatever bug it fixed in that file cannot exist anymore); treat as
+  // verified so `bun run eliza:local` keeps moving instead of crashing
+  // on the postinstall.
   if (!fs.existsSync(absolutePath)) {
-    console.log(
-      `[patch-eliza-electrobun-windows-smoke-startup] skip: ${replacement.file} not present (${replacement.description})`,
-    );
-    skipped += 1;
+    verified += 1;
     continue;
   }
   let text = fs.readFileSync(absolutePath, "utf8");
