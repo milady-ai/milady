@@ -97,6 +97,12 @@ const nativePluginsRoot = path.join(localElizaRoot, "packages/native-plugins");
 const appCoreSrcRoot = hasLocalElizaWorkspace
   ? path.join(localElizaRoot, "packages/app-core/src")
   : null;
+const appCoreNativePluginEntrypoints = appCoreSrcRoot
+  ? path.join(
+      localElizaRoot,
+      "packages/ui/src/platform/native-plugin-entrypoints.ts",
+    )
+  : requireResolve("@elizaos/ui/platform/native-plugin-entrypoints");
 const emptyNodeModuleEntry = appCoreSrcRoot
   ? path.join(appCoreSrcRoot, "platform/empty-node-module.ts")
   : requireResolve("@elizaos/app-core/platform/empty-node-module");
@@ -612,54 +618,6 @@ function resolveLocalAppCoreAliases(): Alias[] {
         },
       ]
     : [];
-
-  // Wave A moved styles from @elizaos/app-core to @elizaos/ui. The npm
-  // @elizaos/app-core package still includes them for packages-mode compat,
-  // but the local source no longer has ./styles/*.css or the exports entries.
-  // Add an explicit redirect before the catch-all so local builds find the CSS.
-  const uiStylesSourceDir = uiPkgRoot
-    ? path.join(uiPkgRoot, "src/styles")
-    : null;
-  const appCoreStylesLocalDir = path.join(appCoreSrcRoot, "styles");
-  const cssRedirectAlias: Alias[] =
-    uiStylesSourceDir &&
-    fs.existsSync(path.join(uiStylesSourceDir, "styles.css")) &&
-    !fs.existsSync(path.join(appCoreStylesLocalDir, "styles.css"))
-      ? [
-          {
-            find: /^@elizaos\/app-core\/styles\/(.+\.css)$/,
-            replacement: `${uiStylesSourceDir}/$1`,
-          },
-        ]
-      : [];
-
-  // Wave A moved several components/types from @elizaos/app-core to @elizaos/ui.
-  // The catch-all maps to app-core/src/* which may not have them. Use a custom
-  // resolver to fall back to the ui source when the app-core path doesn't exist.
-  const uiComponentsSourceDir = uiPkgRoot ? path.join(uiPkgRoot, "src") : null;
-
-  function resolveAppCoreWithUiFallback(id: string): string {
-    if (fs.existsSync(id)) return id;
-    const withTsx = id.endsWith(".tsx") ? id : `${id}.tsx`;
-    if (fs.existsSync(withTsx)) return withTsx;
-    const withTs = id.endsWith(".ts") ? id : `${id}.ts`;
-    if (fs.existsSync(withTs)) return withTs;
-    // Try the equivalent path under @elizaos/ui source
-    if (uiComponentsSourceDir) {
-      const relativeToSrc = id.includes(`${appCoreSrcRoot}/`)
-        ? id.slice(appCoreSrcRoot.length + 1)
-        : null;
-      if (relativeToSrc) {
-        const uiEquiv = path.join(uiComponentsSourceDir, relativeToSrc);
-        if (fs.existsSync(uiEquiv)) return uiEquiv;
-        const uiEquivTsx = `${uiEquiv}.tsx`;
-        if (fs.existsSync(uiEquivTsx)) return uiEquivTsx;
-        const uiEquivTs = `${uiEquiv}.ts`;
-        if (fs.existsSync(uiEquivTs)) return uiEquivTs;
-      }
-    }
-    return id;
-  }
 
   return [
     ...cssRedirectAlias,
