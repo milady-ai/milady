@@ -15,7 +15,7 @@ Current ledger state (open items only, after 2026-05-11 sweep):
 
 - **P0** open: **0**
 - **P1** open: **0** (item 18 — all 5 connectors migrated; item 14 resolved via 18)
-- **P2** open: **1** (item 12 — desktop half only)
+- **P2** open: **0** (item 12 desktop half DONE 2026-05-11)
 - **P3** open: **0**
 
 ---
@@ -113,12 +113,14 @@ Pinned by `eliza/plugins/plugin-elizacloud/__tests__/onboarding-failures.test.ts
 - **Verification:** `bun run --cwd eliza/packages/ui test -- deep-link-entry` → 17/17 PASS. `bun run --cwd eliza/packages/ui test -- onboarding/__tests__/` → 160/160 PASS across 4 onboarding test files. `bun run --cwd eliza/packages/ui typecheck` clean. No new lint errors.
 - **Follow-up not in scope:** Wiring `installOnboardingDeepLinkListener` into `apps/app/src/main.tsx`'s `initializeAppLifecycle()` so the deep link reaches RuntimeGate in production. The handler module is fully tested and ready to import; the host wiring is a small change tracked separately if a future onboarding stage requires it. The 12 `routeOnboardingDeepLink` unit cases plus the 5 listener cases are independently meaningful regression guards.
 
-### 12. OS-native permission prompts (notifications, file access, camera) — DONE 2026-05-11 (mobile scaffold); desktop part still PENDING
+### 12. OS-native permission prompts (notifications, file access, camera) — DONE 2026-05-11
 
 - **Severity:** P2
 - **Citation:** `docs/QA-onboarding.md` M5 row notes "Playwright CANNOT reach native dialogs". No coverage at all today.
 - **Summary:** Permissions are now requested lazily (per `DesktopOnboardingRuntime.tsx` doc-comment, since deleted — lazy-permissions path is now in `installDesktopPermissionsClientPatch` / `desktop-permissions-client.ts`) but there is no automated harness driving the lazy request → grant → success path.
-- **Status:** DONE 2026-05-11 for the mobile half. Added `scripts/qa/mobile-permission-walkthrough.mjs` — an MCP-driven scaffold + manifest writer mirroring the `mobile-screenshot-walkthrough.mjs` pattern. `--init` scaffolds `reports/qa/<date>/mobile-permissions/<surface>/` with a P1-P6 `CHECKLIST.md` (P6 Bluetooth/Local Network is Android-only; iOS gets P1-P5). Operator drives each prompt via `mcp__computer-use__screenshot` + `mcp__computer-use__left_click` inside a Claude Code session and saves PNGs into the scaffolded directory. `--finalize` validates the directory and emits `SUMMARY.md` with per-prompt size + sha256, exiting 0 on partial capture (local-dev tolerant). M5 row in `docs/QA-onboarding.md` updated to point to the new --init/--finalize workflow. Desktop side (an Electrobun spec exercising `tccutil`-mediated permission resets between runs) is still PENDING and tracked here.
+- **Status:** DONE 2026-05-11 (both halves).
+  - **Mobile (DONE 2026-05-11):** `scripts/qa/mobile-permission-walkthrough.mjs` — MCP-driven scaffold + manifest writer mirroring the `mobile-screenshot-walkthrough.mjs` pattern. `--init` scaffolds `reports/qa/<date>/mobile-permissions/<surface>/` with a P1-P6 `CHECKLIST.md` (P6 Bluetooth/Local Network is Android-only; iOS gets P1-P5). Operator drives each prompt via `mcp__computer-use__screenshot` + `mcp__computer-use__left_click` inside a Claude Code session and saves PNGs into the scaffolded directory. `--finalize` validates the directory and emits `SUMMARY.md` with per-prompt size + sha256, exiting 0 on partial capture (local-dev tolerant). M5 row in `docs/QA-onboarding.md` updated to point to the new --init/--finalize workflow.
+  - **Desktop (DONE 2026-05-11):** `scripts/qa/desktop-permission-walkthrough.mjs` — same scaffold pattern for the Electrobun shell's lazy-permission flow (`installDesktopPermissionsClientPatch` in `eliza/packages/ui/src/platform/desktop-permissions-client.ts`). Documents a D1-D7 cascade (Notifications, Camera, Microphone, Location, Photos, Accessibility, Screen Recording) and the operator pre-flight (`tccutil reset Notifications/Camera/Microphone/MediaLibrary/Accessibility/ScreenCapture ai.elizaos.app`) so each run exercises a fresh prompt cascade. The script intentionally does NOT shell out to `tccutil` — operator runs those commands so admin prompts stay in-band. `--init` scaffolds `reports/qa/<date>/desktop-permissions/` with a `CHECKLIST.md` containing the cascade table + pre-flight block; `--finalize` writes `SUMMARY.md` with per-prompt size + sha256, exiting 0 on partial capture. Verified end-to-end: `node --check` clean; `--init` writes CHECKLIST.md; `--finalize` against an empty dir reports `INCOMPLETE: missing all` and exits 0; dropping a fake PNG and re-finalizing detects it (`1/7 captured`). Windows (UAC + per-capability consent in Settings) and Linux (XDG portals / `flatpak permission-reset`) variants are TODO comments in the script. New D6 row added to the Desktop table in `docs/QA-onboarding.md` pointing at this script.
 
 ### 13. App relaunch after cloud agent provisioning — DONE 2026-05-11
 
@@ -206,6 +208,6 @@ Per-connector status (mirrored from the `migrated:` flag on each entry in `eliza
 - **Knip dead-code rename pass complete.** All 5 `-compat`-suffixed files renamed; no code deleted (none were dead).
 - **Audit doc citations refreshed.** `audit/layer-4-api.md` and `audit/layer-8-state-config.md` now reference the new filenames.
 
-**Open items:** 1 total — item 12 (desktop permission walkthrough — mobile half DONE 2026-05-11, desktop `tccutil`-mediated reset scaffold PENDING).
+**Open items:** 0 total — item 12 desktop half completed 2026-05-11 with `scripts/qa/desktop-permission-walkthrough.mjs`.
 
 **Tests passing as of 2026-05-11 sweep:** 19 (`onboarding-failures` — up from 17 with the new C8 + C9 observer cases) + 96 (`flow.test`) + 33 (`mobile-runtime-mode-hardening`) + 14 (`sandbox-variant-detection`) + 17 (`deep-link-entry`) + 5 (`auth-pairing-routes`) + 5 skipped without `MILADY_DESKTOP_QA=1` (`dev-stack-probe`) + 32 PASS / 3 expected-fail (`setup-routes-contract` — the 3 expected-fail blocks are rule-1 strict-prefix checks for connectors with legitimate non-setup data routes: discord, imessage, bluebubbles) = **221 covering cases, 3 documented gaps**.
