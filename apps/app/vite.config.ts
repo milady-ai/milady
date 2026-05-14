@@ -414,7 +414,22 @@ function resolveLocalSharedAliases(): Alias[] {
   return aliases;
 }
 
+/**
+ * When a local eliza workspace is present and `@elizaos/shared` has been
+ * built, return the path to its local `dist/index.js` so the renderer
+ * prefers it over the (possibly lagging) bun-store published copy.
+ */
+function resolveLocalSharedDist(): string | null {
+  const localDist = path.join(localElizaRoot, "packages/shared/dist/index.js");
+  return fs.existsSync(localDist) ? localDist : null;
+}
+
 function resolveLocalAppCoreAliases(): Alias[] {
+  const sharedDist = resolveLocalSharedDist();
+  const sharedDistDir = sharedDist
+    ? path.join(localElizaRoot, "packages/shared/dist")
+    : null;
+
   // Map @elizaos/agent's root import to its real source so static named
   // imports from compiled app-core code (e.g. account-pool.js's
   // ACCOUNT_CREDENTIAL_PROVIDER_IDS) resolve. Server-only runtime branches
@@ -541,6 +556,32 @@ function resolveLocalAppCoreAliases(): Alias[] {
 
   const uiSource = path.join(appCoreSrcRoot, "ui");
   const uiPkgSrcRoot = uiPkgRoot ? path.join(uiPkgRoot, "src") : null;
+  // Some app-core component paths only exist in the @elizaos/ui source tree
+  // (the compiled app-core dist re-exports them). The catch-all alias points
+  // at appCoreSrcRoot; this resolver lets it fall back to the ui source when
+  // the app-core path doesn't exist on disk.
+  const uiComponentsSourceDir = uiPkgRoot ? path.join(uiPkgRoot, "src") : null;
+  function resolveAppCoreWithUiFallback(id: string): string {
+    if (fs.existsSync(id)) return id;
+    const withTsx = id.endsWith(".tsx") ? id : `${id}.tsx`;
+    if (fs.existsSync(withTsx)) return withTsx;
+    const withTs = id.endsWith(".ts") ? id : `${id}.ts`;
+    if (fs.existsSync(withTs)) return withTs;
+    if (uiComponentsSourceDir) {
+      const relativeToSrc = id.includes(`${appCoreSrcRoot}/`)
+        ? id.slice(appCoreSrcRoot.length + 1)
+        : null;
+      if (relativeToSrc) {
+        const uiEquiv = path.join(uiComponentsSourceDir, relativeToSrc);
+        if (fs.existsSync(uiEquiv)) return uiEquiv;
+        const uiEquivTsx = `${uiEquiv}.tsx`;
+        if (fs.existsSync(uiEquivTsx)) return uiEquivTsx;
+        const uiEquivTs = `${uiEquiv}.ts`;
+        if (fs.existsSync(uiEquivTs)) return uiEquivTs;
+      }
+    }
+    return id;
+  }
   const legacyAppCoreUiAliases: Alias[] = uiPkgSrcRoot
     ? [
         {
@@ -603,6 +644,26 @@ function resolveLocalAppCoreAliases(): Alias[] {
         },
       ]
     : [];
+
+  // Add an explicit CSS redirect before the catch-all so local-mode builds
+  // resolve `@elizaos/app-core/styles/*.css` from the ui package's source
+  // styles dir (the compiled app-core dist doesn't carry the .css when the
+  // ui workspace owns it).
+  const uiStylesSourceDir = uiPkgRoot
+    ? path.join(uiPkgRoot, "src/styles")
+    : null;
+  const appCoreStylesLocalDir = path.join(appCoreSrcRoot, "styles");
+  const cssRedirectAlias: Alias[] =
+    uiStylesSourceDir &&
+    fs.existsSync(path.join(uiStylesSourceDir, "styles.css")) &&
+    !fs.existsSync(path.join(appCoreStylesLocalDir, "styles.css"))
+      ? [
+          {
+            find: /^@elizaos\/app-core\/styles\/(.+\.css)$/,
+            replacement: `${uiStylesSourceDir}/$1`,
+          },
+        ]
+      : [];
 
   return [
     ...cssRedirectAlias,
@@ -1302,7 +1363,12 @@ function generateNodeBuiltinStub(moduleId: string, req = _require): string {
     //   * mutation traps (set / defineProperty) don't throw under strict mode
     //   * `instanceof`, `default`, `__esModule` resolve sensibly for ESM<->CJS
     "function noopFn() { return noop; }",
-    "const handler = { get(t, p) { if (typeof p === 'symbol') return undefined; if (p === '__esModule') return true; if (p === 'default') return noop; if (p === 'prototype') return {}; if (p in t) return t[p]; return noop; }, set(t, p, v) { try { t[p] = v; } catch {} return true; }, has() { return true; }, ownKeys() { return []; }, getOwnPropertyDescriptor() { return { configurable: true, enumerable: true }; }, apply() { return noop; }, construct() { return noop; }, defineProperty(t, p, d) { try { Object.defineProperty(t, p, { configurable: true, writable: true, enumerable: true, ...d }); } catch {} return true; } };",
+    // ownKeys / getOwnPropertyDescriptor forward to the function target so the
+    // proxy stays invariant-safe: a function has a non-configurable `prototype`
+    // own property, so ownKeys MUST include it and getOwnPropertyDescriptor
+    // MUST report its real (non-configurable) descriptor — otherwise any
+    // Object.assign / spread / Object.keys over the stub throws a TypeError.
+    "const handler = { get(t, p) { if (typeof p === 'symbol') return undefined; if (p === '__esModule') return true; if (p === 'default') return noop; if (p === 'prototype') return {}; if (p in t) return t[p]; return noop; }, set(t, p, v) { try { t[p] = v; } catch {} return true; }, has() { return true; }, ownKeys(t) { return Reflect.ownKeys(t); }, getOwnPropertyDescriptor(t, p) { return Reflect.getOwnPropertyDescriptor(t, p) || { configurable: true, enumerable: true, value: undefined, writable: true }; }, apply() { return noop; }, construct() { return noop; }, defineProperty(t, p, d) { try { Object.defineProperty(t, p, { configurable: true, writable: true, enumerable: true, ...d }); } catch {} return true; } };",
     "const noop = new Proxy(noopFn, handler);",
     "const stub = noop;",
     "const asyncNoop = () => Promise.resolve();",
@@ -1742,15 +1808,34 @@ function generatePluginElizacloudStub(): string {
   return generateNamedExportStub(PLUGIN_ELIZACLOUD_STUB_NAMES);
 }
 
-// Names actually imported from @elizaos/plugin-local-inference by server-only
-// agent runtime modules. The renderer never enters those code paths; the
-// stub satisfies Rollup's static analysis and trees away at module init.
+// Names imported from @elizaos/plugin-local-inference (and its `/routes`,
+// `/runtime`, `/services` subpaths) by server-only agent runtime modules.
+// All subpaths resolve to the same generated stub; the renderer never enters
+// those code paths — the stub only satisfies Rollup's static analysis.
 const PLUGIN_LOCAL_INFERENCE_STUB_NAMES = [
+  // bare module
   "getLocalInferenceActiveModelId",
   "getLocalInferenceActiveSnapshot",
   "getLocalInferenceChatStatus",
   "handleLocalInferenceChatCommand",
   "handleLocalInferenceRoutes",
+  // /routes
+  "handleLocalInferenceCompatRoutes",
+  // /runtime
+  "DEFAULT_MODELS_DIR",
+  "detectEmbeddingPreset",
+  "embeddingGgufFilePresent",
+  "ensureLocalInferenceHandler",
+  "ensureModel",
+  "findExistingEmbeddingModelForWarmupReuse",
+  "isEmbeddingWarmupReuseDisabled",
+  "shouldEnableMobileLocalInference",
+  "shouldWarmupLocalEmbeddingModel",
+  // /services
+  "PhraseChunker",
+  "buildVoiceLatencyDevPayload",
+  "deviceBridge",
+  "voiceLatencyTracer",
 ] as const;
 
 function generatePluginLocalInferenceStub(): string {
@@ -1824,7 +1909,13 @@ function generateNativeModuleStub(
   strippedId: string,
   capacitorNativeScopeRe: RegExp,
 ): string {
-  const modName = strippedId.split("/")[0];
+  // Bare package name — keep the scope for `@scope/pkg` so scoped keys in
+  // NATIVE_MODULE_STUB_GENERATORS (e.g. `@elizaos/plugin-local-inference`)
+  // actually match. `split("/")[0]` alone collapses them all to `@elizaos`,
+  // dropping their named-export stubs and emitting a bare `export default {}`.
+  const modName = strippedId.startsWith("@")
+    ? strippedId.split("/").slice(0, 2).join("/")
+    : strippedId.split("/")[0];
   const stubGenerator = NATIVE_MODULE_STUB_GENERATORS.get(modName);
   if (stubGenerator) return stubGenerator(strippedId);
   if (modName.startsWith("node:")) return generateNodeBuiltinStub(strippedId);
