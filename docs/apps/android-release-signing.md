@@ -1,20 +1,32 @@
 # Android release signing for Milady
 
-> **Status (2026-05-13):** This doc describes the signing-config shape the
-> Capacitor Android project should adopt. The `apps/app/android/` Gradle
-> tree itself has not been generated/committed yet — `bunx cap add
-> android` is the next step (per @dutchiono's review on #2136). Once the
-> scaffolding lands, the `build.gradle` block below drops in unchanged.
-> Operators following this doc today need to also create the Capacitor
-> Android shell first; a follow-up issue tracks the sequencing.
-
 The `release` build type in `apps/app/android/app/build.gradle` is wired
-for one-time keystore configuration via env vars or gradle `-P` properties.
-When the env vars are absent the release build falls back to debug signing
-so local development is unaffected.
+for one-time keystore configuration via environment variables. When the
+env vars are absent the release build falls back to debug signing so
+local development is unaffected.
 
 The Solana dApp Store and the Google Play Store **both reject debug-signed
 APKs.** CI and submission flows MUST set the env vars below.
+
+## How the Android tree is generated
+
+`apps/app/android/` is **not source-tracked**. It is regenerated from the
+Capacitor scaffolding template at
+`eliza/packages/app-core/platforms/android/` every time you run:
+
+```bash
+cd apps/app
+bun run build:android      # or: bun run cap:sync:android
+```
+
+This is the same pattern as `apps/app/ios/` — the platform-specific
+project is a build artifact, not a checked-in source tree. The generator
+lives at `eliza/packages/app-core/scripts/run-mobile-build.mjs` and is
+invoked indirectly through the `build:android` and `cap:sync:android`
+scripts in `apps/app/package.json`.
+
+Run that step **before** invoking gradle directly — every command in
+this document assumes `apps/app/android/` already exists.
 
 ## One-time setup
 
@@ -66,28 +78,27 @@ artefacts.
 
 ### 3. Wire the build
 
-Either export env vars before invoking gradle:
+Export the four env vars read by `apps/app/android/app/build.gradle`
+before invoking gradle:
 
 ```bash
-export MILADY_RELEASE_KEYSTORE_PATH=~/.config/milady/milady-release.jks
-export MILADY_RELEASE_STORE_PASSWORD='...'
-export MILADY_RELEASE_KEY_ALIAS=milady
-export MILADY_RELEASE_KEY_PASSWORD='...'
+export ELIZAOS_KEYSTORE_PATH=~/.config/milady/milady-release.jks
+export ELIZAOS_KEYSTORE_PASSWORD='...'
+export ELIZAOS_KEY_ALIAS=milady
+export ELIZAOS_KEY_PASSWORD='...'
 ```
 
-…or pass them as gradle properties:
-
-```bash
-./gradlew assembleRelease \
-  -PmiladyReleaseKeystorePath=$HOME/.config/milady/milady-release.jks \
-  -PmiladyReleaseStorePassword='...' \
-  -PmiladyReleaseKeyAlias=milady \
-  -PmiladyReleaseKeyPassword='...'
-```
-
-Either source works; pick the one that fits your CI's secret-management.
+The `signingConfigs.release` block in the generated `build.gradle`
+reads these via `System.getenv(...)`. If `ELIZAOS_KEYSTORE_PATH` is
+unset, the conditional doesn't attach a signing config to the release
+build type and the APK is debug-signed.
 
 ## Build commands
+
+Make sure the Capacitor Android project exists first
+(`bun run build:android` or `bun run cap:sync:android` — see [How the
+Android tree is generated](#how-the-android-tree-is-generated)). The
+gradle invocations below assume that step has already run.
 
 ### Slim cloud-only release (recommended first dApp Store submission)
 
@@ -97,11 +108,7 @@ backend rather than the on-device agent.
 
 ```bash
 cd apps/app/android
-./gradlew assembleRelease \
-  -PelizaCloudBuild=true \
-  -PmiladyReleaseKeystorePath=$HOME/.config/milady/milady-release.jks \
-  -PmiladyReleaseStorePassword=$MILADY_RELEASE_STORE_PASSWORD \
-  -PmiladyReleaseKeyPassword=$MILADY_RELEASE_KEY_PASSWORD
+./gradlew assembleRelease -PelizaCloudBuild=true
 ```
 
 Output: `apps/app/android/app/build/outputs/apk/release/app-release.apk`.
@@ -114,10 +121,7 @@ GGUFs are bundled in `apps/app/android/app/src/main/assets/agent/models/`).
 
 ```bash
 cd apps/app/android
-./gradlew assembleRelease \
-  -PmiladyReleaseKeystorePath=$HOME/.config/milady/milady-release.jks \
-  -PmiladyReleaseStorePassword=$MILADY_RELEASE_STORE_PASSWORD \
-  -PmiladyReleaseKeyPassword=$MILADY_RELEASE_KEY_PASSWORD
+./gradlew assembleRelease
 ```
 
 ## Verification
@@ -138,8 +142,8 @@ For dApp Store submission, also confirm:
 aapt dump badging app-release.apk | head -20
 ```
 
-should show `package: name='ai.milady.milady'`, `versionCode=N`,
-`targetSdkVersion=36`.
+should show `package: name='ai.milady.milady'`, `versionCode=N`, and
+the `targetSdkVersion` configured in `apps/app/android/variables.gradle`.
 
 ## CI hooks
 
@@ -147,36 +151,37 @@ For GitHub Actions (or whatever runner you wire up):
 
 ```yaml
 - name: Decode keystore
+  env:
+    ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
   run: |
-    echo "$MILADY_RELEASE_KEYSTORE_BASE64" | base64 --decode \
+    echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode \
       > $RUNNER_TEMP/milady-release.jks
 
 - name: Build release APK
+  working-directory: apps/app/android
   env:
-    MILADY_RELEASE_KEYSTORE_PATH: ${{ runner.temp }}/milady-release.jks
-    MILADY_RELEASE_STORE_PASSWORD: ${{ secrets.MILADY_RELEASE_STORE_PASSWORD }}
-    MILADY_RELEASE_KEY_ALIAS: milady
-    MILADY_RELEASE_KEY_PASSWORD: ${{ secrets.MILADY_RELEASE_KEY_PASSWORD }}
-  run: bun run build:android -- assembleRelease -PelizaCloudBuild=true
+    ELIZAOS_KEYSTORE_PATH: ${{ runner.temp }}/milady-release.jks
+    ELIZAOS_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+    ELIZAOS_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+    ELIZAOS_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+  run: ./gradlew assembleRelease -PelizaCloudBuild=true
 ```
 
 Keystore-as-secret pattern: store the JKS file as a base64 string in a
-single `MILADY_RELEASE_KEYSTORE_BASE64` secret. The decode step writes
-it to a runner-temp path that goes away when the job finishes.
+single `ANDROID_KEYSTORE_BASE64` secret. The decode step writes it to a
+runner-temp path that goes away when the job finishes. The existing
+`.github/workflows/android-release.yml` workflow follows the same
+shape.
 
 ## When the env vars are absent
 
 `release` builds fall back to debug signing. Useful for engineers who
 need to test minify/proguard behavior locally without the production
 keystore. The resulting APK is NOT submission-ready — it will be
-rejected by the dApp Store and the Play Store. Log line to look for
-during the build:
+rejected by the dApp Store and the Play Store.
 
-```
-WARNING: Release build is debug-signed. Set MILADY_RELEASE_KEYSTORE_PATH
-to produce a signed APK for distribution.
-```
-
-(Note: the warning line is gradle's own — there's no extra logging
-because the conditional `signingConfig signingConfigs.release` simply
-isn't attached when the env vars are absent.)
+The build.gradle's `signingConfigs.release` block guards on
+`System.getenv("ELIZAOS_KEYSTORE_PATH")` — when the variable is unset
+the conditional `signingConfig signingConfigs.release` simply isn't
+attached to the release build type, and AGP falls back to debug
+signing without any explicit log line.
