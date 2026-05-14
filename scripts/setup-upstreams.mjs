@@ -1378,6 +1378,35 @@ async function ensureRepoLocalEliza(repoRoot) {
   }
 
   if (existsSync(path.join(repoRoot, ".git"))) {
+    // SAFETY: `git submodule update --init` will FORCE the submodule working
+    // tree to the SHA recorded in the parent index, blowing away any local
+    // edits that haven't been committed inside `eliza/`. Refuse to run that
+    // command if the submodule already has any uncommitted work — let the
+    // operator commit or stash explicitly first. The original "I lost my
+    // local UI fixes when re-running eliza:local" bug came from exactly this
+    // path: parent moved the recorded SHA, the operator re-ran setup, and
+    // every working-tree edit in eliza/ vanished without a warning.
+    if (
+      existsSync(elizaRoot) &&
+      existsSync(path.join(elizaRoot, ".git"))
+    ) {
+      const statusProbe = spawnSync(
+        "git",
+        ["-C", elizaRoot, "status", "--porcelain"],
+        {
+          stdio: ["ignore", "pipe", "ignore"],
+          encoding: "utf8",
+        },
+      );
+      if (statusProbe.status === 0 && statusProbe.stdout.trim().length > 0) {
+        console.warn(
+          "[setup-upstreams] Skipping submodule update of eliza/ — working tree has uncommitted changes.\n" +
+            "[setup-upstreams] Commit (or stash) those edits inside eliza/ before re-running setup, otherwise they will be overwritten by the recorded submodule SHA.",
+        );
+        return elizaRoot;
+      }
+    }
+
     console.log("[setup-upstreams] Initializing tracked submodules");
     try {
       await runCommand(
