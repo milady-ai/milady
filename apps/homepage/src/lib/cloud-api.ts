@@ -730,10 +730,6 @@ export class CloudApiClient {
       throw new Error(`API ${primary.status}: /api/health`);
     }
 
-    if (primary.status !== 404) {
-      throw new Error(`API ${primary.status}: /api/health`);
-    }
-
     throw new Error(`API ${primary.status}: /api/health`);
   }
 
@@ -785,8 +781,6 @@ export class CloudApiClient {
         return makeUnauthenticatedAgentStatus();
       }
       // We have a token but it was rejected — that's a real auth failure.
-      throw new Error(`API ${primary.status}: /api/status`);
-    } else if (primary.status !== 404) {
       throw new Error(`API ${primary.status}: /api/status`);
     }
 
@@ -859,10 +853,6 @@ export class CloudApiClient {
     if (opts?.level) params.set("level", opts.level);
     const qs = params.toString();
     return this.request(`/api/logs${qs ? `?${qs}` : ""}`, { method: "GET" });
-  }
-
-  async getBilling(): Promise<object> {
-    return this.request("/api/billing", { method: "GET" });
   }
 
   // Wallet

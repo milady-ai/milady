@@ -24,6 +24,18 @@
 import { Capacitor } from "@capacitor/core";
 import { AGENT_READY_EVENT, dispatchAppEvent } from "@elizaos/app-core";
 import { APP_LOG_PREFIX } from "./app-config";
+import {
+  buildLocalAgentReply,
+  buildSendMessagePayload,
+  dispatchLocalAgentEvent,
+  getLocalAgentStatusFromPlugin,
+  loadBunRuntimePlugin,
+  type BunRuntimePluginBase,
+  type LocalAgentReply,
+  type LocalAgentStatus,
+} from "./mobile-local-runtime-shared";
+
+export type { LocalAgentStatus, LocalAgentReply };
 
 const LOG_PREFIX = `${APP_LOG_PREFIX} [android-local-runtime]`;
 
@@ -31,39 +43,12 @@ export const ANDROID_LOCAL_AGENT_LOG_EVENT = "android-local-agent-log";
 export const ANDROID_LOCAL_AGENT_ERROR_EVENT = "android-local-agent-error";
 export const ANDROID_LOCAL_AGENT_REPLY_EVENT = "android-local-agent-reply";
 
-function dispatchLocalAgentEvent(name: string, detail: unknown): void {
-  if (typeof document === "undefined") return;
-  document.dispatchEvent(new CustomEvent(name, { detail }));
-}
-
-export interface LocalAgentStatus {
-  ready: boolean;
-  model?: string;
-  tokensPerSecond?: number;
-  bridgeVersion?: string;
-}
-
-export interface LocalAgentReply {
-  reply: string;
-  conversationId?: string;
-}
-
-interface BunRuntimePlugin {
-  start(
-    opts: Record<string, unknown>,
-  ): Promise<{ ok: boolean; error?: string }>;
-  sendMessage(opts: {
-    message: string;
-    conversationId?: string;
-  }): Promise<{ reply: string }>;
-  getStatus(): Promise<LocalAgentStatus>;
-  stop(): Promise<void>;
-}
+type AndroidBunRuntimePlugin = BunRuntimePluginBase;
 
 type RuntimeState =
   | { kind: "idle" }
   | { kind: "starting"; promise: Promise<boolean> }
-  | { kind: "ready"; plugin: BunRuntimePlugin }
+  | { kind: "ready"; plugin: AndroidBunRuntimePlugin }
   | { kind: "unavailable"; reason: string };
 
 let runtimeState: RuntimeState = { kind: "idle" };
@@ -81,29 +66,8 @@ function isApplicable(): boolean {
   }
 }
 
-async function loadPlugin(): Promise<BunRuntimePlugin | null> {
-  try {
-    const mod = await import("@elizaos/capacitor-bun-runtime");
-    const plugin = (mod as unknown as { ElizaBunRuntime?: BunRuntimePlugin })
-      .ElizaBunRuntime;
-    if (!plugin) {
-      console.warn(
-        `${LOG_PREFIX} plugin module loaded but ElizaBunRuntime export missing`,
-      );
-      return null;
-    }
-    return plugin;
-  } catch (error) {
-    console.warn(
-      `${LOG_PREFIX} plugin not available:`,
-      error instanceof Error ? error.message : error,
-    );
-    return null;
-  }
-}
-
 async function startRuntime(): Promise<boolean> {
-  const plugin = await loadPlugin();
+  const plugin = await loadBunRuntimePlugin<AndroidBunRuntimePlugin>(LOG_PREFIX);
   if (!plugin) {
     runtimeState = { kind: "unavailable", reason: "plugin-not-loaded" };
     return false;
@@ -169,13 +133,9 @@ export async function sendLocalAgentMessage(
       `Android local runtime not ready (state: ${runtimeState.kind})`,
     );
   }
-  const payload = conversationId
-    ? { message: text, conversationId }
-    : { message: text };
+  const payload = buildSendMessagePayload(text, conversationId);
   const result = await runtimeState.plugin.sendMessage(payload);
-  const reply: LocalAgentReply = conversationId
-    ? { reply: result.reply, conversationId }
-    : { reply: result.reply };
+  const reply = buildLocalAgentReply(result.reply, conversationId);
   dispatchLocalAgentEvent(ANDROID_LOCAL_AGENT_REPLY_EVENT, reply);
   return reply;
 }
@@ -185,15 +145,7 @@ export async function sendLocalAgentMessage(
  */
 export async function getLocalAgentStatus(): Promise<LocalAgentStatus> {
   if (runtimeState.kind !== "ready") return { ready: false };
-  try {
-    return await runtimeState.plugin.getStatus();
-  } catch (error) {
-    console.warn(
-      `${LOG_PREFIX} getStatus() failed:`,
-      error instanceof Error ? error.message : error,
-    );
-    return { ready: false };
-  }
+  return getLocalAgentStatusFromPlugin(runtimeState.plugin, LOG_PREFIX);
 }
 
 /** Reset for tests. */
