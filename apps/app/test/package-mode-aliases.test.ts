@@ -98,6 +98,9 @@ describe("package mode aliases", () => {
       "utf8",
     );
 
+    expect(patchScript).toContain("patchAgentConfigPaths");
+    expect(patchScript).toContain("getElizaNamespace");
+    expect(patchScript).toContain("resolveOAuthDir");
     expect(patchScript).toContain("patchAgentExtractParamsPrompt");
     expect(patchScript).toContain("EXTRACT_ACTION_PARAMS_TEMPLATE");
     expect(patchScript).toContain("extractActionParamsTemplate");

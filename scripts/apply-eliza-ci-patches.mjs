@@ -686,6 +686,167 @@ function patchAgentExtractParamsPrompt(raw) {
   return next;
 }
 
+const agentConfigPathsImportBlock = `import fs from "node:fs";
+import path from "node:path";
+import {
+  getElizaNamespace,
+  migrateLegacyStateDir,
+  readEnv,
+  resolveOAuthDir,
+  resolveStateDir,
+  resolveUserPath,
+} from "@elizaos/core";`;
+
+const agentConfigPathsPatchedImportBlock = `import fs from "node:fs";
+import { homedir } from "node:os";
+import path from "node:path";
+import { logger } from "@elizaos/core";`;
+
+const agentConfigPathsHelpers = [
+  'const LEGACY_NAMESPACE = "milady";',
+  "const warnedAliases = new Set<string>();",
+  "",
+  "interface ReadEnvOptions {",
+  "  env?: NodeJS.ProcessEnv;",
+  "  defaultValue?: string;",
+  "  silent?: boolean;",
+  "}",
+  "",
+  "function defaultEnv(): NodeJS.ProcessEnv {",
+  '  return typeof process !== "undefined" && process.env',
+  "    ? process.env",
+  "    : ({} as NodeJS.ProcessEnv);",
+  "}",
+  "",
+  "function readRaw(env: NodeJS.ProcessEnv, key: string): string | undefined {",
+  "  const value = env[key];",
+  '  if (typeof value !== "string") return undefined;',
+  "  const trimmed = value.trim();",
+  "  return trimmed.length > 0 ? trimmed : undefined;",
+  "}",
+  "",
+  "function readEnv(",
+  "  canonicalKey: string,",
+  "  legacyAliases: readonly string[] = [],",
+  "  options: ReadEnvOptions = {},",
+  "): string | undefined {",
+  "  const env = options.env ?? defaultEnv();",
+  "  const canonical = readRaw(env, canonicalKey);",
+  "  if (canonical !== undefined) return canonical;",
+  "  for (const alias of legacyAliases) {",
+  "    const value = readRaw(env, alias);",
+  "    if (value === undefined) continue;",
+  "    if (!options.silent && !warnedAliases.has(alias)) {",
+  "      warnedAliases.add(alias);",
+  "      logger.warn(",
+  '        "[env] \\"" +',
+  "          alias +",
+  '          "\\" is deprecated; use \\"" +',
+  "          canonicalKey +",
+  '          "\\" instead. The legacy name still works for now.",',
+  "      );",
+  "    }",
+  "    return value;",
+  "  }",
+  "  return options.defaultValue;",
+  "}",
+  "",
+  "function resolveUserPath(input: string): string {",
+  "  const trimmed = input.trim();",
+  "  if (!trimmed) return trimmed;",
+  '  if (trimmed.startsWith("~")) {',
+  "    return path.resolve(trimmed.replace(/^~(?=$|[\\\\/])/, homedir()));",
+  "  }",
+  "  return path.resolve(trimmed);",
+  "}",
+  "",
+  "function getElizaNamespace(env: NodeJS.ProcessEnv = process.env): string {",
+  '  return readEnv("ELIZA_NAMESPACE", [], { env }) ?? "eliza";',
+  "}",
+  "",
+  "function resolveStateDir(",
+  "  env: NodeJS.ProcessEnv = process.env,",
+  "  getHome: () => string = homedir,",
+  "): string {",
+  '  const explicit = readEnv("ELIZA_STATE_DIR", ["MILADY_STATE_DIR"], { env });',
+  "  if (explicit) return resolveUserPath(explicit);",
+  '  return path.join(getHome(), "." + getElizaNamespace(env));',
+  "}",
+  "",
+  "function resolveOAuthDir(",
+  "  env: NodeJS.ProcessEnv = process.env,",
+  "  stateDirPath: string = resolveStateDir(env),",
+  "): string {",
+  '  const explicit = readEnv("ELIZA_OAUTH_DIR", [], { env });',
+  "  return explicit",
+  "    ? resolveUserPath(explicit)",
+  '    : path.join(stateDirPath, "credentials");',
+  "}",
+  "",
+  "function migrateLegacyStateDir(",
+  "  env: NodeJS.ProcessEnv = process.env,",
+  "  getHome: () => string = homedir,",
+  "): { migrated: boolean; from?: string; to?: string } {",
+  '  if (readEnv("ELIZA_STATE_DIR", ["MILADY_STATE_DIR"], { env, silent: true })) {',
+  "    return { migrated: false };",
+  "  }",
+  "  const namespace = getElizaNamespace(env);",
+  "  if (namespace === LEGACY_NAMESPACE) return { migrated: false };",
+  "  const home = getHome();",
+  '  const newDir = path.join(home, "." + namespace);',
+  '  const legacyDir = path.join(home, "." + LEGACY_NAMESPACE);',
+  "  if (fs.existsSync(newDir)) return { migrated: false };",
+  "  if (!fs.existsSync(legacyDir)) return { migrated: false };",
+  "  try {",
+  "    fs.mkdirSync(newDir, { recursive: true });",
+  "    fs.cpSync(legacyDir, newDir, {",
+  "      recursive: true,",
+  "      force: false,",
+  "      errorOnExist: false,",
+  "      dereference: false,",
+  "    });",
+  "    logger.warn(",
+  '      "[state-dir] migrated legacy state from \\"" +',
+  "        legacyDir +",
+  '        "\\" to \\"" +',
+  "        newDir +",
+  '        "\\". The old directory is left in place; you may remove it once you\'ve confirmed the migration.",',
+  "    );",
+  "    return { migrated: true, from: legacyDir, to: newDir };",
+  "  } catch (err) {",
+  "    logger.warn(",
+  '      "[state-dir] failed to migrate legacy state from \\"" +',
+  "        legacyDir +",
+  '        "\\" to \\"" +',
+  "        newDir +",
+  '        "\\": " +',
+  "        (err instanceof Error ? err.message : String(err)) +",
+  '        ". Continuing with a fresh \\"" +',
+  "        newDir +",
+  '        "\\".",',
+  "    );",
+  "    return { migrated: false, from: legacyDir, to: newDir };",
+  "  }",
+  "}",
+  "",
+].join("\n");
+
+function patchAgentConfigPaths(raw) {
+  let next = raw.replace(
+    agentConfigPathsImportBlock,
+    agentConfigPathsPatchedImportBlock,
+  );
+
+  if (!next.includes("function getElizaNamespace(")) {
+    next = next.replace(
+      'const LEGACY_CONFIG_FILENAME = "milady.json";\n',
+      `const LEGACY_CONFIG_FILENAME = "milady.json";\n${agentConfigPathsHelpers}`,
+    );
+  }
+
+  return next;
+}
+
 function patchSqlRawConnectionReturnType(raw, managerTypeName) {
   return raw.replace(
     "  getRawConnection() {\n    return this.manager.getConnection();\n  }",
@@ -935,6 +1096,12 @@ function applyReleaseSourcePatches() {
     ),
     patchN8nCharacterKnowledge,
     "agent n8n explicit knowledge gate",
+  );
+
+  replaceFileText(
+    path.join(elizaDir, "packages", "agent", "src", "config", "paths.ts"),
+    patchAgentConfigPaths,
+    "agent config path helpers",
   );
 
   replaceFileText(
