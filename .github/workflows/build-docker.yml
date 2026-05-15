@@ -173,28 +173,47 @@ jobs:
         env:
           MILADY_SKIP_CLOUD_SUBMODULE: "1"
 
-      # Stub @elizaos/cloud-sdk so link-docker-local-app-packages.mjs (which
-      # hard-requires eliza/cloud/packages/sdk/package.json) doesn't blow up
-      # under MILADY_SKIP_CLOUD_SUBMODULE=1. Upstream eliza added this entry
-      # to localPackages on develop after our last green run.
-      - name: Stub eliza cloud-sdk package for docker context
+      # Stub any localPackages entry from link-docker-local-app-packages.mjs
+      # that has no package.json on disk. Upstream eliza periodically renames
+      # or adds entries (cloud-sdk, plugin-native-activity-tracker) faster than
+      # the actual file moves land, leaving the linker pointing at non-existent
+      # paths. The agent image doesn't actually use these stubs at runtime —
+      # they exist solely to satisfy resolveLocalPackageDir().
+      - name: Stub missing eliza local-package entries for docker context
         run: |
-          STUB_DIR="eliza/cloud/packages/sdk"
-          if [ ! -f "$STUB_DIR/package.json" ]; then
-            mkdir -p "$STUB_DIR"
-            cat > "$STUB_DIR/package.json" <<'JSON'
-          {
-            "name": "@elizaos/cloud-sdk",
-            "version": "0.0.0-stub",
-            "private": true,
-            "description": "Stub injected by milady CI when cloud submodule is skipped (MILADY_SKIP_CLOUD_SUBMODULE=1).",
-            "main": "index.js",
-            "exports": { ".": "./index.js" }
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          import path from "node:path";
+          const linker = "eliza/packages/app-core/scripts/link-docker-local-app-packages.mjs";
+          if (!fs.existsSync(linker)) process.exit(0);
+          const src = fs.readFileSync(linker, "utf8");
+          const arrayMatch = src.match(/const localPackages = \[([\s\S]*?)\];/);
+          if (!arrayMatch) {
+            console.log("[stub-local-packages] localPackages array not found in linker; skipping");
+            process.exit(0);
           }
-          JSON
-            echo "// stub cloud-sdk for docker build context" > "$STUB_DIR/index.js"
-            echo "Created stub at $STUB_DIR/package.json"
-          fi
+          const entries = [...arrayMatch[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]);
+          for (const entry of entries) {
+            const candidates = [entry];
+            if (entry.startsWith("eliza/")) candidates.push(entry.slice("eliza/".length));
+            const found = candidates.some((c) => fs.existsSync(path.join(c, "package.json")));
+            if (found) continue;
+            const stubDir = entry;
+            fs.mkdirSync(stubDir, { recursive: true });
+            const inferredName = "@elizaos/" + path.basename(entry);
+            const pkg = {
+              name: inferredName,
+              version: "0.0.0-stub",
+              private: true,
+              description: "Stub injected by milady CI for missing upstream eliza local-package entry.",
+              main: "index.js",
+              exports: { ".": "./index.js" },
+            };
+            fs.writeFileSync(path.join(stubDir, "package.json"), JSON.stringify(pkg, null, 2) + "\n");
+            fs.writeFileSync(path.join(stubDir, "index.js"), "// stub for docker build context\n");
+            console.log(`[stub-local-packages] stubbed ${stubDir} as ${inferredName}`);
+          }
+          NODE
 
       - name: Apply elizaOS source CI patches
         run: node scripts/apply-eliza-ci-patches.mjs
