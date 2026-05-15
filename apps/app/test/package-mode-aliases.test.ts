@@ -70,4 +70,25 @@ describe("package mode aliases", () => {
     expect(stubText).not.toContain("@elizaos/ui/state/");
     expect(stubText).not.toContain("@elizaos/ui/components/");
   });
+
+  it("patches all Bun-installed app-core stylesheet copies", () => {
+    const patchScript = fs.readFileSync(
+      path.resolve(
+        appRoot,
+        "../..",
+        "scripts/patch-elizaos-package-styles.mjs",
+      ),
+      "utf8",
+    );
+
+    expect(patchScript).toContain("collectAppCorePackageDirs");
+    expect(patchScript).toContain('node_modules", ".bun"');
+    expect(patchScript).toContain("@elizaos+app-core@");
+    expect(patchScript).toContain(
+      '@import "../../../ui/src/styles/electrobun-mac-window-drag.css";',
+    );
+    expect(patchScript).toContain(
+      '@import "./electrobun-mac-window-drag.css";',
+    );
+  });
 });
