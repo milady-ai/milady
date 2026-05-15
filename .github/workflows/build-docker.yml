@@ -173,6 +173,29 @@ jobs:
         env:
           MILADY_SKIP_CLOUD_SUBMODULE: "1"
 
+      # Stub @elizaos/cloud-sdk so link-docker-local-app-packages.mjs (which
+      # hard-requires eliza/cloud/packages/sdk/package.json) doesn't blow up
+      # under MILADY_SKIP_CLOUD_SUBMODULE=1. Upstream eliza added this entry
+      # to localPackages on develop after our last green run.
+      - name: Stub eliza cloud-sdk package for docker context
+        run: |
+          STUB_DIR="eliza/cloud/packages/sdk"
+          if [ ! -f "$STUB_DIR/package.json" ]; then
+            mkdir -p "$STUB_DIR"
+            cat > "$STUB_DIR/package.json" <<'JSON'
+          {
+            "name": "@elizaos/cloud-sdk",
+            "version": "0.0.0-stub",
+            "private": true,
+            "description": "Stub injected by milady CI when cloud submodule is skipped (MILADY_SKIP_CLOUD_SUBMODULE=1).",
+            "main": "index.js",
+            "exports": { ".": "./index.js" }
+          }
+          JSON
+            echo "// stub cloud-sdk for docker build context" > "$STUB_DIR/index.js"
+            echo "Created stub at $STUB_DIR/package.json"
+          fi
+
       - name: Apply elizaOS source CI patches
         run: node scripts/apply-eliza-ci-patches.mjs
 
