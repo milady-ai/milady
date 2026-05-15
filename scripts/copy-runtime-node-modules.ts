@@ -406,6 +406,7 @@ function ensureLocalWorkspaceDists() {
       path.join(elizaPackagesDir, "agent"),
       "dist/services/app-package-modules.js",
     ],
+    ["eliza/packages/app-core", elizaAppCoreDir, "dist/api/auth.js"],
     [
       "eliza/plugins/plugin-elizacloud",
       path.join(elizaPluginsDir, "plugin-elizacloud"),
@@ -490,6 +491,7 @@ function linkLocalElizaWorkspacePackages() {
     ["@elizaos/core", path.join(elizaPackagesDir, "core")],
     ["@elizaos/shared", path.join(elizaPackagesDir, "shared")],
     ["@elizaos/agent", path.join(elizaPackagesDir, "agent")],
+    ["@elizaos/app-core", elizaAppCoreDir],
     ["@elizaos/cloud-sdk", path.join(elizaCloudPackagesDir, "sdk")],
     ["@elizaos/cloud-routing", path.join(elizaPackagesDir, "cloud-routing")],
     ...agentRuntimePlugins.map(

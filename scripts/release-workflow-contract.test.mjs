@@ -509,6 +509,8 @@ test("Electrobun release applies elizaOS source overlay before manual build setu
     /elizaPackagesDir,\s*"agent"[\s\S]*dist\/services\/app-package-modules\.js/,
   );
   assert.match(copyRuntimeWrapper, /"@elizaos\/agent"/);
+  assert.match(copyRuntimeWrapper, /elizaAppCoreDir[\s\S]*dist\/api\/auth\.js/);
+  assert.match(copyRuntimeWrapper, /"@elizaos\/app-core"/);
   for (const packageName of [
     "plugin-agent-skills",
     "plugin-registry",
