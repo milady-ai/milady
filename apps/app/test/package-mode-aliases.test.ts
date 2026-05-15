@@ -37,4 +37,15 @@ describe("package mode aliases", () => {
       "./apps/app/src/native-plugin-stubs.ts",
     ]);
   });
+
+  it("imports packaged app-core style exports instead of private ui dist paths", () => {
+    const mainText = fs.readFileSync(
+      path.join(appRoot, "src/main.tsx"),
+      "utf8",
+    );
+
+    expect(mainText).toContain("@elizaos/app-core/styles/styles.css");
+    expect(mainText).toContain("@elizaos/app-core/styles/brand-gold.css");
+    expect(mainText).not.toContain("@elizaos/ui/dist/styles/");
+  });
 });

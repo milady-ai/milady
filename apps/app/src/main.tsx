@@ -1,6 +1,6 @@
 import { App, ErrorBoundary } from "@elizaos/app-core";
-import "@elizaos/ui/dist/styles/styles.css";
-import "@elizaos/ui/dist/styles/brand-gold.css";
+import "@elizaos/app-core/styles/styles.css";
+import "@elizaos/app-core/styles/brand-gold.css";
 
 import { App as CapacitorApp } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";

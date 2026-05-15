@@ -1,14 +1,29 @@
 #!/usr/bin/env node
 
+import { generateKeyPairSync, sign } from "node:crypto";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { exportJWK, generateKeyPair, SignJWT } from "jose";
 
 function assert(condition, message) {
   if (!condition) {
     throw new Error(message);
   }
+}
+
+function base64UrlJson(value) {
+  return Buffer.from(JSON.stringify(value)).toString("base64url");
+}
+
+function signJwt(payload, privateKey) {
+  const header = { alg: "RS256", kid: "smoke-key" };
+  const signingInput = `${base64UrlJson(header)}.${base64UrlJson(payload)}`;
+  const signature = sign(
+    "RSA-SHA256",
+    Buffer.from(signingInput),
+    privateKey,
+  ).toString("base64url");
+  return `${signingInput}.${signature}`;
 }
 
 async function loadVerifyBootstrapToken() {
@@ -39,23 +54,27 @@ async function main() {
   const issuer = `https://issuer.milady.local/${nowMs.toString(36)}`;
   const containerId = "container-1";
 
-  const { privateKey, publicKey } = await generateKeyPair("RS256");
-  const jwk = await exportJWK(publicKey);
+  const { privateKey, publicKey } = generateKeyPairSync("rsa", {
+    modulusLength: 2048,
+    publicExponent: 0x10001,
+  });
+  const jwk = publicKey.export({ format: "jwk" });
   jwk.kid = "smoke-key";
   jwk.alg = "RS256";
   jwk.use = "sig";
 
-  const token = await new SignJWT({
-    sub: "cloud-user-123",
-    containerId,
-    scope: "bootstrap",
-    jti: "jti-1",
-  })
-    .setProtectedHeader({ alg: "RS256", kid: "smoke-key" })
-    .setIssuer(issuer)
-    .setIssuedAt(nowSeconds)
-    .setExpirationTime(nowSeconds + 300)
-    .sign(privateKey);
+  const token = signJwt(
+    {
+      sub: "cloud-user-123",
+      containerId,
+      scope: "bootstrap",
+      jti: "jti-1",
+      iss: issuer,
+      iat: nowSeconds,
+      exp: nowSeconds + 300,
+    },
+    privateKey,
+  );
 
   const seen = new Set();
   const authStore = {

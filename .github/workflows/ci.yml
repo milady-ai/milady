@@ -73,10 +73,12 @@ jobs:
           fi
 
       - name: Generate i18n keyword data
+        if: ${{ hashFiles('eliza/package.json') != '' }}
         run: node packages/shared/scripts/generate-keywords.mjs --target ts
         working-directory: eliza
 
       - name: Build eliza packages required for typecheck
+        if: ${{ hashFiles('eliza/package.json') != '' }}
         run: |
           if [ ! -f eliza/packages/core/dist/index.node.js ] || [ ! -f eliza/packages/core/dist/index.d.ts ]; then
             (cd eliza/packages/core && bun run build)
@@ -173,6 +175,7 @@ jobs:
         working-directory: eliza
 
       - name: Build eliza packages required for typecheck
+        if: ${{ hashFiles('eliza/package.json') != '' }}
         run: |
           if [ ! -f eliza/packages/core/dist/index.node.js ] || [ ! -f eliza/packages/core/dist/index.d.ts ]; then
             (cd eliza/packages/core && bun run build)
