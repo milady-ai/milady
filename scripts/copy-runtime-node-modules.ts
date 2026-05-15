@@ -18,6 +18,7 @@ const target = path.resolve(
 
 const elizaAppCoreDir = path.resolve(repoRoot, "eliza", "packages", "app-core");
 const elizaPackagesDir = path.resolve(repoRoot, "eliza", "packages");
+const elizaAgentDir = path.resolve(repoRoot, "eliza", "packages", "agent");
 const elizaElectrobunDir = path.resolve(
   elizaAppCoreDir,
   "platforms",
@@ -29,8 +30,11 @@ const elizaElectrobunNodeModules = path.join(
   elizaElectrobunDir,
   "node_modules",
 );
+const elizaAgentNodeModules = path.join(elizaAgentDir, "node_modules");
 const miladyRootNodeModules = path.join(repoRoot, "node_modules");
 const miladyRootBunStore = path.join(miladyRootNodeModules, ".bun");
+const elizaRootNodeModules = path.join(repoRoot, "eliza", "node_modules");
+const elizaRootBunStore = path.join(elizaRootNodeModules, ".bun");
 
 // In disable-local-eliza-workspace mode the eliza/ tree is restored *after*
 // `bun install` ran against the root only, so eliza/packages/app-core/
@@ -142,6 +146,124 @@ function populateNodeModules(targetDir: string): PopulateCounts | null {
   return counts;
 }
 
+function packageExists(packageDir: string) {
+  return fs.existsSync(path.join(packageDir, "package.json"));
+}
+
+function addPackageCandidate(
+  candidates: Map<string, string>,
+  packageDir: string,
+) {
+  if (!packageExists(packageDir)) {
+    return;
+  }
+  const realPackageDir = fs.realpathSync(packageDir);
+  if (!candidates.has(realPackageDir)) {
+    candidates.set(realPackageDir, packageDir);
+  }
+}
+
+function addBunStoreCoreCandidates(
+  candidates: Map<string, string>,
+  bunStore: string,
+) {
+  if (!fs.existsSync(bunStore)) {
+    return;
+  }
+
+  for (const entry of sortedDirents(bunStore)) {
+    if (!isLinkablePackageEntry(entry)) {
+      continue;
+    }
+    addPackageCandidate(
+      candidates,
+      path.join(bunStore, entry.name, "node_modules", "@elizaos", "core"),
+    );
+  }
+}
+
+function collectCorePackageCandidates() {
+  const candidates = new Map<string, string>();
+
+  for (const nodeModules of [
+    miladyRootNodeModules,
+    elizaRootNodeModules,
+    elizaPackagesNodeModules,
+    elizaAgentNodeModules,
+    elizaAppCoreNodeModules,
+    elizaElectrobunNodeModules,
+  ]) {
+    addPackageCandidate(candidates, path.join(nodeModules, "@elizaos", "core"));
+  }
+
+  addBunStoreCoreCandidates(candidates, miladyRootBunStore);
+  addBunStoreCoreCandidates(candidates, elizaRootBunStore);
+  addBunStoreCoreCandidates(
+    candidates,
+    path.join(elizaAgentNodeModules, ".bun"),
+  );
+
+  return [...candidates.values()];
+}
+
+function findCoreRuntimeSource(packageDirs: string[]) {
+  for (const packageDir of packageDirs) {
+    const source = path.join(packageDir, "dist", "node", "index.node.js");
+    if (fs.existsSync(source)) {
+      return packageDir;
+    }
+  }
+  return null;
+}
+
+function copyExistingFile(src: string, dest: string) {
+  if (!fs.existsSync(src) || fs.existsSync(dest)) {
+    return false;
+  }
+  fs.mkdirSync(path.dirname(dest), { recursive: true });
+  fs.copyFileSync(src, dest);
+  return true;
+}
+
+function repairCoreRuntimeDist(packageDir: string, sourcePackageDir: string) {
+  const copies = [
+    ["dist/node/index.node.js", "dist/node/index.node.js"],
+    ["dist/node/index.node.js.map", "dist/node/index.node.js.map"],
+    ["dist/index.node.d.ts", "dist/node/index.node.d.ts"],
+    ["dist/index.node.d.ts.map", "dist/node/index.node.d.ts.map"],
+  ] as const;
+
+  let copied = 0;
+  for (const [sourceRel, destRel] of copies) {
+    const source = path.join(sourcePackageDir, sourceRel);
+    const dest = path.join(packageDir, destRel);
+    if (copyExistingFile(source, dest)) {
+      copied += 1;
+    }
+  }
+
+  return copied;
+}
+
+function ensureElizaCoreRuntimeAliases() {
+  const packageDirs = collectCorePackageCandidates();
+  const sourcePackageDir = findCoreRuntimeSource(packageDirs);
+  if (!sourcePackageDir) {
+    return;
+  }
+
+  let repaired = 0;
+  for (const packageDir of packageDirs) {
+    repaired += repairCoreRuntimeDist(packageDir, sourcePackageDir);
+  }
+
+  if (repaired > 0) {
+    console.log(
+      `[copy-runtime-node-modules wrapper] repaired ${repaired} @elizaos/core runtime dist aliases from ${sourcePackageDir}`,
+    );
+  }
+}
+
 function ensureMirroredNodeModules() {
   if (!fs.existsSync(miladyRootNodeModules)) {
     return;
@@ -163,6 +285,7 @@ function ensureMirroredNodeModules() {
 }
 
 ensureMirroredNodeModules();
+ensureElizaCoreRuntimeAliases();
 
 if (process.argv.includes("--link-only")) {
   process.exit(0);

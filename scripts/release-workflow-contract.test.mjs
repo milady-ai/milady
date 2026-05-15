@@ -446,6 +446,9 @@ test("Electrobun release applies elizaOS source overlay before manual build setu
     copyRuntimeWrapper,
     /elizaAppCoreDir,\s*"platforms",\s*"electrobun"/,
   );
+  assert.match(copyRuntimeWrapper, /elizaAgentNodeModules/);
+  assert.match(copyRuntimeWrapper, /ensureElizaCoreRuntimeAliases/);
+  assert.match(copyRuntimeWrapper, /dist\/node\/index\.node\.js/);
 });
 
 test("Electrobun Windows release runs packaged Playwright check after disk cleanup", () => {
