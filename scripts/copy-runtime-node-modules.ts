@@ -309,6 +309,26 @@ function ensureBuiltElizaPackage(
     return false;
   }
 
+  // Skip packages with no `build` script — upstream eliza occasionally
+  // strips a workspace down to just package.json (e.g. cloud-routing on
+  // develop after the cloud migration). Calling `bun run build` against
+  // such a package fails with "Script not found 'build'", which then
+  // breaks the desktop-build stage. Treat absent script as a no-op.
+  const packageJsonPath = path.join(packageDir, "package.json");
+  if (fs.existsSync(packageJsonPath)) {
+    try {
+      const pkg = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
+      if (!pkg?.scripts?.build) {
+        console.log(
+          `[copy-runtime-node-modules wrapper] skipping ${packageDir}: no build script`,
+        );
+        return false;
+      }
+    } catch {
+      // fall through and let `bun run build` surface the real error
+    }
+  }
+
   const result = spawnSync(bunExecutable, ["run", "build"], {
     cwd: packageDir,
     env: process.env,
