@@ -80,10 +80,10 @@ on:
           - rc
           - stable
       draft:
-        description: "Create as draft release (hidden from main page until manually published)"
+        description: "Create as draft release (hidden from main page until manually published). Default true keeps the carrots packaging fallback active; flip to false only when packaging is fully green."
         required: false
         type: boolean
-        default: false
+        default: true
       platform:
         description: "Desktop platform matrix to build"
         required: false
