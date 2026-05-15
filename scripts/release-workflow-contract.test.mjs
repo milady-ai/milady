@@ -142,10 +142,17 @@ test("distribution workflows consume the canonical channel policy", () => {
     electrobun,
     /bun install --cwd eliza --no-frozen-lockfile --ignore-scripts/,
   );
-  assert.match(electrobun, /eliza\/packages\/browser-bridge\/dist\/artifacts/);
+  assert.match(
+    electrobun,
+    /eliza\/packages\/browser-bridge-extension\/dist\/artifacts/,
+  );
   assert.match(
     electrobun,
     /name: Package Agent Browser Bridge release bundles[\s\S]*?bun run browser-bridge:package:release[\s\S]*?packaged=true/,
+  );
+  assert.match(
+    electrobun,
+    /if \[ -d eliza\/packages\/schemas \] && \[ -f eliza\/packages\/schemas\/buf\.gen\.yaml \]; then[\s\S]*?test -f eliza\/packages\/core\/src\/types\/generated\/eliza\/v1\/agent_pb\.ts[\s\S]*?test -f eliza\/packages\/core\/src\/types\/generated\/eliza\/v1\/components_pb\.ts[\s\S]*?else[\s\S]*?skipping protobuf generation[\s\S]*?fi/,
   );
   assert.doesNotMatch(
     electrobun,

@@ -445,10 +445,10 @@ jobs:
         with:
           name: browser-bridge-store-bundles
           path: |
-            eliza/packages/browser-bridge/dist/artifacts/browser-bridge-chrome-v*.zip
-            eliza/packages/browser-bridge/dist/artifacts/browser-bridge-safari-v*.zip
-            eliza/packages/browser-bridge/dist/artifacts/browser-bridge-safari-project-v*.zip
-            eliza/packages/browser-bridge/dist/artifacts/browser-bridge-release-manifest-v*.json
+            eliza/packages/browser-bridge-extension/dist/artifacts/browser-bridge-chrome-v*.zip
+            eliza/packages/browser-bridge-extension/dist/artifacts/browser-bridge-safari-v*.zip
+            eliza/packages/browser-bridge-extension/dist/artifacts/browser-bridge-safari-project-v*.zip
+            eliza/packages/browser-bridge-extension/dist/artifacts/browser-bridge-release-manifest-v*.json
           if-no-files-found: error
           retention-days: 30
 
@@ -628,9 +628,11 @@ jobs:
               sleep 15
             done
             popd
+            test -f eliza/packages/core/src/types/generated/eliza/v1/agent_pb.ts
+            test -f eliza/packages/core/src/types/generated/eliza/v1/components_pb.ts
+          else
+            echo "eliza packages/schemas is absent; skipping protobuf generation"
           fi
-          test -f eliza/packages/core/src/types/generated/eliza/v1/agent_pb.ts
-          test -f eliza/packages/core/src/types/generated/eliza/v1/components_pb.ts
 
       - name: Align package-mode agent pins
         run: node scripts/align-eliza-agent-package-pins.mjs
