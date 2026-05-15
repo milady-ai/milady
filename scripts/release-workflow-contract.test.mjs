@@ -496,6 +496,8 @@ test("Electrobun release applies elizaOS source overlay before manual build setu
   );
   assert.match(copyRuntimeWrapper, /"@elizaos\/cloud-routing"/);
   for (const packageName of [
+    "plugin-registry",
+    "plugin-app-manager",
     "plugin-browser",
     "plugin-capacitor-bridge",
     "plugin-coding-tools",

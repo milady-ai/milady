@@ -311,6 +311,18 @@ function ensureBuiltElizaPackage(
 
 function ensureLocalWorkspaceDists() {
   const agentRuntimePluginBuilds = [
+    [
+      "eliza/plugins/plugin-registry",
+      "plugin-registry",
+      "dist/index.js",
+      { allowExistingMarkerAfterFailure: true },
+    ],
+    [
+      "eliza/plugins/plugin-app-manager",
+      "plugin-app-manager",
+      "dist/index.js",
+      { allowExistingMarkerAfterFailure: true },
+    ],
     ["eliza/plugins/plugin-browser", "plugin-browser", "dist/index.js"],
     [
       "eliza/plugins/plugin-capacitor-bridge",
@@ -416,6 +428,8 @@ function linkLocalScopedPackage(
 
 function linkLocalElizaWorkspacePackages() {
   const agentRuntimePlugins = [
+    "plugin-registry",
+    "plugin-app-manager",
     "plugin-browser",
     "plugin-capacitor-bridge",
     "plugin-coding-tools",
