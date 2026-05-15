@@ -52,7 +52,6 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
           install-command: bun install --ignore-scripts --no-frozen-lockfile
-          disable-local-eliza-workspace: "true"
           prepare-local-eliza-runtime: "true"
           run-postinstall: "false"
           skip-avatar-clone: "true"
@@ -115,7 +114,6 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
           install-command: bun install --ignore-scripts --no-frozen-lockfile
-          disable-local-eliza-workspace: "true"
           prepare-local-eliza-runtime: "true"
           skip-cloud-submodule: "true"
           skip-local-upstreams-postinstall: "true"
@@ -151,7 +149,6 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
           install-command: bun install --ignore-scripts --no-frozen-lockfile
-          disable-local-eliza-workspace: "true"
           prepare-local-eliza-runtime: "true"
           skip-cloud-submodule: "true"
           skip-local-upstreams-postinstall: "true"
@@ -206,7 +203,6 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
           install-command: bun install --ignore-scripts --no-frozen-lockfile
-          disable-local-eliza-workspace: "true"
           prepare-local-eliza-runtime: "true"
           skip-cloud-submodule: "true"
           skip-local-upstreams-postinstall: "true"
@@ -239,7 +235,6 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
           install-command: bun install --ignore-scripts --no-frozen-lockfile
-          disable-local-eliza-workspace: "true"
           prepare-local-eliza-runtime: "true"
           skip-cloud-submodule: "true"
           skip-local-upstreams-postinstall: "true"
