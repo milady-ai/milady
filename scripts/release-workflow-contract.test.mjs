@@ -160,8 +160,10 @@ test("distribution workflows consume the canonical channel policy", () => {
   );
   assert.match(
     electrobun,
-    /workflow_dispatch:[\s\S]*?tag:\n\s+description: "Release tag \(e\.g\. v2\.0\.0-alpha\.3\)"\n\s+required: true/,
+    /workflow_dispatch:[\s\S]*?tag:\n\s+description: "Release tag[^"]*Leave blank to auto-pick[^"]*"\n\s+required: false/,
   );
+  assert.match(electrobun, /Auto-picked tag: \$TAG/);
+  assert.match(electrobun, /auto-bumped to fresh tag \$TAG/);
   assert.match(electrobun, /beta desktop release requires a beta version/);
   assert.match(electrobun, /BUILD_ENV="stable"/);
 });
