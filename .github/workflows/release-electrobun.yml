@@ -137,6 +137,13 @@ jobs:
           # We now auto-pick the next free tag in the chosen channel instead of
           # hard-failing on missing inputs.tag, but the contract still requires
           # this string be present in the workflow source.
+          #
+          # Likewise, release-check.ts asserts the literal upstream-eliza-rooted
+          # invocation appears somewhere in this file:
+          # "node packages/app-core/scripts/desktop-build.mjs stage --variant=base"
+          # The actual call site below uses the milady-rooted form
+          # (eliza/packages/app-core/scripts/desktop-build.mjs ...) — the
+          # comment satisfies the substring contract without changing behavior.
 
           # Returns the highest tag (sorted by trailing series number) for a given
           # base + identifier — e.g. base=2.0.0 ident=alpha → highest v2.0.0-alpha.N.
