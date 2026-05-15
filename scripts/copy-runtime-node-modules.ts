@@ -19,6 +19,12 @@ const target = path.resolve(
 const elizaAppCoreDir = path.resolve(repoRoot, "eliza", "packages", "app-core");
 const elizaPackagesDir = path.resolve(repoRoot, "eliza", "packages");
 const elizaPluginsDir = path.resolve(repoRoot, "eliza", "plugins");
+const elizaCloudPackagesDir = path.resolve(
+  repoRoot,
+  "eliza",
+  "cloud",
+  "packages",
+);
 const elizaAgentDir = path.resolve(repoRoot, "eliza", "packages", "agent");
 const elizaElectrobunDir = path.resolve(
   elizaAppCoreDir,
@@ -321,6 +327,11 @@ function ensureLocalWorkspaceDists() {
       "dist/index.js",
     ],
     [
+      "eliza/cloud/packages/sdk",
+      path.join(elizaCloudPackagesDir, "sdk"),
+      "dist/index.js",
+    ],
+    [
       "eliza/plugins/plugin-elizacloud",
       path.join(elizaPluginsDir, "plugin-elizacloud"),
       "dist/node/index.node.js",
@@ -371,6 +382,7 @@ function linkLocalElizaWorkspacePackages() {
   const packages = [
     ["@elizaos/core", path.join(elizaPackagesDir, "core")],
     ["@elizaos/shared", path.join(elizaPackagesDir, "shared")],
+    ["@elizaos/cloud-sdk", path.join(elizaCloudPackagesDir, "sdk")],
     [
       "@elizaos/plugin-elizacloud",
       path.join(elizaPluginsDir, "plugin-elizacloud"),
