@@ -481,6 +481,14 @@ test("Electrobun release applies elizaOS source overlay before manual build setu
     copyRuntimeWrapper,
     /elizaPluginsDir,\s*"plugin-elizacloud"[\s\S]*dist\/node\/index\.node\.js/,
   );
+  assert.match(
+    copyRuntimeWrapper,
+    /plugin-elizacloud"[\s\S]*allowExistingMarkerAfterFailure:\s*true/,
+  );
+  assert.match(
+    copyRuntimeWrapper,
+    /allowExistingMarkerAfterFailure[\s\S]*fs\.existsSync\(marker\)/,
+  );
   assert.match(copyRuntimeWrapper, /"@elizaos\/plugin-elizacloud"/);
   assert.match(copyRuntimeWrapper, /dist\/index\.js/);
   assert.match(copyRuntimeWrapper, /ensureElizaCoreRuntimeAliases/);
