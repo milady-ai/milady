@@ -510,6 +510,10 @@ test("Electrobun release applies elizaOS source overlay before manual build setu
   );
   assert.match(
     copyRuntimeWrapper,
+    /plugin-capacitor-bridge"[\s\S]*allowExistingMarkerAfterFailure:\s*true/,
+  );
+  assert.match(
+    copyRuntimeWrapper,
     /allowExistingMarkerAfterFailure[\s\S]*fs\.existsSync\(marker\)/,
   );
   assert.match(copyRuntimeWrapper, /"@elizaos\/plugin-elizacloud"/);

@@ -316,6 +316,7 @@ function ensureLocalWorkspaceDists() {
       "eliza/plugins/plugin-capacitor-bridge",
       "plugin-capacitor-bridge",
       "dist/index.js",
+      { allowExistingMarkerAfterFailure: true },
     ],
     [
       "eliza/plugins/plugin-coding-tools",
@@ -359,11 +360,12 @@ function ensureLocalWorkspaceDists() {
       "dist/index.js",
     ],
     ...agentRuntimePluginBuilds.map(
-      ([label, packageName, markerRelPath]) =>
+      ([label, packageName, markerRelPath, options]) =>
         [
           label,
           path.join(elizaPluginsDir, packageName),
           markerRelPath,
+          options,
         ] as const,
     ),
     [
