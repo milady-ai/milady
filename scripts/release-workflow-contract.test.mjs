@@ -453,6 +453,10 @@ test("Electrobun release applies elizaOS source overlay before manual build setu
   assert.match(electrobun, /--external @node-llama-cpp\/mac-arm64-metal/);
   assert.match(electrobun, /--external @node-llama-cpp\/linux-x64/);
   assert.match(electrobun, /--external @node-llama-cpp\/win-x64/);
+  assert.match(electrobun, /-name "\*\.app\.tar\.gz"/);
+  assert.match(electrobun, /-name "\*\.tar\.zst"/);
+  assert.match(electrobun, /-name "eliza-\*\.exe\.zip"/);
+  assert.match(electrobun, /No public release files collected/);
   assert.match(copyRuntimeWrapper, /elizaElectrobunNodeModules/);
   assert.match(
     copyRuntimeWrapper,

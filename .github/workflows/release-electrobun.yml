@@ -1866,8 +1866,11 @@ jobs:
           # installer, not the raw Electrobun bootstrap stub.
           find release-artifacts -type f \( \
             -name "*.dmg" -o \
+            -name "*.app.tar.gz" -o \
+            -name "*.tar.zst" -o \
             -name "ElizaOSApp-Setup-*.exe" -o \
             -name "ElizaOSApp-Setup-*.exe.zip" -o \
+            -name "eliza-*.exe.zip" -o \
             -name "*Setup*.tar.gz" -o \
             -name "*.msix" \
           \) -exec cp {} release-files/ \; 2>/dev/null || true
@@ -1897,6 +1900,10 @@ jobs:
       - name: Generate checksums
         run: |
           cd release-files
+          if ! find . -maxdepth 1 -type f ! -name SHA256SUMS.txt | grep -q .; then
+            echo "::error::No public release files collected"
+            exit 1
+          fi
           sha256sum -- * > SHA256SUMS.txt
           cat SHA256SUMS.txt
 
