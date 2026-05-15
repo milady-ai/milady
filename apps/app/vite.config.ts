@@ -1873,6 +1873,9 @@ const ELIZA_AGENT_FUNCTION_STUB_NAMES = [
   "queryAuditFeed",
   "readBundledPluginPackageMetadata",
   "readConfigEnv",
+  "readJsonBody",
+  "readRequestBody",
+  "readRequestBodyBuffer",
   "readTriggerConfig",
   "readTriggerRuns",
   "requestRestart",
@@ -1898,6 +1901,8 @@ const ELIZA_AGENT_FUNCTION_STUB_NAMES = [
   "routeAutonomyTextToUser",
   "saveElizaConfig",
   "scanDropInPlugins",
+  "sendJson",
+  "sendJsonError",
   "setRestartHandler",
   "shouldIgnoreUnhandledRejection",
   "shutdownRuntime",
@@ -1923,6 +1928,10 @@ function generateElizaAgentStub(): string {
     "export const DISABLED_TRIGGER_INTERVAL_MS = 0;",
     "export const TRIGGER_TASK_NAME = '';",
     "export const CUSTOM_PLUGINS_DIRNAME = 'plugins';",
+    // Compat re-exports — published @elizaos/app-core imports these from
+    // @elizaos/agent for the HTTP server's body-parsing helpers. Renderer
+    // never executes the server code, so noop/zero stubs are fine.
+    "export const DEFAULT_MAX_BODY_BYTES = 0;",
   ];
   for (const name of ELIZA_AGENT_OBJECT_STUB_NAMES) {
     lines.push(`export const ${name} = emptyObject;`);
