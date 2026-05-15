@@ -510,6 +510,7 @@ test("Electrobun release applies elizaOS source overlay before manual build setu
   );
   assert.match(copyRuntimeWrapper, /"@elizaos\/agent"/);
   for (const packageName of [
+    "plugin-agent-skills",
     "plugin-registry",
     "plugin-app-manager",
     "plugin-browser",

@@ -331,6 +331,11 @@ function ensureBuiltElizaPackage(
 function ensureLocalWorkspaceDists() {
   const agentRuntimePluginBuilds = [
     [
+      "eliza/plugins/plugin-agent-skills",
+      "plugin-agent-skills",
+      "dist/index.js",
+    ],
+    [
       "eliza/plugins/plugin-registry",
       "plugin-registry",
       "dist/index.js",
@@ -452,6 +457,7 @@ function linkLocalScopedPackage(
 
 function linkLocalElizaWorkspacePackages() {
   const agentRuntimePlugins = [
+    "plugin-agent-skills",
     "plugin-registry",
     "plugin-app-manager",
     "plugin-browser",
