@@ -283,7 +283,19 @@ test("eliza CI patches align release source helpers", () => {
   assert.match(patchScript, /Agent-Browser-Bridge/);
   assert.ok(patchScript.includes("Agent-Browser-Bridge\\\\.Extension"));
   assert.match(patchScript, /browser bridge Safari bundle identifiers/);
-  assert.match(patchScript, /app-core release browser bridge hard gate/);
+  assert.match(patchScript, /app-core release-check Milady wrappers/);
+  assert.match(
+    patchScript,
+    /requiredRootPackageScriptSnippets[\s\S]*scripts\/run-release-check\.mjs/,
+  );
+  assert.match(
+    patchScript,
+    /eliza\/packages\/app-core\/scripts\/ensure-avatars\.mjs/,
+  );
+  assert.match(
+    patchScript,
+    /resolveExistingPath\(\[\s*"packages\/app-core\/scripts\/audit-apple-store-sandbox\.mjs"[\s\S]*"eliza\/packages\/app-core\/scripts\/audit-apple-store-sandbox\.mjs"/,
+  );
   assert.match(patchScript, /nestedElizaPackageJson/);
   assert.match(patchScript, /collectWorkspaceMaps\(\s*elizaRoot/);
   assert.match(patchScript, /patchCorePluginRuntimeSurface/);

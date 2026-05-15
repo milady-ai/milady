@@ -283,7 +283,7 @@ function patchBrowserBridgeSafariPackage(raw) {
 }
 
 function patchAppCoreReleaseCheck(raw) {
-  return raw
+  let patched = raw
     .replace(
       '  "if bun run browser-bridge:package:release; then",\n',
       '  "bun run browser-bridge:package:release",\n',
@@ -316,6 +316,140 @@ function patchAppCoreReleaseCheck(raw) {
       "must either use workspace:* for the local checkout or be pinned to an exact version",
       "must either use workspace:* for the local checkout, use a release dist tag, or be pinned to an exact version",
     );
+
+  patched = patched.replace(
+    /const requiredPaths = \[[\s\S]*?\];/,
+    `const requiredPaths = [
+  "dist/index.js",
+  "dist/entry.js",
+  "dist/build-info.json",
+  "eliza/packages/app-core/scripts",
+  "eliza/packages/app-core/scripts/setup-upstreams.mjs",
+  "eliza/packages/app-core/scripts/init-submodules.mjs",
+];`,
+  );
+
+  patched = patched.replace(
+    /const requiredRootPackageScriptSnippets: Record<string, readonly string\[]> = \{[\s\S]*?\n\};\nconst requiredElectrobunConfigSnippets/,
+    `const requiredRootPackageScriptSnippets: Record<string, readonly string[]> = {
+  "release:check": ["scripts/run-release-check.mjs"],
+  "test:release:contract": ["scripts/run-release-contract-suite.mjs"],
+  "test:regression-matrix:release": [
+    "scripts/run-eliza-app-core-script.mjs validate-regression-matrix.mjs --workflow release",
+  ],
+  "test:regression-matrix:release-contract": [
+    "scripts/run-eliza-app-core-script.mjs validate-regression-matrix.mjs --workflow release-contract",
+  ],
+};
+const requiredElectrobunConfigSnippets`,
+  );
+
+  const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  for (const [upstreamSnippet, miladySnippet] of [
+    [
+      "node packages/app-core/scripts/ensure-avatars.mjs",
+      "node eliza/packages/app-core/scripts/ensure-avatars.mjs",
+    ],
+    [
+      "bash packages/app-core/platforms/electrobun/scripts/ensure-whisper-model.sh base.en",
+      "bash eliza/packages/app-core/platforms/electrobun/scripts/ensure-whisper-model.sh base.en",
+    ],
+    [
+      "packages/app-core/platforms/electrobun/scripts/hdiutil-wrapper.sh",
+      "eliza/packages/app-core/platforms/electrobun/scripts/hdiutil-wrapper.sh",
+    ],
+    [
+      "packages/app-core/platforms/electrobun/scripts/xcrun-wrapper.sh",
+      "eliza/packages/app-core/platforms/electrobun/scripts/xcrun-wrapper.sh",
+    ],
+    [
+      "packages/app-core/platforms/electrobun/scripts/zip-wrapper.sh",
+      "eliza/packages/app-core/platforms/electrobun/scripts/zip-wrapper.sh",
+    ],
+    [
+      "node packages/app-core/scripts/desktop-build.mjs stage --variant=base --build-whisper",
+      "node eliza/packages/app-core/scripts/desktop-build.mjs stage --variant=base --build-whisper",
+    ],
+    [
+      "packages/app-core/platforms/electrobun/scripts/stage-macos-release-artifacts.sh",
+      "eliza/packages/app-core/platforms/electrobun/scripts/stage-macos-release-artifacts.sh",
+    ],
+    [
+      'Get-ChildItem -Path "packages/app-core/platforms/electrobun/artifacts" -File -Filter "ElizaOSApp-Setup-*.exe"',
+      'Get-ChildItem -Path "eliza/packages/app-core/platforms/electrobun/artifacts" -File -Filter "ElizaOSApp-Setup-*.exe"',
+    ],
+    [
+      "packages/app-core/platforms/electrobun/artifacts/*.exe",
+      "eliza/packages/app-core/platforms/electrobun/artifacts/*.exe",
+    ],
+    [
+      "path: packages/app-core/platforms/electrobun/artifacts/public-canary-installer/ElizaOSApp-Setup-*.exe",
+      "path: eliza/packages/app-core/platforms/electrobun/artifacts/public-canary-installer/ElizaOSApp-Setup-*.exe",
+    ],
+    [
+      'const workspacePackageJson = path.resolve("packages/app-core/platforms/electrobun/package.json");',
+      'const workspacePackageJson = path.resolve("eliza/packages/app-core/platforms/electrobun/package.json");',
+    ],
+    [
+      'node packages/app-core/scripts/build-patched-electrobun-cli.mjs "$',
+      'node eliza/packages/app-core/scripts/build-patched-electrobun-cli.mjs "$',
+    ],
+    [
+      "node packages/app-core/scripts/desktop-build.mjs package --env=$",
+      "node eliza/packages/app-core/scripts/desktop-build.mjs package --env=$",
+    ],
+    [
+      "path: packages/app-core/platforms/electrobun/artifacts/windows-installer-proof/**",
+      "path: eliza/packages/app-core/platforms/electrobun/artifacts/windows-installer-proof/**",
+    ],
+  ]) {
+    patched = patched.replace(
+      new RegExp(`(?<!eliza/)${escapeRegExp(upstreamSnippet)}`, "g"),
+      miladySnippet,
+    );
+  }
+  patched = patched.replace(
+    /(?:eliza\/)+packages\/app-core/g,
+    "eliza/packages/app-core",
+  );
+
+  patched = patched.replace(
+    `function assertAppleStoreSandboxAuditPasses() {
+  try {
+    execSync("node packages/app-core/scripts/audit-apple-store-sandbox.mjs", {
+      stdio: "inherit",
+      env: process.env,
+    });
+  } catch {
+    console.error("release-check: Apple store sandbox audit failed.");
+    process.exit(1);
+  }
+}
+`,
+    `function assertAppleStoreSandboxAuditPasses() {
+  const auditScriptPath = resolveExistingPath([
+    "packages/app-core/scripts/audit-apple-store-sandbox.mjs",
+    "eliza/packages/app-core/scripts/audit-apple-store-sandbox.mjs",
+  ]);
+  if (!auditScriptPath) {
+    console.error("release-check: Apple store sandbox audit script is missing.");
+    process.exit(1);
+  }
+
+  try {
+    execSync(\`node \${JSON.stringify(auditScriptPath)}\`, {
+      stdio: "inherit",
+      env: process.env,
+    });
+  } catch {
+    console.error("release-check: Apple store sandbox audit failed.");
+    process.exit(1);
+  }
+}
+`,
+  );
+
+  return patched;
 }
 
 function patchStartApiServerCatchBlock(raw) {
@@ -638,7 +772,7 @@ function applyReleaseSourcePatches() {
   replaceFileText(
     path.join(elizaDir, "packages", "app-core", "scripts", "release-check.ts"),
     patchAppCoreReleaseCheck,
-    "app-core release browser bridge hard gate",
+    "app-core release-check Milady wrappers",
   );
 
   replaceFileText(
