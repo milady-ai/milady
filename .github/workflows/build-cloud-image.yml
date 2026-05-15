@@ -257,32 +257,49 @@ jobs:
 
       - name: Stage Dockerfile-expected paths
         # Dockerfile.cloud was authored against the eliza-monorepo layout where
-        # patches/, plugins/plugin-selfcontrol/, and scripts/docker-entrypoint.sh
-        # all live at repo root. In milady they live at eliza/... and packages/...
-        # so we materialize the expected paths into the build context here.
+        # packages/<name>/ and plugins/<name>/ all live at repo root. In milady
+        # they live under eliza/packages/ and eliza/plugins/, so mirror the
+        # entire eliza monorepo layout into the build context root here.
+        # Special case: packages/app comes from apps/app (the Vite app), not eliza.
         run: |
           set -eu
-          # patches/ — copy from eliza/packages/app-core/patches
+          # Mirror eliza/packages → packages/ (excluding "app", which milady serves from apps/app)
+          mkdir -p packages
+          for dir in eliza/packages/*/; do
+            name=$(basename "$dir")
+            if [ "$name" = "app" ]; then
+              continue
+            fi
+            if [ ! -e "packages/$name" ]; then
+              cp -R "$dir" "packages/$name"
+            fi
+          done
+          # Mirror eliza/plugins → plugins/
+          mkdir -p plugins
+          for dir in eliza/plugins/*/; do
+            name=$(basename "$dir")
+            if [ ! -e "plugins/$name" ]; then
+              cp -R "$dir" "plugins/$name"
+            fi
+          done
+          # patches/ at build context root — Dockerfile COPYs both patches and packages/app-core/patches
           if [ ! -e patches ] && [ -d eliza/packages/app-core/patches ]; then
             cp -R eliza/packages/app-core/patches patches
           fi
-          # scripts/docker-entrypoint.sh — copy from eliza/packages/app-core/scripts
+          # scripts/docker-entrypoint.sh — for the milady-rooted COPY in Dockerfile prep stage
           mkdir -p scripts
           if [ ! -e scripts/docker-entrypoint.sh ] && [ -f eliza/packages/app-core/scripts/docker-entrypoint.sh ]; then
             cp eliza/packages/app-core/scripts/docker-entrypoint.sh scripts/docker-entrypoint.sh
             chmod +x scripts/docker-entrypoint.sh
           fi
-          # plugins/plugin-selfcontrol — copy from packages/plugin-selfcontrol
-          mkdir -p plugins
+          # plugins/plugin-selfcontrol — copy from packages/plugin-selfcontrol if milady-local
           if [ ! -e plugins/plugin-selfcontrol ] && [ -d packages/plugin-selfcontrol ]; then
             cp -R packages/plugin-selfcontrol plugins/plugin-selfcontrol
           fi
           rm -rf cloud-sdk
           cp -R eliza/cloud/packages/sdk cloud-sdk
           test -f cloud-sdk/package.json
-          # Dockerfile.cloud is shared with the upstream elizaOS layout where
-          # the built web app lives at packages/app. Milady's Vite app lives at
-          # apps/app, so materialize the expected manifest and dist tree.
+          # packages/app comes from milady's Vite app at apps/app, not from eliza
           mkdir -p packages/app
           cp apps/app/package.json packages/app/package.json
           rm -rf packages/app/dist
