@@ -414,6 +414,25 @@ function resolveLocalSharedAliases(): Alias[] {
   return aliases;
 }
 
+function resolveBuiltLocalSharedAliases(): Alias[] {
+  if (!hasLocalElizaWorkspace) return [];
+
+  const sharedDistDir = path.join(localElizaRoot, "packages/shared/dist");
+  const sharedDist = path.join(sharedDistDir, "index.js");
+  if (!fs.existsSync(sharedDist)) return [];
+
+  return [
+    {
+      find: /^@elizaos\/shared$/,
+      replacement: sharedDist,
+    },
+    {
+      find: /^@elizaos\/shared\/(.+)$/,
+      replacement: `${sharedDistDir}/$1`,
+    },
+  ];
+}
+
 function resolveLocalAppCoreAliases(): Alias[] {
   // Map @elizaos/agent's root import to its real source so static named
   // imports from compiled app-core code (e.g. account-pool.js's
@@ -435,18 +454,7 @@ function resolveLocalAppCoreAliases(): Alias[] {
     // When a local eliza workspace is present and @elizaos/shared has been
     // built, prefer the local dist over the bun-store published copy which
     // may lag behind and miss exports added in the local workspace.
-    ...(sharedDist
-      ? [
-          {
-            find: /^@elizaos\/shared$/,
-            replacement: sharedDist,
-          } as Alias,
-          {
-            find: /^@elizaos\/shared\/(.+)$/,
-            replacement: `${sharedDistDir}/$1`,
-          } as Alias,
-        ]
-      : []),
+    ...resolveBuiltLocalSharedAliases(),
   ];
 
   const appCorePkgPath = path.join(
@@ -1757,6 +1765,179 @@ function generatePluginLocalInferenceStub(): string {
   return generateNamedExportStub(PLUGIN_LOCAL_INFERENCE_STUB_NAMES);
 }
 
+function generateAgentPluginAutoEnableStub(): string {
+  return [
+    "export const CONNECTOR_PLUGINS = {};",
+    "export const AUTH_PROVIDER_PLUGINS = {};",
+    "export const STREAMING_PLUGINS = {};",
+    "export const isConnectorConfigured = () => false;",
+    "export const isStreamingDestinationConfigured = () => false;",
+    "export const applyPluginSelfDeclaredAutoEnable = () => {};",
+    "export const applyPluginAutoEnable = (params = {}) => ({ config: params.config, changes: [] });",
+    "export default {};",
+  ].join("\n");
+}
+
+const ELIZA_AGENT_OBJECT_STUB_NAMES = [
+  "AUDIT_EVENT_TYPES",
+  "AUDIT_SEVERITIES",
+  "CONFIG_WRITE_ALLOWED_TOP_KEYS",
+  "CONNECTOR_ENV_MAP",
+  "CONNECTOR_IDS",
+  "CORE_PLUGINS",
+  "EMBEDDING_PRESETS",
+  "CHANNEL_PLUGIN_MAP",
+] as const;
+
+const ELIZA_AGENT_ARRAY_STUB_NAMES = [
+  "AGENT_EVENT_ALLOWED_STREAMS",
+  "TRIGGER_TASK_TAGS",
+] as const;
+
+const ELIZA_AGENT_FUNCTION_STUB_NAMES = [
+  "applyCanonicalOnboardingConfig",
+  "applyCloudConfigToEnv",
+  "applyN8nConfigToEnv",
+  "applyOnboardingCredentialPersistence",
+  "applyPluginRuntimeMutation",
+  "bootElizaRuntime",
+  "buildCharacterFromConfig",
+  "buildTriggerConfig",
+  "buildTriggerMetadata",
+  "checkForUpdate",
+  "classifyRegistryPluginRelease",
+  "clearPersistedOnboardingConfig",
+  "cloneWithoutBlockedObjectKeys",
+  "collectConfigEnvVars",
+  "collectConnectorEnvVars",
+  "collectPluginNames",
+  "configureLocalEmbeddingPlugin",
+  "createElizaPlugin",
+  "createEngine",
+  "createIntegrationTelemetrySpan",
+  "detectBestEngine",
+  "detectEmbeddingTier",
+  "discoverInstalledPlugins",
+  "discoverPluginsFromManifest",
+  "ensureApiTokenForBindHost",
+  "estimateExportSize",
+  "executeTriggerTask",
+  "exportAgent",
+  "extractAuthToken",
+  "fetchWithTimeoutGuard",
+  "findPrimaryEnvKey",
+  "formatVaultRef",
+  "getAccessToken",
+  "getAuditFeedSize",
+  "getLastFailedPluginNames",
+  "getPluginInfo",
+  "getTriggerHealthSnapshot",
+  "getTriggerLimit",
+  "getWalletAddresses",
+  "handleAccountsRoutes",
+  "handleAgentAdminRoutes",
+  "handleAgentLifecycleRoutes",
+  "handleAgentTransferRoutes",
+  "handleCharacterRoutes",
+  "handleCloudBillingRoute",
+  "handleCloudCompatRoute",
+  "handleCloudRoute",
+  "handleDiagnosticsRoutes",
+  "handleMemoryRoutes",
+  "handlePermissionRoutes",
+  "handleRegistryRoutes",
+  "handleSubscriptionRoutes",
+  "handleTrainingRoutes",
+  "handleTriggerRoutes",
+  "importAgent",
+  "initStewardWalletCache",
+  "injectApiBaseIntoHtml",
+  "isAdvancedCapabilityPluginId",
+  "isAllowedHost",
+  "isAuthorized",
+  "isAutomationConversationMetadata",
+  "isLoopbackHost",
+  "isPlainObject",
+  "isPluginManagerLike",
+  "isSafeResetStateDir",
+  "isVaultRef",
+  "listProviderAccounts",
+  "listTriggerTasks",
+  "loadElizaConfig",
+  "normalizeCloudSiteUrl",
+  "normalizeTriggerDraft",
+  "normalizeWsClientId",
+  "parseVaultRef",
+  "persistConfigEnv",
+  "persistConversationRoomTitle",
+  "queryAuditFeed",
+  "readBundledPluginPackageMetadata",
+  "readConfigEnv",
+  "readTriggerConfig",
+  "readTriggerRuns",
+  "requestRestart",
+  "resolveAdvancedCapabilitiesEnabled",
+  "resolveAppHeroImage",
+  "resolveChannel",
+  "resolveCloudApiBaseUrl",
+  "resolveConfigPath",
+  "resolveCorsOrigin",
+  "resolveDefaultAgentWorkspaceDir",
+  "resolveElizaVersion",
+  "resolveMcpServersRejection",
+  "resolveMcpTerminalAuthorizationRejection",
+  "resolvePackageEntry",
+  "resolvePluginConfigMutationRejections",
+  "resolveStateDir",
+  "resolveTerminalRunClientId",
+  "resolveTerminalRunRejection",
+  "resolveUserPath",
+  "resolveWalletExportRejection",
+  "resolveWalletRpcReadiness",
+  "resolveWebSocketUpgradeRejection",
+  "routeAutonomyTextToUser",
+  "saveElizaConfig",
+  "scanDropInPlugins",
+  "setRestartHandler",
+  "shouldIgnoreUnhandledRejection",
+  "shutdownRuntime",
+  "startApiServer",
+  "startEliza",
+  "streamResponseBodyWithByteLimit",
+  "subscribeAuditFeed",
+  "taskToTriggerSummary",
+  "toWorkbenchTask",
+  "triggersFeatureEnabled",
+  "validateCloudBaseUrl",
+  "validateMcpServerConfig",
+] as const;
+
+function generateElizaAgentStub(): string {
+  const lines = [
+    "const noop = () => undefined;",
+    "const asyncNoop = async () => undefined;",
+    "const emptyObject = Object.freeze({});",
+    "const emptyArray = Object.freeze([]);",
+    "export class AgentExportError extends Error {}",
+    "export const CharacterSchema = emptyObject;",
+    "export const DISABLED_TRIGGER_INTERVAL_MS = 0;",
+    "export const TRIGGER_TASK_NAME = '';",
+    "export const CUSTOM_PLUGINS_DIRNAME = 'plugins';",
+  ];
+  for (const name of ELIZA_AGENT_OBJECT_STUB_NAMES) {
+    lines.push(`export const ${name} = emptyObject;`);
+  }
+  for (const name of ELIZA_AGENT_ARRAY_STUB_NAMES) {
+    lines.push(`export const ${name} = emptyArray;`);
+  }
+  for (const name of ELIZA_AGENT_FUNCTION_STUB_NAMES) {
+    lines.push(`export const ${name} = noop;`);
+  }
+  lines.push("export default new Proxy(noop, { get: () => noop });");
+  lines.push("void asyncNoop;");
+  return `${lines.join("\n")}\n`;
+}
+
 // esbuild is a server-only build-time dep that drizzle-kit pulls in; the
 // agent's plugin-compiler imports it as a namespace. Stub the surface
 // the renderer's transitive imports might touch.
@@ -1824,7 +2005,19 @@ function generateNativeModuleStub(
   strippedId: string,
   capacitorNativeScopeRe: RegExp,
 ): string {
-  const modName = strippedId.split("/")[0];
+  if (strippedId === "@elizaos/agent/config/plugin-auto-enable") {
+    return generateAgentPluginAutoEnableStub();
+  }
+  if (
+    strippedId === "@elizaos/agent" ||
+    strippedId.startsWith("@elizaos/agent/")
+  ) {
+    return generateElizaAgentStub();
+  }
+
+  const modName = strippedId.startsWith("@")
+    ? strippedId.split("/").slice(0, 2).join("/")
+    : strippedId.split("/")[0];
   const stubGenerator = NATIVE_MODULE_STUB_GENERATORS.get(modName);
   if (stubGenerator) return stubGenerator(strippedId);
   if (modName.startsWith("node:")) return generateNodeBuiltinStub(strippedId);
@@ -1950,7 +2143,7 @@ function nativeModuleStubPlugin(): Plugin {
       // fires. Intercept it here with enforce:"pre" so Rollup gets the
       // stub from the start.
       if (id === "@elizaos/agent") {
-        return elizaosAgentBrowserStubEntry;
+        return VIRTUAL_PREFIX + id;
       }
       // Plugin-elizacloud is server-only (cloud secrets, TTS routing).
       // The renderer reaches it transitively through `dist/api/onboarding-routes.js`
@@ -1961,7 +2154,7 @@ function nativeModuleStubPlugin(): Plugin {
               appCoreSrcRoot,
               "platform/elizaos-plugin-elizacloud-browser-stub.ts",
             )
-          : elizaosAgentBrowserStubEntry;
+          : VIRTUAL_PREFIX + id;
       }
       // Intercept ALL node: builtins before Vite externalizes them.
       // The @elizaos/core node entry uses many Node APIs (crypto, fs, module,
@@ -2108,6 +2301,19 @@ function nativeModuleStubPlugin(): Plugin {
         PluginManagerService: "function(){}",
         redactSensitiveRequestMetadata: "function(x){return x}",
         registerAppCoreRuntimeHooks: "function(){}",
+        getElizaNamespace: "function(){return 'eliza'}",
+        expandConnectorSourceFilter: "function(){return []}",
+        getConnectorSourceAliases: "function(){return []}",
+        isConnectorConfigured: "function(){return false}",
+        isStreamingDestinationConfigured: "function(){return false}",
+        isWechatConfigured: "function(){return false}",
+        logger:
+          "{info:function(){},warn:function(){},error:function(){},debug:function(){}}",
+        normalizeConnectorSource: "function(x){return x}",
+        registerAppRoutePluginLoader: "function(){}",
+        registerConnectorSourceAliases: "function(){}",
+        resolveStateDir: "function(){return ''}",
+        resolveUserPath: "function(x){return x}",
       };
       // Check which are actually missing from the existing export block
       const needed = Object.keys(missingExports).filter((n) => {
