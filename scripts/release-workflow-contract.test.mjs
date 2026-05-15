@@ -465,9 +465,23 @@ test("Electrobun release applies elizaOS source overlay before manual build setu
     copyRuntimeWrapper,
     /miladyRootNodeModules,\s*\n\s*elizaPackagesNodeModules/,
   );
-  assert.match(copyRuntimeWrapper, /\["shared", "dist\/index\.js"\]/);
-  assert.match(copyRuntimeWrapper, /\["core", "dist\/node\/index\.node\.js"\]/);
-  assert.match(copyRuntimeWrapper, /\["vault", "dist\/index\.js"\]/);
+  assert.match(
+    copyRuntimeWrapper,
+    /elizaPackagesDir,\s*"core"[\s\S]*dist\/node\/index\.node\.js/,
+  );
+  assert.match(
+    copyRuntimeWrapper,
+    /elizaPackagesDir,\s*"shared"[\s\S]*dist\/index\.js/,
+  );
+  assert.match(
+    copyRuntimeWrapper,
+    /elizaPackagesDir,\s*"vault"[\s\S]*dist\/index\.js/,
+  );
+  assert.match(
+    copyRuntimeWrapper,
+    /elizaPluginsDir,\s*"plugin-elizacloud"[\s\S]*dist\/node\/index\.node\.js/,
+  );
+  assert.match(copyRuntimeWrapper, /"@elizaos\/plugin-elizacloud"/);
   assert.match(copyRuntimeWrapper, /dist\/index\.js/);
   assert.match(copyRuntimeWrapper, /ensureElizaCoreRuntimeAliases/);
   assert.match(copyRuntimeWrapper, /dist\/node\/index\.node\.js/);

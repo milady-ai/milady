@@ -18,6 +18,7 @@ const target = path.resolve(
 
 const elizaAppCoreDir = path.resolve(repoRoot, "eliza", "packages", "app-core");
 const elizaPackagesDir = path.resolve(repoRoot, "eliza", "packages");
+const elizaPluginsDir = path.resolve(repoRoot, "eliza", "plugins");
 const elizaAgentDir = path.resolve(repoRoot, "eliza", "packages", "agent");
 const elizaElectrobunDir = path.resolve(
   elizaAppCoreDir,
@@ -290,32 +291,54 @@ function ensureBuiltElizaPackage(packageDir: string, markerRelPath: string) {
 
 function ensureLocalWorkspaceDists() {
   const builds = [
-    ["core", "dist/node/index.node.js"],
-    ["shared", "dist/index.js"],
-    ["vault", "dist/index.js"],
+    [
+      "eliza/packages/core",
+      path.join(elizaPackagesDir, "core"),
+      "dist/node/index.node.js",
+    ],
+    [
+      "eliza/packages/shared",
+      path.join(elizaPackagesDir, "shared"),
+      "dist/index.js",
+    ],
+    [
+      "eliza/packages/vault",
+      path.join(elizaPackagesDir, "vault"),
+      "dist/index.js",
+    ],
+    [
+      "eliza/plugins/plugin-elizacloud",
+      path.join(elizaPluginsDir, "plugin-elizacloud"),
+      "dist/node/index.node.js",
+    ],
   ] as const;
 
-  for (const [packageName, markerRelPath] of builds) {
-    const built = ensureBuiltElizaPackage(
-      path.join(elizaPackagesDir, packageName),
-      markerRelPath,
-    );
+  for (const [label, packageDir, markerRelPath] of builds) {
+    const built = ensureBuiltElizaPackage(packageDir, markerRelPath);
     if (built) {
       console.log(
-        `[copy-runtime-node-modules wrapper] built eliza/packages/${packageName} dist for runtime staging`,
+        `[copy-runtime-node-modules wrapper] built ${label} dist for runtime staging`,
       );
     }
   }
 }
 
-function linkLocalElizaPackage(targetNodeModules: string, packageName: string) {
-  const packageDir = path.join(elizaPackagesDir, packageName);
+function linkLocalScopedPackage(
+  targetNodeModules: string,
+  packageName: string,
+  packageDir: string,
+) {
   if (!packageExists(packageDir)) {
     return false;
   }
 
-  const scopeDir = path.join(targetNodeModules, "@elizaos");
-  const dest = path.join(scopeDir, packageName);
+  const [scope, unscopedName] = packageName.split("/");
+  if (!scope || !unscopedName) {
+    return false;
+  }
+
+  const scopeDir = path.join(targetNodeModules, scope);
+  const dest = path.join(scopeDir, unscopedName);
   fs.mkdirSync(scopeDir, { recursive: true });
   fs.rmSync(dest, { force: true, recursive: true });
   fs.symlinkSync(packageDir, dest, "dir");
@@ -330,13 +353,22 @@ function linkLocalElizaWorkspacePackages() {
     elizaAppCoreNodeModules,
     elizaElectrobunNodeModules,
   ];
-  const packages = ["core", "shared"] as const;
+  const packages = [
+    ["@elizaos/core", path.join(elizaPackagesDir, "core")],
+    ["@elizaos/shared", path.join(elizaPackagesDir, "shared")],
+    [
+      "@elizaos/plugin-elizacloud",
+      path.join(elizaPluginsDir, "plugin-elizacloud"),
+    ],
+  ] as const;
 
   for (const targetNodeModules of targets) {
     if (!fs.existsSync(targetNodeModules)) continue;
-    const linked = packages.filter((packageName) =>
-      linkLocalElizaPackage(targetNodeModules, packageName),
-    );
+    const linked = packages
+      .filter(([packageName, packageDir]) =>
+        linkLocalScopedPackage(targetNodeModules, packageName, packageDir),
+      )
+      .map(([packageName]) => packageName);
     if (linked.length > 0) {
       console.log(
         `[copy-runtime-node-modules wrapper] linked local eliza packages in ${targetNodeModules}: ${linked.join(", ")}`,
