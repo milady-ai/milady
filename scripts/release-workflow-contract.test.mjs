@@ -280,6 +280,8 @@ test("eliza CI patches align release source helpers", () => {
   );
   assert.match(patchScript, /alpha\|beta\|rc\|nightly/);
   assert.match(patchScript, /browser bridge canary release versions/);
+  assert.match(patchScript, /browser-bridge-extension/);
+  assert.match(patchScript, /browser bridge extension canary release versions/);
   assert.match(patchScript, /Agent-Browser-Bridge/);
   assert.ok(patchScript.includes("Agent-Browser-Bridge\\\\.Extension"));
   assert.match(patchScript, /browser bridge Safari bundle identifiers/);

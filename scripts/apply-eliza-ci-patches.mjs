@@ -804,6 +804,30 @@ function applyReleaseSourcePatches() {
   );
 
   replaceFileText(
+    path.join(
+      elizaDir,
+      "packages",
+      "browser-bridge-extension",
+      "scripts",
+      "release-version.mjs",
+    ),
+    patchBrowserBridgeReleaseVersion,
+    "browser bridge extension canary release versions",
+  );
+
+  replaceFileText(
+    path.join(
+      elizaDir,
+      "packages",
+      "browser-bridge-extension",
+      "scripts",
+      "package-safari.mjs",
+    ),
+    patchBrowserBridgeSafariPackage,
+    "browser bridge extension Safari bundle identifiers",
+  );
+
+  replaceFileText(
     path.join(elizaDir, "packages", "app-core", "scripts", "release-check.ts"),
     patchAppCoreReleaseCheck,
     "app-core release-check Milady wrappers",

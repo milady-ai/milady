@@ -28,27 +28,28 @@ const patches = [
       }
 
       const match = source.match(
-        / {6}const childEnv: Record<string, string> = \{[\s\S]*? {6}\};/,
+        /\n([ \t]*)const childEnv: Record<string, string> = \{[\s\S]*?\n\1\};/,
       );
       if (!match) {
         throw new Error("could not locate childEnv object");
       }
 
       let block = match[0];
-      const anchor = block.includes("        ELIZA_PORT: String(apiPort),")
-        ? "        ELIZA_PORT: String(apiPort),"
-        : "        ELIZA_API_PORT: String(apiPort),";
+      const apiPortLine = block.match(
+        /\n([ \t]*)(ELIZA_PORT|ELIZA_API_PORT): String\(apiPort\),/,
+      );
+      const anchor = apiPortLine?.[0].slice(1);
 
-      if (!block.includes(anchor)) {
+      if (!anchor) {
         throw new Error("could not locate API port assignment in childEnv");
       }
 
       const additions = [];
       if (!block.includes("MILADY_API_PORT: String(apiPort)")) {
-        additions.push("        MILADY_API_PORT: String(apiPort),");
+        additions.push(`${apiPortLine[1]}MILADY_API_PORT: String(apiPort),`);
       }
       if (!block.includes("MILADY_PORT: String(apiPort)")) {
-        additions.push("        MILADY_PORT: String(apiPort),");
+        additions.push(`${apiPortLine[1]}MILADY_PORT: String(apiPort),`);
       }
       block = block.replace(anchor, [anchor, ...additions].join("\n"));
       return source.replace(match[0], block);
@@ -67,24 +68,33 @@ const patches = [
     transform(source) {
       let next = source;
       for (const suffix of ["SESSION_ID", "STATE_FILE", "EVENTS_FILE"]) {
-        const miladyLine = `    trimEnv(env.MILADY_STARTUP_${suffix}) ??`;
-        const elizaLine = `    trimEnv(env.ELIZA_STARTUP_${suffix}) ??`;
-        if (next.includes(miladyLine)) {
+        if (next.includes(`trimEnv(env.MILADY_STARTUP_${suffix}) ??`)) {
           continue;
         }
 
         const duplicate = new RegExp(
-          `    trimEnv\\(env\\.ELIZA_STARTUP_${suffix}\\) \\?\\?\\n    trimEnv\\(env\\.ELIZA_STARTUP_${suffix}\\) \\?\\?`,
+          `\\n([ \\t]*)trimEnv\\(env\\.ELIZA_STARTUP_${suffix}\\) \\?\\?\\n\\1trimEnv\\(env\\.ELIZA_STARTUP_${suffix}\\) \\?\\?`,
         );
         if (duplicate.test(next)) {
-          next = next.replace(duplicate, `${miladyLine}\n${elizaLine}`);
+          next = next.replace(
+            duplicate,
+            (_, indent) =>
+              `\n${indent}trimEnv(env.MILADY_STARTUP_${suffix}) ??\n${indent}trimEnv(env.ELIZA_STARTUP_${suffix}) ??`,
+          );
           continue;
         }
 
-        if (!next.includes(elizaLine)) {
+        const elizaLine = new RegExp(
+          `\\n([ \\t]*)trimEnv\\(env\\.ELIZA_STARTUP_${suffix}\\) \\?\\?`,
+        );
+        const match = next.match(elizaLine);
+        if (!match) {
           throw new Error(`could not locate startup trace ${suffix} anchor`);
         }
-        next = next.replace(elizaLine, `${miladyLine}\n${elizaLine}`);
+        next = next.replace(
+          elizaLine,
+          `\n${match[1]}trimEnv(env.MILADY_STARTUP_${suffix}) ??${match[0]}`,
+        );
       }
       return next;
     },
@@ -123,17 +133,25 @@ const patches = [
     relativePath: windowsSmokePath,
     description: "export branded and legacy packaged backend ports",
     transform(source) {
-      if (source.includes('$env:MILADY_PORT = "$BackendPort"')) {
-        return source;
+      let next = source;
+      const miladyApiPort = '$env:MILADY_API_PORT = "$BackendPort"';
+      const elizaApiPort = '$env:ELIZA_API_PORT = "$BackendPort"';
+      if (!next.includes(miladyApiPort)) {
+        if (!next.includes(elizaApiPort)) {
+          throw new Error("could not locate API port assignment");
+        }
+        next = next.replace(elizaApiPort, `${miladyApiPort}\n${elizaApiPort}`);
       }
-      const anchor = '$env:MILADY_API_PORT = "$BackendPort"';
-      if (!source.includes(anchor)) {
-        throw new Error("could not locate Milady API port assignment");
+
+      const miladyPort = '$env:MILADY_PORT = "$BackendPort"';
+      const elizaPort = '$env:ELIZA_PORT = "$BackendPort"';
+      if (!next.includes(miladyPort)) {
+        if (!next.includes(elizaPort)) {
+          throw new Error("could not locate legacy port assignment");
+        }
+        next = next.replace(elizaPort, `${miladyPort}\n${elizaPort}`);
       }
-      return source.replace(
-        anchor,
-        `${anchor}\n$env:MILADY_PORT = "$BackendPort"`,
-      );
+      return next;
     },
   },
   {
@@ -143,6 +161,22 @@ const patches = [
       let next = source;
       const eol = next.includes("\r\n") ? "\r\n" : "\n";
       const block = (lines) => lines.join(eol);
+
+      if (!next.includes("$env:MILADY_TEST_WINDOWS_APPDATA_PATH")) {
+        const anchor =
+          "$testAppDataRoot = if ($env:ELIZA_TEST_WINDOWS_APPDATA_PATH) {";
+        if (!next.includes(anchor)) {
+          throw new Error("could not locate Windows AppData path selection");
+        }
+        next = next.replace(
+          anchor,
+          block([
+            "$testAppDataRoot = if ($env:MILADY_TEST_WINDOWS_APPDATA_PATH) {",
+            "  $env:MILADY_TEST_WINDOWS_APPDATA_PATH",
+            "} elseif ($env:ELIZA_TEST_WINDOWS_APPDATA_PATH) {",
+          ]),
+        );
+      }
 
       if (!next.includes("elseif ($env:ELIZA_TEST_WINDOWS_APPDATA_PATH)")) {
         const anchor = block([
@@ -161,6 +195,24 @@ const patches = [
             "} elseif ($env:ELIZA_TEST_WINDOWS_APPDATA_PATH) {",
             "  $env:ELIZA_TEST_WINDOWS_APPDATA_PATH",
             "} else {",
+          ]),
+        );
+      }
+
+      if (!next.includes("$env:MILADY_TEST_WINDOWS_LOCALAPPDATA_PATH")) {
+        const anchor =
+          "$testLocalAppDataRoot = if ($env:ELIZA_TEST_WINDOWS_LOCALAPPDATA_PATH) {";
+        if (!next.includes(anchor)) {
+          throw new Error(
+            "could not locate Windows LocalAppData path selection",
+          );
+        }
+        next = next.replace(
+          anchor,
+          block([
+            "$testLocalAppDataRoot = if ($env:MILADY_TEST_WINDOWS_LOCALAPPDATA_PATH) {",
+            "  $env:MILADY_TEST_WINDOWS_LOCALAPPDATA_PATH",
+            "} elseif ($env:ELIZA_TEST_WINDOWS_LOCALAPPDATA_PATH) {",
           ]),
         );
       }
@@ -190,36 +242,51 @@ const patches = [
         );
       }
 
-      if (
-        !next.includes(
-          'Add-Content -Path $env:GITHUB_ENV -Value "ELIZA_TEST_WINDOWS_APPDATA_PATH=$($env:APPDATA)"',
-        )
-      ) {
-        const anchor =
-          '  Add-Content -Path $env:GITHUB_ENV -Value "MILADY_TEST_WINDOWS_APPDATA_PATH=$($env:APPDATA)"';
-        if (!next.includes(anchor)) {
+      const miladyAppDataExport =
+        '  Add-Content -Path $env:GITHUB_ENV -Value "MILADY_TEST_WINDOWS_APPDATA_PATH=$($env:APPDATA)"';
+      const elizaAppDataExport =
+        '  Add-Content -Path $env:GITHUB_ENV -Value "ELIZA_TEST_WINDOWS_APPDATA_PATH=$($env:APPDATA)"';
+      if (!next.includes(miladyAppDataExport)) {
+        if (!next.includes(elizaAppDataExport)) {
+          throw new Error("could not locate AppData GITHUB_ENV export");
+        }
+        next = next.replace(
+          elizaAppDataExport,
+          `${miladyAppDataExport}\n${elizaAppDataExport}`,
+        );
+      }
+      if (!next.includes(elizaAppDataExport)) {
+        if (!next.includes(miladyAppDataExport)) {
           throw new Error("could not locate Milady AppData GITHUB_ENV export");
         }
         next = next.replace(
-          anchor,
-          `${anchor}\n  Add-Content -Path $env:GITHUB_ENV -Value "ELIZA_TEST_WINDOWS_APPDATA_PATH=$($env:APPDATA)"`,
+          miladyAppDataExport,
+          `${miladyAppDataExport}\n${elizaAppDataExport}`,
         );
       }
-      if (
-        !next.includes(
-          'Add-Content -Path $env:GITHUB_ENV -Value "ELIZA_TEST_WINDOWS_LOCALAPPDATA_PATH=$($env:LOCALAPPDATA)"',
-        )
-      ) {
-        const anchor =
-          '  Add-Content -Path $env:GITHUB_ENV -Value "MILADY_TEST_WINDOWS_LOCALAPPDATA_PATH=$($env:LOCALAPPDATA)"';
-        if (!next.includes(anchor)) {
+
+      const miladyLocalAppDataExport =
+        '  Add-Content -Path $env:GITHUB_ENV -Value "MILADY_TEST_WINDOWS_LOCALAPPDATA_PATH=$($env:LOCALAPPDATA)"';
+      const elizaLocalAppDataExport =
+        '  Add-Content -Path $env:GITHUB_ENV -Value "ELIZA_TEST_WINDOWS_LOCALAPPDATA_PATH=$($env:LOCALAPPDATA)"';
+      if (!next.includes(miladyLocalAppDataExport)) {
+        if (!next.includes(elizaLocalAppDataExport)) {
+          throw new Error("could not locate LocalAppData GITHUB_ENV export");
+        }
+        next = next.replace(
+          elizaLocalAppDataExport,
+          `${miladyLocalAppDataExport}\n${elizaLocalAppDataExport}`,
+        );
+      }
+      if (!next.includes(elizaLocalAppDataExport)) {
+        if (!next.includes(miladyLocalAppDataExport)) {
           throw new Error(
             "could not locate Milady LocalAppData GITHUB_ENV export",
           );
         }
         next = next.replace(
-          anchor,
-          `${anchor}\n  Add-Content -Path $env:GITHUB_ENV -Value "ELIZA_TEST_WINDOWS_LOCALAPPDATA_PATH=$($env:LOCALAPPDATA)"`,
+          miladyLocalAppDataExport,
+          `${miladyLocalAppDataExport}\n${elizaLocalAppDataExport}`,
         );
       }
       return next;
@@ -383,15 +450,18 @@ const patches = [
       const eol = next.includes("\r\n") ? "\r\n" : "\n";
       const block = (lines) => lines.join(eol);
 
-      const rootAnchor =
-        '$selfExtractionRoot = Join-Path $env:LOCALAPPDATA "com.miladyai.milady"';
-      if (!next.includes(rootAnchor)) {
+      const rootMatch = next.match(
+        /\$selfExtractionRoot = Join-Path \$env:LOCALAPPDATA "([^"]+)"/,
+      );
+      if (!rootMatch) {
         throw new Error("could not locate Windows self-extraction root anchor");
       }
       next = next.replace(
-        rootAnchor,
+        rootMatch[0],
         `$selfExtractionRoots = @(
   (Join-Path $env:LOCALAPPDATA "com.miladyai.milady"),
+  (Join-Path $env:LOCALAPPDATA "${rootMatch[1]}"),
+  (Join-Path $env:LOCALAPPDATA "com.elizaai.eliza"),
   (Join-Path $env:LOCALAPPDATA "ai.elizaos.app"),
   (Join-Path $env:LOCALAPPDATA "ai.elizaos.Eliza")
 ) | Select-Object -Unique
@@ -459,6 +529,9 @@ $selfExtractedRelaunchDone = $false`,
       if (!next.includes(loopAnchor)) {
         throw new Error("could not locate Windows smoke loop anchor");
       }
+      const stopProcesses = next.includes("function Stop-MiladyProcesses")
+        ? "Stop-MiladyProcesses"
+        : "Stop-ElizaProcesses";
       next = next.replace(
         loopAnchor,
         `  while ((Get-Date) -lt $deadline) {
@@ -473,7 +546,7 @@ $selfExtractedRelaunchDone = $false`,
       $extractedLauncher = Find-SelfExtractedLauncher
       if ($extractedLauncher -and $extractedLauncher.FullName -ne $launcher.FullName) {
         Write-Host "Relaunching self-extracted launcher directly: $($extractedLauncher.FullName)"
-        Stop-MiladyProcesses
+        ${stopProcesses}
         $launcher = Write-ReusableLauncherPath -Launcher $extractedLauncher -TemporaryRoot $null
         $launcherDir = Split-Path -Parent $launcher.FullName
         $startupBundleRoot = Split-Path -Parent $launcherDir
