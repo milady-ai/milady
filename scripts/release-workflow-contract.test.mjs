@@ -340,6 +340,10 @@ test("release jobs hydrate eliza source without a root eliza gitlink", () => {
     buildDocker,
     /name: Apply elizaOS source CI patches[\s\S]*?run: node scripts\/apply-eliza-ci-patches\.mjs[\s\S]*?name: Repair known eliza patch files/,
   );
+  assert.match(
+    buildDocker,
+    /name: Build @elizaos\/app-core[\s\S]*?bun run build[\s\S]*?name: Reapply app-core package style patches[\s\S]*?node scripts\/patch-elizaos-package-styles\.mjs[\s\S]*?name: Build runtime \(tsdown\)/,
+  );
 });
 
 test("release docs validation tracks current eliza docs package layout", () => {

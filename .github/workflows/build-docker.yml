@@ -261,6 +261,9 @@ jobs:
           cd eliza/packages/app-core
           bun run build
 
+      - name: Reapply app-core package style patches
+        run: node scripts/patch-elizaos-package-styles.mjs
+
       # ── 9. Build runtime (tsdown) ───────────────────────────────────────────
       - name: Build runtime (tsdown)
         run: |
