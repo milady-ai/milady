@@ -482,6 +482,24 @@ test("Electrobun release applies elizaOS source overlay before manual build setu
     /elizaCloudPackagesDir,\s*"sdk"[\s\S]*dist\/index\.js/,
   );
   assert.match(copyRuntimeWrapper, /"@elizaos\/cloud-sdk"/);
+  for (const packageName of [
+    "plugin-browser",
+    "plugin-capacitor-bridge",
+    "plugin-coding-tools",
+    "plugin-computeruse",
+    "plugin-discord",
+    "plugin-imessage",
+    "plugin-local-inference",
+    "plugin-mcp",
+    "plugin-signal",
+    "plugin-streaming",
+    "plugin-whatsapp",
+    "plugin-workflow",
+    "plugin-x402",
+  ]) {
+    assert.match(copyRuntimeWrapper, new RegExp(`"${packageName}"`));
+  }
+  assert.match(copyRuntimeWrapper, /`@elizaos\/\$\{packageName\}`/);
   assert.match(
     copyRuntimeWrapper,
     /elizaPluginsDir,\s*"plugin-elizacloud"[\s\S]*dist\/node\/index\.node\.js/,

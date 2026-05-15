@@ -310,6 +310,33 @@ function ensureBuiltElizaPackage(
 }
 
 function ensureLocalWorkspaceDists() {
+  const agentRuntimePluginBuilds = [
+    ["eliza/plugins/plugin-browser", "plugin-browser", "dist/index.js"],
+    [
+      "eliza/plugins/plugin-capacitor-bridge",
+      "plugin-capacitor-bridge",
+      "dist/index.js",
+    ],
+    [
+      "eliza/plugins/plugin-coding-tools",
+      "plugin-coding-tools",
+      "dist/index.js",
+    ],
+    ["eliza/plugins/plugin-computeruse", "plugin-computeruse", "dist/index.js"],
+    ["eliza/plugins/plugin-discord", "plugin-discord", "dist/index.js"],
+    ["eliza/plugins/plugin-imessage", "plugin-imessage", "dist/index.js"],
+    [
+      "eliza/plugins/plugin-local-inference",
+      "plugin-local-inference",
+      "dist/index.js",
+    ],
+    ["eliza/plugins/plugin-mcp", "plugin-mcp", "dist/node/index.js"],
+    ["eliza/plugins/plugin-signal", "plugin-signal", "dist/index.js"],
+    ["eliza/plugins/plugin-streaming", "plugin-streaming", "dist/index.js"],
+    ["eliza/plugins/plugin-whatsapp", "plugin-whatsapp", "dist/index.js"],
+    ["eliza/plugins/plugin-workflow", "plugin-workflow", "dist/index.js"],
+    ["eliza/plugins/plugin-x402", "plugin-x402", "dist/index.js"],
+  ] as const;
   const builds = [
     [
       "eliza/packages/core",
@@ -331,6 +358,14 @@ function ensureLocalWorkspaceDists() {
       path.join(elizaCloudPackagesDir, "sdk"),
       "dist/index.js",
     ],
+    ...agentRuntimePluginBuilds.map(
+      ([label, packageName, markerRelPath]) =>
+        [
+          label,
+          path.join(elizaPluginsDir, packageName),
+          markerRelPath,
+        ] as const,
+    ),
     [
       "eliza/plugins/plugin-elizacloud",
       path.join(elizaPluginsDir, "plugin-elizacloud"),
@@ -372,6 +407,21 @@ function linkLocalScopedPackage(
 }
 
 function linkLocalElizaWorkspacePackages() {
+  const agentRuntimePlugins = [
+    "plugin-browser",
+    "plugin-capacitor-bridge",
+    "plugin-coding-tools",
+    "plugin-computeruse",
+    "plugin-discord",
+    "plugin-imessage",
+    "plugin-local-inference",
+    "plugin-mcp",
+    "plugin-signal",
+    "plugin-streaming",
+    "plugin-whatsapp",
+    "plugin-workflow",
+    "plugin-x402",
+  ] as const;
   const targets = [
     miladyRootNodeModules,
     elizaPackagesNodeModules,
@@ -383,6 +433,13 @@ function linkLocalElizaWorkspacePackages() {
     ["@elizaos/core", path.join(elizaPackagesDir, "core")],
     ["@elizaos/shared", path.join(elizaPackagesDir, "shared")],
     ["@elizaos/cloud-sdk", path.join(elizaCloudPackagesDir, "sdk")],
+    ...agentRuntimePlugins.map(
+      (packageName) =>
+        [
+          `@elizaos/${packageName}`,
+          path.join(elizaPluginsDir, packageName),
+        ] as const,
+    ),
     [
       "@elizaos/plugin-elizacloud",
       path.join(elizaPluginsDir, "plugin-elizacloud"),
