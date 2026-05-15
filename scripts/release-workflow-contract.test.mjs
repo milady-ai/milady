@@ -482,6 +482,11 @@ test("Electrobun release applies elizaOS source overlay before manual build setu
     /elizaCloudPackagesDir,\s*"sdk"[\s\S]*dist\/index\.js/,
   );
   assert.match(copyRuntimeWrapper, /"@elizaos\/cloud-sdk"/);
+  assert.match(
+    copyRuntimeWrapper,
+    /elizaPackagesDir,\s*"cloud-routing"[\s\S]*dist\/index\.js/,
+  );
+  assert.match(copyRuntimeWrapper, /"@elizaos\/cloud-routing"/);
   for (const packageName of [
     "plugin-browser",
     "plugin-capacitor-bridge",
