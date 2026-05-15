@@ -139,10 +139,20 @@ jobs:
         run: |
           if [ -f eliza/.gitmodules ]; then
             git -C eliza submodule sync --recursive
-            git -C eliza \
-              -c submodule.cloud.update=none \
-              -c submodule.plugins/plugin-elizacloud.update=none \
-              submodule update --init --recursive --depth=1
+            # Init only paths registered in .gitmodules — upstream eliza
+            # currently has orphan gitlinks (e.g. swe-bench-workspace-opencode/*)
+            # that aren't declared in .gitmodules and break a bare
+            # `submodule update --init --recursive`.
+            mapfile -t SUBMODULE_PATHS < <(
+              git -C eliza config -f .gitmodules --get-regexp '^submodule\..*\.path$' \
+                | awk '{print $2}'
+            )
+            for path in "${SUBMODULE_PATHS[@]}"; do
+              case "$path" in
+                cloud|plugins/plugin-elizacloud) continue ;;
+              esac
+              git -C eliza submodule update --init --recursive --depth=1 -- "$path"
+            done
           fi
           node --input-type=module <<'NODE'
           import {
