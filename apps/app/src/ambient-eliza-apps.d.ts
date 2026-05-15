@@ -17,5 +17,4 @@ declare module "@elizaos/app-defense-of-the-agents/ui";
 declare module "@elizaos/app-screenshare/ui";
 declare module "@elizaos/app-shopify/register";
 declare module "@elizaos/app-hyperliquid/client";
-declare module "@elizaos/app-core/components/character/CharacterEditor";
 declare module "@elizaos/app-task-coordinator/register-slots";

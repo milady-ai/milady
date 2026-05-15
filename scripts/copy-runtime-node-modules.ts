@@ -35,6 +35,7 @@ const miladyRootNodeModules = path.join(repoRoot, "node_modules");
 const miladyRootBunStore = path.join(miladyRootNodeModules, ".bun");
 const elizaRootNodeModules = path.join(repoRoot, "eliza", "node_modules");
 const elizaRootBunStore = path.join(elizaRootNodeModules, ".bun");
+const bunExecutable = process.platform === "win32" ? "bun.exe" : "bun";
 
 // In disable-local-eliza-workspace mode the eliza/ tree is restored *after*
 // `bun install` ran against the root only, so eliza/packages/app-core/
@@ -264,6 +265,41 @@ function ensureElizaCoreRuntimeAliases() {
   }
 }
 
+function ensureBuiltElizaPackage(packageDir: string, markerRelPath: string) {
+  if (!packageExists(packageDir)) {
+    return false;
+  }
+
+  const marker = path.join(packageDir, markerRelPath);
+  if (fs.existsSync(marker)) {
+    return false;
+  }
+
+  const result = spawnSync(bunExecutable, ["run", "build"], {
+    cwd: packageDir,
+    env: process.env,
+    stdio: "inherit",
+  });
+  if (result.status !== 0) {
+    throw new Error(
+      `[copy-runtime-node-modules wrapper] failed to build ${packageDir}`,
+    );
+  }
+  return true;
+}
+
+function ensureLocalWorkspaceDists() {
+  const built = ensureBuiltElizaPackage(
+    path.join(elizaPackagesDir, "vault"),
+    "dist/index.js",
+  );
+  if (built) {
+    console.log(
+      "[copy-runtime-node-modules wrapper] built eliza/packages/vault dist for runtime staging",
+    );
+  }
+}
+
 function ensureMirroredNodeModules() {
   if (!fs.existsSync(miladyRootNodeModules)) {
     return;
@@ -285,6 +321,7 @@ function ensureMirroredNodeModules() {
 }
 
 ensureMirroredNodeModules();
+ensureLocalWorkspaceDists();
 ensureElizaCoreRuntimeAliases();
 
 if (process.argv.includes("--link-only")) {

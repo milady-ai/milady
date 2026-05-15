@@ -138,11 +138,7 @@ import {
   type IosRuntimeMode,
   resolveIosRuntimeConfig,
 } from "@elizaos/app-core";
-
-// CharacterEditor is statically re-exported by `@elizaos/app-core/browser`,
-// so the previous `lazy()` wrapper here was eagerly merged back into the
-// main chunk by Rollup. Static import keeps the load path honest.
-import { CharacterEditor } from "@elizaos/ui/components/character/CharacterEditor";
+import { CharacterEditor } from "@elizaos/app-core/components/character/CharacterEditor";
 
 declare global {
   interface Window {

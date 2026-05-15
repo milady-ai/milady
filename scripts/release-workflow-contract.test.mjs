@@ -447,6 +447,9 @@ test("Electrobun release applies elizaOS source overlay before manual build setu
     /elizaAppCoreDir,\s*"platforms",\s*"electrobun"/,
   );
   assert.match(copyRuntimeWrapper, /elizaAgentNodeModules/);
+  assert.match(copyRuntimeWrapper, /ensureLocalWorkspaceDists/);
+  assert.match(copyRuntimeWrapper, /path\.join\(elizaPackagesDir,\s*"vault"\)/);
+  assert.match(copyRuntimeWrapper, /dist\/index\.js/);
   assert.match(copyRuntimeWrapper, /ensureElizaCoreRuntimeAliases/);
   assert.match(copyRuntimeWrapper, /dist\/node\/index\.node\.js/);
 });
