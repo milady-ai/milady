@@ -380,7 +380,7 @@ function ensureLocalWorkspaceDists() {
     [
       "eliza/packages/agent",
       path.join(elizaPackagesDir, "agent"),
-      "dist/config/feature-flags.js",
+      "dist/services/app-package-modules.js",
     ],
     [
       "eliza/plugins/plugin-elizacloud",

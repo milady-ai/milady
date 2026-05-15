@@ -504,7 +504,7 @@ test("Electrobun release applies elizaOS source overlay before manual build setu
   assert.match(copyRuntimeWrapper, /"@elizaos\/cloud-routing"/);
   assert.match(
     copyRuntimeWrapper,
-    /elizaPackagesDir,\s*"agent"[\s\S]*dist\/config\/feature-flags\.js/,
+    /elizaPackagesDir,\s*"agent"[\s\S]*dist\/services\/app-package-modules\.js/,
   );
   assert.match(copyRuntimeWrapper, /"@elizaos\/agent"/);
   for (const packageName of [
