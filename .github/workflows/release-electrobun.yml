@@ -848,7 +848,21 @@ jobs:
           out_dir="$RUNNER_TEMP/electrobun-entry-probe"
           rm -rf "$out_dir"
           node "$GITHUB_WORKSPACE/scripts/copy-runtime-node-modules.ts" --link-only
-          bun build src/index.ts --target=bun --outdir "$out_dir"
+          bun build src/index.ts --target=bun --outdir "$out_dir" \
+            --external "*.node" \
+            --external @node-llama-cpp/mac-arm64-metal \
+            --external @node-llama-cpp/mac-x64 \
+            --external @node-llama-cpp/linux-x64-cuda \
+            --external @node-llama-cpp/linux-x64-cuda-ext \
+            --external @node-llama-cpp/linux-x64-vulkan \
+            --external @node-llama-cpp/linux-x64 \
+            --external @node-llama-cpp/linux-arm64 \
+            --external @node-llama-cpp/linux-armv7l \
+            --external @node-llama-cpp/win-x64-cuda \
+            --external @node-llama-cpp/win-x64-cuda-ext \
+            --external @node-llama-cpp/win-x64-vulkan \
+            --external @node-llama-cpp/win-x64 \
+            --external @node-llama-cpp/win-arm64
 
       - name: Build patched Electrobun CLI
         shell: bash

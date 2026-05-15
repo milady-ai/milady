@@ -449,6 +449,10 @@ test("Electrobun release applies elizaOS source overlay before manual build setu
     electrobun,
     /name: Probe Electrobun bun entry build[\s\S]*?node "\$GITHUB_WORKSPACE\/scripts\/copy-runtime-node-modules\.ts" --link-only[\s\S]*?bun build src\/index\.ts --target=bun/,
   );
+  assert.match(electrobun, /--external "\*\.node"/);
+  assert.match(electrobun, /--external @node-llama-cpp\/mac-arm64-metal/);
+  assert.match(electrobun, /--external @node-llama-cpp\/linux-x64/);
+  assert.match(electrobun, /--external @node-llama-cpp\/win-x64/);
   assert.match(copyRuntimeWrapper, /elizaElectrobunNodeModules/);
   assert.match(
     copyRuntimeWrapper,
