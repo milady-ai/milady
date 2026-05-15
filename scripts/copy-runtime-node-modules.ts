@@ -365,6 +365,12 @@ function ensureLocalWorkspaceDists() {
       path.join(elizaPackagesDir, "cloud-routing"),
       "dist/index.js",
     ],
+    [
+      "eliza/plugins/plugin-elizacloud",
+      path.join(elizaPluginsDir, "plugin-elizacloud"),
+      "dist/node/index.node.js",
+      { allowExistingMarkerAfterFailure: true },
+    ],
     ...agentRuntimePluginBuilds.map(
       ([label, packageName, markerRelPath, options]) =>
         [
@@ -374,12 +380,6 @@ function ensureLocalWorkspaceDists() {
           options,
         ] as const,
     ),
-    [
-      "eliza/plugins/plugin-elizacloud",
-      path.join(elizaPluginsDir, "plugin-elizacloud"),
-      "dist/node/index.node.js",
-      { allowExistingMarkerAfterFailure: true },
-    ],
   ] as const;
 
   for (const [label, packageDir, markerRelPath, options] of builds) {
