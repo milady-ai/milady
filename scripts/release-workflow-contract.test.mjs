@@ -256,6 +256,10 @@ test("eliza CI patches align release source helpers", () => {
     "scripts/cloud-image-prune-deps.mjs",
     "utf8",
   );
+  const capacitorBridgeReleaseBuild = fs.readFileSync(
+    "scripts/build-capacitor-bridge-release.mjs",
+    "utf8",
+  );
 
   assert.match(
     patchScript,
@@ -294,7 +298,15 @@ test("eliza CI patches align release source helpers", () => {
   assert.match(patchScript, /browser bridge Safari bundle identifiers/);
   assert.match(patchScript, /app-core release-check Milady wrappers/);
   assert.match(patchScript, /patchCapacitorBridgeBuildScript/);
+  assert.match(patchScript, /patchCapacitorBridgeLazyCliExports/);
+  assert.match(patchScript, /build-capacitor-bridge-release\.mjs/);
   assert.match(patchScript, /plugin-capacitor-bridge JS-only release build/);
+  assert.match(patchScript, /plugin-capacitor-bridge lazy mobile CLI exports/);
+  assert.match(capacitorBridgeReleaseBuild, /mobile-device-bridge-bootstrap/);
+  assert.match(capacitorBridgeReleaseBuild, /src\/shared\/fs-shim\.ts/);
+  assert.match(capacitorBridgeReleaseBuild, /src\/android\/bridge\.ts/);
+  assert.match(capacitorBridgeReleaseBuild, /src\/ios\/bridge\.ts/);
+  assert.match(capacitorBridgeReleaseBuild, /packages=external/);
   assert.match(
     patchScript,
     /requiredRootPackageScriptSnippets[\s\S]*scripts\/run-release-check\.mjs/,

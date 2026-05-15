@@ -240,9 +240,32 @@ function patchLocalInferenceExternalGlob(raw) {
 }
 
 function patchCapacitorBridgeBuildScript(raw) {
+  return raw
+    .replace(
+      "tsup src/index.ts --format esm --dts --clean",
+      "node ../../../scripts/build-capacitor-bridge-release.mjs",
+    )
+    .replace(
+      "bun run check:android-manifest && tsup",
+      "bun run check:android-manifest && node ../../../scripts/build-capacitor-bridge-release.mjs",
+    );
+}
+
+function patchCapacitorBridgeLazyCliExports(raw) {
   return raw.replace(
-    "tsup src/index.ts --format esm --dts --clean",
-    "tsup src/index.ts --format esm --clean",
+    `export { runAndroidBridgeCli } from "./android/bridge.js";
+export { runIosBridgeCli } from "./ios/bridge.js";`,
+    `export async function runAndroidBridgeCli(): Promise<void> {
+\tconst { runAndroidBridgeCli } = await import("./android/bridge.js");
+\treturn runAndroidBridgeCli();
+}
+
+export async function runIosBridgeCli(
+\targv: string[] = process.argv,
+): Promise<void> {
+\tconst { runIosBridgeCli } = await import("./ios/bridge.js");
+\treturn runIosBridgeCli(argv);
+}`,
   );
 }
 
@@ -1243,6 +1266,18 @@ function applyReleaseSourcePatches() {
     path.join(elizaDir, "plugins", "plugin-capacitor-bridge", "package.json"),
     patchCapacitorBridgeBuildScript,
     "plugin-capacitor-bridge JS-only release build",
+  );
+
+  replaceFileText(
+    path.join(
+      elizaDir,
+      "plugins",
+      "plugin-capacitor-bridge",
+      "src",
+      "index.ts",
+    ),
+    patchCapacitorBridgeLazyCliExports,
+    "plugin-capacitor-bridge lazy mobile CLI exports",
   );
 
   replaceFileText(
