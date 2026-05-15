@@ -847,6 +847,28 @@ function patchAgentConfigPaths(raw) {
   return next;
 }
 
+const agentConfigPlainObjectHelper = [
+  "function isPlainObject(value: unknown): value is Record<string, unknown> {",
+  '  return typeof value === "object" && value !== null && !Array.isArray(value);',
+  "}",
+  "",
+].join("\n");
+
+function patchAgentConfigPlainObjectImport(raw) {
+  let next = raw
+    .replace('import { isPlainObject } from "@elizaos/shared";\n', "")
+    .replace("  isPlainObject,\n", "");
+
+  if (!next.includes("function isPlainObject(")) {
+    next = next.replace(
+      'import JSON5 from "json5";\n',
+      `import JSON5 from "json5";\n\n${agentConfigPlainObjectHelper}`,
+    );
+  }
+
+  return next;
+}
+
 function patchSqlRawConnectionReturnType(raw, managerTypeName) {
   return raw.replace(
     "  getRawConnection() {\n    return this.manager.getConnection();\n  }",
@@ -1103,6 +1125,14 @@ function applyReleaseSourcePatches() {
     patchAgentConfigPaths,
     "agent config path helpers",
   );
+
+  for (const configFileName of ["config.ts", "includes.ts"]) {
+    replaceFileText(
+      path.join(elizaDir, "packages", "agent", "src", "config", configFileName),
+      patchAgentConfigPlainObjectImport,
+      `agent config plain object helper (${configFileName})`,
+    );
+  }
 
   replaceFileText(
     path.join(

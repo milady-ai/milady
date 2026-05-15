@@ -463,6 +463,8 @@ test("Electrobun release applies elizaOS source overlay before manual build setu
   assert.match(elizaPatchScript, /patchAgentConfigPaths/);
   assert.match(elizaPatchScript, /getElizaNamespace/);
   assert.match(elizaPatchScript, /resolveOAuthDir/);
+  assert.match(elizaPatchScript, /patchAgentConfigPlainObjectImport/);
+  assert.match(elizaPatchScript, /agent config plain object helper/);
   assert.match(elizaPatchScript, /patchAgentExtractParamsPrompt/);
   assert.match(elizaPatchScript, /EXTRACT_ACTION_PARAMS_TEMPLATE/);
   assert.match(elizaPatchScript, /extractActionParamsTemplate/);
