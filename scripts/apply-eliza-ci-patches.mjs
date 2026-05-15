@@ -330,6 +330,24 @@ function patchAppCoreReleaseCheck(raw) {
   );
 
   patched = patched.replace(
+    /const requiredElectrobunPrWorkflowSnippets = \[[\s\S]*?\];/,
+    `const requiredElectrobunPrWorkflowSnippets = [
+  "name: Validate Electrobun Release Workflow",
+  "pull_request:",
+  "branches: [main, develop]",
+  "workflow_dispatch:",
+  "permissions:",
+  "contents: read",
+  'BUN_VERSION: "1.3.13"',
+  "name: Release Workflow Contract",
+  "bun install --ignore-scripts",
+  'run-postinstall: "true"',
+  "bun run test:regression-matrix:release-contract",
+  "bun run test:release:contract",
+];`,
+  );
+
+  patched = patched.replace(
     /const requiredRootPackageScriptSnippets: Record<string, readonly string\[]> = \{[\s\S]*?\n\};\nconst requiredElectrobunConfigSnippets/,
     `const requiredRootPackageScriptSnippets: Record<string, readonly string[]> = {
   "release:check": ["scripts/run-release-check.mjs"],

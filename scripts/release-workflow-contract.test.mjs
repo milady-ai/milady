@@ -643,19 +643,19 @@ test("Electrobun release has a lightweight PR contract workflow", () => {
   assert.match(workflowText, /^name: Validate Electrobun Release Workflow$/m);
   assert.match(workflowText, /branches: \[main, develop\]/);
   assert.match(workflowText, /BUN_VERSION: "1\.3\.13"/);
-  assert.match(workflowText, /MILADY_SKIP_LOCAL_UPSTREAMS: "1"/);
   assert.match(
     workflowText,
     /git clone --depth=1 --branch "\$\{MILADY_ELIZA_BRANCH:-develop\}" https:\/\/github\.com\/elizaOS\/eliza\.git eliza/,
   );
+  assert.match(workflowText, /run-postinstall: "true"/);
+  assert.match(workflowText, /skip-avatar-clone: "true"/);
+  assert.match(workflowText, /no-vision-deps: "true"/);
+  assert.match(workflowText, /skip-local-upstreams-postinstall: "true"/);
   assert.match(
     workflowText,
     /run: bun run test:regression-matrix:release-contract/,
   );
   assert.match(workflowText, /run: bun run test:release:contract/);
-  assert.match(workflowText, /SKIP_AVATAR_CLONE: "1"/);
-  assert.match(workflowText, /ELIZA_NO_VISION_DEPS: "1"/);
-  assert.match(workflowText, /MILADY_NO_VISION_DEPS: "1"/);
 });
 
 test("Electrobun release workflow root bun scripts are wired", () => {

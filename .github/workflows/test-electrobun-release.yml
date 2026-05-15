@@ -56,15 +56,10 @@ jobs:
           bun-version: ${{ env.BUN_VERSION }}
           install-command: bun install --ignore-scripts
           install-native-deps: "false"
-          run-postinstall: "false"
-
-      - name: Run repository postinstall patches
-        run: bun run postinstall
-        env:
-          MILADY_SKIP_LOCAL_UPSTREAMS: "1"
-          SKIP_AVATAR_CLONE: "1"
-          ELIZA_NO_VISION_DEPS: "1"
-          MILADY_NO_VISION_DEPS: "1"
+          run-postinstall: "true"
+          skip-avatar-clone: "true"
+          no-vision-deps: "true"
+          skip-local-upstreams-postinstall: "true"
 
       - name: Run regression matrix contract
         run: bun run test:regression-matrix:release-contract
