@@ -322,6 +322,8 @@ jobs:
         run: node eliza/packages/app-core/scripts/ensure-avatars.mjs
 
       - name: Build core dist (server bundle)
+        env:
+          MILADY_ELIZA_SOURCE: local
         run: |
           node scripts/run-tsdown.mjs
           echo '{"type":"module"}' > dist/package.json

@@ -30,6 +30,11 @@ function assertNoElizaWorkspaceSpecifiers(
         "workspace:*",
         `${packageJsonPath} ${section}.${name} must not point at a local elizaOS workspace`,
       );
+      assert.doesNotMatch(
+        String(specifier),
+        /^(?:file|link):\.?\/?eliza\//,
+        `${packageJsonPath} ${section}.${name} must not point at a local elizaOS checkout`,
+      );
     }
   }
 }

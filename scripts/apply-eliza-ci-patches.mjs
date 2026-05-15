@@ -111,6 +111,19 @@ function replaceFileText(filePath, transform, label) {
   console.log(`[apply-eliza-ci-patches] patched ${label}`);
 }
 
+function writeFileText(filePath, content, label, mode) {
+  if (fs.existsSync(filePath)) {
+    const raw = fs.readFileSync(filePath, "utf8");
+    if (raw === content) return;
+  }
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  fs.writeFileSync(filePath, content);
+  if (mode !== undefined) {
+    fs.chmodSync(filePath, mode);
+  }
+  console.log(`[apply-eliza-ci-patches] patched ${label}`);
+}
+
 function patchCloudDockerfile(raw) {
   let next = raw;
   if (!next.includes("COPY patches ./patches")) {
@@ -282,7 +295,111 @@ function patchAppCoreReleaseCheck(raw) {
     .replace(
       "release-check: release workflow is missing notary wrapper wiring:",
       "release-check: release workflow is missing required release wiring:",
+    )
+    .replace(
+      '"ELIZA_TEST_WINDOWS_PROOF_INSTALL_DIR: $" + "{{ runner.temp }}\\\\el-proof",',
+      '"ELIZA_TEST_WINDOWS_PROOF_INSTALL_DIR: $" + "{{ runner.temp }}\\\\el-smoke-proof",',
+    )
+    .replace(
+      '!catchBlock.includes("opts?.serverOnly") ||',
+      '!(catchBlock.includes("opts?.serverOnly") || catchBlock.includes("options?.serverOnly")) ||',
+    )
+    .replace(
+      "  if (!isExactVersion(version)) {\n",
+      '  if (!isExactVersion(version) && !["alpha", "beta"].includes(version)) {\n',
+    )
+    .replace(
+      '  if (!isExactVersion(version) && version !== "beta") {\n',
+      '  if (!isExactVersion(version) && !["alpha", "beta"].includes(version)) {\n',
+    )
+    .replace(
+      "must either use workspace:* for the local checkout or be pinned to an exact version",
+      "must either use workspace:* for the local checkout, use a release dist tag, or be pinned to an exact version",
     );
+}
+
+function patchStartApiServerCatchBlock(raw) {
+  if (raw.includes("console.error(apiErrMsg)")) {
+    return raw;
+  }
+
+  const existingCatch = raw.replace(
+    "    logger.error(apiErrMsg);\n\n    // In server-only mode",
+    "    logger.error(apiErrMsg);\n    console.error(apiErrMsg);\n\n    // In server-only mode",
+  );
+  if (existingCatch !== raw) {
+    return existingCatch;
+  }
+
+  const before = `      const { port: actualApiPort } = await startApiServer({
+        port: apiPort,
+        runtime: currentRuntime,
+        onRestart: async () => {
+          if (!currentRuntime) {
+            return null;
+          }
+
+          await upstreamShutdownRuntime(currentRuntime, "server-only restart");
+
+          const restarted =
+            (await upstreamStartElizaWithPgliteCompat({
+              ...options,
+              headless: true,
+              serverOnly: false,
+            })) ?? undefined;
+
+          currentRuntime = restarted
+            ? await repairRuntimeAfterBoot(restarted)
+            : undefined;
+          earlyCompatState.current = currentRuntime ?? null;
+
+          return currentRuntime ?? null;
+        },
+      });
+`;
+  const after = `      let actualApiPort: number;
+      try {
+        const startedApiServer = await startApiServer({
+          port: apiPort,
+          runtime: currentRuntime,
+          onRestart: async () => {
+            if (!currentRuntime) {
+              return null;
+            }
+
+            await upstreamShutdownRuntime(currentRuntime, "server-only restart");
+
+            const restarted =
+              (await upstreamStartElizaWithPgliteCompat({
+                ...options,
+                headless: true,
+                serverOnly: false,
+              })) ?? undefined;
+
+            currentRuntime = restarted
+              ? await repairRuntimeAfterBoot(restarted)
+              : undefined;
+            earlyCompatState.current = currentRuntime ?? null;
+
+            return currentRuntime ?? null;
+          },
+        });
+        actualApiPort = startedApiServer.port;
+      } catch (apiErr) {
+        const apiErrMsg =
+          apiErr instanceof Error
+            ? (apiErr.stack ?? apiErr.message)
+            : String(apiErr);
+        logger.error(\`[eliza] API server failed to start: \${apiErrMsg}\`);
+        console.error(apiErrMsg);
+        if (options?.serverOnly) {
+          process.exit(1);
+        }
+        throw apiErr;
+      }
+`;
+
+  return raw.replace(before, after);
 }
 
 function patchWorkspaceDistRelinkScript(raw) {
@@ -367,7 +484,59 @@ function patchSqlRawConnectionReturnType(raw, managerTypeName) {
   );
 }
 
+const ensureWhisperModelScript = `#!/usr/bin/env bash
+set -euo pipefail
+
+model="\${1:-base.en}"
+whisper_pkg="\${WHISPER_NODE_PACKAGE_DIR:-}"
+
+if [ -z "$whisper_pkg" ]; then
+  whisper_pkg="$(node -e 'const { createRequire } = require("node:module"); const path = require("node:path"); const req = createRequire(process.cwd() + "/"); console.log(path.dirname(req.resolve("whisper-node/package.json")));')"
+fi
+
+models_dir="$whisper_pkg/lib/whisper.cpp/models"
+model_file="$models_dir/ggml-$model.bin"
+cache_dir="\${MILADY_WHISPER_MODEL_CACHE_DIR:-}"
+cache_file=""
+
+if [ -n "$cache_dir" ]; then
+  cache_file="$cache_dir/ggml-$model.bin"
+fi
+
+if [ -n "$cache_file" ] && [ -f "$cache_file" ]; then
+  mkdir -p "$models_dir"
+  cp "$cache_file" "$model_file"
+  exit 0
+fi
+
+if [ -f "$model_file" ]; then
+  exit 0
+fi
+
+bash "$models_dir/download-ggml-model.sh" "$model"
+
+if [ -n "$cache_file" ]; then
+  mkdir -p "$cache_dir"
+  cp "$model_file" "$cache_file"
+fi
+`;
+
 function applyReleaseSourcePatches() {
+  writeFileText(
+    path.join(
+      elizaDir,
+      "packages",
+      "app-core",
+      "platforms",
+      "electrobun",
+      "scripts",
+      "ensure-whisper-model.sh",
+    ),
+    ensureWhisperModelScript,
+    "Electrobun whisper model script",
+    0o755,
+  );
+
   replaceFileText(
     path.join(
       elizaDir,
@@ -470,6 +639,18 @@ function applyReleaseSourcePatches() {
     path.join(elizaDir, "packages", "app-core", "scripts", "release-check.ts"),
     patchAppCoreReleaseCheck,
     "app-core release browser bridge hard gate",
+  );
+
+  replaceFileText(
+    path.join(elizaDir, "packages", "app-core", "src", "runtime", "eliza.ts"),
+    patchStartApiServerCatchBlock,
+    "app-core API startup error visibility",
+  );
+
+  replaceFileText(
+    path.join(elizaDir, "packages", "agent", "src", "runtime", "eliza.ts"),
+    patchStartApiServerCatchBlock,
+    "agent API startup error visibility",
   );
 
   replaceFileText(

@@ -349,7 +349,11 @@ test("npm release builds generate gitignored eliza i18n data before bundling", (
   }
   assert.match(
     releaseContractSuite,
-    /ensure-shared-i18n-data\.mjs"[\s\S]*?run\("node", \["scripts\/run-tsdown\.mjs"/,
+    /ensure-shared-i18n-data\.mjs"[\s\S]*?scripts\/run-tsdown\.mjs/,
+  );
+  assert.match(
+    releaseContractSuite,
+    /scripts\/run-tsdown\.mjs[\s\S]*?MILADY_ELIZA_SOURCE:\s*"local"/,
   );
 });
 

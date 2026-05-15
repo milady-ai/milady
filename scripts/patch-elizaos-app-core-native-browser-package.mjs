@@ -268,6 +268,45 @@ function replaceAnyPrototypeFunction(source, methodName, replacement) {
   return source.replace(pattern, replacement);
 }
 
+function patchIosRuntimeJs(source) {
+  let next = source;
+
+  if (!next.includes('case "tunnel-to-mobile":')) {
+    next = next.replace(
+      '        case "local":\n            return "local";\n        default:',
+      '        case "local":\n            return "local";\n        case "tunnel-to-mobile":\n        case "mobile-tunnel":\n        case "host-with-tunnel":\n        case "tunneled":\n            return "tunnel-to-mobile";\n        default:',
+    );
+  }
+
+  if (!next.includes("VITE_MILADY_TUNNEL_RELAY_URL")) {
+    next = next.replace(
+      '    const deviceBridgeToken = readString(env, [\n        "VITE_MILADY_DEVICE_BRIDGE_TOKEN",\n        "VITE_ELIZA_DEVICE_BRIDGE_TOKEN",\n    ]);\n',
+      '    const deviceBridgeToken = readString(env, [\n        "VITE_MILADY_DEVICE_BRIDGE_TOKEN",\n        "VITE_ELIZA_DEVICE_BRIDGE_TOKEN",\n    ]);\n    const tunnelRelayUrl = readString(env, [\n        "VITE_MILADY_TUNNEL_RELAY_URL",\n        "VITE_ELIZA_TUNNEL_RELAY_URL",\n    ]);\n    const tunnelPairingToken = readString(env, [\n        "VITE_MILADY_TUNNEL_PAIRING_TOKEN",\n        "VITE_ELIZA_TUNNEL_PAIRING_TOKEN",\n    ]);\n',
+    );
+  }
+
+  if (!next.includes("tunnelRelayUrl ? { tunnelRelayUrl }")) {
+    next = next.replace(
+      "        ...(deviceBridgeToken ? { deviceBridgeToken } : {}),\n    };",
+      "        ...(deviceBridgeToken ? { deviceBridgeToken } : {}),\n        ...(tunnelRelayUrl ? { tunnelRelayUrl } : {}),\n        ...(tunnelPairingToken ? { tunnelPairingToken } : {}),\n    };",
+    );
+  }
+
+  return next;
+}
+
+function patchIosRuntimeTypes(source) {
+  return source
+    .replace(
+      'export type IosRuntimeMode = "remote-mac" | "cloud" | "cloud-hybrid" | "local";',
+      'export type IosRuntimeMode = "remote-mac" | "cloud" | "cloud-hybrid" | "local" | "tunnel-to-mobile";',
+    )
+    .replace(
+      "    deviceBridgeToken?: string;\n}",
+      "    deviceBridgeToken?: string;\n    tunnelRelayUrl?: string;\n    tunnelPairingToken?: string;\n}",
+    );
+}
+
 const openExternalUrlPath = path.join(
   appCoreDir,
   "packages/app-core/src/utils/openExternalUrl.js",
@@ -431,6 +470,18 @@ for (const packageDir of appCorePackageDirs) {
         }
         return `${source.trimEnd()}\n${appShellRegistryTypesSource}`;
       },
+    ) || changed;
+
+  changed =
+    patchFile(
+      appCorePackageSourcePath(packageDir, "platform/ios-runtime.js"),
+      patchIosRuntimeJs,
+    ) || changed;
+
+  changed =
+    patchFile(
+      appCorePackageSourcePath(packageDir, "platform/ios-runtime.d.ts"),
+      patchIosRuntimeTypes,
     ) || changed;
 }
 

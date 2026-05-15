@@ -53,12 +53,13 @@ function selectReleaseContractTests(root = repoRoot) {
   return packageModeReleaseContractTests;
 }
 
-export function run(command, args, cwd = repoRoot) {
+export function run(command, args, cwd = repoRoot, env = {}) {
   const result = spawnSync(command, args, {
     cwd,
     stdio: "inherit",
     env: {
       ...process.env,
+      ...env,
       NODE_NO_WARNINGS: process.env.NODE_NO_WARNINGS ?? "1",
     },
     shell: process.platform === "win32",
@@ -444,7 +445,14 @@ export function main() {
       run("node", [
         "eliza/packages/app-core/scripts/ensure-shared-i18n-data.mjs",
       ]);
-      run("node", ["scripts/run-tsdown.mjs", "--fail-on-warn", "false"]);
+      run(
+        "node",
+        ["scripts/run-tsdown.mjs", "--fail-on-warn", "false"],
+        repoRoot,
+        {
+          MILADY_ELIZA_SOURCE: "local",
+        },
+      );
       fs.mkdirSync(path.join(repoRoot, "dist"), { recursive: true });
       fs.writeFileSync(
         path.join(repoRoot, "dist", "package.json"),
