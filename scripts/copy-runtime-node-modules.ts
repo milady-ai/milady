@@ -272,6 +272,25 @@ function ensureElizaCoreRuntimeAliases() {
   }
 }
 
+function ensureAgentRuntimeDistAliases() {
+  const compiledDir = path.join(
+    elizaAgentDir,
+    "dist",
+    "packages",
+    "agent",
+    "src",
+  );
+  const distDir = path.join(elizaAgentDir, "dist");
+  if (!fs.existsSync(compiledDir)) {
+    return;
+  }
+
+  fs.cpSync(compiledDir, distDir, { force: true, recursive: true });
+  console.log(
+    `[copy-runtime-node-modules wrapper] mirrored @elizaos/agent compiled dist aliases from ${compiledDir}`,
+  );
+}
+
 type EnsureBuildOptions = {
   allowExistingMarkerAfterFailure?: boolean;
 };
@@ -518,6 +537,7 @@ function ensureMirroredNodeModules() {
 ensureMirroredNodeModules();
 linkLocalElizaWorkspacePackages();
 ensureLocalWorkspaceDists();
+ensureAgentRuntimeDistAliases();
 linkLocalElizaWorkspacePackages();
 ensureElizaCoreRuntimeAliases();
 

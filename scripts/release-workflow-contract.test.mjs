@@ -466,6 +466,8 @@ test("Electrobun release applies elizaOS source overlay before manual build setu
   );
   assert.match(copyRuntimeWrapper, /elizaAgentNodeModules/);
   assert.match(copyRuntimeWrapper, /ensureLocalWorkspaceDists/);
+  assert.match(copyRuntimeWrapper, /ensureAgentRuntimeDistAliases/);
+  assert.match(copyRuntimeWrapper, /"dist",\s*"packages",\s*"agent",\s*"src"/);
   assert.match(copyRuntimeWrapper, /linkLocalElizaWorkspacePackages/);
   assert.match(
     copyRuntimeWrapper,
@@ -474,7 +476,7 @@ test("Electrobun release applies elizaOS source overlay before manual build setu
   assert.match(copyRuntimeWrapper, /packageName,\s*"node_modules"/);
   assert.match(
     copyRuntimeWrapper,
-    /ensureMirroredNodeModules\(\);\s*linkLocalElizaWorkspacePackages\(\);\s*ensureLocalWorkspaceDists\(\);\s*linkLocalElizaWorkspacePackages\(\);\s*ensureElizaCoreRuntimeAliases\(\);/,
+    /ensureMirroredNodeModules\(\);\s*linkLocalElizaWorkspacePackages\(\);\s*ensureLocalWorkspaceDists\(\);\s*ensureAgentRuntimeDistAliases\(\);\s*linkLocalElizaWorkspacePackages\(\);\s*ensureElizaCoreRuntimeAliases\(\);/,
   );
   assert.match(
     copyRuntimeWrapper,
