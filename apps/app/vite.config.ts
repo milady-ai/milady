@@ -97,15 +97,22 @@ const nativePluginsRoot = path.join(localElizaRoot, "packages/native-plugins");
 const appCoreSrcRoot = hasLocalElizaWorkspace
   ? path.join(localElizaRoot, "packages/app-core/src")
   : null;
-const appCoreNativePluginEntrypoints = appCoreSrcRoot
-  ? path.join(
-      localElizaRoot,
-      "packages/ui/src/platform/native-plugin-entrypoints.ts",
-    )
-  : requireResolve("@elizaos/ui/platform/native-plugin-entrypoints");
 const emptyNodeModuleEntry = appCoreSrcRoot
   ? path.join(appCoreSrcRoot, "platform/empty-node-module.ts")
   : requireResolve("@elizaos/app-core/platform/empty-node-module");
+// `native-plugin-entrypoints` is only imported on iOS/Android at runtime, but
+// vite must still statically resolve the specifier. Fall back to the empty stub
+// when a local source checkout does not carry that mobile entrypoint.
+const appCoreNativePluginEntrypoints = (() => {
+  if (appCoreSrcRoot) {
+    const localPath = path.join(
+      appCoreSrcRoot,
+      "platform/native-plugin-entrypoints.ts",
+    );
+    return fs.existsSync(localPath) ? localPath : emptyNodeModuleEntry;
+  }
+  return requireResolve("@elizaos/app-core/platform/native-plugin-entrypoints");
+})();
 const uiPkgRoot = hasLocalElizaWorkspace
   ? path.join(localElizaRoot, "packages/ui")
   : null;
