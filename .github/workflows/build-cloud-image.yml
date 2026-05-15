@@ -309,13 +309,30 @@ jobs:
           const path = require("path");
           const dockerfile = "eliza/packages/app-core/deploy/Dockerfile.cloud";
           if (fs.existsSync(dockerfile)) {
-            const rawDockerfile = fs.readFileSync(dockerfile, "utf8");
-            const nextDockerfile = rawDockerfile.replace(
+            let dockerfileContents = fs.readFileSync(dockerfile, "utf8");
+            const original = dockerfileContents;
+            dockerfileContents = dockerfileContents.replace(
               "plugin-agent-orchestrator|plugin-cli|plugin-imessage",
               "plugin-agent-orchestrator|plugin-app-control|plugin-cli|plugin-imessage",
             );
-            if (nextDockerfile !== rawDockerfile) {
-              fs.writeFileSync(dockerfile, nextDockerfile);
+            // The prep stage does `cp -a "${APP_ENTRYPOINT}" /runtime/` but
+            // the upstream Dockerfile never `COPY`s the milady-specific
+            // entrypoint into /src. Inject a `COPY milady.mjs ./` next to
+            // the existing `COPY package.json plugins.json ./` line so
+            // milady.mjs lands at /src/milady.mjs before the RUN script.
+            const prepCopyLine = "COPY package.json plugins.json ./";
+            const prepCopyWithEntry = `${prepCopyLine}\nCOPY milady.mjs ./milady.mjs`;
+            if (
+              !dockerfileContents.includes("COPY milady.mjs") &&
+              dockerfileContents.includes(prepCopyLine)
+            ) {
+              dockerfileContents = dockerfileContents.replace(
+                prepCopyLine,
+                prepCopyWithEntry,
+              );
+            }
+            if (dockerfileContents !== original) {
+              fs.writeFileSync(dockerfile, dockerfileContents);
             }
           }
           const manifests = [
