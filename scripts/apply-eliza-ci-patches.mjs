@@ -869,6 +869,20 @@ function patchAgentConfigPlainObjectImport(raw) {
   return next;
 }
 
+function patchAgentRelationshipsGraphExports(raw) {
+  return raw.replace(
+    '  searchMemoriesForCluster,\n} from "@elizaos/core";',
+    '  searchMemoriesForCluster,\n} from "../../../core/src/services/relationships-graph-builder.ts";',
+  );
+}
+
+function patchAgentRuntimeSchemaDurationImport(raw) {
+  return raw.replace(
+    'import { parseDurationMs } from "@elizaos/shared";',
+    'import { parseDurationMs } from "../../../shared/src/cli/parse-duration.ts";',
+  );
+}
+
 function patchSqlRawConnectionReturnType(raw, managerTypeName) {
   return raw.replace(
     "  getRawConnection() {\n    return this.manager.getConnection();\n  }",
@@ -1133,6 +1147,32 @@ function applyReleaseSourcePatches() {
       `agent config plain object helper (${configFileName})`,
     );
   }
+
+  replaceFileText(
+    path.join(
+      elizaDir,
+      "packages",
+      "agent",
+      "src",
+      "services",
+      "relationships-graph.ts",
+    ),
+    patchAgentRelationshipsGraphExports,
+    "agent relationships graph local core exports",
+  );
+
+  replaceFileText(
+    path.join(
+      elizaDir,
+      "packages",
+      "agent",
+      "src",
+      "config",
+      "zod-schema.agent-runtime.ts",
+    ),
+    patchAgentRuntimeSchemaDurationImport,
+    "agent runtime schema duration import",
+  );
 
   replaceFileText(
     path.join(

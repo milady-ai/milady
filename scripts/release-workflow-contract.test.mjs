@@ -456,7 +456,14 @@ test("Electrobun release applies elizaOS source overlay before manual build setu
   );
   assert.match(copyRuntimeWrapper, /elizaAgentNodeModules/);
   assert.match(copyRuntimeWrapper, /ensureLocalWorkspaceDists/);
-  assert.match(copyRuntimeWrapper, /path\.join\(elizaPackagesDir,\s*"vault"\)/);
+  assert.match(copyRuntimeWrapper, /linkLocalElizaWorkspacePackages/);
+  assert.match(
+    copyRuntimeWrapper,
+    /miladyRootNodeModules,\s*\n\s*elizaPackagesNodeModules/,
+  );
+  assert.match(copyRuntimeWrapper, /\["shared", "dist\/index\.js"\]/);
+  assert.match(copyRuntimeWrapper, /\["core", "dist\/node\/index\.node\.js"\]/);
+  assert.match(copyRuntimeWrapper, /\["vault", "dist\/index\.js"\]/);
   assert.match(copyRuntimeWrapper, /dist\/index\.js/);
   assert.match(copyRuntimeWrapper, /ensureElizaCoreRuntimeAliases/);
   assert.match(copyRuntimeWrapper, /dist\/node\/index\.node\.js/);
@@ -465,6 +472,10 @@ test("Electrobun release applies elizaOS source overlay before manual build setu
   assert.match(elizaPatchScript, /resolveOAuthDir/);
   assert.match(elizaPatchScript, /patchAgentConfigPlainObjectImport/);
   assert.match(elizaPatchScript, /agent config plain object helper/);
+  assert.match(elizaPatchScript, /patchAgentRelationshipsGraphExports/);
+  assert.match(elizaPatchScript, /relationships-graph-builder\.ts/);
+  assert.match(elizaPatchScript, /patchAgentRuntimeSchemaDurationImport/);
+  assert.match(elizaPatchScript, /shared\/src\/cli\/parse-duration\.ts/);
   assert.match(elizaPatchScript, /patchAgentExtractParamsPrompt/);
   assert.match(elizaPatchScript, /EXTRACT_ACTION_PARAMS_TEMPLATE/);
   assert.match(elizaPatchScript, /extractActionParamsTemplate/);

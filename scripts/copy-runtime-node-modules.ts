@@ -289,14 +289,59 @@ function ensureBuiltElizaPackage(packageDir: string, markerRelPath: string) {
 }
 
 function ensureLocalWorkspaceDists() {
-  const built = ensureBuiltElizaPackage(
-    path.join(elizaPackagesDir, "vault"),
-    "dist/index.js",
-  );
-  if (built) {
-    console.log(
-      "[copy-runtime-node-modules wrapper] built eliza/packages/vault dist for runtime staging",
+  const builds = [
+    ["shared", "dist/index.js"],
+    ["core", "dist/node/index.node.js"],
+    ["vault", "dist/index.js"],
+  ] as const;
+
+  for (const [packageName, markerRelPath] of builds) {
+    const built = ensureBuiltElizaPackage(
+      path.join(elizaPackagesDir, packageName),
+      markerRelPath,
     );
+    if (built) {
+      console.log(
+        `[copy-runtime-node-modules wrapper] built eliza/packages/${packageName} dist for runtime staging`,
+      );
+    }
+  }
+}
+
+function linkLocalElizaPackage(targetNodeModules: string, packageName: string) {
+  const packageDir = path.join(elizaPackagesDir, packageName);
+  if (!packageExists(packageDir)) {
+    return false;
+  }
+
+  const scopeDir = path.join(targetNodeModules, "@elizaos");
+  const dest = path.join(scopeDir, packageName);
+  fs.mkdirSync(scopeDir, { recursive: true });
+  fs.rmSync(dest, { force: true, recursive: true });
+  fs.symlinkSync(packageDir, dest, "dir");
+  return true;
+}
+
+function linkLocalElizaWorkspacePackages() {
+  const targets = [
+    miladyRootNodeModules,
+    elizaPackagesNodeModules,
+    elizaAgentNodeModules,
+    elizaAppCoreNodeModules,
+    elizaElectrobunNodeModules,
+  ];
+  const packages = ["core", "shared"] as const;
+
+  for (const targetNodeModules of targets) {
+    if (!fs.existsSync(targetNodeModules)) continue;
+    const linked = packages.filter((packageName) =>
+      linkLocalElizaPackage(targetNodeModules, packageName),
+    );
+    if (linked.length > 0) {
+      console.log(
+        `[copy-runtime-node-modules wrapper] linked local eliza packages in ${targetNodeModules}: ${linked.join(", ")}`,
+      );
+    }
   }
 }
 
@@ -322,6 +367,7 @@ function ensureMirroredNodeModules() {
 
 ensureMirroredNodeModules();
 ensureLocalWorkspaceDists();
+linkLocalElizaWorkspacePackages();
 ensureElizaCoreRuntimeAliases();
 
 if (process.argv.includes("--link-only")) {
