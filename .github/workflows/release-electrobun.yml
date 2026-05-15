@@ -1882,6 +1882,14 @@ jobs:
             echo "Decompressing $f"
             cd release-files && unzip -o "$(basename "$f")" && rm "$(basename "$f")" && cd ..
           done
+          find release-files -mindepth 2 -type f \( \
+            -name "ElizaOSApp-Setup-*.exe" -o \
+            -name "*.dmg" -o \
+            -name "*.app.tar.gz" -o \
+            -name "*.tar.zst" -o \
+            -name "*.msix" \
+          \) -exec mv -f {} release-files/ \; 2>/dev/null || true
+          find release-files -mindepth 1 -maxdepth 1 -type d -exec rm -rf {} + 2>/dev/null || true
 
           echo "=== Public release files ==="
           ls -lh release-files/ 2>/dev/null || echo "None"
@@ -1904,7 +1912,7 @@ jobs:
             echo "::error::No public release files collected"
             exit 1
           fi
-          sha256sum -- * > SHA256SUMS.txt
+          find . -maxdepth 1 -type f ! -name SHA256SUMS.txt -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt
           cat SHA256SUMS.txt
 
       - name: Create GitHub Release
