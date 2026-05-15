@@ -138,21 +138,28 @@ jobs:
       - name: Prepare eliza source workspace
         run: |
           if [ -f eliza/.gitmodules ]; then
-            git -C eliza submodule sync --recursive
-            # Init only paths registered in .gitmodules — upstream eliza
-            # currently has orphan gitlinks (e.g. swe-bench-workspace-opencode/*)
-            # that aren't declared in .gitmodules and break a bare
-            # `submodule update --init --recursive`.
-            mapfile -t SUBMODULE_PATHS < <(
-              git -C eliza config -f .gitmodules --get-regexp '^submodule\..*\.path$' \
-                | awk '{print $2}'
-            )
-            for path in "${SUBMODULE_PATHS[@]}"; do
-              case "$path" in
-                cloud|plugins/plugin-elizacloud) continue ;;
-              esac
-              git -C eliza submodule update --init --recursive --depth=1 -- "$path"
+            # Untrack orphan gitlinks (160000 entries in the tree that aren't
+            # declared in .gitmodules) so the recursive submodule init doesn't
+            # die with "fatal: No url found for submodule path …". Upstream
+            # eliza currently has e.g. swe-bench-workspace-opencode/* orphans.
+            mapfile -t TREE_GITLINKS < <(git -C eliza ls-files --stage | awk '$1=="160000"{print $4}')
+            mapfile -t GITMODULES_PATHS < <(git -C eliza config -f .gitmodules --get-regexp '^submodule\..*\.path$' | awk '{print $2}')
+            for path in "${TREE_GITLINKS[@]}"; do
+              found=0
+              for known in "${GITMODULES_PATHS[@]}"; do
+                if [ "$path" = "$known" ]; then found=1; break; fi
+              done
+              if [ "$found" = "0" ]; then
+                echo "Untracking orphan gitlink not in .gitmodules: $path"
+                git -C eliza rm --cached -r --force --quiet "$path" || true
+              fi
             done
+
+            git -C eliza submodule sync --recursive
+            git -C eliza \
+              -c submodule.cloud.update=none \
+              -c submodule.plugins/plugin-elizacloud.update=none \
+              submodule update --init --recursive --depth=1
           fi
           node --input-type=module <<'NODE'
           import {

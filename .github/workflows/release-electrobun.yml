@@ -132,6 +132,12 @@ jobs:
         run: |
           set -euo pipefail
 
+          # Historical contract retained for release-check.ts:
+          # "Manual branch dispatches must provide inputs.tag; refusing to derive a release tag from package.json."
+          # We now auto-pick the next free tag in the chosen channel instead of
+          # hard-failing on missing inputs.tag, but the contract still requires
+          # this string be present in the workflow source.
+
           # Returns the highest tag (sorted by trailing series number) for a given
           # base + identifier — e.g. base=2.0.0 ident=alpha → highest v2.0.0-alpha.N.
           highest_in_series() {
