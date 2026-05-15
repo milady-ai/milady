@@ -13,6 +13,8 @@ const startupTracePath =
   "eliza/packages/app-core/platforms/electrobun/src/startup-trace.ts";
 const windowsSmokePath =
   "eliza/packages/app-core/platforms/electrobun/scripts/smoke-test-windows.ps1";
+const postwrapDiagnosticsPath =
+  "eliza/packages/app-core/platforms/electrobun/scripts/postwrap-diagnostics.ts";
 
 const patches = [
   {
@@ -607,6 +609,46 @@ $selfExtractedRelaunchDone = $false`,
       );
 
       return next;
+    },
+  },
+  {
+    relativePath: postwrapDiagnosticsPath,
+    description:
+      "postwrap-diagnostics: drop wrapper-only checks for launcher.exe and libwebgpu_dawn.dll",
+    transform(source) {
+      // The wrapper bundle's bin/ holds the self-extracting toolchain
+      // (extractor.exe, bun.exe, bspatch.exe, process_helper.exe,
+      // libNativeWrapper.dll). The real launcher.exe and libwebgpu_dawn.dll
+      // live inside the resource tarball, so the existing checks reported
+      // them as "missing" on every Windows build. Drop them from the
+      // wrapper-side lists; the tarball scan below still reports WGPU.
+      const launcherRe = /\bosName === "win" \? "launcher\.exe" : "launcher",\s*/;
+      let next = source.replace(launcherRe, "");
+      const dllRe = /^(\s*)"libwebgpu_dawn\.dll",\n/m;
+      next = next.replace(dllRe, "");
+      if (next === source) {
+        return source;
+      }
+      return next;
+    },
+  },
+  {
+    relativePath: postwrapDiagnosticsPath,
+    description:
+      "postwrap-diagnostics: match WGPU dll without lib prefix on Windows",
+    transform(source) {
+      // Electrobun's Windows packaging copies WGPU as `webgpu_dawn.dll`
+      // (no lib prefix). The existing substring search for `libwebgpu_dawn`
+      // never matched, so containsWgpuDawn always reported false even when
+      // the tarball had the file. Match the no-prefix form too.
+      const needle = 'listing.includes("libwebgpu_dawn")';
+      if (!source.includes(needle)) {
+        return source;
+      }
+      return source.replace(
+        needle,
+        'listing.includes("webgpu_dawn")',
+      );
     },
   },
 ];
