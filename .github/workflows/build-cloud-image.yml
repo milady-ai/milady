@@ -321,20 +321,33 @@ jobs:
           const manifests = [
             "package.json",
             "apps/app/package.json",
+            // Every mirrored package — these are the manifests that travel
+            // into the docker build context and must be free of workspace:*
+            // specs that the container can't resolve.
+            "packages/core/package.json",
             "packages/agent/package.json",
             "packages/app-core/package.json",
             "packages/shared/package.json",
             "packages/ui/package.json",
+            "packages/workflows/package.json",
             "packages/app-core/platforms/electrobun/package.json",
             "packages/app-core/deploy/cloud-agent-template/package.json",
+            "plugins/plugin-sql/package.json",
+            "plugins/plugin-elizacloud/package.json",
+            "plugins/plugin-workflow/package.json",
             // Keep the eliza/ originals in sync too (host-side bun install
             // still consults them during release-check etc.).
+            "eliza/packages/core/package.json",
             "eliza/packages/agent/package.json",
             "eliza/packages/app-core/package.json",
             "eliza/packages/shared/package.json",
             "eliza/packages/ui/package.json",
+            "eliza/packages/workflows/package.json",
             "eliza/packages/app-core/platforms/electrobun/package.json",
             "eliza/packages/app-core/deploy/cloud-agent-template/package.json",
+            "eliza/plugins/plugin-sql/package.json",
+            "eliza/plugins/plugin-elizacloud/package.json",
+            "eliza/plugins/plugin-workflow/package.json",
           ];
           const fields = [
             "dependencies",
