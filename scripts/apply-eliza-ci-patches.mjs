@@ -206,6 +206,32 @@ function patchCoreStateTypes(raw) {
   return raw.replace('format: "JSON";', 'format: "JSON" | "TOON";');
 }
 
+function patchComputerUseVisionContextProvider(raw) {
+  const providerPath = path.join(
+    elizaDir,
+    "plugins",
+    "plugin-computeruse",
+    "src",
+    "services",
+    "vision-context-provider.ts",
+  );
+  if (fs.existsSync(providerPath)) return raw;
+
+  return raw
+    .replace(
+      'import { VisionContextProvider } from "./services/vision-context-provider.js";\n',
+      "",
+    )
+    .replace(
+      "  services: [ComputerUseService, VisionContextProvider],",
+      "  services: [ComputerUseService],",
+    )
+    .replace(
+      /export \{\n {2}type VisionContext,[\s\S]*?\} from "\.\/services\/vision-context-provider\.js";\n/,
+      "",
+    );
+}
+
 function patchRuntimeCopyTarSafeHoists(raw) {
   let next = raw.replace(
     'const ALWAYS_HOISTED_PACKAGES = new Set(["@elizaos/core"]);',
@@ -1185,6 +1211,12 @@ function applyReleaseSourcePatches() {
     ),
     patchAgentExtractParamsPrompt,
     "agent action param extraction prompt",
+  );
+
+  replaceFileText(
+    path.join(elizaDir, "plugins", "plugin-computeruse", "src", "index.ts"),
+    patchComputerUseVisionContextProvider,
+    "plugin-computeruse missing vision context provider import",
   );
 
   replaceFileText(

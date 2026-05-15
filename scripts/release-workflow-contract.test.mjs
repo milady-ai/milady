@@ -532,6 +532,13 @@ test("Electrobun release applies elizaOS source overlay before manual build setu
   assert.match(elizaPatchScript, /patchAgentExtractParamsPrompt/);
   assert.match(elizaPatchScript, /EXTRACT_ACTION_PARAMS_TEMPLATE/);
   assert.match(elizaPatchScript, /extractActionParamsTemplate/);
+  assert.match(elizaPatchScript, /patchComputerUseVisionContextProvider/);
+  assert.match(elizaPatchScript, /vision-context-provider\.ts/);
+  assert.match(
+    elizaPatchScript,
+    /plugin-computeruse missing vision context provider import/,
+  );
+  assert.match(elizaPatchScript, /services: \[ComputerUseService\]/);
 });
 
 test("Electrobun Windows release runs packaged Playwright check after disk cleanup", () => {
