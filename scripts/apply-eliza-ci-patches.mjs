@@ -219,7 +219,7 @@ function patchComputerUseVisionContextProvider(raw) {
 
   return raw
     .replace(
-      'import { VisionContextProvider } from "./services/vision-context-provider.js";\n',
+      /import \{ VisionContextProvider \} from "\.\/services\/vision-context-provider\.js";\r?\n/,
       "",
     )
     .replace(
@@ -227,7 +227,7 @@ function patchComputerUseVisionContextProvider(raw) {
       "  services: [ComputerUseService],",
     )
     .replace(
-      /export \{\n {2}type VisionContext,[\s\S]*?\} from "\.\/services\/vision-context-provider\.js";\n/,
+      /export \{\r?\n {2}type VisionContext,[\s\S]*?\} from "\.\/services\/vision-context-provider\.js";\r?\n/,
       "",
     );
 }
