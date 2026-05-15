@@ -232,6 +232,13 @@ function patchComputerUseVisionContextProvider(raw) {
     );
 }
 
+function patchLocalInferenceExternalGlob(raw) {
+  return raw.replaceAll(
+    "--external @node-llama-cpp/*",
+    '--external \\"@node-llama-cpp/*\\"',
+  );
+}
+
 function patchRuntimeCopyTarSafeHoists(raw) {
   let next = raw.replace(
     'const ALWAYS_HOISTED_PACKAGES = new Set(["@elizaos/core"]);',
@@ -1217,6 +1224,12 @@ function applyReleaseSourcePatches() {
     path.join(elizaDir, "plugins", "plugin-computeruse", "src", "index.ts"),
     patchComputerUseVisionContextProvider,
     "plugin-computeruse missing vision context provider import",
+  );
+
+  replaceFileText(
+    path.join(elizaDir, "plugins", "plugin-local-inference", "package.json"),
+    patchLocalInferenceExternalGlob,
+    "plugin-local-inference quoted node-llama external glob",
   );
 
   replaceFileText(

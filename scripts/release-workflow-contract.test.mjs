@@ -544,6 +544,11 @@ test("Electrobun release applies elizaOS source overlay before manual build setu
   assert.match(elizaPatchScript, /patchComputerUseVisionContextProvider/);
   assert.match(elizaPatchScript, /vision-context-provider\.ts/);
   assert.ok(elizaPatchScript.includes('vision-context-provider\\.js";\\r?\\n'));
+  assert.match(elizaPatchScript, /patchLocalInferenceExternalGlob/);
+  assert.match(
+    elizaPatchScript,
+    /plugin-local-inference quoted node-llama external glob/,
+  );
   assert.match(
     elizaPatchScript,
     /plugin-computeruse missing vision context provider import/,
