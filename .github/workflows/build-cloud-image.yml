@@ -344,12 +344,23 @@ jobs:
             "overrides",
           ];
           const unpublished = /^@elizaos\/(app-|capacitor-|plugin-agent-orchestrator|plugin-app-control|plugin-cli|plugin-imessage|plugin-local-ai|plugin-pdf|plugin-wechat|steward-)/;
-          // The mirrored packages reference each other and additional eliza
-          // workspaces (prompts, vault, training, etc.) via workspace:*. The
-          // Dockerfile only materializes the small set of packages above, so
-          // remap every workspace:*/file:*/link:* spec in the staged manifests
-          // to "alpha" (the npm dist-tag) — bun then resolves those names
-          // against published versions instead of looking for missing workspaces.
+          // Only packages the cloud-image build stage actually materializes
+          // can satisfy a workspace:* spec inside the container. The rest
+          // (electrobun-carrots, plugin-mlx, plugin-aosp-*, plugin-streaming,
+          // etc.) live only in the upstream eliza workspace and either 404
+          // on npm or have no alpha dist-tag — keeping them wedges bun
+          // install inside the Docker deps stage.
+          const mirroredWorkspacePackages = new Set([
+            "@elizaos/core",
+            "@elizaos/agent",
+            "@elizaos/app-core",
+            "@elizaos/shared",
+            "@elizaos/ui",
+            "@elizaos/workflows",
+            "@elizaos/plugin-sql",
+            "@elizaos/plugin-elizacloud",
+            "@elizaos/plugin-workflow",
+          ]);
           function isLocalSpec(value) {
             if (typeof value !== "string") return false;
             return ["workspace:", "file:", "link:", "portal:"].some((p) => value.startsWith(p));
@@ -365,8 +376,19 @@ jobs:
                 if (unpublished.test(name)) {
                   delete deps[name];
                   changed = true;
-                } else if (isLocalSpec(spec)) {
-                  deps[name] = "alpha";
+                  continue;
+                }
+                if (isLocalSpec(spec)) {
+                  // Keep workspace:* for mirrored packages — the root
+                  // manifest below extends `workspaces` to packages/* and
+                  // plugins/* so bun resolves them inside the container.
+                  // Drop the rest — there's no corresponding directory to
+                  // resolve and they aren't reliably published on npm.
+                  if (mirroredWorkspacePackages.has(name)) {
+                    deps[name] = "workspace:*";
+                  } else {
+                    delete deps[name];
+                  }
                   changed = true;
                 }
               }
@@ -374,6 +396,25 @@ jobs:
             if (changed) {
               fs.writeFileSync(manifest, JSON.stringify(pkg, null, 2) + "\n");
             }
+          }
+          // Extend root.workspaces so bun treats the mirrored packages/* and
+          // plugins/* trees as workspace members inside the docker context.
+          const rootForWorkspaces = JSON.parse(fs.readFileSync("package.json", "utf8"));
+          const existingWorkspaces = Array.isArray(rootForWorkspaces.workspaces)
+            ? rootForWorkspaces.workspaces
+            : [];
+          const requiredWorkspaces = ["packages/*", "plugins/*"];
+          const mergedWorkspaces = [...existingWorkspaces];
+          let workspacesChanged = false;
+          for (const entry of requiredWorkspaces) {
+            if (!mergedWorkspaces.includes(entry)) {
+              mergedWorkspaces.push(entry);
+              workspacesChanged = true;
+            }
+          }
+          if (workspacesChanged) {
+            rootForWorkspaces.workspaces = mergedWorkspaces;
+            fs.writeFileSync("package.json", JSON.stringify(rootForWorkspaces, null, 2) + "\n");
           }
           const root = JSON.parse(fs.readFileSync("package.json", "utf8"));
           root.overrides = {
