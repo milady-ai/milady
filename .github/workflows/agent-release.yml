@@ -481,8 +481,12 @@ jobs:
       - name: Sanitize npm package metadata
         run: node "$GITHUB_WORKSPACE/eliza/packages/app-core/scripts/sanitize-npm-package-metadata.mjs"
       - name: Validate package
+        # --ignore-scripts: the prepack lifecycle runs the entire app-core
+        # production build (tsdown + apps/app vite) which only resolves
+        # correctly inside a full milady workspace install. dist/ was built
+        # explicitly above, so skip lifecycle scripts during pack.
         run: |
-          npm pack --dry-run 2>&1 | tee /tmp/pack-output.txt
+          npm pack --dry-run --ignore-scripts 2>&1 | tee /tmp/pack-output.txt
           grep -q "package.json" /tmp/pack-output.txt
 
   # ── Release validation builds (blocking) ────────────────────────────
