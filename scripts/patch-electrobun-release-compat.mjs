@@ -622,7 +622,8 @@ $selfExtractedRelaunchDone = $false`,
       // live inside the resource tarball, so the existing checks reported
       // them as "missing" on every Windows build. Drop them from the
       // wrapper-side lists; the tarball scan below still reports WGPU.
-      const launcherRe = /\bosName === "win" \? "launcher\.exe" : "launcher",\s*/;
+      const launcherRe =
+        /\bosName === "win" \? "launcher\.exe" : "launcher",\s*/;
       let next = source.replace(launcherRe, "");
       const dllRe = /^(\s*)"libwebgpu_dawn\.dll",\n/m;
       next = next.replace(dllRe, "");
@@ -645,10 +646,7 @@ $selfExtractedRelaunchDone = $false`,
       if (!source.includes(needle)) {
         return source;
       }
-      return source.replace(
-        needle,
-        'listing.includes("webgpu_dawn")',
-      );
+      return source.replace(needle, 'listing.includes("webgpu_dawn")');
     },
   },
 ];
