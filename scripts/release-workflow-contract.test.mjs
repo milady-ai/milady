@@ -469,6 +469,11 @@ test("Electrobun release applies elizaOS source overlay before manual build setu
   assert.match(copyRuntimeWrapper, /linkLocalElizaWorkspacePackages/);
   assert.match(
     copyRuntimeWrapper,
+    /elizaPluginsDir,\s*"plugin-elizacloud",\s*"node_modules"/,
+  );
+  assert.match(copyRuntimeWrapper, /packageName,\s*"node_modules"/);
+  assert.match(
+    copyRuntimeWrapper,
     /ensureMirroredNodeModules\(\);\s*linkLocalElizaWorkspacePackages\(\);\s*ensureLocalWorkspaceDists\(\);\s*linkLocalElizaWorkspacePackages\(\);\s*ensureElizaCoreRuntimeAliases\(\);/,
   );
   assert.match(

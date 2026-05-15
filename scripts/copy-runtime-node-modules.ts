@@ -456,6 +456,10 @@ function linkLocalElizaWorkspacePackages() {
     elizaAgentNodeModules,
     elizaAppCoreNodeModules,
     elizaElectrobunNodeModules,
+    path.join(elizaPluginsDir, "plugin-elizacloud", "node_modules"),
+    ...agentRuntimePlugins.map((packageName) =>
+      path.join(elizaPluginsDir, packageName, "node_modules"),
+    ),
   ];
   const packages = [
     ["@elizaos/core", path.join(elizaPackagesDir, "core")],
@@ -477,7 +481,7 @@ function linkLocalElizaWorkspacePackages() {
   ] as const;
 
   for (const targetNodeModules of targets) {
-    if (!fs.existsSync(targetNodeModules)) continue;
+    if (!fs.existsSync(path.dirname(targetNodeModules))) continue;
     const linked = packages
       .filter(([packageName, packageDir]) =>
         linkLocalScopedPackage(targetNodeModules, packageName, packageDir),
