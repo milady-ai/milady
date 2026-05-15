@@ -24,7 +24,7 @@ env:
   # Pin upstream eliza checkout to a known-good SHA. Upstream develop landed a
   # cloud-migration squash that broke milady CI; pinning here keeps reproducibility.
   # Bump after upstream stabilizes (or override with MILADY_ELIZA_REF env var).
-  MILADY_ELIZA_REF: "ad90147d6dd8bc11c2ea9d4855ce3758859ec942"
+  MILADY_ELIZA_REF: "f7a4e0bc50f966174ea42c41db787359ca6d8e67"
   BUN_VERSION: "1.3.13"
   NODE_NO_WARNINGS: "1"
 
