@@ -632,6 +632,16 @@ jobs:
       - name: Install eliza source dependencies
         run: bun install --cwd eliza --no-frozen-lockfile --ignore-scripts
 
+      - name: Build @elizaos/electrobun-carrots dist
+        # Electrobun's bundler resolves @elizaos/electrobun-carrots from the
+        # workspace, but the package.json declares main: ./dist/index.js — the
+        # subsequent bunx electrobun build cannot resolve the import until tsc
+        # has run. Build the dist here so the symlinked workspace package has
+        # the expected entry point before the desktop build kicks off.
+        shell: bash
+        working-directory: eliza/packages/electrobun-carrots
+        run: bun run build
+
       - name: Hydrate eliza Bun package postinstall
         # bun is hoisted to top-level node_modules in some setups; only hydrate
         # the eliza-nested copy when it actually exists.

@@ -514,6 +514,10 @@ function linkLocalElizaWorkspacePackages() {
     ["@elizaos/app-core", elizaAppCoreDir],
     ["@elizaos/cloud-sdk", path.join(elizaCloudPackagesDir, "sdk")],
     ["@elizaos/cloud-routing", path.join(elizaPackagesDir, "cloud-routing")],
+    [
+      "@elizaos/electrobun-carrots",
+      path.join(elizaPackagesDir, "electrobun-carrots"),
+    ],
     ...agentRuntimePlugins.map(
       (packageName) =>
         [
