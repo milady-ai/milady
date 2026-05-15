@@ -91,4 +91,15 @@ describe("package mode aliases", () => {
       '@import "./electrobun-mac-window-drag.css";',
     );
   });
+
+  it("patches agent action parameter extraction away from package-mode core prompts", () => {
+    const patchScript = fs.readFileSync(
+      path.resolve(appRoot, "../..", "scripts/apply-eliza-ci-patches.mjs"),
+      "utf8",
+    );
+
+    expect(patchScript).toContain("patchAgentExtractParamsPrompt");
+    expect(patchScript).toContain("EXTRACT_ACTION_PARAMS_TEMPLATE");
+    expect(patchScript).toContain("extractActionParamsTemplate");
+  });
 });

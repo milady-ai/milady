@@ -432,6 +432,10 @@ test("Electrobun release applies elizaOS source overlay before manual build setu
     "scripts/copy-runtime-node-modules.ts",
     "utf8",
   );
+  const elizaPatchScript = fs.readFileSync(
+    "scripts/apply-eliza-ci-patches.mjs",
+    "utf8",
+  );
 
   assert.match(
     electrobun,
@@ -456,6 +460,9 @@ test("Electrobun release applies elizaOS source overlay before manual build setu
   assert.match(copyRuntimeWrapper, /dist\/index\.js/);
   assert.match(copyRuntimeWrapper, /ensureElizaCoreRuntimeAliases/);
   assert.match(copyRuntimeWrapper, /dist\/node\/index\.node\.js/);
+  assert.match(elizaPatchScript, /patchAgentExtractParamsPrompt/);
+  assert.match(elizaPatchScript, /EXTRACT_ACTION_PARAMS_TEMPLATE/);
+  assert.match(elizaPatchScript, /extractActionParamsTemplate/);
 });
 
 test("Electrobun Windows release runs packaged Playwright check after disk cleanup", () => {

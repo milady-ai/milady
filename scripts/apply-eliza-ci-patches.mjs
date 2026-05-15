@@ -645,6 +645,47 @@ function patchN8nCharacterKnowledge(raw) {
   );
 }
 
+const agentActionParamsTemplateDefinition = [
+  "const EXTRACT_ACTION_PARAMS_TEMPLATE = `You are filling in missing parameters for the {{actionName}} action.",
+  "Action description: {{actionDescription}}",
+  "",
+  "Parameter schema:",
+  "{{schemaLines}}",
+  "",
+  "Already-supplied parameters: {{existingJson}}",
+  "",
+  "Missing required fields you must extract: {{missingFields}}",
+  "",
+  "{{recentConversationBlock}}",
+  "",
+  "Current user message: {{currentMessageText}}",
+  "",
+  "Return a JSON object containing values for the MISSING fields.",
+  "If a value is genuinely indeterminable from the conversation, return null for that field.",
+  'Example: {"subaction": "search", "query": "github"}',
+  "",
+  "JSON only. Return one JSON object. No prose, fences, thinking, or markdown.`;",
+  "",
+].join("\n");
+
+function patchAgentExtractParamsPrompt(raw) {
+  let next = raw
+    .replace("  extractActionParamsTemplate,\n", "")
+    .replace(
+      "    template: extractActionParamsTemplate,",
+      "    template: EXTRACT_ACTION_PARAMS_TEMPLATE,",
+    );
+
+  if (!next.includes("const EXTRACT_ACTION_PARAMS_TEMPLATE = `")) {
+    next = next.replace(
+      "const DEFAULT_RECENT_MESSAGES_LIMIT = 8;\n",
+      `const DEFAULT_RECENT_MESSAGES_LIMIT = 8;\n${agentActionParamsTemplateDefinition}`,
+    );
+  }
+
+  return next;
+}
+
 function patchSqlRawConnectionReturnType(raw, managerTypeName) {
   return raw.replace(
     "  getRawConnection() {\n    return this.manager.getConnection();\n  }",
@@ -894,6 +935,19 @@ function applyReleaseSourcePatches() {
     ),
     patchN8nCharacterKnowledge,
     "agent n8n explicit knowledge gate",
+  );
+
+  replaceFileText(
+    path.join(
+      elizaDir,
+      "packages",
+      "agent",
+      "src",
+      "actions",
+      "extract-params.ts",
+    ),
+    patchAgentExtractParamsPrompt,
+    "agent action param extraction prompt",
   );
 
   replaceFileText(
