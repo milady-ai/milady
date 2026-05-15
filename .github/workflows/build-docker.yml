@@ -76,6 +76,10 @@ concurrency:
   cancel-in-progress: false
 
 env:
+  # Pin upstream eliza checkout to a known-good SHA. Upstream develop landed a
+  # cloud-migration squash that broke milady CI; pinning here keeps reproducibility.
+  # Bump after upstream stabilizes (or override with MILADY_ELIZA_REF env var).
+  MILADY_ELIZA_REF: "ad90147d6dd8"
   REGISTRY: ghcr.io
   IMAGE_NAME: milady-ai/agent
 
@@ -128,6 +132,11 @@ jobs:
         run: |
           if [ ! -f eliza/package.json ]; then
             git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza
+            if [ -n "${MILADY_ELIZA_REF:-}" ]; then
+              git -C eliza fetch --depth=1 origin "$MILADY_ELIZA_REF"
+              git -C eliza checkout --quiet FETCH_HEAD
+              echo "Pinned eliza to ${MILADY_ELIZA_REF}"
+            fi
           fi
 
       - name: Initialize tracked workspace submodules
