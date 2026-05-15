@@ -65,14 +65,14 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Release tag (e.g. v2.0.0-alpha.3)"
-        required: true
+        description: "Release tag (e.g. v2.0.0-alpha.140). Leave blank to auto-pick the next free tag in the chosen channel."
+        required: false
         type: string
       channel:
-        description: "Release channel"
+        description: "Release channel (drives auto-tag series when tag is blank)"
         required: false
         type: choice
-        default: auto
+        default: canary
         options:
           - auto
           - canary
@@ -80,10 +80,10 @@ on:
           - rc
           - stable
       draft:
-        description: "Create as draft release"
+        description: "Create as draft release (hidden from main page until manually published)"
         required: false
         type: boolean
-        default: true
+        default: false
       platform:
         description: "Desktop platform matrix to build"
         required: false
@@ -127,16 +127,78 @@ jobs:
       - name: Determine version + env
         id: version
         env:
+          INPUT_TAG: ${{ inputs.tag || '' }}
           INPUT_CHANNEL: ${{ inputs.channel || '' }}
         run: |
-          if [[ -n "${{ inputs.tag }}" ]]; then
-            TAG="${{ inputs.tag }}"
-          elif [[ "${{ github.ref_type }}" == "tag" ]]; then
+          set -euo pipefail
+
+          # Returns the highest tag (sorted by trailing series number) for a given
+          # base + identifier — e.g. base=2.0.0 ident=alpha → highest v2.0.0-alpha.N.
+          highest_in_series() {
+            local base="$1" ident="$2"
+            git ls-remote --tags origin 2>/dev/null \
+              | awk '{print $2}' \
+              | sed -n "s|^refs/tags/\(v${base}-${ident}\.[0-9][0-9]*\)\$|\1|p" \
+              | sed "s|^v${base}-${ident}\.||" \
+              | sort -n \
+              | tail -1
+          }
+
+          # Auto-bump: take base+ident from a hint tag (or package.json), find the
+          # highest existing series number on origin, and pick the next free slot.
+          # Prevents silent re-targeting of old releases (which kept their stale
+          # published_at and stayed buried on the main page).
+          auto_bump_tag() {
+            local hint="$1"
+            local base ident next n
+            # Hint can be a full tag like v2.0.0-alpha.116, or just a channel name.
+            if [[ "$hint" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)-(alpha|beta|rc|nightly)\.[0-9]+$ ]]; then
+              base="${BASH_REMATCH[1]}"
+              ident="${BASH_REMATCH[2]}"
+            else
+              # Read base version from package.json without requiring node/jq.
+              base="$(grep -m1 '"version"' package.json | sed -E 's/.*"version":[[:space:]]*"([0-9]+\.[0-9]+\.[0-9]+).*/\1/' || true)"
+              [[ -z "$base" ]] && base="2.0.0"
+              case "$INPUT_CHANNEL" in
+                beta)  ident="beta"  ;;
+                rc)    ident="rc"    ;;
+                stable)
+                  echo "::error::Auto-bump for stable releases is not supported — supply an explicit inputs.tag." >&2
+                  return 1
+                  ;;
+                *)     ident="alpha" ;;
+              esac
+            fi
+            n="$(highest_in_series "$base" "$ident")"
+            if [[ -z "$n" ]]; then n=0; fi
+            next=$((n + 1))
+            echo "v${base}-${ident}.${next}"
+          }
+
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            # Tag push: honor the pushed tag verbatim, no auto-bump.
             TAG="${{ github.ref_name }}"
+          elif [[ -z "$INPUT_TAG" ]]; then
+            # Dispatch with no tag → derive next free tag from channel + package.json base.
+            git fetch --tags --quiet origin 'refs/tags/v*:refs/tags/v*' || true
+            TAG="$(auto_bump_tag "")"
+            echo "Auto-picked tag: $TAG (channel hint: ${INPUT_CHANNEL:-canary})"
           else
-            echo "Manual branch dispatches must provide inputs.tag; refusing to derive a release tag from package.json." >&2
-            exit 1
+            # Dispatch with explicit tag → use it if free, otherwise auto-bump within
+            # the same series. Old releases keep their original publish date when
+            # softprops re-targets them, so re-using a stale tag hides the new build
+            # on the main page — auto-bump to a fresh slot instead.
+            git fetch --tags --quiet origin 'refs/tags/v*:refs/tags/v*' || true
+            EXISTING_SHA="$(git ls-remote --tags origin "refs/tags/$INPUT_TAG" 2>/dev/null | awk '{print $1}' | head -1)"
+            if [[ -z "$EXISTING_SHA" || "$EXISTING_SHA" == "$GITHUB_SHA" ]]; then
+              TAG="$INPUT_TAG"
+            else
+              ORIGINAL="$INPUT_TAG"
+              TAG="$(auto_bump_tag "$INPUT_TAG")"
+              echo "::warning::Tag $ORIGINAL already exists at $EXISTING_SHA; auto-bumped to fresh tag $TAG"
+            fi
           fi
+
           VERSION="${TAG#v}"
           CHANNEL="$INPUT_CHANNEL"
           if [[ "$CHANNEL" == "auto" ]]; then

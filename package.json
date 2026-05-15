@@ -1,6 +1,6 @@
 {
   "name": "miladyai",
-  "version": "2.0.0-alpha.116",
+  "version": "2.0.0-alpha.140",
   "description": "Cute agents for the acceleration. Fresh clone: run ./install (Unix / macOS) or install.cmd (Windows). Plain bun install works for updates.",
   "homepage": "https://github.com/milady-ai/milady",
   "author": {
