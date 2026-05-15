@@ -507,6 +507,7 @@ test("Electrobun release applies elizaOS source overlay before manual build setu
     "plugin-signal",
     "plugin-streaming",
     "plugin-whatsapp",
+    "plugin-wallet",
     "plugin-workflow",
     "plugin-x402",
   ]) {

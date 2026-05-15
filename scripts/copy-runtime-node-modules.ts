@@ -335,6 +335,7 @@ function ensureLocalWorkspaceDists() {
     ["eliza/plugins/plugin-signal", "plugin-signal", "dist/index.js"],
     ["eliza/plugins/plugin-streaming", "plugin-streaming", "dist/index.js"],
     ["eliza/plugins/plugin-whatsapp", "plugin-whatsapp", "dist/index.js"],
+    ["eliza/plugins/plugin-wallet", "plugin-wallet", "dist/index.mjs"],
     ["eliza/plugins/plugin-workflow", "plugin-workflow", "dist/index.js"],
     ["eliza/plugins/plugin-x402", "plugin-x402", "dist/index.js"],
   ] as const;
@@ -426,6 +427,7 @@ function linkLocalElizaWorkspacePackages() {
     "plugin-signal",
     "plugin-streaming",
     "plugin-whatsapp",
+    "plugin-wallet",
     "plugin-workflow",
     "plugin-x402",
   ] as const;
