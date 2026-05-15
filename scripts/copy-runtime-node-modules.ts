@@ -290,8 +290,8 @@ function ensureBuiltElizaPackage(packageDir: string, markerRelPath: string) {
 
 function ensureLocalWorkspaceDists() {
   const builds = [
-    ["shared", "dist/index.js"],
     ["core", "dist/node/index.node.js"],
+    ["shared", "dist/index.js"],
     ["vault", "dist/index.js"],
   ] as const;
 
@@ -366,6 +366,7 @@ function ensureMirroredNodeModules() {
 }
 
 ensureMirroredNodeModules();
+linkLocalElizaWorkspacePackages();
 ensureLocalWorkspaceDists();
 linkLocalElizaWorkspacePackages();
 ensureElizaCoreRuntimeAliases();

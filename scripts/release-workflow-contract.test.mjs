@@ -459,6 +459,10 @@ test("Electrobun release applies elizaOS source overlay before manual build setu
   assert.match(copyRuntimeWrapper, /linkLocalElizaWorkspacePackages/);
   assert.match(
     copyRuntimeWrapper,
+    /ensureMirroredNodeModules\(\);\s*linkLocalElizaWorkspacePackages\(\);\s*ensureLocalWorkspaceDists\(\);\s*linkLocalElizaWorkspacePackages\(\);\s*ensureElizaCoreRuntimeAliases\(\);/,
+  );
+  assert.match(
+    copyRuntimeWrapper,
     /miladyRootNodeModules,\s*\n\s*elizaPackagesNodeModules/,
   );
   assert.match(copyRuntimeWrapper, /\["shared", "dist\/index\.js"\]/);
