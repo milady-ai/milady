@@ -315,6 +315,22 @@ function patchAppCoreReleaseCheck(raw) {
     .replace(
       "must either use workspace:* for the local checkout or be pinned to an exact version",
       "must either use workspace:* for the local checkout, use a release dist tag, or be pinned to an exact version",
+    )
+    .replace(
+      '    !hasNoPublishedRelease &&\n    !releaseDataSource.includes("/packages/homepage/public/")\n',
+      '    !hasNoPublishedRelease &&\n    !releaseDataSource.includes("/apps/homepage/public/")\n',
+    )
+    .replace(
+      "release-check: generated homepage release data must point homepageAssetBaseUrl at /packages/homepage/public/.",
+      "release-check: generated homepage release data must point homepageAssetBaseUrl at /apps/homepage/public/.",
+    )
+    .replace(
+      '    releaseDataSource.includes("/apps/web/public/") ||\n    releaseDataSource.includes("/apps/homepage/public/")\n',
+      '    releaseDataSource.includes("/apps/web/public/")\n',
+    )
+    .replace(
+      "release-check: generated homepage release data still points at legacy /apps/*/public/. Regenerate it with node scripts/write-homepage-release-data.mjs.",
+      "release-check: generated homepage release data still points at legacy /apps/web/public/. Regenerate it with node scripts/write-homepage-release-data.mjs.",
     );
 
   patched = patched.replace(
