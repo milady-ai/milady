@@ -293,6 +293,8 @@ test("eliza CI patches align release source helpers", () => {
   assert.ok(patchScript.includes("Agent-Browser-Bridge\\\\.Extension"));
   assert.match(patchScript, /browser bridge Safari bundle identifiers/);
   assert.match(patchScript, /app-core release-check Milady wrappers/);
+  assert.match(patchScript, /patchCapacitorBridgeBuildScript/);
+  assert.match(patchScript, /plugin-capacitor-bridge JS-only release build/);
   assert.match(
     patchScript,
     /requiredRootPackageScriptSnippets[\s\S]*scripts\/run-release-check\.mjs/,
@@ -495,6 +497,11 @@ test("Electrobun release applies elizaOS source overlay before manual build setu
     /elizaPackagesDir,\s*"cloud-routing"[\s\S]*dist\/index\.js/,
   );
   assert.match(copyRuntimeWrapper, /"@elizaos\/cloud-routing"/);
+  assert.match(
+    copyRuntimeWrapper,
+    /elizaPackagesDir,\s*"agent"[\s\S]*dist\/config\/feature-flags\.js/,
+  );
+  assert.match(copyRuntimeWrapper, /"@elizaos\/agent"/);
   for (const packageName of [
     "plugin-registry",
     "plugin-app-manager",

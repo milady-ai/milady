@@ -239,6 +239,13 @@ function patchLocalInferenceExternalGlob(raw) {
   );
 }
 
+function patchCapacitorBridgeBuildScript(raw) {
+  return raw.replace(
+    "tsup src/index.ts --format esm --dts --clean",
+    "tsup src/index.ts --format esm --clean",
+  );
+}
+
 function patchRuntimeCopyTarSafeHoists(raw) {
   let next = raw.replace(
     'const ALWAYS_HOISTED_PACKAGES = new Set(["@elizaos/core"]);',
@@ -1230,6 +1237,12 @@ function applyReleaseSourcePatches() {
     path.join(elizaDir, "plugins", "plugin-local-inference", "package.json"),
     patchLocalInferenceExternalGlob,
     "plugin-local-inference quoted node-llama external glob",
+  );
+
+  replaceFileText(
+    path.join(elizaDir, "plugins", "plugin-capacitor-bridge", "package.json"),
+    patchCapacitorBridgeBuildScript,
+    "plugin-capacitor-bridge JS-only release build",
   );
 
   replaceFileText(
