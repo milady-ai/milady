@@ -96,6 +96,9 @@ const appCoreSrcRoot = hasLocalElizaWorkspace
 const emptyNodeModuleEntry = appCoreSrcRoot
   ? path.join(appCoreSrcRoot, "platform/empty-node-module.ts")
   : requireResolve("@elizaos/app-core/platform/empty-node-module");
+const elizaosAgentBrowserStubEntry = appCoreSrcRoot
+  ? path.join(appCoreSrcRoot, "platform/elizaos-agent-browser-stub.ts")
+  : emptyNodeModuleEntry;
 // `native-plugin-entrypoints` is only imported on iOS/Android at runtime, but
 // vite must still statically resolve the specifier. Upstream eliza may remove
 // this file (mobile Capacitor wiring is in flux) — fall back to the empty
@@ -281,6 +284,11 @@ function resolveLocalUiAliases(): Alias[] {
       replacement: `${uiPkgRoot}/src/layouts/$1/$2.tsx`,
     },
     {
+      find: /^@elizaos\/ui\/slots\/(.+?)(?:\.js)?$/,
+      replacement: `${uiPkgRoot}/src/slots/$1.tsx`,
+      customResolver: resolveExistingUiSourceModule,
+    },
+    {
       find: /^@elizaos\/ui\/lib\/(.*)$/,
       replacement: `${uiPkgRoot}/src/lib/$1.ts`,
     },
@@ -434,13 +442,14 @@ function resolveBuiltLocalSharedAliases(): Alias[] {
 }
 
 function resolveLocalAppCoreAliases(): Alias[] {
-  // Map @elizaos/agent's root import to its real source so static named
-  // imports from compiled app-core code (e.g. account-pool.js's
-  // ACCOUNT_CREDENTIAL_PROVIDER_IDS) resolve. Server-only runtime branches
-  // tree-shake out for the renderer; the previous empty-module stub only
-  // had a default export and broke Rollup's static analysis.
+  // The renderer must never evaluate the real @elizaos/agent root entry:
+  // the agent package is the Bun/API process runtime and now contains
+  // server-only top-level await imports that can deadlock a WebView module
+  // graph before React mounts. Use the named browser stub for static app-core
+  // imports; the real mobile agent bundle is built separately by app-core's
+  // Android staging scripts.
   const agentRootEntry = appCoreSrcRoot
-    ? path.join(localElizaRoot, "packages/agent/src/index.ts")
+    ? elizaosAgentBrowserStubEntry
     : emptyNodeModuleEntry;
   const packageAgnosticAliases: Alias[] = [
     {
@@ -488,7 +497,6 @@ function resolveLocalAppCoreAliases(): Alias[] {
 
   for (const [key, value] of Object.entries(appCorePkg.exports || {})) {
     if (key === ".") continue; // handled by the explicit bare alias above
-    if (typeof value !== "string") continue;
     const aliasKey =
       key === "."
         ? "@elizaos/app-core"
@@ -631,7 +639,7 @@ function resolveLocalAppCoreAliases(): Alias[] {
     },
     {
       find: /^@elizaos\/agent\/(.+)$/,
-      replacement: path.join(localElizaRoot, "packages/agent/src/$1"),
+      replacement: elizaosAgentBrowserStubEntry,
     },
     ...packageAgnosticAliases,
   ];
@@ -1759,6 +1767,24 @@ const PLUGIN_LOCAL_INFERENCE_STUB_NAMES = [
   "getLocalInferenceChatStatus",
   "handleLocalInferenceChatCommand",
   "handleLocalInferenceRoutes",
+  // /routes
+  "handleLocalInferenceCompatRoutes",
+  "handleLocalInferenceTtsRoute",
+  // /runtime
+  "DEFAULT_MODELS_DIR",
+  "detectEmbeddingPreset",
+  "embeddingGgufFilePresent",
+  "ensureLocalInferenceHandler",
+  "ensureModel",
+  "findExistingEmbeddingModelForWarmupReuse",
+  "isEmbeddingWarmupReuseDisabled",
+  "shouldEnableMobileLocalInference",
+  "shouldWarmupLocalEmbeddingModel",
+  // /services
+  "PhraseChunker",
+  "buildVoiceLatencyDevPayload",
+  "deviceBridge",
+  "voiceLatencyTracer",
 ] as const;
 
 function generatePluginLocalInferenceStub(): string {
@@ -1791,10 +1817,12 @@ const ELIZA_AGENT_OBJECT_STUB_NAMES = [
 
 const ELIZA_AGENT_ARRAY_STUB_NAMES = [
   "AGENT_EVENT_ALLOWED_STREAMS",
+  "OPTIONAL_CORE_PLUGINS",
   "TRIGGER_TASK_TAGS",
 ] as const;
 
 const ELIZA_AGENT_FUNCTION_STUB_NAMES = [
+  "applyAdvancedCapabilitiesConfig",
   "applyCanonicalOnboardingConfig",
   "applyCloudConfigToEnv",
   "applyN8nConfigToEnv",
@@ -1830,6 +1858,7 @@ const ELIZA_AGENT_FUNCTION_STUB_NAMES = [
   "getAccessToken",
   "getAuditFeedSize",
   "getLastFailedPluginNames",
+  "getPluginWidgets",
   "getPluginInfo",
   "getTriggerHealthSnapshot",
   "getTriggerLimit",
@@ -1915,6 +1944,7 @@ const ELIZA_AGENT_FUNCTION_STUB_NAMES = [
   "triggersFeatureEnabled",
   "validateCloudBaseUrl",
   "validateMcpServerConfig",
+  "validatePluginConfig",
 ] as const;
 
 function generateElizaAgentStub(): string {
@@ -2146,13 +2176,11 @@ function nativeModuleStubPlugin(): Plugin {
     enforce: "pre",
     resolveId(id) {
       // Server-only `@elizaos/agent` is aliased via packageAgnosticAliases
-      // to `elizaos-agent-browser-stub.ts`. The resolve.alias step runs
-      // AFTER `commonjs--resolver` in some rollup paths, which causes
-      // dist-side static-named-import scans to fail before the alias
-      // fires. Intercept it here with enforce:"pre" so Rollup gets the
-      // stub from the start.
+      // to `elizaos-agent-browser-stub.ts`. The resolve.alias step can run
+      // too late for Rollup's dist-side static import scans, so intercept the
+      // root import here too and return the concrete named stub file.
       if (id === "@elizaos/agent") {
-        return VIRTUAL_PREFIX + id;
+        return elizaosAgentBrowserStubEntry;
       }
       // Plugin-elizacloud is server-only (cloud secrets, TTS routing).
       // The renderer reaches it transitively through `dist/api/onboarding-routes.js`

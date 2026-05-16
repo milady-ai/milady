@@ -136,7 +136,7 @@ function ensureBuiltLocalPackage(
   packageName,
   sourceRel,
   outputRelPaths,
-  { optional = false } = {},
+  { optional = false, outputChecks = [] } = {},
 ) {
   const source = path.join(repoRoot, sourceRel);
   if (!fs.existsSync(path.join(source, "package.json"))) {
@@ -154,12 +154,30 @@ function ensureBuiltLocalPackage(
   const missingOutputs = outputRelPaths.filter(
     (outputRelPath) => !fs.existsSync(path.join(source, outputRelPath)),
   );
-  if (missingOutputs.length === 0) {
+  const staleOutputs = outputChecks.filter(
+    ({ path: outputRelPath, includes }) => {
+      const outputPath = path.join(source, outputRelPath);
+      if (!fs.existsSync(outputPath)) {
+        return false;
+      }
+      return !fs.readFileSync(outputPath, "utf8").includes(includes);
+    },
+  );
+  if (missingOutputs.length === 0 && staleOutputs.length === 0) {
     return;
   }
 
+  const staleLabels = staleOutputs.map(
+    ({ path: outputRelPath, includes }) =>
+      `${outputRelPath} missing ${includes}`,
+  );
   console.log(
-    `[align-eliza-ci-node-modules] building ${packageName}; missing ${missingOutputs.join(", ")}`,
+    `[align-eliza-ci-node-modules] building ${packageName}; ${[
+      missingOutputs.length > 0 ? `missing ${missingOutputs.join(", ")}` : null,
+      staleLabels.length > 0 ? `stale ${staleLabels.join(", ")}` : null,
+    ]
+      .filter(Boolean)
+      .join("; ")}`,
   );
   const result = spawnSync("bun", ["run", "build"], {
     cwd: source,
@@ -181,6 +199,26 @@ function ensureBuiltLocalPackage(
   if (stillMissingOutputs.length > 0) {
     throw new Error(
       `build for ${packageName} did not create required output(s): ${stillMissingOutputs.join(", ")}`,
+    );
+  }
+
+  const stillStaleOutputs = outputChecks.filter(
+    ({ path: outputRelPath, includes }) => {
+      const outputPath = path.join(source, outputRelPath);
+      return (
+        !fs.existsSync(outputPath) ||
+        !fs.readFileSync(outputPath, "utf8").includes(includes)
+      );
+    },
+  );
+  if (stillStaleOutputs.length > 0) {
+    throw new Error(
+      `build for ${packageName} did not create required content: ${stillStaleOutputs
+        .map(
+          ({ path: outputRelPath, includes }) =>
+            `${outputRelPath} missing ${includes}`,
+        )
+        .join(", ")}`,
     );
   }
 }
@@ -270,6 +308,14 @@ linkLocalPackage("@elizaos/shared", "eliza/packages/shared", [
   "apps/homepage/node_modules/@elizaos/shared",
 ]);
 
+linkLocalPackage("@elizaos/agent", "eliza/packages/agent", [
+  "node_modules/@elizaos/agent",
+  "eliza/node_modules/@elizaos/agent",
+  "eliza/plugins/plugin-app-manager/node_modules/@elizaos/agent",
+  "apps/app/node_modules/@elizaos/agent",
+  "apps/homepage/node_modules/@elizaos/agent",
+]);
+
 linkLocalPackage("@elizaos/cloud-routing", "eliza/packages/cloud-routing", [
   "node_modules/@elizaos/cloud-routing",
   "eliza/node_modules/@elizaos/cloud-routing",
@@ -311,6 +357,68 @@ linkOptionalLocalPackage("@elizaos/plugin-sql", "eliza/plugins/plugin-sql", [
 ]);
 
 linkOptionalLocalPackage(
+  "@elizaos/plugin-registry",
+  "eliza/plugins/plugin-registry",
+  [
+    "node_modules/@elizaos/plugin-registry",
+    "eliza/node_modules/@elizaos/plugin-registry",
+    "eliza/packages/agent/node_modules/@elizaos/plugin-registry",
+    "eliza/packages/app-core/node_modules/@elizaos/plugin-registry",
+    "apps/app/node_modules/@elizaos/plugin-registry",
+  ],
+);
+
+linkOptionalLocalPackage(
+  "@elizaos/plugin-app-manager",
+  "eliza/plugins/plugin-app-manager",
+  [
+    "node_modules/@elizaos/plugin-app-manager",
+    "eliza/node_modules/@elizaos/plugin-app-manager",
+    "eliza/packages/agent/node_modules/@elizaos/plugin-app-manager",
+    "eliza/packages/app-core/node_modules/@elizaos/plugin-app-manager",
+    "apps/app/node_modules/@elizaos/plugin-app-manager",
+  ],
+);
+
+linkOptionalLocalPackage(
+  "@elizaos/plugin-wallet",
+  "eliza/plugins/plugin-wallet",
+  [
+    "node_modules/@elizaos/plugin-wallet",
+    "eliza/node_modules/@elizaos/plugin-wallet",
+    "eliza/packages/agent/node_modules/@elizaos/plugin-wallet",
+  ],
+);
+
+const appNativePluginPackages = [
+  ["@elizaos/capacitor-agent", "agent"],
+  ["@elizaos/capacitor-appblocker", "appblocker"],
+  ["@elizaos/capacitor-bun-runtime", "bun-runtime"],
+  ["@elizaos/capacitor-camera", "camera"],
+  ["@elizaos/capacitor-canvas", "canvas"],
+  ["@elizaos/capacitor-contacts", "contacts"],
+  ["@elizaos/capacitor-gateway", "gateway"],
+  ["@elizaos/capacitor-llama", "llama"],
+  ["@elizaos/capacitor-location", "location"],
+  ["@elizaos/capacitor-messages", "messages"],
+  ["@elizaos/capacitor-mobile-signals", "mobile-signals"],
+  ["@elizaos/capacitor-phone", "phone"],
+  ["@elizaos/capacitor-screencapture", "screencapture"],
+  ["@elizaos/capacitor-swabble", "swabble"],
+  ["@elizaos/capacitor-system", "system"],
+  ["@elizaos/capacitor-talkmode", "talkmode"],
+  ["@elizaos/capacitor-websiteblocker", "websiteblocker"],
+];
+
+for (const [packageName, packageDir] of appNativePluginPackages) {
+  linkOptionalLocalPackage(
+    packageName,
+    `eliza/packages/native-plugins/${packageDir}`,
+    [`node_modules/${packageName}`, `apps/app/node_modules/${packageName}`],
+  );
+}
+
+linkOptionalLocalPackage(
   "@elizaos/plugin-streaming",
   "eliza/plugins/plugin-streaming",
   [
@@ -326,6 +434,26 @@ ensureBuiltLocalPackage("@elizaos/core", "eliza/packages/core", [
 ]);
 
 ensureBuiltLocalPackage(
+  "@elizaos/shared",
+  "eliza/packages/shared",
+  ["dist/index.js", "dist/index.d.ts", "dist/utils/assistant-text.js"],
+  {
+    outputChecks: [
+      { path: "dist/index.js", includes: "./utils/assistant-text.js" },
+      { path: "dist/config/app-config.js", includes: "DEFAULT_APP_CONFIG" },
+      {
+        path: "dist/utils/assistant-text.js",
+        includes: "extractAssistantReplyText",
+      },
+      {
+        path: "dist/utils/assistant-text.d.ts",
+        includes: "extractAssistantReplyText",
+      },
+    ],
+  },
+);
+
+ensureBuiltLocalPackage(
   "@elizaos/cloud-routing",
   "eliza/packages/cloud-routing",
   ["dist/index.js", "dist/index.d.ts"],
@@ -335,7 +463,17 @@ ensureBuiltLocalPackage(
   "@elizaos/plugin-agent-skills",
   "eliza/plugins/plugin-agent-skills",
   ["dist/index.js", "dist/index.d.ts"],
-  { optional: true },
+  {
+    optional: true,
+    outputChecks: [
+      { path: "dist/index.js", includes: "discoverSkills" },
+      { path: "dist/index.js", includes: "handleCuratedSkillsRoutes" },
+      { path: "dist/index.js", includes: "handleSkillsRoutes" },
+      { path: "dist/index.d.ts", includes: "discoverSkills" },
+      { path: "dist/index.d.ts", includes: "handleCuratedSkillsRoutes" },
+      { path: "dist/index.d.ts", includes: "handleSkillsRoutes" },
+    ],
+  },
 );
 
 ensureBuiltLocalPackage(
@@ -348,8 +486,36 @@ ensureBuiltLocalPackage(
 ensureBuiltLocalPackage(
   "@elizaos/plugin-sql",
   "eliza/plugins/plugin-sql",
-  ["typescript/dist/index.js", "typescript/dist/index.d.ts"],
+  ["src/dist/index.js", "src/dist/index.d.ts"],
   { optional: true },
+);
+
+ensureBuiltLocalPackage(
+  "@elizaos/plugin-registry",
+  "eliza/plugins/plugin-registry",
+  ["dist/index.js", "dist/index.d.ts"],
+  { optional: true },
+);
+
+ensureBuiltLocalPackage(
+  "@elizaos/plugin-app-manager",
+  "eliza/plugins/plugin-app-manager",
+  ["dist/index.js"],
+  { optional: true },
+);
+
+ensureBuiltLocalPackage(
+  "@elizaos/plugin-wallet",
+  "eliza/plugins/plugin-wallet",
+  ["dist/index.mjs", "dist/index.d.ts", "dist/api/wallet-routes.d.ts"],
+  {
+    optional: true,
+    outputChecks: [
+      { path: "dist/index.mjs", includes: "handleWalletRoutes" },
+      { path: "dist/index.d.ts", includes: "./api/wallet-routes.js" },
+      { path: "dist/api/wallet-routes.d.ts", includes: "handleWalletRoutes" },
+    ],
+  },
 );
 
 ensureBuiltLocalPackage(

@@ -331,6 +331,45 @@ const STALE_BOOTSTRAP_KEYS = [
   MOBILE_RUNTIME_MODE_STORAGE_KEY,
 ] as const;
 
+function readInjectedLocalAgentToken(): string | null {
+  try {
+    const injected = (
+      window as unknown as {
+        __ELIZA_API_TOKEN__?: string | null;
+        ElizaNative?: { getLocalAgentToken?: () => string | null };
+      }
+    ).__ELIZA_API_TOKEN__?.trim();
+    if (injected) return injected;
+
+    const nativeToken = (
+      window as unknown as {
+        ElizaNative?: { getLocalAgentToken?: () => string | null };
+      }
+    ).ElizaNative?.getLocalAgentToken?.()?.trim();
+    return nativeToken || null;
+  } catch {
+    return null;
+  }
+}
+
+function persistLocalAgentToken(token: string): void {
+  const trimmed = token.trim();
+  if (!trimmed) return;
+  appBootConfig.apiToken = trimmed;
+  appBootConfig.apiBase ??= window.location.origin;
+  try {
+    (
+      window as unknown as { __ELIZA_API_TOKEN__?: string }
+    ).__ELIZA_API_TOKEN__ = trimmed;
+  } catch {}
+  try {
+    window.localStorage.setItem(SELF_HOSTED_TOKEN_KEY, trimmed);
+  } catch {}
+  try {
+    client.setToken(trimmed);
+  } catch {}
+}
+
 function isLoopbackApiBase(value: unknown): boolean {
   if (typeof value !== "string" || !value.trim()) return false;
   try {
@@ -410,6 +449,9 @@ try {
     window.history.replaceState({}, "", url.toString());
   }
   if (!bootstrapToken) {
+    bootstrapToken = readInjectedLocalAgentToken();
+  }
+  if (!bootstrapToken) {
     try {
       const saved = window.localStorage.getItem(SELF_HOSTED_TOKEN_KEY)?.trim();
       if (saved) bootstrapToken = saved;
@@ -420,31 +462,8 @@ try {
   // (see `os/android/.../ElizaNativeBridge.java`). Pull it before the
   // first auth-status poll so the React shell never hits PairingView
   // for the loopback case where the device IS the agent.
-  if (!bootstrapToken) {
-    try {
-      const native = (
-        window as unknown as {
-          ElizaNative?: { getLocalAgentToken?: () => string | null };
-        }
-      ).ElizaNative;
-      const nativeToken = native?.getLocalAgentToken?.()?.trim();
-      if (nativeToken) {
-        bootstrapToken = nativeToken;
-        // Persist to the same key the fragment-token path uses so any
-        // later re-load through localStorage finds it without needing
-        // the bridge to be available at that moment.
-        try {
-          window.localStorage.setItem(SELF_HOSTED_TOKEN_KEY, nativeToken);
-        } catch {}
-      }
-    } catch {}
-  }
   if (bootstrapToken) {
-    appBootConfig.apiToken = bootstrapToken;
-    appBootConfig.apiBase ??= window.location.origin;
-    try {
-      client.setToken(bootstrapToken);
-    } catch {}
+    persistLocalAgentToken(bootstrapToken);
   }
 } catch {}
 // On desktop, the Electrobun shell injects the local agent's HTTP origin
@@ -462,75 +481,26 @@ if (isDesktopPlatform()) {
 setBootConfig(appBootConfig);
 forceDesktopDevLocalActiveServer();
 
-// On AOSP/Milady, ElizaNativeBridge.getLocalAgentToken() returns null
-// for the first ~30-50s of app launch — the on-device agent process is
-// still booting and hasn't written its per-boot bearer to its volatile
-// static yet. The synchronous bootstrap above fires BEFORE the agent is
-// up, so it sees null and the React shell falls into PairingView even
-// though the bearer is in fact about to be available.
+// On Android local mode, the bearer is per-boot. Never let an older
+// localStorage token win over the token injected by the current agent
+// service, or the device bridge will connect with a stale query token
+// and be rejected by the local agent.
 //
 // Poll the bridge for up to 90s after launch; the first non-null read
-// applies the bearer to the client + localStorage and stops. Stock
+// applies the bearer to boot config, client, globals, and localStorage.
+// Stock
 // Capacitor builds never expose `window.ElizaNative` so the watchdog
 // exits immediately.
 (function installOnDeviceBearerWatchdog() {
   if (typeof window === "undefined") return;
-  const bridge = (
-    window as unknown as {
-      ElizaNative?: { getLocalAgentToken?: () => string | null };
-    }
-  ).ElizaNative;
-  if (!bridge?.getLocalAgentToken) return;
 
   const deadline = Date.now() + 90_000;
   const tick = () => {
     try {
-      if (client.hasToken()) return;
-      const token = bridge.getLocalAgentToken?.()?.trim();
+      const token = readInjectedLocalAgentToken();
       if (token) {
-        client.setToken(token);
-        try {
-          window.localStorage.setItem(SELF_HOSTED_TOKEN_KEY, token);
-        } catch {}
-        return;
-      }
-    } catch {}
-    if (Date.now() < deadline) setTimeout(tick, 500);
-  };
-  setTimeout(tick, 500);
-})();
-
-// On AOSP/Milady, ElizaNativeBridge.getLocalAgentToken() returns null
-// for the first ~30-50s of app launch (the on-device agent process is
-// still booting and hasn't written its per-boot bearer to its volatile
-// static yet). The synchronous bootstrap above + the upstream
-// applyRestoredConnection both fire BEFORE the agent is up, so they
-// see null and the React shell falls into PairingView even though the
-// bearer is in fact about to be available.
-//
-// Poll the bridge for up to 90s after launch; the first non-null read
-// applies the bearer to the boot config + client and stops. Stock
-// Capacitor builds never expose `window.ElizaNative` so the watchdog
-// exits immediately on the first tick.
-(function installOnDeviceBearerWatchdog() {
-  if (typeof window === "undefined") return;
-  const bridge = (
-    window as unknown as {
-      ElizaNative?: { getLocalAgentToken?: () => string | null };
-    }
-  ).ElizaNative;
-  if (!bridge?.getLocalAgentToken) return;
-
-  const deadline = Date.now() + 90_000;
-  const tick = () => {
-    try {
-      if (client.hasToken()) return;
-      const token = bridge.getLocalAgentToken?.()?.trim();
-      if (token) {
-        client.setToken(token);
-        try {
-          window.localStorage.setItem(SELF_HOSTED_TOKEN_KEY, token);
-        } catch {}
+        persistLocalAgentToken(token);
+        setBootConfig({ ...getBootConfig(), apiToken: token });
         return;
       }
     } catch {}
@@ -1080,6 +1050,40 @@ function resolveDeviceBridgeUrl(config: IosRuntimeConfig): string | null {
   }
 }
 
+async function resolveDeviceBridgePairingToken(
+  config: IosRuntimeConfig,
+): Promise<string | undefined> {
+  const configured = config.deviceBridgeToken?.trim();
+  if (configured) return configured;
+
+  if (!(isAndroid && config.mode === "local")) return undefined;
+
+  try {
+    const localAgent = Agent as typeof Agent & {
+      getLocalAgentToken?: () => Promise<{
+        available?: boolean;
+        token?: string | null;
+      }>;
+    };
+    const result = await localAgent.getLocalAgentToken?.();
+    const token = result?.token?.trim();
+    if (result?.available && token) {
+      persistLocalAgentToken(token);
+      setBootConfig({ ...getBootConfig(), apiToken: token });
+      return token;
+    }
+  } catch {}
+
+  const injected = readInjectedLocalAgentToken();
+  if (injected) {
+    persistLocalAgentToken(injected);
+    setBootConfig({ ...getBootConfig(), apiToken: injected });
+    return injected;
+  }
+
+  return undefined;
+}
+
 async function initializeMobileDeviceBridge(): Promise<void> {
   const runtimeConfig = getCurrentIosRuntimeConfig();
   if (
@@ -1096,12 +1100,17 @@ async function initializeMobileDeviceBridge(): Promise<void> {
 
   mobileDeviceBridgeStartPromise = (async () => {
     try {
+      const pairingToken = await resolveDeviceBridgePairingToken(runtimeConfig);
+      if (isAndroid && runtimeConfig.mode === "local" && !pairingToken) {
+        setTimeout(() => {
+          void initializeMobileDeviceBridge();
+        }, 1_000);
+        return;
+      }
       const deviceId = await getOrCreateDeviceBridgeId();
       mobileDeviceBridgeClient = startDeviceBridgeClient({
         agentUrl,
-        ...(runtimeConfig.deviceBridgeToken
-          ? { pairingToken: runtimeConfig.deviceBridgeToken }
-          : {}),
+        ...(pairingToken ? { pairingToken } : {}),
         deviceId,
         onStateChange: (state, detail) => {
           console.info(

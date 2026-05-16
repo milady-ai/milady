@@ -67,6 +67,8 @@ type RuntimeState =
   | { kind: "unavailable"; reason: string };
 
 let runtimeState: RuntimeState = { kind: "idle" };
+const ElizaBunRuntime =
+  Capacitor.registerPlugin<BunRuntimePlugin>("ElizaBunRuntime");
 
 function isApplicable(): boolean {
   if (Capacitor.getPlatform() !== "android") return false;
@@ -82,24 +84,14 @@ function isApplicable(): boolean {
 }
 
 async function loadPlugin(): Promise<BunRuntimePlugin | null> {
-  try {
-    const mod = await import("@elizaos/capacitor-bun-runtime");
-    const plugin = (mod as unknown as { ElizaBunRuntime?: BunRuntimePlugin })
-      .ElizaBunRuntime;
-    if (!plugin) {
-      console.warn(
-        `${LOG_PREFIX} plugin module loaded but ElizaBunRuntime export missing`,
-      );
-      return null;
-    }
-    return plugin;
-  } catch (error) {
+  const plugin = ElizaBunRuntime as unknown as BunRuntimePlugin | undefined;
+  if (!plugin) {
     console.warn(
-      `${LOG_PREFIX} plugin not available:`,
-      error instanceof Error ? error.message : error,
+      `${LOG_PREFIX} plugin module loaded but ElizaBunRuntime export missing`,
     );
     return null;
   }
+  return plugin;
 }
 
 async function startRuntime(): Promise<boolean> {
