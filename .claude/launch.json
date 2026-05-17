@@ -42,6 +42,17 @@
         "cd /Users/shawwalters/eliza-workspace/milady/apps/app/dist && python3 -m http.server 4173"
       ],
       "port": 4173
+    },
+    {
+      "name": "onboarding-prototype",
+      "runtimeExecutable": "/bin/zsh",
+      "runtimeArgs": [
+        "-l",
+        "-c",
+        "cd /Users/shawwalters/eliza-workspace/milady/eliza/packages/docs/prototypes/onboarding-reimagined && python3 -m http.server 5199"
+      ],
+      "port": 5199,
+      "autoPort": false
     }
   ]
 }
