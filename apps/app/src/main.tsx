@@ -568,10 +568,9 @@ async function initializePlatform(): Promise<void> {
     // here. No-ops on Android, on iOS cloud/cloud-hybrid/remote-mac, and
     // when the native plugin isn't compiled into the binary.
     void bootIosLocalRuntimeIfApplicable();
-    // Android local runtime: when mobile-runtime-mode is "local", calls
-    // ElizaBunRuntimePlugin.start() which triggers ElizaAgentService to
-    // start the Bun backend and polls until /api/health reports ready.
-    // No-ops on iOS and when the plugin isn't compiled into the APK.
+    // Android local runtime: the Java ElizaAgentService / Agent bridge owns
+    // startup. This renderer hook only records the handoff and must not call
+    // the iOS BunRuntime plugin, which is not implemented in Android APKs.
     void bootAndroidLocalRuntimeIfApplicable();
   }
 

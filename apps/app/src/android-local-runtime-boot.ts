@@ -1,28 +1,27 @@
 /**
  * android-local-runtime-boot.ts
  *
- * Activates the on-device Bun agent backend via
- * `@elizaos/capacitor-bun-runtime` when:
+ * Android local-agent startup handoff.
+ *
+ * Detects the Android local runtime mode when:
  *   - Capacitor platform === "android" AND
  *   - The mobile runtime mode resolves to "local".
  *
  * On Android the agent runs as a foreground service (`ElizaAgentService`)
  * that executes the Bun binary with `agent-bundle.js android-bridge`.
- * The `ElizaBunRuntimePlugin` Kotlin implementation delegates lifecycle
- * calls to that service via reflection and routes all RPC calls over
- * the loopback HTTP surface at `127.0.0.1:31337`.
+ * MainActivity and RuntimeGate start that service through the Java
+ * service / Agent bridge path. This renderer boot module must not call
+ * `ElizaBunRuntime`: the stock Android APK does not implement that
+ * Capacitor plugin, and invoking it logs
+ * "ElizaBunRuntime plugin is not implemented on android".
  *
- * This module mirrors the shape of `ios-local-runtime-boot.ts` so the
- * chat UI can call the same `sendLocalAgentMessage` / `getLocalAgentStatus`
- * API regardless of platform.
- *
- * Bridge-not-available (Capacitor web fallback, module missing, native
- * `start()` rejects) is logged and silently falls through so cloud paths
- * keep working.
+ * The exported shape stays intentionally narrow for existing imports:
+ * Android chat/status traffic uses the app-core client and
+ * `@elizaos/capacitor-agent` transport, not this iOS-style BunRuntime
+ * adapter.
  */
 
 import { Capacitor } from "@capacitor/core";
-import { AGENT_READY_EVENT, dispatchAppEvent } from "@elizaos/app-core";
 import { APP_LOG_PREFIX } from "./app-config";
 
 const LOG_PREFIX = `${APP_LOG_PREFIX} [android-local-runtime]`;
@@ -30,11 +29,6 @@ const LOG_PREFIX = `${APP_LOG_PREFIX} [android-local-runtime]`;
 export const ANDROID_LOCAL_AGENT_LOG_EVENT = "android-local-agent-log";
 export const ANDROID_LOCAL_AGENT_ERROR_EVENT = "android-local-agent-error";
 export const ANDROID_LOCAL_AGENT_REPLY_EVENT = "android-local-agent-reply";
-
-function dispatchLocalAgentEvent(name: string, detail: unknown): void {
-  if (typeof document === "undefined") return;
-  document.dispatchEvent(new CustomEvent(name, { detail }));
-}
 
 export interface LocalAgentStatus {
   ready: boolean;
@@ -48,27 +42,11 @@ export interface LocalAgentReply {
   conversationId?: string;
 }
 
-interface BunRuntimePlugin {
-  start(
-    opts: Record<string, unknown>,
-  ): Promise<{ ok: boolean; error?: string }>;
-  sendMessage(opts: {
-    message: string;
-    conversationId?: string;
-  }): Promise<{ reply: string }>;
-  getStatus(): Promise<LocalAgentStatus>;
-  stop(): Promise<void>;
-}
-
 type RuntimeState =
   | { kind: "idle" }
-  | { kind: "starting"; promise: Promise<boolean> }
-  | { kind: "ready"; plugin: BunRuntimePlugin }
-  | { kind: "unavailable"; reason: string };
+  | { kind: "delegated"; owner: "ElizaAgentService" };
 
 let runtimeState: RuntimeState = { kind: "idle" };
-const ElizaBunRuntime =
-  Capacitor.registerPlugin<BunRuntimePlugin>("ElizaBunRuntime");
 
 function isApplicable(): boolean {
   if (Capacitor.getPlatform() !== "android") return false;
@@ -83,109 +61,62 @@ function isApplicable(): boolean {
   }
 }
 
-async function loadPlugin(): Promise<BunRuntimePlugin | null> {
-  const plugin = ElizaBunRuntime as unknown as BunRuntimePlugin | undefined;
-  if (!plugin) {
-    console.warn(
-      `${LOG_PREFIX} plugin module loaded but ElizaBunRuntime export missing`,
-    );
-    return null;
-  }
-  return plugin;
-}
-
-async function startRuntime(): Promise<boolean> {
-  const plugin = await loadPlugin();
-  if (!plugin) {
-    runtimeState = { kind: "unavailable", reason: "plugin-not-loaded" };
-    return false;
-  }
-
-  try {
-    const result = await plugin.start({ engine: "bun" });
-    if (!result.ok) {
-      const reason = result.error ?? "start-returned-not-ok";
-      console.warn(`${LOG_PREFIX} start() rejected: ${reason}`);
-      runtimeState = { kind: "unavailable", reason };
-      return false;
-    }
-  } catch (error) {
-    const reason = error instanceof Error ? error.message : String(error);
-    console.warn(`${LOG_PREFIX} start() threw:`, reason);
-    runtimeState = { kind: "unavailable", reason };
-    return false;
-  }
-
-  runtimeState = { kind: "ready", plugin };
-  dispatchAppEvent(AGENT_READY_EVENT, { platform: "android", engine: "bun" });
-  console.log(`${LOG_PREFIX} runtime started`);
-  return true;
-}
-
 /**
  * Boot the Android local agent if `Capacitor.getPlatform() === "android"` and
- * the resolved runtime mode is "local". Idempotent: subsequent calls return
- * the same in-flight promise (when starting) or no-op (when already
- * started/unavailable).
+ * the resolved runtime mode is "local".
+ *
+ * Android startup is owned by native Java code:
+ *   - `MainActivity` calls `ElizaAgentService.start()` on launch when
+ *     `ElizaAgentService.shouldAutoStart()` resolves true.
+ *   - `RuntimeGate` calls the registered `Agent.start()` bridge when a
+ *     stock Android user chooses Local mode.
+ *
+ * This function is therefore an idempotent no-op handoff. Returning false
+ * means "this renderer adapter did not start a BunRuntime plugin", not
+ * "Android local mode is unavailable".
  */
 export function bootAndroidLocalRuntimeIfApplicable(): Promise<boolean> {
   if (!isApplicable()) return Promise.resolve(false);
 
-  if (runtimeState.kind === "ready") return Promise.resolve(true);
-  if (runtimeState.kind === "unavailable") return Promise.resolve(false);
-  if (runtimeState.kind === "starting") return runtimeState.promise;
+  if (runtimeState.kind === "idle") {
+    runtimeState = { kind: "delegated", owner: "ElizaAgentService" };
+    console.info(
+      `${LOG_PREFIX} startup delegated to ElizaAgentService; skipping BunRuntime plugin`,
+    );
+  }
 
-  const promise = startRuntime();
-  runtimeState = { kind: "starting", promise };
-  return promise;
+  return Promise.resolve(false);
 }
 
 /**
- * Whether the Android local runtime is fully started and ready to accept
- * messages.
+ * Whether this renderer-owned adapter is ready to accept messages.
+ * Android local chat/status traffic does not use this adapter.
  */
 export function isAndroidLocalRuntimeReady(): boolean {
-  return runtimeState.kind === "ready";
+  return false;
 }
 
 /**
- * Send a single message to the on-device agent. Throws if the runtime
- * isn't ready.
+ * Android local messages are sent through the app-core client /
+ * `@elizaos/capacitor-agent` transport, not this iOS-style adapter.
  */
 export async function sendLocalAgentMessage(
   text: string,
   conversationId?: string,
 ): Promise<LocalAgentReply> {
-  if (runtimeState.kind !== "ready") {
-    throw new Error(
-      `Android local runtime not ready (state: ${runtimeState.kind})`,
-    );
-  }
-  const payload = conversationId
-    ? { message: text, conversationId }
-    : { message: text };
-  const result = await runtimeState.plugin.sendMessage(payload);
-  const reply: LocalAgentReply = conversationId
-    ? { reply: result.reply, conversationId }
-    : { reply: result.reply };
-  dispatchLocalAgentEvent(ANDROID_LOCAL_AGENT_REPLY_EVENT, reply);
-  return reply;
+  void text;
+  void conversationId;
+  throw new Error(
+    `Android local runtime adapter not available (state: ${runtimeState.kind}); use Agent transport`,
+  );
 }
 
 /**
- * Read the on-device agent status. Never throws.
+ * Android local status is read through the app-core client /
+ * `@elizaos/capacitor-agent` transport. Never throws.
  */
 export async function getLocalAgentStatus(): Promise<LocalAgentStatus> {
-  if (runtimeState.kind !== "ready") return { ready: false };
-  try {
-    return await runtimeState.plugin.getStatus();
-  } catch (error) {
-    console.warn(
-      `${LOG_PREFIX} getStatus() failed:`,
-      error instanceof Error ? error.message : error,
-    );
-    return { ready: false };
-  }
+  return { ready: false };
 }
 
 /** Reset for tests. */
