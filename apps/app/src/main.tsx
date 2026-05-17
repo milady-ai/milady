@@ -44,11 +44,13 @@ import {
   installLocalProviderCloudPreferencePatch,
   isAppWindowRoute,
   isDetachedWindowShell,
+  isPillWindowShell,
   getWindowNavigationPath,
   resolveWindowShellRoute,
   shouldInstallMainWindowOnboardingPatches,
   syncDetachedShellLocation,
 } from "@elizaos/app-core";
+import { VoicePill, type VoicePillMessage } from "@elizaos/ui";
 import { AppWindowRenderer } from "@elizaos/app-core";
 import { dispatchQueuedLifeOpsGithubCallbackFromUrl } from "@elizaos/app-lifeops/platform";
 import type { ShareTargetPayload } from "@elizaos/app-core/platform";
@@ -904,6 +906,91 @@ function resolveAppWindowSlug(): string | null {
   return slug.length > 0 ? slug : null;
 }
 
+// Sample messages for the pill demo. The pill window is an early-stage
+// always-on-top overlay; live agent conversation plumbing will hook in here
+// once we settle on the channel/session model.
+// TODO: wire `messages` to the active chat session by reusing the same
+// store the main `<App />` chat composer uses (see
+// `eliza/packages/ui/src/state/useApp.ts` + the messaging routes under
+// `eliza/packages/app-core/src/api/`). Until then the pill is visual only.
+const PILL_SAMPLE_MESSAGES: VoicePillMessage[] = [
+  { id: "demo-1", role: "agent", text: "Hi — I'm here. What's up?" },
+  { id: "demo-2", role: "user", text: "Just testing the overlay." },
+  { id: "demo-3", role: "agent", text: "Looks good. Ready when you are." },
+];
+
+function injectPillRendererStyles(): void {
+  const style = document.createElement("style");
+  style.dataset.elizaPillReset = "1";
+  style.textContent = `
+html, body, #root {
+  background: transparent !important;
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+html, body {
+  /* Allow the user to grab any non-interactive area to drag the window. */
+  -webkit-app-region: drag;
+}
+.elizaos-voice-pill,
+.elizaos-voice-pill__hit,
+.elizaos-voice-pill__chat,
+.elizaos-voice-pill__composer,
+.elizaos-voice-pill__input,
+.elizaos-voice-pill__ctrl,
+.elizaos-voice-pill__send,
+button,
+input,
+textarea {
+  -webkit-app-region: no-drag;
+}
+#root {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 12px;
+  box-sizing: border-box;
+}
+`;
+  document.head.appendChild(style);
+}
+
+function mountPillWindow(): void {
+  const rootEl = document.getElementById("root");
+  if (!rootEl) throw new Error("Root element #root not found");
+  injectPillRendererStyles();
+
+  function PillRoot() {
+    const handleSubmit = (text: string): void => {
+      // TODO: forward to the active chat session via the same client/state
+      // the main `<App />` composer uses. For now the pill is visual only —
+      // we just log so the developer can confirm submit fires end-to-end.
+      console.info(`${APP_LOG_PREFIX} [pill] submit`, text);
+    };
+    const handleRecordingChange = (recording: boolean): void => {
+      // TODO: wire to the renderer's voice service
+      // (see `eliza/packages/ui/src/voice/`). No-op for now.
+      console.info(`${APP_LOG_PREFIX} [pill] recording`, recording);
+    };
+    return (
+      <VoicePill
+        messages={PILL_SAMPLE_MESSAGES}
+        onSubmit={handleSubmit}
+        onRecordingChange={handleRecordingChange}
+      />
+    );
+  }
+
+  createRoot(rootEl).render(
+    <ErrorBoundary>
+      <StrictMode>
+        <PillRoot />
+      </StrictMode>
+    </ErrorBoundary>,
+  );
+}
+
 function mountReactApp(): void {
   const rootEl = document.getElementById("root");
   if (!rootEl) throw new Error("Root element #root not found");
@@ -1252,6 +1339,15 @@ async function main(): Promise<void> {
   if (isMiladyOS()) {
     await registerMiladyOsSystemApps();
     preSeedAndroidLocalRuntimeIfFresh();
+  }
+
+  if (isPillWindowShell(windowShellRoute)) {
+    // Pill overlay window: minimal renderer that only mounts <VoicePill>.
+    // No AppProvider, no chrome, no platform init — the pill is a standalone
+    // OS-level overlay launched alongside the main shell from the Electrobun
+    // process. The same renderer bundle serves it via `?shell=pill`.
+    mountPillWindow();
+    return;
   }
 
   if (isPopoutWindow()) {

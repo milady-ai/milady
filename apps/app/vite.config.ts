@@ -423,6 +423,14 @@ function resolveLocalAppCoreAliases(): Alias[] {
   const agentRootEntry = appCoreSrcRoot
     ? path.join(localElizaRoot, "packages/agent/src/index.ts")
     : emptyNodeModuleEntry;
+  const sharedDistEntry = path.join(
+    localElizaRoot,
+    "packages/shared/dist/index.js",
+  );
+  const sharedDist = fs.existsSync(sharedDistEntry) ? sharedDistEntry : null;
+  const sharedDistDir = sharedDist
+    ? path.join(localElizaRoot, "packages/shared/dist")
+    : null;
   const packageAgnosticAliases: Alias[] = [
     {
       find: /^@elizaos\/agent$/,
@@ -604,8 +612,34 @@ function resolveLocalAppCoreAliases(): Alias[] {
       ]
     : [];
 
+  // Wave A moved several components/types from @elizaos/app-core to @elizaos/ui.
+  // The catch-all maps to app-core/src/* which may not have them. Use a custom
+  // resolver to fall back to the ui source when the app-core path doesn't exist.
+  const uiComponentsSourceDir = uiPkgRoot ? path.join(uiPkgRoot, "src") : null;
+
+  function resolveAppCoreWithUiFallback(id: string): string {
+    if (fs.existsSync(id)) return id;
+    const withTsx = id.endsWith(".tsx") ? id : `${id}.tsx`;
+    if (fs.existsSync(withTsx)) return withTsx;
+    const withTs = id.endsWith(".ts") ? id : `${id}.ts`;
+    if (fs.existsSync(withTs)) return withTs;
+    if (uiComponentsSourceDir && appCoreSrcRoot) {
+      const relativeToSrc = id.includes(`${appCoreSrcRoot}/`)
+        ? id.slice(appCoreSrcRoot.length + 1)
+        : null;
+      if (relativeToSrc) {
+        const uiEquiv = path.join(uiComponentsSourceDir, relativeToSrc);
+        if (fs.existsSync(uiEquiv)) return uiEquiv;
+        const uiEquivTsx = `${uiEquiv}.tsx`;
+        if (fs.existsSync(uiEquivTsx)) return uiEquivTsx;
+        const uiEquivTs = `${uiEquiv}.ts`;
+        if (fs.existsSync(uiEquivTs)) return uiEquivTs;
+      }
+    }
+    return id;
+  }
+
   return [
-    ...cssRedirectAlias,
     ...generatedAliases,
     ...legacyAppCoreUiAliases,
     {
