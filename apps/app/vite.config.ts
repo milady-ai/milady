@@ -39,6 +39,7 @@ const optionalElizaAppStubEntry = path.join(
   "src/optional-eliza-app-stub.tsx",
 );
 const nativePluginStubEntry = path.join(here, "src/native-plugin-stubs.ts");
+const voicePillFallbackEntry = path.join(here, "src/voice-pill-fallback.tsx");
 const localElizaRoot = path.join(miladyRoot, "eliza");
 
 function requireResolve(id: string): string {
@@ -131,6 +132,25 @@ const reactJsxRuntimeEntry = requireResolve("react/jsx-runtime");
 const reactJsxDevRuntimeEntry = requireResolve("react/jsx-dev-runtime");
 const reactDomEntry = requireResolve("react-dom");
 const reactDomClientEntry = requireResolve("react-dom/client");
+
+function resolveVoicePillFallbackAlias(): Alias[] {
+  const localVoicePillEntry = uiPkgRoot
+    ? path.join(uiPkgRoot, "src/components/voice-pill/index.ts")
+    : null;
+  if (localVoicePillEntry && fs.existsSync(localVoicePillEntry)) {
+    return [];
+  }
+  if (tryResolve("@elizaos/ui/components/voice-pill")) {
+    return [];
+  }
+  return [
+    {
+      find: /^@elizaos\/ui\/components\/voice-pill$/,
+      replacement: voicePillFallbackEntry,
+    },
+  ];
+}
+
 // `@elizaos/app-core` is always real. `@elizaos/app-wallet` is required by
 // onboarding callbacks + AppContext (useWalletState), so resolve it real
 // when present. `app-hyperscape` is real when its package is present.
@@ -470,7 +490,9 @@ function resolveLocalSharedAliases(): Alias[] {
       const sourceTarget = exportTarget
         .replace(/^\.\/dist\//, "./src/")
         .replace(/\.js$/, ".ts");
-      return resolveSharedSourceOrDist(path.resolve(sharedPkgDir, sourceTarget));
+      return resolveSharedSourceOrDist(
+        path.resolve(sharedPkgDir, sourceTarget),
+      );
     }
     return resolveSharedSourceOrDist(path.resolve(sharedPkgDir, exportTarget));
   }
@@ -485,9 +507,7 @@ function resolveLocalSharedAliases(): Alias[] {
         : `@elizaos/shared/${key.replace(/^\.\//, "")}`;
     if (aliasKey.includes("*")) {
       aliases.push({
-        find: new RegExp(
-          `^${escapeRegExp(aliasKey).replace("\\*", "(.+)")}$`,
-        ),
+        find: new RegExp(`^${escapeRegExp(aliasKey).replace("\\*", "(.+)")}$`),
         replacement: resolveSharedRuntimeTarget(exportTarget).replace(
           "*",
           "$1",
@@ -577,6 +597,24 @@ function resolveLocalAppCoreAliases(): Alias[] {
     replacement: appCoreBrowserEntry,
   });
 
+  function resolveAppCoreExportTarget(exportTarget: string): string {
+    if (exportTarget === "./package.json") {
+      return path.join(appCorePkgDir, "package.json");
+    }
+    if (exportTarget.startsWith("./dist/")) {
+      const sourceTarget = exportTarget
+        .replace(/^\.\/dist\//, "./src/")
+        .replace(/\.js$/, ".ts");
+      const sourcePath = resolveAppCoreWithUiFallback(
+        path.resolve(appCorePkgDir, sourceTarget),
+      );
+      if (fs.existsSync(sourcePath)) {
+        return sourcePath;
+      }
+    }
+    return path.resolve(appCorePkgDir, exportTarget);
+  }
+
   for (const [key, value] of Object.entries(appCorePkg.exports || {})) {
     if (key === ".") continue; // handled by the explicit bare alias above
     const resolvedValue: string | null =
@@ -622,7 +660,7 @@ function resolveLocalAppCoreAliases(): Alias[] {
       key === "."
         ? appCoreBrowserEntry
         : resolvedValue
-          ? path.resolve(appCorePkgDir, resolvedValue)
+          ? resolveAppCoreExportTarget(resolvedValue)
           : null;
     if (!targetPath) continue;
 
@@ -2520,14 +2558,27 @@ function nativeModuleStubPlugin(): Plugin {
         resolveStateDir: "function(){return ''}",
         resolveUserPath: "function(x){return x}",
       };
-      // Check which are actually missing from the existing export block
-      const needed = Object.keys(missingExports).filter((n) => {
-        // Check if already exported (as named export or re-export alias)
-        const exportedAs = new RegExp(`\\b${n}\\b`);
-        // Search only in export{} blocks
+      function hasNamedExport(name: string): boolean {
+        const escaped = escapeRegExp(name);
+        if (
+          new RegExp(
+            `export\\s+(?:async\\s+)?(?:function|class|const|let|var)\\s+${escaped}\\b`,
+          ).test(patched)
+        ) {
+          return true;
+        }
+
         const exportBlocks = patched.match(/export\s*\{[^}]+\}/g) || [];
-        return !exportBlocks.some((b) => exportedAs.test(b));
-      });
+        return exportBlocks.some((block) =>
+          new RegExp(`(?:\\b${escaped}\\b\\s+as\\s+)?\\b${escaped}\\b`).test(
+            block,
+          ),
+        );
+      }
+
+      const needed = Object.keys(missingExports).filter(
+        (name) => !hasNamedExport(name),
+      );
       if (needed.length === 0 && patched === code) return null;
       // Use unique prefixed names to avoid collisions with minified vars
       const prefix = "__milady_stub_";
@@ -2834,6 +2885,7 @@ export default defineConfig({
         find: ELIZA_CAPACITOR_PLUGIN_STUB_PATTERN,
         replacement: nativePluginStubEntry,
       },
+      ...resolveVoicePillFallbackAlias(),
       // Local source aliases are only installed when the eliza checkout exists.
       // Published-only builds should resolve normal @elizaos package exports.
       ...resolveLocalUiAliases(),

@@ -66,7 +66,8 @@ describe("package mode aliases", () => {
     expect(stubText).toContain(
       "@elizaos/app-core/components/chat/widgets/types",
     );
-    expect(mainText).not.toContain("@elizaos/ui/components/");
+    expect(mainText.match(/@elizaos\/ui\/components\//g)).toHaveLength(1);
+    expect(mainText).toContain("@elizaos/ui/components/voice-pill");
     expect(stubText).not.toContain("@elizaos/ui/state/");
     expect(stubText).not.toContain("@elizaos/ui/components/");
   });
@@ -136,6 +137,10 @@ describe("package mode aliases", () => {
     );
     expect(viteConfigText).toContain("fs.existsSync(runtimeTarget)");
     expect(viteConfigText).toContain("replacement: runtimeTarget");
+    expect(viteConfigText).toContain("function resolveAppCoreExportTarget");
+    expect(viteConfigText).toContain(
+      "const sourcePath = resolveAppCoreWithUiFallback",
+    );
     expect(viteConfigText).toContain("function resolveSharedExportTarget");
     expect(viteConfigText).toContain(
       'for (const condition of ["source", "import", "default", "types"])',
@@ -145,6 +150,31 @@ describe("package mode aliases", () => {
     expect(viteConfigText).toContain("@elizaos\\/ui\\/(.+)");
     expect(viteConfigText).toContain("fs.statSync(candidate).isFile()");
     expect(viteConfigText).not.toContain("fs.existsSync(resolvedTarget)");
+  });
+
+  it("uses the local voice pill when present and a package-mode fallback when absent", () => {
+    const viteConfigText = fs.readFileSync(
+      path.join(appRoot, "vite.config.ts"),
+      "utf8",
+    );
+
+    expect(viteConfigText).toContain("resolveVoicePillFallbackAlias");
+    expect(viteConfigText).toContain("voice-pill-fallback.tsx");
+    expect(viteConfigText).toContain("src/components/voice-pill/index.ts");
+    expect(viteConfigText).toContain("@elizaos\\/ui\\/components\\/voice-pill");
+  });
+
+  it("does not duplicate core browser exports that upstream now provides directly", () => {
+    const viteConfigText = fs.readFileSync(
+      path.join(appRoot, "vite.config.ts"),
+      "utf8",
+    );
+
+    expect(viteConfigText).toContain("function hasNamedExport");
+    expect(viteConfigText).toContain(
+      "export\\\\s+(?:async\\\\s+)?(?:function|class|const|let|var)",
+    );
+    expect(viteConfigText).toContain("(name) => !hasNamedExport(name)");
   });
 
   it("aliases React entrypoints to one resolved package copy", () => {

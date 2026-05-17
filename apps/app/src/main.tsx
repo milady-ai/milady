@@ -1,6 +1,7 @@
 import { App, ErrorBoundary } from "@elizaos/app-core";
 import "@elizaos/app-core/styles/styles.css";
 import "@elizaos/app-core/styles/brand-gold.css";
+import { VoicePill } from "@elizaos/ui/components/voice-pill";
 
 import { App as CapacitorApp } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";
@@ -65,7 +66,7 @@ import {
   startDeviceBridgeClient,
   type DeviceBridgeClient,
 } from "@elizaos/capacitor-llama";
-import { StrictMode } from "react";
+import { StrictMode, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import { CompanionShell } from "@elizaos/app-companion/ui";
 import {
@@ -884,6 +885,14 @@ function isPhoneCompanionMode(): boolean {
   return params.get("mode") === "companion";
 }
 
+function isVoicePillShellMode(): boolean {
+  if (typeof window === "undefined") return false;
+  const params = new URLSearchParams(
+    window.location.search || window.location.hash.split("?")[1] || "",
+  );
+  return params.get("shell") === "pill";
+}
+
 function resolveAppWindowSlug(): string | null {
   if (!isAppWindowRoute()) return null;
   const path = getWindowNavigationPath();
@@ -902,6 +911,17 @@ function mountReactApp(): void {
   const rootEl = document.getElementById("root");
   if (!rootEl) throw new Error("Root element #root not found");
 
+  if (isVoicePillShellMode()) {
+    createRoot(rootEl).render(
+      <ErrorBoundary>
+        <StrictMode>
+          <VoicePill ariaLabel={APP_BRANDING_BASE.appName ?? "Eliza"} />
+        </StrictMode>
+      </ErrorBoundary>,
+    );
+    return;
+  }
+
   const phoneCompanion = isPhoneCompanionMode();
   const detachedShell = isDetachedWindowShell(windowShellRoute);
   const appWindowSlug = detachedShell ? null : resolveAppWindowSlug();
@@ -909,29 +929,31 @@ function mountReactApp(): void {
   createRoot(rootEl).render(
     <ErrorBoundary>
       <StrictMode>
-        <AppProvider branding={APP_BRANDING}>
-          {phoneCompanion ? (
-            <CompanionShell tab="companion" actionNotice={null} />
-          ) : detachedShell ? (
-            <div className="flex h-[100dvh] min-h-0 w-full max-w-full flex-col overflow-hidden">
-              <DetachedShellRoot route={windowShellRoute} />
-            </div>
-          ) : appWindowSlug ? (
-            <div className="flex h-[100dvh] min-h-0 w-full max-w-full flex-col overflow-hidden">
-              <AppWindowRenderer slug={appWindowSlug} />
-            </div>
-          ) : (
-            <>
-              {/* DesktopOnboardingRuntime was deleted upstream but main.tsx
-                  still referenced it. The surface-navigation + tray runtimes
-                  cover the desktop chrome bits we still need. */}
-              <DesktopSurfaceNavigationRuntime />
-              <DesktopTrayRuntime />
-              <LifeOpsActivitySignalsEffect />
-              <App />
-            </>
-          )}
-        </AppProvider>
+        <Suspense fallback={null}>
+          <AppProvider branding={APP_BRANDING}>
+            {phoneCompanion ? (
+              <CompanionShell tab="companion" actionNotice={null} />
+            ) : detachedShell ? (
+              <div className="flex h-[100dvh] min-h-0 w-full max-w-full flex-col overflow-hidden">
+                <DetachedShellRoot route={windowShellRoute} />
+              </div>
+            ) : appWindowSlug ? (
+              <div className="flex h-[100dvh] min-h-0 w-full max-w-full flex-col overflow-hidden">
+                <AppWindowRenderer slug={appWindowSlug} />
+              </div>
+            ) : (
+              <>
+                {/* DesktopOnboardingRuntime was deleted upstream but main.tsx
+                    still referenced it. The surface-navigation + tray runtimes
+                    cover the desktop chrome bits we still need. */}
+                <DesktopSurfaceNavigationRuntime />
+                <DesktopTrayRuntime />
+                <LifeOpsActivitySignalsEffect />
+                <App />
+              </>
+            )}
+          </AppProvider>
+        </Suspense>
       </StrictMode>
     </ErrorBoundary>,
   );
@@ -1221,6 +1243,12 @@ async function initializeStatusBar(): Promise<void> {
 async function main(): Promise<void> {
   setupPlatformStyles();
   await initializeStatusBar();
+
+  if (isVoicePillShellMode()) {
+    mountReactApp();
+    return;
+  }
+
   applyBuildTimeIosConnection();
 
   try {
