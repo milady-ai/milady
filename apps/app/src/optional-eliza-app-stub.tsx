@@ -49,9 +49,6 @@ export const CodingAgentTasksPanel = EmptyComponent;
 export const PtyConsoleDrawer = EmptyComponent;
 export const FineTuningView = EmptyComponent;
 
-// Restored from before upstream 0a75bd6eb dropped it — main.tsx still imports
-// `prefetchVrmToCache` and registers it on the boot config (used by
-// startup-phase-hydrate to warm the VRM cache before companion mount).
 export function prefetchVrmToCache(_url?: string): Promise<void> {
   return Promise.resolve();
 }

@@ -30,7 +30,6 @@ import {
   shouldAutoProbeLocalAgent,
 } from "./runtime-config";
 
-// Timeouts for health probes - shorter than before to avoid long waits
 const HEALTH_TIMEOUT_MS = 3000;
 const STATUS_TIMEOUT_MS = 2000;
 const DISCOVERY_TIMEOUT_MS = 5000;
