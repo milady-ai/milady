@@ -24,6 +24,7 @@ import type {
   WalletRpcCredentialKey,
   WalletRpcSelections,
 } from "@elizaos/shared";
+import type { PromptOptions } from "@elizaos/ui/components/ui/confirm-dialog";
 import type { InventoryChainFilters } from "@elizaos/ui/state/types";
 import type { ComponentType } from "react";
 import * as THREE from "three";
@@ -67,7 +68,7 @@ export function resolveCompanionInferenceNotice(): null {
 // wallet surface). Each export below mirrors a real symbol that
 // @elizaos/app-core source files import so typecheck stays green.
 export function buildWalletRpcUpdateRequest(_args: {
-  walletConfig?: unknown;
+  walletConfig?: WalletConfigStatus | null;
   rpcFieldValues: Partial<Record<WalletRpcCredentialKey, string>>;
   selectedProviders:
     | WalletRpcSelections
@@ -81,7 +82,7 @@ export function buildWalletRpcUpdateRequest(_args: {
 }
 
 export function resolveInitialWalletRpcSelections(
-  _walletConfig?: unknown,
+  _walletConfig?: WalletConfigStatus | null,
 ): WalletRpcSelections {
   return {} as WalletRpcSelections;
 }
@@ -273,7 +274,7 @@ export function useWalletState(_args: {
     once?: boolean,
     busy?: boolean,
   ) => void;
-  promptModal?: unknown;
+  promptModal?: (opts: PromptOptions) => Promise<string | null>;
   agentName?: string;
   characterName?: string;
 }): WalletStateHook {
@@ -497,6 +498,8 @@ export { THREE };
 // no-op RPC update. With `bun run eliza:local`, the alias auto-detect in
 // vite.config.ts routes through the real package instead.
 
-export function collectSelectedCredentialKeys(_selections: unknown): string[] {
+export function collectSelectedCredentialKeys(
+  _selections: WalletRpcSelections | null | undefined,
+): string[] {
   return [];
 }

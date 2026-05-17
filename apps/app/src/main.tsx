@@ -53,6 +53,8 @@ import {
 import {
   type Conversation,
   type ConversationMessage,
+  createVoiceCapture,
+  type VoiceCaptureHandle,
   VoicePill,
   type VoicePillMessage,
 } from "@elizaos/ui";
@@ -938,25 +940,44 @@ function writePillConversationId(id: string | null): void {
 }
 
 /**
+ * Minimal shape of a conversation list entry the pill cares about. Kept local
+ * (rather than imported from `@elizaos/ui`) because the app-core dist surface
+ * exposes a slightly looser variant of `Conversation`, and the pill only
+ * needs id + updatedAt to pick a "newest" conversation to attach to.
+ */
+type PillConversationSummary = {
+  id: string;
+  updatedAt?: number | string;
+};
+
+/**
  * Pick the most-recently-updated conversation from a server snapshot. Returns
  * null when the list is empty. The pill uses this to re-attach to the
  * conversation the user just left off in when no sticky pill id is set.
  */
 function pickNewestConversation(
-  conversations: Conversation[],
-): Conversation | null {
+  conversations: PillConversationSummary[],
+): PillConversationSummary | null {
   if (conversations.length === 0) return null;
   let best = conversations[0];
   for (let i = 1; i < conversations.length; i++) {
     const candidate = conversations[i];
     if (
-      new Date(candidate.updatedAt).getTime() >
-      new Date(best.updatedAt).getTime()
+      conversationUpdatedAtMs(candidate) > conversationUpdatedAtMs(best)
     ) {
       best = candidate;
     }
   }
   return best;
+}
+
+function conversationUpdatedAtMs(c: PillConversationSummary): number {
+  if (typeof c.updatedAt === "number") return c.updatedAt;
+  if (typeof c.updatedAt === "string") {
+    const t = Date.parse(c.updatedAt);
+    return Number.isFinite(t) ? t : 0;
+  }
+  return 0;
 }
 
 /**
@@ -975,6 +996,8 @@ function PillRoot() {
   const [messages, setMessages] = useState<ConversationMessage[]>([]);
   const conversationIdRef = useRef<string | null>(readPillConversationId());
   const sendInFlightRef = useRef<boolean>(false);
+  const voiceCaptureRef = useRef<VoiceCaptureHandle | null>(null);
+  const handleSubmitRef = useRef<((text: string) => void) | null>(null);
 
   // Append-or-replace by id so streaming token updates collapse onto a single
   // assistant turn without flicker.
@@ -997,7 +1020,10 @@ function PillRoot() {
   > => {
     const sticky = conversationIdRef.current;
     const { conversations } = await client.listConversations();
-    if (sticky && conversations.some((c: Conversation) => c.id === sticky)) {
+    if (
+      sticky &&
+      conversations.some((c: PillConversationSummary) => c.id === sticky)
+    ) {
       return sticky;
     }
     const newest = pickNewestConversation(conversations);
@@ -1019,7 +1045,7 @@ function PillRoot() {
       const { messages: history } =
         await client.getConversationMessages(convId);
       if (cancelled) return;
-      setMessages(history);
+      setMessages(history.map(normalizePillMessage));
     })();
     return () => {
       cancelled = true;
@@ -1033,16 +1059,19 @@ function PillRoot() {
     client.connectWs();
     const unsubscribe = client.onWsEvent(
       "proactive-message",
-      (event: Record<string, unknown>) => {
+      (event: unknown) => {
+        if (!event || typeof event !== "object") return;
         const payload = event as {
           conversationId?: unknown;
           message?: unknown;
         };
         if (typeof payload.conversationId !== "string") return;
         if (payload.conversationId !== conversationIdRef.current) return;
-        const incoming = payload.message as ConversationMessage | undefined;
-        if (!incoming || typeof incoming.id !== "string") return;
-        upsertMessage(incoming);
+        const raw = payload.message;
+        if (!raw || typeof raw !== "object") return;
+        const candidate = raw as { id?: unknown };
+        if (typeof candidate.id !== "string") return;
+        upsertMessage(normalizePillMessage(raw));
       },
     );
     return () => {
@@ -1110,15 +1139,57 @@ function PillRoot() {
     [upsertMessage],
   );
 
+  // Keep a live ref to handleSubmit so the voice-capture callback (which is
+  // installed once when the recorder lazily constructs) always routes finals
+  // through the current closure, not the one captured at first use.
+  useEffect(() => {
+    handleSubmitRef.current = handleSubmit;
+  }, [handleSubmit]);
+
+  // Tear the recorder down on unmount. start/stop themselves are driven by
+  // `handleRecordingChange` below.
+  useEffect(() => {
+    return () => {
+      voiceCaptureRef.current?.dispose();
+      voiceCaptureRef.current = null;
+    };
+  }, []);
+
+  // Voice capture via createVoiceCapture from @elizaos/ui — see eliza/packages/ui/src/voice/voice-capture-factory.ts
   const handleRecordingChange = useCallback((recording: boolean): void => {
-    // TODO: route through the shared voice capture pipeline at
-    // `eliza/packages/ui/src/voice/local-asr-capture.ts` +
-    // `eliza/packages/ui/src/voice/voice-chat-recording.ts`. The pill window
-    // is a standalone Electrobun renderer process with no AppProvider, so we
-    // can't reuse `useChatVoiceSession` directly — capture + transcription
-    // needs a hook-free factory before this can be wired end-to-end. For now
-    // start/stop is logged so devs can confirm the toggle fires.
-    console.info(`${APP_LOG_PREFIX} [pill] recording`, recording);
+    if (recording) {
+      if (!voiceCaptureRef.current) {
+        voiceCaptureRef.current = createVoiceCapture({
+          onTranscript: (segment) => {
+            if (!segment.final) {
+              // Interim segments are best-guess partials — useful for a future
+              // live caption surface but not safe to submit. Log only.
+              console.info(
+                `${APP_LOG_PREFIX} [pill] voice interim`,
+                segment.text,
+              );
+              return;
+            }
+            const submit = handleSubmitRef.current;
+            if (!submit) return;
+            submit(segment.text);
+          },
+          onStateChange: (state, error) => {
+            if (error) {
+              console.warn(
+                `${APP_LOG_PREFIX} [pill] voice ${state}`,
+                error.message,
+              );
+              return;
+            }
+            console.info(`${APP_LOG_PREFIX} [pill] voice ${state}`);
+          },
+        });
+      }
+      void voiceCaptureRef.current.start();
+      return;
+    }
+    void voiceCaptureRef.current?.stop();
   }, []);
 
   const pillMessages = projectPillMessages(messages);
