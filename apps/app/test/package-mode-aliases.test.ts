@@ -105,4 +105,67 @@ describe("package mode aliases", () => {
     expect(patchScript).toContain("EXTRACT_ACTION_PARAMS_TEMPLATE");
     expect(patchScript).toContain("extractActionParamsTemplate");
   });
+
+  it("keeps generated native module proxy stubs compatible with WebKit invariants", () => {
+    const viteConfigText = fs.readFileSync(
+      path.join(appRoot, "vite.config.ts"),
+      "utf8",
+    );
+
+    expect(viteConfigText).toContain(
+      "ownKeys(t) { return Reflect.ownKeys(t); }",
+    );
+    expect(viteConfigText).toContain(
+      "getOwnPropertyDescriptor(t, p) { return Reflect.getOwnPropertyDescriptor(t, p)",
+    );
+    expect(viteConfigText).toContain(
+      "p === 'prototype' || p === 'name' || p === 'length'",
+    );
+    expect(viteConfigText).not.toContain("ownKeys() { return []; }");
+    expect(viteConfigText).not.toContain("p === 'prototype') return {}");
+  });
+
+  it("prefers local source aliases before stale package dist fallbacks", () => {
+    const viteConfigText = fs.readFileSync(
+      path.join(appRoot, "vite.config.ts"),
+      "utf8",
+    );
+
+    expect(viteConfigText).toContain(
+      "const runtimeTarget = resolveRuntimeTarget(pkgDir, exportTarget)",
+    );
+    expect(viteConfigText).toContain("fs.existsSync(runtimeTarget)");
+    expect(viteConfigText).toContain("replacement: runtimeTarget");
+    expect(viteConfigText).toContain("@elizaos\\/ui\\/platform");
+    expect(viteConfigText).toContain("@elizaos\\/ui\\/(.+)");
+    expect(viteConfigText).toContain("fs.statSync(candidate).isFile()");
+    expect(viteConfigText).not.toContain("fs.existsSync(resolvedTarget)");
+  });
+
+  it("aliases React entrypoints to one resolved package copy", () => {
+    const viteConfigText = fs.readFileSync(
+      path.join(appRoot, "vite.config.ts"),
+      "utf8",
+    );
+
+    expect(viteConfigText).toContain('requireResolve("react")');
+    expect(viteConfigText).toContain('requireResolve("react/jsx-runtime")');
+    expect(viteConfigText).toContain("find: /^react-dom\\/client$/");
+    expect(viteConfigText).toContain("replacement: reactDomClientEntry");
+  });
+
+  it("keeps the local app-core browser surface aligned with app imports", () => {
+    const appCoreBrowserPath = path.resolve(
+      appRoot,
+      "../..",
+      "eliza/packages/app-core/src/browser.ts",
+    );
+    if (!fs.existsSync(appCoreBrowserPath)) {
+      return;
+    }
+
+    const appCoreBrowserText = fs.readFileSync(appCoreBrowserPath, "utf8");
+    expect(appCoreBrowserText).toContain("resolveIosRuntimeConfig");
+    expect(appCoreBrowserText).toContain("type IosRuntimeConfig");
+  });
 });

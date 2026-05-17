@@ -155,8 +155,12 @@ jobs:
 
       - name: Build local eliza runtime plugins
         run: |
-          if [ ! -f eliza/packages/core/dist/index.node.js ] || [ ! -f eliza/packages/core/dist/index.d.ts ]; then
-            (cd eliza/packages/core && bun run build)
+          if [ -d eliza/packages/core ]; then
+            if [ ! -f eliza/packages/core/dist/index.node.js ] || [ ! -f eliza/packages/core/dist/index.d.ts ]; then
+              (cd eliza/packages/core && bun run build)
+            fi
+          else
+            echo "Skipping local eliza core build; package-mode checkout has no eliza/ tree."
           fi
           if [ -f eliza/plugins/plugin-agent-skills/package.json ] && [ ! -f eliza/plugins/plugin-agent-skills/dist/index.js ]; then
             (cd eliza/plugins/plugin-agent-skills && bun run build)

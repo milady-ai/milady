@@ -5,9 +5,9 @@
  *
  * Two failure modes this handles:
  *
- * 1. **Orphan dev-server.ts / Milady-dev.app processes.** The Electrobun
+ * 1. **Orphan dev-server.ts / Milady-dev processes.** The Electrobun
  *    orchestrator spawns `bun --watch eliza/packages/app-core/src/runtime/dev-server.ts`
- *    plus a Milady-dev.app launcher. If the parent terminal closed
+ *    plus a Milady-dev launcher. If the parent terminal closed
  *    ungracefully (Ctrl-Z, `pkill -9 dev-platform`, IDE crash), the
  *    children survive — they still hold port 31337, the PGlite WAL,
  *    and the `eliza-pglite.lock` file. A fresh `dev:desktop` then
@@ -64,6 +64,9 @@ const ORPHAN_PATTERNS = [
   // Milady-dev.app launcher binary and its bun child.
   "Milady-dev.app/Contents/MacOS/launcher",
   "Milady-dev.app/Contents/MacOS/../Resources/main.js",
+  // Linux Electrobun dev bundle launcher and packaged Bun child.
+  "build/dev-linux-x64/Milady-dev/bin/launcher",
+  "build/dev-linux-x64/Milady-dev/bin/../Resources/main.js",
   // The dev-platform orchestrator itself.
   "eliza/packages/app-core/scripts/dev-platform.mjs",
   // The Milady-side wrapper that delegates to dev-platform.mjs.

@@ -126,6 +126,11 @@ function tryResolve(id: string): string | undefined {
 const capacitorKeyboardEntry = tryResolve("@capacitor/keyboard");
 const capacitorPreferencesEntry = tryResolve("@capacitor/preferences");
 const capacitorAppEntry = tryResolve("@capacitor/app");
+const reactEntry = requireResolve("react");
+const reactJsxRuntimeEntry = requireResolve("react/jsx-runtime");
+const reactJsxDevRuntimeEntry = requireResolve("react/jsx-dev-runtime");
+const reactDomEntry = requireResolve("react-dom");
+const reactDomClientEntry = requireResolve("react-dom/client");
 // `@elizaos/app-core` is always real. `@elizaos/app-wallet` is required by
 // onboarding callbacks + AppContext (useWalletState), so resolve it real
 // when present. `app-hyperscape` is real when its package is present.
@@ -242,6 +247,15 @@ function resolveLocalUiAliases(): Alias[] {
       replacement: path.join(uiPkgRoot, "src/index.ts"),
     },
     {
+      find: /^@elizaos\/ui\/api$/,
+      replacement: path.join(uiPkgRoot, "src/api/index.ts"),
+    },
+    {
+      find: /^@elizaos\/ui\/api\/(.*)$/,
+      replacement: `${uiPkgRoot}/src/api/$1.ts`,
+      customResolver: resolveExistingUiSourceModule,
+    },
+    {
       find: /^@elizaos\/ui\/components\/ui\/(.*)$/,
       replacement: `${uiPkgRoot}/src/components/ui/$1.tsx`,
       customResolver: resolveExistingUiSourceModule,
@@ -281,8 +295,18 @@ function resolveLocalUiAliases(): Alias[] {
       replacement: `${uiPkgRoot}/src/layouts/$1/$2.tsx`,
     },
     {
+      find: /^@elizaos\/ui\/platform\/(.*)$/,
+      replacement: `${uiPkgRoot}/src/platform/$1.ts`,
+      customResolver: resolveExistingUiSourceModule,
+    },
+    {
       find: /^@elizaos\/ui\/lib\/(.*)$/,
       replacement: `${uiPkgRoot}/src/lib/$1.ts`,
+    },
+    {
+      find: /^@elizaos\/ui\/(.+)$/,
+      replacement: `${uiPkgRoot}/src/$1`,
+      customResolver: resolveExistingUiSourceModule,
     },
   ];
 }
@@ -353,16 +377,16 @@ function resolveLocalElizaAppAliases(): Alias[] {
       for (const [key, value] of Object.entries(pkg.exports || {})) {
         const exportTarget = resolveExportTarget(value);
         if (!exportTarget) continue;
-        const resolvedTarget = path.resolve(pkgDir, exportTarget);
-        // Only create an alias when the target file actually exists on disk.
-        // In a fresh local clone, dist/ may not be built yet. Skipping the
-        // alias lets the import fall through to the stub or npm package.
-        if (!fs.existsSync(resolvedTarget)) continue;
+        const runtimeTarget = resolveRuntimeTarget(pkgDir, exportTarget);
+        // Prefer local source targets when the package export points at dist/.
+        // Fresh local clones often have src/ but no dist/ yet; checking dist
+        // first lets imports fall through to stale npm/Bun-store packages.
+        if (!fs.existsSync(runtimeTarget)) continue;
         const aliasKey =
           key === "." ? pkgName : `${pkgName}/${key.replace(/^\.\//, "")}`;
         aliases.push({
           find: new RegExp(`^${escapeRegExp(aliasKey)}$`),
-          replacement: resolveRuntimeTarget(pkgDir, exportTarget),
+          replacement: runtimeTarget,
         });
       }
 
@@ -488,21 +512,21 @@ function resolveLocalAppCoreAliases(): Alias[] {
 
   for (const [key, value] of Object.entries(appCorePkg.exports || {})) {
     if (key === ".") continue; // handled by the explicit bare alias above
-    if (typeof value !== "string") continue;
-    const aliasKey =
-      key === "."
-        ? "@elizaos/app-core"
-        : `@elizaos/app-core/${key.replace(/^\.\//, "")}`;
-
-    // Resolve the string value, handling both plain strings and conditional exports.
     const resolvedValue: string | null =
       typeof value === "string"
         ? value
         : typeof value === "object" && value !== null
-          ? ((value as Record<string, string>).import ??
+          ? ((value as Record<string, string>).source ??
+            (value as Record<string, string>).import ??
             (value as Record<string, string>).default ??
             null)
           : null;
+    if (!resolvedValue) continue;
+
+    const aliasKey =
+      key === "."
+        ? "@elizaos/app-core"
+        : `@elizaos/app-core/${key.replace(/^\.\//, "")}`;
 
     // CSS files in app-core exports point to dist paths (e.g. ./styles/styles.css).
     // In Wave A these moved to @elizaos/ui. If the dist path doesn't exist locally,
@@ -549,6 +573,52 @@ function resolveLocalAppCoreAliases(): Alias[] {
 
   const uiSource = path.join(appCoreSrcRoot, "ui");
   const uiPkgSrcRoot = uiPkgRoot ? path.join(uiPkgRoot, "src") : null;
+  // Wave A moved styles from @elizaos/app-core to @elizaos/ui. Keep an
+  // explicit redirect ahead of the catch-all so local-source builds do not
+  // resolve CSS requests to missing app-core source files.
+  const uiStylesSourceDir = uiPkgRoot
+    ? path.join(uiPkgRoot, "src/styles")
+    : null;
+  const appCoreStylesLocalDir = path.join(appCoreSrcRoot, "styles");
+  const cssRedirectAlias: Alias[] =
+    uiStylesSourceDir &&
+    fs.existsSync(path.join(uiStylesSourceDir, "styles.css")) &&
+    !fs.existsSync(path.join(appCoreStylesLocalDir, "styles.css"))
+      ? [
+          {
+            find: /^@elizaos\/app-core\/styles\/(.+\.css)$/,
+            replacement: `${uiStylesSourceDir}/$1`,
+          },
+        ]
+      : [];
+  const uiComponentsSourceDir = uiPkgRoot ? path.join(uiPkgRoot, "src") : null;
+
+  function resolveAppCoreWithUiFallback(id: string): string {
+    if (fs.existsSync(id)) return id;
+    const withTsx = id.endsWith(".tsx") ? id : `${id}.tsx`;
+    if (fs.existsSync(withTsx)) return withTsx;
+    const withTs = id.endsWith(".ts") ? id : `${id}.ts`;
+    if (fs.existsSync(withTs)) return withTs;
+
+    if (
+      uiComponentsSourceDir &&
+      id.startsWith(`${appCoreSrcRoot}${path.sep}`)
+    ) {
+      const relativeToAppCoreSrc = id.slice(appCoreSrcRoot.length + 1);
+      const uiEquivalent = path.join(
+        uiComponentsSourceDir,
+        relativeToAppCoreSrc,
+      );
+      if (fs.existsSync(uiEquivalent)) return uiEquivalent;
+      const uiEquivalentTsx = `${uiEquivalent}.tsx`;
+      if (fs.existsSync(uiEquivalentTsx)) return uiEquivalentTsx;
+      const uiEquivalentTs = `${uiEquivalent}.ts`;
+      if (fs.existsSync(uiEquivalentTs)) return uiEquivalentTs;
+    }
+
+    return id;
+  }
+
   const legacyAppCoreUiAliases: Alias[] = uiPkgSrcRoot
     ? [
         {
@@ -840,7 +910,7 @@ function resolveExistingUiSourceModule(id: string) {
   }
 
   for (const candidate of candidates) {
-    if (fs.existsSync(candidate)) {
+    if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
       return candidate;
     }
   }
@@ -1310,7 +1380,7 @@ function generateNodeBuiltinStub(moduleId: string, req = _require): string {
     //   * mutation traps (set / defineProperty) don't throw under strict mode
     //   * `instanceof`, `default`, `__esModule` resolve sensibly for ESM<->CJS
     "function noopFn() { return noop; }",
-    "const handler = { get(t, p) { if (typeof p === 'symbol') return undefined; if (p === '__esModule') return true; if (p === 'default') return noop; if (p === 'prototype') return {}; if (p in t) return t[p]; return noop; }, set(t, p, v) { try { t[p] = v; } catch {} return true; }, has() { return true; }, ownKeys() { return []; }, getOwnPropertyDescriptor() { return { configurable: true, enumerable: true }; }, apply() { return noop; }, construct() { return noop; }, defineProperty(t, p, d) { try { Object.defineProperty(t, p, { configurable: true, writable: true, enumerable: true, ...d }); } catch {} return true; } };",
+    "const handler = { get(t, p) { if (p === 'prototype' || p === 'name' || p === 'length' || typeof p === 'symbol') return Reflect.get(t, p); if (p === '__esModule') return true; if (p === 'default') return noop; if (p in t) return t[p]; return noop; }, set(t, p, v) { try { t[p] = v; } catch {} return true; }, has() { return true; }, ownKeys(t) { return Reflect.ownKeys(t); }, getOwnPropertyDescriptor(t, p) { return Reflect.getOwnPropertyDescriptor(t, p) ?? { configurable: true, enumerable: true, writable: true, value: noop }; }, apply() { return noop; }, construct() { return noop; }, defineProperty(t, p, d) { try { Object.defineProperty(t, p, { configurable: true, writable: true, enumerable: true, ...d }); } catch {} return true; } };",
     "const noop = new Proxy(noopFn, handler);",
     "const stub = noop;",
     "const asyncNoop = () => Promise.resolve();",
@@ -1754,6 +1824,7 @@ function generatePluginElizacloudStub(): string {
 // agent runtime modules. The renderer never enters those code paths; the
 // stub satisfies Rollup's static analysis and trees away at module init.
 const PLUGIN_LOCAL_INFERENCE_STUB_NAMES = [
+  "detectEmbeddingPreset",
   "getLocalInferenceActiveModelId",
   "getLocalInferenceActiveSnapshot",
   "getLocalInferenceChatStatus",
@@ -1763,6 +1834,53 @@ const PLUGIN_LOCAL_INFERENCE_STUB_NAMES = [
 
 function generatePluginLocalInferenceStub(): string {
   return generateNamedExportStub(PLUGIN_LOCAL_INFERENCE_STUB_NAMES);
+}
+
+function generatePluginAgentSkillsStub(): string {
+  return generateNamedExportStub([
+    "discoverSkills",
+    "handleCuratedSkillsRoutes",
+    "handleSkillsRoutes",
+  ]);
+}
+
+function generatePluginAppManagerStub(): string {
+  return [
+    "const noop = () => undefined;",
+    "const asyncFalse = async () => false;",
+    "export class AppManager {}",
+    "export const handleAppsRoutes = asyncFalse;",
+    "export const readAppRunStore = () => [];",
+    "export const resolveAppRunStoreFilePath = () => '';",
+    "export const resolveLegacyAppRunStoreFilePath = () => '';",
+    "export const writeAppRunStore = noop;",
+    "export default new Proxy(noop, { get: () => noop, apply: () => undefined });",
+  ].join("\n");
+}
+
+function generatePluginRegistryStub(): string {
+  return [
+    "const noop = () => undefined;",
+    "const asyncFalse = async () => false;",
+    "const emptyPluginList = () => ({ plugins: [], categories: [], installed: [] });",
+    "export const buildPluginListResponse = emptyPluginList;",
+    "export const handlePluginRoutes = asyncFalse;",
+    "export const handlePluginsCompatRoutes = asyncFalse;",
+    "export const installAndRestart = noop;",
+    "export const installPlugin = noop;",
+    "export const listInstalledPlugins = () => [];",
+    "export const uninstallAndRestart = noop;",
+    "export const uninstallPlugin = noop;",
+    "export default new Proxy(noop, { get: () => noop, apply: () => undefined });",
+  ].join("\n");
+}
+
+function generatePluginWalletStub(): string {
+  return generateNamedExportStub(["handleWalletRoutes"]);
+}
+
+function generatePluginX402Stub(): string {
+  return generateNamedExportStub(["validateX402Startup"]);
 }
 
 function generateAgentPluginAutoEnableStub(): string {
@@ -1982,6 +2100,11 @@ const NATIVE_MODULE_STUB_GENERATORS = new Map<
   ["async_hooks", generateAsyncHooksStub],
   ["@elizaos/plugin-elizacloud", generatePluginElizacloudStub],
   ["@elizaos/plugin-local-inference", generatePluginLocalInferenceStub],
+  ["@elizaos/plugin-agent-skills", generatePluginAgentSkillsStub],
+  ["@elizaos/plugin-app-manager", generatePluginAppManagerStub],
+  ["@elizaos/plugin-registry", generatePluginRegistryStub],
+  ["@elizaos/plugin-wallet", generatePluginWalletStub],
+  ["@elizaos/plugin-x402", generatePluginX402Stub],
   ["esbuild", generateEsbuildStub],
   // @node-rs/argon2's server-side Rust binding is referenced by
   // app-core's password-hashing helpers. Renderer never executes them
@@ -2091,6 +2214,7 @@ function nativeModuleStubPlugin(): Plugin {
     "@elizaos/plugin-sql",
     "@elizaos/plugin-agent-skills",
     "@elizaos/plugin-agent-orchestrator",
+    "@elizaos/plugin-app-manager",
     // The agent runtime is server-only — it lives in the API child
     // process, not in the renderer. app-core/dist code can leak agent
     // imports (account-pool etc.); stub them so Rollup doesn't try to
@@ -2100,6 +2224,11 @@ function nativeModuleStubPlugin(): Plugin {
     // tts proxy routes). Renderer references the exported names but
     // never executes the code; named-export stub registered above.
     "@elizaos/plugin-elizacloud",
+    // Server-side plugin install/discovery routes. The renderer only needs
+    // static named exports to resolve when app-core server barrels leak in.
+    "@elizaos/plugin-registry",
+    "@elizaos/plugin-wallet",
+    "@elizaos/plugin-x402",
     // @node-rs/argon2 has a wasm32-wasi variant that browser builds
     // surface via dynamic import. The browser can't resolve the bare
     // specifier at runtime; stub it so the bundle loads. Real hashing
@@ -2544,6 +2673,14 @@ export default defineConfig({
     alias: [
       // Bare Node built-in polyfills for browser — pathe provides ESM path,
       // events is pre-bundled via optimizeDeps.
+      { find: /^react$/, replacement: reactEntry },
+      { find: /^react\/jsx-runtime$/, replacement: reactJsxRuntimeEntry },
+      {
+        find: /^react\/jsx-dev-runtime$/,
+        replacement: reactJsxDevRuntimeEntry,
+      },
+      { find: /^react-dom$/, replacement: reactDomEntry },
+      { find: /^react-dom\/client$/, replacement: reactDomClientEntry },
       { find: /^path$/, replacement: patheEntry },
       { find: /^@capacitor\/core$/, replacement: capacitorCoreEntry },
       // Aliases for Capacitor packages that may not be hoisted to root node_modules
