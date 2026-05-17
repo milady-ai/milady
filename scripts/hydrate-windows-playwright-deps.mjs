@@ -118,22 +118,29 @@ function addEntryCandidate(candidates, value) {
 
 function packageEntryCandidates(packageRoot, fallbackEntries) {
   const manifestPath = path.join(packageRoot, "package.json");
-  const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
   const candidates = [];
 
-  addEntryCandidate(candidates, manifest.main);
-  addEntryCandidate(candidates, manifest.module);
+  // The source-side candidate root (e.g., eliza/plugins/plugin-sql/typescript)
+  // can be a directory tree without its own package.json — only dist/ +
+  // node_modules/. Treat the missing manifest as "no manifest-derived
+  // candidates"; the fallbackEntries below still let the caller probe
+  // dist/index.node.js etc. without crashing.
+  if (fs.existsSync(manifestPath)) {
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+    addEntryCandidate(candidates, manifest.main);
+    addEntryCandidate(candidates, manifest.module);
 
-  const rootExport = manifest.exports?.["."] ?? manifest.exports;
-  if (typeof rootExport === "string") {
-    addEntryCandidate(candidates, rootExport);
-  } else if (rootExport && typeof rootExport === "object") {
-    addEntryCandidate(candidates, rootExport.node?.import);
-    addEntryCandidate(candidates, rootExport.node?.default);
-    addEntryCandidate(candidates, rootExport.bun?.import);
-    addEntryCandidate(candidates, rootExport.bun?.default);
-    addEntryCandidate(candidates, rootExport.import);
-    addEntryCandidate(candidates, rootExport.default);
+    const rootExport = manifest.exports?.["."] ?? manifest.exports;
+    if (typeof rootExport === "string") {
+      addEntryCandidate(candidates, rootExport);
+    } else if (rootExport && typeof rootExport === "object") {
+      addEntryCandidate(candidates, rootExport.node?.import);
+      addEntryCandidate(candidates, rootExport.node?.default);
+      addEntryCandidate(candidates, rootExport.bun?.import);
+      addEntryCandidate(candidates, rootExport.bun?.default);
+      addEntryCandidate(candidates, rootExport.import);
+      addEntryCandidate(candidates, rootExport.default);
+    }
   }
 
   for (const fallback of fallbackEntries) {

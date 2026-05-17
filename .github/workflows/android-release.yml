@@ -114,24 +114,61 @@ jobs:
             echo "ready=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Check Android signing credentials
+        id: android_signing
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          missing=()
+          [[ -z "$ANDROID_KEYSTORE_BASE64" ]] && missing+=("ANDROID_KEYSTORE_BASE64")
+          [[ -z "$ANDROID_KEYSTORE_PASSWORD" ]] && missing+=("ANDROID_KEYSTORE_PASSWORD")
+          [[ -z "$ANDROID_KEY_ALIAS" ]] && missing+=("ANDROID_KEY_ALIAS")
+          [[ -z "$ANDROID_KEY_PASSWORD" ]] && missing+=("ANDROID_KEY_PASSWORD")
+          if [[ ${#missing[@]} -gt 0 ]]; then
+            echo "::warning::Skipping Android release build — missing signing secrets: ${missing[*]}"
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Install dependencies
+        if: steps.android_signing.outputs.ready == 'true'
         run: bun install
 
+      - name: Initialize eliza source checkout
+        if: steps.android_signing.outputs.ready == 'true'
+        run: |
+          if [ ! -f eliza/package.json ]; then
+            git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza
+            if [ -n "${MILADY_ELIZA_REF:-}" ]; then
+              git -C eliza fetch --depth=1 origin "$MILADY_ELIZA_REF"
+              git -C eliza checkout --quiet FETCH_HEAD
+              echo "Pinned eliza to ${MILADY_ELIZA_REF}"
+            fi
+          fi
+
       - name: Build web assets
+        if: steps.android_signing.outputs.ready == 'true'
         working-directory: apps/app
         run: bun run build
 
       - name: Sync Capacitor
+        if: steps.android_signing.outputs.ready == 'true'
         working-directory: apps/app
         run: bun run cap:sync:android
 
       - name: Decode keystore
+        if: steps.android_signing.outputs.ready == 'true'
         run: |
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > /tmp/elizaos-upload.jks
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
 
       - name: Build signed AAB and APK
+        if: steps.android_signing.outputs.ready == 'true'
         working-directory: apps/app/android
         env:
           ELIZA_VERSION_NAME: ${{ steps.version.outputs.name }}
@@ -145,6 +182,7 @@ jobs:
           ./gradlew bundleRelease assembleRelease
 
       - name: Verify AAB
+        if: steps.android_signing.outputs.ready == 'true'
         run: |
           AAB_PATH="apps/app/android/app/build/outputs/bundle/release/app-release.aab"
           if [[ ! -f "$AAB_PATH" ]]; then
@@ -156,6 +194,7 @@ jobs:
           file "$AAB_PATH"
 
       - name: Upload AAB artifact
+        if: steps.android_signing.outputs.ready == 'true'
         uses: actions/upload-artifact@v7
         with:
           name: eliza-release-aab
@@ -163,6 +202,7 @@ jobs:
           retention-days: 90
 
       - name: Upload APK artifact
+        if: steps.android_signing.outputs.ready == 'true'
         uses: actions/upload-artifact@v7
         with:
           name: eliza-release-apk
@@ -170,6 +210,7 @@ jobs:
           retention-days: 90
 
       - name: Attach AAB to GitHub Release
+        if: steps.android_signing.outputs.ready == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -184,6 +225,7 @@ jobs:
           gh release upload "$TAG" "Eliza-${VERSION}.aab" --clobber
 
       - name: Attach APK to GitHub Release
+        if: steps.android_signing.outputs.ready == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |

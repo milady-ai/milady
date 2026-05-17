@@ -176,42 +176,45 @@ jobs:
         run: bun run build
 
       - name: Validate iOS secrets
+        id: validate_ios
         run: |
           # Secrets required for signing the IPA. Without these the build
-          # itself cannot produce a signed artifact.
+          # itself cannot produce a signed artifact — skip the rest of the
+          # job cleanly so missing-secret repos don't fail CI.
           missing=()
           [[ -z "$MATCH_GIT_URL" ]] && missing+=("MATCH_GIT_URL")
           [[ -z "$MATCH_PASSWORD" ]] && missing+=("MATCH_PASSWORD")
           [[ -z "$MATCH_GIT_BASIC_AUTHORIZATION" ]] && missing+=("MATCH_GIT_BASIC_AUTHORIZATION")
           [[ -z "$ITC_TEAM_ID" ]] && missing+=("ITC_TEAM_ID")
+          [[ -z "$APP_STORE_APP_ID" ]] && missing+=("APP_STORE_APP_ID")
           if [[ ${#missing[@]} -gt 0 ]]; then
-            echo "::error::Missing required iOS signing secrets: ${missing[*]}"
-            echo "Configure these secrets in the repo settings to enable iOS App Store builds."
-            exit 1
-          fi
-
-          if [[ -z "$APP_STORE_APP_ID" ]]; then
-            echo "::error::APP_STORE_APP_ID is required for TestFlight/App Store delivery."
-            exit 1
+            echo "::warning::Skipping iOS App Store build — missing signing secrets: ${missing[*]}"
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Prepare CocoaPods trunk repo
+        if: steps.validate_ios.outputs.ready == 'true'
         run: bash eliza/packages/app-core/scripts/prepare-ios-cocoapods.sh
         env:
           LANG: en_US.UTF-8
 
       - name: Sync Capacitor iOS
+        if: steps.validate_ios.outputs.ready == 'true'
         working-directory: apps/app
         run: bun run cap:sync:ios
         env:
           LANG: en_US.UTF-8
 
       - name: Overlay iOS native files (Fastlane, AppDelegate, entitlements)
+        if: steps.validate_ios.outputs.ready == 'true'
         run: node eliza/packages/app-core/scripts/run-mobile-build.mjs ios-overlay
         env:
           LANG: en_US.UTF-8
 
       - name: Update Xcode project version
+        if: steps.validate_ios.outputs.ready == 'true'
         working-directory: apps/app/ios/App/App.xcodeproj
         run: |
           VERSION="${{ needs.prepare.outputs.version }}"
@@ -220,10 +223,12 @@ jobs:
           sed -i '' "s/CURRENT_PROJECT_VERSION = .*/CURRENT_PROJECT_VERSION = $BUILD;/" project.pbxproj
 
       - name: Install CocoaPods
+        if: steps.validate_ios.outputs.ready == 'true'
         working-directory: apps/app/ios/App
         run: pod install
 
       - name: Setup Ruby
+        if: steps.validate_ios.outputs.ready == 'true'
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: "4.0.3"
@@ -231,6 +236,7 @@ jobs:
           working-directory: apps/app/ios
 
       - name: Resolve app identifiers
+        if: steps.validate_ios.outputs.ready == 'true'
         working-directory: apps/app
         run: |
           # Read the runtime bundle id straight from pbxproj (the overlay step
@@ -248,6 +254,7 @@ jobs:
           echo "Resolved: APP_IDENTIFIER=$APP_ID, APP_IDENTIFIER_EXTRA=$APP_ID_EXTRA"
 
       - name: Build and upload
+        if: steps.validate_ios.outputs.ready == 'true'
         working-directory: apps/app/ios
         env:
           APP_IDENTIFIER: ${{ env.APP_IDENTIFIER }}
@@ -266,6 +273,7 @@ jobs:
           fi
 
       - name: Upload IPA artifact
+        if: steps.validate_ios.outputs.ready == 'true'
         uses: actions/upload-artifact@v7
         with:
           name: ios-ipa
@@ -310,7 +318,39 @@ jobs:
       - name: Materialize bun npm package binary
         run: if [ -f node_modules/bun/install.js ]; then (cd node_modules/bun && node install.js); fi
 
+      - name: Validate signing secrets
+        id: validate_mas
+        run: |
+          # Skip the rest of the job cleanly when MAS signing secrets are missing
+          # rather than fail. Downstream steps are gated on validate_mas.outputs.ready.
+          missing=()
+          [[ -z "$CSC_LINK" ]] && missing+=("MAS_CSC_LINK")
+          [[ -z "$CSC_KEY_PASSWORD" ]] && missing+=("MAS_CSC_KEY_PASSWORD")
+          [[ -z "$MAS_INSTALLER_CERT" ]] && missing+=("MAS_INSTALLER_CERT")
+          [[ -z "$MAS_INSTALLER_KEY_PASSWORD" ]] && missing+=("MAS_INSTALLER_KEY_PASSWORD")
+          [[ -z "$APP_STORE_API_KEY_ID" ]] && missing+=("APP_STORE_API_KEY_ID")
+          [[ -z "$APP_STORE_API_ISSUER_ID" ]] && missing+=("APP_STORE_API_ISSUER_ID")
+          if [[ ${#missing[@]} -gt 0 ]]; then
+            echo "::warning::Skipping Mac App Store build — missing signing secrets: ${missing[*]}"
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Initialize eliza source checkout
+        if: steps.validate_mas.outputs.ready == 'true'
+        run: |
+          if [ ! -f eliza/package.json ]; then
+            git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza
+            if [ -n "${MILADY_ELIZA_REF:-}" ]; then
+              git -C eliza fetch --depth=1 origin "$MILADY_ELIZA_REF"
+              git -C eliza checkout --quiet FETCH_HEAD
+              echo "Pinned eliza to ${MILADY_ELIZA_REF}"
+            fi
+          fi
+
       - name: Set version
+        if: steps.validate_mas.outputs.ready == 'true'
         env:
           RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
         run: |
@@ -325,18 +365,22 @@ jobs:
               } catch(e) {}
             }
             const cfgPath = 'eliza/packages/app-core/platforms/electrobun/electrobun.config.ts';
-            let cfg = fs.readFileSync(cfgPath, 'utf8');
-            cfg = cfg.replace(/version:\s*\"[^\"]+\"/, 'version: \"' + v + '\"');
-            fs.writeFileSync(cfgPath, cfg);
+            if (fs.existsSync(cfgPath)) {
+              let cfg = fs.readFileSync(cfgPath, 'utf8');
+              cfg = cfg.replace(/version:\s*\"[^\"]+\"/, 'version: \"' + v + '\"');
+              fs.writeFileSync(cfgPath, cfg);
+            }
           "
 
       - name: Build core dist
+        if: steps.validate_mas.outputs.ready == 'true'
         run: |
           node scripts/run-tsdown.mjs
           echo '{"type":"module"}' > dist/package.json
           node --import tsx scripts/write-build-info.ts
 
       - name: Build renderer
+        if: steps.validate_mas.outputs.ready == 'true'
         working-directory: apps/app
         run: |
           bun install --ignore-scripts
@@ -344,34 +388,23 @@ jobs:
           bun run build:web
 
       - name: Stage renderer
+        if: steps.validate_mas.outputs.ready == 'true'
         run: |
           rm -rf eliza/packages/app-core/platforms/electrobun/renderer
           cp -r apps/app/dist eliza/packages/app-core/platforms/electrobun/renderer
 
       - name: Build native macOS effects
+        if: steps.validate_mas.outputs.ready == 'true'
         working-directory: eliza/packages/app-core/platforms/electrobun
         run: bun run build:native-effects
 
       - name: Build webview preload
+        if: steps.validate_mas.outputs.ready == 'true'
         working-directory: eliza/packages/app-core/platforms/electrobun
         run: bun run build:preload
 
-      - name: Validate signing secrets
-        run: |
-          missing=()
-          [[ -z "$CSC_LINK" ]] && missing+=("MAS_CSC_LINK")
-          [[ -z "$CSC_KEY_PASSWORD" ]] && missing+=("MAS_CSC_KEY_PASSWORD")
-          [[ -z "$MAS_INSTALLER_CERT" ]] && missing+=("MAS_INSTALLER_CERT")
-          [[ -z "$MAS_INSTALLER_KEY_PASSWORD" ]] && missing+=("MAS_INSTALLER_KEY_PASSWORD")
-          [[ -z "$APP_STORE_API_KEY_ID" ]] && missing+=("APP_STORE_API_KEY_ID")
-          [[ -z "$APP_STORE_API_ISSUER_ID" ]] && missing+=("APP_STORE_API_ISSUER_ID")
-          if [[ ${#missing[@]} -gt 0 ]]; then
-            echo "::error::Missing required signing secrets: ${missing[*]}"
-            echo "Configure these secrets in the repo settings to enable Mac App Store builds."
-            exit 1
-          fi
-
       - name: Import signing certificates
+        if: steps.validate_mas.outputs.ready == 'true'
         run: |
           KEYCHAIN="build-mas.keychain"
           KEYCHAIN_PASS="$(openssl rand -hex 16)"
@@ -398,12 +431,14 @@ jobs:
           echo "INSTALLER_IDENTITY=$INSTALLER_IDENTITY" >> "$GITHUB_ENV"
 
       - name: Build Electrobun app
+        if: steps.validate_mas.outputs.ready == 'true'
         working-directory: eliza/packages/app-core/platforms/electrobun
         run: ELECTROBUN_SKIP_CODESIGN=1 bun run build
         env:
           ELECTROBUN_BUILD_ENV: "stable"
 
       - name: Re-sign for Mac App Store
+        if: steps.validate_mas.outputs.ready == 'true'
         working-directory: eliza/packages/app-core/platforms/electrobun
         run: |
           APP_PATH=$(find build -name "*.app" -maxdepth 2 | head -1)
@@ -429,6 +464,7 @@ jobs:
           codesign --verify --deep --strict "$APP_PATH"
 
       - name: Create installer pkg
+        if: steps.validate_mas.outputs.ready == 'true'
         working-directory: eliza/packages/app-core/platforms/electrobun
         run: |
           APP_PATH=$(find build -name "*.app" -maxdepth 2 | head -1)
@@ -442,6 +478,7 @@ jobs:
           echo "PKG_PATH=eliza/packages/app-core/platforms/electrobun/build/$PKG_NAME" >> "$GITHUB_ENV"
 
       - name: Upload to App Store Connect
+        if: steps.validate_mas.outputs.ready == 'true'
         run: |
           xcrun altool --upload-app \
             --file "$PKG_PATH" \
@@ -451,6 +488,7 @@ jobs:
             --show-progress
 
       - name: Upload pkg artifact
+        if: steps.validate_mas.outputs.ready == 'true'
         uses: actions/upload-artifact@v7
         with:
           name: macos-mas-pkg

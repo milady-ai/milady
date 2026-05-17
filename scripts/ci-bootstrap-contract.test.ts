@@ -15,7 +15,7 @@ describe("CI bootstrap contract", () => {
 
     expect(setupAction).toContain("skip-local-upstreams-postinstall:");
     expect(ci.match(/skip-local-upstreams-postinstall: "true"/g)).toHaveLength(
-      3,
+      4,
     );
   });
 

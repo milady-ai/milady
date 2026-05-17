@@ -11,6 +11,7 @@ import type {
   WalletExportResult,
   WhitelistStatus,
 } from "@elizaos/app-core/api";
+import type { InventoryChainFilters } from "@elizaos/app-core/state/types";
 import type {
   WalletAddresses,
   WalletBalancesResponse,
@@ -24,8 +25,6 @@ import type {
   WalletRpcCredentialKey,
   WalletRpcSelections,
 } from "@elizaos/shared";
-import type { PromptOptions } from "@elizaos/ui/components/ui/confirm-dialog";
-import type { InventoryChainFilters } from "@elizaos/ui/state/types";
 import type { ComponentType } from "react";
 import * as THREE from "three";
 
@@ -188,10 +187,9 @@ export function useInventoryData(): {
   return { tokens: [], nfts: [], loading: false };
 }
 
-// Wallet sidebar widget. Component prop type comes from
-// @elizaos/ui/components/chat/widgets/types so the seed registry
-// accepts this stub as a valid ChatSidebarWidgetDefinition.
-import type { ChatSidebarWidgetDefinition } from "@elizaos/ui/components/chat/widgets/types";
+// Wallet sidebar widget. Component prop type comes from app-core so the seed
+// registry accepts this stub as a valid ChatSidebarWidgetDefinition.
+import type { ChatSidebarWidgetDefinition } from "@elizaos/app-core/components/chat/widgets/types";
 export const WALLET_STATUS_WIDGET: ChatSidebarWidgetDefinition = {
   id: "wallet.status",
   pluginId: "wallet",

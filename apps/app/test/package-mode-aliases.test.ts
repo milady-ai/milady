@@ -37,4 +37,72 @@ describe("package mode aliases", () => {
       "./apps/app/src/native-plugin-stubs.ts",
     ]);
   });
+
+  it("imports packaged app-core style exports instead of private ui dist paths", () => {
+    const mainText = fs.readFileSync(
+      path.join(appRoot, "src/main.tsx"),
+      "utf8",
+    );
+
+    expect(mainText).toContain("@elizaos/app-core/styles/styles.css");
+    expect(mainText).toContain("@elizaos/app-core/styles/brand-gold.css");
+    expect(mainText).not.toContain("@elizaos/ui/dist/styles/");
+  });
+
+  it("imports packaged app-core component and state exports instead of private ui source paths", () => {
+    const mainText = fs.readFileSync(
+      path.join(appRoot, "src/main.tsx"),
+      "utf8",
+    );
+    const stubText = fs.readFileSync(
+      path.join(appRoot, "src/optional-eliza-app-stub.tsx"),
+      "utf8",
+    );
+
+    expect(mainText).toContain(
+      "@elizaos/app-core/components/character/CharacterEditor",
+    );
+    expect(stubText).toContain("@elizaos/app-core/state/types");
+    expect(stubText).toContain(
+      "@elizaos/app-core/components/chat/widgets/types",
+    );
+    expect(mainText).not.toContain("@elizaos/ui/components/");
+    expect(stubText).not.toContain("@elizaos/ui/state/");
+    expect(stubText).not.toContain("@elizaos/ui/components/");
+  });
+
+  it("patches all Bun-installed app-core stylesheet copies", () => {
+    const patchScript = fs.readFileSync(
+      path.resolve(
+        appRoot,
+        "../..",
+        "scripts/patch-elizaos-package-styles.mjs",
+      ),
+      "utf8",
+    );
+
+    expect(patchScript).toContain("collectAppCorePackageDirs");
+    expect(patchScript).toContain('node_modules", ".bun"');
+    expect(patchScript).toContain("@elizaos+app-core@");
+    expect(patchScript).toContain(
+      '@import "../../../ui/src/styles/electrobun-mac-window-drag.css";',
+    );
+    expect(patchScript).toContain(
+      '@import "./electrobun-mac-window-drag.css";',
+    );
+  });
+
+  it("patches agent action parameter extraction away from package-mode core prompts", () => {
+    const patchScript = fs.readFileSync(
+      path.resolve(appRoot, "../..", "scripts/apply-eliza-ci-patches.mjs"),
+      "utf8",
+    );
+
+    expect(patchScript).toContain("patchAgentConfigPaths");
+    expect(patchScript).toContain("getElizaNamespace");
+    expect(patchScript).toContain("resolveOAuthDir");
+    expect(patchScript).toContain("patchAgentExtractParamsPrompt");
+    expect(patchScript).toContain("EXTRACT_ACTION_PARAMS_TEMPLATE");
+    expect(patchScript).toContain("extractActionParamsTemplate");
+  });
 });

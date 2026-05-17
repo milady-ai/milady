@@ -1,6 +1,6 @@
 import { App, ErrorBoundary } from "@elizaos/app-core";
-import "@elizaos/ui/dist/styles/styles.css";
-import "@elizaos/ui/dist/styles/brand-gold.css";
+import "@elizaos/app-core/styles/styles.css";
+import "@elizaos/app-core/styles/brand-gold.css";
 
 import { App as CapacitorApp } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";
@@ -14,7 +14,6 @@ import {
   isElectrobunRuntime,
 } from "@elizaos/app-core";
 import type { BrandingConfig } from "@elizaos/app-core";
-import { ELIZA_DEFAULT_THEME } from "@elizaos/ui";
 import {
   type AppBootConfig,
   getBootConfig,
@@ -148,8 +147,7 @@ import {
   type IosRuntimeMode,
   resolveIosRuntimeConfig,
 } from "@elizaos/app-core";
-
-import { CharacterEditor } from "@elizaos/ui/components/character/CharacterEditor";
+import { CharacterEditor } from "@elizaos/app-core/components/character/CharacterEditor";
 
 declare global {
   interface Window {
@@ -208,7 +206,6 @@ function getInjectedAppApiBase(): string | undefined {
 
 const APP_BRANDING: Partial<BrandingConfig> = {
   ...APP_BRANDING_BASE,
-  theme: ELIZA_DEFAULT_THEME,
   // The hosted web bundle stays cloud-only in production. Desktop shells and
   // other hosts inject an explicit API base before React boots, and that host
   // backend should control onboarding capabilities instead.

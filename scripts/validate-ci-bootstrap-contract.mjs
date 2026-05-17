@@ -133,6 +133,7 @@ assertContainsAll(
   failures,
 );
 assertCiPreReviewBootstrap(ciWorkflowText, failures);
+assertCiPackageModeElizaGuards(ciWorkflowText, failures);
 assertContainsNone(
   ciWorkflowText,
   ".github/workflows/ci.yml",
@@ -355,6 +356,60 @@ function assertCiPreReviewBootstrap(workflowText, targetFailures) {
     requiredSnippets,
     targetFailures,
   );
+}
+
+function assertCiPackageModeElizaGuards(workflowText, targetFailures) {
+  const expected = [
+    {
+      jobName: "pre-review",
+      stepNames: [
+        "Generate i18n keyword data",
+        "Build eliza packages required for typecheck",
+      ],
+    },
+    {
+      jobName: "typecheck",
+      stepNames: ["Build eliza packages required for typecheck"],
+    },
+  ];
+
+  for (const { jobName, stepNames } of expected) {
+    const jobBlock = findWorkflowJobBlock(workflowText, jobName);
+    if (!jobBlock) {
+      targetFailures.push(
+        `.github/workflows/ci.yml is missing the "${jobName}" job block`,
+      );
+      continue;
+    }
+
+    for (const stepName of stepNames) {
+      const stepMatch = new RegExp(
+        `- name: ${escapeRegExp(stepName)}\\n([\\s\\S]*?)(?:\\n {6}- name:|\\n {2}[a-zA-Z0-9_-]+:|$)`,
+      ).exec(jobBlock);
+      if (!stepMatch) {
+        targetFailures.push(
+          `.github/workflows/ci.yml ${jobName} job is missing step "${stepName}"`,
+        );
+        continue;
+      }
+      if (!stepMatch[1].includes("hashFiles('eliza/package.json') != ''")) {
+        targetFailures.push(
+          `.github/workflows/ci.yml ${jobName} step "${stepName}" must be skipped when eliza/ is absent`,
+        );
+      }
+    }
+  }
+}
+
+function findWorkflowJobBlock(workflowText, jobName) {
+  const match = new RegExp(
+    `\\n {2}${escapeRegExp(jobName)}:\\n([\\s\\S]*?)(?=\\n {2}[a-zA-Z0-9_-]+:\\n|$)`,
+  ).exec(workflowText);
+  return match?.[1] ?? null;
+}
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function assertAgentReviewAuthBootstrap(targetFailures) {
