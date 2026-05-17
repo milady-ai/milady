@@ -130,6 +130,7 @@ test("package manifests default to published elizaOS alpha packages", () => {
 test("root build resolves app-core entries from packages by default", () => {
   const helper = read("scripts/lib/eliza-package-mode.mjs");
   const resolver = read("scripts/lib/resolve-eliza-app-core-script.mjs");
+  const appCoreScriptRunner = read("scripts/run-eliza-app-core-script.mjs");
   const tsdownConfig = read("tsdown.config.mjs");
 
   assert.match(helper, /DEFAULT_ELIZA_SOURCE_MODE = "packages"/);
@@ -140,6 +141,9 @@ test("root build resolves app-core entries from packages by default", () => {
   );
   assert.match(read("scripts/run-app-web-build.mjs"), /vite\.js", "build"/);
   assert.match(resolver, /preferLocal && existsSync/);
+  assert.match(appCoreScriptRunner, /getExplicitElizaSourceMode/);
+  assert.match(appCoreScriptRunner, /MILADY_ELIZA_SOURCE = "local"/);
+  assert.match(appCoreScriptRunner, /explicitSourceMode === "packages"/);
   assert.match(tsdownConfig, /"packages"/);
   assert.match(tsdownConfig, /require\.resolve\(packageSubpath\)/);
   assert.doesNotMatch(tsdownConfig, /entry:\s*["']eliza\/packages\/app-core/);
