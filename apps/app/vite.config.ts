@@ -420,19 +420,86 @@ function resolveLocalSharedAliases(): Alias[] {
   if (!fs.existsSync(sharedPkgPath)) return [];
 
   const sharedPkgDir = path.dirname(sharedPkgPath);
+  const sharedSrcDir = path.join(sharedPkgDir, "src");
+  const sharedDistDir = path.join(sharedPkgDir, "dist");
   const sharedPkg = JSON.parse(fs.readFileSync(sharedPkgPath, "utf8")) as {
     exports?: Record<string, unknown>;
   };
+
+  function resolveSharedExportTarget(value: unknown): string | null {
+    if (typeof value === "string") return value;
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+      return null;
+    }
+    const record = value as Record<string, unknown>;
+    for (const condition of ["source", "import", "default", "types"]) {
+      const target = record[condition];
+      if (typeof target === "string") return target;
+    }
+    return null;
+  }
+
+  function resolveSharedSourceOrDist(id: string): string {
+    const sourcePath = resolveExistingUiSourceModule(id);
+    if (fs.existsSync(sourcePath)) return sourcePath;
+
+    if (id.startsWith(`${sharedSrcDir}${path.sep}`)) {
+      const relative = path.relative(sharedSrcDir, id);
+      const distBase = path.join(sharedDistDir, relative);
+      const distCandidates = [
+        distBase,
+        `${distBase}.js`,
+        `${distBase}.css`,
+        path.join(distBase, "index.js"),
+      ];
+      for (const candidate of distCandidates) {
+        if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
+          return candidate;
+        }
+      }
+    }
+
+    return id;
+  }
+
+  function resolveSharedRuntimeTarget(exportTarget: string): string {
+    if (exportTarget === "./package.json") {
+      return path.join(sharedPkgDir, "package.json");
+    }
+    if (exportTarget.startsWith("./dist/")) {
+      const sourceTarget = exportTarget
+        .replace(/^\.\/dist\//, "./src/")
+        .replace(/\.js$/, ".ts");
+      return resolveSharedSourceOrDist(path.resolve(sharedPkgDir, sourceTarget));
+    }
+    return resolveSharedSourceOrDist(path.resolve(sharedPkgDir, exportTarget));
+  }
+
   const aliases: Alias[] = [];
   for (const [key, value] of Object.entries(sharedPkg.exports || {})) {
-    if (typeof value !== "string") continue;
+    const exportTarget = resolveSharedExportTarget(value);
+    if (!exportTarget) continue;
     const aliasKey =
       key === "."
         ? "@elizaos/shared"
         : `@elizaos/shared/${key.replace(/^\.\//, "")}`;
+    if (aliasKey.includes("*")) {
+      aliases.push({
+        find: new RegExp(
+          `^${escapeRegExp(aliasKey).replace("\\*", "(.+)")}$`,
+        ),
+        replacement: resolveSharedRuntimeTarget(exportTarget).replace(
+          "*",
+          "$1",
+        ),
+        customResolver: resolveSharedSourceOrDist,
+      });
+      continue;
+    }
     aliases.push({
       find: new RegExp(`^${escapeRegExp(aliasKey)}$`),
-      replacement: path.resolve(sharedPkgDir, value),
+      replacement: resolveSharedRuntimeTarget(exportTarget),
+      customResolver: resolveSharedSourceOrDist,
     });
   }
   return aliases;

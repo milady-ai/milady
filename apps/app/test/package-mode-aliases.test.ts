@@ -136,6 +136,11 @@ describe("package mode aliases", () => {
     );
     expect(viteConfigText).toContain("fs.existsSync(runtimeTarget)");
     expect(viteConfigText).toContain("replacement: runtimeTarget");
+    expect(viteConfigText).toContain("function resolveSharedExportTarget");
+    expect(viteConfigText).toContain(
+      'for (const condition of ["source", "import", "default", "types"])',
+    );
+    expect(viteConfigText).toContain("resolveSharedSourceOrDist");
     expect(viteConfigText).toContain("@elizaos\\/ui\\/platform");
     expect(viteConfigText).toContain("@elizaos\\/ui\\/(.+)");
     expect(viteConfigText).toContain("fs.statSync(candidate).isFile()");
