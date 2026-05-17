@@ -77,6 +77,48 @@ function log(message) {
   console.log(`[cleanup-desktop-orphans] ${message}`);
 }
 
+function readParentPid(pid) {
+  if (!Number.isFinite(pid) || pid <= 1) return null;
+
+  if (process.platform === "linux") {
+    try {
+      const stat = fs.readFileSync(`/proc/${pid}/stat`, "utf8");
+      // /proc/<pid>/stat is: pid (comm, which may contain spaces) state ppid ...
+      const closeParen = stat.lastIndexOf(")");
+      const fields = stat
+        .slice(closeParen + 2)
+        .trim()
+        .split(/\s+/);
+      const ppid = Number.parseInt(fields[1] ?? "", 10);
+      return Number.isFinite(ppid) && ppid > 0 ? ppid : null;
+    } catch {
+      return null;
+    }
+  }
+
+  const result = spawnSync("ps", ["-o", "ppid=", "-p", String(pid)], {
+    encoding: "utf8",
+  });
+  if (result.status !== 0) return null;
+  const ppid = Number.parseInt(result.stdout.trim(), 10);
+  return Number.isFinite(ppid) && ppid > 0 ? ppid : null;
+}
+
+function collectProtectedPids() {
+  const protectedPids = new Set([process.pid]);
+  let pid = process.pid;
+
+  while (true) {
+    const ppid = readParentPid(pid);
+    if (!ppid || protectedPids.has(ppid)) break;
+    protectedPids.add(ppid);
+    if (ppid <= 1) break;
+    pid = ppid;
+  }
+
+  return protectedPids;
+}
+
 function listMatchingPids(pattern) {
   const result = spawnSync("pgrep", ["-f", pattern], { encoding: "utf8" });
   if (result.status !== 0) return [];
@@ -140,9 +182,10 @@ function lockPidIsAlive(lockFile) {
 
 async function killOrphans() {
   const collected = new Set();
+  const protectedPids = collectProtectedPids();
   for (const pattern of ORPHAN_PATTERNS) {
     for (const pid of listMatchingPids(pattern)) {
-      if (pid === process.pid) continue;
+      if (protectedPids.has(pid)) continue;
       collected.add(pid);
     }
   }

@@ -23,4 +23,10 @@ describe("cleanup-desktop-orphans", () => {
       "Milady-dev.app/Contents/MacOS/../Resources/main.js",
     );
   });
+
+  it("protects the current launch process tree from broad pgrep matches", () => {
+    expect(scriptText).toContain("function collectProtectedPids()");
+    expect(scriptText).toContain("readParentPid(pid)");
+    expect(scriptText).toContain("if (protectedPids.has(pid)) continue");
+  });
 });
