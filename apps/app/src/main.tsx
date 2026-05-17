@@ -142,9 +142,6 @@ import {
   resolveIosRuntimeConfig,
 } from "@elizaos/app-core";
 
-// CharacterEditor is statically re-exported by `@elizaos/app-core/browser`,
-// so the previous `lazy()` wrapper here was eagerly merged back into the
-// main chunk by Rollup. Static import keeps the load path honest.
 import { CharacterEditor } from "@elizaos/ui/components/character/CharacterEditor";
 
 declare global {
@@ -216,9 +213,6 @@ const APP_BRANDING: Partial<BrandingConfig> = {
   }),
 };
 
-/**
- * Platform detection utilities
- */
 const platform = Capacitor.getPlatform();
 const isNative = Capacitor.isNativePlatform();
 const isIOS = platform === "ios";
@@ -389,7 +383,12 @@ function forceDesktopDevLocalActiveServer(): void {
     console.warn(
       `${APP_LOG_PREFIX} Desktop dev ignored stale remote active server; using local agent.`,
     );
-  } catch {}
+  } catch (err) {
+    console.warn(
+      `${APP_LOG_PREFIX} forceDesktopDevLocalActiveServer failed:`,
+      err instanceof Error ? err.message : err,
+    );
+  }
 }
 try {
   const url = new URL(window.location.href);
@@ -454,7 +453,12 @@ try {
       client.setToken(bootstrapToken);
     } catch {}
   }
-} catch {}
+} catch (err) {
+  console.warn(
+    `${APP_LOG_PREFIX} Bootstrap token resolution failed:`,
+    err instanceof Error ? err.message : err,
+  );
+}
 // On desktop, the Electrobun shell injects the local agent's HTTP origin
 // (e.g. `http://127.0.0.1:31337`) onto window before the renderer mounts.
 // Push it into the boot config so the React shell talks to that origin
@@ -473,48 +477,9 @@ forceDesktopDevLocalActiveServer();
 // On AOSP/Milady, ElizaNativeBridge.getLocalAgentToken() returns null
 // for the first ~30-50s of app launch — the on-device agent process is
 // still booting and hasn't written its per-boot bearer to its volatile
-// static yet. The synchronous bootstrap above fires BEFORE the agent is
-// up, so it sees null and the React shell falls into PairingView even
-// though the bearer is in fact about to be available.
-//
-// Poll the bridge for up to 90s after launch; the first non-null read
-// applies the bearer to the client + localStorage and stops. Stock
-// Capacitor builds never expose `window.ElizaNative` so the watchdog
-// exits immediately.
-(function installOnDeviceBearerWatchdog() {
-  if (typeof window === "undefined") return;
-  const bridge = (
-    window as unknown as {
-      ElizaNative?: { getLocalAgentToken?: () => string | null };
-    }
-  ).ElizaNative;
-  if (!bridge?.getLocalAgentToken) return;
-
-  const deadline = Date.now() + 90_000;
-  const tick = () => {
-    try {
-      if (client.hasToken()) return;
-      const token = bridge.getLocalAgentToken?.()?.trim();
-      if (token) {
-        client.setToken(token);
-        try {
-          window.localStorage.setItem(SELF_HOSTED_TOKEN_KEY, token);
-        } catch {}
-        return;
-      }
-    } catch {}
-    if (Date.now() < deadline) setTimeout(tick, 500);
-  };
-  setTimeout(tick, 500);
-})();
-
-// On AOSP/Milady, ElizaNativeBridge.getLocalAgentToken() returns null
-// for the first ~30-50s of app launch (the on-device agent process is
-// still booting and hasn't written its per-boot bearer to its volatile
-// static yet). The synchronous bootstrap above + the upstream
-// applyRestoredConnection both fire BEFORE the agent is up, so they
-// see null and the React shell falls into PairingView even though the
-// bearer is in fact about to be available.
+// static yet. The synchronous bootstrap above + applyRestoredConnection
+// both fire BEFORE the agent is up, so they see null and the React shell
+// falls into PairingView even though the bearer is about to be available.
 //
 // Poll the bridge for up to 90s after launch; the first non-null read
 // applies the bearer to the boot config + client and stops. Stock
@@ -541,7 +506,13 @@ forceDesktopDevLocalActiveServer();
         } catch {}
         return;
       }
-    } catch {}
+    } catch (err) {
+      console.warn(
+        `${APP_LOG_PREFIX} On-device bearer watchdog tick failed:`,
+        err instanceof Error ? err.message : err,
+      );
+      return; // Stop polling if the bridge itself is throwing.
+    }
     if (Date.now() < deadline) setTimeout(tick, 500);
   };
   setTimeout(tick, 500);
@@ -906,13 +877,9 @@ function resolveAppWindowSlug(): string | null {
   return slug.length > 0 ? slug : null;
 }
 
-// Sample messages for the pill demo. The pill window is an early-stage
-// always-on-top overlay; live agent conversation plumbing will hook in here
-// once we settle on the channel/session model.
-// TODO: wire `messages` to the active chat session by reusing the same
-// store the main `<App />` chat composer uses (see
-// `eliza/packages/ui/src/state/useApp.ts` + the messaging routes under
-// `eliza/packages/app-core/src/api/`). Until then the pill is visual only.
+// Sample messages for the pill demo (visual only — not yet wired to the live
+// chat session; see `eliza/packages/ui/src/state/useApp.ts` + the messaging
+// routes under `eliza/packages/app-core/src/api/` when implementing).
 const PILL_SAMPLE_MESSAGES: VoicePillMessage[] = [
   { id: "demo-1", role: "agent", text: "Hi — I'm here. What's up?" },
   { id: "demo-2", role: "user", text: "Just testing the overlay." },
@@ -963,14 +930,9 @@ function mountPillWindow(): void {
 
   function PillRoot() {
     const handleSubmit = (text: string): void => {
-      // TODO: forward to the active chat session via the same client/state
-      // the main `<App />` composer uses. For now the pill is visual only —
-      // we just log so the developer can confirm submit fires end-to-end.
       console.info(`${APP_LOG_PREFIX} [pill] submit`, text);
     };
     const handleRecordingChange = (recording: boolean): void => {
-      // TODO: wire to the renderer's voice service
-      // (see `eliza/packages/ui/src/voice/`). No-op for now.
       console.info(`${APP_LOG_PREFIX} [pill] recording`, recording);
     };
     return (
@@ -1015,9 +977,6 @@ function mountReactApp(): void {
             </div>
           ) : (
             <>
-              {/* DesktopOnboardingRuntime was deleted upstream but main.tsx
-                  still referenced it. The surface-navigation + tray runtimes
-                  cover the desktop chrome bits we still need. */}
               <DesktopSurfaceNavigationRuntime />
               <DesktopTrayRuntime />
               <LifeOpsActivitySignalsEffect />
@@ -1168,7 +1127,11 @@ function resolveDeviceBridgeUrl(config: IosRuntimeConfig): string | null {
   if (!apiBase) return null;
   try {
     return apiBaseToDeviceBridgeUrl(apiBase);
-  } catch {
+  } catch (err) {
+    console.warn(
+      `${APP_LOG_PREFIX} Could not derive device bridge URL from apiBase:`,
+      err instanceof Error ? err.message : err,
+    );
     return null;
   }
 }
