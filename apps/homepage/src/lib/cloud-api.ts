@@ -745,10 +745,7 @@ export class CloudApiClient {
   async getAgentStatus(options?: {
     signal?: AbortSignal;
   }): Promise<AgentStatus> {
-    // Our self-hosted agents expose /api/status (not /api/agent/status).
-    // Try /api/status first (returns agentName, state, uptime directly),
-    // then fall back to /api/agent/status for compatibility with older or
-    // partially implemented backends.
+    // Self-hosted agents expose /api/status (returns agentName, state, uptime).
     const fetchOpts: RequestInit = { method: "GET" };
     if (options?.signal) fetchOpts.signal = options.signal;
 

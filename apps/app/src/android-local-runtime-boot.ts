@@ -22,7 +22,11 @@
  */
 
 import { Capacitor } from "@capacitor/core";
-import { AGENT_READY_EVENT, dispatchAppEvent } from "@elizaos/app-core";
+import {
+  AGENT_READY_EVENT,
+  dispatchAppEvent,
+  MOBILE_RUNTIME_MODE_STORAGE_KEY,
+} from "@elizaos/app-core";
 import { APP_LOG_PREFIX } from "./app-config";
 import {
   buildLocalAgentReply,
@@ -55,11 +59,8 @@ let runtimeState: RuntimeState = { kind: "idle" };
 
 function isApplicable(): boolean {
   if (Capacitor.getPlatform() !== "android") return false;
-  // Read the same localStorage key that the mobile onboarding picker writes.
-  // Mirrors the key in eliza/packages/app-core/src/onboarding/mobile-runtime-mode.ts
-  // (MOBILE_RUNTIME_MODE_STORAGE_KEY = "eliza:mobile-runtime-mode").
   try {
-    const mode = localStorage.getItem("eliza:mobile-runtime-mode");
+    const mode = localStorage.getItem(MOBILE_RUNTIME_MODE_STORAGE_KEY);
     return mode === "local";
   } catch {
     return false;
