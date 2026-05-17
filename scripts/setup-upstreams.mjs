@@ -1386,10 +1386,7 @@ async function ensureRepoLocalEliza(repoRoot) {
     // local UI fixes when re-running eliza:local" bug came from exactly this
     // path: parent moved the recorded SHA, the operator re-ran setup, and
     // every working-tree edit in eliza/ vanished without a warning.
-    if (
-      existsSync(elizaRoot) &&
-      existsSync(path.join(elizaRoot, ".git"))
-    ) {
+    if (existsSync(elizaRoot) && existsSync(path.join(elizaRoot, ".git"))) {
       const statusProbe = spawnSync(
         "git",
         ["-C", elizaRoot, "status", "--porcelain"],

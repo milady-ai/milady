@@ -17,7 +17,9 @@ export interface LocalAgentReply {
 }
 
 export interface BunRuntimePluginBase {
-  start(opts: Record<string, unknown>): Promise<{ ok: boolean; error?: string }>;
+  start(
+    opts: Record<string, unknown>,
+  ): Promise<{ ok: boolean; error?: string }>;
   sendMessage(opts: {
     message: string;
     conversationId?: string;
@@ -31,14 +33,16 @@ export function dispatchLocalAgentEvent(name: string, detail: unknown): void {
   document.dispatchEvent(new CustomEvent(name, { detail }));
 }
 
-export async function loadBunRuntimePlugin<
-  T extends BunRuntimePluginBase,
->(logPrefix: string): Promise<T | null> {
+export async function loadBunRuntimePlugin<T extends BunRuntimePluginBase>(
+  logPrefix: string,
+): Promise<T | null> {
   try {
     const mod = await import(LOCAL_RUNTIME_CAPACITOR_PACKAGE);
     const plugin = (mod as unknown as { ElizaBunRuntime?: T }).ElizaBunRuntime;
     if (!plugin) {
-      console.warn(`${logPrefix} plugin module loaded but ElizaBunRuntime export missing`);
+      console.warn(
+        `${logPrefix} plugin module loaded but ElizaBunRuntime export missing`,
+      );
       return null;
     }
     return plugin;

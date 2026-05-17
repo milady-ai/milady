@@ -146,6 +146,7 @@ declare module "@elizaos/app-core" {
   // React-side surface — typed as a permissive component to keep JSX usage
   // typechecking without committing to a specific prop shape.
   import type * as React from "react";
+
   type LooseComponent = React.ComponentType<Record<string, unknown>>;
   export const App: LooseComponent;
   export const AppProvider: LooseComponent;
@@ -156,18 +157,61 @@ declare module "@elizaos/app-core" {
   export const ErrorBoundary: LooseComponent;
 
   // Generic API client — main.tsx uses the token helpers during the
-  // local-agent bearer-prefetch loop; the rest of the surface stays open
-  // for consumers to cast as needed.
+  // local-agent bearer-prefetch loop. Specific methods used by the VoicePill
+  // overlay are declared precisely so property accesses don't collapse to
+  // `unknown` via the index signature.
   export interface ElizaApiClient {
     hasToken(): boolean;
     setToken(token: string): void;
     clearToken?(): void;
+    setBaseUrl(baseUrl: string | null, options?: { persist?: boolean }): void;
+    // Conversation methods (used by VoicePill)
+    listConversations(): Promise<{
+      conversations: Array<{
+        id: string;
+        title?: string;
+        updatedAt?: number;
+        [key: string]: unknown;
+      }>;
+    }>;
+    getConversationMessages(id: string): Promise<{
+      messages: Array<{
+        id: string;
+        role: string;
+        text: string;
+        timestamp: number;
+        [key: string]: unknown;
+      }>;
+    }>;
+    createConversation(title?: string): Promise<{
+      conversation: { id: string; [key: string]: unknown };
+    }>;
+    sendConversationMessageStream(
+      id: string,
+      text: string,
+      onToken: (token: string, accumulatedText?: string) => void,
+      ...rest: unknown[]
+    ): Promise<{ text?: string; [key: string]: unknown }>;
+    // WebSocket methods (used by VoicePill)
+    connectWs(): void;
+    onWsEvent(type: string, handler: (event: unknown) => void): () => void;
+    disconnectWs?(): void;
     [key: string]: unknown;
   }
   export const client: ElizaApiClient;
 }
 
 declare module "@elizaos/app-core/platform" {
+  // ShareTargetPayload is the real type from @elizaos/ui/src/platform/init.ts.
+  // Re-declared here because "@elizaos/app-core" does not publish a "./platform"
+  // subpath export yet, so TypeScript cannot resolve the real declaration.
+  export interface ShareTargetPayload {
+    source?: string;
+    title?: string;
+    text?: string;
+    url?: string;
+    files?: unknown[];
+  }
   const _default: unknown;
   export default _default;
 }
@@ -190,14 +234,16 @@ declare module "@elizaos/app-core/api" {
 }
 
 declare module "@elizaos/shared/onboarding-presets" {
-  // Minimal shape needed by main.tsx — the .sort/.map callbacks read
-  // `avatarIndex` and `name` off each preset.
+  // Minimal shape needed by character-catalog.ts and main.tsx.
+  // buildElizaCharacterCatalog is the real export from onboarding-presets.ts;
+  // the dist publish may lag the workspace source, so it is shimmed here.
   export interface StylePreset {
     name: string;
     avatarIndex: number;
     [key: string]: unknown;
   }
   export function getStylePresets(): StylePreset[];
+  export function buildElizaCharacterCatalog(): unknown;
 }
 
 declare module "@elizaos/shared/dist/index.js" {
@@ -206,4 +252,21 @@ declare module "@elizaos/shared/dist/index.js" {
   // `import { ELIZA_DEFAULT_THEME } from "@elizaos/shared/dist/index.js"`
   // typechecks until the upstream beta publish lifts the export.
   export const ELIZA_DEFAULT_THEME: unknown;
+}
+
+declare module "@elizaos/contracts" {
+  // Wallet / chain type primitives. The @elizaos/shared contracts/wallet.ts
+  // re-exports these from @elizaos/contracts; the package is not yet in the
+  // local node_modules, so we shim the types needed by optional-eliza-app-stub.tsx.
+  export type WalletAddresses = unknown;
+  export type WalletBalancesResponse = unknown;
+  export type WalletChainKind = string;
+  export type WalletConfigStatus = unknown;
+  export type WalletConfigUpdateRequest = unknown;
+  export type WalletEntry = unknown;
+  export type WalletNftsResponse = unknown;
+  export type WalletPrimaryMap = unknown;
+  export type WalletRpcChain = string;
+  export type WalletRpcCredentialKey = string;
+  export type WalletRpcSelections = unknown;
 }

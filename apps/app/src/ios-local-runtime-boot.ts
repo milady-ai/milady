@@ -25,17 +25,17 @@ import {
 } from "@elizaos/app-core";
 import { APP_LOG_PREFIX } from "./app-config";
 import {
+  type BunRuntimePluginBase,
   buildLocalAgentReply,
   buildSendMessagePayload,
   dispatchLocalAgentEvent,
   getLocalAgentStatusFromPlugin,
-  loadBunRuntimePlugin,
-  type BunRuntimePluginBase,
   type LocalAgentReply,
   type LocalAgentStatus,
+  loadBunRuntimePlugin,
 } from "./mobile-local-runtime-shared";
 
-export type { LocalAgentStatus, LocalAgentReply };
+export type { LocalAgentReply, LocalAgentStatus };
 
 const LOG_PREFIX = `${APP_LOG_PREFIX} [ios-local-runtime]`;
 
@@ -53,7 +53,9 @@ interface BunRuntimeListenerHandle {
 }
 
 interface BunRuntimePlugin extends BunRuntimePluginBase {
-  start(opts: { bundlePath?: string }): Promise<{ ok: boolean; error?: string }>;
+  start(opts: {
+    bundlePath?: string;
+  }): Promise<{ ok: boolean; error?: string }>;
   addListener(
     eventName: string,
     listenerFunc: (e: unknown) => void,

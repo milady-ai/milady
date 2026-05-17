@@ -14,7 +14,7 @@ import {
   isElectrobunRuntime,
 } from "@elizaos/app-core";
 import type { BrandingConfig } from "@elizaos/app-core";
-import { ELIZA_DEFAULT_THEME } from "@elizaos/shared";
+import { ELIZA_DEFAULT_THEME } from "@elizaos/ui";
 import {
   type AppBootConfig,
   getBootConfig,
@@ -50,7 +50,12 @@ import {
   shouldInstallMainWindowOnboardingPatches,
   syncDetachedShellLocation,
 } from "@elizaos/app-core";
-import { VoicePill, type VoicePillMessage } from "@elizaos/ui";
+import {
+  type Conversation,
+  type ConversationMessage,
+  VoicePill,
+  type VoicePillMessage,
+} from "@elizaos/ui";
 import { AppWindowRenderer } from "@elizaos/app-core";
 import { dispatchQueuedLifeOpsGithubCallbackFromUrl } from "@elizaos/app-lifeops/platform";
 import type { ShareTargetPayload } from "@elizaos/app-core/platform";
@@ -68,7 +73,7 @@ import {
   startDeviceBridgeClient,
   type DeviceBridgeClient,
 } from "@elizaos/capacitor-llama";
-import { StrictMode } from "react";
+import { StrictMode, useCallback, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { CompanionShell } from "@elizaos/app-companion/ui";
 import {
@@ -877,14 +882,255 @@ function resolveAppWindowSlug(): string | null {
   return slug.length > 0 ? slug : null;
 }
 
-// Sample messages for the pill demo (visual only — not yet wired to the live
-// chat session; see `eliza/packages/ui/src/state/useApp.ts` + the messaging
-// routes under `eliza/packages/app-core/src/api/` when implementing).
-const PILL_SAMPLE_MESSAGES: VoicePillMessage[] = [
-  { id: "demo-1", role: "agent", text: "Hi — I'm here. What's up?" },
-  { id: "demo-2", role: "user", text: "Just testing the overlay." },
-  { id: "demo-3", role: "agent", text: "Looks good. Ready when you are." },
-];
+// The pill is a compact overlay, not a full chat surface. Cap the tail we
+// render so a long conversation can't blow the panel out.
+const PILL_MESSAGE_TAIL = 20;
+// localStorage key for the sticky pill conversation id. The pill window runs
+// in its own Electrobun renderer process with no access to the main shell's
+// active conversation state, so we keep its own session pinned to localStorage.
+const PILL_CONVERSATION_STORAGE_KEY = "milady.pill.activeConversationId";
+
+/**
+ * Map a chat-API `ConversationMessage` to the trimmed `VoicePillMessage` shape
+ * the pill renders. Skips entries with no display text and collapses message
+ * roles to the binary user/agent split the pill UI expects.
+ */
+function toPillMessage(message: ConversationMessage): VoicePillMessage | null {
+  const text = message.text?.trim() ?? "";
+  if (!text) return null;
+  return {
+    id: message.id,
+    role: message.role === "user" ? "user" : "agent",
+    text,
+  };
+}
+
+function projectPillMessages(
+  messages: ConversationMessage[],
+): VoicePillMessage[] {
+  const tail = messages.slice(-PILL_MESSAGE_TAIL);
+  const projected: VoicePillMessage[] = [];
+  for (const message of tail) {
+    const pill = toPillMessage(message);
+    if (pill) projected.push(pill);
+  }
+  return projected;
+}
+
+function readPillConversationId(): string | null {
+  try {
+    return window.localStorage.getItem(PILL_CONVERSATION_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function writePillConversationId(id: string | null): void {
+  try {
+    if (id) {
+      window.localStorage.setItem(PILL_CONVERSATION_STORAGE_KEY, id);
+    } else {
+      window.localStorage.removeItem(PILL_CONVERSATION_STORAGE_KEY);
+    }
+  } catch {
+    /* sticky id is best-effort — pill still works without it */
+  }
+}
+
+/**
+ * Pick the most-recently-updated conversation from a server snapshot. Returns
+ * null when the list is empty. The pill uses this to re-attach to the
+ * conversation the user just left off in when no sticky pill id is set.
+ */
+function pickNewestConversation(
+  conversations: Conversation[],
+): Conversation | null {
+  if (conversations.length === 0) return null;
+  let best = conversations[0];
+  for (let i = 1; i < conversations.length; i++) {
+    const candidate = conversations[i];
+    if (
+      new Date(candidate.updatedAt).getTime() >
+      new Date(best.updatedAt).getTime()
+    ) {
+      best = candidate;
+    }
+  }
+  return best;
+}
+
+/**
+ * Pill renderer for the Electrobun overlay window.
+ *
+ * The pill window is its own renderer process — no AppProvider, no shared
+ * React state with the main shell. We talk to the same local agent the main
+ * composer talks to via the shared `client` singleton (already configured
+ * against the local API base by the boot-config block at module top), reuse
+ * the messaging routes (`createConversation`, `getConversationMessages`,
+ * `sendConversationMessageStream`), and subscribe to the same
+ * `proactive-message` WebSocket event the main app uses for out-of-band
+ * agent turns.
+ */
+function PillRoot() {
+  const [messages, setMessages] = useState<ConversationMessage[]>([]);
+  const conversationIdRef = useRef<string | null>(readPillConversationId());
+  const sendInFlightRef = useRef<boolean>(false);
+
+  // Append-or-replace by id so streaming token updates collapse onto a single
+  // assistant turn without flicker.
+  const upsertMessage = useCallback((next: ConversationMessage) => {
+    setMessages((prev) => {
+      const index = prev.findIndex((entry) => entry.id === next.id);
+      if (index < 0) return [...prev, next];
+      const copy = prev.slice();
+      copy[index] = next;
+      return copy;
+    });
+  }, []);
+
+  // Resolve which conversation the pill should attach to: prefer the sticky
+  // pill id if it still exists on the server, otherwise fall back to the
+  // most-recently-updated conversation. If the list is empty, return null
+  // and let the first send create a fresh conversation.
+  const resolveConversationId = useCallback(async (): Promise<
+    string | null
+  > => {
+    const sticky = conversationIdRef.current;
+    const { conversations } = await client.listConversations();
+    if (sticky && conversations.some((c: Conversation) => c.id === sticky)) {
+      return sticky;
+    }
+    const newest = pickNewestConversation(conversations);
+    if (newest) {
+      conversationIdRef.current = newest.id;
+      writePillConversationId(newest.id);
+      return newest.id;
+    }
+    return null;
+  }, []);
+
+  // Hydrate the pill on mount with the existing conversation tail so the
+  // overlay opens in-context instead of blank.
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const convId = await resolveConversationId();
+      if (cancelled || !convId) return;
+      const { messages: history } =
+        await client.getConversationMessages(convId);
+      if (cancelled) return;
+      setMessages(history);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [resolveConversationId]);
+
+  // Subscribe to proactive (agent-initiated) messages — autonomy ticks,
+  // connector inbox forwards, etc. — so they show up in the pill the same
+  // way they show up in the main composer.
+  useEffect(() => {
+    client.connectWs();
+    const unsubscribe = client.onWsEvent(
+      "proactive-message",
+      (event: Record<string, unknown>) => {
+        const payload = event as {
+          conversationId?: unknown;
+          message?: unknown;
+        };
+        if (typeof payload.conversationId !== "string") return;
+        if (payload.conversationId !== conversationIdRef.current) return;
+        const incoming = payload.message as ConversationMessage | undefined;
+        if (!incoming || typeof incoming.id !== "string") return;
+        upsertMessage(incoming);
+      },
+    );
+    return () => {
+      unsubscribe();
+    };
+  }, [upsertMessage]);
+
+  const handleSubmit = useCallback(
+    (text: string): void => {
+      const trimmed = text.trim();
+      if (!trimmed || sendInFlightRef.current) return;
+      sendInFlightRef.current = true;
+      void (async () => {
+        try {
+          let convId = conversationIdRef.current;
+          if (!convId) {
+            const created = await client.createConversation();
+            convId = created.conversation.id;
+            conversationIdRef.current = convId;
+            writePillConversationId(convId);
+          }
+
+          const now = Date.now();
+          const userMsgId = `pill-user-${now}`;
+          const assistantMsgId = `pill-asst-${now}`;
+          upsertMessage({
+            id: userMsgId,
+            role: "user",
+            text: trimmed,
+            timestamp: now,
+          });
+          upsertMessage({
+            id: assistantMsgId,
+            role: "assistant",
+            text: "",
+            timestamp: now,
+          });
+
+          const result = await client.sendConversationMessageStream(
+            convId,
+            trimmed,
+            (_token: string, accumulatedText?: string) => {
+              if (typeof accumulatedText !== "string") return;
+              upsertMessage({
+                id: assistantMsgId,
+                role: "assistant",
+                text: accumulatedText,
+                timestamp: now,
+              });
+            },
+          );
+
+          upsertMessage({
+            id: assistantMsgId,
+            role: "assistant",
+            text: result.text,
+            timestamp: Date.now(),
+            ...(result.failureKind ? { failureKind: result.failureKind } : {}),
+          });
+        } finally {
+          sendInFlightRef.current = false;
+        }
+      })();
+    },
+    [upsertMessage],
+  );
+
+  const handleRecordingChange = useCallback((recording: boolean): void => {
+    // TODO: route through the shared voice capture pipeline at
+    // `eliza/packages/ui/src/voice/local-asr-capture.ts` +
+    // `eliza/packages/ui/src/voice/voice-chat-recording.ts`. The pill window
+    // is a standalone Electrobun renderer process with no AppProvider, so we
+    // can't reuse `useChatVoiceSession` directly — capture + transcription
+    // needs a hook-free factory before this can be wired end-to-end. For now
+    // start/stop is logged so devs can confirm the toggle fires.
+    console.info(`${APP_LOG_PREFIX} [pill] recording`, recording);
+  }, []);
+
+  const pillMessages = projectPillMessages(messages);
+
+  return (
+    <VoicePill
+      messages={pillMessages}
+      onSubmit={handleSubmit}
+      onRecordingChange={handleRecordingChange}
+    />
+  );
+}
 
 function injectPillRendererStyles(): void {
   const style = document.createElement("style");
@@ -927,22 +1173,6 @@ function mountPillWindow(): void {
   const rootEl = document.getElementById("root");
   if (!rootEl) throw new Error("Root element #root not found");
   injectPillRendererStyles();
-
-  function PillRoot() {
-    const handleSubmit = (text: string): void => {
-      console.info(`${APP_LOG_PREFIX} [pill] submit`, text);
-    };
-    const handleRecordingChange = (recording: boolean): void => {
-      console.info(`${APP_LOG_PREFIX} [pill] recording`, recording);
-    };
-    return (
-      <VoicePill
-        messages={PILL_SAMPLE_MESSAGES}
-        onSubmit={handleSubmit}
-        onRecordingChange={handleRecordingChange}
-      />
-    );
-  }
 
   createRoot(rootEl).render(
     <ErrorBoundary>

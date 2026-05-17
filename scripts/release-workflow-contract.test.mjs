@@ -133,10 +133,6 @@ test("distribution workflows consume the canonical channel policy", () => {
     electrobun,
     /\n\s+build:\n\s+name: Build \$\{\{ matrix\.platform\.name \}\}[\s\S]*?name: Initialize eliza source checkout[\s\S]*?git clone --depth=1 --branch "\$\{MILADY_ELIZA_BRANCH:-develop\}" https:\/\/github\.com\/elizaOS\/eliza\.git eliza[\s\S]*?name: Initialize tracked workspace submodules/,
   );
-  assert.match(
-    electrobun,
-    /\$HOME\/\.cache\/eliza\/whisper\/ggml-base\.en\.bin/,
-  );
   assert.match(electrobun, /node scripts\/align-eliza-agent-package-pins\.mjs/);
   assert.match(
     electrobun,

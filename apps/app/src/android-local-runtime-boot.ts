@@ -29,17 +29,17 @@ import {
 } from "@elizaos/app-core";
 import { APP_LOG_PREFIX } from "./app-config";
 import {
+  type BunRuntimePluginBase,
   buildLocalAgentReply,
   buildSendMessagePayload,
   dispatchLocalAgentEvent,
   getLocalAgentStatusFromPlugin,
-  loadBunRuntimePlugin,
-  type BunRuntimePluginBase,
   type LocalAgentReply,
   type LocalAgentStatus,
+  loadBunRuntimePlugin,
 } from "./mobile-local-runtime-shared";
 
-export type { LocalAgentStatus, LocalAgentReply };
+export type { LocalAgentReply, LocalAgentStatus };
 
 const LOG_PREFIX = `${APP_LOG_PREFIX} [android-local-runtime]`;
 
@@ -68,7 +68,8 @@ function isApplicable(): boolean {
 }
 
 async function startRuntime(): Promise<boolean> {
-  const plugin = await loadBunRuntimePlugin<AndroidBunRuntimePlugin>(LOG_PREFIX);
+  const plugin =
+    await loadBunRuntimePlugin<AndroidBunRuntimePlugin>(LOG_PREFIX);
   if (!plugin) {
     runtimeState = { kind: "unavailable", reason: "plugin-not-loaded" };
     return false;
