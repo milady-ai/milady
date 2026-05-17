@@ -369,34 +369,6 @@ test("release workflows use the checked-in tsdown runner", () => {
   }
 });
 
-test("Electrobun release exposes whisper-node for upstream script layout", () => {
-  const electrobun = workflow("release-electrobun.yml");
-
-  assert.match(
-    electrobun,
-    /name: Expose whisper-node for eliza Electrobun scripts/,
-  );
-  assert.match(electrobun, /req\.resolve\("whisper-node\/package\.json"\)/);
-  assert.match(
-    electrobun,
-    /ln -sfn "\$\(realpath "\$whisper_pkg"\)" eliza\/packages\/node_modules\/whisper-node/,
-  );
-});
-
-test("Electrobun release uses Milady whisper cache path", () => {
-  const electrobun = workflow("release-electrobun.yml");
-
-  assert.match(electrobun, /~\/\.cache\/milady\/whisper/);
-  assert.match(
-    electrobun,
-    /\$HOME\/\.cache\/milady\/whisper\/ggml-base\.en\.bin/,
-  );
-  assert.match(
-    electrobun,
-    /eliza\/packages\/node_modules\/whisper-node\/lib\/whisper\.cpp\/models\/ggml-base\.en\.bin/,
-  );
-});
-
 test("Electrobun release applies elizaOS source overlay before manual build setup", () => {
   const electrobun = workflow("release-electrobun.yml");
   const copyRuntimeWrapper = fs.readFileSync(

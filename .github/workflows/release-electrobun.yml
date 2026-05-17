@@ -272,34 +272,6 @@ jobs:
       - name: Regression matrix contract
         run: bun run test:regression-matrix:release
 
-      - name: Prepare Whisper model artifact
-        run: |
-          whisper_pkg="$(node -e 'const { createRequire } = require("node:module"); const path = require("node:path"); const req = createRequire(process.cwd() + "/"); console.log(path.dirname(req.resolve("whisper-node/package.json")));')"
-          mkdir -p eliza/packages/node_modules
-          ln -sfn "$(realpath "$whisper_pkg")" eliza/packages/node_modules/whisper-node
-          export MILADY_WHISPER_MODEL_CACHE_DIR="$HOME/.cache/milady/whisper"
-          bash eliza/packages/app-core/platforms/electrobun/scripts/ensure-whisper-model.sh base.en
-          mkdir -p .artifacts/whisper-model
-          for candidate in \
-            "$HOME/.cache/milady/whisper/ggml-base.en.bin" \
-            "$HOME/.cache/eliza/whisper/ggml-base.en.bin" \
-            "$whisper_pkg/lib/whisper.cpp/models/ggml-base.en.bin"; do
-            if [ -f "$candidate" ]; then
-              cp "$candidate" .artifacts/whisper-model/ggml-base.en.bin
-              break
-            fi
-          done
-          test -f .artifacts/whisper-model/ggml-base.en.bin
-          mkdir -p eliza/packages/node_modules/whisper-node/lib/whisper.cpp/models
-          cp .artifacts/whisper-model/ggml-base.en.bin eliza/packages/node_modules/whisper-node/lib/whisper.cpp/models/ggml-base.en.bin
-
-      - name: Upload Whisper model artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: whisper-model-base-en
-          path: .artifacts/whisper-model/ggml-base.en.bin
-          if-no-files-found: error
-
       - name: Align version with release tag
         run: |
           node eliza/packages/app-core/scripts/align-electrobun-version.mjs
@@ -551,41 +523,8 @@ jobs:
         env:
           MILADY_NO_VISION_DEPS: ${{ matrix.platform.os == 'windows' && '1' || '' }}
 
-      - name: Expose whisper-node for eliza Electrobun scripts
-        if: matrix.platform.os == 'macos' || matrix.platform.os == 'linux'
-        run: |
-          whisper_pkg="$(node -e 'const { createRequire } = require("node:module"); const path = require("node:path"); const req = createRequire(process.cwd() + "/"); console.log(path.dirname(req.resolve("whisper-node/package.json")));')"
-          mkdir -p eliza/packages/node_modules
-          ln -sfn "$(realpath "$whisper_pkg")" eliza/packages/node_modules/whisper-node
-
       - name: Apply Electrobun release compatibility patches
         run: node scripts/patch-electrobun-release-compat.mjs
-
-      - name: Cache Whisper models and binaries
-        if: matrix.platform.os == 'macos' || matrix.platform.os == 'linux'
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~/.cache/milady/whisper
-            node_modules/whisper-node/lib/whisper.cpp/main
-            node_modules/whisper-node/lib/whisper.cpp/build
-          key: whisper-${{ matrix.platform.artifact-name }}-${{ hashFiles('eliza/packages/app-core/platforms/electrobun/scripts/build-whisper.sh', 'eliza/packages/app-core/platforms/electrobun/scripts/build-whisper-universal.sh', 'eliza/packages/app-core/platforms/electrobun/scripts/ensure-whisper-model.sh') }}
-          restore-keys: whisper-${{ matrix.platform.artifact-name }}-
-
-      - name: Download Whisper model artifact
-        if: matrix.platform.os == 'macos' || matrix.platform.os == 'linux'
-        uses: actions/download-artifact@v8
-        with:
-          name: whisper-model-base-en
-          path: .artifacts/whisper-model
-
-      - name: Seed Whisper model cache
-        if: matrix.platform.os == 'macos' || matrix.platform.os == 'linux'
-        run: |
-          mkdir -p "$HOME/.cache/milady/whisper"
-          cp .artifacts/whisper-model/ggml-base.en.bin "$HOME/.cache/milady/whisper/ggml-base.en.bin"
-          mkdir -p eliza/packages/node_modules/whisper-node/lib/whisper.cpp/models
-          cp .artifacts/whisper-model/ggml-base.en.bin eliza/packages/node_modules/whisper-node/lib/whisper.cpp/models/ggml-base.en.bin
 
       - name: Align version with release tag
         run: |
