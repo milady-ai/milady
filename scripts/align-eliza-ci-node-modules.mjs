@@ -30,44 +30,69 @@ function compareVersions(left, right) {
   return String(left).localeCompare(String(right));
 }
 
-function resolveBunStorePackage(packageName) {
-  const store = path.join(repoRoot, "node_modules", ".bun");
-  if (!fs.existsSync(store)) {
-    return null;
-  }
+function nodeModulesRoots() {
+  return [
+    path.join(repoRoot, "node_modules"),
+    path.join(repoRoot, "eliza", "node_modules"),
+  ];
+}
 
+function normalizePathForCompare(candidate) {
+  return path.resolve(candidate);
+}
+
+function isExcludedPackagePath(candidate, excludedPaths) {
+  const normalized = normalizePathForCompare(candidate);
+  return excludedPaths.some(
+    (excludedPath) => normalizePathForCompare(excludedPath) === normalized,
+  );
+}
+
+function resolveBunStorePackage(packageName) {
   let best = null;
-  for (const entry of fs.readdirSync(store).sort()) {
-    const packageDir = path.join(
-      store,
-      entry,
-      "node_modules",
-      ...packageName.split("/"),
-    );
-    const packageJsonPath = path.join(packageDir, "package.json");
-    if (!fs.existsSync(packageJsonPath)) {
+  for (const nodeModulesRoot of nodeModulesRoots()) {
+    const store = path.join(nodeModulesRoot, ".bun");
+    if (!fs.existsSync(store)) {
       continue;
     }
 
-    try {
-      const pkg = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
-      if (pkg.name !== packageName) {
+    for (const entry of fs.readdirSync(store).sort()) {
+      const packageDir = path.join(
+        store,
+        entry,
+        "node_modules",
+        ...packageName.split("/"),
+      );
+      const packageJsonPath = path.join(packageDir, "package.json");
+      if (!fs.existsSync(packageJsonPath)) {
         continue;
       }
-      const version = typeof pkg.version === "string" ? pkg.version : "0.0.0";
-      if (!best || compareVersions(version, best.version) > 0) {
-        best = { packageDir, version };
-      }
-    } catch {}
+
+      try {
+        const pkg = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
+        if (pkg.name !== packageName) {
+          continue;
+        }
+        const version = typeof pkg.version === "string" ? pkg.version : "0.0.0";
+        if (!best || compareVersions(version, best.version) > 0) {
+          best = { packageDir, version };
+        }
+      } catch {}
+    }
   }
 
   return best?.packageDir ?? null;
 }
 
-function resolveInstalledPackage(packageName) {
-  const direct = path.join(repoRoot, "node_modules", ...packageName.split("/"));
-  if (fs.existsSync(direct)) {
-    return direct;
+function resolveInstalledPackage(packageName, { excludedPaths = [] } = {}) {
+  for (const nodeModulesRoot of nodeModulesRoots()) {
+    const direct = path.join(nodeModulesRoot, ...packageName.split("/"));
+    if (isExcludedPackagePath(direct, excludedPaths)) {
+      continue;
+    }
+    if (fs.existsSync(direct)) {
+      return direct;
+    }
   }
 
   const storePackage = resolveBunStorePackage(packageName);
@@ -78,8 +103,41 @@ function resolveInstalledPackage(packageName) {
   return null;
 }
 
+function resolvePackageBinDirs(packageNames) {
+  const dirs = [];
+  for (const packageName of packageNames) {
+    const packageDir = resolveInstalledPackage(packageName);
+    if (!packageDir) {
+      continue;
+    }
+    try {
+      const pkg = JSON.parse(
+        fs.readFileSync(path.join(packageDir, "package.json"), "utf8"),
+      );
+      const binEntries =
+        typeof pkg.bin === "string"
+          ? [pkg.bin]
+          : pkg.bin && typeof pkg.bin === "object"
+            ? Object.values(pkg.bin)
+            : [];
+      for (const binEntry of binEntries) {
+        if (typeof binEntry !== "string") {
+          continue;
+        }
+        dirs.push(path.dirname(path.join(packageDir, binEntry)));
+      }
+    } catch {}
+  }
+  return [...new Set(dirs)];
+}
+
 function linkRootPackage(packageName, targets) {
-  const source = resolveInstalledPackage(packageName);
+  const absoluteTargets = targets.map((targetRel) =>
+    path.join(repoRoot, targetRel),
+  );
+  const source = resolveInstalledPackage(packageName, {
+    excludedPaths: absoluteTargets,
+  });
   if (!source) {
     throw new Error(`missing root package install: ${packageName}`);
   }
@@ -132,6 +190,86 @@ function linkOptionalLocalPackage(packageName, sourceRel, targets) {
   linkLocalPackage(packageName, sourceRel, targets);
 }
 
+function resolveFirstLocalPackageSource(packageName, sourceRelCandidates) {
+  for (const sourceRel of sourceRelCandidates) {
+    const source = path.join(repoRoot, sourceRel, "package.json");
+    if (fs.existsSync(source)) {
+      return sourceRel;
+    }
+  }
+
+  console.log(
+    `[align-eliza-ci-node-modules] skipping ${packageName}; missing ${sourceRelCandidates
+      .map((candidate) => `${candidate}/package.json`)
+      .join(" or ")}`,
+  );
+  return null;
+}
+
+function linkOptionalLocalPackageFromCandidates(
+  packageName,
+  sourceRelCandidates,
+  targets,
+) {
+  const sourceRel = resolveFirstLocalPackageSource(
+    packageName,
+    sourceRelCandidates,
+  );
+  if (!sourceRel) return;
+  linkLocalPackage(packageName, sourceRel, targets);
+}
+
+function discoverNativePluginPackages() {
+  const pluginsDir = path.join(repoRoot, "eliza", "plugins");
+  if (!fs.existsSync(pluginsDir)) {
+    return [];
+  }
+
+  const packages = [];
+  for (const entry of fs.readdirSync(pluginsDir).sort()) {
+    if (!entry.startsWith("plugin-native-")) {
+      continue;
+    }
+    const sourceRel = `eliza/plugins/${entry}`;
+    const packageJsonPath = path.join(repoRoot, sourceRel, "package.json");
+    if (!fs.existsSync(packageJsonPath)) {
+      continue;
+    }
+    try {
+      const pkg = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
+      if (typeof pkg.name !== "string" || !pkg.name.startsWith("@elizaos/")) {
+        continue;
+      }
+      packages.push([pkg.name, entry.replace(/^plugin-native-/, "")]);
+    } catch {}
+  }
+  return packages;
+}
+
+function packageExportOutputRelPaths(sourceRel) {
+  const packageJsonPath = path.join(repoRoot, sourceRel, "package.json");
+  let pkg;
+  try {
+    pkg = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
+  } catch {
+    return [];
+  }
+
+  const rootExport = pkg.exports?.["."];
+  const candidates =
+    rootExport && typeof rootExport === "object"
+      ? [rootExport.import, rootExport.require, rootExport.types]
+      : [pkg.module, pkg.main, pkg.types];
+  return [
+    ...new Set(
+      candidates
+        .filter((entry) => typeof entry === "string")
+        .filter((entry) => entry.startsWith("./dist/") || entry === "./dist")
+        .map((entry) => entry.replace(/^\.\//, "")),
+    ),
+  ];
+}
+
 function ensureBuiltLocalPackage(
   packageName,
   sourceRel,
@@ -181,7 +319,16 @@ function ensureBuiltLocalPackage(
   );
   const result = spawnSync("bun", ["run", "build"], {
     cwd: source,
-    env: process.env,
+    env: {
+      ...process.env,
+      PATH: [
+        path.join(repoRoot, "node_modules", ".bin"),
+        ...resolvePackageBinDirs(["rollup", "typescript"]),
+        process.env.PATH ?? "",
+      ]
+        .filter(Boolean)
+        .join(path.delimiter),
+    },
     stdio: "inherit",
   });
   if (result.error) {
@@ -233,6 +380,15 @@ const sharedTypeTargets = [
 ];
 
 linkRootPackage("@biomejs", ["eliza/node_modules/@biomejs"]);
+
+linkRootPackage("rollup", ["eliza/node_modules/rollup"]);
+linkRootPackage("typescript", ["eliza/node_modules/typescript"]);
+linkRootPackage("@rollup/plugin-node-resolve", [
+  "eliza/node_modules/@rollup/plugin-node-resolve",
+]);
+linkRootPackage("llama-cpp-capacitor", [
+  "eliza/node_modules/llama-cpp-capacitor",
+]);
 
 linkRootPackage("react", [
   "eliza/node_modules/react",
@@ -308,12 +464,28 @@ linkLocalPackage("@elizaos/shared", "eliza/packages/shared", [
   "apps/homepage/node_modules/@elizaos/shared",
 ]);
 
+linkLocalPackage("@elizaos/ui", "eliza/packages/ui", [
+  "node_modules/@elizaos/ui",
+  "eliza/node_modules/@elizaos/ui",
+  "eliza/packages/app-core/node_modules/@elizaos/ui",
+  "apps/app/node_modules/@elizaos/ui",
+  "apps/homepage/node_modules/@elizaos/ui",
+]);
+
 linkLocalPackage("@elizaos/agent", "eliza/packages/agent", [
   "node_modules/@elizaos/agent",
   "eliza/node_modules/@elizaos/agent",
   "eliza/plugins/plugin-app-manager/node_modules/@elizaos/agent",
   "apps/app/node_modules/@elizaos/agent",
   "apps/homepage/node_modules/@elizaos/agent",
+]);
+
+linkLocalPackage("@elizaos/app-core", "eliza/packages/app-core", [
+  "node_modules/@elizaos/app-core",
+  "eliza/node_modules/@elizaos/app-core",
+  "eliza/packages/ui/node_modules/@elizaos/app-core",
+  "apps/app/node_modules/@elizaos/app-core",
+  "apps/homepage/node_modules/@elizaos/app-core",
 ]);
 
 linkLocalPackage("@elizaos/cloud-routing", "eliza/packages/cloud-routing", [
@@ -394,28 +566,55 @@ const appNativePluginPackages = [
   ["@elizaos/capacitor-agent", "agent"],
   ["@elizaos/capacitor-appblocker", "appblocker"],
   ["@elizaos/capacitor-bun-runtime", "bun-runtime"],
+  ["@elizaos/capacitor-calendar", "calendar"],
   ["@elizaos/capacitor-camera", "camera"],
   ["@elizaos/capacitor-canvas", "canvas"],
   ["@elizaos/capacitor-contacts", "contacts"],
+  ["@elizaos/capacitor-desktop", "desktop"],
+  ["@elizaos/capacitor-eliza-tasks", "eliza-tasks"],
   ["@elizaos/capacitor-gateway", "gateway"],
   ["@elizaos/capacitor-llama", "llama"],
   ["@elizaos/capacitor-location", "location"],
   ["@elizaos/capacitor-messages", "messages"],
+  ["@elizaos/capacitor-mobile-agent-bridge", "mobile-agent-bridge"],
   ["@elizaos/capacitor-mobile-signals", "mobile-signals"],
+  ["@elizaos/capacitor-network-policy", "network-policy"],
   ["@elizaos/capacitor-phone", "phone"],
   ["@elizaos/capacitor-screencapture", "screencapture"],
   ["@elizaos/capacitor-swabble", "swabble"],
   ["@elizaos/capacitor-system", "system"],
   ["@elizaos/capacitor-talkmode", "talkmode"],
   ["@elizaos/capacitor-websiteblocker", "websiteblocker"],
+  ["@elizaos/capacitor-wifi", "wifi"],
+  ["@elizaos/macosalarm", "macosalarm"],
+  ["@elizaos/native-activity-tracker", "activity-tracker"],
+  ["@elizaos/native-plugin-shared-types", "shared-types"],
 ];
 
-for (const [packageName, packageDir] of appNativePluginPackages) {
-  linkOptionalLocalPackage(
-    packageName,
+const nativePluginPackages = new Map(appNativePluginPackages);
+for (const [packageName, packageDir] of discoverNativePluginPackages()) {
+  nativePluginPackages.set(packageName, packageDir);
+}
+
+const linkedNativePluginSources = [];
+for (const [packageName, packageDir] of nativePluginPackages) {
+  const sourceRelCandidates = [
+    `eliza/plugins/plugin-native-${packageDir}`,
     `eliza/packages/native-plugins/${packageDir}`,
+  ];
+  const sourceRel = resolveFirstLocalPackageSource(
+    packageName,
+    sourceRelCandidates,
+  );
+  if (!sourceRel) {
+    continue;
+  }
+  linkLocalPackage(
+    packageName,
+    sourceRel,
     [`node_modules/${packageName}`, `apps/app/node_modules/${packageName}`],
   );
+  linkedNativePluginSources.push([packageName, sourceRel]);
 }
 
 linkOptionalLocalPackage(
@@ -452,6 +651,37 @@ ensureBuiltLocalPackage(
     ],
   },
 );
+
+ensureBuiltLocalPackage(
+  "@elizaos/ui",
+  "eliza/packages/ui",
+  [
+    "dist/index.js",
+    "dist/index.d.ts",
+    "dist/onboarding/mobile-runtime-mode.js",
+    "dist/onboarding/mobile-runtime-mode.d.ts",
+  ],
+  {
+    outputChecks: [
+      {
+        path: "dist/onboarding/mobile-runtime-mode.js",
+        includes: "isMobileLocalAgentIpcUrl",
+      },
+      {
+        path: "dist/onboarding/mobile-runtime-mode.d.ts",
+        includes: "isMobileLocalAgentIpcUrl",
+      },
+    ],
+  },
+);
+
+ensureBuiltLocalPackage("@elizaos/app-core", "eliza/packages/app-core", [
+  "dist/index.js",
+  "dist/index.d.ts",
+  "dist/services/app-updates/update-policy.js",
+  "dist/services/app-updates/update-policy.d.ts",
+  "dist/platform/empty-node-module.js",
+]);
 
 ensureBuiltLocalPackage(
   "@elizaos/cloud-routing",
@@ -524,3 +754,13 @@ ensureBuiltLocalPackage(
   ["dist/index.js", "dist/index.d.ts"],
   { optional: true },
 );
+
+for (const [packageName, sourceRel] of linkedNativePluginSources) {
+  const outputRelPaths = packageExportOutputRelPaths(sourceRel);
+  if (outputRelPaths.length === 0) {
+    continue;
+  }
+  ensureBuiltLocalPackage(packageName, sourceRel, outputRelPaths, {
+    optional: true,
+  });
+}

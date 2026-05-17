@@ -272,6 +272,15 @@ function resolveLocalUiAliases(): Alias[] {
       replacement: `${uiPkgRoot}/src/hooks/$1.ts`,
     },
     {
+      find: /^@elizaos\/ui\/state$/,
+      replacement: path.join(uiPkgRoot, "src/state/index.ts"),
+    },
+    {
+      find: /^@elizaos\/ui\/state\/(.+?)(?:\.js)?$/,
+      replacement: `${uiPkgRoot}/src/state/$1.ts`,
+      customResolver: resolveExistingUiSourceModule,
+    },
+    {
       find: /^@elizaos\/ui\/layouts$/,
       replacement: path.join(uiPkgRoot, "src/layouts/index.ts"),
     },
@@ -621,7 +630,6 @@ function resolveLocalAppCoreAliases(): Alias[] {
     : [];
 
   return [
-    ...cssRedirectAlias,
     ...generatedAliases,
     ...legacyAppCoreUiAliases,
     {
@@ -854,6 +862,25 @@ function resolveExistingUiSourceModule(id: string) {
   }
 
   return id;
+}
+
+function resolveAppCoreWithUiFallback(id: string) {
+  const appCoreCandidate = resolveExistingUiSourceModule(id);
+  if (fs.existsSync(appCoreCandidate)) {
+    return appCoreCandidate;
+  }
+
+  if (appCoreSrcRoot && uiPkgRoot && id.startsWith(appCoreSrcRoot)) {
+    const relativePath = path.relative(appCoreSrcRoot, id);
+    const uiCandidate = resolveExistingUiSourceModule(
+      path.join(uiPkgRoot, "src", relativePath),
+    );
+    if (fs.existsSync(uiCandidate)) {
+      return uiCandidate;
+    }
+  }
+
+  return appCoreCandidate;
 }
 
 /**
@@ -1318,7 +1345,7 @@ function generateNodeBuiltinStub(moduleId: string, req = _require): string {
     //   * mutation traps (set / defineProperty) don't throw under strict mode
     //   * `instanceof`, `default`, `__esModule` resolve sensibly for ESM<->CJS
     "function noopFn() { return noop; }",
-    "const handler = { get(t, p) { if (typeof p === 'symbol') return undefined; if (p === '__esModule') return true; if (p === 'default') return noop; if (p === 'prototype') return {}; if (p in t) return t[p]; return noop; }, set(t, p, v) { try { t[p] = v; } catch {} return true; }, has() { return true; }, ownKeys() { return []; }, getOwnPropertyDescriptor() { return { configurable: true, enumerable: true }; }, apply() { return noop; }, construct() { return noop; }, defineProperty(t, p, d) { try { Object.defineProperty(t, p, { configurable: true, writable: true, enumerable: true, ...d }); } catch {} return true; } };",
+    "const handler = { get(t, p) { if (typeof p === 'symbol') return undefined; if (p === 'prototype' || p === 'name' || p === 'length') return Reflect.get(t, p); if (p === '__esModule') return true; if (p === 'default') return noop; if (p in t) return t[p]; return noop; }, set(t, p, v) { try { t[p] = v; } catch {} return true; }, has() { return true; }, ownKeys(t) { return Reflect.ownKeys(t); }, getOwnPropertyDescriptor(t, p) { return Reflect.getOwnPropertyDescriptor(t, p) || { configurable: true, enumerable: true, value: noop, writable: true }; }, apply() { return noop; }, construct() { return noop; }, defineProperty(t, p, d) { try { Object.defineProperty(t, p, { configurable: true, writable: true, enumerable: true, ...d }); } catch {} return true; } };",
     "const noop = new Proxy(noopFn, handler);",
     "const stub = noop;",
     "const asyncNoop = () => Promise.resolve();",
@@ -2568,6 +2595,7 @@ export default defineConfig({
       "three",
       "@capacitor/core",
       "@elizaos/app-core",
+      "@elizaos/ui",
     ],
     alias: [
       // Bare Node built-in polyfills for browser — pathe provides ESM path,
