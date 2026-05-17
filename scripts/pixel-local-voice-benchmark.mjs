@@ -644,6 +644,24 @@ function matchingLines(text, pattern, limit = 80) {
   return lines.slice(Math.max(0, lines.length - limit));
 }
 
+function redactSensitiveLogText(text) {
+  if (!text) return text;
+  return text
+    .replace(/\bBearer\s+[A-Za-z0-9._~+/-]+=*/g, "Bearer ***REDACTED***")
+    .replace(
+      /("Authorization"\s*:\s*")Bearer\s+[^"]+(")/gi,
+      '$1Bearer ***REDACTED***$2',
+    )
+    .replace(
+      /('Authorization'\s*:\s*')Bearer\s+[^']+(')/gi,
+      "$1Bearer ***REDACTED***$2",
+    )
+    .replace(
+      /\b(local-agent-token=)[A-Za-z0-9._~+/-]+=*/gi,
+      "$1***REDACTED***",
+    );
+}
+
 function collectDflashEvidence({ logs, probes, chat }) {
   const sourceText = [
     logs?.agentLog?.tail ?? "",
@@ -723,6 +741,7 @@ function captureLogs(
       relativePath,
       options.logBytes,
     );
+    const redactedTail = redactSensitiveLogText(tail);
     logs.agentLog = {
       path: relativePath,
       beforeBytes: beforeAgentLogBytes,
@@ -731,9 +750,9 @@ function captureLogs(
         typeof beforeAgentLogBytes === "number"
           ? Math.max(0, afterBytes - beforeAgentLogBytes)
           : null,
-      capturedBytes: Buffer.byteLength(tail),
+      capturedBytes: Buffer.byteLength(redactedTail),
       truncated: afterBytes > options.logBytes,
-      tail,
+      tail: redactedTail,
     };
   } catch (error) {
     logs.agentLog = {
@@ -748,15 +767,16 @@ function captureLogs(
       ["logcat", "-d", "-v", "time", "-t", String(options.logcatLines)],
       { maxBuffer: options.logBytes * 2 + 64 * 1024 },
     );
+    const redactedTail = redactSensitiveLogText(tail);
     logs.logcat = {
       lines: options.logcatLines,
-      capturedBytes: Buffer.byteLength(tail),
+      capturedBytes: Buffer.byteLength(redactedTail),
       matchingAgentLines: matchingLines(
-        tail,
+        redactedTail,
         /\b(ElizaAgent|ElizaAgentService|DFlash|dflash|speculative|ELIZA_DFLASH)\b/i,
         120,
       ),
-      tail,
+      tail: redactedTail,
     };
   } catch (error) {
     logs.logcat = {
