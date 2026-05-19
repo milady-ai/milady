@@ -121,6 +121,17 @@ describe("package mode aliases", () => {
     expect(patchScript).toContain("UI AppContext singleton");
   });
 
+  it("patches packaged Windows agent startup to tolerate Explorer-style Path casing", () => {
+    const patchScript = fs.readFileSync(
+      path.resolve(appRoot, "../..", "scripts/apply-eliza-ci-patches.mjs"),
+      "utf8",
+    );
+
+    expect(patchScript).toContain("patchElectrobunAgentChildPathFallback");
+    expect(patchScript).toContain("existingPathKey");
+    expect(patchScript).toContain("Electrobun agent child PATH fallback");
+  });
+
   it("keeps generated native module proxy stubs compatible with WebKit invariants", () => {
     const viteConfigText = fs.readFileSync(
       path.join(appRoot, "vite.config.ts"),

@@ -71,6 +71,10 @@ windowsTest?.(
         launcherPath: launcherPath as string,
         apiBase: api.baseUrl,
       });
+      const inheritedWindowsPath =
+        harness.appEnv.PATH ?? harness.appEnv.Path ?? "";
+      delete harness.appEnv.PATH;
+      harness.appEnv.Path = inheritedWindowsPath;
 
       await harness.start();
 

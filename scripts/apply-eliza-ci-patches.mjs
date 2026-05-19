@@ -248,6 +248,36 @@ export const AppContext =
   return next;
 }
 
+function patchElectrobunAgentChildPathFallback(raw) {
+  if (raw.includes("existingPathKey")) {
+    return raw;
+  }
+
+  const next = raw.replace(
+    /      const bunDir = path\.dirname\(bunExecutable\);\r?\n      const existingPath = childEnv\.PATH;\r?\n      if \(!existingPath\.split\(path\.delimiter\)\.includes\(bunDir\)\) \{\r?\n        childEnv\.PATH = bunDir \+ path\.delimiter \+ existingPath;\r?\n        diagnosticLog\(`\[Agent\] Prepended bun dir to child PATH: \$\{bunDir\}`\);\r?\n      \}\r?\n/,
+    `      const bunDir = path.dirname(bunExecutable);
+      const existingPathKey =
+        childEnv.PATH !== undefined ? "PATH" : "Path";
+      const existingPath =
+        childEnv[existingPathKey] ?? process.env.PATH ?? process.env.Path ?? "";
+      if (!existingPath.split(path.delimiter).includes(bunDir)) {
+        childEnv[existingPathKey] = existingPath
+          ? bunDir + path.delimiter + existingPath
+          : bunDir;
+        diagnosticLog(\`[Agent] Prepended bun dir to child PATH: \${bunDir}\`);
+      }
+`,
+  );
+
+  if (next === raw) {
+    throw new Error(
+      "Could not patch Electrobun agent PATH fallback: expected child PATH block was not found",
+    );
+  }
+
+  return next;
+}
+
 function patchCoreTsconfigLocalPrompts(raw) {
   if (raw.includes('"@elizaos/prompts": ["../prompts/src/index.ts"]')) {
     return raw;
@@ -2518,6 +2548,21 @@ function applyReleaseSourcePatches() {
     path.join(elizaDir, "packages", "ui", "src", "state", "useApp.ts"),
     patchUiAppContextSingleton,
     "UI AppContext singleton",
+  );
+
+  replaceFileText(
+    path.join(
+      elizaDir,
+      "packages",
+      "app-core",
+      "platforms",
+      "electrobun",
+      "src",
+      "native",
+      "agent.ts",
+    ),
+    patchElectrobunAgentChildPathFallback,
+    "Electrobun agent child PATH fallback",
   );
 
   replaceFileText(
