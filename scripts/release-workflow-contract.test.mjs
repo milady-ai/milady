@@ -694,6 +694,15 @@ test("Electrobun macOS release keeps one command path for both CPU architectures
     electrobun,
     /node eliza\/packages\/app-core\/scripts\/desktop-build\.mjs stage --variant=base --build-whisper/,
   );
+  assert.match(electrobun, /name: Prepare Whisper model artifact/);
+  assert.match(
+    electrobun,
+    /bash eliza\/packages\/app-core\/platforms\/electrobun\/scripts\/ensure-whisper-model\.sh base\.en/,
+  );
+  assert.match(electrobun, /name: Upload Whisper model artifact/);
+  assert.match(electrobun, /name: whisper-model-base-en/);
+  assert.match(electrobun, /name: Download Whisper model artifact/);
+  assert.match(electrobun, /name: Seed Whisper model cache/);
   assert.match(
     electrobun,
     /node eliza\/packages\/app-core\/scripts\/desktop-build\.mjs package --env=\$\{\{ needs\.prepare\.outputs\.env \}\}/,

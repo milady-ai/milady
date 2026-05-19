@@ -356,6 +356,19 @@ jobs:
       - name: Regression matrix contract
         run: bun run test:regression-matrix:release
 
+      - name: Prepare Whisper model artifact
+        run: |
+          bash eliza/packages/app-core/platforms/electrobun/scripts/ensure-whisper-model.sh base.en
+          mkdir -p .artifacts/whisper-model
+          cp "$HOME/.cache/eliza/whisper/ggml-base.en.bin" .artifacts/whisper-model/ggml-base.en.bin
+
+      - name: Upload Whisper model artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: whisper-model-base-en
+          path: .artifacts/whisper-model/ggml-base.en.bin
+          if-no-files-found: error
+
       - name: Align version with release tag
         run: |
           node eliza/packages/app-core/scripts/align-electrobun-version.mjs
@@ -494,6 +507,19 @@ jobs:
           run-postinstall: "true"
           skip-cloud-submodule: "true"
 
+      - name: Download Whisper model artifact
+        if: ${{ needs.validate-release.result == 'success' }}
+        uses: actions/download-artifact@v7
+        with:
+          name: whisper-model-base-en
+          path: ${{ runner.temp }}/whisper-model
+
+      - name: Seed Whisper model cache
+        if: ${{ needs.validate-release.result == 'success' }}
+        run: |
+          mkdir -p "$HOME/.cache/eliza/whisper"
+          cp "${{ runner.temp }}/whisper-model/ggml-base.en.bin" "$HOME/.cache/eliza/whisper/ggml-base.en.bin"
+
       - name: Package Agent Browser Bridge release bundles
         id: package-browser-bridge
         run: |
@@ -623,6 +649,19 @@ jobs:
           else
             echo "eliza/node_modules/bun not present (likely hoisted) — skipping hydration"
           fi
+
+      - name: Download Whisper model artifact
+        if: ${{ needs.validate-release.result == 'success' }}
+        uses: actions/download-artifact@v7
+        with:
+          name: whisper-model-base-en
+          path: ${{ runner.temp }}/whisper-model
+
+      - name: Seed Whisper model cache
+        if: ${{ needs.validate-release.result == 'success' }}
+        run: |
+          mkdir -p "$HOME/.cache/eliza/whisper"
+          cp "${{ runner.temp }}/whisper-model/ggml-base.en.bin" "$HOME/.cache/eliza/whisper/ggml-base.en.bin"
 
       - name: Run repository postinstall patches
         run: bun run postinstall

@@ -956,38 +956,33 @@ function patchSqlRawConnectionReturnType(raw, managerTypeName) {
 const ensureWhisperModelScript = `#!/usr/bin/env bash
 set -euo pipefail
 
-model="\${1:-base.en}"
-whisper_pkg="\${WHISPER_NODE_PACKAGE_DIR:-}"
+MODEL_NAME="\${1:-base.en}"
+CACHE_DIR="\${ELIZA_WHISPER_MODEL_DIR:-$HOME/.cache/eliza/whisper}"
+MODEL_FILE="$CACHE_DIR/ggml-\${MODEL_NAME}.bin"
+MODEL_URL="\${ELIZA_WHISPER_MODEL_URL:-https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-\${MODEL_NAME}.bin}"
 
-if [ -z "$whisper_pkg" ]; then
-  whisper_pkg="$(node -e 'const { createRequire } = require("node:module"); const path = require("node:path"); const req = createRequire(process.cwd() + "/"); console.log(path.dirname(req.resolve("whisper-node/package.json")));')"
-fi
+mkdir -p "$CACHE_DIR"
 
-models_dir="$whisper_pkg/lib/whisper.cpp/models"
-model_file="$models_dir/ggml-$model.bin"
-cache_dir="\${MILADY_WHISPER_MODEL_CACHE_DIR:-}"
-cache_file=""
-
-if [ -n "$cache_dir" ]; then
-  cache_file="$cache_dir/ggml-$model.bin"
-fi
-
-if [ -n "$cache_file" ] && [ -f "$cache_file" ]; then
-  mkdir -p "$models_dir"
-  cp "$cache_file" "$model_file"
+if [[ -s "$MODEL_FILE" ]]; then
+  echo "Whisper model already present: $MODEL_FILE"
   exit 0
 fi
 
-if [ -f "$model_file" ]; then
-  exit 0
+TMP_FILE="\${MODEL_FILE}.tmp"
+rm -f "$TMP_FILE"
+
+echo "Downloading Whisper model \${MODEL_NAME}..."
+if command -v curl >/dev/null 2>&1; then
+  curl --fail --location --retry 3 --output "$TMP_FILE" "$MODEL_URL"
+elif command -v wget >/dev/null 2>&1; then
+  wget --tries=3 --output-document="$TMP_FILE" "$MODEL_URL"
+else
+  echo "curl or wget is required to download $MODEL_URL" >&2
+  exit 1
 fi
 
-bash "$models_dir/download-ggml-model.sh" "$model"
-
-if [ -n "$cache_file" ]; then
-  mkdir -p "$cache_dir"
-  cp "$model_file" "$cache_file"
-fi
+mv "$TMP_FILE" "$MODEL_FILE"
+echo "Whisper model ready: $MODEL_FILE"
 `;
 
 function applyReleaseSourcePatches() {
