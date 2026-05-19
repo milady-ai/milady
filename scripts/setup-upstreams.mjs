@@ -87,10 +87,16 @@ export const ELIZA_BUILD_STEPS = [
   {
     // plugin-elizacloud imports types from @elizaos/cloud-sdk; fresh CI
     // checkouts need the SDK declarations before plugin builds run.
+    // The eliza/cloud/ tree is sourced from a separate peer repo and is
+    // not present in every checkout (e.g. Tails ISO full build pipeline
+    // pulls only the eliza submodule). Mark optional so a missing source
+    // directory skips the step instead of producing a misleading
+    // "spawn bun ENOENT" from an invalid cwd.
     check: path.join("cloud", "packages", "sdk", "dist", "index.d.ts"),
     cwd: path.join("cloud", "packages", "sdk"),
     args: ["run", "build"],
     label: "@elizaos/cloud-sdk",
+    optional: true,
   },
   {
     // plugin-streaming imports isCloudConnected from @elizaos/cloud-routing;
@@ -1697,9 +1703,22 @@ export async function ensureElizaBuildOutputs(
       continue;
     }
 
+    const stepCwd = path.join(elizaRoot, step.cwd);
+    if (!pathExists(stepCwd)) {
+      if (step.optional) {
+        log(
+          `[setup-upstreams] ${step.label} source not present at ${toDisplayPath(stepCwd)}, skipping`,
+        );
+        continue;
+      }
+      throw new Error(
+        `[setup-upstreams] ${step.label} source missing at ${toDisplayPath(stepCwd)}; expected an eliza checkout that includes ${step.cwd}`,
+      );
+    }
+
     log(`[setup-upstreams] Building ${step.label}`);
     await runCommandImpl("bun", step.args, {
-      cwd: path.join(elizaRoot, step.cwd),
+      cwd: stepCwd,
       label: `bun ${step.args.join(" ")} (${step.label})`,
     });
   }
