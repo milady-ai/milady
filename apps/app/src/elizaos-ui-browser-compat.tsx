@@ -1,5 +1,67 @@
-import { Mic, Plus, Send } from "lucide-react";
 import { type KeyboardEvent, useState } from "react";
+
+interface IconProps {
+  size?: number;
+}
+
+function MicIcon({ size = 18 }: IconProps) {
+  return (
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height={size}
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+      viewBox="0 0 24 24"
+      width={size}
+    >
+      <path d="M12 3a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z" />
+      <path d="M19 10v1a7 7 0 0 1-14 0v-1" />
+      <path d="M12 18v3" />
+      <path d="M8 21h8" />
+    </svg>
+  );
+}
+
+function PlusIcon({ size = 16 }: IconProps) {
+  return (
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height={size}
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+      viewBox="0 0 24 24"
+      width={size}
+    >
+      <path d="M12 5v14" />
+      <path d="M5 12h14" />
+    </svg>
+  );
+}
+
+function SendIcon({ size = 16 }: IconProps) {
+  return (
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height={size}
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+      viewBox="0 0 24 24"
+      width={size}
+    >
+      <path d="m4 4 16 8-16 8 4-8-4-8Z" />
+      <path d="M8 12h12" />
+    </svg>
+  );
+}
 
 export function CharacterEditor(): null {
   return null;
@@ -86,7 +148,7 @@ export function VoicePill({
         type="button"
       >
         <span className={pillClass}>
-          <Mic aria-hidden="true" size={18} />
+          <MicIcon size={18} />
         </span>
       </button>
       <div aria-hidden={!isOpen} className={chatClass}>
@@ -113,7 +175,7 @@ export function VoicePill({
             onClick={onAdd}
             type="button"
           >
-            <Plus aria-hidden="true" size={16} />
+            <PlusIcon size={16} />
           </button>
           <button
             aria-label={isRecording ? "Stop recording" : "Start recording"}
@@ -121,7 +183,7 @@ export function VoicePill({
             onClick={() => setRecordingState(!isRecording)}
             type="button"
           >
-            <Mic aria-hidden="true" size={16} />
+            <MicIcon size={16} />
           </button>
           <input
             className="elizaos-voice-pill__input"
@@ -135,7 +197,7 @@ export function VoicePill({
             onClick={submit}
             type="button"
           >
-            <Send aria-hidden="true" size={16} />
+            <SendIcon size={16} />
           </button>
         </div>
       </div>

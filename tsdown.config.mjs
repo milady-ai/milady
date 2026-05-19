@@ -53,6 +53,24 @@ function packageSourceEntry(packageRoot, localRelativePath) {
   return path.join(packageRoot, "packages", "app-core", localRelativePath);
 }
 
+function resolvePackageRoot(packageName) {
+  try {
+    return path.dirname(require.resolve(`${packageName}/package.json`));
+  } catch {}
+
+  const packageEntry = require.resolve(packageName);
+  let current = path.dirname(packageEntry);
+  while (current !== path.dirname(current)) {
+    const packageJsonPath = path.join(current, "package.json");
+    if (existsSync(packageJsonPath)) {
+      return current;
+    }
+    current = path.dirname(current);
+  }
+
+  throw new Error(`Could not locate ${packageName} package root`);
+}
+
 function appCoreEntry(subpath, localRelativePath) {
   const explicitEntry = explicitAppCoreEntry(localRelativePath);
   if (explicitEntry) {
@@ -75,8 +93,7 @@ function appCoreEntry(subpath, localRelativePath) {
   try {
     return require.resolve(packageSubpath);
   } catch (error) {
-    const packageJsonPath = require.resolve("@elizaos/app-core/package.json");
-    const packageRoot = path.dirname(packageJsonPath);
+    const packageRoot = resolvePackageRoot("@elizaos/app-core");
     const packageSource = packageSourceEntry(packageRoot, localRelativePath);
     if (existsSync(packageSource)) {
       return packageSource;

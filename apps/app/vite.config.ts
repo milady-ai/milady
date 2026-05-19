@@ -129,6 +129,55 @@ function tryResolve(id: string): string | undefined {
 const capacitorKeyboardEntry = tryResolve("@capacitor/keyboard");
 const capacitorPreferencesEntry = tryResolve("@capacitor/preferences");
 const capacitorAppEntry = tryResolve("@capacitor/app");
+
+function resolvePackageRoot(packageName: string): string | null {
+  const packageJsonPath = tryResolve(`${packageName}/package.json`);
+  if (packageJsonPath) {
+    return path.dirname(packageJsonPath);
+  }
+
+  const entry = tryResolve(packageName);
+  if (!entry) return null;
+
+  let current = path.dirname(entry);
+  while (current !== path.dirname(current)) {
+    const packageJson = path.join(current, "package.json");
+    if (fs.existsSync(packageJson)) {
+      const parentPackageJson = path.join(
+        path.dirname(current),
+        "package.json",
+      );
+      if (
+        path.basename(current) === "dist" &&
+        fs.existsSync(parentPackageJson)
+      ) {
+        return path.dirname(current);
+      }
+      return current;
+    }
+    current = path.dirname(current);
+  }
+
+  return null;
+}
+
+function firstExistingFile(candidates: string[]): string | null {
+  return (
+    candidates.find(
+      (candidate) =>
+        fs.existsSync(candidate) && fs.statSync(candidate).isFile(),
+    ) ?? null
+  );
+}
+
+function firstExistingDirectory(candidates: string[]): string | null {
+  return (
+    candidates.find(
+      (candidate) =>
+        fs.existsSync(candidate) && fs.statSync(candidate).isDirectory(),
+    ) ?? null
+  );
+}
 // `@elizaos/app-core` is always real. `@elizaos/app-wallet` is required by
 // onboarding callbacks + AppContext (useWalletState), so resolve it real
 // when present. `app-hyperscape` is real when its package is present.
@@ -314,14 +363,136 @@ function resolveLocalUiAliases(): Alias[] {
 
 function resolvePackageModeUiCompatAliases(): Alias[] {
   if (hasLocalElizaWorkspace) return [];
+  const uiRoot = resolvePackageRoot("@elizaos/ui");
+  const browserEntry = uiRoot
+    ? firstExistingFile([
+        path.join(uiRoot, "src/browser.ts"),
+        path.join(uiRoot, "packages/ui/src/browser.js"),
+        path.join(uiRoot, "dist/browser.js"),
+      ])
+    : null;
+  const voiceEntry = uiRoot
+    ? firstExistingFile([
+        path.join(uiRoot, "src/voice/index.ts"),
+        path.join(uiRoot, "packages/ui/src/voice/index.js"),
+        path.join(uiRoot, "dist/voice/index.js"),
+      ])
+    : null;
   return [
     {
       find: /^@elizaos\/ui\/browser$/,
-      replacement: path.join(here, "src/elizaos-ui-browser-compat.tsx"),
+      replacement:
+        browserEntry ?? path.join(here, "src/elizaos-ui-browser-compat.tsx"),
     },
     {
       find: /^@elizaos\/ui\/voice$/,
-      replacement: path.join(here, "src/elizaos-ui-voice-compat.ts"),
+      replacement:
+        voiceEntry ?? path.join(here, "src/elizaos-ui-voice-compat.ts"),
+    },
+  ];
+}
+
+function resolvePackageModeUiSourceAliases(): Alias[] {
+  if (hasLocalElizaWorkspace) return [];
+
+  const uiRoot = resolvePackageRoot("@elizaos/ui");
+  if (!uiRoot) return [];
+
+  const uiSourceRoot = firstExistingDirectory([
+    path.join(uiRoot, "src"),
+    path.join(uiRoot, "packages/ui/src"),
+    path.join(uiRoot, "dist"),
+  ]);
+  if (!uiSourceRoot) return [];
+
+  return [
+    {
+      find: /^@elizaos\/ui\/api$/,
+      replacement: path.join(uiSourceRoot, "api/index"),
+      customResolver: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/api\/(.+)$/,
+      replacement: `${uiSourceRoot}/api/$1`,
+      customResolver: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/components\/(.+)$/,
+      replacement: `${uiSourceRoot}/components/$1`,
+      customResolver: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/platform\/(.+)$/,
+      replacement: `${uiSourceRoot}/platform/$1`,
+      customResolver: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/state\/(.+)$/,
+      replacement: `${uiSourceRoot}/state/$1`,
+      customResolver: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/hooks\/(.+)$/,
+      replacement: `${uiSourceRoot}/hooks/$1`,
+      customResolver: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/lib\/(.+)$/,
+      replacement: `${uiSourceRoot}/lib/$1`,
+      customResolver: resolveExistingUiSourceModule,
+    },
+  ];
+}
+
+function resolvePackageModeAppCoreStyleAliases(): Alias[] {
+  if (hasLocalElizaWorkspace) return [];
+
+  const appCoreRoot = resolvePackageRoot("@elizaos/app-core");
+  const uiRoot = resolvePackageRoot("@elizaos/ui");
+  const candidateDirs = [
+    appCoreRoot ? path.join(appCoreRoot, "styles") : null,
+    appCoreRoot ? path.join(appCoreRoot, "dist/styles") : null,
+    uiRoot ? path.join(uiRoot, "styles") : null,
+    uiRoot ? path.join(uiRoot, "dist/styles") : null,
+    uiRoot ? path.join(uiRoot, "src/styles") : null,
+  ].filter((candidate): candidate is string => Boolean(candidate));
+  const styleDir = candidateDirs.find(
+    (candidate) =>
+      fs.existsSync(path.join(candidate, "styles.css")) &&
+      fs.existsSync(path.join(candidate, "brand-gold.css")),
+  );
+
+  return styleDir
+    ? [
+        {
+          find: /^@elizaos\/app-core\/styles\/(.*)$/,
+          replacement: `${styleDir}/$1`,
+        },
+      ]
+    : [];
+}
+
+function resolvePackageModeAppCoreBrowserAliases(): Alias[] {
+  if (hasLocalElizaWorkspace) return [];
+
+  const appCoreRoot = resolvePackageRoot("@elizaos/app-core");
+  if (!appCoreRoot) return [];
+
+  const browserEntry = firstExistingFile([
+    path.join(appCoreRoot, "src/browser.ts"),
+    path.join(appCoreRoot, "packages/app-core/src/browser.js"),
+    path.join(appCoreRoot, "dist/browser.js"),
+  ]);
+  if (!browserEntry) return [];
+
+  return [
+    {
+      find: /^@elizaos\/app-core$/,
+      replacement: browserEntry,
+    },
+    {
+      find: /^@elizaos\/app-core\.js$/,
+      replacement: browserEntry,
     },
   ];
 }
@@ -483,6 +654,8 @@ function resolveLocalAppCoreAliases(): Alias[] {
     ? elizaosAgentBrowserStubEntry
     : emptyNodeModuleEntry;
   const packageAgnosticAliases: Alias[] = [
+    ...resolvePackageModeAppCoreBrowserAliases(),
+    ...resolvePackageModeAppCoreStyleAliases(),
     {
       find: /^@elizaos\/agent$/,
       replacement: agentRootEntry,
@@ -895,17 +1068,25 @@ function resolveExistingUiSourceModule(id: string) {
     candidates.push(`${id.slice(0, -4)}.ts`);
   } else if (id.endsWith(".ts")) {
     candidates.push(`${id.slice(0, -3)}.tsx`);
+  } else if (id.endsWith(".jsx")) {
+    candidates.push(`${id.slice(0, -4)}.js`);
+  } else if (id.endsWith(".js")) {
+    candidates.push(`${id.slice(0, -3)}.jsx`);
   } else if (!path.extname(id)) {
     candidates.push(
       `${id}.ts`,
       `${id}.tsx`,
+      `${id}.js`,
+      `${id}.jsx`,
       path.join(id, "index.ts"),
       path.join(id, "index.tsx"),
+      path.join(id, "index.js"),
+      path.join(id, "index.jsx"),
     );
   }
 
   for (const candidate of candidates) {
-    if (fs.existsSync(candidate)) {
+    if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
       return candidate;
     }
   }
@@ -2719,6 +2900,7 @@ export default defineConfig({
       // Local source aliases are only installed when the eliza checkout exists.
       // Published-only builds should resolve normal @elizaos package exports.
       ...resolvePackageModeUiCompatAliases(),
+      ...resolvePackageModeUiSourceAliases(),
       ...resolveLocalUiAliases(),
       ...resolveLocalSharedAliases(),
       ...resolveLocalAppCoreAliases(),

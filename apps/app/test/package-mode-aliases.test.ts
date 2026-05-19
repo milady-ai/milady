@@ -54,17 +54,35 @@ describe("package mode aliases", () => {
       path.join(appRoot, "src/main.tsx"),
       "utf8",
     );
+    const viteConfigText = fs.readFileSync(
+      path.join(appRoot, "vite.config.ts"),
+      "utf8",
+    );
     const stubText = fs.readFileSync(
       path.join(appRoot, "src/optional-eliza-app-stub.tsx"),
       "utf8",
     );
 
     expect(mainText).toContain("@elizaos/ui/browser");
+    expect(viteConfigText).toContain("resolvePackageModeUiSourceAliases");
+    expect(viteConfigText).toContain("resolvePackageModeAppCoreBrowserAliases");
+    expect(viteConfigText).toContain("resolvePackageModeAppCoreStyleAliases");
     expect(stubText).toContain("type InventoryChainFilters");
     expect(stubText).toContain("type ChatSidebarWidgetDefinition");
     expect(mainText).not.toContain("@elizaos/ui/components/");
     expect(stubText).not.toContain("@elizaos/ui/state/");
     expect(stubText).not.toContain("@elizaos/ui/components/");
+  });
+
+  it("keeps package-mode UI compatibility modules self-contained", () => {
+    const browserCompatText = fs.readFileSync(
+      path.join(appRoot, "src/elizaos-ui-browser-compat.tsx"),
+      "utf8",
+    );
+
+    expect(browserCompatText).not.toContain("lucide-react");
+    expect(browserCompatText).toContain("function MicIcon");
+    expect(browserCompatText).toContain("function SendIcon");
   });
 
   it("patches all Bun-installed app-core stylesheet copies", () => {
