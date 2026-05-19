@@ -142,6 +142,8 @@ test("root build resolves app-core entries from packages by default", () => {
   assert.match(resolver, /preferLocal && existsSync/);
   assert.match(tsdownConfig, /"packages"/);
   assert.match(tsdownConfig, /require\.resolve\(packageSubpath\)/);
+  assert.match(tsdownConfig, /function resolvePackageRoot/);
+  assert.match(tsdownConfig, /packageSourceEntry/);
   assert.doesNotMatch(tsdownConfig, /entry:\s*["']eliza\/packages\/app-core/);
 });
 
@@ -341,5 +343,6 @@ test("eject and uneject scripts wire the tsconfig-mode helper", () => {
   const disableScript = read("scripts/disable-local-eliza-workspace.mjs");
   const restoreScript = read("scripts/restore-local-eliza-workspace.mjs");
   assert.match(disableScript, /applyTsconfigMode\(repoRoot, "packages"/);
+  assert.match(restoreScript, /applyTsconfigMode\(repoRoot, "packages"/);
   assert.match(restoreScript, /applyTsconfigMode\(repoRoot, "local"/);
 });

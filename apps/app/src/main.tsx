@@ -42,21 +42,19 @@ import {
   installForceFreshOnboardingClientPatch,
   installLocalProviderCloudPreferencePatch,
   isAppWindowRoute,
-  isDetachedWindowShell,
-  isPillWindowShell,
   getWindowNavigationPath,
-  resolveWindowShellRoute,
-  shouldInstallMainWindowOnboardingPatches,
   syncDetachedShellLocation,
 } from "@elizaos/app-core";
 import {
-  type Conversation,
-  type ConversationMessage,
-  createVoiceCapture,
-  type VoiceCaptureHandle,
   VoicePill,
   type VoicePillMessage,
-} from "@elizaos/ui";
+} from "@elizaos/ui/components/voice-pill/index";
+import {
+  createVoiceCapture,
+  type VoiceCaptureHandle,
+  type VoiceCaptureState,
+  type VoiceCaptureTranscriptSegment,
+} from "@elizaos/ui/voice";
 import { AppWindowRenderer } from "@elizaos/app-core";
 import { dispatchQueuedLifeOpsGithubCallbackFromUrl } from "@elizaos/app-lifeops/platform";
 import type { ShareTargetPayload } from "@elizaos/app-core/platform";
@@ -147,7 +145,7 @@ import {
   type IosRuntimeMode,
   resolveIosRuntimeConfig,
 } from "@elizaos/app-core";
-import { CharacterEditor } from "@elizaos/app-core/components/character/CharacterEditor";
+import { CharacterEditor } from "@elizaos/ui/components/character/CharacterEditor";
 
 declare global {
   interface Window {
@@ -239,6 +237,71 @@ async function registerMiladyOsSystemApps(): Promise<void> {
 
 function isDesktopPlatform(): boolean {
   return isElectrobunRuntime();
+}
+
+type WindowShellRoute =
+  | { mode: "main" }
+  | { mode: "settings"; tab?: string }
+  | {
+      mode: "surface";
+      tab:
+        | "browser"
+        | "chat"
+        | "cloud"
+        | "connectors"
+        | "plugins"
+        | "release"
+        | "triggers";
+    }
+  | { mode: "pill" };
+
+function resolveWindowShellRoute(
+  search = typeof window !== "undefined" ? window.location.search : "",
+): WindowShellRoute {
+  const params = new URLSearchParams(search);
+  const shell = params.get("shell");
+
+  if (shell === "settings") {
+    const tab = params.get("tab")?.trim() || undefined;
+    return tab ? { mode: "settings", tab } : { mode: "settings" };
+  }
+
+  if (shell === "pill") return { mode: "pill" };
+
+  if (shell === "surface") {
+    const tab = params.get("tab");
+    if (
+      tab === "browser" ||
+      tab === "chat" ||
+      tab === "release" ||
+      tab === "triggers" ||
+      tab === "plugins" ||
+      tab === "connectors" ||
+      tab === "cloud"
+    ) {
+      return { mode: "surface", tab };
+    }
+  }
+
+  return { mode: "main" };
+}
+
+function isDetachedWindowShell(
+  route: WindowShellRoute,
+): route is Exclude<WindowShellRoute, { mode: "main" } | { mode: "pill" }> {
+  return route.mode !== "main" && route.mode !== "pill";
+}
+
+function isPillWindowShell(
+  route: WindowShellRoute,
+): route is Extract<WindowShellRoute, { mode: "pill" }> {
+  return route.mode === "pill";
+}
+
+function shouldInstallMainWindowOnboardingPatches(
+  route: WindowShellRoute,
+): boolean {
+  return route.mode === "main";
 }
 
 const windowShellRoute = resolveWindowShellRoute();
@@ -337,6 +400,45 @@ const STALE_BOOTSTRAP_KEYS = [
   MOBILE_RUNTIME_MODE_STORAGE_KEY,
 ] as const;
 
+function readInjectedLocalAgentToken(): string | null {
+  try {
+    const injected = (
+      window as unknown as {
+        __ELIZA_API_TOKEN__?: string | null;
+        ElizaNative?: { getLocalAgentToken?: () => string | null };
+      }
+    ).__ELIZA_API_TOKEN__?.trim();
+    if (injected) return injected;
+
+    const nativeToken = (
+      window as unknown as {
+        ElizaNative?: { getLocalAgentToken?: () => string | null };
+      }
+    ).ElizaNative?.getLocalAgentToken?.()?.trim();
+    return nativeToken || null;
+  } catch {
+    return null;
+  }
+}
+
+function persistLocalAgentToken(token: string): void {
+  const trimmed = token.trim();
+  if (!trimmed) return;
+  appBootConfig.apiToken = trimmed;
+  appBootConfig.apiBase ??= window.location.origin;
+  try {
+    (
+      window as unknown as { __ELIZA_API_TOKEN__?: string }
+    ).__ELIZA_API_TOKEN__ = trimmed;
+  } catch {}
+  try {
+    window.localStorage.setItem(SELF_HOSTED_TOKEN_KEY, trimmed);
+  } catch {}
+  try {
+    client.setToken(trimmed);
+  } catch {}
+}
+
 function isLoopbackApiBase(value: unknown): boolean {
   if (typeof value !== "string" || !value.trim()) return false;
   try {
@@ -421,6 +523,9 @@ try {
     window.history.replaceState({}, "", url.toString());
   }
   if (!bootstrapToken) {
+    bootstrapToken = readInjectedLocalAgentToken();
+  }
+  if (!bootstrapToken) {
     try {
       const saved = window.localStorage.getItem(SELF_HOSTED_TOKEN_KEY)?.trim();
       if (saved) bootstrapToken = saved;
@@ -431,31 +536,8 @@ try {
   // (see `os/android/.../ElizaNativeBridge.java`). Pull it before the
   // first auth-status poll so the React shell never hits PairingView
   // for the loopback case where the device IS the agent.
-  if (!bootstrapToken) {
-    try {
-      const native = (
-        window as unknown as {
-          ElizaNative?: { getLocalAgentToken?: () => string | null };
-        }
-      ).ElizaNative;
-      const nativeToken = native?.getLocalAgentToken?.()?.trim();
-      if (nativeToken) {
-        bootstrapToken = nativeToken;
-        // Persist to the same key the fragment-token path uses so any
-        // later re-load through localStorage finds it without needing
-        // the bridge to be available at that moment.
-        try {
-          window.localStorage.setItem(SELF_HOSTED_TOKEN_KEY, nativeToken);
-        } catch {}
-      }
-    } catch {}
-  }
   if (bootstrapToken) {
-    appBootConfig.apiToken = bootstrapToken;
-    appBootConfig.apiBase ??= window.location.origin;
-    try {
-      client.setToken(bootstrapToken);
-    } catch {}
+    persistLocalAgentToken(bootstrapToken);
   }
 } catch (err) {
   console.warn(
@@ -486,9 +568,11 @@ forceDesktopDevLocalActiveServer();
 // falls into PairingView even though the bearer is about to be available.
 //
 // Poll the bridge for up to 90s after launch; the first non-null read
-// applies the bearer to the boot config + client and stops. Stock
-// Capacitor builds never expose `window.ElizaNative` so the watchdog
-// exits immediately on the first tick.
+// applies the bearer to boot config, client, globals, and localStorage.
+// This must replace any stale localStorage token from a previous app boot,
+// otherwise the device bridge can connect with an old query token and be
+// rejected by the local agent. Stock Capacitor builds never expose
+// `window.ElizaNative` so the watchdog exits immediately on the first tick.
 (function installOnDeviceBearerWatchdog() {
   if (typeof window === "undefined") return;
   const bridge = (
@@ -501,13 +585,10 @@ forceDesktopDevLocalActiveServer();
   const deadline = Date.now() + 90_000;
   const tick = () => {
     try {
-      if (client.hasToken()) return;
-      const token = bridge.getLocalAgentToken?.()?.trim();
+      const token = readInjectedLocalAgentToken();
       if (token) {
-        client.setToken(token);
-        try {
-          window.localStorage.setItem(SELF_HOSTED_TOKEN_KEY, token);
-        } catch {}
+        persistLocalAgentToken(token);
+        setBootConfig({ ...getBootConfig(), apiToken: token });
         return;
       }
     } catch (err) {
@@ -581,10 +662,9 @@ async function initializePlatform(): Promise<void> {
     // here. No-ops on Android, on iOS cloud/cloud-hybrid/remote-mac, and
     // when the native plugin isn't compiled into the binary.
     void bootIosLocalRuntimeIfApplicable();
-    // Android local runtime: when mobile-runtime-mode is "local", calls
-    // ElizaBunRuntimePlugin.start() which triggers ElizaAgentService to
-    // start the Bun backend and polls until /api/health reports ready.
-    // No-ops on iOS and when the plugin isn't compiled into the APK.
+    // Android local runtime: the Java ElizaAgentService / Agent bridge owns
+    // startup. This renderer hook only records the handoff and must not call
+    // the iOS BunRuntime plugin, which is not implemented in Android APKs.
     void bootAndroidLocalRuntimeIfApplicable();
   }
 
@@ -894,7 +974,16 @@ const PILL_CONVERSATION_STORAGE_KEY = "milady.pill.activeConversationId";
  * the pill renders. Skips entries with no display text and collapses message
  * roles to the binary user/agent split the pill UI expects.
  */
-function toPillMessage(message: ConversationMessage): VoicePillMessage | null {
+type PillMessage = {
+  id: string;
+  role: string;
+  text?: string | null;
+  timestamp?: number;
+  failureKind?: unknown;
+  [key: string]: unknown;
+};
+
+function toPillMessage(message: PillMessage): VoicePillMessage | null {
   const text = message.text?.trim() ?? "";
   if (!text) return null;
   return {
@@ -904,9 +993,7 @@ function toPillMessage(message: ConversationMessage): VoicePillMessage | null {
   };
 }
 
-function projectPillMessages(
-  messages: ConversationMessage[],
-): VoicePillMessage[] {
+function projectPillMessages(messages: PillMessage[]): VoicePillMessage[] {
   const tail = messages.slice(-PILL_MESSAGE_TAIL);
   const projected: VoicePillMessage[] = [];
   for (const message of tail) {
@@ -914,6 +1001,33 @@ function projectPillMessages(
     if (pill) projected.push(pill);
   }
   return projected;
+}
+
+function normalizePillMessage(message: unknown): PillMessage | null {
+  if (!message || typeof message !== "object") return null;
+  const raw = message as {
+    id?: unknown;
+    role?: unknown;
+    text?: unknown;
+    timestamp?: unknown;
+  };
+  if (typeof raw.id !== "string") return null;
+  return {
+    ...(message as Record<string, unknown>),
+    id: raw.id,
+    role: typeof raw.role === "string" ? raw.role : "assistant",
+    text: typeof raw.text === "string" ? raw.text : "",
+    timestamp: typeof raw.timestamp === "number" ? raw.timestamp : Date.now(),
+  };
+}
+
+function normalizePillMessages(messages: unknown[]): PillMessage[] {
+  const normalized: PillMessage[] = [];
+  for (const message of messages) {
+    const next = normalizePillMessage(message);
+    if (next) normalized.push(next);
+  }
+  return normalized;
 }
 
 function readPillConversationId(): string | null {
@@ -959,9 +1073,7 @@ function pickNewestConversation(
   let best = conversations[0];
   for (let i = 1; i < conversations.length; i++) {
     const candidate = conversations[i];
-    if (
-      conversationUpdatedAtMs(candidate) > conversationUpdatedAtMs(best)
-    ) {
+    if (conversationUpdatedAtMs(candidate) > conversationUpdatedAtMs(best)) {
       best = candidate;
     }
   }
@@ -990,7 +1102,7 @@ function conversationUpdatedAtMs(c: PillConversationSummary): number {
  * agent turns.
  */
 function PillRoot() {
-  const [messages, setMessages] = useState<ConversationMessage[]>([]);
+  const [messages, setMessages] = useState<PillMessage[]>([]);
   const conversationIdRef = useRef<string | null>(readPillConversationId());
   const sendInFlightRef = useRef<boolean>(false);
   const voiceCaptureRef = useRef<VoiceCaptureHandle | null>(null);
@@ -998,7 +1110,7 @@ function PillRoot() {
 
   // Append-or-replace by id so streaming token updates collapse onto a single
   // assistant turn without flicker.
-  const upsertMessage = useCallback((next: ConversationMessage) => {
+  const upsertMessage = useCallback((next: PillMessage) => {
     setMessages((prev) => {
       const index = prev.findIndex((entry) => entry.id === next.id);
       if (index < 0) return [...prev, next];
@@ -1042,7 +1154,7 @@ function PillRoot() {
       const { messages: history } =
         await client.getConversationMessages(convId);
       if (cancelled) return;
-      setMessages(history.map(normalizePillMessage));
+      setMessages(normalizePillMessages(history));
     })();
     return () => {
       cancelled = true;
@@ -1068,7 +1180,8 @@ function PillRoot() {
         if (!raw || typeof raw !== "object") return;
         const candidate = raw as { id?: unknown };
         if (typeof candidate.id !== "string") return;
-        upsertMessage(normalizePillMessage(raw));
+        const message = normalizePillMessage(raw);
+        if (message) upsertMessage(message);
       },
     );
     return () => {
@@ -1124,7 +1237,7 @@ function PillRoot() {
           upsertMessage({
             id: assistantMsgId,
             role: "assistant",
-            text: result.text,
+            text: typeof result.text === "string" ? result.text : "",
             timestamp: Date.now(),
             ...(result.failureKind ? { failureKind: result.failureKind } : {}),
           });
@@ -1152,12 +1265,12 @@ function PillRoot() {
     };
   }, []);
 
-  // Voice capture via createVoiceCapture from @elizaos/ui — see eliza/packages/ui/src/voice/voice-capture-factory.ts
+  // Voice capture via createVoiceCapture from @elizaos/ui/voice.
   const handleRecordingChange = useCallback((recording: boolean): void => {
     if (recording) {
       if (!voiceCaptureRef.current) {
         voiceCaptureRef.current = createVoiceCapture({
-          onTranscript: (segment) => {
+          onTranscript: (segment: VoiceCaptureTranscriptSegment) => {
             if (!segment.final) {
               // Interim segments are best-guess partials — useful for a future
               // live caption surface but not safe to submit. Log only.
@@ -1171,7 +1284,7 @@ function PillRoot() {
             if (!submit) return;
             submit(segment.text);
           },
-          onStateChange: (state, error) => {
+          onStateChange: (state: VoiceCaptureState, error?: Error) => {
             if (error) {
               console.warn(
                 `${APP_LOG_PREFIX} [pill] voice ${state}`,
@@ -1434,6 +1547,40 @@ function resolveDeviceBridgeUrl(config: IosRuntimeConfig): string | null {
   }
 }
 
+async function resolveDeviceBridgePairingToken(
+  config: IosRuntimeConfig,
+): Promise<string | undefined> {
+  const configured = config.deviceBridgeToken?.trim();
+  if (configured) return configured;
+
+  if (!(isAndroid && config.mode === "local")) return undefined;
+
+  try {
+    const localAgent = Agent as typeof Agent & {
+      getLocalAgentToken?: () => Promise<{
+        available?: boolean;
+        token?: string | null;
+      }>;
+    };
+    const result = await localAgent.getLocalAgentToken?.();
+    const token = result?.token?.trim();
+    if (result?.available && token) {
+      persistLocalAgentToken(token);
+      setBootConfig({ ...getBootConfig(), apiToken: token });
+      return token;
+    }
+  } catch {}
+
+  const injected = readInjectedLocalAgentToken();
+  if (injected) {
+    persistLocalAgentToken(injected);
+    setBootConfig({ ...getBootConfig(), apiToken: injected });
+    return injected;
+  }
+
+  return undefined;
+}
+
 async function initializeMobileDeviceBridge(): Promise<void> {
   const runtimeConfig = getCurrentIosRuntimeConfig();
   if (
@@ -1450,12 +1597,17 @@ async function initializeMobileDeviceBridge(): Promise<void> {
 
   mobileDeviceBridgeStartPromise = (async () => {
     try {
+      const pairingToken = await resolveDeviceBridgePairingToken(runtimeConfig);
+      if (isAndroid && runtimeConfig.mode === "local" && !pairingToken) {
+        setTimeout(() => {
+          void initializeMobileDeviceBridge();
+        }, 1_000);
+        return;
+      }
       const deviceId = await getOrCreateDeviceBridgeId();
       mobileDeviceBridgeClient = startDeviceBridgeClient({
         agentUrl,
-        ...(runtimeConfig.deviceBridgeToken
-          ? { pairingToken: runtimeConfig.deviceBridgeToken }
-          : {}),
+        ...(pairingToken ? { pairingToken } : {}),
         deviceId,
         onStateChange: (state, detail) => {
           console.info(

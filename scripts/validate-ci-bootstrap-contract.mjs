@@ -66,10 +66,13 @@ const requiredActionSnippets = [
   "run: node scripts/build-local-eliza-ci-overrides.mjs",
 ];
 
+const elizaHashFilesGuard =
+  "if: $" + "{{ hashFiles('eliza/package.json') != '' }}";
+
 const forbiddenActionSnippets = ["bun add --no-save --dev"];
 
 const requiredAlignScriptSnippets = [
-  "function resolveInstalledPackage(packageName)",
+  "function resolveInstalledPackage(packageName,",
   "function ensureBuiltLocalPackage",
   'linkRootPackage(\n  "bun-types"',
   'linkRootPackage(\n  "@types/react"',
@@ -80,7 +83,7 @@ const requiredAlignScriptSnippets = [
   '"@elizaos/plugin-streaming"',
   '"@elizaos/cloud-routing"',
   '"dist/node/index.node.js"',
-  '"typescript/dist/index.js"',
+  '"src/dist/index.js"',
 ];
 
 const disableMarkers = [
@@ -437,7 +440,7 @@ function assertAgentReviewAuthBootstrap(targetFailures) {
       "run: node scripts/align-eliza-ci-node-modules.mjs",
       "- name: Generate protobuf types",
       "- name: Build local eliza runtime plugins",
-      "if: ${{ hashFiles('eliza/package.json') != '' }}",
+      elizaHashFilesGuard,
       "(cd eliza/packages/core && bun run build)",
       "(cd eliza/plugins/plugin-agent-skills && bun run build)",
       "- name: Run auth test suite",

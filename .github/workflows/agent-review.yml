@@ -156,6 +156,10 @@ jobs:
       - name: Build local eliza runtime plugins
         if: ${{ hashFiles('eliza/package.json') != '' }}
         run: |
+          if [ ! -d eliza/packages/core ]; then
+            echo "eliza checkout is absent; skipping local runtime plugin build"
+            exit 0
+          fi
           if [ ! -f eliza/packages/core/dist/index.node.js ] || [ ! -f eliza/packages/core/dist/index.d.ts ]; then
             (cd eliza/packages/core && bun run build)
           fi

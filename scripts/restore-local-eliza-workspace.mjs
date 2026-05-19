@@ -160,10 +160,10 @@ export function restoreLocalElizaWorkspace(
   if (!fs.existsSync(disabledElizaRoot)) {
     if (!fs.existsSync(elizaRoot)) {
       log(
-        "restore-local-eliza-workspace: .eliza.ci-disabled not present and eliza/ is missing; skipping restore.",
+        "restore-local-eliza-workspace: .eliza.ci-disabled not present and eliza/ is missing; keeping package-mode paths.",
       );
       restoreRootPackageJson(repoRoot, { log, errorLog });
-      applyTsconfigMode(repoRoot, "local", { log });
+      applyTsconfigMode(repoRoot, "packages", { log });
       return false;
     }
     ensureNestedElizaSubmodules(repoRoot, { log, errorLog });

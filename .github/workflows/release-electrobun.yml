@@ -128,6 +128,28 @@ jobs:
         with:
           submodules: false
 
+      - name: Initialize eliza source checkout
+        run: |
+          if [ ! -f eliza/package.json ]; then
+            git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza
+            if [ -n "${MILADY_ELIZA_REF:-}" ]; then
+              git -C eliza fetch --depth=1 origin "$MILADY_ELIZA_REF"
+              git -C eliza checkout --quiet FETCH_HEAD
+              echo "Pinned eliza to ${MILADY_ELIZA_REF}"
+            fi
+          fi
+
+      - name: Prepare Whisper model artifact
+        run: bash eliza/packages/app-core/platforms/electrobun/scripts/ensure-whisper-model.sh base.en
+
+      - name: Upload Whisper model artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: whisper-model-base-en
+          path: ~/.cache/eliza/whisper/ggml-base.en.bin
+          if-no-files-found: error
+          retention-days: 7
+
       - name: Determine version + env
         id: version
         env:
@@ -667,6 +689,18 @@ jobs:
         run: bun run postinstall
         env:
           MILADY_NO_VISION_DEPS: ${{ matrix.platform.os == 'windows' && '1' || '' }}
+
+      - name: Download Whisper model artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: whisper-model-base-en
+          path: ${{ runner.temp }}/whisper-model
+
+      - name: Seed Whisper model cache
+        run: |
+          mkdir -p "$HOME/.cache/eliza/whisper"
+          cp "$RUNNER_TEMP/whisper-model/ggml-base.en.bin" "$HOME/.cache/eliza/whisper/ggml-base.en.bin"
+          test -s "$HOME/.cache/eliza/whisper/ggml-base.en.bin"
 
       - name: Apply Electrobun release compatibility patches
         run: node scripts/patch-electrobun-release-compat.mjs

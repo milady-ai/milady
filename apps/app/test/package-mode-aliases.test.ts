@@ -49,9 +49,13 @@ describe("package mode aliases", () => {
     expect(mainText).not.toContain("@elizaos/ui/dist/styles/");
   });
 
-  it("imports packaged app-core component and state exports instead of private ui source paths", () => {
+  it("imports public ui package subpaths for ui-owned component and state types", () => {
     const mainText = fs.readFileSync(
       path.join(appRoot, "src/main.tsx"),
+      "utf8",
+    );
+    const viteConfigText = fs.readFileSync(
+      path.join(appRoot, "vite.config.ts"),
       "utf8",
     );
     const stubText = fs.readFileSync(
@@ -60,15 +64,48 @@ describe("package mode aliases", () => {
     );
 
     expect(mainText).toContain(
+      "@elizaos/ui/components/character/CharacterEditor",
+    );
+    expect(mainText).toContain("@elizaos/ui/components/voice-pill/index");
+    expect(mainText).toContain("@elizaos/ui/voice");
+    expect(stubText).toContain("@elizaos/ui/state/types");
+    expect(stubText).toContain("@elizaos/ui/components/chat/widgets/types");
+    expect(stubText).toContain("@elizaos/ui/components/ui/confirm-dialog");
+    expect(viteConfigText).toContain("resolvePackageModeUiSourceAliases");
+    expect(viteConfigText).toContain("resolvePackageModeAppCoreBrowserAliases");
+    expect(viteConfigText).toContain("resolvePackageModeAppCoreStyleAliases");
+    expect(mainText).not.toContain("@elizaos/ui/dist/");
+    expect(stubText).not.toContain("@elizaos/ui/dist/");
+  });
+
+  it("keeps package-mode build aliases for ui subpaths that alpha packages have not published yet", () => {
+    const viteConfigText = fs.readFileSync(
+      path.join(appRoot, "vite.config.ts"),
+      "utf8",
+    );
+
+    expect(viteConfigText).toContain("resolvePackageModeUiCompatAliases");
+    expect(viteConfigText).toContain("eliza-ui-voice-capture-fallback.ts");
+    expect(viteConfigText).toContain("eliza-ui-voice-pill-fallback.tsx");
+    expect(viteConfigText).toContain(
       "@elizaos/app-core/components/character/CharacterEditor",
     );
-    expect(stubText).toContain("@elizaos/app-core/state/types");
-    expect(stubText).toContain(
-      "@elizaos/app-core/components/chat/widgets/types",
+  });
+
+  it("keeps package-mode voice fallback modules self-contained", () => {
+    const voicePillFallbackText = fs.readFileSync(
+      path.join(appRoot, "src/eliza-ui-voice-pill-fallback.tsx"),
+      "utf8",
     );
-    expect(mainText).not.toContain("@elizaos/ui/components/");
-    expect(stubText).not.toContain("@elizaos/ui/state/");
-    expect(stubText).not.toContain("@elizaos/ui/components/");
+    const voiceCaptureFallbackText = fs.readFileSync(
+      path.join(appRoot, "src/eliza-ui-voice-capture-fallback.ts"),
+      "utf8",
+    );
+
+    expect(voicePillFallbackText).not.toContain("lucide-react");
+    expect(voicePillFallbackText).toContain("function MicIcon");
+    expect(voicePillFallbackText).toContain("function SendIcon");
+    expect(voiceCaptureFallbackText).toContain("createVoiceCapture");
   });
 
   it("patches all Bun-installed app-core stylesheet copies", () => {
