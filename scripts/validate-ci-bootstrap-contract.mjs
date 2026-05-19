@@ -437,6 +437,7 @@ function assertAgentReviewAuthBootstrap(targetFailures) {
       "run: node scripts/align-eliza-ci-node-modules.mjs",
       "- name: Generate protobuf types",
       "- name: Build local eliza runtime plugins",
+      "if: ${{ hashFiles('eliza/package.json') != '' }}",
       "(cd eliza/packages/core && bun run build)",
       "(cd eliza/plugins/plugin-agent-skills && bun run build)",
       "- name: Run auth test suite",

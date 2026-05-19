@@ -154,6 +154,7 @@ jobs:
           fi
 
       - name: Build local eliza runtime plugins
+        if: ${{ hashFiles('eliza/package.json') != '' }}
         run: |
           if [ ! -f eliza/packages/core/dist/index.node.js ] || [ ! -f eliza/packages/core/dist/index.d.ts ]; then
             (cd eliza/packages/core && bun run build)
