@@ -6,6 +6,10 @@ const workflow = (name: string) =>
   fs.readFileSync(`.github/workflows/${name}`, "utf8");
 
 describe("CI bootstrap contract", () => {
+  const localUpstreamsEnv =
+    "MILADY_FORCE_LOCAL_UPSTREAMS: $" +
+    "{{ hashFiles('eliza/package.json') != '' && '1' || '' }}";
+
   it("declares the local upstream postinstall skip before CI uses it", () => {
     const ci = workflow("ci.yml");
     const setupAction = fs.readFileSync(
@@ -49,9 +53,7 @@ describe("CI bootstrap contract", () => {
 
       expect(step, `${file} missing local package link step`).not.toBeNull();
       expect(step?.[1]).toContain("hashFiles('eliza/package.json') != ''");
-      expect(ci).toContain(
-        "MILADY_FORCE_LOCAL_UPSTREAMS: ${{ hashFiles('eliza/package.json') != '' && '1' || '' }}",
-      );
+      expect(ci).toContain(localUpstreamsEnv);
     }
   });
 

@@ -68,6 +68,9 @@ const requiredActionSnippets = [
 
 const elizaHashFilesGuard =
   "if: $" + "{{ hashFiles('eliza/package.json') != '' }}";
+const localUpstreamsEnvGuard =
+  "MILADY_FORCE_LOCAL_UPSTREAMS: $" +
+  "{{ hashFiles('eliza/package.json') != '' && '1' || '' }}";
 
 const forbiddenActionSnippets = ["bun add --no-save --dev"];
 
@@ -376,34 +379,33 @@ function assertCiPackageModeElizaGuards(
   workflowPath,
   targetFailures,
 ) {
-  const expected =
-    workflowPath.endsWith("ci-fork.yml")
-      ? [
-          {
-            jobName: "build",
-            stepNames: ["Link local @elizaos workspace packages"],
-          },
-        ]
-      : [
-          {
-            jobName: "pre-review",
-            stepNames: [
-              "Generate i18n keyword data",
-              "Build eliza packages required for typecheck",
-            ],
-          },
-          {
-            jobName: "typecheck",
-            stepNames: ["Build eliza packages required for typecheck"],
-          },
-          {
-            jobName: "build",
-            stepNames: [
-              "Build eliza packages required for typecheck",
-              "Link local @elizaos workspace packages",
-            ],
-          },
-        ];
+  const expected = workflowPath.endsWith("ci-fork.yml")
+    ? [
+        {
+          jobName: "build",
+          stepNames: ["Link local @elizaos workspace packages"],
+        },
+      ]
+    : [
+        {
+          jobName: "pre-review",
+          stepNames: [
+            "Generate i18n keyword data",
+            "Build eliza packages required for typecheck",
+          ],
+        },
+        {
+          jobName: "typecheck",
+          stepNames: ["Build eliza packages required for typecheck"],
+        },
+        {
+          jobName: "build",
+          stepNames: [
+            "Build eliza packages required for typecheck",
+            "Link local @elizaos workspace packages",
+          ],
+        },
+      ];
 
   for (const { jobName, stepNames } of expected) {
     const jobBlock = findWorkflowJobBlock(workflowText, jobName);
@@ -431,12 +433,7 @@ function assertCiPackageModeElizaGuards(
       }
     }
 
-    if (
-      jobName === "build" &&
-      !jobBlock.includes(
-        "MILADY_FORCE_LOCAL_UPSTREAMS: ${{ hashFiles('eliza/package.json') != '' && '1' || '' }}",
-      )
-    ) {
+    if (jobName === "build" && !jobBlock.includes(localUpstreamsEnvGuard)) {
       targetFailures.push(
         `${workflowPath} build job must only force local upstream aliases when eliza/ is present`,
       );
