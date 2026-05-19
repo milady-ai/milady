@@ -254,18 +254,18 @@ function patchElectrobunAgentChildPathFallback(raw) {
   }
 
   const next = raw.replace(
-    /      const bunDir = path\.dirname\(bunExecutable\);\r?\n      const existingPath = childEnv\.PATH;\r?\n      if \(!existingPath\.split\(path\.delimiter\)\.includes\(bunDir\)\) \{\r?\n        childEnv\.PATH = bunDir \+ path\.delimiter \+ existingPath;\r?\n        diagnosticLog\(`\[Agent\] Prepended bun dir to child PATH: \$\{bunDir\}`\);\r?\n      \}\r?\n/,
-    `      const bunDir = path.dirname(bunExecutable);
-      const existingPathKey =
-        childEnv.PATH !== undefined ? "PATH" : "Path";
-      const existingPath =
-        childEnv[existingPathKey] ?? process.env.PATH ?? process.env.Path ?? "";
-      if (!existingPath.split(path.delimiter).includes(bunDir)) {
-        childEnv[existingPathKey] = existingPath
-          ? bunDir + path.delimiter + existingPath
-          : bunDir;
-        diagnosticLog(\`[Agent] Prepended bun dir to child PATH: \${bunDir}\`);
-      }
+    /([ \t]*)const bunDir = path\.dirname\(bunExecutable\);\r?\n\1const existingPath = childEnv\.PATH(?: \?\? "")?;\r?\n\1if \(!existingPath\.split\(path\.delimiter\)\.includes\(bunDir\)\) \{\r?\n\1[ \t]*childEnv\.PATH = bunDir \+ path\.delimiter \+ existingPath;\r?\n\1[ \t]*diagnosticLog\(`\[Agent\] Prepended bun dir to child PATH: \$\{bunDir\}`\);\r?\n\1\}\r?\n/,
+    (_, indent) => `${indent}const bunDir = path.dirname(bunExecutable);
+${indent}const existingPathKey =
+${indent}  childEnv.PATH !== undefined ? "PATH" : "Path";
+${indent}const existingPath =
+${indent}  childEnv[existingPathKey] ?? process.env.PATH ?? process.env.Path ?? "";
+${indent}if (!existingPath.split(path.delimiter).includes(bunDir)) {
+${indent}  childEnv[existingPathKey] = existingPath
+${indent}    ? bunDir + path.delimiter + existingPath
+${indent}    : bunDir;
+${indent}  diagnosticLog(\`[Agent] Prepended bun dir to child PATH: \${bunDir}\`);
+${indent}}
 `,
   );
 
