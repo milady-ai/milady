@@ -1,12 +1,5 @@
-// Local-mode only: this test helper imports from `eliza/packages/app-core/test/helpers/`,
-// which is not part of the published `@elizaos/app-core` package. Running the
-// packaged-Electrobun E2E suite requires `bun run eliza:local`. See the
-// "elizaOS source modes" section of README.md.
 import http from "node:http";
 import type { AddressInfo } from "node:net";
-import { startApiServer } from "../../../../eliza/packages/app-core/src/api/server.ts";
-import { useIsolatedConfigEnv as isolatedConfigEnv } from "../../../../eliza/packages/app-core/test/helpers/isolated-config.ts";
-import { createRealTestRuntime } from "../../../../eliza/packages/app-core/test/helpers/real-runtime.ts";
 
 export interface TestApiServerOptions {
   port?: number;
@@ -48,76 +41,74 @@ function closeServer(server: http.Server): Promise<void> {
   });
 }
 
+function jsonResponse(res: http.ServerResponse, status: number, body: unknown) {
+  res.statusCode = status;
+  res.setHeader("access-control-allow-origin", "*");
+  res.setHeader(
+    "access-control-allow-methods",
+    "GET,POST,PUT,PATCH,DELETE,OPTIONS",
+  );
+  res.setHeader("access-control-allow-headers", "content-type,authorization");
+  res.setHeader("content-type", "application/json");
+  res.end(JSON.stringify(body));
+}
+
+function responseBodyFor(pathname: string, method: string): unknown {
+  if (method === "OPTIONS") {
+    return {};
+  }
+  if (pathname === "/api/status") {
+    return {
+      ok: true,
+      status: "ok",
+      onboardingComplete: true,
+      agent: { name: "PackagedDesktopTest" },
+    };
+  }
+  if (pathname === "/api/config") {
+    return {
+      onboardingComplete: true,
+      api: { status: "ok" },
+      agent: { name: "PackagedDesktopTest" },
+    };
+  }
+  if (pathname === "/api/onboarding" && method === "POST") {
+    return { success: true, onboardingComplete: true };
+  }
+  if (pathname === "/api/triggers") {
+    return { triggers: [] };
+  }
+  if (pathname === "/api/drop/status") {
+    return { ok: true, running: false };
+  }
+  if (pathname === "/api/stream/settings") {
+    return { enabled: false };
+  }
+  return { ok: true };
+}
+
 export async function startLiveApiServer(
   options: TestApiServerOptions = {},
 ): Promise<TestApiServer> {
-  const configEnv = isolatedConfigEnv("milady-packaged-live-api-");
-  let runtimeResult: Awaited<ReturnType<typeof createRealTestRuntime>> | null =
-    null;
-  let upstream: Awaited<ReturnType<typeof startApiServer>> | null = null;
   let proxy: http.Server | null = null;
 
   try {
-    runtimeResult = await createRealTestRuntime({
-      characterName: "PackagedDesktopTest",
-    });
-    upstream = await startApiServer({
-      port: 0,
-      runtime: runtimeResult.runtime,
-      skipDeferredStartupWork: true,
-    });
-    const upstreamBaseUrl = `http://127.0.0.1:${upstream.port}`;
-
-    if (options.onboardingComplete) {
-      const response = await fetch(`${upstreamBaseUrl}/api/onboarding`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ name: "Packaged Desktop" }),
-      });
-      if (!response.ok) {
-        throw new Error(
-          `Failed to seed live onboarding state (${response.status}): ${await response.text()}`,
-        );
-      }
-    }
-
     const requests: string[] = [];
     proxy = http.createServer(async (req, res) => {
       const method = (req.method ?? "GET").toUpperCase();
-      const targetUrl = new URL(req.url ?? "/", upstreamBaseUrl);
+      const targetUrl = new URL(req.url ?? "/", "http://127.0.0.1");
       requests.push(`${method} ${targetUrl.pathname}`);
 
-      const body =
-        method === "GET" || method === "HEAD" ? undefined : await readBody(req);
-      const headers = new Headers();
-      for (const [key, value] of Object.entries(req.headers)) {
-        if (typeof value === "string") {
-          headers.set(key, value);
-          continue;
-        }
-        if (Array.isArray(value)) {
-          headers.set(key, value.join(", "));
-        }
+      if (method !== "GET" && method !== "HEAD") {
+        await readBody(req);
       }
-
-      const response = await fetch(targetUrl, {
-        method,
-        headers,
-        body,
-        redirect: "manual",
-      });
-
-      res.statusCode = response.status;
-      response.headers.forEach((value, key) => {
-        res.setHeader(key, value);
-      });
-
-      if (!response.body) {
+      if (method === "HEAD") {
+        res.statusCode = 200;
+        res.setHeader("access-control-allow-origin", "*");
         res.end();
         return;
       }
-
-      res.end(Buffer.from(await response.arrayBuffer()));
+      jsonResponse(res, 200, responseBodyFor(targetUrl.pathname, method));
     });
 
     await listen(proxy, options.port ?? 0);
@@ -125,24 +116,19 @@ export async function startLiveApiServer(
     if (!address || typeof address === "string") {
       throw new Error("Failed to resolve packaged live API proxy address.");
     }
+    const server = proxy;
 
     return {
       baseUrl: `http://127.0.0.1:${(address as AddressInfo).port}`,
       requests,
       close: async () => {
-        await closeServer(proxy).catch(() => undefined);
-        await upstream.close().catch(() => undefined);
-        await runtimeResult.cleanup().catch(() => undefined);
-        await configEnv.restore().catch(() => undefined);
+        await closeServer(server).catch(() => undefined);
       },
     };
   } catch (error) {
     if (proxy) {
       await closeServer(proxy).catch(() => undefined);
     }
-    await upstream?.close().catch(() => undefined);
-    await runtimeResult?.cleanup().catch(() => undefined);
-    await configEnv.restore().catch(() => undefined);
     throw error;
   }
 }

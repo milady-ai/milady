@@ -4,15 +4,52 @@ import fs from "node:fs";
 import path from "node:path";
 
 const repoRoot = process.cwd();
+
+function findPackagedRendererRoots(root) {
+  if (!fs.existsSync(root)) return [];
+
+  const results = [];
+  const stack = [root];
+  while (stack.length > 0) {
+    const current = stack.pop();
+    const entries = fs.readdirSync(current, { withFileTypes: true });
+    if (
+      path.basename(current) === "renderer" &&
+      entries.some((entry) => entry.isFile() && entry.name === "index.html")
+    ) {
+      results.push(current);
+      continue;
+    }
+
+    for (const entry of entries) {
+      if (entry.isDirectory()) {
+        stack.push(path.join(current, entry.name));
+      }
+    }
+  }
+
+  return results.sort();
+}
+
+const electrobunDir = path.join(
+  repoRoot,
+  "eliza/packages/app-core/platforms/electrobun",
+);
 const rendererRoots = [
   "apps/app/dist",
   "eliza/packages/app/dist",
   "eliza/apps/app/dist",
 ]
   .map((relativePath) => path.join(repoRoot, relativePath))
+  .concat(
+    findPackagedRendererRoots(path.join(electrobunDir, "build")),
+    findPackagedRendererRoots(path.join(electrobunDir, "artifacts")),
+  )
   .filter((candidate) => fs.existsSync(candidate));
 const sourceRoots = [
   ...rendererRoots,
+  path.join(repoRoot, "eliza/plugins/plugin-companion/public"),
+  path.join(repoRoot, "eliza/plugins/plugin-companion/public_src"),
   path.join(repoRoot, "eliza/plugins/app-companion/public"),
   path.join(repoRoot, "eliza/plugins/app-companion/public_src"),
   path.join(repoRoot, "apps/homepage/public"),

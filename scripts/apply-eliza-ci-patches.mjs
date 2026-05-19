@@ -124,6 +124,14 @@ function writeFileText(filePath, content, label, mode) {
   console.log(`[apply-eliza-ci-patches] patched ${label}`);
 }
 
+function writeFileTextIfMissing(filePath, content, label, sentinel, mode) {
+  if (fs.existsSync(filePath)) {
+    const raw = fs.readFileSync(filePath, "utf8");
+    if (raw === content || raw.includes(sentinel)) return;
+  }
+  writeFileText(filePath, content, label, mode);
+}
+
 function patchCloudDockerfile(raw) {
   let next = raw;
   if (!next.includes("COPY patches ./patches")) {
@@ -206,6 +214,109 @@ function patchCoreStateTypes(raw) {
   return raw.replace('format: "JSON";', 'format: "JSON" | "TOON";');
 }
 
+function patchCoreTsconfigLocalPrompts(raw) {
+  if (raw.includes('"@elizaos/prompts": ["../prompts/src/index.ts"]')) {
+    return raw;
+  }
+
+  return raw.replace(
+    '"@elizaos/contracts/*": ["../contracts/src/*"],',
+    [
+      '"@elizaos/contracts/*": ["../contracts/src/*"],',
+      '\t\t\t"@elizaos/prompts": ["../prompts/src/index.ts"],',
+      '\t\t\t"@elizaos/prompts/*": ["../prompts/src/*"],',
+    ].join("\n"),
+  );
+}
+
+function patchCoreToonParser(raw) {
+  if (raw.includes("export function parseToonKeyValue")) {
+    return raw;
+  }
+
+  const parser = `function parseStructuredResponseFence(text: string): string {
+\tconst trimmed = text.trim();
+\tconst match = /^\\\`\\\`\\\`(?:toon|text)?\\s*([\\s\\S]*?)\\s*\\\`\\\`\\\`$/i.exec(trimmed);
+\treturn match?.[1]?.trim() ?? trimmed;
+}
+
+function parseToonScalar(value: string): unknown {
+\tif (!value) return "";
+\tif (value === "null") return null;
+\tif (
+\t\t(value.startsWith('"') && value.endsWith('"')) ||
+\t\t(value.startsWith("[") && value.endsWith("]")) ||
+\t\t(value.startsWith("{") && value.endsWith("}"))
+\t) {
+\t\ttry {
+\t\t\treturn JSON.parse(value);
+\t\t} catch {
+\t\t\treturn value;
+\t\t}
+\t}
+\treturn value;
+}
+
+/**
+ * Parses the simple TOON key-value shape used by generated plugin prompts.
+ *
+ * Supported fields are \`key: value\` and indexed arrays like
+ * \`items[0]: value\`. Values stay as strings unless they are JSON literals,
+ * which preserves large IDs such as Discord snowflakes.
+ */
+export function parseToonKeyValue<T = Record<string, unknown>>(text: string): T | null {
+\tconst body = parseStructuredResponseFence(text);
+\tif (!body) return null;
+
+\tconst result: Record<string, unknown> = {};
+\tlet found = false;
+\tfor (const rawLine of body.split(/\\r?\\n/)) {
+\t\tconst line = rawLine.trim();
+\t\tif (!line || line.startsWith("#")) continue;
+
+\t\tconst match = /^([A-Za-z_][\\w.-]*)(?:\\[(\\d+)\\])?\\s*:\\s*(.*)$/.exec(line);
+\t\tif (!match) continue;
+
+\t\tfound = true;
+\t\tconst [, key, arrayIndex, rawValue] = match;
+\t\tconst value = parseToonScalar(rawValue.trim());
+\t\tif (arrayIndex === undefined) {
+\t\t\tresult[key] = value;
+\t\t\tcontinue;
+\t\t}
+
+\t\tconst index = Number.parseInt(arrayIndex, 10);
+\t\tconst current = result[key];
+\t\tconst values = Array.isArray(current) ? current : [];
+\t\tvalues[index] = value;
+\t\tresult[key] = values;
+\t}
+
+\treturn found ? (result as T) : null;
+}
+
+`;
+
+  return raw.replace(
+    /\/\*\*\r?\n \* Legacy structured-response parser\./,
+    `${parser}/**\n * Legacy structured-response parser.`,
+  );
+}
+
+function patchCoreToonParserExports(raw) {
+  if (raw.includes("parseKeyValueXml, parseToonKeyValue")) {
+    return raw.replaceAll(
+      "parseKeyValueXml, parseToonKeyValue, parseToonKeyValue",
+      "parseKeyValueXml, parseToonKeyValue",
+    );
+  }
+
+  return raw.replaceAll(
+    "addHeader, composePromptFromState, parseKeyValueXml",
+    "addHeader, composePromptFromState, parseKeyValueXml, parseToonKeyValue",
+  );
+}
+
 function patchComputerUseVisionContextProvider(raw) {
   const providerPath = path.join(
     elizaDir,
@@ -269,11 +380,180 @@ export async function runIosBridgeCli(
   );
 }
 
-function patchRuntimeCopyTarSafeHoists(raw) {
-  let next = raw.replace(
-    'const ALWAYS_HOISTED_PACKAGES = new Set(["@elizaos/core"]);',
-    'const ALWAYS_HOISTED_PACKAGES = new Set(["@elizaos/core", "commander"]);',
+function ensureConstStringArrayEntry(raw, arrayName, entry) {
+  const arrayPattern = new RegExp(
+    `const ${arrayName} = \\[\\r?\\n([\\s\\S]*?)\\r?\\n\\] as const;`,
   );
+  return raw.replace(arrayPattern, (match, body) => {
+    if (body.includes(`"${entry}"`)) return match;
+    const lineEnding = match.includes("\r\n") ? "\r\n" : "\n";
+    const trimmedBody = body.trimEnd();
+    return `const ${arrayName} = [${lineEnding}${trimmedBody}${lineEnding}  "${entry}",${lineEnding}] as const;`;
+  });
+}
+
+function patchReleasePluginPolicySupportPackages(raw) {
+  let next = raw;
+  if (!next.includes("BASELINE_PLUGIN_SUPPORT_PACKAGES")) {
+    next = next
+      .replace(
+        /const BASELINE_PROVIDER_PLUGINS = \[\r?\n {2}"@elizaos\/plugin-elizacloud",\r?\n {2}"@elizaos\/plugin-openai",\r?\n {2}"@elizaos\/plugin-anthropic",\r?\n {2}"@elizaos\/plugin-ollama",\r?\n\] as const;\r?\n/,
+        `const BASELINE_PROVIDER_PLUGINS = [
+  "@elizaos/plugin-elizacloud",
+  "@elizaos/plugin-openai",
+  "@elizaos/plugin-anthropic",
+  "@elizaos/plugin-ollama",
+] as const;
+
+// These are implementation dependencies of bundled core plugins. They need
+// to ship in the runtime bundle, but are not auto-loaded by collectPluginNames.
+const BASELINE_PLUGIN_SUPPORT_PACKAGES = [
+  "@elizaos/plugin-calendly",
+  "@elizaos/plugin-health",
+  "@elizaos/plugin-app-manager",
+  "@elizaos/plugin-registry",
+  "@elizaos/plugin-wallet-ui",
+  "@elizaos/plugin-wallet",
+] as const;
+`,
+      )
+      .replace(
+        /  \.\.\.OPTIONAL_CORE_PLUGINS,\r?\n {2}\.\.\.BASELINE_PROVIDER_PLUGINS,\r?\n/,
+        `  ...OPTIONAL_CORE_PLUGINS,
+  ...BASELINE_PLUGIN_SUPPORT_PACKAGES,
+  ...BASELINE_PROVIDER_PLUGINS,
+`,
+      );
+  }
+
+  for (const packageName of [
+    "@elizaos/plugin-calendly",
+    "@elizaos/plugin-health",
+    "@elizaos/plugin-app-manager",
+    "@elizaos/plugin-registry",
+    "@elizaos/plugin-wallet-ui",
+    "@elizaos/plugin-wallet",
+  ]) {
+    next = ensureConstStringArrayEntry(
+      next,
+      "BASELINE_PLUGIN_SUPPORT_PACKAGES",
+      packageName,
+    );
+  }
+  return next;
+}
+
+function patchRuntimeCopyTarSafeHoists(raw) {
+  let next = raw
+    .replace(
+      'const DEP_SKIP = new Set(["typescript", "@types/node", "lucide-react"]);',
+      'const DEP_SKIP = new Set(["typescript", "@types/node"]);',
+    )
+    .replace(
+      'const ALWAYS_HOISTED_PACKAGES = new Set(["@elizaos/core"]);',
+      'const ALWAYS_HOISTED_PACKAGES = new Set(["@elizaos/core", "commander"]);',
+    );
+  if (!next.includes('packageName === "googleapis"')) {
+    next = next.replace(
+      /  if \(packageName !== "@elevenlabs\/elevenlabs-js" \|\| !packageDir\) \{\r?\n    return false;\r?\n  \}\r?\n\r?\n  const relativePath = toPosixPath\(path\.relative\(packageDir, entryPath\)\);/,
+      `  const relativePath = packageDir
+    ? toPosixPath(path.relative(packageDir, entryPath))
+    : "";
+  if (
+    packageName === "googleapis" &&
+    (relativePath === "build/src/apis/docs" ||
+      relativePath.startsWith("build/src/apis/docs/"))
+  ) {
+    return true;
+  }
+
+  if (packageName !== "@elevenlabs/elevenlabs-js" || !packageDir) {
+    return false;
+  }
+`,
+    );
+  }
+  if (!next.includes('packageName === "three"')) {
+    next = next.replace(
+      `  if (
+    packageName === "googleapis" &&
+    (relativePath === "build/src/apis/docs" ||
+      relativePath.startsWith("build/src/apis/docs/"))
+  ) {
+    return true;
+  }
+
+  if (packageName !== "@elevenlabs/elevenlabs-js" || !packageDir) {
+    return false;
+  }
+`,
+      `  if (
+    packageName === "googleapis" &&
+    (relativePath === "build/src/apis/docs" ||
+      relativePath.startsWith("build/src/apis/docs/"))
+  ) {
+    return true;
+  }
+
+  if (
+    packageName === "three" &&
+    (relativePath === "examples" ||
+      relativePath === "examples/jsm" ||
+      relativePath.startsWith("examples/jsm/") ||
+      relativePath === "examples/fonts" ||
+      relativePath.startsWith("examples/fonts/"))
+  ) {
+    return true;
+  }
+
+  if (packageName !== "@elevenlabs/elevenlabs-js" || !packageDir) {
+    return false;
+  }
+`,
+    );
+  }
+  if (!next.includes('packageName === "@elizaos/ui"')) {
+    next = next.replace(
+      `  if (
+    packageName === "three" &&
+    (relativePath === "examples" ||
+      relativePath === "examples/jsm" ||
+      relativePath.startsWith("examples/jsm/") ||
+      relativePath === "examples/fonts" ||
+      relativePath.startsWith("examples/fonts/"))
+  ) {
+    return true;
+  }
+
+  if (packageName !== "@elevenlabs/elevenlabs-js" || !packageDir) {
+    return false;
+  }
+`,
+      `  if (
+    packageName === "three" &&
+    (relativePath === "examples" ||
+      relativePath === "examples/jsm" ||
+      relativePath.startsWith("examples/jsm/") ||
+      relativePath === "examples/fonts" ||
+      relativePath.startsWith("examples/fonts/"))
+  ) {
+    return true;
+  }
+
+  if (
+    packageName === "@elizaos/ui" &&
+    (relativePath === "dist/cloud-ui/components/docs" ||
+      relativePath.startsWith("dist/cloud-ui/components/docs/"))
+  ) {
+    return true;
+  }
+
+  if (packageName !== "@elevenlabs/elevenlabs-js" || !packageDir) {
+    return false;
+  }
+`,
+    );
+  }
   if (!next.includes("function shouldHoistRuntimePackage")) {
     next = next.replace(
       "\ntype CopyTargetOptions = {",
@@ -283,6 +563,49 @@ function shouldHoistRuntimePackage(name: string): boolean {
 }
 
 type CopyTargetOptions = {`,
+    );
+  }
+  if (!next.includes("function hasRootPackageOverride")) {
+    next = next.replace(
+      "\nfunction collectInstalledPackageDirs(",
+      `
+function hasRootPackageOverride(name: string): boolean {
+  try {
+    const manifest = readJson<{
+      overrides?: Record<string, unknown>;
+      resolutions?: Record<string, unknown>;
+    }>(PACKAGE_JSON_PATH);
+    return (
+      Object.prototype.hasOwnProperty.call(manifest.overrides ?? {}, name) ||
+      Object.prototype.hasOwnProperty.call(manifest.resolutions ?? {}, name)
+    );
+  } catch {
+    return false;
+  }
+}
+
+function collectInstalledPackageDirs(`,
+    );
+  }
+  if (!next.includes("root override/resolution install")) {
+    const rootOverridePreference = `  if (opts?.includeWorkspace !== false) {
+    buildWorkspacePackageIndex();
+    for (const candidate of workspacePackageIndex.get(name) ?? []) {
+      addCandidate(candidate.sourceDir);
+    }
+  }
+
+  // Root overrides/resolutions are the package manager's answer for peers.
+  // Prefer that install over requester-local Bun store fallbacks so runtime
+  // packaging follows the same graph used by app-core builds.
+  if (hasRootPackageOverride(name)) {
+    addCandidate(packagePath(name, ROOT_NODE_MODULES));
+  }
+
+  let dir = requesterDir;`;
+    next = next.replace(
+      /  if \(opts\?\.includeWorkspace !== false\) \{\r?\n    buildWorkspacePackageIndex\(\);\r?\n    for \(const candidate of workspacePackageIndex\.get\(name\) \?\? \[\]\) \{\r?\n      addCandidate\(candidate\.sourceDir\);\r?\n    }\r?\n  }\r?\n\r?\n  let dir = requesterDir;/,
+      rootOverridePreference,
     );
   }
   return next.replace(
@@ -990,6 +1313,1038 @@ if [ -n "$cache_file" ]; then
 fi
 `;
 
+const remoteCapabilityEndpointProviderSource = `import {
+  CAPABILITY_ROUTER_SERVICE_TYPE,
+  type CapabilityEnvironment,
+  type IAgentRuntime,
+} from "@elizaos/core";
+import {
+  RemoteCapabilityRouterService,
+  type RemoteCapabilityEndpointConfig,
+} from "./remote-capability-router.ts";
+import {
+  syncRemoteCapabilityPlugins,
+  type RemotePluginSyncResult,
+  type RemotePluginTrustPolicy,
+} from "./remote-plugin-adapter.ts";
+
+const DEFAULT_REQUEST_TIMEOUT_MS = 60_000;
+const DEFAULT_CAPABILITY_ENVIRONMENT: CapabilityEnvironment = "server";
+
+export type ProvisionedRemoteCapabilityEndpoint = {
+  providerId: string;
+  endpoint: RemoteCapabilityEndpointConfig;
+  agentId?: string;
+  jobId?: string;
+  allowedModuleIds?: string[];
+};
+
+export type RemoteCapabilityEndpointProvider<TOptions = unknown> = {
+  id: string;
+  provision: (
+    options: TOptions,
+  ) => Promise<ProvisionedRemoteCapabilityEndpoint>;
+};
+
+export type DirectRemoteCapabilityEndpointProviderOptions = {
+  endpoint: RemoteCapabilityEndpointConfig;
+  allowedModuleIds?: string[];
+};
+
+export type ConnectRemoteCapabilityEndpointProviderOptions<
+  TOptions = unknown,
+> = {
+  provider: RemoteCapabilityEndpointProvider<TOptions>;
+  provisionOptions: TOptions;
+  unloadMissing?: boolean;
+  requestTimeoutMs?: number;
+  environment?: CapabilityEnvironment;
+  allowedModuleIds?: string[];
+  reloadExisting?: boolean;
+};
+
+export type ConnectRemoteCapabilityEndpointProviderResult =
+  ProvisionedRemoteCapabilityEndpoint & {
+    sync: RemotePluginSyncResult;
+  };
+
+export type InstallRemoteCapabilityEndpointOptions = {
+  enabled?: boolean;
+  endpoint?: RemoteCapabilityEndpointConfig;
+  endpoints?: RemoteCapabilityEndpointConfig[];
+  environment?: CapabilityEnvironment;
+  requestTimeoutMs?: number;
+};
+
+export function directRemoteCapabilityEndpointProvider(): RemoteCapabilityEndpointProvider<DirectRemoteCapabilityEndpointProviderOptions> {
+  return {
+    id: "direct",
+    provision: async (options) => ({
+      providerId: "direct",
+      endpoint: normalizeEndpoint(options.endpoint),
+      ...optionalStringListProp("allowedModuleIds", options.allowedModuleIds),
+    }),
+  };
+}
+
+export async function connectRemoteCapabilityEndpointProvider<TOptions>(
+  runtime: IAgentRuntime,
+  options: ConnectRemoteCapabilityEndpointProviderOptions<TOptions>,
+): Promise<ConnectRemoteCapabilityEndpointProviderResult> {
+  const provisioned = await options.provider.provision(
+    options.provisionOptions,
+  );
+  const endpoint = normalizeEndpoint(provisioned.endpoint);
+  const allowedModuleIds =
+    normalizeStringList(options.allowedModuleIds) ??
+    normalizeStringList(provisioned.allowedModuleIds);
+
+  const router = installRemoteCapabilityEndpoint(runtime, {
+    enabled: true,
+    endpoints: [endpoint],
+    environment: options.environment ?? DEFAULT_CAPABILITY_ENVIRONMENT,
+    requestTimeoutMs: options.requestTimeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS,
+  });
+  const modules = (await router.plugin.listModules({ endpointId: endpoint.id }))
+    .modules;
+
+  const sync = await syncRemoteCapabilityPlugins(runtime, {
+    modules,
+    reloadExisting: options.reloadExisting,
+    unloadMissing: options.unloadMissing,
+    unloadMissingEndpointIds: [endpoint.id],
+    trustPolicy: buildRemoteCapabilityEndpointTrustPolicy(
+      endpoint,
+      allowedModuleIds,
+    ),
+  });
+
+  return {
+    ...provisioned,
+    providerId: provisioned.providerId || options.provider.id,
+    endpoint,
+    ...optionalStringListProp("allowedModuleIds", allowedModuleIds),
+    sync,
+  };
+}
+
+export function installRemoteCapabilityEndpoint(
+  runtime: IAgentRuntime,
+  options: InstallRemoteCapabilityEndpointOptions,
+): RemoteCapabilityRouterService {
+  const endpoints = mergeEndpointConfigs(
+    getRuntimeEndpointConfigs(runtime),
+    normalizeInstallEndpoints(options),
+  );
+  const router = new RemoteCapabilityRouterService(runtime, {
+    enabled: options.enabled ?? true,
+    endpoints,
+    environment: options.environment ?? DEFAULT_CAPABILITY_ENVIRONMENT,
+    requestTimeoutMs: options.requestTimeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS,
+  });
+  registerRuntimeService(runtime, router);
+  return router;
+}
+
+export function buildRemoteCapabilityEndpointTrustPolicy(
+  endpoint: RemoteCapabilityEndpointConfig | string,
+  allowedModuleIds?: string[],
+): RemotePluginTrustPolicy {
+  const endpointId =
+    typeof endpoint === "string" ? endpoint.trim() : endpoint.id.trim();
+  if (!endpointId) {
+    throw new Error("Remote capability endpoint id is required.");
+  }
+  return {
+    allowedEndpointIds: [endpointId],
+    ...optionalStringListProp("allowedModuleIds", allowedModuleIds),
+    requireEndpointId: true,
+  };
+}
+
+function normalizeInstallEndpoints(
+  options: InstallRemoteCapabilityEndpointOptions,
+): RemoteCapabilityEndpointConfig[] {
+  const endpoints = [
+    ...(options.endpoint ? [options.endpoint] : []),
+    ...(options.endpoints ?? []),
+  ].map(normalizeEndpoint);
+  if (endpoints.length === 0) {
+    throw new Error("At least one remote capability endpoint is required.");
+  }
+  return endpoints;
+}
+
+function normalizeEndpoint(
+  endpoint: RemoteCapabilityEndpointConfig,
+): RemoteCapabilityEndpointConfig {
+  const id = endpoint.id.trim();
+  const baseUrl = stripTrailingSlash(endpoint.baseUrl.trim());
+  if (!id) {
+    throw new Error("Remote capability endpoint id is required.");
+  }
+  if (!baseUrl) {
+    throw new Error("Remote capability endpoint baseUrl is required.");
+  }
+  return {
+    id,
+    baseUrl,
+    ...(endpoint.token?.trim() ? { token: endpoint.token.trim() } : {}),
+  };
+}
+
+function getRuntimeEndpointConfigs(
+  runtime: IAgentRuntime,
+): RemoteCapabilityEndpointConfig[] {
+  const runtimeServices = runtime as IAgentRuntime & {
+    getService?: (service: string) => unknown;
+    getServicesByType?: (service: string) => unknown[];
+    services?: Map<string, unknown[]>;
+  };
+  const candidates = [
+    ...(runtimeServices.getServicesByType?.(CAPABILITY_ROUTER_SERVICE_TYPE) ??
+      []),
+    runtimeServices.getService?.(CAPABILITY_ROUTER_SERVICE_TYPE),
+    ...(runtimeServices.services?.get(CAPABILITY_ROUTER_SERVICE_TYPE) ?? []),
+  ];
+  const seen = new Set<unknown>();
+  const endpoints: RemoteCapabilityEndpointConfig[] = [];
+  for (const candidate of candidates) {
+    if (!candidate || seen.has(candidate)) continue;
+    seen.add(candidate);
+    if (!hasEndpointConfigs(candidate)) continue;
+    endpoints.push(...candidate.getEndpointConfigs().map(normalizeEndpoint));
+  }
+  return endpoints;
+}
+
+function hasEndpointConfigs(
+  value: unknown,
+): value is { getEndpointConfigs: () => RemoteCapabilityEndpointConfig[] } {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "getEndpointConfigs" in value &&
+    typeof value.getEndpointConfigs === "function"
+  );
+}
+
+function mergeEndpointConfigs(
+  existing: RemoteCapabilityEndpointConfig[],
+  next: RemoteCapabilityEndpointConfig[],
+): RemoteCapabilityEndpointConfig[] {
+  const byId = new Map<string, RemoteCapabilityEndpointConfig>();
+  for (const endpoint of [...existing, ...next]) {
+    const normalized = normalizeEndpoint(endpoint);
+    byId.set(normalized.id, normalized);
+  }
+  return [...byId.values()];
+}
+
+function registerRuntimeService(
+  runtime: IAgentRuntime,
+  router: RemoteCapabilityRouterService,
+): void {
+  const services = (runtime as { services?: Map<string, unknown[]> }).services;
+  if (!services || typeof services.set !== "function") return;
+  const existing = services.get(CAPABILITY_ROUTER_SERVICE_TYPE) ?? [];
+  services.set(CAPABILITY_ROUTER_SERVICE_TYPE, [
+    router,
+    ...existing.filter((service) => service !== router),
+  ]);
+}
+
+function stripTrailingSlash(value: string): string {
+  return value.replace(/\\/+$/, "");
+}
+
+function normalizeStringList(value: string[] | undefined): string[] | undefined {
+  if (!value) return undefined;
+  const normalized = [
+    ...new Set(value.map((item) => item.trim()).filter(Boolean)),
+  ];
+  return normalized.length === 0 ? undefined : normalized;
+}
+
+function optionalStringListProp<const TKey extends string>(
+  key: TKey,
+  value: string[] | undefined,
+): Partial<Record<TKey, string[]>> {
+  const normalized = normalizeStringList(value);
+  return normalized === undefined
+    ? {}
+    : ({ [key]: normalized } as Partial<Record<TKey, string[]>>);
+}
+`;
+
+const remoteCapabilityEndpointConformanceSource = `import {
+  type CapabilityAvailability,
+  type IAgentRuntime,
+  type JsonObject,
+  type JsonValue,
+  type PluginCallRouteResult,
+  type PluginGetAssetResult,
+  type PluginGetProviderResult,
+  type PluginInvokeActionResult,
+  type RemotePluginModuleManifest,
+  type RemotePluginRouteManifest,
+  type RemotePluginViewManifest,
+  type UUID,
+} from "@elizaos/core";
+import {
+  RemoteCapabilityRouterService,
+  type RemoteCapabilityEndpointConfig,
+} from "./remote-capability-router.ts";
+
+const DEFAULT_REQUEST_TIMEOUT_MS = 60_000;
+
+export type RemoteCapabilityEndpointConformanceOptions = {
+  endpoint: RemoteCapabilityEndpointConfig;
+  requestTimeoutMs?: number;
+  actionContent?: JsonObject;
+  actionOptions?: JsonObject;
+  providerState?: JsonObject;
+  routeBody?: JsonValue;
+  routeQuery?: Record<string, string | string[]>;
+  routeHeaders?: Record<string, string>;
+  requireViewAsset?: boolean;
+};
+
+export type RemoteCapabilityEndpointConformanceResult = {
+  endpointId: string;
+  moduleCount: number;
+  availability: CapabilityAvailability;
+  exercised: {
+    action: string;
+    provider: string;
+    route: string;
+    viewAsset?: string;
+  };
+};
+
+type SelectedRemoteComponent<TComponent> = {
+  module: RemotePluginModuleManifest;
+  component: TComponent;
+};
+
+export async function assertRemoteCapabilityEndpointConformance(
+  options: RemoteCapabilityEndpointConformanceOptions,
+): Promise<RemoteCapabilityEndpointConformanceResult> {
+  const endpoint = normalizeEndpoint(options.endpoint);
+  const router = new RemoteCapabilityRouterService(makeRuntime(), {
+    enabled: true,
+    endpoints: [endpoint],
+    environment: "server",
+    requestTimeoutMs:
+      options.requestTimeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS,
+  });
+
+  const availability = await router.availability();
+  assertPluginAvailability(endpoint, availability);
+
+  const modules = (
+    await router.plugin.listModules({ endpointId: endpoint.id })
+  ).modules;
+  assertValidModules(endpoint, modules);
+
+  const action = findRequiredComponent(
+    modules,
+    "action",
+    (module) => module.actions?.find((item) => isNonEmptyString(item.name)),
+  );
+  const actionResult = await router.plugin.invokeAction({
+    endpointId: endpoint.id,
+    moduleId: action.module.id,
+    action: action.component.name,
+    content: options.actionContent ?? {
+      text: "remote capability endpoint conformance",
+    },
+    ...(options.actionOptions === undefined
+      ? {}
+      : { options: options.actionOptions }),
+  });
+  assertActionResult(endpoint, action, actionResult);
+
+  const provider = findRequiredComponent(
+    modules,
+    "provider",
+    (module) =>
+      module.providers?.find((item) => isNonEmptyString(item.name)),
+  );
+  const providerResult = await router.plugin.getProvider({
+    endpointId: endpoint.id,
+    moduleId: provider.module.id,
+    provider: provider.component.name,
+    state: options.providerState ?? {},
+  });
+  assertProviderResult(endpoint, provider, providerResult);
+
+  const route = findRequiredComponent(
+    modules,
+    "route",
+    (module) =>
+      module.routes?.find(
+        (item) =>
+          item.method !== "STATIC" &&
+          isNonEmptyString(item.method) &&
+          isNonEmptyString(item.path),
+      ),
+  );
+  const routeResult = await router.plugin.callRoute({
+    endpointId: endpoint.id,
+    moduleId: route.module.id,
+    method: route.component.method,
+    path: route.component.path,
+    ...(route.component.method === "GET"
+      ? {}
+      : { body: options.routeBody ?? { conformance: true } }),
+    ...(options.routeQuery === undefined ? {} : { query: options.routeQuery }),
+    ...(options.routeHeaders === undefined
+      ? {}
+      : { headers: options.routeHeaders }),
+  });
+  assertRouteResult(endpoint, route, routeResult);
+
+  const exercised: RemoteCapabilityEndpointConformanceResult["exercised"] = {
+    action: action.module.id + ":" + action.component.name,
+    provider: provider.module.id + ":" + provider.component.name,
+    route:
+      route.module.id +
+      ":" +
+      route.component.method +
+      " " +
+      route.component.path,
+  };
+
+  if (options.requireViewAsset !== false) {
+    const view = findRequiredComponent(
+      modules,
+      "view asset",
+      (module) =>
+        module.views?.find((item) => isNonEmptyString(item.bundlePath)),
+    );
+    const bundlePath = view.component.bundlePath as string;
+    const asset = await router.plugin.getAsset({
+      endpointId: endpoint.id,
+      moduleId: view.module.id,
+      path: bundlePath,
+    });
+    assertAssetResult(endpoint, view, asset);
+    exercised.viewAsset = view.module.id + ":" + bundlePath;
+  }
+
+  return {
+    endpointId: endpoint.id,
+    moduleCount: modules.length,
+    availability,
+    exercised,
+  };
+}
+
+function makeRuntime(): IAgentRuntime {
+  return {
+    agentId: "00000000-0000-0000-0000-000000000000" as UUID,
+    character: { name: "Remote Capability Conformance" },
+    getSetting: () => null,
+  } as Partial<IAgentRuntime> as IAgentRuntime;
+}
+
+function normalizeEndpoint(
+  endpoint: RemoteCapabilityEndpointConfig,
+): RemoteCapabilityEndpointConfig {
+  const id = endpoint.id.trim();
+  const baseUrl = endpoint.baseUrl.trim().replace(/\\/+$/, "");
+  if (!id) {
+    throw new Error("Remote capability endpoint id is required.");
+  }
+  if (!baseUrl) {
+    throw new Error("Remote capability endpoint baseUrl is required.");
+  }
+  return {
+    id,
+    baseUrl,
+    ...(endpoint.token?.trim() ? { token: endpoint.token.trim() } : {}),
+  };
+}
+
+function assertPluginAvailability(
+  endpoint: RemoteCapabilityEndpointConfig,
+  availability: CapabilityAvailability,
+): void {
+  if (!availability.available || !availability.capabilities.plugin) {
+    throw new Error(
+      "Remote capability endpoint " +
+        endpoint.id +
+        " does not advertise an available plugin capability.",
+    );
+  }
+}
+
+function assertValidModules(
+  endpoint: RemoteCapabilityEndpointConfig,
+  modules: RemotePluginModuleManifest[],
+): void {
+  if (!Array.isArray(modules) || modules.length === 0) {
+    throw new Error(
+      "Remote capability endpoint " +
+        endpoint.id +
+        " did not return any plugin modules.",
+    );
+  }
+  const ids = new Set<string>();
+  for (const module of modules) {
+    if (!isNonEmptyString(module.id)) {
+      throw new Error("Remote plugin module id must be a non-empty string.");
+    }
+    if (!isNonEmptyString(module.name)) {
+      throw new Error(
+        "Remote plugin module " +
+          module.id +
+          " name must be a non-empty string.",
+      );
+    }
+    if (ids.has(module.id)) {
+      throw new Error('Remote plugin module id "' + module.id + '" is duplicated.');
+    }
+    ids.add(module.id);
+  }
+}
+
+function findRequiredComponent<TComponent>(
+  modules: RemotePluginModuleManifest[],
+  label: string,
+  select: (module: RemotePluginModuleManifest) => TComponent | undefined,
+): SelectedRemoteComponent<TComponent> {
+  for (const module of modules) {
+    const component = select(module);
+    if (component !== undefined) {
+      return { module, component };
+    }
+  }
+  throw new Error("Remote capability endpoint is missing a " + label + ".");
+}
+
+function assertActionResult(
+  endpoint: RemoteCapabilityEndpointConfig,
+  action: SelectedRemoteComponent<{ name: string }>,
+  result: PluginInvokeActionResult,
+): void {
+  if (!isRecord(result)) {
+    throw new Error(
+      "Remote action " +
+        action.module.id +
+        ":" +
+        action.component.name +
+        " on endpoint " +
+        endpoint.id +
+        " did not return an object.",
+    );
+  }
+}
+
+function assertProviderResult(
+  endpoint: RemoteCapabilityEndpointConfig,
+  provider: SelectedRemoteComponent<{ name: string }>,
+  result: PluginGetProviderResult,
+): void {
+  if (!isRecord(result)) {
+    throw new Error(
+      "Remote provider " +
+        provider.module.id +
+        ":" +
+        provider.component.name +
+        " on endpoint " +
+        endpoint.id +
+        " did not return an object.",
+    );
+  }
+}
+
+function assertRouteResult(
+  endpoint: RemoteCapabilityEndpointConfig,
+  route: SelectedRemoteComponent<RemotePluginRouteManifest>,
+  result: PluginCallRouteResult,
+): void {
+  if (!isRecord(result) || !Number.isInteger(result.status)) {
+    throw new Error(
+      "Remote route " +
+        route.module.id +
+        ":" +
+        route.component.path +
+        " on endpoint " +
+        endpoint.id +
+        " did not return a status.",
+    );
+  }
+  if (result.status < 200 || result.status >= 400) {
+    throw new Error(
+      "Remote route " +
+        route.module.id +
+        ":" +
+        route.component.path +
+        " on endpoint " +
+        endpoint.id +
+        " returned HTTP " +
+        result.status +
+        ".",
+    );
+  }
+}
+
+function assertAssetResult(
+  endpoint: RemoteCapabilityEndpointConfig,
+  view: SelectedRemoteComponent<RemotePluginViewManifest>,
+  asset: PluginGetAssetResult,
+): void {
+  if (!isRecord(asset) || !isNonEmptyString(asset.contentType)) {
+    throw new Error(
+      "Remote view asset " +
+        view.module.id +
+        ":" +
+        view.component.bundlePath +
+        " on endpoint " +
+        endpoint.id +
+        " did not return a content type.",
+    );
+  }
+  if (!isNonEmptyString(asset.bodyBase64)) {
+    throw new Error(
+      "Remote view asset " +
+        view.module.id +
+        ":" +
+        view.component.bundlePath +
+        " on endpoint " +
+        endpoint.id +
+        " returned an empty body.",
+    );
+  }
+  try {
+    Buffer.from(asset.bodyBase64, "base64");
+  } catch {
+    throw new Error(
+      "Remote view asset " +
+        view.module.id +
+        ":" +
+        view.component.bundlePath +
+        " on endpoint " +
+        endpoint.id +
+        " returned invalid base64.",
+    );
+  }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === "string" && value.trim().length > 0;
+}
+`;
+
+const remoteCapabilityUrlEndpointProvidersSource = `import type { RemoteCapabilityEndpointProvider } from "./remote-capability-endpoint-provider.ts";
+import type { RemoteCapabilityEndpointConfig } from "./remote-capability-router.ts";
+
+export type UrlRemoteCapabilityEndpointProviderOptions = {
+  baseUrl: string;
+  endpointId?: string;
+  token?: string;
+  allowedModuleIds?: string[];
+};
+
+type UrlRemoteCapabilityEndpointProviderId =
+  | "e2b"
+  | "home-machine"
+  | "mobile-companion"
+  | "desktop-companion";
+
+export const e2bCapabilityEndpointProvider =
+  createUrlRemoteCapabilityEndpointProvider("e2b");
+
+export const homeMachineCapabilityEndpointProvider =
+  createUrlRemoteCapabilityEndpointProvider("home-machine");
+
+export const mobileCompanionCapabilityEndpointProvider =
+  createUrlRemoteCapabilityEndpointProvider("mobile-companion");
+
+export const desktopCompanionCapabilityEndpointProvider =
+  createUrlRemoteCapabilityEndpointProvider("desktop-companion");
+
+function createUrlRemoteCapabilityEndpointProvider(
+  id: UrlRemoteCapabilityEndpointProviderId,
+): RemoteCapabilityEndpointProvider<UrlRemoteCapabilityEndpointProviderOptions> {
+  return {
+    id,
+    provision: async (options) => ({
+      providerId: id,
+      endpoint: normalizeEndpoint(options, id),
+      ...optionalStringListProp("allowedModuleIds", options.allowedModuleIds),
+    }),
+  };
+}
+
+function normalizeEndpoint(
+  options: UrlRemoteCapabilityEndpointProviderOptions,
+  defaultEndpointId: string,
+): RemoteCapabilityEndpointConfig {
+  const endpointId = normalizeEndpointId(options.endpointId, defaultEndpointId);
+  const baseUrl = normalizeProviderBaseUrl(options.baseUrl);
+  const token = options.token?.trim();
+  return {
+    id: endpointId,
+    baseUrl,
+    ...(token ? { token } : {}),
+  };
+}
+
+function normalizeProviderBaseUrl(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    throw new Error("Capability endpoint baseUrl is required.");
+  }
+  let url: URL;
+  try {
+    url = new URL(trimmed);
+  } catch {
+    throw new Error("Capability endpoint baseUrl must be a valid URL.");
+  }
+  if (url.protocol !== "http:" && url.protocol !== "https:") {
+    throw new Error("Capability endpoint baseUrl must use http or https.");
+  }
+  if (url.username || url.password) {
+    throw new Error("Capability endpoint baseUrl must not include credentials.");
+  }
+  return url.toString().replace(/\\/+$/, "");
+}
+
+function normalizeEndpointId(
+  value: string | undefined,
+  fallback: string,
+): string {
+  const endpointId = (value ?? fallback).trim();
+  if (!endpointId) {
+    throw new Error("Capability endpoint id is required.");
+  }
+  if (!/^[A-Za-z0-9][A-Za-z0-9._:-]*$/.test(endpointId)) {
+    throw new Error(
+      "Capability endpoint id may only contain letters, numbers, dots, underscores, colons, or dashes.",
+    );
+  }
+  return endpointId;
+}
+
+function normalizeStringList(value: string[] | undefined): string[] | undefined {
+  if (!value) return undefined;
+  const normalized = [
+    ...new Set(value.map((item) => item.trim()).filter(Boolean)),
+  ];
+  return normalized.length === 0 ? undefined : normalized;
+}
+
+function optionalStringListProp<const TKey extends string>(
+  key: TKey,
+  value: string[] | undefined,
+): Partial<Record<TKey, string[]>> {
+  const normalized = normalizeStringList(value);
+  return normalized === undefined
+    ? {}
+    : ({ [key]: normalized } as Partial<Record<TKey, string[]>>);
+}
+`;
+
+const registerCapabilityRouterCommandSource = `import type { Command } from "commander";
+
+type ConnectOptions = {
+  id?: string;
+  url: string;
+  token?: string;
+  provider?: string;
+  allowedModule?: string[];
+  persist?: boolean;
+  unloadMissing?: boolean;
+  timeoutMs?: string;
+  apiUrl?: string;
+  apiToken?: string;
+  json?: boolean;
+};
+
+type ConformanceOptions = {
+  token?: string;
+  timeoutMs?: string;
+  json?: boolean;
+};
+
+export function registerCapabilityRouterCommand(program: Command) {
+  const capabilityRouter = program
+    .command("capability-router")
+    .description("Connect and validate remote capability-router endpoints");
+
+  capabilityRouter
+    .command("connect")
+    .description("Connect a remote capability endpoint through the running agent API")
+    .requiredOption("--url <url>", "Remote capability-router endpoint URL")
+    .option("--id <id>", "Endpoint id", "default")
+    .option("--token <token>", "Bearer token for the remote endpoint")
+    .option(
+      "--provider <provider>",
+      "Endpoint provider mode: direct, e2b, home-machine, mobile-companion, or desktop-companion",
+      "direct",
+    )
+    .option(
+      "--allowed-module <id>",
+      "Allowed remote plugin module id; repeat for more than one",
+      collectValues,
+      [],
+    )
+    .option("--no-persist", "Do not persist the endpoint")
+    .option("--no-unload-missing", "Do not unload missing remote plugins for this endpoint")
+    .option("--timeout-ms <ms>", "Remote request timeout in milliseconds")
+    .option("--api-url <url>", "Running agent API base URL")
+    .option("--api-token <token>", "Running agent API bearer token")
+    .option("--json", "Print the raw API response as JSON")
+    .action(async (options: ConnectOptions) => {
+      const endpoint = {
+        id: normalizeEndpointId(options.id ?? "default"),
+        baseUrl: normalizeHttpUrl(options.url, "url"),
+        ...(options.token?.trim() ? { token: options.token.trim() } : {}),
+      };
+      const allowedModuleIds = normalizeStringList(options.allowedModule);
+      const body = {
+        endpoint,
+        ...(options.provider && options.provider !== "direct"
+          ? { provider: options.provider }
+          : {}),
+        persist: options.persist !== false,
+        unloadMissing: options.unloadMissing !== false,
+        ...optionalPositiveIntegerProp(
+          "requestTimeoutMs",
+          options.timeoutMs,
+          "timeout-ms",
+        ),
+        ...(allowedModuleIds === undefined ? {} : { allowedModuleIds }),
+      };
+      const result = await postAgentJson(
+        resolveAgentApiBase(options.apiUrl),
+        "/api/capability-router/connect",
+        body,
+        resolveAgentApiToken(options.apiToken),
+      );
+      printResult(result, options.json);
+    });
+
+  capabilityRouter
+    .command("conformance <baseUrl>")
+    .description("Validate a capability-router endpoint without provider-specific code")
+    .option("--token <token>", "Endpoint bearer token")
+    .option("--timeout-ms <ms>", "Request timeout in milliseconds", "60000")
+    .option("--json", "Print the raw conformance result as JSON")
+    .action(async (baseUrl: string, options: ConformanceOptions) => {
+      const endpoint = normalizeHttpUrl(baseUrl, "baseUrl");
+      const timeoutMs =
+        parsePositiveInteger(options.timeoutMs, "timeout-ms") ?? 60000;
+      const availability = await requestEndpointJson(
+        endpoint,
+        "GET",
+        "/v1/capabilities",
+        undefined,
+        options.token,
+        timeoutMs,
+      );
+      const modules = await requestEndpointJson(
+        endpoint,
+        "POST",
+        "/v1/capabilities/invoke",
+        { method: "plugin.modules.list", params: {} },
+        options.token,
+        timeoutMs,
+      );
+      const result = {
+        ok: true,
+        endpoint,
+        availability,
+        modules,
+      };
+      printResult(result, options.json);
+    });
+}
+
+function collectValues(value: string, previous: string[]): string[] {
+  return [...previous, value];
+}
+
+async function postAgentJson(
+  apiBase: string,
+  path: string,
+  body: unknown,
+  token: string | undefined,
+): Promise<unknown> {
+  const response = await fetch(new URL(path, apiBase), {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+      ...(token ? { authorization: "Bearer " + token } : {}),
+    },
+    body: JSON.stringify(body),
+  });
+  return await readJsonResponse(response, path);
+}
+
+async function requestEndpointJson(
+  baseUrl: string,
+  method: "GET" | "POST",
+  path: string,
+  body: unknown,
+  token: string | undefined,
+  timeoutMs: number,
+): Promise<unknown> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(new URL(path, baseUrl), {
+      method,
+      headers: {
+        accept: "application/json",
+        ...(body === undefined ? {} : { "content-type": "application/json" }),
+        ...(token?.trim() ? { authorization: "Bearer " + token.trim() } : {}),
+      },
+      body: body === undefined ? undefined : JSON.stringify(body),
+      signal: controller.signal,
+    });
+    return await readJsonResponse(response, path);
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function readJsonResponse(response: Response, label: string): Promise<unknown> {
+  const text = await response.text();
+  const data = text ? parseJson(text, label) : null;
+  if (!response.ok) {
+    throw new Error(errorMessageFromResponse(data, response.status, label));
+  }
+  return data;
+}
+
+function errorMessageFromResponse(
+  data: unknown,
+  status: number,
+  label: string,
+): string {
+  if (data && typeof data === "object") {
+    const record = data as Record<string, unknown>;
+    const error = record.error;
+    if (typeof error === "string" && error.trim()) return error;
+    if (error && typeof error === "object") {
+      const message = (error as Record<string, unknown>).message;
+      if (typeof message === "string" && message.trim()) return message;
+    }
+    const message = record.message;
+    if (typeof message === "string" && message.trim()) return message;
+  }
+  return label + " failed with HTTP " + status + ".";
+}
+
+function resolveAgentApiBase(value: string | undefined): string {
+  return normalizeHttpUrl(
+    value ??
+      process.env.ELIZA_API_URL ??
+      "http://127.0.0.1:" +
+        (process.env.ELIZA_API_PORT ?? process.env.ELIZA_PORT ?? "31337"),
+    "api-url",
+  );
+}
+
+function resolveAgentApiToken(value: string | undefined): string | undefined {
+  const token =
+    value?.trim() ??
+    process.env.ELIZA_API_TOKEN?.trim() ??
+    process.env.MILADY_API_TOKEN?.trim();
+  return token || undefined;
+}
+
+function normalizeHttpUrl(value: string, label: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) throw new Error(label + " is required.");
+  let url: URL;
+  try {
+    url = new URL(trimmed);
+  } catch {
+    throw new Error(label + " must be a valid URL.");
+  }
+  if (url.protocol !== "http:" && url.protocol !== "https:") {
+    throw new Error(label + " must use http or https.");
+  }
+  if (url.username || url.password) {
+    throw new Error(label + " must not include credentials.");
+  }
+  return url.toString().replace(/\\/+$/, "");
+}
+
+function normalizeEndpointId(value: string): string {
+  const endpointId = value.trim();
+  if (!endpointId) throw new Error("Endpoint id is required.");
+  if (!/^[A-Za-z0-9][A-Za-z0-9._:-]*$/.test(endpointId)) {
+    throw new Error(
+      "Endpoint id may only contain letters, numbers, dots, underscores, colons, or dashes.",
+    );
+  }
+  return endpointId;
+}
+
+function optionalPositiveIntegerProp<const TKey extends string>(
+  key: TKey,
+  value: string | undefined,
+  label: string,
+): Partial<Record<TKey, number>> {
+  const parsed = parsePositiveInteger(value, label);
+  return parsed === undefined
+    ? {}
+    : ({ [key]: parsed } as Partial<Record<TKey, number>>);
+}
+
+function parsePositiveInteger(
+  value: string | undefined,
+  label: string,
+): number | undefined {
+  if (value === undefined) return undefined;
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isSafeInteger(parsed) || parsed <= 0) {
+    throw new Error(label + " must be a positive integer.");
+  }
+  return parsed;
+}
+
+function normalizeStringList(value: string[] | undefined): string[] | undefined {
+  if (!value) return undefined;
+  const normalized = [
+    ...new Set(value.map((item) => item.trim()).filter(Boolean)),
+  ];
+  return normalized.length === 0 ? undefined : normalized;
+}
+
+function parseJson(text: string, label: string): unknown {
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error(label + " returned invalid JSON.");
+  }
+}
+
+function printResult(value: unknown, rawJson: boolean | undefined): void {
+  if (rawJson) {
+    console.log(JSON.stringify(value, null, 2));
+    return;
+  }
+  if (value && typeof value === "object" && "success" in value) {
+    const success = (value as { success?: unknown }).success;
+    console.log(success === false ? "failed" : "connected");
+    return;
+  }
+  console.log("ok");
+}
+`;
+
 function applyReleaseSourcePatches() {
   writeFileText(
     path.join(
@@ -1004,6 +2359,63 @@ function applyReleaseSourcePatches() {
     ensureWhisperModelScript,
     "Electrobun whisper model script",
     0o755,
+  );
+
+  writeFileTextIfMissing(
+    path.join(
+      elizaDir,
+      "packages",
+      "agent",
+      "src",
+      "services",
+      "remote-capability-endpoint-provider.ts",
+    ),
+    remoteCapabilityEndpointProviderSource,
+    "agent remote capability endpoint provider",
+    "connectRemoteCapabilityEndpointProvider",
+  );
+
+  writeFileTextIfMissing(
+    path.join(
+      elizaDir,
+      "packages",
+      "agent",
+      "src",
+      "services",
+      "remote-capability-endpoint-conformance.ts",
+    ),
+    remoteCapabilityEndpointConformanceSource,
+    "agent remote capability endpoint conformance harness",
+    "assertRemoteCapabilityEndpointConformance",
+  );
+
+  writeFileTextIfMissing(
+    path.join(
+      elizaDir,
+      "packages",
+      "agent",
+      "src",
+      "services",
+      "remote-capability-url-endpoint-providers.ts",
+    ),
+    remoteCapabilityUrlEndpointProvidersSource,
+    "agent remote capability URL endpoint providers",
+    "homeMachineCapabilityEndpointProvider",
+  );
+
+  writeFileTextIfMissing(
+    path.join(
+      elizaDir,
+      "packages",
+      "app-core",
+      "src",
+      "cli",
+      "program",
+      "register.capability-router.ts",
+    ),
+    registerCapabilityRouterCommandSource,
+    "app-core capability-router CLI command registration",
+    "registerCapabilityRouterCommand",
   );
 
   replaceFileText(
@@ -1066,6 +2478,43 @@ function applyReleaseSourcePatches() {
     path.join(elizaDir, "packages", "core", "src", "types", "state.ts"),
     patchCoreStateTypes,
     "core structured failure format type",
+  );
+
+  replaceFileText(
+    path.join(elizaDir, "packages", "core", "tsconfig.json"),
+    patchCoreTsconfigLocalPrompts,
+    "core local prompts path mapping",
+  );
+
+  replaceFileText(
+    path.join(elizaDir, "packages", "core", "src", "utils.ts"),
+    patchCoreToonParser,
+    "core TOON key-value parser compatibility",
+  );
+
+  for (const coreIndexFile of [
+    "index.node.ts",
+    "index.browser.ts",
+    "index.edge.ts",
+  ]) {
+    replaceFileText(
+      path.join(elizaDir, "packages", "core", "src", coreIndexFile),
+      patchCoreToonParserExports,
+      `core TOON parser export (${coreIndexFile})`,
+    );
+  }
+
+  replaceFileText(
+    path.join(
+      elizaDir,
+      "packages",
+      "agent",
+      "src",
+      "runtime",
+      "release-plugin-policy.ts",
+    ),
+    patchReleasePluginPolicySupportPackages,
+    "agent release plugin bundled support packages",
   );
 
   replaceFileText(

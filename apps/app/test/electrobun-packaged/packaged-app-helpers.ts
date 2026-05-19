@@ -11,20 +11,30 @@ import { createPackagedWindowsAppEnv } from "./windows-test-env";
 const execFileAsync = promisify(execFile);
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "../../../..");
-const electrobunArtifactsDir = path.join(
-  repoRoot,
-  "apps",
-  "app",
-  "electrobun",
-  "artifacts",
-);
-const electrobunBuildDir = path.join(
-  repoRoot,
-  "apps",
-  "app",
-  "electrobun",
-  "build",
-);
+const electrobunBuildDirs = [
+  path.join(
+    repoRoot,
+    "eliza",
+    "packages",
+    "app-core",
+    "platforms",
+    "electrobun",
+    "build",
+  ),
+  path.join(repoRoot, "apps", "app", "electrobun", "build"),
+];
+const electrobunArtifactsDirs = [
+  path.join(
+    repoRoot,
+    "eliza",
+    "packages",
+    "app-core",
+    "platforms",
+    "electrobun",
+    "artifacts",
+  ),
+  path.join(repoRoot, "apps", "app", "electrobun", "artifacts"),
+];
 
 export interface PackagedProcessLogs {
   stdout: string[];
@@ -105,16 +115,28 @@ async function findMacLauncher(): Promise<string | null> {
   }
 
   const candidates = [
-    ...(await findFiles(electrobunBuildDir, (fullPath) =>
-      fullPath.endsWith(
-        `${path.sep}Contents${path.sep}MacOS${path.sep}launcher`,
-      ),
-    )),
-    ...(await findFiles(electrobunArtifactsDir, (fullPath) =>
-      fullPath.endsWith(
-        `${path.sep}Contents${path.sep}MacOS${path.sep}launcher`,
-      ),
-    )),
+    ...(
+      await Promise.all(
+        electrobunBuildDirs.map((buildDir) =>
+          findFiles(buildDir, (fullPath) =>
+            fullPath.endsWith(
+              `${path.sep}Contents${path.sep}MacOS${path.sep}launcher`,
+            ),
+          ),
+        ),
+      )
+    ).flat(),
+    ...(
+      await Promise.all(
+        electrobunArtifactsDirs.map((artifactsDir) =>
+          findFiles(artifactsDir, (fullPath) =>
+            fullPath.endsWith(
+              `${path.sep}Contents${path.sep}MacOS${path.sep}launcher`,
+            ),
+          ),
+        ),
+      )
+    ).flat(),
   ];
 
   if (candidates.length === 0) {
@@ -160,25 +182,37 @@ async function resolveWindowsLauncher(tempExtractDir: string): Promise<string> {
     return await fs.realpath(explicit);
   }
 
-  let launcher = await findWindowsLauncherExe(electrobunBuildDir);
-  if (launcher) {
-    return launcher;
+  for (const buildDir of electrobunBuildDirs) {
+    const launcher = await findWindowsLauncherExe(buildDir);
+    if (launcher) {
+      return launcher;
+    }
   }
 
-  launcher = await findWindowsLauncherExe(electrobunArtifactsDir);
-  if (launcher) {
-    return launcher;
+  for (const artifactsDir of electrobunArtifactsDirs) {
+    const launcher = await findWindowsLauncherExe(artifactsDir);
+    if (launcher) {
+      return launcher;
+    }
   }
 
-  const artifactEntries = await fs
-    .readdir(electrobunArtifactsDir, { withFileTypes: true })
-    .catch(() => []);
-  const tarballs = artifactEntries
-    .filter((entry) => entry.isFile() && entry.name.endsWith(".tar.zst"))
-    .map((entry) => path.join(electrobunArtifactsDir, entry.name));
+  const tarballs = (
+    await Promise.all(
+      electrobunArtifactsDirs.map(async (artifactsDir) => {
+        const artifactEntries = await fs
+          .readdir(artifactsDir, { withFileTypes: true })
+          .catch(() => []);
+        return artifactEntries
+          .filter((entry) => entry.isFile() && entry.name.endsWith(".tar.zst"))
+          .map((entry) => path.join(artifactsDir, entry.name));
+      }),
+    )
+  ).flat();
   if (tarballs.length === 0) {
     throw new Error(
-      `No Windows packaged artifacts found in ${electrobunArtifactsDir}.`,
+      `No Windows packaged artifacts found in ${electrobunArtifactsDirs.join(
+        ", ",
+      )}.`,
     );
   }
 
@@ -200,7 +234,7 @@ async function resolveWindowsLauncher(tempExtractDir: string): Promise<string> {
     tempExtractDir,
   ]);
 
-  launcher = await findWindowsLauncherExe(tempExtractDir);
+  const launcher = await findWindowsLauncherExe(tempExtractDir);
   if (!launcher) {
     throw new Error(
       `Failed to find launcher.exe after extracting ${archivePath}.`,

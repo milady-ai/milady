@@ -30,6 +30,14 @@ function relativePath(filePath) {
   return path.relative(repoRoot, filePath) || ".";
 }
 
+function firstPackageRootWithManifest(...candidates) {
+  return (
+    candidates.find((candidate) =>
+      fs.existsSync(path.join(candidate, "package.json")),
+    ) ?? candidates[0]
+  );
+}
+
 function copyPackage(sourcePath, destinationPath) {
   fs.cpSync(sourcePath, destinationPath, {
     recursive: true,
@@ -89,6 +97,77 @@ function linkScopedPackage(
     )}`,
   );
   return linkPath;
+}
+
+function findBunStorePackage(nodeModulesRoot, packageName, requiredFiles) {
+  const bunStore = path.join(nodeModulesRoot, ".bun");
+  if (!fs.existsSync(bunStore)) return null;
+  const prefix = `${packageName}@`;
+  const entries = fs
+    .readdirSync(bunStore, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && entry.name.startsWith(prefix))
+    .map((entry) =>
+      path.join(bunStore, entry.name, "node_modules", packageName),
+    )
+    .filter((candidate) =>
+      requiredFiles.every((fileName) =>
+        fs.existsSync(path.join(candidate, fileName)),
+      ),
+    );
+  entries.sort();
+  return entries.at(-1) ?? null;
+}
+
+function linkPlainPackage(nodeModulesRoot, packageName, sourcePath) {
+  const sourceManifestPath = path.join(sourcePath, "package.json");
+  if (!fs.existsSync(sourceManifestPath)) {
+    throw new Error(
+      `Cannot hydrate ${packageName}; package manifest is missing at ${sourceManifestPath}`,
+    );
+  }
+
+  const linkPath = path.join(nodeModulesRoot, packageName);
+  fs.mkdirSync(path.dirname(linkPath), { recursive: true });
+  removeExistingLink(linkPath);
+  try {
+    fs.symlinkSync(
+      sourcePath,
+      linkPath,
+      process.platform === "win32" ? "junction" : "dir",
+    );
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    console.warn(
+      `[hydrate-windows-playwright-deps] symlink failed for ${packageName}; copying instead: ${reason}`,
+    );
+    copyPackage(sourcePath, linkPath);
+  }
+  console.log(
+    `[hydrate-windows-playwright-deps] linked ${packageName} at ${relativePath(
+      linkPath,
+    )}`,
+  );
+}
+
+function repairVitestLinks(elizaRoot) {
+  const sourcePath = findBunStorePackage(
+    path.join(elizaRoot, "node_modules"),
+    "vitest",
+    ["package.json", "dist/index.js", "vitest.mjs"],
+  );
+  if (!sourcePath) {
+    console.warn(
+      "[hydrate-windows-playwright-deps] complete vitest package not found in eliza Bun store; leaving existing links",
+    );
+    return;
+  }
+
+  for (const nodeModulesRoot of [
+    path.join(elizaRoot, "node_modules"),
+    path.join(elizaRoot, "packages", "core", "node_modules"),
+  ]) {
+    linkPlainPackage(nodeModulesRoot, "vitest", sourcePath);
+  }
 }
 
 function linkElizaPackage(scopedPackageName, sourcePath, options = {}) {
@@ -296,15 +375,26 @@ run(
 
 const elizaRoot = path.join(repoRoot, "eliza");
 if (fs.existsSync(path.join(elizaRoot, "package.json"))) {
+  repairVitestLinks(elizaRoot);
+
   const corePath = path.join(elizaRoot, "packages", "core");
   const coreRuntimePath = selectRuntimePackageRoot("@elizaos/core", corePath, [
     "dist/index.node.js",
     "dist/node/index.node.js",
   ]);
   const sharedPath = path.join(elizaRoot, "packages", "shared");
+  const cloudSdkPath = firstPackageRootWithManifest(
+    path.join(elizaRoot, "packages", "cloud-sdk"),
+    path.join(elizaRoot, "cloud", "packages", "sdk"),
+  );
   const sqlPluginPath = path.join(elizaRoot, "plugins", "plugin-sql");
   const sqlPluginTypescriptPath = path.join(sqlPluginPath, "typescript");
   const sqlPluginRuntimeEntries = [
+    "src/dist/node/index.node.js",
+    "src/index.ts",
+    "src/drizzle/index.ts",
+    "src/schema/index.ts",
+    "src/types.ts",
     "dist/node/index.node.js",
     "index.ts",
     "drizzle/index.ts",
@@ -324,7 +414,7 @@ if (fs.existsSync(path.join(elizaRoot, "package.json"))) {
   ];
   const sqlPluginRuntimePath = selectRuntimePackageRoot(
     "@elizaos/plugin-sql",
-    sqlPluginTypescriptPath,
+    sqlPluginPath,
     sqlPluginRuntimeEntries,
   );
   const elizaCloudPluginRuntimePath = selectOptionalRuntimePackageRoot(
@@ -332,12 +422,14 @@ if (fs.existsSync(path.join(elizaRoot, "package.json"))) {
     elizaCloudPluginPath,
     elizaCloudPluginRuntimeEntries,
   );
+  const cloudSdkRuntimePath = selectRuntimePackageRoot(
+    "@elizaos/cloud-sdk",
+    cloudSdkPath,
+    ["dist/index.js", "src/index.ts"],
+  );
 
   linkElizaPackage("@elizaos/core", coreRuntimePath);
-  linkElizaPackage(
-    "@elizaos/cloud-sdk",
-    path.join(elizaRoot, "cloud", "packages", "sdk"),
-  );
+  linkElizaPackage("@elizaos/cloud-sdk", cloudSdkRuntimePath);
   linkElizaPackage("@elizaos/shared", sharedPath);
   if (elizaCloudPluginRuntimePath) {
     linkRendererSourcePackage(

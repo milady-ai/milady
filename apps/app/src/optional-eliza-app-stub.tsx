@@ -11,6 +11,7 @@ import type {
   WalletExportResult,
   WhitelistStatus,
 } from "@elizaos/app-core/api";
+import type { ChatSidebarWidgetDefinition } from "@elizaos/app-core/components/chat/widgets/types";
 import type { InventoryChainFilters } from "@elizaos/app-core/state/types";
 import type {
   WalletAddresses,
@@ -27,19 +28,6 @@ import type {
 } from "@elizaos/shared";
 import type { ComponentType } from "react";
 import * as THREE from "three";
-
-// Mirrors @elizaos/ui's confirm-dialog PromptOptions. Declared locally because
-// the tsconfig "@elizaos/ui/*" path-map bypasses the package exports field,
-// so the deep "@elizaos/ui/components/ui/confirm-dialog" subpath does not
-// resolve in this stub.
-type PromptOptions = {
-  title: string;
-  description?: string;
-  placeholder?: string;
-  initialValue?: string;
-  confirmLabel?: string;
-  cancelLabel?: string;
-};
 
 const EmptyComponent: ComponentType = () => null;
 type PromptOptions = Record<string, unknown>;
@@ -203,7 +191,6 @@ export function useInventoryData(): {
 
 // Wallet sidebar widget. Component prop type comes from app-core so the seed
 // registry accepts this stub as a valid ChatSidebarWidgetDefinition.
-import type { ChatSidebarWidgetDefinition } from "@elizaos/app-core/components/chat/widgets/types";
 export const WALLET_STATUS_WIDGET: ChatSidebarWidgetDefinition = {
   id: "wallet.status",
   pluginId: "wallet",

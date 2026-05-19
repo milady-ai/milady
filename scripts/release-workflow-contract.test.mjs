@@ -285,6 +285,28 @@ test("eliza CI patches align release source helpers", () => {
   assert.match(patchScript, /name\.startsWith\("@solana\/"\)/);
   assert.match(
     patchScript,
+    /DEP_SKIP[\s\S]*"typescript", "@types\/node"[\s\S]*lucide-react/,
+  );
+  assert.match(patchScript, /BASELINE_PLUGIN_SUPPORT_PACKAGES/);
+  assert.match(patchScript, /@elizaos\/plugin-calendly/);
+  assert.match(patchScript, /@elizaos\/plugin-health/);
+  assert.match(patchScript, /@elizaos\/plugin-app-manager/);
+  assert.match(patchScript, /@elizaos\/plugin-registry/);
+  assert.match(patchScript, /@elizaos\/plugin-wallet-ui/);
+  assert.match(patchScript, /@elizaos\/plugin-wallet/);
+  assert.match(patchScript, /writeFileTextIfMissing/);
+  assert.match(patchScript, /remote-capability-endpoint-provider\.ts/);
+  assert.match(patchScript, /connectRemoteCapabilityEndpointProvider/);
+  assert.match(patchScript, /installRemoteCapabilityEndpoint/);
+  assert.match(patchScript, /mergeEndpointConfigs/);
+  assert.match(patchScript, /remote-capability-endpoint-conformance\.ts/);
+  assert.match(patchScript, /assertRemoteCapabilityEndpointConformance/);
+  assert.match(patchScript, /remote-capability-url-endpoint-providers\.ts/);
+  assert.match(patchScript, /homeMachineCapabilityEndpointProvider/);
+  assert.match(patchScript, /register\.capability-router\.ts/);
+  assert.match(patchScript, /registerCapabilityRouterCommand/);
+  assert.match(
+    patchScript,
     /"@elizaos\/core", "commander"[\s\S]*runtime copy tar-safe Solana hoists/,
   );
   assert.match(patchScript, /alpha\|beta\|rc\|nightly/);
@@ -486,6 +508,11 @@ test("Electrobun release applies elizaOS source overlay before manual build setu
   );
   assert.match(
     copyRuntimeWrapper,
+    /elizaPackagesDir,\s*"ui"[\s\S]*dist\/index\.js/,
+  );
+  assert.match(copyRuntimeWrapper, /"@elizaos\/ui"/);
+  assert.match(
+    copyRuntimeWrapper,
     /elizaPackagesDir,\s*"vault"[\s\S]*dist\/index\.js/,
   );
   assert.match(
@@ -505,6 +532,26 @@ test("Electrobun release applies elizaOS source overlay before manual build setu
   assert.match(copyRuntimeWrapper, /"@elizaos\/agent"/);
   assert.match(copyRuntimeWrapper, /elizaAppCoreDir[\s\S]*dist\/api\/auth\.js/);
   assert.match(copyRuntimeWrapper, /"@elizaos\/app-core"/);
+  for (const packageName of [
+    "plugin-google",
+    "plugin-health",
+    "plugin-calendly",
+    "plugin-companion",
+    "plugin-wallet-ui",
+    "plugin-lifeops",
+  ]) {
+    assert.match(
+      copyRuntimeWrapper,
+      new RegExp(`"${packageName}"[\\s\\S]*dist/index\\.js`),
+    );
+    assert.match(copyRuntimeWrapper, new RegExp(`"@elizaos/${packageName}"`));
+  }
+  assert.match(copyRuntimeWrapper, /scriptName:\s*"build:js"/);
+  assert.match(copyRuntimeWrapper, /linkLocalPackage/);
+  assert.match(
+    copyRuntimeWrapper,
+    /"three",\s*path\.join\(elizaRootNodeModules,\s*"three"\)/,
+  );
   for (const packageName of [
     "plugin-agent-skills",
     "plugin-registry",
@@ -543,7 +590,24 @@ test("Electrobun release applies elizaOS source overlay before manual build setu
     copyRuntimeWrapper,
     /allowExistingMarkerAfterFailure[\s\S]*fs\.existsSync\(marker\)/,
   );
+  assert.match(copyRuntimeWrapper, /newestBuildInputMtimeMs/);
+  assert.match(copyRuntimeWrapper, /markerMtimeMs >= inputMtimeMs/);
+  assert.match(copyRuntimeWrapper, /freshMarker/);
+  assert.match(copyRuntimeWrapper, /resolveElizaCloudSdkDir/);
+  assert.match(copyRuntimeWrapper, /elizaPackagesDir,\s*"cloud-sdk"/);
+  assert.match(copyRuntimeWrapper, /elizaCloudPackagesDir,\s*"sdk"/);
   assert.match(copyRuntimeWrapper, /"@elizaos\/plugin-elizacloud"/);
+  assert.match(elizaPatchScript, /parseToonKeyValue/);
+  assert.match(elizaPatchScript, /packageName === "googleapis"/);
+  assert.match(elizaPatchScript, /build\/src\/apis\/docs/);
+  assert.match(elizaPatchScript, /packageName === "three"/);
+  assert.match(elizaPatchScript, /examples\/jsm/);
+  assert.match(elizaPatchScript, /packageName === "@elizaos\/ui"/);
+  assert.match(elizaPatchScript, /dist\/cloud-ui\/components\/docs/);
+  assert.match(elizaPatchScript, /hasRootPackageOverride/);
+  assert.match(elizaPatchScript, /root override\/resolution install/);
+  assert.match(elizaPatchScript, /manifest\.overrides/);
+  assert.match(elizaPatchScript, /manifest\.resolutions/);
   assert.match(copyRuntimeWrapper, /dist\/index\.js/);
   assert.match(copyRuntimeWrapper, /ensureElizaCoreRuntimeAliases/);
   assert.match(copyRuntimeWrapper, /dist\/node\/index\.node\.js/);
@@ -616,6 +680,10 @@ test("Electrobun Windows release runs packaged Playwright check after disk clean
   assert.match(hydrateScript, /@elizaos\/cloud-sdk/);
   assert.match(hydrateScript, /@elizaos\/core/);
   assert.match(hydrateScript, /@elizaos\/plugin-sql/);
+  assert.match(hydrateScript, /firstPackageRootWithManifest/);
+  assert.match(hydrateScript, /"packages", "cloud-sdk"/);
+  assert.match(hydrateScript, /repairVitestLinks/);
+  assert.match(hydrateScript, /"dist\/index\.js", "vitest\.mjs"/);
   assert.match(hydrateScript, /plugins", "plugin-sql/);
   assert.match(hydrateScript, /sqlPluginTypescriptPath = path\.join/);
   assert.match(hydrateScript, /sqlPluginPath,\s*"typescript"/);
@@ -636,6 +704,7 @@ test("Electrobun Windows release runs packaged Playwright check after disk clean
   assert.match(hydrateScript, /using installed \$\{scopedPackageName\}/);
   assert.match(hydrateScript, /dist\/index\.node\.js/);
   assert.match(hydrateScript, /dist\/node\/index\.node\.js/);
+  assert.match(hydrateScript, /src\/dist\/node\/index\.node\.js/);
   assert.match(hydrateScript, /drizzle\/index\.ts/);
   assert.match(hydrateScript, /schema\/index\.ts/);
   assert.match(hydrateScript, /types\.ts/);
@@ -656,10 +725,137 @@ test("Electrobun Windows release runs packaged Playwright check after disk clean
     rootPackage.scripts["test:desktop:playwright:windows"],
     /bunx playwright test --config playwright\.electrobun\.packaged\.config\.ts/,
   );
+  assert.equal(
+    rootPackage.scripts["test:desktop:packaged:windows"],
+    "node scripts/run-windows-packaged-desktop-smoke.mjs",
+  );
+  assert.ok(
+    rootPackage.files.includes(
+      "scripts/run-windows-packaged-desktop-smoke.mjs",
+    ),
+  );
   assert.match(
     electrobun,
     /name: Run Windows packaged renderer bootstrap check[\s\S]*?PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"[\s\S]*?run: bun run test:desktop:playwright:windows/,
   );
+});
+
+test("local desktop build publishes renderer avatar assets before packaging", () => {
+  const rootPackage = JSON.parse(fs.readFileSync("package.json", "utf8"));
+  const desktopBuildScript = fs.readFileSync(
+    "scripts/run-milady-desktop-build.mjs",
+    "utf8",
+  );
+  const avatarAssetScript = fs.readFileSync(
+    "scripts/ensure-eliza-renderer-avatar-assets.mjs",
+    "utf8",
+  );
+  const patchScript = fs.readFileSync(
+    "scripts/apply-eliza-ci-patches.mjs",
+    "utf8",
+  );
+
+  assert.equal(
+    rootPackage.scripts["build:desktop"],
+    "node scripts/run-milady-desktop-build.mjs build --variant=base",
+  );
+  assert.equal(
+    rootPackage.scripts["desktop:preflight"],
+    "node scripts/run-milady-desktop-build.mjs preflight --variant=base",
+  );
+  assert.equal(
+    rootPackage.scripts["start:desktop"],
+    "node scripts/run-milady-desktop-build.mjs run --variant=base",
+  );
+  assert.ok(rootPackage.files.includes("scripts/run-milady-desktop-build.mjs"));
+  assert.match(desktopBuildScript, /apply-eliza-ci-patches\.mjs/);
+  assert.match(desktopBuildScript, /runDesktopBuild\("stage"\)/);
+  assert.match(desktopBuildScript, /repairRuntimeEntry\(\)/);
+  assert.match(desktopBuildScript, /@elizaos\/app-core/);
+  assert.match(desktopBuildScript, /publishAvatarAssets\(\)/);
+  assert.match(desktopBuildScript, /runDesktopBuild\("package"\)/);
+  assert.match(desktopBuildScript, /repairPackagedRuntimePayloads\(\)/);
+  assert.match(desktopBuildScript, /relativePath:\s*"node_modules"/);
+  assert.match(desktopBuildScript, /prunedDirs/);
+  assert.match(desktopBuildScript, /@elizaos", "core", "src/);
+  assert.match(desktopBuildScript, /@elizaos", "ui", "src/);
+  assert.match(
+    desktopBuildScript,
+    /@elizaos", "core", "dist", "node", "index\.node\.js/,
+  );
+  assert.match(
+    desktopBuildScript,
+    /"app-core"[\s\S]*"dist"[\s\S]*"cli"[\s\S]*"program"[\s\S]*"register\.capability-router\.js"/,
+  );
+  assert.match(
+    desktopBuildScript,
+    /"agent"[\s\S]*"src"[\s\S]*"services"[\s\S]*"remote-capability-endpoint-provider\.ts"/,
+  );
+  assert.match(
+    desktopBuildScript,
+    /"agent"[\s\S]*"src"[\s\S]*"services"[\s\S]*"remote-capability-endpoint-conformance\.ts"/,
+  );
+  assert.match(
+    desktopBuildScript,
+    /"agent"[\s\S]*"src"[\s\S]*"services"[\s\S]*"remote-capability-url-endpoint-providers\.ts"/,
+  );
+  assert.match(
+    desktopBuildScript,
+    /remote-capability-endpoint-provider\.ts"[\s\S]*connectRemoteCapabilityEndpointProvider/,
+  );
+  assert.match(
+    desktopBuildScript,
+    /remote-capability-endpoint-conformance\.ts"[\s\S]*assertRemoteCapabilityEndpointConformance/,
+  );
+  assert.match(
+    desktopBuildScript,
+    /remote-capability-url-endpoint-providers\.ts"[\s\S]*homeMachineCapabilityEndpointProvider/,
+  );
+  assert.match(
+    desktopBuildScript,
+    /register\.capability-router\.js"[\s\S]*registerCapabilityRouterCommand/,
+  );
+  assert.match(
+    desktopBuildScript,
+    /"cloud-ui"[\s\S]*"components"[\s\S]*"docs"[\s\S]*"index\.js"/,
+  );
+  assert.match(desktopBuildScript, /plugin-app-manager", "dist", "index\.js/);
+  assert.match(desktopBuildScript, /readAppRunStore/);
+  assert.match(desktopBuildScript, /plugin-calendly", "dist", "index\.js/);
+  assert.match(desktopBuildScript, /listCalendlyEventTypes/);
+  assert.match(desktopBuildScript, /plugin-health", "dist", "index\.js/);
+  assert.match(desktopBuildScript, /"health-bridge"[\s\S]*"health-bridge\.js"/);
+  assert.match(desktopBuildScript, /detectHealthBackend/);
+  assert.match(desktopBuildScript, /plugin-wallet-ui", "dist", "index\.js/);
+  assert.match(desktopBuildScript, /BSC_GAS_READY_THRESHOLD/);
+  assert.match(desktopBuildScript, /plugin-wallet", "dist", "index\.mjs/);
+  assert.match(desktopBuildScript, /handleWalletRoutes/);
+  assert.match(desktopBuildScript, /plugin-registry", "dist", "index\.js/);
+  assert.match(desktopBuildScript, /handlePluginsCompatRoutes/);
+  assert.match(desktopBuildScript, /plugin-discord", "dist", "index\.js/);
+  assert.match(desktopBuildScript, /fetchDocumentFromUrl/);
+  assert.match(desktopBuildScript, /fetchKnowledgeFromUrl/);
+  assert.match(desktopBuildScript, /requiredText/);
+  assert.match(desktopBuildScript, /forbiddenText/);
+  assert.match(
+    desktopBuildScript,
+    /googleapis", "build", "src", "apis", "docs/,
+  );
+  assert.match(desktopBuildScript, /"three", "build", "three\.webgpu\.js/);
+  assert.match(desktopBuildScript, /three\.webgpu\.js/);
+  assert.match(desktopBuildScript, /FBXLoader\.js/);
+  assert.match(desktopBuildScript, /lucide-react", "package\.json/);
+  assert.match(desktopBuildScript, /dist", "esm", "lucide-react\.mjs/);
+  assert.match(desktopBuildScript, /@lifi", "sdk", "package\.json/);
+  assert.match(patchScript, /core local prompts path mapping/);
+  assert.match(patchScript, /@elizaos\/prompts/);
+  assert.match(patchScript, /parseToonKeyValue/);
+  assert.match(patchScript, /packageName === "googleapis"/);
+  assert.match(patchScript, /packageName === "three"/);
+  assert.match(patchScript, /packageName === "@elizaos\/ui"/);
+  assert.match(patchScript, /hasRootPackageOverride/);
+  assert.match(avatarAssetScript, /plugin-companion\/public/);
+  assert.match(avatarAssetScript, /findPackagedRendererRoots/);
 });
 
 test("package-mode production build reapplies native app-core patch before Vite", () => {
