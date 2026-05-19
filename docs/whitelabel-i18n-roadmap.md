@@ -10,11 +10,35 @@ Registry: `eliza/packages/ui/src/i18n/messages.ts` (`UI_LANGUAGES`), `eliza/pack
 
 ## What's done
 
+### Infrastructure
+
 - **i18n linter** — `eliza/packages/{app-core/scripts,scripts}/check-i18n.mjs` `LOCALE_DIR` corrected from `packages/app-core/src/i18n/locales` (non-existent) to `packages/ui/src/i18n/locales`. `bun run verify:i18n` now actually runs.
-- **17 missing keys** filled in `es`, `ko`, `pt`, `tl`, `vi`, `zh-CN` (`finetuningview.*` + `settings.sections.*`).
-- **Japanese (`ja`) added** — `UI_LANGUAGES`, `MESSAGES`, lazy loader, dropdown entry, `normalizeLanguage` mapping. `ja.json` seeded with onboarding + finetuning + startup-shell keys; full 3309-key translation produced separately and merged.
+- **Japanese (`ja`) added** as 8th locale — `UI_LANGUAGES`, `MESSAGES`, lazy loader, dropdown entry, `normalizeLanguage` mapping. Full 3373-key translation.
+- **`StateSetup.LANGUAGES`** expanded from 4 to all 8 region-coded locales (en-US, zh-CN, es-ES, ja-JP, ko-KR, pt-BR, tl-PH, vi-VN).
+- **`plugin-lifeops` `PromptLocale`** expanded from `"en" | "es" | "fr" | "ja"` to all 8 UI locales. OWNER_ROUTINES example pair registered in ko / pt / tl / vi / zh-CN (kept `fr` for back-compat).
+- **cloud-services-common test** — `bun test` (which fails on empty test set) replaced with `echo 'no tests'` to match workspace convention.
+
+### Translation quality pass — 7 locales reviewed + improved
+
+Each non-English locale was passed through a translation+review agent with explicit modern-app-vocabulary criteria (Spotify / KakaoTalk / WhatsApp BR / Zalo / LINE / WeChat etc.) — not Google Translate. Catches included:
+
+- **ko**: `common.save` was `구하다` ("rescue / save a life"); `common.dismiss` was `해고하다` ("fire from a job"); `common.disabled` was `장애가 있는` (offensive disability label).
+- **vi**: `common.save` was `Cứu` ("rescue"); buttons like Next/Search were truncated awkwardly.
+- **pt**: brand names mistranslated wholesale — `Cláudio` for Claude, `Gêmeos` (zodiac sign) for Gemini, `Difusão Estável` for Stable Diffusion, `Soneto de Cláudio` for Claude 3.5 Sonnet.
+- **tl**: `Maaliwalas` ("sunny weather") for Clear, `Bulong` (verb "to whisper") for Whisper, `Larawan` ("image") for Imagen, OFF/ON as `SARADO/BUKAS` (locked/opened).
+- **es**: usted-form imperatives systematically replaced with tú-form (Pegue→Pega, Haga clic→Toca, Cargue→Sube), brand-name unicode (Antrópico→Anthropic), Caja de arena→Sandbox.
+- **ja**: stiff `…に失敗しました` errors softened to `…できませんでした` matching LINE/Mercari tone; verbose hints shortened.
+
+All seven locales now match en.json exactly (3373 keys), every `{{placeholder}}` preserved, valid JSON.
+
+### Brand parameterization
+
 - **StateSetup onboarding** — "Setup Your Eliza" / "Where should Eliza run?" replaced by `t("onboarding.setup.setupYourApp" | "onboarding.setup.whereShouldRun", appNameInterpolationVars(branding))`. Translations added in all 8 locales.
-- **cloud-services-common test** — `bun test` (which fails on empty test set) replaced with `echo 'no tests'` to match workspace convention used by `checkout-shared`, `hardware-catalog`, `shared-brand`.
+- **RuntimeGate welcome splash** — `runtimegate.welcome{Eyebrow,Title,Subtitle}` parameterized via `{{appName}}` across all 8 locales. Dropped misleading "hosted on Eliza Cloud" from subtitle.
+
+### 61 missing keys repaired
+
+`verify:i18n` had been silently broken; once fixed it surfaced 61 keys referenced via `t("…", { defaultValue: "…" })` in source but never present in any locale file (RuntimeSettingsSection, AddAccountDialog, RuntimeGate, ReleaseCenterView, TrajectoryDetailView, DocumentsView, SubscriptionStatus, PermissionsSection, SignalQrOverlay, BrowserWorkspaceView, AccountCard). All 61 defaultValues extracted into en.json and translated in all 7 other locales as part of the per-language passes above.
 
 ## Remaining work — ranked
 
