@@ -10,10 +10,12 @@ import {
 } from "./runtime-config";
 
 // ── Wallet types ───────────────────────────────────────────────────────
+// Wallet addresses response (same shape as WalletAddresses but with Response suffix for API clarity)
 export type {
   EvmChainBalance,
   EvmTokenBalance,
   SolanaTokenBalance,
+  WalletAddresses as WalletAddressesResponse,
   WalletBalancesResponse,
 } from "@elizaos/shared/contracts/wallet";
 export type {
@@ -25,18 +27,16 @@ export type {
   StewardTxStatus,
 } from "@elizaos/ui/api/client-types-steward";
 
-import type { WalletBalancesResponse } from "@elizaos/shared/contracts/wallet";
+import type {
+  WalletAddresses as WalletAddressesResponse,
+  WalletBalancesResponse,
+} from "@elizaos/shared/contracts/wallet";
 import type {
   StewardApprovalActionResponse,
   StewardPendingApproval,
   StewardStatusResponse,
   StewardTxRecord,
 } from "@elizaos/ui/api/client-types-steward";
-
-// Wallet addresses response (same shape as WalletAddresses but with Response suffix for API clarity)
-export type { WalletAddresses as WalletAddressesResponse } from "@elizaos/shared/contracts/wallet";
-
-import type { WalletAddresses as WalletAddressesResponse } from "@elizaos/shared/contracts/wallet";
 
 // Steward policy types (not in shared — these are UI-specific config shapes)
 export type StewardPolicyType =

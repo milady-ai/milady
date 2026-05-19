@@ -39,6 +39,14 @@ const optionalElizaAppStubEntry = path.join(
   "src/optional-eliza-app-stub.tsx",
 );
 const nativePluginStubEntry = path.join(here, "src/native-plugin-stubs.ts");
+const packageModeVoiceCaptureFallbackEntry = path.join(
+  here,
+  "src/eliza-ui-voice-capture-fallback.ts",
+);
+const packageModeVoicePillFallbackEntry = path.join(
+  here,
+  "src/eliza-ui-voice-pill-fallback.tsx",
+);
 const localElizaRoot = path.join(miladyRoot, "eliza");
 
 function requireResolve(id: string): string {
@@ -178,6 +186,11 @@ function firstExistingDirectory(candidates: string[]): string | null {
     ) ?? null
   );
 }
+
+const packageUiEntry = tryResolve("@elizaos/ui");
+const appCoreCharacterEditorEntry = tryResolve(
+  "@elizaos/app-core/components/character/CharacterEditor",
+);
 // `@elizaos/app-core` is always real. `@elizaos/app-wallet` is required by
 // onboarding callbacks + AppContext (useWalletState), so resolve it real
 // when present. `app-hyperscape` is real when its package is present.
@@ -363,6 +376,26 @@ function resolveLocalUiAliases(): Alias[] {
 
 function resolvePackageModeUiCompatAliases(): Alias[] {
   if (hasLocalElizaWorkspace) return [];
+
+  const aliases: Alias[] = [
+    ...(packageUiEntry
+      ? [
+          {
+            find: /^@elizaos\/ui$/,
+            replacement: packageUiEntry,
+          },
+        ]
+      : []),
+    {
+      find: /^@elizaos\/ui\/voice$/,
+      replacement: packageModeVoiceCaptureFallbackEntry,
+    },
+    {
+      find: /^@elizaos\/ui\/components\/voice-pill\/index$/,
+      replacement: packageModeVoicePillFallbackEntry,
+    },
+  ];
+
   const uiRoot = resolvePackageRoot("@elizaos/ui");
   const browserEntry = uiRoot
     ? firstExistingFile([
@@ -371,25 +404,21 @@ function resolvePackageModeUiCompatAliases(): Alias[] {
         path.join(uiRoot, "dist/browser.js"),
       ])
     : null;
-  const voiceEntry = uiRoot
-    ? firstExistingFile([
-        path.join(uiRoot, "src/voice/index.ts"),
-        path.join(uiRoot, "packages/ui/src/voice/index.js"),
-        path.join(uiRoot, "dist/voice/index.js"),
-      ])
-    : null;
-  return [
-    {
+  if (browserEntry) {
+    aliases.push({
       find: /^@elizaos\/ui\/browser$/,
-      replacement:
-        browserEntry ?? path.join(here, "src/elizaos-ui-browser-compat.tsx"),
-    },
-    {
-      find: /^@elizaos\/ui\/voice$/,
-      replacement:
-        voiceEntry ?? path.join(here, "src/elizaos-ui-voice-compat.ts"),
-    },
-  ];
+      replacement: browserEntry,
+    });
+  }
+
+  if (appCoreCharacterEditorEntry) {
+    aliases.push({
+      find: /^@elizaos\/ui\/components\/character\/CharacterEditor$/,
+      replacement: appCoreCharacterEditorEntry,
+    });
+  }
+
+  return aliases;
 }
 
 function resolvePackageModeUiSourceAliases(): Alias[] {
