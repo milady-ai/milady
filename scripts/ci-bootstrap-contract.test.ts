@@ -40,6 +40,21 @@ describe("CI bootstrap contract", () => {
     expect(ci.indexOf(coreBuild)).toBeLessThan(ci.indexOf(skillsBuild));
   });
 
+  it("guards CI package-local app linking when eliza is absent", () => {
+    for (const file of ["ci.yml", "ci-fork.yml"]) {
+      const ci = workflow(file);
+      const step = ci.match(
+        /- name: Link local @elizaos workspace packages\n([\s\S]*?)\n\s*run: node eliza\/packages\/app-core\/scripts\/link-docker-local-app-packages\.mjs/,
+      );
+
+      expect(step, `${file} missing local package link step`).not.toBeNull();
+      expect(step?.[1]).toContain("hashFiles('eliza/package.json') != ''");
+      expect(ci).toContain(
+        "MILADY_FORCE_LOCAL_UPSTREAMS: ${{ hashFiles('eliza/package.json') != '' && '1' || '' }}",
+      );
+    }
+  });
+
   it("generates protobuf types before auth tests run", () => {
     const agentReview = workflow("agent-review.yml");
     const generateProtobuf = "- name: Generate protobuf types";

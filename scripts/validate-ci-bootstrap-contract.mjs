@@ -124,6 +124,7 @@ const actionText = readText(files.action, failures);
 const alignScriptText = readText(files.alignScript, failures);
 const packageJson = readJson(files.packageJson, failures);
 const ciWorkflowText = readText(".github/workflows/ci.yml", failures);
+const ciForkWorkflowText = readText(".github/workflows/ci-fork.yml", failures);
 const _buildDockerText = readText(
   ".github/workflows/build-docker.yml",
   failures,
@@ -136,7 +137,16 @@ assertContainsAll(
   failures,
 );
 assertCiPreReviewBootstrap(ciWorkflowText, failures);
-assertCiPackageModeElizaGuards(ciWorkflowText, failures);
+assertCiPackageModeElizaGuards(
+  ciWorkflowText,
+  ".github/workflows/ci.yml",
+  failures,
+);
+assertCiPackageModeElizaGuards(
+  ciForkWorkflowText,
+  ".github/workflows/ci-fork.yml",
+  failures,
+);
 assertContainsNone(
   ciWorkflowText,
   ".github/workflows/ci.yml",
@@ -361,26 +371,45 @@ function assertCiPreReviewBootstrap(workflowText, targetFailures) {
   );
 }
 
-function assertCiPackageModeElizaGuards(workflowText, targetFailures) {
-  const expected = [
-    {
-      jobName: "pre-review",
-      stepNames: [
-        "Generate i18n keyword data",
-        "Build eliza packages required for typecheck",
-      ],
-    },
-    {
-      jobName: "typecheck",
-      stepNames: ["Build eliza packages required for typecheck"],
-    },
-  ];
+function assertCiPackageModeElizaGuards(
+  workflowText,
+  workflowPath,
+  targetFailures,
+) {
+  const expected =
+    workflowPath.endsWith("ci-fork.yml")
+      ? [
+          {
+            jobName: "build",
+            stepNames: ["Link local @elizaos workspace packages"],
+          },
+        ]
+      : [
+          {
+            jobName: "pre-review",
+            stepNames: [
+              "Generate i18n keyword data",
+              "Build eliza packages required for typecheck",
+            ],
+          },
+          {
+            jobName: "typecheck",
+            stepNames: ["Build eliza packages required for typecheck"],
+          },
+          {
+            jobName: "build",
+            stepNames: [
+              "Build eliza packages required for typecheck",
+              "Link local @elizaos workspace packages",
+            ],
+          },
+        ];
 
   for (const { jobName, stepNames } of expected) {
     const jobBlock = findWorkflowJobBlock(workflowText, jobName);
     if (!jobBlock) {
       targetFailures.push(
-        `.github/workflows/ci.yml is missing the "${jobName}" job block`,
+        `${workflowPath} is missing the "${jobName}" job block`,
       );
       continue;
     }
@@ -391,15 +420,26 @@ function assertCiPackageModeElizaGuards(workflowText, targetFailures) {
       ).exec(jobBlock);
       if (!stepMatch) {
         targetFailures.push(
-          `.github/workflows/ci.yml ${jobName} job is missing step "${stepName}"`,
+          `${workflowPath} ${jobName} job is missing step "${stepName}"`,
         );
         continue;
       }
       if (!stepMatch[1].includes("hashFiles('eliza/package.json') != ''")) {
         targetFailures.push(
-          `.github/workflows/ci.yml ${jobName} step "${stepName}" must be skipped when eliza/ is absent`,
+          `${workflowPath} ${jobName} step "${stepName}" must be skipped when eliza/ is absent`,
         );
       }
+    }
+
+    if (
+      jobName === "build" &&
+      !jobBlock.includes(
+        "MILADY_FORCE_LOCAL_UPSTREAMS: ${{ hashFiles('eliza/package.json') != '' && '1' || '' }}",
+      )
+    ) {
+      targetFailures.push(
+        `${workflowPath} build job must only force local upstream aliases when eliza/ is present`,
+      );
     }
   }
 }
