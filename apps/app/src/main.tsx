@@ -42,19 +42,23 @@ import {
   installForceFreshOnboardingClientPatch,
   installLocalProviderCloudPreferencePatch,
   isAppWindowRoute,
+  isDetachedWindowShell,
   getWindowNavigationPath,
+  resolveWindowShellRoute,
+  shouldInstallMainWindowOnboardingPatches,
   syncDetachedShellLocation,
 } from "@elizaos/app-core";
+// Pill / voice-capture symbols live in upstream @elizaos/ui source but are
+// not yet published on the `alpha` dist-tag. Route through the local stub so
+// package-mode builds stay green; see apps/app/src/pill-stubs.tsx.
 import {
-  VoicePill,
-  type VoicePillMessage,
-} from "@elizaos/ui/components/voice-pill/index";
-import {
+  type ConversationMessage,
   createVoiceCapture,
   type VoiceCaptureHandle,
-  type VoiceCaptureState,
-  type VoiceCaptureTranscriptSegment,
-} from "@elizaos/ui/voice";
+  VoicePill,
+  type VoicePillMessage,
+  normalizePillMessage,
+} from "./pill-stubs";
 import { AppWindowRenderer } from "@elizaos/app-core";
 import { dispatchQueuedLifeOpsGithubCallbackFromUrl } from "@elizaos/app-lifeops/platform";
 import type { ShareTargetPayload } from "@elizaos/app-core/platform";
@@ -239,72 +243,24 @@ function isDesktopPlatform(): boolean {
   return isElectrobunRuntime();
 }
 
-type WindowShellRoute =
-  | { mode: "main" }
-  | { mode: "settings"; tab?: string }
-  | {
-      mode: "surface";
-      tab:
-        | "browser"
-        | "chat"
-        | "cloud"
-        | "connectors"
-        | "plugins"
-        | "release"
-        | "triggers";
-    }
-  | { mode: "pill" };
-
-function resolveWindowShellRoute(
-  search = typeof window !== "undefined" ? window.location.search : "",
-): WindowShellRoute {
-  const params = new URLSearchParams(search);
-  const shell = params.get("shell");
-
-  if (shell === "settings") {
-    const tab = params.get("tab")?.trim() || undefined;
-    return tab ? { mode: "settings", tab } : { mode: "settings" };
-  }
-
-  if (shell === "pill") return { mode: "pill" };
-
-  if (shell === "surface") {
-    const tab = params.get("tab");
-    if (
-      tab === "browser" ||
-      tab === "chat" ||
-      tab === "release" ||
-      tab === "triggers" ||
-      tab === "plugins" ||
-      tab === "connectors" ||
-      tab === "cloud"
-    ) {
-      return { mode: "surface", tab };
-    }
-  }
-
-  return { mode: "main" };
-}
-
-function isDetachedWindowShell(
-  route: WindowShellRoute,
-): route is Exclude<WindowShellRoute, { mode: "main" } | { mode: "pill" }> {
-  return route.mode !== "main" && route.mode !== "pill";
-}
-
-function isPillWindowShell(
-  route: WindowShellRoute,
-): route is Extract<WindowShellRoute, { mode: "pill" }> {
-  return route.mode === "pill";
-}
-
-function shouldInstallMainWindowOnboardingPatches(
-  route: WindowShellRoute,
-): boolean {
-  return route.mode === "main";
-}
-
 const windowShellRoute = resolveWindowShellRoute();
+
+// `isPillWindowShell` is not yet exported from the published @elizaos/app-core
+// alpha. The pill window is launched with `?shell=pill` by the Electrobun
+// host, so we detect that locally until the upstream helper ships.
+function isPillWindowShellRoute(route: unknown): boolean {
+  if (route && typeof route === "object") {
+    const kind = (route as { kind?: unknown }).kind;
+    if (typeof kind === "string" && kind === "pill") return true;
+  }
+  if (typeof window === "undefined") return false;
+  try {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("shell") === "pill";
+  } catch {
+    return false;
+  }
+}
 
 /**
  * Adds `eliza-electrobun-frameless` for CSS `-webkit-app-region` (Chromium/CEF).
@@ -974,16 +930,7 @@ const PILL_CONVERSATION_STORAGE_KEY = "milady.pill.activeConversationId";
  * the pill renders. Skips entries with no display text and collapses message
  * roles to the binary user/agent split the pill UI expects.
  */
-type PillMessage = {
-  id: string;
-  role: string;
-  text?: string | null;
-  timestamp?: number;
-  failureKind?: unknown;
-  [key: string]: unknown;
-};
-
-function toPillMessage(message: PillMessage): VoicePillMessage | null {
+function toPillMessage(message: ConversationMessage): VoicePillMessage | null {
   const text = message.text?.trim() ?? "";
   if (!text) return null;
   return {
@@ -993,7 +940,9 @@ function toPillMessage(message: PillMessage): VoicePillMessage | null {
   };
 }
 
-function projectPillMessages(messages: PillMessage[]): VoicePillMessage[] {
+function projectPillMessages(
+  messages: ConversationMessage[],
+): VoicePillMessage[] {
   const tail = messages.slice(-PILL_MESSAGE_TAIL);
   const projected: VoicePillMessage[] = [];
   for (const message of tail) {
@@ -1001,33 +950,6 @@ function projectPillMessages(messages: PillMessage[]): VoicePillMessage[] {
     if (pill) projected.push(pill);
   }
   return projected;
-}
-
-function normalizePillMessage(message: unknown): PillMessage | null {
-  if (!message || typeof message !== "object") return null;
-  const raw = message as {
-    id?: unknown;
-    role?: unknown;
-    text?: unknown;
-    timestamp?: unknown;
-  };
-  if (typeof raw.id !== "string") return null;
-  return {
-    ...(message as Record<string, unknown>),
-    id: raw.id,
-    role: typeof raw.role === "string" ? raw.role : "assistant",
-    text: typeof raw.text === "string" ? raw.text : "",
-    timestamp: typeof raw.timestamp === "number" ? raw.timestamp : Date.now(),
-  };
-}
-
-function normalizePillMessages(messages: unknown[]): PillMessage[] {
-  const normalized: PillMessage[] = [];
-  for (const message of messages) {
-    const next = normalizePillMessage(message);
-    if (next) normalized.push(next);
-  }
-  return normalized;
 }
 
 function readPillConversationId(): string | null {
@@ -1102,7 +1024,7 @@ function conversationUpdatedAtMs(c: PillConversationSummary): number {
  * agent turns.
  */
 function PillRoot() {
-  const [messages, setMessages] = useState<PillMessage[]>([]);
+  const [messages, setMessages] = useState<ConversationMessage[]>([]);
   const conversationIdRef = useRef<string | null>(readPillConversationId());
   const sendInFlightRef = useRef<boolean>(false);
   const voiceCaptureRef = useRef<VoiceCaptureHandle | null>(null);
@@ -1110,7 +1032,7 @@ function PillRoot() {
 
   // Append-or-replace by id so streaming token updates collapse onto a single
   // assistant turn without flicker.
-  const upsertMessage = useCallback((next: PillMessage) => {
+  const upsertMessage = useCallback((next: ConversationMessage) => {
     setMessages((prev) => {
       const index = prev.findIndex((entry) => entry.id === next.id);
       if (index < 0) return [...prev, next];
@@ -1154,7 +1076,7 @@ function PillRoot() {
       const { messages: history } =
         await client.getConversationMessages(convId);
       if (cancelled) return;
-      setMessages(normalizePillMessages(history));
+      setMessages(history.map(normalizePillMessage));
     })();
     return () => {
       cancelled = true;
@@ -1180,8 +1102,7 @@ function PillRoot() {
         if (!raw || typeof raw !== "object") return;
         const candidate = raw as { id?: unknown };
         if (typeof candidate.id !== "string") return;
-        const message = normalizePillMessage(raw);
-        if (message) upsertMessage(message);
+        upsertMessage(normalizePillMessage(raw));
       },
     );
     return () => {
@@ -1237,7 +1158,7 @@ function PillRoot() {
           upsertMessage({
             id: assistantMsgId,
             role: "assistant",
-            text: typeof result.text === "string" ? result.text : "",
+            text: result.text ?? "",
             timestamp: Date.now(),
             ...(result.failureKind ? { failureKind: result.failureKind } : {}),
           });
@@ -1270,7 +1191,7 @@ function PillRoot() {
     if (recording) {
       if (!voiceCaptureRef.current) {
         voiceCaptureRef.current = createVoiceCapture({
-          onTranscript: (segment: VoiceCaptureTranscriptSegment) => {
+          onTranscript: (segment) => {
             if (!segment.final) {
               // Interim segments are best-guess partials — useful for a future
               // live caption surface but not safe to submit. Log only.
@@ -1284,7 +1205,7 @@ function PillRoot() {
             if (!submit) return;
             submit(segment.text);
           },
-          onStateChange: (state: VoiceCaptureState, error?: Error) => {
+          onStateChange: (state, error) => {
             if (error) {
               console.warn(
                 `${APP_LOG_PREFIX} [pill] voice ${state}`,
@@ -1754,7 +1675,7 @@ async function main(): Promise<void> {
     preSeedAndroidLocalRuntimeIfFresh();
   }
 
-  if (isPillWindowShell(windowShellRoute)) {
+  if (isPillWindowShellRoute(windowShellRoute)) {
     // Pill overlay window: minimal renderer that only mounts <VoicePill>.
     // No AppProvider, no chrome, no platform init — the pill is a standalone
     // OS-level overlay launched alongside the main shell from the Electrobun
