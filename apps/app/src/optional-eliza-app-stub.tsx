@@ -24,29 +24,11 @@ import type {
   WalletRpcCredentialKey,
   WalletRpcSelections,
 } from "@elizaos/shared";
+import type { ChatSidebarWidgetDefinition } from "@elizaos/ui/components/chat/widgets/types";
+import type { PromptOptions } from "@elizaos/ui/components/ui/confirm-dialog";
+import type { InventoryChainFilters } from "@elizaos/ui/state/types";
 import type { ComponentType } from "react";
 import * as THREE from "three";
-
-type ChatSidebarWidgetDefinition = {
-  Component?: ComponentType<Record<string, unknown>>;
-  defaultEnabled?: boolean;
-  id: string;
-  order?: number;
-  pluginId?: string;
-  title?: string;
-};
-
-type InventoryChainFilters = {
-  [chain: string]: boolean | undefined;
-};
-
-type PromptOptions = {
-  title?: string;
-  message?: string;
-  description?: string;
-  defaultValue?: string;
-  placeholder?: string;
-};
 
 const EmptyComponent: ComponentType = () => null;
 
@@ -207,7 +189,7 @@ export function useInventoryData(): {
   return { tokens: [], nfts: [], loading: false };
 }
 
-// Wallet sidebar widget. Component prop type comes from UI so the seed
+// Wallet sidebar widget. Component prop type comes from ui so the seed
 // registry accepts this stub as a valid ChatSidebarWidgetDefinition.
 export const WALLET_STATUS_WIDGET: ChatSidebarWidgetDefinition = {
   id: "wallet.status",

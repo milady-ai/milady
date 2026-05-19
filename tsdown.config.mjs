@@ -50,7 +50,11 @@ function packageDistEntry(packageRoot, localRelativePath) {
 }
 
 function packageSourceEntry(packageRoot, localRelativePath) {
-  return path.join(packageRoot, "packages", "app-core", localRelativePath);
+  return path.join(
+    packageRoot,
+    "packages/app-core",
+    localRelativePath.replace(/\.[cm]?tsx?$/, ".js"),
+  );
 }
 
 function appCoreEntry(subpath, localRelativePath) {
@@ -77,13 +81,14 @@ function appCoreEntry(subpath, localRelativePath) {
   } catch (error) {
     const packageJsonPath = require.resolve("@elizaos/app-core/package.json");
     const packageRoot = path.dirname(packageJsonPath);
-    const packageSource = packageSourceEntry(packageRoot, localRelativePath);
-    if (existsSync(packageSource)) {
-      return packageSource;
-    }
-    const packageEntry = packageDistEntry(packageRoot, localRelativePath);
-    if (existsSync(packageEntry)) {
-      return packageEntry;
+    const packageEntries = [
+      packageDistEntry(packageRoot, localRelativePath),
+      packageSourceEntry(packageRoot, localRelativePath),
+    ];
+    for (const packageEntry of packageEntries) {
+      if (existsSync(packageEntry)) {
+        return packageEntry;
+      }
     }
     throw error;
   }

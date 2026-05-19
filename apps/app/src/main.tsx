@@ -42,18 +42,13 @@ import {
   installForceFreshOnboardingClientPatch,
   installLocalProviderCloudPreferencePatch,
   isAppWindowRoute,
-  isDetachedWindowShell,
-  isPillWindowShell,
   getWindowNavigationPath,
-  resolveWindowShellRoute,
-  shouldInstallMainWindowOnboardingPatches,
   syncDetachedShellLocation,
 } from "@elizaos/app-core";
 import {
-  CharacterEditor,
   VoicePill,
   type VoicePillMessage,
-} from "@elizaos/ui/browser";
+} from "@elizaos/ui/components/voice-pill/index";
 import {
   createVoiceCapture,
   type VoiceCaptureHandle,
@@ -150,6 +145,7 @@ import {
   type IosRuntimeMode,
   resolveIosRuntimeConfig,
 } from "@elizaos/app-core";
+import { CharacterEditor } from "@elizaos/ui/components/character/CharacterEditor";
 
 declare global {
   interface Window {
@@ -241,6 +237,71 @@ async function registerMiladyOsSystemApps(): Promise<void> {
 
 function isDesktopPlatform(): boolean {
   return isElectrobunRuntime();
+}
+
+type WindowShellRoute =
+  | { mode: "main" }
+  | { mode: "settings"; tab?: string }
+  | {
+      mode: "surface";
+      tab:
+        | "browser"
+        | "chat"
+        | "cloud"
+        | "connectors"
+        | "plugins"
+        | "release"
+        | "triggers";
+    }
+  | { mode: "pill" };
+
+function resolveWindowShellRoute(
+  search = typeof window !== "undefined" ? window.location.search : "",
+): WindowShellRoute {
+  const params = new URLSearchParams(search);
+  const shell = params.get("shell");
+
+  if (shell === "settings") {
+    const tab = params.get("tab")?.trim() || undefined;
+    return tab ? { mode: "settings", tab } : { mode: "settings" };
+  }
+
+  if (shell === "pill") return { mode: "pill" };
+
+  if (shell === "surface") {
+    const tab = params.get("tab");
+    if (
+      tab === "browser" ||
+      tab === "chat" ||
+      tab === "release" ||
+      tab === "triggers" ||
+      tab === "plugins" ||
+      tab === "connectors" ||
+      tab === "cloud"
+    ) {
+      return { mode: "surface", tab };
+    }
+  }
+
+  return { mode: "main" };
+}
+
+function isDetachedWindowShell(
+  route: WindowShellRoute,
+): route is Exclude<WindowShellRoute, { mode: "main" } | { mode: "pill" }> {
+  return route.mode !== "main" && route.mode !== "pill";
+}
+
+function isPillWindowShell(
+  route: WindowShellRoute,
+): route is Extract<WindowShellRoute, { mode: "pill" }> {
+  return route.mode === "pill";
+}
+
+function shouldInstallMainWindowOnboardingPatches(
+  route: WindowShellRoute,
+): boolean {
+  return route.mode === "main";
 }
 
 const windowShellRoute = resolveWindowShellRoute();

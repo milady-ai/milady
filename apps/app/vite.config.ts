@@ -39,6 +39,14 @@ const optionalElizaAppStubEntry = path.join(
   "src/optional-eliza-app-stub.tsx",
 );
 const nativePluginStubEntry = path.join(here, "src/native-plugin-stubs.ts");
+const packageModeVoiceCaptureFallbackEntry = path.join(
+  here,
+  "src/eliza-ui-voice-capture-fallback.ts",
+);
+const packageModeVoicePillFallbackEntry = path.join(
+  here,
+  "src/eliza-ui-voice-pill-fallback.tsx",
+);
 const localElizaRoot = path.join(miladyRoot, "eliza");
 
 function requireResolve(id: string): string {
@@ -129,6 +137,42 @@ function tryResolve(id: string): string | undefined {
 const capacitorKeyboardEntry = tryResolve("@capacitor/keyboard");
 const capacitorPreferencesEntry = tryResolve("@capacitor/preferences");
 const capacitorAppEntry = tryResolve("@capacitor/app");
+const packageUiEntry = tryResolve("@elizaos/ui");
+const appCoreCharacterEditorEntry = tryResolve(
+  "@elizaos/app-core/components/character/CharacterEditor",
+);
+
+function resolvePackageModeUiCompatAliases(): Alias[] {
+  if (hasLocalElizaWorkspace) return [];
+
+  const aliases: Alias[] = [
+    ...(packageUiEntry
+      ? [
+          {
+            find: /^@elizaos\/ui$/,
+            replacement: packageUiEntry,
+          },
+        ]
+      : []),
+    {
+      find: /^@elizaos\/ui\/voice$/,
+      replacement: packageModeVoiceCaptureFallbackEntry,
+    },
+    {
+      find: /^@elizaos\/ui\/components\/voice-pill\/index$/,
+      replacement: packageModeVoicePillFallbackEntry,
+    },
+  ];
+
+  if (appCoreCharacterEditorEntry) {
+    aliases.push({
+      find: /^@elizaos\/ui\/components\/character\/CharacterEditor$/,
+      replacement: appCoreCharacterEditorEntry,
+    });
+  }
+
+  return aliases;
+}
 // `@elizaos/app-core` is always real. `@elizaos/app-wallet` is required by
 // onboarding callbacks + AppContext (useWalletState), so resolve it real
 // when present. `app-hyperscape` is real when its package is present.
@@ -308,20 +352,6 @@ function resolveLocalUiAliases(): Alias[] {
     {
       find: /^@elizaos\/ui\/lib\/(.*)$/,
       replacement: `${uiPkgRoot}/src/lib/$1.ts`,
-    },
-  ];
-}
-
-function resolvePackageModeUiCompatAliases(): Alias[] {
-  if (hasLocalElizaWorkspace) return [];
-  return [
-    {
-      find: /^@elizaos\/ui\/browser$/,
-      replacement: path.join(here, "src/elizaos-ui-browser-compat.tsx"),
-    },
-    {
-      find: /^@elizaos\/ui\/voice$/,
-      replacement: path.join(here, "src/elizaos-ui-voice-compat.ts"),
     },
   ];
 }

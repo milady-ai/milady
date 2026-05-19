@@ -9,13 +9,6 @@ import {
   getCloudAgentApiPath,
 } from "./runtime-config";
 
-// ── Wallet types ───────────────────────────────────────────────────────
-export type {
-  EvmChainBalance,
-  EvmTokenBalance,
-  SolanaTokenBalance,
-  WalletBalancesResponse,
-} from "@elizaos/shared/contracts/wallet";
 export type {
   StewardApprovalActionResponse,
   StewardPendingApproval,
@@ -23,15 +16,22 @@ export type {
   StewardStatusResponse,
   StewardTxRecord,
   StewardTxStatus,
-} from "@elizaos/ui/api/client-types-steward";
+} from "@elizaos/app-core/api/client-types-steward";
+// ── Wallet types ───────────────────────────────────────────────────────
+export type {
+  EvmChainBalance,
+  EvmTokenBalance,
+  SolanaTokenBalance,
+  WalletBalancesResponse,
+} from "@elizaos/shared/contracts/wallet";
 
-import type { WalletBalancesResponse } from "@elizaos/shared/contracts/wallet";
 import type {
   StewardApprovalActionResponse,
   StewardPendingApproval,
   StewardStatusResponse,
   StewardTxRecord,
-} from "@elizaos/ui/api/client-types-steward";
+} from "@elizaos/app-core/api/client-types-steward";
+import type { WalletBalancesResponse } from "@elizaos/shared/contracts/wallet";
 
 // Wallet addresses response (same shape as WalletAddresses but with Response suffix for API clarity)
 export type { WalletAddresses as WalletAddressesResponse } from "@elizaos/shared/contracts/wallet";
