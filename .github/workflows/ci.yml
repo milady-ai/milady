@@ -282,14 +282,18 @@ jobs:
       # @elizaos/ui from npm and the build fails with
       # `"createVoiceCapture" is not exported by "@elizaos/ui"`.
       - name: Link local @elizaos workspace packages
-        run: node eliza/packages/app-core/scripts/link-docker-local-app-packages.mjs
+        run: |
+          if [ -f eliza/packages/app-core/scripts/link-docker-local-app-packages.mjs ]; then
+            node eliza/packages/app-core/scripts/link-docker-local-app-packages.mjs
+            echo "MILADY_FORCE_LOCAL_UPSTREAMS=1" >> "$GITHUB_ENV"
+          else
+            echo "eliza checkout absent; package-mode build will use installed @elizaos packages"
+          fi
 
       # MILADY_FORCE_LOCAL_UPSTREAMS=1 forces apps/app/vite.config.ts to treat
       # the freshly-linked eliza/ checkout as the source of truth for the
       # @elizaos/* aliases.
       - name: Build project
-        env:
-          MILADY_FORCE_LOCAL_UPSTREAMS: "1"
         run: bun run build
 
       - name: Build homepage
