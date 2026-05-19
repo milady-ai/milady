@@ -39,7 +39,6 @@ const optionalElizaAppStubEntry = path.join(
   "src/optional-eliza-app-stub.tsx",
 );
 const nativePluginStubEntry = path.join(here, "src/native-plugin-stubs.ts");
-const voicePillFallbackEntry = path.join(here, "src/voice-pill-fallback.tsx");
 const localElizaRoot = path.join(miladyRoot, "eliza");
 
 function requireResolve(id: string): string {
@@ -132,24 +131,6 @@ const reactJsxRuntimeEntry = requireResolve("react/jsx-runtime");
 const reactJsxDevRuntimeEntry = requireResolve("react/jsx-dev-runtime");
 const reactDomEntry = requireResolve("react-dom");
 const reactDomClientEntry = requireResolve("react-dom/client");
-
-function resolveVoicePillFallbackAlias(): Alias[] {
-  const localVoicePillEntry = uiPkgRoot
-    ? path.join(uiPkgRoot, "src/components/voice-pill/index.ts")
-    : null;
-  if (localVoicePillEntry && fs.existsSync(localVoicePillEntry)) {
-    return [];
-  }
-  if (tryResolve("@elizaos/ui/components/voice-pill")) {
-    return [];
-  }
-  return [
-    {
-      find: /^@elizaos\/ui\/components\/voice-pill$/,
-      replacement: voicePillFallbackEntry,
-    },
-  ];
-}
 
 // `@elizaos/app-core` is always real. `@elizaos/app-wallet` is required by
 // onboarding callbacks + AppContext (useWalletState), so resolve it real
@@ -1114,12 +1095,10 @@ function isElizaCoreBrowserDistId(id: string | undefined): boolean {
 function resolveElizaCoreBundlePath(): string {
   const pkgDir = tryResolveElizaCorePkgDir();
   // Prefer the Node entry for the renderer bundle when running against a
-  // linked eliza checkout. Upstream's hand-curated index.browser.ts misses
-  // many symbols that server-side modules (statically reachable from the
-  // renderer's dep graph) re-export — fixing each one is whack-a-mole. The
-  // Node entry has the full surface; nativeModuleStubPlugin + the rollup
-  // externals already neutralize the Node-only API surface, and tree-shaking
-  // drops unused code.
+  // linked eliza checkout. It carries the full export surface that renderer-
+  // reachable server barrels may reference; nativeModuleStubPlugin and the
+  // Rollup externals neutralize Node-only APIs, and tree-shaking drops the
+  // unused server code.
   if (pkgDir) {
     const nodeEntry = path.join(pkgDir, "dist/node/index.node.js");
     if (fs.existsSync(nodeEntry)) return nodeEntry;
@@ -2885,7 +2864,6 @@ export default defineConfig({
         find: ELIZA_CAPACITOR_PLUGIN_STUB_PATTERN,
         replacement: nativePluginStubEntry,
       },
-      ...resolveVoicePillFallbackAlias(),
       // Local source aliases are only installed when the eliza checkout exists.
       // Published-only builds should resolve normal @elizaos package exports.
       ...resolveLocalUiAliases(),

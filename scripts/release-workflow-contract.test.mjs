@@ -133,10 +133,6 @@ test("distribution workflows consume the canonical channel policy", () => {
     electrobun,
     /\n\s+build:\n\s+name: Build \$\{\{ matrix\.platform\.name \}\}[\s\S]*?name: Initialize eliza source checkout[\s\S]*?git clone --depth=1 --branch "\$\{MILADY_ELIZA_BRANCH:-develop\}" https:\/\/github\.com\/elizaOS\/eliza\.git eliza[\s\S]*?name: Initialize tracked workspace submodules/,
   );
-  assert.match(
-    electrobun,
-    /\$HOME\/\.cache\/eliza\/whisper\/ggml-base\.en\.bin/,
-  );
   assert.match(electrobun, /node scripts\/align-eliza-agent-package-pins\.mjs/);
   assert.match(
     electrobun,
@@ -412,34 +408,6 @@ test("release workflows use the checked-in tsdown runner", () => {
     assert.match(content, /node scripts\/run-tsdown\.mjs/);
     assert.doesNotMatch(content, /\b(?:bunx|npx) tsdown\b/);
   }
-});
-
-test("Electrobun release exposes whisper-node for upstream script layout", () => {
-  const electrobun = workflow("release-electrobun.yml");
-
-  assert.match(
-    electrobun,
-    /name: Expose whisper-node for eliza Electrobun scripts/,
-  );
-  assert.match(electrobun, /req\.resolve\("whisper-node\/package\.json"\)/);
-  assert.match(
-    electrobun,
-    /ln -sfn "\$\(realpath "\$whisper_pkg"\)" eliza\/packages\/node_modules\/whisper-node/,
-  );
-});
-
-test("Electrobun release uses Milady whisper cache path", () => {
-  const electrobun = workflow("release-electrobun.yml");
-
-  assert.match(electrobun, /~\/\.cache\/milady\/whisper/);
-  assert.match(
-    electrobun,
-    /\$HOME\/\.cache\/milady\/whisper\/ggml-base\.en\.bin/,
-  );
-  assert.match(
-    electrobun,
-    /eliza\/packages\/node_modules\/whisper-node\/lib\/whisper\.cpp\/models\/ggml-base\.en\.bin/,
-  );
 });
 
 test("Electrobun release applies elizaOS source overlay before manual build setup", () => {

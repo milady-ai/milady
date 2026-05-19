@@ -66,8 +66,8 @@ describe("package mode aliases", () => {
     expect(stubText).toContain(
       "@elizaos/app-core/components/chat/widgets/types",
     );
-    expect(mainText.match(/@elizaos\/ui\/components\//g)).toHaveLength(1);
-    expect(mainText).toContain("@elizaos/ui/components/voice-pill");
+    expect(mainText).toContain('from "@elizaos/ui";');
+    expect(mainText).not.toContain("@elizaos/ui/components/");
     expect(stubText).not.toContain("@elizaos/ui/state/");
     expect(stubText).not.toContain("@elizaos/ui/components/");
   });
@@ -150,18 +150,6 @@ describe("package mode aliases", () => {
     expect(viteConfigText).toContain("@elizaos\\/ui\\/(.+)");
     expect(viteConfigText).toContain("fs.statSync(candidate).isFile()");
     expect(viteConfigText).not.toContain("fs.existsSync(resolvedTarget)");
-  });
-
-  it("uses the local voice pill when present and a package-mode fallback when absent", () => {
-    const viteConfigText = fs.readFileSync(
-      path.join(appRoot, "vite.config.ts"),
-      "utf8",
-    );
-
-    expect(viteConfigText).toContain("resolveVoicePillFallbackAlias");
-    expect(viteConfigText).toContain("voice-pill-fallback.tsx");
-    expect(viteConfigText).toContain("src/components/voice-pill/index.ts");
-    expect(viteConfigText).toContain("@elizaos\\/ui\\/components\\/voice-pill");
   });
 
   it("does not duplicate core browser exports that upstream now provides directly", () => {

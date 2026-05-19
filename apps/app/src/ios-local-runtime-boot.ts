@@ -24,6 +24,18 @@ import {
   resolveIosRuntimeConfig,
 } from "@elizaos/app-core";
 import { APP_LOG_PREFIX } from "./app-config";
+import {
+  type BunRuntimePluginBase,
+  buildLocalAgentReply,
+  buildSendMessagePayload,
+  dispatchLocalAgentEvent,
+  getLocalAgentStatusFromPlugin,
+  type LocalAgentReply,
+  type LocalAgentStatus,
+  loadBunRuntimePlugin,
+} from "./mobile-local-runtime-shared";
+
+export type { LocalAgentReply, LocalAgentStatus };
 
 const LOG_PREFIX = `${APP_LOG_PREFIX} [ios-local-runtime]`;
 
@@ -36,37 +48,14 @@ export const IOS_LOCAL_AGENT_LOG_EVENT = "ios-local-agent-log";
 export const IOS_LOCAL_AGENT_ERROR_EVENT = "ios-local-agent-error";
 export const IOS_LOCAL_AGENT_REPLY_EVENT = "ios-local-agent-reply";
 
-function dispatchLocalAgentEvent(name: string, detail: unknown): void {
-  if (typeof document === "undefined") return;
-  document.dispatchEvent(new CustomEvent(name, { detail }));
-}
-
-export interface LocalAgentStatus {
-  ready: boolean;
-  model?: string;
-  tokensPerSecond?: number;
-  bridgeVersion?: string;
-}
-
-export interface LocalAgentReply {
-  reply: string;
-  conversationId?: string;
-}
-
 interface BunRuntimeListenerHandle {
   remove(): Promise<void> | void;
 }
 
-interface BunRuntimePlugin {
+interface BunRuntimePlugin extends BunRuntimePluginBase {
   start(opts: {
     bundlePath?: string;
   }): Promise<{ ok: boolean; error?: string }>;
-  sendMessage(opts: {
-    message: string;
-    conversationId?: string;
-  }): Promise<{ reply: string }>;
-  getStatus(): Promise<LocalAgentStatus>;
-  stop(): Promise<void>;
   addListener(
     eventName: string,
     listenerFunc: (e: unknown) => void,
@@ -85,27 +74,6 @@ function isApplicable(): boolean {
   if (Capacitor.getPlatform() !== "ios") return false;
   const config = resolveIosRuntimeConfig(import.meta.env);
   return config.mode === "local";
-}
-
-async function loadPlugin(): Promise<BunRuntimePlugin | null> {
-  try {
-    const mod = await import("@elizaos/capacitor-bun-runtime");
-    const plugin = (mod as unknown as { ElizaBunRuntime?: BunRuntimePlugin })
-      .ElizaBunRuntime;
-    if (!plugin) {
-      console.warn(
-        `${LOG_PREFIX} plugin module loaded but ElizaBunRuntime export missing`,
-      );
-      return null;
-    }
-    return plugin;
-  } catch (error) {
-    console.warn(
-      `${LOG_PREFIX} plugin not available:`,
-      error instanceof Error ? error.message : error,
-    );
-    return null;
-  }
 }
 
 async function subscribePluginEvents(plugin: BunRuntimePlugin): Promise<void> {
@@ -138,7 +106,7 @@ async function subscribePluginEvents(plugin: BunRuntimePlugin): Promise<void> {
 }
 
 async function startRuntime(): Promise<boolean> {
-  const plugin = await loadPlugin();
+  const plugin = await loadBunRuntimePlugin<BunRuntimePlugin>(LOG_PREFIX);
   if (!plugin) {
     runtimeState = { kind: "unavailable", reason: "plugin-not-loaded" };
     return false;
@@ -206,13 +174,9 @@ export async function sendLocalAgentMessage(
       `iOS local runtime not ready (state: ${runtimeState.kind})`,
     );
   }
-  const payload = conversationId
-    ? { message: text, conversationId }
-    : { message: text };
+  const payload = buildSendMessagePayload(text, conversationId);
   const result = await runtimeState.plugin.sendMessage(payload);
-  const reply: LocalAgentReply = conversationId
-    ? { reply: result.reply, conversationId }
-    : { reply: result.reply };
+  const reply = buildLocalAgentReply(result.reply, conversationId);
   dispatchLocalAgentEvent(IOS_LOCAL_AGENT_REPLY_EVENT, reply);
   return reply;
 }
@@ -224,15 +188,7 @@ export async function sendLocalAgentMessage(
  */
 export async function getLocalAgentStatus(): Promise<LocalAgentStatus> {
   if (runtimeState.kind !== "ready") return { ready: false };
-  try {
-    return await runtimeState.plugin.getStatus();
-  } catch (error) {
-    console.warn(
-      `${LOG_PREFIX} getStatus() failed:`,
-      error instanceof Error ? error.message : error,
-    );
-    return { ready: false };
-  }
+  return getLocalAgentStatusFromPlugin(runtimeState.plugin, LOG_PREFIX);
 }
 
 /**

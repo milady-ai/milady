@@ -64,6 +64,7 @@ Surfaces tested via `eliza/packages/app/test/ui-smoke/onboarding-full-flow.spec.
 | D3 | Driving the flow | Click through W2–W8 with mouse | Reuse Playwright spec via Electrobun's CDP (renderer URL from `/api/dev/stack`) | Same as W2–W8 |
 | D4 | Pairing token | Open `/api/auth/pair` UI | Manual click + verify token TTL (5 min per auth-pairing-compat-routes.ts) | Token expires after 5 min |
 | D5 | Reset | Quit, delete `~/.milady/`, relaunch | n/a | Returns to BootstrapStep |
+| D6 | Permission prompts (lazy cascade D1-D7) | Reset granted permissions per the macOS pre-flight (`tccutil reset Notifications/Camera/Microphone/MediaLibrary/Accessibility/ScreenCapture ai.elizaos.app`), launch `bun run dev:desktop`, drive each prompt: D1 notifications, D2 camera, D3 microphone, D4 location, D5 photos, D6 accessibility, D7 screen recording. Grant or skip per prompt | `node scripts/qa/desktop-permission-walkthrough.mjs --init` scaffolds `reports/qa/<date>/desktop-permissions/` with a D1-D7 `CHECKLIST.md` (including the `tccutil reset` operator block); capture each OS dialog via `mcp__computer-use__screenshot` into that directory using the listed filenames; `--finalize` validates and writes `SUMMARY.md` with sizes + sha256s. Playwright cannot reach native OS dialogs — computer-use MCP is required. Windows + Linux variants are TODO comments in the script | Each prompt observed; outcome (granted/skipped) recorded in CHECKLIST.md; SUMMARY.md reports `PASS: 7/7 prompts captured` or itemizes the gaps |
 
 ### Mobile (Capacitor — local dev only)
 

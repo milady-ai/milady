@@ -12,9 +12,9 @@ The original matrix counted 28 checkpoints derived from an outdated multi-step w
 |---|---|---|---|---|
 | Web (W1–W11) | 11 | 9 (W1, W2, W3-neg, W4+W5-gating, W6+W7-neg, W8, W9, W10, W11) | 0 | 3 (password / features / character — counted as negative-assertion tests) |
 | Desktop (D1–D5) | 5 | 2 partial (D1, D2 — Windows packaged only) + 1 opt-in probe (`dev-stack-probe.test.ts`) | 2 (D3 + D5 packaged flow) | 0 |
-| Mobile (M1–M5) | 5 | 1 unit (M3 — `mobile-runtime-mode-hardening.test.ts` 33 cases) + 1 partial (M4 iOS-sim path) + scripts for M1/M2 (gracefully-skip in CI) | 3 (M1, M2, M5 real-device flows) | 0 |
+| Mobile (M1–M5) | 5 | 1 unit (M3 — `mobile-runtime-mode-hardening.test.ts` 33 cases) + 1 partial (M4 iOS-sim path) + scripts for M1/M2 (gracefully-skip in CI) + 1 wire-protocol (M5 — `ios-bridge-handshake-smoke.mjs`, full iOS-handshake phase requires a cloud-hybrid build) | 2 (M1, M2 real-device flows) | 0 |
 | Cloud (C1–C7) | 7 | 7 (C1–C7 via `onboarding-failures.test.ts` 12 it-blocks + `RuntimeGate.cloud-provisioning.test.tsx`) | 0 | 0 |
-| **Total** | **28** | **20** | **5** | **3** |
+| **Total** | **28** | **21** | **4** | **3** |
 
 The W1–W11 "11 steps" remain in the row count for continuity with the original matrix, but three of them (W3, W6, W7) are now framed as negative-assertion tests — they verify that password, feature-toggle, and character-pick UIs do NOT render in the shipping flow. They are by-design absent, not coverage gaps.
 
@@ -64,6 +64,7 @@ All paths are relative to `eliza/` (the elizaOS workspace under `milady/eliza`).
 | `packages/app-core/test/dev-stack/dev-stack-probe.test.ts` | Desktop dev-stack (vitest, opt-in) | D1 / D2 (local-dev probe) | NEW (this campaign). Skips unless `MILADY_DESKTOP_QA=1`; verifies `bun run desktop:stack-status -- --json` reports `apiListening: true, uiListening: true` against a live `bun run dev:desktop`. Not in CI. |
 | `packages/ui/src/onboarding/__tests__/mobile-runtime-mode-hardening.test.ts` | Mobile (vitest) | M3 | NEW (this campaign). 25 it-blocks (some `.each` parameterized — 33 effective cases) covering `normalizeMobileRuntimeMode`, `mobileRuntimeModeForServerTarget`, `readPersistedMobileRuntimeMode`, `persistMobileRuntimeModeForServerTarget`, event dispatch, Capacitor Preferences failure paths, idempotency, and round-trip persistence. |
 | `plugins/__tests__/setup-routes-contract.test.ts` | Plugin contract (vitest) | (cross-plugin connector setup) | NEW (this campaign). 5 `test.fails(...)` per connector pinning the intended `/api/setup/<name>/{status,start,cancel}` contract. Today every connector diverges (see `docs/onboarding-contracts.md` §5). These tests document the gap; normalization tracked as Stage 1.6 follow-up. |
+| `packages/app/scripts/ios-bridge-handshake-smoke.mjs` | Mobile (Node + iOS sim) | M5 | NEW. Wire-protocol smoke for the agent ↔ device-bridge WebSocket handshake. Boots a mock HTTP+WS server matching the agent half of `/api/local-inference/device-bridge`, dials it from a Node `ws` client that sends the same `register` frame the iOS `DeviceBridgeClient` sends, and verifies the mock surfaces the device on `GET /api/local-inference/device`. iOS-sim launch phase opt-in: only runs end-to-end when the prebuilt App.app bakes `VITE_ELIZA_IOS_API_BASE=http://127.0.0.1:31337` + `VITE_ELIZA_IOS_RUNTIME_MODE=cloud-hybrid`; otherwise skips cleanly. Not in CI. |
 
 ## Coverage matrix
 
@@ -101,7 +102,7 @@ Note on numbering: the W-labels here match `docs/QA-onboarding.md` after the rea
 | M2 Android cold launch + Capacitor bootstrap | Operator-required | `scripts/qa/android-emu-smoke.sh`, `scripts/qa/mobile-screenshot-walkthrough.mjs` | NEW (this campaign). Script gracefully skips when adb/emulator/AVD missing. CI does NOT run on Android emu. Same `MILADY_DEFAULT_THEME` build blocker. |
 | M3 Mobile runtime-mode persistence | Covered | `packages/ui/src/onboarding/__tests__/mobile-runtime-mode-hardening.test.ts` (NEW — 33 cases), `packages/ui/src/onboarding/mobile-runtime-mode.test.ts`, `packages/ui/src/onboarding/probe-local-agent.test.ts` | Hardening test pins normalization, server-target mapping, persistence (localStorage + Capacitor Preferences), event dispatch, idempotency, and round-trip. Android AOSP pre-seed lives in `eliza/packages/ui/src/onboarding/pre-seed-local-runtime.ts` (NOT `mobile-runtime-mode.ts`). |
 | M4 Mobile auto-download recommended local model | Partial | `packages/ui/src/onboarding/auto-download-recommended.test.ts` | iOS-sim path only; Android tier / cellular-skip branches untested. |
-| M5 Mobile pairing for remote target | Operator-required | — | Pairing-code helper is unit-tested at the web layer; mobile UX is not exercised. Deep-link entry (`milady://onboard/...`) is also operator-required (see iOS / Android sandbox docs). |
+| M5 Mobile pairing for remote target | Automated (wire-protocol) | `eliza/packages/app/scripts/ios-bridge-handshake-smoke.mjs` (`test:sim:bridge:ios`) | NEW. Wire-protocol smoke: mock device-bridge HTTP+WS server on `127.0.0.1:31337` (override via `MILADY_BRIDGE_SMOKE_PORT`), self-test dial from a Node `ws` client that sends a real `register` frame and verifies the mock surfaces the device on `GET /api/local-inference/device`. Pairing-code helper is also unit-tested at the web layer. iOS-sim launch phase runs end-to-end when the prebuilt App.app bakes `VITE_ELIZA_IOS_API_BASE=http://127.0.0.1:31337` and `VITE_ELIZA_IOS_RUNTIME_MODE=cloud-hybrid`; otherwise it skips cleanly with a rebuild instruction. Deep-link entry (`milady://onboard/...`) remains operator-required. |
 
 ### Cloud (C1–C7)
 
@@ -124,7 +125,7 @@ The Stage 1.1 / 1.2 / 1.3 / 1.6 / 2.2 / 2.4 deliverables in the original ledger 
 - **D4 (Desktop cloud pairing through Electrobun renderer)** — web Playwright covers cloud provisioning, but not in the Electrobun renderer with native IPC.
 - **D5 (Desktop relaunch / pending-restart)** — operator-required; not in scope for headless Electrobun coverage.
 - **M1 / M2 (Real iOS / Android cold launch)** — opt-in scripts ship but skip in CI. Blocked end-to-end on a CI signing / signing-cert path AND on the `MILADY_DEFAULT_THEME` shared-package export break (see `QA-onboarding-followups.md`).
-- **M5 (Mobile pairing for remote target)** — operator-required. Deep-link entry (`milady://onboard/...`) is also operator-required.
+- **M5 (Full iOS device-bridge handshake)** — wire-protocol smoke ships via `eliza/packages/app/scripts/ios-bridge-handshake-smoke.mjs` (`test:sim:bridge:ios`). The iOS-sim launch phase only runs end-to-end when the App.app baked into the simulator has `VITE_ELIZA_IOS_API_BASE=http://127.0.0.1:31337` and `VITE_ELIZA_IOS_RUNTIME_MODE=cloud-hybrid`; today's prebuilt bakes neither, so the iOS-launch phase skips cleanly. Deep-link entry (`milady://onboard/...`) remains operator-required.
 - **C6 (Cloud credential provider via onboarding)** — onboarding-failures tests assert provisioning + key persistence at the orchestrator layer, but do not walk the end-to-end "agent provisioned → connector secret materialized" path through the runtime.
 - **Connector OAuth flows (Discord / Telegram / Signal)** — `setup-routes-contract.test.ts` pins the *intended* contract via `test.fails(...)`. Today every connector diverges and there is no automated end-to-end OAuth walkthrough. Normalization is Stage 1.6 follow-up.
 - **iOS deep-link entry (`milady://onboard/...`)** — no automated test; documented under M5.

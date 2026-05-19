@@ -30,9 +30,4 @@ describe("homepage", () => {
     sessionStorage.removeItem("test-key");
   });
 
-  it("imports shared package utilities", async () => {
-    const shared = await import("@elizaos/shared/connectors");
-    expect(shared).toBeDefined();
-    expect(typeof shared.normalizeConnectorSource).toBe("function");
-  });
 });

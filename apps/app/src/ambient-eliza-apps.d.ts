@@ -18,29 +18,3 @@ declare module "@elizaos/app-screenshare/ui";
 declare module "@elizaos/app-shopify/register";
 declare module "@elizaos/app-hyperliquid/client";
 declare module "@elizaos/app-task-coordinator/register-slots";
-
-declare module "@elizaos/ui/components/voice-pill" {
-  export interface VoicePillMessage {
-    id: string;
-    role: "agent" | "user";
-    text: string;
-  }
-
-  export interface VoicePillProps {
-    open?: boolean;
-    onOpenChange?: (open: boolean) => void;
-    recording?: boolean;
-    onRecordingChange?: (recording: boolean) => void;
-    messages?: VoicePillMessage[];
-    placeholder?: string;
-    onSubmit?: (text: string) => void;
-    onAdd?: () => void;
-    ariaLabel?: string;
-    className?: string;
-  }
-
-  export function VoicePill(
-    props: VoicePillProps,
-  ): import("react/jsx-runtime").JSX.Element;
-  export default VoicePill;
-}

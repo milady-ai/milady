@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
@@ -17,9 +18,24 @@ const appCoreBridgeStub = path.join(
   "app-core-bridge.ts",
 );
 
+// Vite's import-analysis does not resolve glob patterns in package exports
+// (e.g. "./*" -> "./dist/*.js"). Provide explicit aliases for subpaths that
+// are structurally present but not enumerated in the package exports map.
+const sharedDistCandidates = [
+  path.join(here, "eliza/packages/shared/dist/connectors.js"),
+  path.join(here, "node_modules/@elizaos/shared/dist/connectors.js"),
+];
+const sharedConnectorsDist =
+  sharedDistCandidates.find((p) => fs.existsSync(p)) ??
+  sharedDistCandidates[1];
+
 export default defineConfig({
   resolve: {
     alias: [
+      {
+        find: "@elizaos/shared/connectors",
+        replacement: sharedConnectorsDist,
+      },
       {
         find: /^@elizaos\/app-(?!core$|core\/|hyperscape$|hyperscape\/)(.*)/,
         replacement: optionalElizaAppStub,

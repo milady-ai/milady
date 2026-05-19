@@ -276,6 +276,18 @@ simultaneously without conflict because the state dirs do not overlap.
 - **MAS first-submission timing.** The JIT entitlement explanation usually
   triggers App Review questions — budget a review cycle for the first MAS
   submission.
+- **Third-party provider keys in store builds do not reach the cloud agent.**
+  A user who enters `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` etc. via the
+  Settings UI in a store build writes the value through the *local* secrets
+  API (`/api/secrets/manager/*`). The local agent runtime is not running —
+  store builds route to Eliza Cloud — so those keys never reach the agent
+  that actually performs inference. The cloud agent uses Eliza Cloud's
+  managed inference (billed through the user's Cloud account). BYOK for
+  store-build users routes through the Eliza Cloud dashboard (per-agent
+  character secrets), not the local Settings UI. Verified 2026-05-14: only
+  `ELIZAOS_CLOUD_API_KEY` / `ELIZAOS_CLOUD_ENABLED` are forwarded into
+  `runtime.character.secrets` via `plugins/plugin-elizacloud/src/routes/cloud-routes.ts`;
+  third-party provider keys are not.
 
 ## 13. Out of scope (future work)
 
@@ -336,6 +348,11 @@ still removes plugin-shell).
    `run-mobile-build.mjs` needs to include the matching `.node`. If the
    native module is missing, `plugin-shell` falls back to the non-PTY
    `cross-spawn` path, which is still a usable shell — PTY is the upgrade.
+   **Status (2026-05-14):** `stage-android-agent.mjs` does not currently
+   bundle `@lydell/node-pty`, so AOSP runs the non-PTY shell path
+   (`plugins/plugin-shell/services/shellService.ts:1372-1374` is the
+   graceful fallback). Functional, just no terminal-control sequences. To
+   upgrade, add the arm64 prebuilt to the agent bundle staging step.
 2. Optional: stage a terminal-emulator UI surface in the WebView. The agent's
    action is what the user really needs ("the agent runs `sh` and reads
    output"), so this is purely UX.

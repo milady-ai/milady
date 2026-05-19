@@ -49,9 +49,6 @@ export const CodingAgentTasksPanel = EmptyComponent;
 export const PtyConsoleDrawer = EmptyComponent;
 export const FineTuningView = EmptyComponent;
 
-// Restored from before upstream 0a75bd6eb dropped it — main.tsx still imports
-// `prefetchVrmToCache` and registers it on the boot config (used by
-// startup-phase-hydrate to warm the VRM cache before companion mount).
 export function prefetchVrmToCache(_url?: string): Promise<void> {
   return Promise.resolve();
 }
@@ -70,7 +67,7 @@ export function resolveCompanionInferenceNotice(): null {
 // wallet surface). Each export below mirrors a real symbol that
 // @elizaos/app-core source files import so typecheck stays green.
 export function buildWalletRpcUpdateRequest(_args: {
-  walletConfig?: unknown;
+  walletConfig?: WalletConfigStatus | null;
   rpcFieldValues: Partial<Record<WalletRpcCredentialKey, string>>;
   selectedProviders:
     | WalletRpcSelections
@@ -84,7 +81,7 @@ export function buildWalletRpcUpdateRequest(_args: {
 }
 
 export function resolveInitialWalletRpcSelections(
-  _walletConfig?: unknown,
+  _walletConfig?: WalletConfigStatus | null,
 ): WalletRpcSelections {
   return {} as WalletRpcSelections;
 }
@@ -275,7 +272,7 @@ export function useWalletState(_args: {
     once?: boolean,
     busy?: boolean,
   ) => void;
-  promptModal?: unknown;
+  promptModal?: (opts: PromptOptions) => Promise<string | null>;
   agentName?: string;
   characterName?: string;
 }): WalletStateHook {
@@ -499,6 +496,8 @@ export { THREE };
 // no-op RPC update. With `bun run eliza:local`, the alias auto-detect in
 // vite.config.ts routes through the real package instead.
 
-export function collectSelectedCredentialKeys(_selections: unknown): string[] {
+export function collectSelectedCredentialKeys(
+  _selections: WalletRpcSelections | null | undefined,
+): string[] {
   return [];
 }

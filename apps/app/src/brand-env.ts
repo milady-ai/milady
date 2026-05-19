@@ -40,7 +40,7 @@ function normalizeEnvPrefix(value: string): string {
   return normalized;
 }
 
-export function buildBrandEnvAliases(prefix: string) {
+function buildBrandEnvAliases(prefix: string) {
   const normalizedPrefix = normalizeEnvPrefix(prefix);
   return ENV_ALIAS_SUFFIXES.map(
     ([brandSuffix, elizaSuffix]) =>
