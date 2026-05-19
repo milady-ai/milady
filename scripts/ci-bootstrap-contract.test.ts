@@ -107,7 +107,7 @@ describe("CI bootstrap contract", () => {
       `${buildPlugins}\\n([\\s\\S]*?)\\n\\s*- name: Run auth test suite`,
     ).exec(agentReview)?.[1];
     expect(buildPluginsBlock).toContain(
-      "if: ${{ hashFiles('eliza/package.json') != '' }}",
+      "if: $" + "{{ hashFiles('eliza/package.json') != '' }}",
     );
     expect(agentReview.indexOf(align)).toBeLessThan(
       agentReview.indexOf(buildPlugins),
