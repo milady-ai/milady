@@ -378,6 +378,7 @@ jobs:
       # symlinks every local @elizaos/* workspace package over the npm-installed
       # copy and rewrites `exports` to point at TS source when dist is absent.
       - name: Link local @elizaos workspace packages
+        if: ${{ hashFiles('eliza/package.json') != '' }}
         run: node eliza/packages/app-core/scripts/link-docker-local-app-packages.mjs
 
       # ── 8. Build UI (vite) ──────────────────────────────────────────────────

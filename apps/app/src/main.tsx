@@ -1186,7 +1186,7 @@ function PillRoot() {
     };
   }, []);
 
-  // Voice capture via createVoiceCapture from @elizaos/ui/voice.
+  // Voice capture via createVoiceCapture from the package-mode pill stub.
   const handleRecordingChange = useCallback((recording: boolean): void => {
     if (recording) {
       if (!voiceCaptureRef.current) {

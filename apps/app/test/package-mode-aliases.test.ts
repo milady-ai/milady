@@ -49,7 +49,7 @@ describe("package mode aliases", () => {
     expect(mainText).not.toContain("@elizaos/ui/dist/styles/");
   });
 
-  it("imports public ui package subpaths for ui-owned component and state types", () => {
+  it("imports public ui package subpaths and package-mode pill stubs", () => {
     const mainText = fs.readFileSync(
       path.join(appRoot, "src/main.tsx"),
       "utf8",
@@ -62,15 +62,24 @@ describe("package mode aliases", () => {
       path.join(appRoot, "src/optional-eliza-app-stub.tsx"),
       "utf8",
     );
+    const pillStubText = fs.readFileSync(
+      path.join(appRoot, "src/pill-stubs.tsx"),
+      "utf8",
+    );
 
     expect(mainText).toContain(
       "@elizaos/ui/components/character/CharacterEditor",
     );
-    expect(mainText).toContain("@elizaos/ui/components/voice-pill/index");
-    expect(mainText).toContain("@elizaos/ui/voice");
+    expect(mainText).toContain("./pill-stubs");
+    expect(mainText).toContain("createVoiceCapture");
+    expect(mainText).toContain("VoicePill");
+    expect(mainText).toContain("normalizePillMessage");
+    expect(pillStubText).toContain("export function createVoiceCapture");
+    expect(pillStubText).toContain("export function VoicePill");
+    expect(pillStubText).toContain("export function normalizePillMessage");
     expect(stubText).toContain("@elizaos/ui/state/types");
     expect(stubText).toContain("@elizaos/ui/components/chat/widgets/types");
-    expect(stubText).toContain("@elizaos/ui/components/ui/confirm-dialog");
+    expect(stubText).toContain("type PromptOptions");
     expect(viteConfigText).toContain("resolvePackageModeUiSourceAliases");
     expect(viteConfigText).toContain("resolvePackageModeAppCoreBrowserAliases");
     expect(viteConfigText).toContain("resolvePackageModeAppCoreStyleAliases");

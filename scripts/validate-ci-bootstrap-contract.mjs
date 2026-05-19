@@ -179,6 +179,7 @@ assertOrdered(
   ],
   failures,
 );
+assertLocalElizaPackageLinkersGuarded(allWorkflowPaths, failures);
 assertDisabledWorkspaceInstallsUseNoFrozen(allWorkflowPaths, failures);
 assertAgentReviewAuthBootstrap(failures);
 
@@ -521,6 +522,30 @@ function assertDisabledWorkspaceInstallsUseNoFrozen(
       ) {
         targetFailures.push(
           `${workflowRelPath}:${index + 1} disables the local eliza workspace without an install-command containing --no-frozen-lockfile`,
+        );
+      }
+    }
+  }
+}
+
+function assertLocalElizaPackageLinkersGuarded(
+  workflowRelPaths,
+  targetFailures,
+) {
+  for (const workflowRelPath of workflowRelPaths) {
+    const text = readText(workflowRelPath, targetFailures);
+    if (!text) continue;
+
+    const lines = text.split(/\r?\n/);
+    for (let index = 0; index < lines.length; index++) {
+      const line = lines[index];
+      if (!line.includes("name: Link local @elizaos workspace packages")) {
+        continue;
+      }
+      const block = lines.slice(index, index + 6).join("\n");
+      if (!block.includes("hashFiles('eliza/package.json') != ''")) {
+        targetFailures.push(
+          `${workflowRelPath}:${index + 1} links local eliza packages without guarding eliza/package.json presence`,
         );
       }
     }

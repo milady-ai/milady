@@ -25,10 +25,22 @@ import type {
   WalletRpcSelections,
 } from "@elizaos/shared";
 import type { ChatSidebarWidgetDefinition } from "@elizaos/ui/components/chat/widgets/types";
-import type { PromptOptions } from "@elizaos/ui/components/ui/confirm-dialog";
 import type { InventoryChainFilters } from "@elizaos/ui/state/types";
 import type { ComponentType } from "react";
 import * as THREE from "three";
+
+// Mirrors @elizaos/ui's confirm-dialog PromptOptions. Declared locally because
+// the tsconfig "@elizaos/ui/*" path-map bypasses the package exports field,
+// so the deep "@elizaos/ui/components/ui/confirm-dialog" subpath does not
+// resolve in this stub.
+type PromptOptions = {
+  title: string;
+  description?: string;
+  placeholder?: string;
+  initialValue?: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+};
 
 const EmptyComponent: ComponentType = () => null;
 

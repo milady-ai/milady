@@ -348,6 +348,7 @@ jobs:
       # when the dist artifact is absent, which is what lets vite import the
       # ui package directly from `eliza/packages/ui/src`.
       - name: Link local @elizaos workspace packages
+        if: ${{ hashFiles('eliza/package.json') != '' }}
         run: node eliza/packages/app-core/scripts/link-docker-local-app-packages.mjs
 
       # ── 9. Build runtime (tsdown) ───────────────────────────────────────────
