@@ -2115,7 +2115,6 @@ function nativeModuleStubPlugin(): Plugin {
     // Their exports maps nest browser/node conditional exports that Vite 6's
     // commonjs--resolver cannot walk. Stubbing returns an empty Proxy virtual
     // module so the browser bundle never tries to execute server-only code.
-    "@elizaos/plugin-local-embedding",
     // plugin-local-inference creates a Node dns.Resolver at module load
     // (mobileDnsResolver) — server-only side effect. Stub so the renderer
     // never evaluates that initializer.
@@ -2777,8 +2776,6 @@ export default defineConfig({
       // Telegram account auth is server-only and pulls in GramJS + socks.
       "telegram",
       "socks",
-      // Native LLM embedding — uses node-llama-cpp, never runs in browser
-      "@elizaos/plugin-local-embedding",
       // OS keychain binding is desktop/server-only and pulls native .node assets.
       "@napi-rs/keyring",
     ],
