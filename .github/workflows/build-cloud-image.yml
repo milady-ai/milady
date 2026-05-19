@@ -60,6 +60,10 @@ concurrency:
   cancel-in-progress: false
 
 env:
+  # Pin upstream eliza checkout to a known-good SHA. Upstream develop landed a
+  # cloud-migration squash that broke milady CI; pinning here keeps reproducibility.
+  # Bump after upstream stabilizes (or override with MILADY_ELIZA_REF env var).
+  MILADY_ELIZA_REF: "f7a4e0bc50f966174ea42c41db787359ca6d8e67"
   REGISTRY: ghcr.io
   IMAGE_NAME: milady-ai/milady/agent
   MILADY_SKIP_LOCAL_UPSTREAMS: "1"
@@ -105,6 +109,11 @@ jobs:
         run: |
           if [ ! -f eliza/package.json ]; then
             git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza
+            if [ -n "${MILADY_ELIZA_REF:-}" ]; then
+              git -C eliza fetch --depth=1 origin "$MILADY_ELIZA_REF"
+              git -C eliza checkout --quiet FETCH_HEAD
+              echo "Pinned eliza to ${MILADY_ELIZA_REF}"
+            fi
           fi
 
       - name: Init cloud image plugin manifests
@@ -248,32 +257,46 @@ jobs:
 
       - name: Stage Dockerfile-expected paths
         # Dockerfile.cloud was authored against the eliza-monorepo layout where
-        # patches/, plugins/plugin-selfcontrol/, and scripts/docker-entrypoint.sh
-        # all live at repo root. In milady they live at eliza/... and packages/...
-        # so we materialize the expected paths into the build context here.
+        # packages/<name>/ and plugins/<name>/ live at repo root. In milady
+        # they live under eliza/packages/ and eliza/plugins/, so mirror the
+        # specific packages and plugins the Dockerfile COPYs into the build
+        # context root here. Mirroring is intentionally narrow: bringing in
+        # extra eliza packages introduces workspace:* dependency edges that
+        # the Dockerfile doesn't materialize (e.g. @elizaos/prompts), which
+        # would cause `bun install` in the deps stage to fail.
+        # Special case: packages/app comes from apps/app (the Vite app).
         run: |
           set -eu
-          # patches/ — copy from eliza/packages/app-core/patches
+          # Mirror just the packages the Dockerfile COPYs from `packages/<name>` / `plugins/<name>`.
+          mkdir -p packages plugins
+          for name in core agent app-core shared ui workflows; do
+            if [ ! -e "packages/$name" ] && [ -d "eliza/packages/$name" ]; then
+              cp -R "eliza/packages/$name" "packages/$name"
+            fi
+          done
+          for name in plugin-sql plugin-elizacloud plugin-workflow; do
+            if [ ! -e "plugins/$name" ] && [ -d "eliza/plugins/$name" ]; then
+              cp -R "eliza/plugins/$name" "plugins/$name"
+            fi
+          done
+          # patches/ at build context root — Dockerfile COPYs both patches and packages/app-core/patches
           if [ ! -e patches ] && [ -d eliza/packages/app-core/patches ]; then
             cp -R eliza/packages/app-core/patches patches
           fi
-          # scripts/docker-entrypoint.sh — copy from eliza/packages/app-core/scripts
+          # scripts/docker-entrypoint.sh — for the milady-rooted COPY in Dockerfile prep stage
           mkdir -p scripts
           if [ ! -e scripts/docker-entrypoint.sh ] && [ -f eliza/packages/app-core/scripts/docker-entrypoint.sh ]; then
             cp eliza/packages/app-core/scripts/docker-entrypoint.sh scripts/docker-entrypoint.sh
             chmod +x scripts/docker-entrypoint.sh
           fi
-          # plugins/plugin-selfcontrol — copy from packages/plugin-selfcontrol
-          mkdir -p plugins
+          # plugins/plugin-selfcontrol — copy from packages/plugin-selfcontrol if milady-local
           if [ ! -e plugins/plugin-selfcontrol ] && [ -d packages/plugin-selfcontrol ]; then
             cp -R packages/plugin-selfcontrol plugins/plugin-selfcontrol
           fi
           rm -rf cloud-sdk
           cp -R eliza/cloud/packages/sdk cloud-sdk
           test -f cloud-sdk/package.json
-          # Dockerfile.cloud is shared with the upstream elizaOS layout where
-          # the built web app lives at packages/app. Milady's Vite app lives at
-          # apps/app, so materialize the expected manifest and dist tree.
+          # packages/app comes from milady's Vite app at apps/app, not from eliza
           mkdir -p packages/app
           cp apps/app/package.json packages/app/package.json
           rm -rf packages/app/dist
@@ -286,24 +309,62 @@ jobs:
           const path = require("path");
           const dockerfile = "eliza/packages/app-core/deploy/Dockerfile.cloud";
           if (fs.existsSync(dockerfile)) {
-            const rawDockerfile = fs.readFileSync(dockerfile, "utf8");
-            const nextDockerfile = rawDockerfile.replace(
+            let dockerfileContents = fs.readFileSync(dockerfile, "utf8");
+            const original = dockerfileContents;
+            dockerfileContents = dockerfileContents.replace(
               "plugin-agent-orchestrator|plugin-cli|plugin-imessage",
               "plugin-agent-orchestrator|plugin-app-control|plugin-cli|plugin-imessage",
             );
-            if (nextDockerfile !== rawDockerfile) {
-              fs.writeFileSync(dockerfile, nextDockerfile);
+            // The prep stage does `cp -a "${APP_ENTRYPOINT}" /runtime/` but
+            // the upstream Dockerfile never `COPY`s the milady-specific
+            // entrypoint into /src. Inject a `COPY milady.mjs ./` next to
+            // the existing `COPY package.json plugins.json ./` line so
+            // milady.mjs lands at /src/milady.mjs before the RUN script.
+            const prepCopyLine = "COPY package.json plugins.json ./";
+            const prepCopyWithEntry = `${prepCopyLine}\nCOPY milady.mjs ./milady.mjs`;
+            if (
+              !dockerfileContents.includes("COPY milady.mjs") &&
+              dockerfileContents.includes(prepCopyLine)
+            ) {
+              dockerfileContents = dockerfileContents.replace(
+                prepCopyLine,
+                prepCopyWithEntry,
+              );
+            }
+            if (dockerfileContents !== original) {
+              fs.writeFileSync(dockerfile, dockerfileContents);
             }
           }
           const manifests = [
             "package.json",
             "apps/app/package.json",
+            // Every mirrored package — these are the manifests that travel
+            // into the docker build context and must be free of workspace:*
+            // specs that the container can't resolve.
+            "packages/core/package.json",
+            "packages/agent/package.json",
+            "packages/app-core/package.json",
+            "packages/shared/package.json",
+            "packages/ui/package.json",
+            "packages/workflows/package.json",
+            "packages/app-core/platforms/electrobun/package.json",
+            "packages/app-core/deploy/cloud-agent-template/package.json",
+            "plugins/plugin-sql/package.json",
+            "plugins/plugin-elizacloud/package.json",
+            "plugins/plugin-workflow/package.json",
+            // Keep the eliza/ originals in sync too (host-side bun install
+            // still consults them during release-check etc.).
+            "eliza/packages/core/package.json",
             "eliza/packages/agent/package.json",
             "eliza/packages/app-core/package.json",
             "eliza/packages/shared/package.json",
             "eliza/packages/ui/package.json",
+            "eliza/packages/workflows/package.json",
             "eliza/packages/app-core/platforms/electrobun/package.json",
             "eliza/packages/app-core/deploy/cloud-agent-template/package.json",
+            "eliza/plugins/plugin-sql/package.json",
+            "eliza/plugins/plugin-elizacloud/package.json",
+            "eliza/plugins/plugin-workflow/package.json",
           ];
           const fields = [
             "dependencies",
@@ -313,6 +374,27 @@ jobs:
             "overrides",
           ];
           const unpublished = /^@elizaos\/(app-|capacitor-|plugin-agent-orchestrator|plugin-app-control|plugin-cli|plugin-imessage|plugin-local-ai|plugin-pdf|plugin-wechat|steward-)/;
+          // Only packages the cloud-image build stage actually materializes
+          // can satisfy a workspace:* spec inside the container. The rest
+          // (electrobun-carrots, plugin-mlx, plugin-aosp-*, plugin-streaming,
+          // etc.) live only in the upstream eliza workspace and either 404
+          // on npm or have no alpha dist-tag — keeping them wedges bun
+          // install inside the Docker deps stage.
+          const mirroredWorkspacePackages = new Set([
+            "@elizaos/core",
+            "@elizaos/agent",
+            "@elizaos/app-core",
+            "@elizaos/shared",
+            "@elizaos/ui",
+            "@elizaos/workflows",
+            "@elizaos/plugin-sql",
+            "@elizaos/plugin-elizacloud",
+            "@elizaos/plugin-workflow",
+          ]);
+          function isLocalSpec(value) {
+            if (typeof value !== "string") return false;
+            return ["workspace:", "file:", "link:", "portal:"].some((p) => value.startsWith(p));
+          }
           for (const manifest of manifests) {
             if (!fs.existsSync(manifest)) continue;
             const pkg = JSON.parse(fs.readFileSync(manifest, "utf8"));
@@ -320,9 +402,23 @@ jobs:
             for (const field of fields) {
               const deps = pkg[field];
               if (!deps || typeof deps !== "object" || Array.isArray(deps)) continue;
-              for (const name of Object.keys(deps)) {
+              for (const [name, spec] of Object.entries(deps)) {
                 if (unpublished.test(name)) {
                   delete deps[name];
+                  changed = true;
+                  continue;
+                }
+                if (isLocalSpec(spec)) {
+                  // Keep workspace:* for mirrored packages — the root
+                  // manifest below extends `workspaces` to packages/* and
+                  // plugins/* so bun resolves them inside the container.
+                  // Drop the rest — there's no corresponding directory to
+                  // resolve and they aren't reliably published on npm.
+                  if (mirroredWorkspacePackages.has(name)) {
+                    deps[name] = "workspace:*";
+                  } else {
+                    delete deps[name];
+                  }
                   changed = true;
                 }
               }
@@ -331,13 +427,52 @@ jobs:
               fs.writeFileSync(manifest, JSON.stringify(pkg, null, 2) + "\n");
             }
           }
+          // Extend root.workspaces so bun treats the mirrored packages/* and
+          // plugins/* trees as workspace members inside the docker context.
+          const rootForWorkspaces = JSON.parse(fs.readFileSync("package.json", "utf8"));
+          const existingWorkspaces = Array.isArray(rootForWorkspaces.workspaces)
+            ? rootForWorkspaces.workspaces
+            : [];
+          const requiredWorkspaces = ["packages/*", "plugins/*"];
+          const mergedWorkspaces = [...existingWorkspaces];
+          let workspacesChanged = false;
+          for (const entry of requiredWorkspaces) {
+            if (!mergedWorkspaces.includes(entry)) {
+              mergedWorkspaces.push(entry);
+              workspacesChanged = true;
+            }
+          }
+          if (workspacesChanged) {
+            rootForWorkspaces.workspaces = mergedWorkspaces;
+            fs.writeFileSync("package.json", JSON.stringify(rootForWorkspaces, null, 2) + "\n");
+          }
           const root = JSON.parse(fs.readFileSync("package.json", "utf8"));
+          const existingOverrides =
+            root.overrides && typeof root.overrides === "object" ? root.overrides : {};
+          // Drop any pre-existing @elizaos/* overrides — disable-local-eliza-workspace
+          // pins those to npm dist-tags (e.g. @elizaos/core: alpha), which then
+          // collides with the same package resolved through workspaces, producing
+          // bun's "Package has a dependency loop" error.
+          const overridesWithoutEliza = Object.fromEntries(
+            Object.entries(existingOverrides).filter(
+              ([name]) => !name.startsWith("@elizaos/"),
+            ),
+          );
           root.overrides = {
-            ...(root.overrides && typeof root.overrides === "object" ? root.overrides : {}),
-            "@elizaos/agent": "file:./eliza/packages/agent",
-            "@elizaos/app-core": "file:./eliza/packages/app-core",
-            "@elizaos/shared": "file:./eliza/packages/shared",
-            "@elizaos/ui": "file:./eliza/packages/ui",
+            ...overridesWithoutEliza,
+            // Point at the mirrored packages/ locations so transitive consumers
+            // get the same source bun resolves through workspaces. eliza/ is
+            // gitignored from the docker build context, so file:./eliza/... can't
+            // resolve inside the container.
+            "@elizaos/core": "file:./packages/core",
+            "@elizaos/agent": "file:./packages/agent",
+            "@elizaos/app-core": "file:./packages/app-core",
+            "@elizaos/shared": "file:./packages/shared",
+            "@elizaos/ui": "file:./packages/ui",
+            "@elizaos/workflows": "file:./packages/workflows",
+            "@elizaos/plugin-sql": "file:./plugins/plugin-sql",
+            "@elizaos/plugin-elizacloud": "file:./plugins/plugin-elizacloud",
+            "@elizaos/plugin-workflow": "file:./plugins/plugin-workflow",
           };
           fs.writeFileSync("package.json", JSON.stringify(root, null, 2) + "\n");
           NODE

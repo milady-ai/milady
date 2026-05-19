@@ -87,10 +87,16 @@ export const ELIZA_BUILD_STEPS = [
   {
     // plugin-elizacloud imports types from @elizaos/cloud-sdk; fresh CI
     // checkouts need the SDK declarations before plugin builds run.
+    // The eliza/cloud/ tree is sourced from a separate peer repo and is
+    // not present in every checkout (e.g. Tails ISO full build pipeline
+    // pulls only the eliza submodule). Mark optional so a missing source
+    // directory skips the step instead of producing a misleading
+    // "spawn bun ENOENT" from an invalid cwd.
     check: path.join("cloud", "packages", "sdk", "dist", "index.d.ts"),
     cwd: path.join("cloud", "packages", "sdk"),
     args: ["run", "build"],
     label: "@elizaos/cloud-sdk",
+    optional: true,
   },
   {
     // plugin-streaming imports isCloudConnected from @elizaos/cloud-routing;
@@ -1378,6 +1384,32 @@ async function ensureRepoLocalEliza(repoRoot) {
   }
 
   if (existsSync(path.join(repoRoot, ".git"))) {
+    // SAFETY: `git submodule update --init` will FORCE the submodule working
+    // tree to the SHA recorded in the parent index, blowing away any local
+    // edits that haven't been committed inside `eliza/`. Refuse to run that
+    // command if the submodule already has any uncommitted work — let the
+    // operator commit or stash explicitly first. The original "I lost my
+    // local UI fixes when re-running eliza:local" bug came from exactly this
+    // path: parent moved the recorded SHA, the operator re-ran setup, and
+    // every working-tree edit in eliza/ vanished without a warning.
+    if (existsSync(elizaRoot) && existsSync(path.join(elizaRoot, ".git"))) {
+      const statusProbe = spawnSync(
+        "git",
+        ["-C", elizaRoot, "status", "--porcelain"],
+        {
+          stdio: ["ignore", "pipe", "ignore"],
+          encoding: "utf8",
+        },
+      );
+      if (statusProbe.status === 0 && statusProbe.stdout.trim().length > 0) {
+        console.warn(
+          "[setup-upstreams] Skipping submodule update of eliza/ — working tree has uncommitted changes.\n" +
+            "[setup-upstreams] Commit (or stash) those edits inside eliza/ before re-running setup, otherwise they will be overwritten by the recorded submodule SHA.",
+        );
+        return elizaRoot;
+      }
+    }
+
     console.log("[setup-upstreams] Initializing tracked submodules");
     try {
       await runCommand(
@@ -1671,9 +1703,22 @@ export async function ensureElizaBuildOutputs(
       continue;
     }
 
+    const stepCwd = path.join(elizaRoot, step.cwd);
+    if (!pathExists(stepCwd)) {
+      if (step.optional) {
+        log(
+          `[setup-upstreams] ${step.label} source not present at ${toDisplayPath(stepCwd)}, skipping`,
+        );
+        continue;
+      }
+      throw new Error(
+        `[setup-upstreams] ${step.label} source missing at ${toDisplayPath(stepCwd)}; expected an eliza checkout that includes ${step.cwd}`,
+      );
+    }
+
     log(`[setup-upstreams] Building ${step.label}`);
     await runCommandImpl("bun", step.args, {
-      cwd: path.join(elizaRoot, step.cwd),
+      cwd: stepCwd,
       label: `bun ${step.args.join(" ")} (${step.label})`,
     });
   }

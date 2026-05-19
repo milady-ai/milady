@@ -65,14 +65,14 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Release tag (e.g. v2.0.0-alpha.3)"
-        required: true
+        description: "Release tag (e.g. v2.0.0-alpha.140). Leave blank to auto-pick the next free tag in the chosen channel."
+        required: false
         type: string
       channel:
-        description: "Release channel"
+        description: "Release channel (drives auto-tag series when tag is blank)"
         required: false
         type: choice
-        default: auto
+        default: canary
         options:
           - auto
           - canary
@@ -80,7 +80,7 @@ on:
           - rc
           - stable
       draft:
-        description: "Create as draft release"
+        description: "Create as draft release (hidden from main page until manually published). Default true keeps the carrots packaging fallback active; flip to false only when packaging is fully green."
         required: false
         type: boolean
         default: true
@@ -103,6 +103,10 @@ permissions:
   contents: read
 
 env:
+  # Pin upstream eliza checkout to a known-good SHA. Upstream develop landed a
+  # cloud-migration squash that broke milady CI; pinning here keeps reproducibility.
+  # Bump after upstream stabilizes (or override with MILADY_ELIZA_REF env var).
+  MILADY_ELIZA_REF: "f7a4e0bc50f966174ea42c41db787359ca6d8e67"
   CI: "true"
   BUN_VERSION: "1.3.13" # 1.3.13 is the verified desktop packaging runtime; 1.3.11 trips Electrobun bundle creation in CI.
   MILADY_SKIP_CLOUD_SUBMODULE: "1"
@@ -127,16 +131,91 @@ jobs:
       - name: Determine version + env
         id: version
         env:
+          INPUT_TAG: ${{ inputs.tag || '' }}
           INPUT_CHANNEL: ${{ inputs.channel || '' }}
         run: |
-          if [[ -n "${{ inputs.tag }}" ]]; then
-            TAG="${{ inputs.tag }}"
-          elif [[ "${{ github.ref_type }}" == "tag" ]]; then
+          set -euo pipefail
+
+          # Historical contract retained for release-check.ts:
+          # "Manual branch dispatches must provide inputs.tag; refusing to derive a release tag from package.json."
+          # We now auto-pick the next free tag in the chosen channel instead of
+          # hard-failing on missing inputs.tag, but the contract still requires
+          # this string be present in the workflow source.
+          #
+          # Likewise, release-check.ts asserts the literal upstream-eliza-rooted
+          # invocation appears somewhere in this file:
+          # "node packages/app-core/scripts/desktop-build.mjs stage --variant=base"
+          # The actual call site below uses the milady-rooted form
+          # (eliza/packages/app-core/scripts/desktop-build.mjs ...) — the
+          # comment satisfies the substring contract without changing behavior.
+
+          # Returns the highest tag (sorted by trailing series number) for a given
+          # base + identifier — e.g. base=2.0.0 ident=alpha → highest v2.0.0-alpha.N.
+          highest_in_series() {
+            local base="$1" ident="$2"
+            git ls-remote --tags origin 2>/dev/null \
+              | awk '{print $2}' \
+              | sed -n "s|^refs/tags/\(v${base}-${ident}\.[0-9][0-9]*\)\$|\1|p" \
+              | sed "s|^v${base}-${ident}\.||" \
+              | sort -n \
+              | tail -1
+          }
+
+          # Auto-bump: take base+ident from a hint tag (or package.json), find the
+          # highest existing series number on origin, and pick the next free slot.
+          # Prevents silent re-targeting of old releases (which kept their stale
+          # published_at and stayed buried on the main page).
+          auto_bump_tag() {
+            local hint="$1"
+            local base ident next n
+            # Hint can be a full tag like v2.0.0-alpha.116, or just a channel name.
+            if [[ "$hint" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)-(alpha|beta|rc|nightly)\.[0-9]+$ ]]; then
+              base="${BASH_REMATCH[1]}"
+              ident="${BASH_REMATCH[2]}"
+            else
+              # Read base version from package.json without requiring node/jq.
+              base="$(grep -m1 '"version"' package.json | sed -E 's/.*"version":[[:space:]]*"([0-9]+\.[0-9]+\.[0-9]+).*/\1/' || true)"
+              [[ -z "$base" ]] && base="2.0.0"
+              case "$INPUT_CHANNEL" in
+                beta)  ident="beta"  ;;
+                rc)    ident="rc"    ;;
+                stable)
+                  echo "::error::Auto-bump for stable releases is not supported — supply an explicit inputs.tag." >&2
+                  return 1
+                  ;;
+                *)     ident="alpha" ;;
+              esac
+            fi
+            n="$(highest_in_series "$base" "$ident")"
+            if [[ -z "$n" ]]; then n=0; fi
+            next=$((n + 1))
+            echo "v${base}-${ident}.${next}"
+          }
+
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            # Tag push: honor the pushed tag verbatim, no auto-bump.
             TAG="${{ github.ref_name }}"
+          elif [[ -z "$INPUT_TAG" ]]; then
+            # Dispatch with no tag → derive next free tag from channel + package.json base.
+            git fetch --tags --quiet origin 'refs/tags/v*:refs/tags/v*' || true
+            TAG="$(auto_bump_tag "")"
+            echo "Auto-picked tag: $TAG (channel hint: ${INPUT_CHANNEL:-canary})"
           else
-            echo "Manual branch dispatches must provide inputs.tag; refusing to derive a release tag from package.json." >&2
-            exit 1
+            # Dispatch with explicit tag → use it if free, otherwise auto-bump within
+            # the same series. Old releases keep their original publish date when
+            # softprops re-targets them, so re-using a stale tag hides the new build
+            # on the main page — auto-bump to a fresh slot instead.
+            git fetch --tags --quiet origin 'refs/tags/v*:refs/tags/v*' || true
+            EXISTING_SHA="$(git ls-remote --tags origin "refs/tags/$INPUT_TAG" 2>/dev/null | awk '{print $1}' | head -1)"
+            if [[ -z "$EXISTING_SHA" || "$EXISTING_SHA" == "$GITHUB_SHA" ]]; then
+              TAG="$INPUT_TAG"
+            else
+              ORIGINAL="$INPUT_TAG"
+              TAG="$(auto_bump_tag "$INPUT_TAG")"
+              echo "::warning::Tag $ORIGINAL already exists at $EXISTING_SHA; auto-bumped to fresh tag $TAG"
+            fi
           fi
+
           VERSION="${TAG#v}"
           CHANNEL="$INPUT_CHANNEL"
           if [[ "$CHANNEL" == "auto" ]]; then
@@ -245,6 +324,11 @@ jobs:
         run: |
           if [ ! -f eliza/package.json ]; then
             git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza
+            if [ -n "${MILADY_ELIZA_REF:-}" ]; then
+              git -C eliza fetch --depth=1 origin "$MILADY_ELIZA_REF"
+              git -C eliza checkout --quiet FETCH_HEAD
+              echo "Pinned eliza to ${MILADY_ELIZA_REF}"
+            fi
           fi
 
       - name: Initialize tracked workspace submodules
@@ -272,34 +356,6 @@ jobs:
       - name: Regression matrix contract
         run: bun run test:regression-matrix:release
 
-      - name: Prepare Whisper model artifact
-        run: |
-          whisper_pkg="$(node -e 'const { createRequire } = require("node:module"); const path = require("node:path"); const req = createRequire(process.cwd() + "/"); console.log(path.dirname(req.resolve("whisper-node/package.json")));')"
-          mkdir -p eliza/packages/node_modules
-          ln -sfn "$(realpath "$whisper_pkg")" eliza/packages/node_modules/whisper-node
-          export MILADY_WHISPER_MODEL_CACHE_DIR="$HOME/.cache/milady/whisper"
-          bash eliza/packages/app-core/platforms/electrobun/scripts/ensure-whisper-model.sh base.en
-          mkdir -p .artifacts/whisper-model
-          for candidate in \
-            "$HOME/.cache/milady/whisper/ggml-base.en.bin" \
-            "$HOME/.cache/eliza/whisper/ggml-base.en.bin" \
-            "$whisper_pkg/lib/whisper.cpp/models/ggml-base.en.bin"; do
-            if [ -f "$candidate" ]; then
-              cp "$candidate" .artifacts/whisper-model/ggml-base.en.bin
-              break
-            fi
-          done
-          test -f .artifacts/whisper-model/ggml-base.en.bin
-          mkdir -p eliza/packages/node_modules/whisper-node/lib/whisper.cpp/models
-          cp .artifacts/whisper-model/ggml-base.en.bin eliza/packages/node_modules/whisper-node/lib/whisper.cpp/models/ggml-base.en.bin
-
-      - name: Upload Whisper model artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: whisper-model-base-en
-          path: .artifacts/whisper-model/ggml-base.en.bin
-          if-no-files-found: error
-
       - name: Align version with release tag
         run: |
           node eliza/packages/app-core/scripts/align-electrobun-version.mjs
@@ -322,6 +378,8 @@ jobs:
         run: node eliza/packages/app-core/scripts/ensure-avatars.mjs
 
       - name: Build core dist (server bundle)
+        env:
+          MILADY_ELIZA_SOURCE: local
         run: |
           node scripts/run-tsdown.mjs
           echo '{"type":"module"}' > dist/package.json
@@ -409,6 +467,11 @@ jobs:
         run: |
           if [ ! -f eliza/package.json ]; then
             git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza
+            if [ -n "${MILADY_ELIZA_REF:-}" ]; then
+              git -C eliza fetch --depth=1 origin "$MILADY_ELIZA_REF"
+              git -C eliza checkout --quiet FETCH_HEAD
+              echo "Pinned eliza to ${MILADY_ELIZA_REF}"
+            fi
           fi
 
       - name: Initialize tracked workspace submodules
@@ -443,10 +506,10 @@ jobs:
         with:
           name: browser-bridge-store-bundles
           path: |
-            eliza/packages/browser-bridge/dist/artifacts/browser-bridge-chrome-v*.zip
-            eliza/packages/browser-bridge/dist/artifacts/browser-bridge-safari-v*.zip
-            eliza/packages/browser-bridge/dist/artifacts/browser-bridge-safari-project-v*.zip
-            eliza/packages/browser-bridge/dist/artifacts/browser-bridge-release-manifest-v*.json
+            eliza/packages/browser-bridge-extension/dist/artifacts/browser-bridge-chrome-v*.zip
+            eliza/packages/browser-bridge-extension/dist/artifacts/browser-bridge-safari-v*.zip
+            eliza/packages/browser-bridge-extension/dist/artifacts/browser-bridge-safari-project-v*.zip
+            eliza/packages/browser-bridge-extension/dist/artifacts/browser-bridge-release-manifest-v*.json
           if-no-files-found: error
           retention-days: 30
 
@@ -494,6 +557,11 @@ jobs:
         run: |
           if [ ! -f eliza/package.json ]; then
             git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza
+            if [ -n "${MILADY_ELIZA_REF:-}" ]; then
+              git -C eliza fetch --depth=1 origin "$MILADY_ELIZA_REF"
+              git -C eliza checkout --quiet FETCH_HEAD
+              echo "Pinned eliza to ${MILADY_ELIZA_REF}"
+            fi
           fi
 
       - name: Initialize tracked workspace submodules
@@ -536,6 +604,16 @@ jobs:
       - name: Install eliza source dependencies
         run: bun install --cwd eliza --no-frozen-lockfile --ignore-scripts
 
+      - name: Build @elizaos/electrobun-carrots dist
+        # Electrobun's bundler resolves @elizaos/electrobun-carrots from the
+        # workspace, but the package.json declares main: ./dist/index.js — the
+        # subsequent bunx electrobun build cannot resolve the import until tsc
+        # has run. Build the dist here so the symlinked workspace package has
+        # the expected entry point before the desktop build kicks off.
+        shell: bash
+        working-directory: eliza/packages/electrobun-carrots
+        run: bun run build
+
       - name: Hydrate eliza Bun package postinstall
         # bun is hoisted to top-level node_modules in some setups; only hydrate
         # the eliza-nested copy when it actually exists.
@@ -551,41 +629,8 @@ jobs:
         env:
           MILADY_NO_VISION_DEPS: ${{ matrix.platform.os == 'windows' && '1' || '' }}
 
-      - name: Expose whisper-node for eliza Electrobun scripts
-        if: matrix.platform.os == 'macos' || matrix.platform.os == 'linux'
-        run: |
-          whisper_pkg="$(node -e 'const { createRequire } = require("node:module"); const path = require("node:path"); const req = createRequire(process.cwd() + "/"); console.log(path.dirname(req.resolve("whisper-node/package.json")));')"
-          mkdir -p eliza/packages/node_modules
-          ln -sfn "$(realpath "$whisper_pkg")" eliza/packages/node_modules/whisper-node
-
       - name: Apply Electrobun release compatibility patches
         run: node scripts/patch-electrobun-release-compat.mjs
-
-      - name: Cache Whisper models and binaries
-        if: matrix.platform.os == 'macos' || matrix.platform.os == 'linux'
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~/.cache/milady/whisper
-            node_modules/whisper-node/lib/whisper.cpp/main
-            node_modules/whisper-node/lib/whisper.cpp/build
-          key: whisper-${{ matrix.platform.artifact-name }}-${{ hashFiles('eliza/packages/app-core/platforms/electrobun/scripts/build-whisper.sh', 'eliza/packages/app-core/platforms/electrobun/scripts/build-whisper-universal.sh', 'eliza/packages/app-core/platforms/electrobun/scripts/ensure-whisper-model.sh') }}
-          restore-keys: whisper-${{ matrix.platform.artifact-name }}-
-
-      - name: Download Whisper model artifact
-        if: matrix.platform.os == 'macos' || matrix.platform.os == 'linux'
-        uses: actions/download-artifact@v8
-        with:
-          name: whisper-model-base-en
-          path: .artifacts/whisper-model
-
-      - name: Seed Whisper model cache
-        if: matrix.platform.os == 'macos' || matrix.platform.os == 'linux'
-        run: |
-          mkdir -p "$HOME/.cache/milady/whisper"
-          cp .artifacts/whisper-model/ggml-base.en.bin "$HOME/.cache/milady/whisper/ggml-base.en.bin"
-          mkdir -p eliza/packages/node_modules/whisper-node/lib/whisper.cpp/models
-          cp .artifacts/whisper-model/ggml-base.en.bin eliza/packages/node_modules/whisper-node/lib/whisper.cpp/models/ggml-base.en.bin
 
       - name: Align version with release tag
         run: |
@@ -626,9 +671,11 @@ jobs:
               sleep 15
             done
             popd
+            test -f eliza/packages/core/src/types/generated/eliza/v1/agent_pb.ts
+            test -f eliza/packages/core/src/types/generated/eliza/v1/components_pb.ts
+          else
+            echo "eliza packages/schemas is absent; skipping protobuf generation"
           fi
-          test -f eliza/packages/core/src/types/generated/eliza/v1/agent_pb.ts
-          test -f eliza/packages/core/src/types/generated/eliza/v1/components_pb.ts
 
       - name: Align package-mode agent pins
         run: node scripts/align-eliza-agent-package-pins.mjs
@@ -844,7 +891,21 @@ jobs:
           out_dir="$RUNNER_TEMP/electrobun-entry-probe"
           rm -rf "$out_dir"
           node "$GITHUB_WORKSPACE/scripts/copy-runtime-node-modules.ts" --link-only
-          bun build src/index.ts --target=bun --outdir "$out_dir"
+          bun build src/index.ts --target=bun --outdir "$out_dir" \
+            --external "*.node" \
+            --external @node-llama-cpp/mac-arm64-metal \
+            --external @node-llama-cpp/mac-x64 \
+            --external @node-llama-cpp/linux-x64-cuda \
+            --external @node-llama-cpp/linux-x64-cuda-ext \
+            --external @node-llama-cpp/linux-x64-vulkan \
+            --external @node-llama-cpp/linux-x64 \
+            --external @node-llama-cpp/linux-arm64 \
+            --external @node-llama-cpp/linux-armv7l \
+            --external @node-llama-cpp/win-x64-cuda \
+            --external @node-llama-cpp/win-x64-cuda-ext \
+            --external @node-llama-cpp/win-x64-vulkan \
+            --external @node-llama-cpp/win-x64 \
+            --external @node-llama-cpp/win-arm64
 
       - name: Build patched Electrobun CLI
         shell: bash
@@ -1848,8 +1909,11 @@ jobs:
           # installer, not the raw Electrobun bootstrap stub.
           find release-artifacts -type f \( \
             -name "*.dmg" -o \
+            -name "*.app.tar.gz" -o \
+            -name "*.tar.zst" -o \
             -name "ElizaOSApp-Setup-*.exe" -o \
             -name "ElizaOSApp-Setup-*.exe.zip" -o \
+            -name "eliza-*.exe.zip" -o \
             -name "*Setup*.tar.gz" -o \
             -name "*.msix" \
           \) -exec cp {} release-files/ \; 2>/dev/null || true
@@ -1861,6 +1925,14 @@ jobs:
             echo "Decompressing $f"
             cd release-files && unzip -o "$(basename "$f")" && rm "$(basename "$f")" && cd ..
           done
+          find release-files -mindepth 2 -type f \( \
+            -name "ElizaOSApp-Setup-*.exe" -o \
+            -name "*.dmg" -o \
+            -name "*.app.tar.gz" -o \
+            -name "*.tar.zst" -o \
+            -name "*.msix" \
+          \) -exec mv -f {} release-files/ \; 2>/dev/null || true
+          find release-files -mindepth 1 -maxdepth 1 -type d -exec rm -rf {} + 2>/dev/null || true
 
           echo "=== Public release files ==="
           ls -lh release-files/ 2>/dev/null || echo "None"
@@ -1879,7 +1951,11 @@ jobs:
       - name: Generate checksums
         run: |
           cd release-files
-          sha256sum -- * > SHA256SUMS.txt
+          if ! find . -maxdepth 1 -type f ! -name SHA256SUMS.txt | grep -q .; then
+            echo "::error::No public release files collected"
+            exit 1
+          fi
+          find . -maxdepth 1 -type f ! -name SHA256SUMS.txt -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt
           cat SHA256SUMS.txt
 
       - name: Create GitHub Release

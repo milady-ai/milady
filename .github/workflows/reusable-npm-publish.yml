@@ -22,6 +22,10 @@ on:
         required: true
 
 env:
+  # Pin upstream eliza checkout to a known-good SHA. Upstream develop landed a
+  # cloud-migration squash that broke milady CI; pinning here keeps reproducibility.
+  # Bump after upstream stabilizes (or override with MILADY_ELIZA_REF env var).
+  MILADY_ELIZA_REF: "f7a4e0bc50f966174ea42c41db787359ca6d8e67"
   MILADY_SKIP_LOCAL_UPSTREAMS: "1"
 
 jobs:
@@ -56,6 +60,11 @@ jobs:
         run: |
           if [ ! -f eliza/package.json ]; then
             git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza
+            if [ -n "${MILADY_ELIZA_REF:-}" ]; then
+              git -C eliza fetch --depth=1 origin "$MILADY_ELIZA_REF"
+              git -C eliza checkout --quiet FETCH_HEAD
+              echo "Pinned eliza to ${MILADY_ELIZA_REF}"
+            fi
           fi
 
       - name: Set version in package.json
@@ -78,8 +87,20 @@ jobs:
       - name: Validate package
         if: inputs.run_validation
         run: |
-          PACK_OUTPUT=$(npm pack --dry-run 2>&1)
+          # --ignore-scripts: the prepack script would run `rt.mjs run build` which
+          # only resolves correctly inside a milady workspace install. We've already
+          # built dist/ explicitly above, so skip lifecycle scripts during pack.
+          # set +e: surface npm pack's output even when it exits non-zero, instead
+          # of letting set -e kill the script with no diagnostics.
+          set +e
+          PACK_OUTPUT=$(npm pack --dry-run --ignore-scripts 2>&1)
+          PACK_EXIT=$?
+          set -e
           echo "$PACK_OUTPUT"
+          if [[ $PACK_EXIT -ne 0 ]]; then
+            echo "::error::npm pack --dry-run exited with code $PACK_EXIT"
+            exit $PACK_EXIT
+          fi
           for required in "milady.mjs" "dist/index.js" "package.json"; do
             if ! echo "$PACK_OUTPUT" | grep -q "$required"; then
               echo "::error::Required file '$required' missing from package contents"
@@ -88,6 +109,9 @@ jobs:
           done
 
       - name: Publish
-        run: npm publish --tag ${{ inputs.dist_tag }} --access public
+        # --ignore-scripts: dist/ was already built above; the prepack lifecycle
+        # would re-invoke `rt.mjs run build` which expects a milady workspace
+        # install, not the CI ./dist staging.
+        run: npm publish --tag ${{ inputs.dist_tag }} --access public --ignore-scripts
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

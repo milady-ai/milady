@@ -76,6 +76,10 @@ concurrency:
   cancel-in-progress: false
 
 env:
+  # Pin upstream eliza checkout to a known-good SHA. Upstream develop landed a
+  # cloud-migration squash that broke milady CI; pinning here keeps reproducibility.
+  # Bump after upstream stabilizes (or override with MILADY_ELIZA_REF env var).
+  MILADY_ELIZA_REF: "f7a4e0bc50f966174ea42c41db787359ca6d8e67"
   REGISTRY: ghcr.io
   IMAGE_NAME: milady-ai/agent
 
@@ -128,6 +132,11 @@ jobs:
         run: |
           if [ ! -f eliza/package.json ]; then
             git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza
+            if [ -n "${MILADY_ELIZA_REF:-}" ]; then
+              git -C eliza fetch --depth=1 origin "$MILADY_ELIZA_REF"
+              git -C eliza checkout --quiet FETCH_HEAD
+              echo "Pinned eliza to ${MILADY_ELIZA_REF}"
+            fi
           fi
 
       - name: Initialize tracked workspace submodules
@@ -138,6 +147,23 @@ jobs:
       - name: Prepare eliza source workspace
         run: |
           if [ -f eliza/.gitmodules ]; then
+            # Untrack orphan gitlinks (160000 entries in the tree that aren't
+            # declared in .gitmodules) so the recursive submodule init doesn't
+            # die with "fatal: No url found for submodule path …". Upstream
+            # eliza currently has e.g. swe-bench-workspace-opencode/* orphans.
+            mapfile -t TREE_GITLINKS < <(git -C eliza ls-files --stage | awk '$1=="160000"{print $4}')
+            mapfile -t GITMODULES_PATHS < <(git -C eliza config -f .gitmodules --get-regexp '^submodule\..*\.path$' | awk '{print $2}')
+            for path in "${TREE_GITLINKS[@]}"; do
+              found=0
+              for known in "${GITMODULES_PATHS[@]}"; do
+                if [ "$path" = "$known" ]; then found=1; break; fi
+              done
+              if [ "$found" = "0" ]; then
+                echo "Untracking orphan gitlink not in .gitmodules: $path"
+                git -C eliza rm --cached -r --force --quiet "$path" || true
+              fi
+            done
+
             git -C eliza submodule sync --recursive
             git -C eliza \
               -c submodule.cloud.update=none \
@@ -155,6 +181,48 @@ jobs:
           NODE
         env:
           MILADY_SKIP_CLOUD_SUBMODULE: "1"
+
+      # Stub any localPackages entry from link-docker-local-app-packages.mjs
+      # that has no package.json on disk. Upstream eliza periodically renames
+      # or adds entries (cloud-sdk, plugin-native-activity-tracker) faster than
+      # the actual file moves land, leaving the linker pointing at non-existent
+      # paths. The agent image doesn't actually use these stubs at runtime —
+      # they exist solely to satisfy resolveLocalPackageDir().
+      - name: Stub missing eliza local-package entries for docker context
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          import path from "node:path";
+          const linker = "eliza/packages/app-core/scripts/link-docker-local-app-packages.mjs";
+          if (!fs.existsSync(linker)) process.exit(0);
+          const src = fs.readFileSync(linker, "utf8");
+          const arrayMatch = src.match(/const localPackages = \[([\s\S]*?)\];/);
+          if (!arrayMatch) {
+            console.log("[stub-local-packages] localPackages array not found in linker; skipping");
+            process.exit(0);
+          }
+          const entries = [...arrayMatch[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]);
+          for (const entry of entries) {
+            const candidates = [entry];
+            if (entry.startsWith("eliza/")) candidates.push(entry.slice("eliza/".length));
+            const found = candidates.some((c) => fs.existsSync(path.join(c, "package.json")));
+            if (found) continue;
+            const stubDir = entry;
+            fs.mkdirSync(stubDir, { recursive: true });
+            const inferredName = "@elizaos/" + path.basename(entry);
+            const pkg = {
+              name: inferredName,
+              version: "0.0.0-stub",
+              private: true,
+              description: "Stub injected by milady CI for missing upstream eliza local-package entry.",
+              main: "index.js",
+              exports: { ".": "./index.js" },
+            };
+            fs.writeFileSync(path.join(stubDir, "package.json"), JSON.stringify(pkg, null, 2) + "\n");
+            fs.writeFileSync(path.join(stubDir, "index.js"), "// stub for docker build context\n");
+            console.log(`[stub-local-packages] stubbed ${stubDir} as ${inferredName}`);
+          }
+          NODE
 
       - name: Apply elizaOS source CI patches
         run: node scripts/apply-eliza-ci-patches.mjs
@@ -260,6 +328,9 @@ jobs:
         run: |
           cd eliza/packages/app-core
           bun run build
+
+      - name: Reapply app-core package style patches
+        run: node scripts/patch-elizaos-package-styles.mjs
 
       # ── 9. Build runtime (tsdown) ───────────────────────────────────────────
       - name: Build runtime (tsdown)

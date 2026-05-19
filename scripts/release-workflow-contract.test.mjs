@@ -133,19 +133,22 @@ test("distribution workflows consume the canonical channel policy", () => {
     electrobun,
     /\n\s+build:\n\s+name: Build \$\{\{ matrix\.platform\.name \}\}[\s\S]*?name: Initialize eliza source checkout[\s\S]*?git clone --depth=1 --branch "\$\{MILADY_ELIZA_BRANCH:-develop\}" https:\/\/github\.com\/elizaOS\/eliza\.git eliza[\s\S]*?name: Initialize tracked workspace submodules/,
   );
-  assert.match(
-    electrobun,
-    /\$HOME\/\.cache\/eliza\/whisper\/ggml-base\.en\.bin/,
-  );
   assert.match(electrobun, /node scripts\/align-eliza-agent-package-pins\.mjs/);
   assert.match(
     electrobun,
     /bun install --cwd eliza --no-frozen-lockfile --ignore-scripts/,
   );
-  assert.match(electrobun, /eliza\/packages\/browser-bridge\/dist\/artifacts/);
+  assert.match(
+    electrobun,
+    /eliza\/packages\/browser-bridge-extension\/dist\/artifacts/,
+  );
   assert.match(
     electrobun,
     /name: Package Agent Browser Bridge release bundles[\s\S]*?bun run browser-bridge:package:release[\s\S]*?packaged=true/,
+  );
+  assert.match(
+    electrobun,
+    /if \[ -d eliza\/packages\/schemas \] && \[ -f eliza\/packages\/schemas\/buf\.gen\.yaml \]; then[\s\S]*?test -f eliza\/packages\/core\/src\/types\/generated\/eliza\/v1\/agent_pb\.ts[\s\S]*?test -f eliza\/packages\/core\/src\/types\/generated\/eliza\/v1\/components_pb\.ts[\s\S]*?else[\s\S]*?skipping protobuf generation[\s\S]*?fi/,
   );
   assert.doesNotMatch(
     electrobun,
@@ -153,8 +156,10 @@ test("distribution workflows consume the canonical channel policy", () => {
   );
   assert.match(
     electrobun,
-    /workflow_dispatch:[\s\S]*?tag:\n\s+description: "Release tag \(e\.g\. v2\.0\.0-alpha\.3\)"\n\s+required: true/,
+    /workflow_dispatch:[\s\S]*?tag:\n\s+description: "Release tag[^"]*Leave blank to auto-pick[^"]*"\n\s+required: false/,
   );
+  assert.match(electrobun, /Auto-picked tag: \$TAG/);
+  assert.match(electrobun, /auto-bumped to fresh tag \$TAG/);
   assert.match(electrobun, /beta desktop release requires a beta version/);
   assert.match(electrobun, /BUILD_ENV="stable"/);
 });
@@ -249,6 +254,10 @@ test("eliza CI patches align release source helpers", () => {
     "scripts/cloud-image-prune-deps.mjs",
     "utf8",
   );
+  const capacitorBridgeReleaseBuild = fs.readFileSync(
+    "scripts/build-capacitor-bridge-release.mjs",
+    "utf8",
+  );
 
   assert.match(
     patchScript,
@@ -280,10 +289,34 @@ test("eliza CI patches align release source helpers", () => {
   );
   assert.match(patchScript, /alpha\|beta\|rc\|nightly/);
   assert.match(patchScript, /browser bridge canary release versions/);
+  assert.match(patchScript, /browser-bridge-extension/);
+  assert.match(patchScript, /browser bridge extension canary release versions/);
   assert.match(patchScript, /Agent-Browser-Bridge/);
   assert.ok(patchScript.includes("Agent-Browser-Bridge\\\\.Extension"));
   assert.match(patchScript, /browser bridge Safari bundle identifiers/);
-  assert.match(patchScript, /app-core release browser bridge hard gate/);
+  assert.match(patchScript, /app-core release-check Milady wrappers/);
+  assert.match(patchScript, /patchCapacitorBridgeBuildScript/);
+  assert.match(patchScript, /patchCapacitorBridgeLazyCliExports/);
+  assert.match(patchScript, /build-capacitor-bridge-release\.mjs/);
+  assert.match(patchScript, /plugin-capacitor-bridge JS-only release build/);
+  assert.match(patchScript, /plugin-capacitor-bridge lazy mobile CLI exports/);
+  assert.match(capacitorBridgeReleaseBuild, /mobile-device-bridge-bootstrap/);
+  assert.match(capacitorBridgeReleaseBuild, /src\/shared\/fs-shim\.ts/);
+  assert.match(capacitorBridgeReleaseBuild, /src\/android\/bridge\.ts/);
+  assert.match(capacitorBridgeReleaseBuild, /src\/ios\/bridge\.ts/);
+  assert.match(capacitorBridgeReleaseBuild, /packages=external/);
+  assert.match(
+    patchScript,
+    /requiredRootPackageScriptSnippets[\s\S]*scripts\/run-release-check\.mjs/,
+  );
+  assert.match(
+    patchScript,
+    /eliza\/packages\/app-core\/scripts\/ensure-avatars\.mjs/,
+  );
+  assert.match(
+    patchScript,
+    /resolveExistingPath\(\[\s*"packages\/app-core\/scripts\/audit-apple-store-sandbox\.mjs"[\s\S]*"eliza\/packages\/app-core\/scripts\/audit-apple-store-sandbox\.mjs"/,
+  );
   assert.match(patchScript, /nestedElizaPackageJson/);
   assert.match(patchScript, /collectWorkspaceMaps\(\s*elizaRoot/);
   assert.match(patchScript, /patchCorePluginRuntimeSurface/);
@@ -319,6 +352,10 @@ test("release jobs hydrate eliza source without a root eliza gitlink", () => {
     buildDocker,
     /name: Apply elizaOS source CI patches[\s\S]*?run: node scripts\/apply-eliza-ci-patches\.mjs[\s\S]*?name: Repair known eliza patch files/,
   );
+  assert.match(
+    buildDocker,
+    /name: Build @elizaos\/app-core[\s\S]*?bun run build[\s\S]*?name: Reapply app-core package style patches[\s\S]*?node scripts\/patch-elizaos-package-styles\.mjs[\s\S]*?name: Build runtime \(tsdown\)/,
+  );
 });
 
 test("release docs validation tracks current eliza docs package layout", () => {
@@ -349,7 +386,11 @@ test("npm release builds generate gitignored eliza i18n data before bundling", (
   }
   assert.match(
     releaseContractSuite,
-    /ensure-shared-i18n-data\.mjs"[\s\S]*?run\("node", \["scripts\/run-tsdown\.mjs"/,
+    /ensure-shared-i18n-data\.mjs"[\s\S]*?scripts\/run-tsdown\.mjs/,
+  );
+  assert.match(
+    releaseContractSuite,
+    /scripts\/run-tsdown\.mjs[\s\S]*?MILADY_ELIZA_SOURCE:\s*"local"/,
   );
 });
 
@@ -369,38 +410,14 @@ test("release workflows use the checked-in tsdown runner", () => {
   }
 });
 
-test("Electrobun release exposes whisper-node for upstream script layout", () => {
-  const electrobun = workflow("release-electrobun.yml");
-
-  assert.match(
-    electrobun,
-    /name: Expose whisper-node for eliza Electrobun scripts/,
-  );
-  assert.match(electrobun, /req\.resolve\("whisper-node\/package\.json"\)/);
-  assert.match(
-    electrobun,
-    /ln -sfn "\$\(realpath "\$whisper_pkg"\)" eliza\/packages\/node_modules\/whisper-node/,
-  );
-});
-
-test("Electrobun release uses Milady whisper cache path", () => {
-  const electrobun = workflow("release-electrobun.yml");
-
-  assert.match(electrobun, /~\/\.cache\/milady\/whisper/);
-  assert.match(
-    electrobun,
-    /\$HOME\/\.cache\/milady\/whisper\/ggml-base\.en\.bin/,
-  );
-  assert.match(
-    electrobun,
-    /eliza\/packages\/node_modules\/whisper-node\/lib\/whisper\.cpp\/models\/ggml-base\.en\.bin/,
-  );
-});
-
 test("Electrobun release applies elizaOS source overlay before manual build setup", () => {
   const electrobun = workflow("release-electrobun.yml");
   const copyRuntimeWrapper = fs.readFileSync(
     "scripts/copy-runtime-node-modules.ts",
+    "utf8",
+  );
+  const elizaPatchScript = fs.readFileSync(
+    "scripts/apply-eliza-ci-patches.mjs",
     "utf8",
   );
 
@@ -416,11 +433,145 @@ test("Electrobun release applies elizaOS source overlay before manual build setu
     electrobun,
     /name: Probe Electrobun bun entry build[\s\S]*?node "\$GITHUB_WORKSPACE\/scripts\/copy-runtime-node-modules\.ts" --link-only[\s\S]*?bun build src\/index\.ts --target=bun/,
   );
+  assert.match(electrobun, /--external "\*\.node"/);
+  assert.match(electrobun, /--external @node-llama-cpp\/mac-arm64-metal/);
+  assert.match(electrobun, /--external @node-llama-cpp\/linux-x64/);
+  assert.match(electrobun, /--external @node-llama-cpp\/win-x64/);
+  assert.match(electrobun, /-name "\*\.app\.tar\.gz"/);
+  assert.match(electrobun, /-name "\*\.tar\.zst"/);
+  assert.match(electrobun, /-name "eliza-\*\.exe\.zip"/);
+  assert.match(
+    electrobun,
+    /find release-files -mindepth 2 -type f[\s\S]*-exec mv -f \{\} release-files\//,
+  );
+  assert.match(
+    electrobun,
+    /find release-files -mindepth 1 -maxdepth 1 -type d -exec rm -rf \{\} \+/,
+  );
+  assert.match(electrobun, /No public release files collected/);
+  assert.match(
+    electrobun,
+    /find \. -maxdepth 1 -type f ! -name SHA256SUMS\.txt -print0 \| sort -z \| xargs -0 sha256sum > SHA256SUMS\.txt/,
+  );
   assert.match(copyRuntimeWrapper, /elizaElectrobunNodeModules/);
   assert.match(
     copyRuntimeWrapper,
     /elizaAppCoreDir,\s*"platforms",\s*"electrobun"/,
   );
+  assert.match(copyRuntimeWrapper, /elizaAgentNodeModules/);
+  assert.match(copyRuntimeWrapper, /ensureLocalWorkspaceDists/);
+  assert.match(copyRuntimeWrapper, /ensureAgentRuntimeDistAliases/);
+  assert.match(copyRuntimeWrapper, /"dist",\s*"packages",\s*"agent",\s*"src"/);
+  assert.match(copyRuntimeWrapper, /linkLocalElizaWorkspacePackages/);
+  assert.match(
+    copyRuntimeWrapper,
+    /elizaPluginsDir,\s*"plugin-elizacloud",\s*"node_modules"/,
+  );
+  assert.match(copyRuntimeWrapper, /packageName,\s*"node_modules"/);
+  assert.match(
+    copyRuntimeWrapper,
+    /ensureMirroredNodeModules\(\);\s*linkLocalElizaWorkspacePackages\(\);\s*ensureLocalWorkspaceDists\(\);\s*ensureAgentRuntimeDistAliases\(\);\s*linkLocalElizaWorkspacePackages\(\);\s*ensureElizaCoreRuntimeAliases\(\);/,
+  );
+  assert.match(
+    copyRuntimeWrapper,
+    /miladyRootNodeModules,\s*\n\s*elizaPackagesNodeModules/,
+  );
+  assert.match(
+    copyRuntimeWrapper,
+    /elizaPackagesDir,\s*"core"[\s\S]*dist\/node\/index\.node\.js/,
+  );
+  assert.match(
+    copyRuntimeWrapper,
+    /elizaPackagesDir,\s*"shared"[\s\S]*dist\/index\.js/,
+  );
+  assert.match(
+    copyRuntimeWrapper,
+    /elizaPackagesDir,\s*"vault"[\s\S]*dist\/index\.js/,
+  );
+  assert.match(
+    copyRuntimeWrapper,
+    /elizaCloudPackagesDir,\s*"sdk"[\s\S]*dist\/index\.js/,
+  );
+  assert.match(copyRuntimeWrapper, /"@elizaos\/cloud-sdk"/);
+  assert.match(
+    copyRuntimeWrapper,
+    /elizaPackagesDir,\s*"cloud-routing"[\s\S]*dist\/index\.js/,
+  );
+  assert.match(copyRuntimeWrapper, /"@elizaos\/cloud-routing"/);
+  assert.match(
+    copyRuntimeWrapper,
+    /elizaPackagesDir,\s*"agent"[\s\S]*dist\/services\/app-package-modules\.js/,
+  );
+  assert.match(copyRuntimeWrapper, /"@elizaos\/agent"/);
+  assert.match(copyRuntimeWrapper, /elizaAppCoreDir[\s\S]*dist\/api\/auth\.js/);
+  assert.match(copyRuntimeWrapper, /"@elizaos\/app-core"/);
+  for (const packageName of [
+    "plugin-agent-skills",
+    "plugin-registry",
+    "plugin-app-manager",
+    "plugin-browser",
+    "plugin-capacitor-bridge",
+    "plugin-coding-tools",
+    "plugin-computeruse",
+    "plugin-discord",
+    "plugin-imessage",
+    "plugin-local-inference",
+    "plugin-mcp",
+    "plugin-signal",
+    "plugin-streaming",
+    "plugin-whatsapp",
+    "plugin-wallet",
+    "plugin-workflow",
+    "plugin-x402",
+  ]) {
+    assert.match(copyRuntimeWrapper, new RegExp(`"${packageName}"`));
+  }
+  assert.match(copyRuntimeWrapper, /`@elizaos\/\$\{packageName\}`/);
+  assert.match(
+    copyRuntimeWrapper,
+    /elizaPluginsDir,\s*"plugin-elizacloud"[\s\S]*dist\/node\/index\.node\.js/,
+  );
+  assert.match(
+    copyRuntimeWrapper,
+    /plugin-elizacloud"[\s\S]*allowExistingMarkerAfterFailure:\s*true/,
+  );
+  assert.match(
+    copyRuntimeWrapper,
+    /plugin-capacitor-bridge"[\s\S]*allowExistingMarkerAfterFailure:\s*true/,
+  );
+  assert.match(
+    copyRuntimeWrapper,
+    /allowExistingMarkerAfterFailure[\s\S]*fs\.existsSync\(marker\)/,
+  );
+  assert.match(copyRuntimeWrapper, /"@elizaos\/plugin-elizacloud"/);
+  assert.match(copyRuntimeWrapper, /dist\/index\.js/);
+  assert.match(copyRuntimeWrapper, /ensureElizaCoreRuntimeAliases/);
+  assert.match(copyRuntimeWrapper, /dist\/node\/index\.node\.js/);
+  assert.match(elizaPatchScript, /patchAgentConfigPaths/);
+  assert.match(elizaPatchScript, /getElizaNamespace/);
+  assert.match(elizaPatchScript, /resolveOAuthDir/);
+  assert.match(elizaPatchScript, /patchAgentConfigPlainObjectImport/);
+  assert.match(elizaPatchScript, /agent config plain object helper/);
+  assert.match(elizaPatchScript, /patchAgentRelationshipsGraphExports/);
+  assert.match(elizaPatchScript, /relationships-graph-builder\.ts/);
+  assert.match(elizaPatchScript, /patchAgentRuntimeSchemaDurationImport/);
+  assert.match(elizaPatchScript, /shared\/src\/cli\/parse-duration\.ts/);
+  assert.match(elizaPatchScript, /patchAgentExtractParamsPrompt/);
+  assert.match(elizaPatchScript, /EXTRACT_ACTION_PARAMS_TEMPLATE/);
+  assert.match(elizaPatchScript, /extractActionParamsTemplate/);
+  assert.match(elizaPatchScript, /patchComputerUseVisionContextProvider/);
+  assert.match(elizaPatchScript, /vision-context-provider\.ts/);
+  assert.ok(elizaPatchScript.includes('vision-context-provider\\.js";\\r?\\n'));
+  assert.match(elizaPatchScript, /patchLocalInferenceExternalGlob/);
+  assert.match(
+    elizaPatchScript,
+    /plugin-local-inference quoted node-llama external glob/,
+  );
+  assert.match(
+    elizaPatchScript,
+    /plugin-computeruse missing vision context provider import/,
+  );
+  assert.match(elizaPatchScript, /services: \[ComputerUseService\]/);
 });
 
 test("Electrobun Windows release runs packaged Playwright check after disk cleanup", () => {
@@ -627,19 +778,19 @@ test("Electrobun release has a lightweight PR contract workflow", () => {
   assert.match(workflowText, /^name: Validate Electrobun Release Workflow$/m);
   assert.match(workflowText, /branches: \[main, develop\]/);
   assert.match(workflowText, /BUN_VERSION: "1\.3\.13"/);
-  assert.match(workflowText, /MILADY_SKIP_LOCAL_UPSTREAMS: "1"/);
   assert.match(
     workflowText,
     /git clone --depth=1 --branch "\$\{MILADY_ELIZA_BRANCH:-develop\}" https:\/\/github\.com\/elizaOS\/eliza\.git eliza/,
   );
+  assert.match(workflowText, /run-postinstall: "true"/);
+  assert.match(workflowText, /skip-avatar-clone: "true"/);
+  assert.match(workflowText, /no-vision-deps: "true"/);
+  assert.match(workflowText, /skip-local-upstreams-postinstall: "true"/);
   assert.match(
     workflowText,
     /run: bun run test:regression-matrix:release-contract/,
   );
   assert.match(workflowText, /run: bun run test:release:contract/);
-  assert.match(workflowText, /SKIP_AVATAR_CLONE: "1"/);
-  assert.match(workflowText, /ELIZA_NO_VISION_DEPS: "1"/);
-  assert.match(workflowText, /MILADY_NO_VISION_DEPS: "1"/);
 });
 
 test("Electrobun release workflow root bun scripts are wired", () => {
