@@ -49,7 +49,7 @@ describe("package mode aliases", () => {
     expect(mainText).not.toContain("@elizaos/ui/dist/styles/");
   });
 
-  it("imports packaged app-core component and state exports instead of private ui source paths", () => {
+  it("imports public ui package subpaths for ui-owned component and state types", () => {
     const mainText = fs.readFileSync(
       path.join(appRoot, "src/main.tsx"),
       "utf8",
@@ -60,16 +60,15 @@ describe("package mode aliases", () => {
     );
 
     expect(mainText).toContain(
-      "@elizaos/app-core/components/character/CharacterEditor",
+      "@elizaos/ui/components/character/CharacterEditor",
     );
-    expect(stubText).toContain("@elizaos/app-core/state/types");
-    expect(stubText).toContain(
-      "@elizaos/app-core/components/chat/widgets/types",
-    );
-    expect(mainText).toContain('from "@elizaos/ui";');
-    expect(mainText).not.toContain("@elizaos/ui/components/");
-    expect(stubText).not.toContain("@elizaos/ui/state/");
-    expect(stubText).not.toContain("@elizaos/ui/components/");
+    expect(mainText).toContain("@elizaos/ui/components/voice-pill/index");
+    expect(mainText).toContain("@elizaos/ui/voice");
+    expect(stubText).toContain("@elizaos/ui/state/types");
+    expect(stubText).toContain("@elizaos/ui/components/chat/widgets/types");
+    expect(stubText).toContain("@elizaos/ui/components/ui/confirm-dialog");
+    expect(mainText).not.toContain("@elizaos/ui/dist/");
+    expect(stubText).not.toContain("@elizaos/ui/dist/");
   });
 
   it("patches all Bun-installed app-core stylesheet copies", () => {

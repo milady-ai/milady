@@ -49,13 +49,11 @@ import {
   shouldInstallMainWindowOnboardingPatches,
   syncDetachedShellLocation,
 } from "@elizaos/app-core";
+import { createVoiceCapture, type VoiceCaptureHandle } from "@elizaos/ui/voice";
 import {
-  type ConversationMessage,
-  createVoiceCapture,
-  type VoiceCaptureHandle,
   VoicePill,
   type VoicePillMessage,
-} from "@elizaos/ui";
+} from "@elizaos/ui/components/voice-pill/index";
 import { AppWindowRenderer } from "@elizaos/app-core";
 import { dispatchQueuedLifeOpsGithubCallbackFromUrl } from "@elizaos/app-lifeops/platform";
 import type { ShareTargetPayload } from "@elizaos/app-core/platform";
@@ -153,7 +151,7 @@ import {
   type IosRuntimeMode,
   resolveIosRuntimeConfig,
 } from "@elizaos/app-core";
-import { CharacterEditor } from "@elizaos/app-core/components/character/CharacterEditor";
+import { CharacterEditor } from "@elizaos/ui/components/character/CharacterEditor";
 
 declare global {
   interface Window {
@@ -895,12 +893,23 @@ const PILL_MESSAGE_TAIL = 20;
 // active conversation state, so we keep its own session pinned to localStorage.
 const PILL_CONVERSATION_STORAGE_KEY = "milady.pill.activeConversationId";
 
+type PillConversationMessage = {
+  id: string;
+  role: "user" | "assistant";
+  text: string;
+  timestamp: number;
+  failureKind?: unknown;
+  [key: string]: unknown;
+};
+
 /**
  * Map a chat-API `ConversationMessage` to the trimmed `VoicePillMessage` shape
  * the pill renders. Skips entries with no display text and collapses message
  * roles to the binary user/agent split the pill UI expects.
  */
-function toPillMessage(message: ConversationMessage): VoicePillMessage | null {
+function toPillMessage(
+  message: PillConversationMessage,
+): VoicePillMessage | null {
   const text = message.text?.trim() ?? "";
   if (!text) return null;
   return {
@@ -911,7 +920,7 @@ function toPillMessage(message: ConversationMessage): VoicePillMessage | null {
 }
 
 function projectPillMessages(
-  messages: ConversationMessage[],
+  messages: PillConversationMessage[],
 ): VoicePillMessage[] {
   const tail = messages.slice(-PILL_MESSAGE_TAIL);
   const projected: VoicePillMessage[] = [];
@@ -920,6 +929,23 @@ function projectPillMessages(
     if (pill) projected.push(pill);
   }
   return projected;
+}
+
+function normalizePillConversationMessage(
+  raw: unknown,
+): PillConversationMessage {
+  const message = raw as Partial<PillConversationMessage>;
+  return {
+    ...message,
+    id:
+      typeof message.id === "string"
+        ? message.id
+        : `pill-message-${Date.now()}`,
+    role: message.role === "user" ? "user" : "assistant",
+    text: typeof message.text === "string" ? message.text : "",
+    timestamp:
+      typeof message.timestamp === "number" ? message.timestamp : Date.now(),
+  } as PillConversationMessage;
 }
 
 function readPillConversationId(): string | null {
@@ -994,7 +1020,7 @@ function conversationUpdatedAtMs(c: PillConversationSummary): number {
  * agent turns.
  */
 function PillRoot() {
-  const [messages, setMessages] = useState<ConversationMessage[]>([]);
+  const [messages, setMessages] = useState<PillConversationMessage[]>([]);
   const conversationIdRef = useRef<string | null>(readPillConversationId());
   const sendInFlightRef = useRef<boolean>(false);
   const voiceCaptureRef = useRef<VoiceCaptureHandle | null>(null);
@@ -1002,7 +1028,7 @@ function PillRoot() {
 
   // Append-or-replace by id so streaming token updates collapse onto a single
   // assistant turn without flicker.
-  const upsertMessage = useCallback((next: ConversationMessage) => {
+  const upsertMessage = useCallback((next: PillConversationMessage) => {
     setMessages((prev) => {
       const index = prev.findIndex((entry) => entry.id === next.id);
       if (index < 0) return [...prev, next];
@@ -1046,7 +1072,7 @@ function PillRoot() {
       const { messages: history } =
         await client.getConversationMessages(convId);
       if (cancelled) return;
-      setMessages(history.map(normalizePillMessage));
+      setMessages(history.map(normalizePillConversationMessage));
     })();
     return () => {
       cancelled = true;
@@ -1072,7 +1098,7 @@ function PillRoot() {
         if (!raw || typeof raw !== "object") return;
         const candidate = raw as { id?: unknown };
         if (typeof candidate.id !== "string") return;
-        upsertMessage(normalizePillMessage(raw));
+        upsertMessage(normalizePillConversationMessage(raw));
       },
     );
     return () => {
@@ -1128,7 +1154,7 @@ function PillRoot() {
           upsertMessage({
             id: assistantMsgId,
             role: "assistant",
-            text: result.text,
+            text: result.text ?? "",
             timestamp: Date.now(),
             ...(result.failureKind ? { failureKind: result.failureKind } : {}),
           });

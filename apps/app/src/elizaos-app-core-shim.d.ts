@@ -221,6 +221,93 @@ declare module "@elizaos/app-core/platform/native-plugin-entrypoints" {
   export default _default;
 }
 
+declare module "@elizaos/ui/voice" {
+  export type VoiceCaptureBackend = "local-inference" | "browser";
+  export type VoiceCaptureState =
+    | "idle"
+    | "starting"
+    | "listening"
+    | "stopped"
+    | "error";
+  export interface VoiceCaptureTranscriptSegment {
+    text: string;
+    final: boolean;
+    backend: VoiceCaptureBackend;
+  }
+  export interface VoiceCaptureFactoryOptions {
+    onTranscript: (segment: VoiceCaptureTranscriptSegment) => void;
+    onStateChange?: (state: VoiceCaptureState, error?: Error) => void;
+    asrProvider?: string;
+    lang?: string;
+  }
+  export interface VoiceCaptureHandle {
+    start(): Promise<void>;
+    stop(): Promise<void>;
+    dispose(): void;
+    isActive(): boolean;
+  }
+  export function createVoiceCapture(
+    options: VoiceCaptureFactoryOptions,
+  ): VoiceCaptureHandle;
+}
+
+declare module "@elizaos/ui/components/voice-pill/index" {
+  import type * as React from "react";
+
+  export interface VoicePillMessage {
+    id: string;
+    role: "user" | "agent";
+    text: string;
+  }
+  export interface VoicePillProps {
+    messages?: VoicePillMessage[];
+    onSubmit?: (text: string) => void;
+    onRecordingChange?: (recording: boolean) => void;
+    [key: string]: unknown;
+  }
+  export const VoicePill: React.ComponentType<VoicePillProps>;
+  export default VoicePill;
+}
+
+declare module "@elizaos/ui/components/character/CharacterEditor" {
+  import type * as React from "react";
+
+  export const CharacterEditor: React.ComponentType<Record<string, unknown>>;
+  export { CharacterEditor as CharacterView };
+}
+
+declare module "@elizaos/ui/components/chat/widgets/types" {
+  import type * as React from "react";
+
+  export interface ChatSidebarWidgetDefinition {
+    id: string;
+    pluginId?: string;
+    order?: number;
+    defaultEnabled?: boolean;
+    Component: React.ComponentType<Record<string, unknown>>;
+    [key: string]: unknown;
+  }
+  export interface ChatSidebarWidgetProps {
+    [key: string]: unknown;
+  }
+}
+
+declare module "@elizaos/ui/components/ui/confirm-dialog" {
+  export interface PromptOptions {
+    title?: string;
+    description?: string;
+    placeholder?: string;
+    defaultValue?: string;
+    confirmLabel?: string;
+    cancelLabel?: string;
+    [key: string]: unknown;
+  }
+}
+
+declare module "@elizaos/ui/state/types" {
+  export type InventoryChainFilters = Record<string, unknown>;
+}
+
 declare module "@elizaos/app-core/api" {
   // optional-eliza-app-stub.tsx imports these as named *types*. The real
   // package will publish them as discriminated unions; the stub-builds path
