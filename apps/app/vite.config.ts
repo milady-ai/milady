@@ -506,6 +506,29 @@ function resolveLocalSharedAliases(): Alias[] {
   return aliases;
 }
 
+function resolveLocalCloudSdkAliases(): Alias[] {
+  if (!hasLocalElizaWorkspace) return [];
+
+  const cloudSdkSrcDir = path.join(localElizaRoot, "packages/cloud-sdk/src");
+  if (!fs.existsSync(path.join(cloudSdkSrcDir, "index.ts"))) return [];
+
+  return [
+    {
+      find: /^@elizaos\/cloud-sdk$/,
+      replacement: path.join(cloudSdkSrcDir, "index.ts"),
+    },
+    {
+      find: /^@elizaos\/cloud-sdk\/cloud-setup-session$/,
+      replacement: path.join(cloudSdkSrcDir, "cloud-setup-session/index.ts"),
+    },
+    {
+      find: /^@elizaos\/cloud-sdk\/cloud-setup-session\/(.+)$/,
+      replacement: `${cloudSdkSrcDir}/cloud-setup-session/$1.ts`,
+      customResolver: resolveExistingUiSourceModule,
+    },
+  ];
+}
+
 function resolveBuiltLocalSharedAliases(): Alias[] {
   if (!hasLocalElizaWorkspace) return [];
 
@@ -2867,6 +2890,7 @@ export default defineConfig({
       // Published-only builds should resolve normal @elizaos package exports.
       ...resolveLocalUiAliases(),
       ...resolveLocalSharedAliases(),
+      ...resolveLocalCloudSdkAliases(),
       ...resolveLocalAppCoreAliases(),
     ],
   },

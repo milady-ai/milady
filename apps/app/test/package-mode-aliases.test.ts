@@ -145,6 +145,10 @@ describe("package mode aliases", () => {
       "const sourcePath = resolveAppCoreWithUiFallback",
     );
     expect(viteConfigText).toContain("function resolveSharedExportTarget");
+    expect(viteConfigText).toContain("function resolveLocalCloudSdkAliases");
+    expect(viteConfigText).toContain(
+      "@elizaos\\/cloud-sdk\\/cloud-setup-session",
+    );
     expect(viteConfigText).toContain(
       'for (const condition of ["source", "import", "default", "types"])',
     );
