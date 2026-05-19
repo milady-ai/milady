@@ -49,7 +49,7 @@ describe("package mode aliases", () => {
     expect(mainText).not.toContain("@elizaos/ui/dist/styles/");
   });
 
-  it("imports packaged app-core component and state exports instead of private ui source paths", () => {
+  it("uses package-mode UI compatibility modules instead of private ui source paths", () => {
     const mainText = fs.readFileSync(
       path.join(appRoot, "src/main.tsx"),
       "utf8",
@@ -59,13 +59,9 @@ describe("package mode aliases", () => {
       "utf8",
     );
 
-    expect(mainText).toContain(
-      "@elizaos/app-core/components/character/CharacterEditor",
-    );
-    expect(stubText).toContain("@elizaos/app-core/state/types");
-    expect(stubText).toContain(
-      "@elizaos/app-core/components/chat/widgets/types",
-    );
+    expect(mainText).toContain("@elizaos/ui/browser");
+    expect(stubText).toContain("type InventoryChainFilters");
+    expect(stubText).toContain("type ChatSidebarWidgetDefinition");
     expect(mainText).not.toContain("@elizaos/ui/components/");
     expect(stubText).not.toContain("@elizaos/ui/state/");
     expect(stubText).not.toContain("@elizaos/ui/components/");

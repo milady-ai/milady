@@ -312,6 +312,20 @@ function resolveLocalUiAliases(): Alias[] {
   ];
 }
 
+function resolvePackageModeUiCompatAliases(): Alias[] {
+  if (hasLocalElizaWorkspace) return [];
+  return [
+    {
+      find: /^@elizaos\/ui\/browser$/,
+      replacement: path.join(here, "src/elizaos-ui-browser-compat.tsx"),
+    },
+    {
+      find: /^@elizaos\/ui\/voice$/,
+      replacement: path.join(here, "src/elizaos-ui-voice-compat.ts"),
+    },
+  ];
+}
+
 function resolveLocalElizaAppAliases(): Alias[] {
   if (!hasLocalElizaWorkspace) return [];
 
@@ -2704,6 +2718,7 @@ export default defineConfig({
       },
       // Local source aliases are only installed when the eliza checkout exists.
       // Published-only builds should resolve normal @elizaos package exports.
+      ...resolvePackageModeUiCompatAliases(),
       ...resolveLocalUiAliases(),
       ...resolveLocalSharedAliases(),
       ...resolveLocalAppCoreAliases(),
