@@ -83,5 +83,11 @@
   "homepage.notice.cloud.agentReady": "agente listo: {{name}}",
   "homepage.notice.install.commandCopied": "Comando de instalación de {{label}} copiado.",
   "homepage.notice.local.stillProbing": "todavía buscando milady en local… dale un momento.",
-  "homepage.notice.local.notRunning": "no hay un milady local corriendo. instala abajo y luego abre la app de escritorio."
+  "homepage.notice.local.notRunning": "no hay un milady local corriendo. instala abajo y luego abre la app de escritorio.",
+  "homepage.nav.mainAriaLabel": "Navegación principal",
+  "homepage.nav.toggleMenu": "Abrir o cerrar menú",
+  "homepage.nav.dashboard": "PANEL",
+  "homepage.nav.docs": "DOCS",
+  "homepage.nav.releases": "VERSIONES",
+  "homepage.nav.download": "DESCARGAR"
 }

@@ -83,5 +83,11 @@
   "homepage.notice.cloud.agentReady": "agent ready: {{name}}",
   "homepage.notice.install.commandCopied": "{{label}} install command copied.",
   "homepage.notice.local.stillProbing": "still looking for local milady… give it a moment.",
-  "homepage.notice.local.notRunning": "no local milady running. install below, then start the desktop app."
+  "homepage.notice.local.notRunning": "no local milady running. install below, then start the desktop app.",
+  "homepage.nav.mainAriaLabel": "Main navigation",
+  "homepage.nav.toggleMenu": "Toggle navigation menu",
+  "homepage.nav.dashboard": "DASHBOARD",
+  "homepage.nav.docs": "DOCS",
+  "homepage.nav.releases": "RELEASES",
+  "homepage.nav.download": "DOWNLOAD"
 }

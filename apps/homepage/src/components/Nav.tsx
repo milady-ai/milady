@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { releaseData } from "../generated/release-data";
+import { useT } from "../providers/I18nProvider";
 
 const LATEST_RELEASE_URL =
   "https://github.com/milady-ai/milady/releases/latest";
 
 export function Nav() {
   const location = useLocation();
+  const t = useT();
   const [mobileOpen, setMobileOpen] = useState(false);
   const isOnDashboard = location.pathname === "/dashboard";
   const isOnDocs =
@@ -14,7 +16,9 @@ export function Nav() {
 
   return (
     <nav
-      aria-label="Main navigation"
+      aria-label={t("homepage.nav.mainAriaLabel", {
+        defaultValue: "Main navigation",
+      })}
       className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-dark/95 backdrop-blur-md"
       style={{ paddingTop: "var(--safe-area-top, 0px)" }}
     >
@@ -39,7 +43,7 @@ export function Nav() {
                   : "text-text-muted hover:text-text-light"
               }`}
           >
-            DASHBOARD
+            {t("homepage.nav.dashboard", { defaultValue: "DASHBOARD" })}
             {isOnDashboard && (
               <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand" />
             )}
@@ -54,7 +58,7 @@ export function Nav() {
                   : "text-text-muted hover:text-text-light"
               }`}
           >
-            DOCS
+            {t("homepage.nav.docs", { defaultValue: "DOCS" })}
             {isOnDocs && (
               <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand" />
             )}
@@ -67,7 +71,7 @@ export function Nav() {
             className="ml-2 px-3 py-1.5 font-mono text-[11px] tracking-wide uppercase text-brand border border-brand/40
               hover:bg-brand hover:text-dark hover:border-brand transition-all duration-150"
           >
-            RELEASES
+            {t("homepage.nav.releases", { defaultValue: "RELEASES" })}
           </a>
 
           {/* Version indicator */}
@@ -85,7 +89,9 @@ export function Nav() {
             type="button"
             onClick={() => setMobileOpen((open) => !open)}
             aria-expanded={mobileOpen}
-            aria-label="Toggle navigation menu"
+            aria-label={t("homepage.nav.toggleMenu", {
+              defaultValue: "Toggle navigation menu",
+            })}
             className="inline-flex h-11 w-11 items-center justify-center border border-border text-text-light 
               hover:bg-surface transition-colors"
           >
@@ -127,7 +133,7 @@ export function Nav() {
             }`}
             onClick={() => setMobileOpen(false)}
           >
-            DASHBOARD
+            {t("homepage.nav.dashboard", { defaultValue: "DASHBOARD" })}
           </Link>
 
           <Link
@@ -139,7 +145,7 @@ export function Nav() {
             }`}
             onClick={() => setMobileOpen(false)}
           >
-            DOCS
+            {t("homepage.nav.docs", { defaultValue: "DOCS" })}
           </Link>
 
           <div className="pt-3 border-t border-border-subtle">
@@ -151,7 +157,9 @@ export function Nav() {
                 text-brand bg-brand/5 border border-brand/20"
               onClick={() => setMobileOpen(false)}
             >
-              <span>DOWNLOAD</span>
+              <span>
+                {t("homepage.nav.download", { defaultValue: "DOWNLOAD" })}
+              </span>
               <span className="text-[10px] text-text-subtle">
                 {releaseData.release.tagName}
               </span>

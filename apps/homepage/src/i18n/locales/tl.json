@@ -83,5 +83,11 @@
   "homepage.notice.cloud.agentReady": "handa na ang agent: {{name}}",
   "homepage.notice.install.commandCopied": "kinopya ang install command ng {{label}}.",
   "homepage.notice.local.stillProbing": "naghahanap pa rin ng local milady… sandali lang.",
-  "homepage.notice.local.notRunning": "walang tumatakbong local milady. mag-install sa baba, tapos buksan ang desktop app."
+  "homepage.notice.local.notRunning": "walang tumatakbong local milady. mag-install sa baba, tapos buksan ang desktop app.",
+  "homepage.nav.mainAriaLabel": "Pangunahing navigation",
+  "homepage.nav.toggleMenu": "I-toggle ang menu ng navigation",
+  "homepage.nav.dashboard": "DASHBOARD",
+  "homepage.nav.docs": "DOCS",
+  "homepage.nav.releases": "RELEASES",
+  "homepage.nav.download": "I-DOWNLOAD"
 }

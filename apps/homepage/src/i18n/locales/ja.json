@@ -83,5 +83,11 @@
   "homepage.notice.cloud.agentReady": "agent の準備ができました: {{name}}",
   "homepage.notice.install.commandCopied": "{{label}} のインストールコマンドをコピーしました。",
   "homepage.notice.local.stillProbing": "ローカルの milady を探しています… 少々お待ちください。",
-  "homepage.notice.local.notRunning": "ローカルで milady が動いていません。下のインストール手順を実行してからデスクトップアプリを起動してください。"
+  "homepage.notice.local.notRunning": "ローカルで milady が動いていません。下のインストール手順を実行してからデスクトップアプリを起動してください。",
+  "homepage.nav.mainAriaLabel": "メインナビゲーション",
+  "homepage.nav.toggleMenu": "ナビゲーションメニューを開閉",
+  "homepage.nav.dashboard": "ダッシュボード",
+  "homepage.nav.docs": "ドキュメント",
+  "homepage.nav.releases": "リリース",
+  "homepage.nav.download": "ダウンロード"
 }

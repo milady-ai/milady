@@ -83,5 +83,11 @@
   "homepage.notice.cloud.agentReady": "에이전트 준비됨: {{name}}",
   "homepage.notice.install.commandCopied": "{{label}} 설치 명령을 복사했어요.",
   "homepage.notice.local.stillProbing": "아직 로컬 milady를 찾는 중이에요… 잠시만요.",
-  "homepage.notice.local.notRunning": "실행 중인 로컬 milady가 없어요. 아래에서 설치한 다음 데스크톱 앱을 켜요."
+  "homepage.notice.local.notRunning": "실행 중인 로컬 milady가 없어요. 아래에서 설치한 다음 데스크톱 앱을 켜요.",
+  "homepage.nav.mainAriaLabel": "메인 내비게이션",
+  "homepage.nav.toggleMenu": "메뉴 열기/닫기",
+  "homepage.nav.dashboard": "대시보드",
+  "homepage.nav.docs": "문서",
+  "homepage.nav.releases": "릴리스",
+  "homepage.nav.download": "다운로드"
 }

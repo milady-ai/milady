@@ -83,5 +83,11 @@
   "homepage.notice.cloud.agentReady": "agent đã sẵn sàng: {{name}}",
   "homepage.notice.install.commandCopied": "đã sao chép lệnh cài {{label}}.",
   "homepage.notice.local.stillProbing": "vẫn đang tìm milady local… đợi một xíu nhé.",
-  "homepage.notice.local.notRunning": "không có milady local nào đang chạy. cài bên dưới rồi mở desktop app."
+  "homepage.notice.local.notRunning": "không có milady local nào đang chạy. cài bên dưới rồi mở desktop app.",
+  "homepage.nav.mainAriaLabel": "Điều hướng chính",
+  "homepage.nav.toggleMenu": "Bật/tắt menu điều hướng",
+  "homepage.nav.dashboard": "BẢNG ĐIỀU KHIỂN",
+  "homepage.nav.docs": "TÀI LIỆU",
+  "homepage.nav.releases": "PHIÊN BẢN",
+  "homepage.nav.download": "TẢI XUỐNG"
 }

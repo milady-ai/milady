@@ -83,5 +83,11 @@
   "homepage.notice.cloud.agentReady": "agent 已就绪：{{name}}",
   "homepage.notice.install.commandCopied": "已复制 {{label}} 的安装命令。",
   "homepage.notice.local.stillProbing": "还在找本地的 milady…再等一下。",
-  "homepage.notice.local.notRunning": "本地没有运行中的 milady。在下方安装，然后启动桌面 app。"
+  "homepage.notice.local.notRunning": "本地没有运行中的 milady。在下方安装，然后启动桌面 app。",
+  "homepage.nav.mainAriaLabel": "主导航",
+  "homepage.nav.toggleMenu": "切换导航菜单",
+  "homepage.nav.dashboard": "控制台",
+  "homepage.nav.docs": "文档",
+  "homepage.nav.releases": "版本",
+  "homepage.nav.download": "下载"
 }
