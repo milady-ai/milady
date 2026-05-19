@@ -206,19 +206,6 @@ function resolveFirstLocalPackageSource(packageName, sourceRelCandidates) {
   return null;
 }
 
-function linkOptionalLocalPackageFromCandidates(
-  packageName,
-  sourceRelCandidates,
-  targets,
-) {
-  const sourceRel = resolveFirstLocalPackageSource(
-    packageName,
-    sourceRelCandidates,
-  );
-  if (!sourceRel) return;
-  linkLocalPackage(packageName, sourceRel, targets);
-}
-
 function discoverNativePluginPackages() {
   const pluginsDir = path.join(repoRoot, "eliza", "plugins");
   if (!fs.existsSync(pluginsDir)) {
@@ -616,11 +603,10 @@ for (const [packageName, packageDir] of nativePluginPackages) {
   if (!sourceRel) {
     continue;
   }
-  linkLocalPackage(
-    packageName,
-    sourceRel,
-    [`node_modules/${packageName}`, `apps/app/node_modules/${packageName}`],
-  );
+  linkLocalPackage(packageName, sourceRel, [
+    `node_modules/${packageName}`,
+    `apps/app/node_modules/${packageName}`,
+  ]);
   linkedNativePluginSources.push([packageName, sourceRel]);
 }
 

@@ -50,6 +50,14 @@
       "@elizaos/skills": ["./node_modules/@elizaos/skills"],
       "@elizaos/skills/*": ["./node_modules/@elizaos/skills/*"],
       "@elizaos/ui": ["./node_modules/@elizaos/ui"],
+      "@elizaos/ui/browser": [
+        "./eliza/packages/ui/src/browser.ts",
+        "./node_modules/@elizaos/ui/dist/browser.d.ts"
+      ],
+      "@elizaos/ui/voice": [
+        "./eliza/packages/ui/src/voice/index.ts",
+        "./node_modules/@elizaos/ui/dist/voice/index.d.ts"
+      ],
       "@elizaos/ui/*": ["./node_modules/@elizaos/ui/*"],
       "react": ["./node_modules/@types/react/index.d.ts"],
       "react/jsx-runtime": ["./node_modules/@types/react/jsx-runtime.d.ts"],

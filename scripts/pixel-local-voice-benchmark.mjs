@@ -650,7 +650,7 @@ function redactSensitiveLogText(text) {
     .replace(/\bBearer\s+[A-Za-z0-9._~+/-]+=*/g, "Bearer ***REDACTED***")
     .replace(
       /("Authorization"\s*:\s*")Bearer\s+[^"]+(")/gi,
-      '$1Bearer ***REDACTED***$2',
+      "$1Bearer ***REDACTED***$2",
     )
     .replace(
       /('Authorization'\s*:\s*')Bearer\s+[^']+(')/gi,

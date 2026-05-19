@@ -1,8 +1,10 @@
 import { existsSync } from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const require = createRequire(import.meta.url);
+const configDir = path.dirname(fileURLToPath(import.meta.url));
 
 const env = {
   NODE_ENV: "production",
@@ -38,6 +40,15 @@ function explicitAppCoreEntry(localRelativePath) {
   return entry;
 }
 
+function packageDistEntry(packageRoot, localRelativePath) {
+  return path.join(
+    packageRoot,
+    localRelativePath
+      .replace(/^src\//, "dist/")
+      .replace(/\.[cm]?tsx?$/, ".js"),
+  );
+}
+
 function appCoreEntry(subpath, localRelativePath) {
   const explicitEntry = explicitAppCoreEntry(localRelativePath);
   if (explicitEntry) {
@@ -45,6 +56,7 @@ function appCoreEntry(subpath, localRelativePath) {
   }
 
   const localPath = path.join(
+    configDir,
     "eliza",
     "packages",
     "app-core",
@@ -61,11 +73,7 @@ function appCoreEntry(subpath, localRelativePath) {
   } catch (error) {
     const packageJsonPath = require.resolve("@elizaos/app-core/package.json");
     const packageRoot = path.dirname(packageJsonPath);
-    const packageEntry = path.join(
-      packageRoot,
-      "packages/app-core",
-      localRelativePath.replace(/\.[cm]?tsx?$/, ".js"),
-    );
+    const packageEntry = packageDistEntry(packageRoot, localRelativePath);
     if (existsSync(packageEntry)) {
       return packageEntry;
     }

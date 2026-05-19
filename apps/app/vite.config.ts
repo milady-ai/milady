@@ -245,6 +245,14 @@ function resolveLocalUiAliases(): Alias[] {
       replacement: path.join(uiPkgRoot, "src/index.ts"),
     },
     {
+      find: /^@elizaos\/ui\/browser$/,
+      replacement: path.join(uiPkgRoot, "src/browser.ts"),
+    },
+    {
+      find: /^@elizaos\/ui\/voice$/,
+      replacement: path.join(uiPkgRoot, "src/voice/index.ts"),
+    },
+    {
       find: /^@elizaos\/ui\/components\/ui\/(.*)$/,
       replacement: `${uiPkgRoot}/src/components/ui/$1.tsx`,
       customResolver: resolveExistingUiSourceModule,
@@ -460,14 +468,6 @@ function resolveLocalAppCoreAliases(): Alias[] {
   const agentRootEntry = appCoreSrcRoot
     ? elizaosAgentBrowserStubEntry
     : emptyNodeModuleEntry;
-  const sharedDistEntry = path.join(
-    localElizaRoot,
-    "packages/shared/dist/index.js",
-  );
-  const sharedDist = fs.existsSync(sharedDistEntry) ? sharedDistEntry : null;
-  const sharedDistDir = sharedDist
-    ? path.join(localElizaRoot, "packages/shared/dist")
-    : null;
   const packageAgnosticAliases: Alias[] = [
     {
       find: /^@elizaos\/agent$/,
@@ -897,25 +897,6 @@ function resolveExistingUiSourceModule(id: string) {
   }
 
   return id;
-}
-
-function resolveAppCoreWithUiFallback(id: string) {
-  const appCoreCandidate = resolveExistingUiSourceModule(id);
-  if (fs.existsSync(appCoreCandidate)) {
-    return appCoreCandidate;
-  }
-
-  if (appCoreSrcRoot && uiPkgRoot && id.startsWith(appCoreSrcRoot)) {
-    const relativePath = path.relative(appCoreSrcRoot, id);
-    const uiCandidate = resolveExistingUiSourceModule(
-      path.join(uiPkgRoot, "src", relativePath),
-    );
-    if (fs.existsSync(uiCandidate)) {
-      return uiCandidate;
-    }
-  }
-
-  return appCoreCandidate;
 }
 
 /**

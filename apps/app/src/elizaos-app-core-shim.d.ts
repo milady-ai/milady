@@ -48,6 +48,41 @@ declare module "@elizaos/app-core" {
   export interface CharacterCatalogData {
     [key: string]: unknown;
   }
+  type OnboardingServerTarget =
+    | ""
+    | "local"
+    | "remote"
+    | "elizacloud"
+    | "elizacloud-hybrid";
+  export interface BuildOnboardingConnectionArgs {
+    onboardingServerTarget?: OnboardingServerTarget;
+    onboardingCloudApiKey: string;
+    onboardingProvider: string;
+    onboardingApiKey: string;
+    omitRuntimeProvider?: boolean;
+    onboardingVoiceProvider: string;
+    onboardingVoiceApiKey: string;
+    onboardingPrimaryModel: string;
+    onboardingOpenRouterModel: string;
+    onboardingRemoteConnected: boolean;
+    onboardingRemoteApiBase: string;
+    onboardingRemoteToken: string;
+    onboardingNanoModel?: string;
+    onboardingSmallModel?: string;
+    onboardingMediumModel?: string;
+    onboardingLargeModel?: string;
+    onboardingMegaModel?: string;
+    onboardingResponseHandlerModel?: string;
+    onboardingActionPlannerModel?: string;
+    onboardingFeatureTelegram?: boolean;
+    onboardingFeatureDiscord?: boolean;
+    onboardingFeaturePhone?: boolean;
+    onboardingFeatureCrypto?: boolean;
+    onboardingFeatureBrowser?: boolean;
+    onboardingFeatureComputerUse?: boolean;
+    onboardingUseLocalEmbeddings?: boolean;
+    [key: string]: unknown;
+  }
   export interface CompanionSceneStatus {
     [key: string]: unknown;
   }
