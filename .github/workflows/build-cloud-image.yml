@@ -205,12 +205,29 @@ jobs:
             echo "tailwindcss already present in app-core/node_modules"
           fi
 
+      # Link local @elizaos workspace packages into node_modules. The vite build
+      # below imports symbols from @elizaos/ui (createVoiceCapture, VoicePill,
+      # VoicePillMessage, VoiceCaptureHandle) that ship in the repo-local
+      # eliza/packages/ui but have not landed on the npm alpha dist-tag yet
+      # (currently @elizaos/ui@2.0.0-alpha.537). Without this step, vite resolves
+      # @elizaos/ui from npm and the build fails with
+      # `"createVoiceCapture" is not exported by "@elizaos/ui"`. The linker
+      # symlinks every local @elizaos/* workspace package over the npm-installed
+      # copy and rewrites `exports` to point at TS source when dist is absent.
+      - name: Link local @elizaos workspace packages
+        run: node eliza/packages/app-core/scripts/link-docker-local-app-packages.mjs
+
+      # MILADY_FORCE_LOCAL_UPSTREAMS=1 forces apps/app/vite.config.ts to treat
+      # the freshly-linked eliza/ checkout as the source of truth for the
+      # @elizaos/* aliases. Without this, the config falls back to its
+      # auto-detect heuristic and may resolve @elizaos/ui from npm.
       - name: Build UI (vite)
         run: |
           cd apps/app
           bun run build:web
         env:
           NODE_ENV: production
+          MILADY_FORCE_LOCAL_UPSTREAMS: "1"
 
       - name: Determine version
         id: version

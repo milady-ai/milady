@@ -42,6 +42,9 @@ import {
   installForceFreshOnboardingClientPatch,
   installLocalProviderCloudPreferencePatch,
 } from "@elizaos/app-core";
+// Pill / voice-capture symbols live in upstream @elizaos/ui source but are
+// not yet published on the `alpha` dist-tag. Route through the Milady-owned
+// runtime so package-mode builds stay green without private UI subpath imports.
 import {
   createVoiceCapture,
   type VoiceCaptureHandle,
@@ -250,6 +253,23 @@ function isDesktopPlatform(): boolean {
 }
 
 const windowShellRoute = resolveWindowShellRoute();
+
+// `isPillWindowShell` is not yet exported from the published @elizaos/app-core
+// alpha. The pill window is launched with `?shell=pill` by the Electrobun
+// host, so we detect that locally until the upstream helper ships.
+function isPillWindowShellRoute(route: unknown): boolean {
+  if (route && typeof route === "object") {
+    const kind = (route as { kind?: unknown }).kind;
+    if (typeof kind === "string" && kind === "pill") return true;
+  }
+  if (typeof window === "undefined") return false;
+  try {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("shell") === "pill";
+  } catch {
+    return false;
+  }
+}
 
 /**
  * Adds `eliza-electrobun-frameless` for CSS `-webkit-app-region` (Chromium/CEF).
@@ -1644,7 +1664,7 @@ async function main(): Promise<void> {
     preSeedAndroidLocalRuntimeIfFresh();
   }
 
-  if (isPillWindowShell(windowShellRoute)) {
+  if (isPillWindowShellRoute(windowShellRoute)) {
     // Pill overlay window: minimal renderer that only mounts <VoicePill>.
     // No AppProvider, no chrome, no platform init — the pill is a standalone
     // OS-level overlay launched alongside the main shell from the Electrobun
