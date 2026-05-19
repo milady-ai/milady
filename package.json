@@ -215,7 +215,6 @@
     "@elizaos/plugin-elizacloud": "alpha",
     "@elizaos/plugin-google-genai": "alpha",
     "@elizaos/plugin-bluebubbles": "alpha",
-    "@elizaos/plugin-local-embedding": "alpha",
     "@elizaos/plugin-ollama": "alpha",
     "@elizaos/plugin-discord": "alpha",
     "@elizaos/plugin-openai": "alpha",
