@@ -531,6 +531,7 @@ jobs:
       # @elizaos/ui from npm and the build fails with
       # `"createVoiceCapture" is not exported by "@elizaos/ui"`.
       - name: Link local @elizaos workspace packages
+        if: ${{ hashFiles('eliza/package.json') != '' }}
         run: node eliza/packages/app-core/scripts/link-docker-local-app-packages.mjs
       # MILADY_FORCE_LOCAL_UPSTREAMS=1 forces apps/app/vite.config.ts to treat
       # the freshly-linked eliza/ checkout as the source of truth for the
@@ -839,6 +840,7 @@ jobs:
       # @elizaos/ui from npm and the build fails with
       # `"createVoiceCapture" is not exported by "@elizaos/ui"`.
       - name: Link local @elizaos workspace packages
+        if: ${{ hashFiles('eliza/package.json') != '' }}
         run: node eliza/packages/app-core/scripts/link-docker-local-app-packages.mjs
       # MILADY_FORCE_LOCAL_UPSTREAMS=1 forces apps/app/vite.config.ts to treat
       # the freshly-linked eliza/ checkout as the source of truth for the
@@ -894,6 +896,7 @@ jobs:
       # @elizaos/ui from npm and the build fails with
       # `"createVoiceCapture" is not exported by "@elizaos/ui"`.
       - name: Link local @elizaos workspace packages
+        if: ${{ hashFiles('eliza/package.json') != '' }}
         run: node eliza/packages/app-core/scripts/link-docker-local-app-packages.mjs
       # MILADY_FORCE_LOCAL_UPSTREAMS=1 forces apps/app/vite.config.ts to treat
       # the freshly-linked eliza/ checkout as the source of truth for the

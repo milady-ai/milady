@@ -34,6 +34,26 @@ describe("CI bootstrap contract", () => {
     );
   });
 
+  it("guards local eliza package linker steps for package-mode jobs", () => {
+    for (const workflowName of fs
+      .readdirSync(".github/workflows")
+      .filter((entry) => /\.ya?ml$/.test(entry))) {
+      const text = workflow(workflowName);
+      const lines = text.split(/\r?\n/);
+      for (let index = 0; index < lines.length; index++) {
+        if (
+          !lines[index].includes("name: Link local @elizaos workspace packages")
+        ) {
+          continue;
+        }
+        const block = lines.slice(index, index + 5).join("\n");
+        expect(block, `${workflowName}:${index + 1}`).toContain(
+          "hashFiles('eliza/package.json') != ''",
+        );
+      }
+    }
+  });
+
   it("builds elizaOS core before bundled skills", () => {
     const ci = workflow("ci.yml");
     const coreBuild = "(cd eliza/packages/core && bun run build)";

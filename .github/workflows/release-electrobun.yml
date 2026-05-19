@@ -722,6 +722,7 @@ jobs:
       # step, vite resolves @elizaos/ui from npm and the build fails with
       # `"createVoiceCapture" is not exported by "@elizaos/ui"`.
       - name: Link local @elizaos workspace packages
+        if: ${{ hashFiles('eliza/package.json') != '' }}
         shell: bash
         run: node eliza/packages/app-core/scripts/link-docker-local-app-packages.mjs
 
