@@ -377,6 +377,17 @@ jobs:
       - name: Ensure avatar assets
         run: node eliza/packages/app-core/scripts/ensure-avatars.mjs
 
+      - name: Prepare Whisper model artifact
+        run: |
+          bash eliza/packages/app-core/platforms/electrobun/scripts/ensure-whisper-model.sh base.en
+
+      - name: Upload Whisper model artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: whisper-model-base-en
+          path: ~/.cache/eliza/whisper/ggml-base.en.bin
+          if-no-files-found: error
+
       - name: Build core dist (server bundle)
         env:
           MILADY_ELIZA_SOURCE: local
@@ -679,6 +690,18 @@ jobs:
 
       - name: Align package-mode agent pins
         run: node scripts/align-eliza-agent-package-pins.mjs
+
+      - name: Download Whisper model artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: whisper-model-base-en
+          path: ${{ runner.temp }}/whisper-model
+
+      - name: Seed Whisper model cache
+        run: |
+          mkdir -p "$HOME/.cache/eliza/whisper"
+          cp "$RUNNER_TEMP/whisper-model/ggml-base.en.bin" "$HOME/.cache/eliza/whisper/ggml-base.en.bin"
+          test -s "$HOME/.cache/eliza/whisper/ggml-base.en.bin"
 
       - name: Stage desktop bundle inputs
         run: |

@@ -66,8 +66,11 @@ describe("package mode aliases", () => {
     expect(stubText).toContain(
       "@elizaos/app-core/components/chat/widgets/types",
     );
-    expect(mainText).toContain('from "@elizaos/ui";');
+    expect(mainText).toContain('from "./voice-pill-runtime";');
+    expect(mainText).toContain('from "./host-window-routing";');
+    expect(mainText).not.toContain('from "@elizaos/ui";');
     expect(mainText).not.toContain("@elizaos/ui/components/");
+    expect(stubText).toContain("type PromptOptions = Record<string, unknown>");
     expect(stubText).not.toContain("@elizaos/ui/state/");
     expect(stubText).not.toContain("@elizaos/ui/components/");
   });
@@ -170,11 +173,16 @@ describe("package mode aliases", () => {
       path.join(appRoot, "vite.config.ts"),
       "utf8",
     );
+    const tsconfig = JSON.parse(
+      fs.readFileSync(path.join(appRoot, "tsconfig.json"), "utf8"),
+    );
 
     expect(viteConfigText).toContain('requireResolve("react")');
     expect(viteConfigText).toContain('requireResolve("react/jsx-runtime")');
     expect(viteConfigText).toContain("find: /^react-dom\\/client$/");
     expect(viteConfigText).toContain("replacement: reactDomClientEntry");
+    expect(tsconfig.compilerOptions.paths.react).toBeUndefined();
+    expect(tsconfig.compilerOptions.paths["react/jsx-runtime"]).toBeUndefined();
   });
 
   it("keeps the local app-core browser surface aligned with app imports", () => {
