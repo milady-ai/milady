@@ -440,6 +440,13 @@ linkRootPackage("drizzle-orm", [
   "eliza/plugins/plugin-sql/node_modules/drizzle-orm",
 ]);
 
+linkLocalPackage("@elizaos/contracts", "eliza/packages/contracts", [
+  "node_modules/@elizaos/contracts",
+  "eliza/node_modules/@elizaos/contracts",
+  "eliza/packages/core/node_modules/@elizaos/contracts",
+  "eliza/packages/shared/node_modules/@elizaos/contracts",
+]);
+
 linkLocalPackage("@elizaos/core", "eliza/packages/core", [
   "node_modules/@elizaos/core",
   "eliza/node_modules/@elizaos/core",
@@ -627,7 +634,13 @@ linkOptionalLocalPackage(
   ],
 );
 
+ensureBuiltLocalPackage("@elizaos/contracts", "eliza/packages/contracts", [
+  "dist/index.js",
+  "dist/index.d.ts",
+]);
+
 ensureBuiltLocalPackage("@elizaos/core", "eliza/packages/core", [
+  "src/i18n/generated/validation-keyword-data.ts",
   "dist/index.node.js",
   "dist/index.d.ts",
 ]);
