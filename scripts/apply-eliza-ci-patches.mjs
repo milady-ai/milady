@@ -214,6 +214,40 @@ function patchCoreStateTypes(raw) {
   return raw.replace('format: "JSON";', 'format: "JSON" | "TOON";');
 }
 
+function patchUiAppContextSingleton(raw) {
+  if (raw.includes("__ELIZAOS_UI_APP_CONTEXT__")) {
+    return raw;
+  }
+
+  const next = raw.replace(
+    /import \{ createContext, useContext \} from "react";\r?\nimport type \{ AppContextValue \} from "\.\/types";\r?\n\r?\nexport const AppContext = createContext<AppContextValue \| null>\(null\);\r?\n/,
+    `import { createContext, useContext } from "react";
+import type { AppContextValue } from "./types";
+
+type AppContextObject = ReturnType<
+  typeof createContext<AppContextValue | null>
+>;
+
+const appContextGlobal = globalThis as typeof globalThis & {
+  __ELIZAOS_UI_APP_CONTEXT__?: AppContextObject;
+};
+
+export const AppContext =
+  appContextGlobal.__ELIZAOS_UI_APP_CONTEXT__ ??
+  (appContextGlobal.__ELIZAOS_UI_APP_CONTEXT__ =
+    createContext<AppContextValue | null>(null));
+`,
+  );
+
+  if (next === raw) {
+    throw new Error(
+      "Could not patch UI AppContext singleton: expected AppContext declaration was not found",
+    );
+  }
+
+  return next;
+}
+
 function patchCoreTsconfigLocalPrompts(raw) {
   if (raw.includes('"@elizaos/prompts": ["../prompts/src/index.ts"]')) {
     return raw;
@@ -2478,6 +2512,12 @@ function applyReleaseSourcePatches() {
     path.join(elizaDir, "packages", "core", "src", "types", "state.ts"),
     patchCoreStateTypes,
     "core structured failure format type",
+  );
+
+  replaceFileText(
+    path.join(elizaDir, "packages", "ui", "src", "state", "useApp.ts"),
+    patchUiAppContextSingleton,
+    "UI AppContext singleton",
   );
 
   replaceFileText(

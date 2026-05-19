@@ -16,6 +16,41 @@ import {
 
 const windowsTest = process.platform === "win32" ? test : null;
 
+interface PackagedRendererSurfaceProbe {
+  state: "blank" | "ready" | "error";
+  bodyText: string;
+  errorText: string | null;
+  rootChildCount: number;
+  url: string;
+}
+
+function getPackagedRendererSurfaceProbeScript(): string {
+  return `(() => {
+    const root = document.getElementById("root");
+    const bodyText = (document.body?.innerText ?? "").trim();
+    const normalizedText = bodyText.replace(/\\s+/g, " ");
+    const hasErrorBoundary = normalizedText.includes("Something went wrong");
+    const hasAppContextError = normalizedText.includes(
+      "useApp must be used within AppProvider",
+    );
+    const state = hasErrorBoundary || hasAppContextError
+      ? "error"
+      : normalizedText.length > 0
+        ? "ready"
+        : "blank";
+
+    return {
+      state,
+      bodyText: normalizedText.slice(0, 1200),
+      errorText: hasErrorBoundary || hasAppContextError
+        ? normalizedText.slice(0, 1200)
+        : null,
+      rootChildCount: root?.childElementCount ?? 0,
+      url: window.location.href,
+    };
+  })()`;
+}
+
 windowsTest?.(
   "packaged Windows app bootstraps the renderer against the external API override",
   async () => {
@@ -72,6 +107,38 @@ windowsTest?.(
         );
       }
 
+      let lastSurfaceProbe: PackagedRendererSurfaceProbe | null = null;
+      try {
+        await expect
+          .poll(
+            async () => {
+              lastSurfaceProbe =
+                await harness.eval<PackagedRendererSurfaceProbe>(
+                  getPackagedRendererSurfaceProbeScript(),
+                );
+              return lastSurfaceProbe.state;
+            },
+            {
+              timeout: process.env.CI ? 180_000 : 90_000,
+              message:
+                "Expected the packaged Windows renderer to render without its error boundary",
+            },
+          )
+          .toBe("ready");
+      } catch (error) {
+        throw new Error(
+          [
+            "Expected the packaged Windows renderer to render without its error boundary",
+            `Last renderer surface probe: ${JSON.stringify(lastSurfaceProbe)}`,
+            error instanceof Error ? error.message : String(error),
+          ].join("\n"),
+        );
+      }
+
+      expect(lastSurfaceProbe?.rootChildCount ?? 0).toBeGreaterThan(0);
+      expect(lastSurfaceProbe?.errorText ?? "").not.toMatch(
+        /Something went wrong|useApp must be used within AppProvider/i,
+      );
       expect(api.requests.length).toBeGreaterThan(0);
       expect(
         `${harness.logs?.stdout.join("") ?? ""}\n${harness.logs?.stderr.join("") ?? ""}`,

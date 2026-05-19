@@ -110,6 +110,17 @@ describe("package mode aliases", () => {
     expect(patchScript).toContain("extractActionParamsTemplate");
   });
 
+  it("patches local-source UI AppContext to survive duplicate renderer module ids", () => {
+    const patchScript = fs.readFileSync(
+      path.resolve(appRoot, "../..", "scripts/apply-eliza-ci-patches.mjs"),
+      "utf8",
+    );
+
+    expect(patchScript).toContain("patchUiAppContextSingleton");
+    expect(patchScript).toContain("__ELIZAOS_UI_APP_CONTEXT__");
+    expect(patchScript).toContain("UI AppContext singleton");
+  });
+
   it("keeps generated native module proxy stubs compatible with WebKit invariants", () => {
     const viteConfigText = fs.readFileSync(
       path.join(appRoot, "vite.config.ts"),
@@ -154,6 +165,12 @@ describe("package mode aliases", () => {
     );
     expect(viteConfigText).toContain("resolveSharedSourceOrDist");
     expect(viteConfigText).toContain("@elizaos\\/ui\\/platform");
+    expect(viteConfigText).toContain("find: /^@elizaos\\/ui$/");
+    expect(viteConfigText).toContain('src/browser.ts"');
+    expect(viteConfigText).toContain("find: /^@elizaos\\/ui\\/state$/");
+    expect(viteConfigText).toContain("find: /^@elizaos\\/ui\\/state\\/(.*)$/");
+    expect(viteConfigText).toContain("function elizaUiStateSingletonPlugin");
+    expect(viteConfigText).toContain('name: "eliza-ui-state-singleton"');
     expect(viteConfigText).toContain("@elizaos\\/ui\\/(.+)");
     expect(viteConfigText).toContain("fs.statSync(candidate).isFile()");
     expect(viteConfigText).not.toContain("fs.existsSync(resolvedTarget)");
@@ -185,6 +202,7 @@ describe("package mode aliases", () => {
     expect(viteConfigText).toContain('requireResolve("react/jsx-runtime")');
     expect(viteConfigText).toContain("find: /^react-dom\\/client$/");
     expect(viteConfigText).toContain("replacement: reactDomClientEntry");
+    expect(viteConfigText).toContain('"@elizaos/ui"');
     expect(tsconfig.compilerOptions.paths.react).toBeUndefined();
     expect(tsconfig.compilerOptions.paths["react/jsx-runtime"]).toBeUndefined();
   });

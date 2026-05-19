@@ -245,7 +245,11 @@ function resolveLocalUiAliases(): Alias[] {
   return [
     {
       find: /^@elizaos\/ui$/,
-      replacement: path.join(uiPkgRoot, "src/index.ts"),
+      replacement: path.join(uiPkgRoot, "src/browser.ts"),
+    },
+    {
+      find: /^@elizaos\/ui\/browser$/,
+      replacement: path.join(uiPkgRoot, "src/browser.ts"),
     },
     {
       find: /^@elizaos\/ui\/api$/,
@@ -298,6 +302,15 @@ function resolveLocalUiAliases(): Alias[] {
     {
       find: /^@elizaos\/ui\/platform\/(.*)$/,
       replacement: `${uiPkgRoot}/src/platform/$1.ts`,
+      customResolver: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/state$/,
+      replacement: path.join(uiPkgRoot, "src/state/index.ts"),
+    },
+    {
+      find: /^@elizaos\/ui\/state\/(.*)$/,
+      replacement: `${uiPkgRoot}/src/state/$1.ts`,
       customResolver: resolveExistingUiSourceModule,
     },
     {
@@ -1025,6 +1038,51 @@ function resolveExistingUiSourceModule(id: string) {
   }
 
   return id;
+}
+
+function toModulePath(id: string): string {
+  return id.replace(/\\/g, "/");
+}
+
+function elizaUiStateSingletonPlugin(): Plugin {
+  const canonicalUseApp = uiPkgRoot
+    ? path.join(uiPkgRoot, "src/state/useApp.ts")
+    : null;
+  const canonicalUseAppModule = canonicalUseApp
+    ? toModulePath(canonicalUseApp)
+    : null;
+
+  return {
+    name: "eliza-ui-state-singleton",
+    enforce: "pre",
+    resolveId(id, importer) {
+      if (!canonicalUseApp || !canonicalUseAppModule) {
+        return null;
+      }
+
+      if (id === "@elizaos/ui/state/useApp") {
+        return canonicalUseApp;
+      }
+
+      const normalizedId = toModulePath(id);
+      if (
+        normalizedId !== canonicalUseAppModule &&
+        normalizedId.endsWith("/packages/ui/src/state/useApp")
+      ) {
+        return canonicalUseApp;
+      }
+
+      const normalizedImporter = importer ? toModulePath(importer) : "";
+      if (
+        (id === "./useApp" || id === "./useApp.ts") &&
+        normalizedImporter.includes("/packages/ui/src/state/")
+      ) {
+        return canonicalUseApp;
+      }
+
+      return null;
+    },
+  };
 }
 
 /**
@@ -2758,6 +2816,7 @@ export default defineConfig({
   plugins: [
     appShellMetadataPlugin(),
     companionAssetsPlugin(),
+    elizaUiStateSingletonPlugin(),
     elizaCoreBrowserEntryFallbackPlugin(),
     nativeModuleStubPlugin(),
     asyncLocalStoragePatchPlugin(),
@@ -2788,6 +2847,7 @@ export default defineConfig({
       "three",
       "@capacitor/core",
       "@elizaos/app-core",
+      "@elizaos/ui",
     ],
     alias: [
       // Bare Node built-in polyfills for browser — pathe provides ESM path,
