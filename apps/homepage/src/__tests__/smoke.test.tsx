@@ -29,5 +29,4 @@ describe("homepage", () => {
     expect(sessionStorage.getItem("test-key")).toBe("test-value");
     sessionStorage.removeItem("test-key");
   });
-
 });

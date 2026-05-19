@@ -332,6 +332,24 @@ jobs:
       - name: Reapply app-core package style patches
         run: node scripts/patch-elizaos-package-styles.mjs
 
+      # ── 8. Link local @elizaos workspace packages into node_modules ─────────
+      # The vite build below imports symbols from @elizaos/ui (createVoiceCapture,
+      # VoicePill, VoicePillMessage, VoiceCaptureHandle) that ship in the
+      # repo-local eliza/packages/ui but have not yet landed on the npm alpha
+      # dist-tag (currently @elizaos/ui@2.0.0-alpha.537). Without this step,
+      # vite resolves @elizaos/ui from npm and the build fails with
+      # `"createVoiceCapture" is not exported by "@elizaos/ui"`.
+      #
+      # Postinstall skips elizaOS's repo-local link step under
+      # MILADY_SKIP_LOCAL_UPSTREAMS=1, so we invoke the linker explicitly here
+      # — after the local eliza packages have been built — to symlink every
+      # local @elizaos/* workspace package over the npm-installed copy. The
+      # script also rewrites each package's `exports` to point at TS source
+      # when the dist artifact is absent, which is what lets vite import the
+      # ui package directly from `eliza/packages/ui/src`.
+      - name: Link local @elizaos workspace packages
+        run: node eliza/packages/app-core/scripts/link-docker-local-app-packages.mjs
+
       # ── 9. Build runtime (tsdown) ───────────────────────────────────────────
       - name: Build runtime (tsdown)
         run: |
@@ -411,6 +429,12 @@ jobs:
           } >> "$GITHUB_ENV"
 
       # ── 11. Build UI (vite) ─────────────────────────────────────────────────
+      # MILADY_FORCE_LOCAL_UPSTREAMS=1 forces apps/app/vite.config.ts to treat
+      # the freshly-linked eliza/ checkout as the source of truth for the
+      # @elizaos/* aliases (created by the "Link local @elizaos workspace
+      # packages" step above). Without this, the config falls back to the
+      # auto-detect heuristic and may resolve @elizaos/ui from npm, which
+      # lacks the createVoiceCapture / VoicePill exports used by main.tsx.
       - name: Build UI (vite)
         run: |
           cd apps/app
@@ -419,6 +443,7 @@ jobs:
           MILADY_RELEASE_TAG: ${{ steps.version.outputs.is_release == 'true' && steps.version.outputs.version || '' }}
           VITE_ASSET_BASE_URL: ${{ steps.version.outputs.is_release == 'true' && format('https://raw.githubusercontent.com/milady-ai/milady/{0}/apps/app/public/', steps.version.outputs.version) || '' }}
           NODE_ENV: production
+          MILADY_FORCE_LOCAL_UPSTREAMS: "1"
 
       # ── 12. Override dockerignore to include pre-built dist/ ────────────────
       # The repo's .dockerignore excludes dist/ to keep developer Docker builds clean.
