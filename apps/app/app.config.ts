@@ -18,8 +18,25 @@ interface AppWebConfig {
   shareImagePath: string;
 }
 
+// AospVariantConfig does not yet include propertyPrefix (Milady-specific
+// extension). Declaring a concrete interface avoids TypeScript 6 excess-
+// property-check issues with indexed-access type intersections.
+interface MiladyAospConfig {
+  productLunch: string;
+  vendorDir: string;
+  variantName: string;
+  productName: string;
+  packageName: string;
+  appName: string;
+  commonMk: string;
+  modelSourceLabel: string;
+  bootanimationAssetDir: string;
+  /** Milady-specific: system-property prefix (e.g. "miladyos"). Falls back to vendorDir when absent. */
+  propertyPrefix?: string;
+}
+
 type AppConfigWithAospPropertyPrefix = Omit<AppConfig, "aosp"> & {
-  aosp: NonNullable<AppConfig["aosp"]> & { propertyPrefix?: string };
+  aosp: MiladyAospConfig;
 };
 
 const config = {

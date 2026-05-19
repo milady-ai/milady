@@ -11,9 +11,9 @@
  * that executes the Bun binary with `agent-bundle.js android-bridge`.
  * MainActivity and RuntimeGate start that service through the Java
  * service / Agent bridge path. This renderer boot module must not call
- * `ElizaBunRuntime`: the stock Android APK does not implement that
- * Capacitor plugin, and invoking it logs
- * "ElizaBunRuntime plugin is not implemented on android".
+ * `ElizaBunRuntime`: stock Android APK builds do not require that
+ * Capacitor RPC plugin for local chat/status traffic, and the runtime
+ * transport is owned by the app-core client plus `@elizaos/capacitor-agent`.
  *
  * The exported shape stays intentionally narrow for existing imports:
  * Android chat/status traffic uses the app-core client and
@@ -22,25 +22,20 @@
  */
 
 import { Capacitor } from "@capacitor/core";
+import { MOBILE_RUNTIME_MODE_STORAGE_KEY } from "@elizaos/app-core";
 import { APP_LOG_PREFIX } from "./app-config";
+import type {
+  LocalAgentReply,
+  LocalAgentStatus,
+} from "./mobile-local-runtime-shared";
+
+export type { LocalAgentReply, LocalAgentStatus };
 
 const LOG_PREFIX = `${APP_LOG_PREFIX} [android-local-runtime]`;
 
 export const ANDROID_LOCAL_AGENT_LOG_EVENT = "android-local-agent-log";
 export const ANDROID_LOCAL_AGENT_ERROR_EVENT = "android-local-agent-error";
 export const ANDROID_LOCAL_AGENT_REPLY_EVENT = "android-local-agent-reply";
-
-export interface LocalAgentStatus {
-  ready: boolean;
-  model?: string;
-  tokensPerSecond?: number;
-  bridgeVersion?: string;
-}
-
-export interface LocalAgentReply {
-  reply: string;
-  conversationId?: string;
-}
 
 type RuntimeState =
   | { kind: "idle" }
@@ -50,11 +45,8 @@ let runtimeState: RuntimeState = { kind: "idle" };
 
 function isApplicable(): boolean {
   if (Capacitor.getPlatform() !== "android") return false;
-  // Read the same localStorage key that the mobile onboarding picker writes.
-  // Mirrors the key in eliza/packages/app-core/src/onboarding/mobile-runtime-mode.ts
-  // (MOBILE_RUNTIME_MODE_STORAGE_KEY = "eliza:mobile-runtime-mode").
   try {
-    const mode = localStorage.getItem("eliza:mobile-runtime-mode");
+    const mode = localStorage.getItem(MOBILE_RUNTIME_MODE_STORAGE_KEY);
     return mode === "local";
   } catch {
     return false;

@@ -1,5 +1,3 @@
-export { formatMoney } from "./format";
-
 export interface BillingSettingsResponse {
   settings?: {
     autoTopUp?: {

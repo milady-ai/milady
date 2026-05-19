@@ -730,10 +730,6 @@ export class CloudApiClient {
       throw new Error(`API ${primary.status}: /api/health`);
     }
 
-    if (primary.status !== 404) {
-      throw new Error(`API ${primary.status}: /api/health`);
-    }
-
     throw new Error(`API ${primary.status}: /api/health`);
   }
 
@@ -749,10 +745,7 @@ export class CloudApiClient {
   async getAgentStatus(options?: {
     signal?: AbortSignal;
   }): Promise<AgentStatus> {
-    // Our self-hosted agents expose /api/status (not /api/agent/status).
-    // Try /api/status first (returns agentName, state, uptime directly),
-    // then fall back to /api/agent/status for compatibility with older or
-    // partially implemented backends.
+    // Self-hosted agents expose /api/status (returns agentName, state, uptime).
     const fetchOpts: RequestInit = { method: "GET" };
     if (options?.signal) fetchOpts.signal = options.signal;
 
@@ -785,8 +778,6 @@ export class CloudApiClient {
         return makeUnauthenticatedAgentStatus();
       }
       // We have a token but it was rejected — that's a real auth failure.
-      throw new Error(`API ${primary.status}: /api/status`);
-    } else if (primary.status !== 404) {
       throw new Error(`API ${primary.status}: /api/status`);
     }
 
@@ -859,10 +850,6 @@ export class CloudApiClient {
     if (opts?.level) params.set("level", opts.level);
     const qs = params.toString();
     return this.request(`/api/logs${qs ? `?${qs}` : ""}`, { method: "GET" });
-  }
-
-  async getBilling(): Promise<object> {
-    return this.request("/api/billing", { method: "GET" });
   }
 
   // Wallet
