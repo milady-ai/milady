@@ -39,6 +39,83 @@ Options:
 `;
 }
 
+const VALUE_OPTION_HANDLERS = new Map([
+  ["--text", (args, value) => (args.text = value)],
+  ["--text-file", (args, value) => (args.textFile = value)],
+  [
+    "--repeat-text",
+    (args, value, flag) =>
+      (args.repeatText = parsePositiveInteger(value, flag)),
+  ],
+  [
+    "--max-tokens",
+    (args, value, flag) => (args.maxTokens = parsePositiveInteger(value, flag)),
+  ],
+  [
+    "--route",
+    (args, value) => {
+      if (value !== "direct" && value !== "agent") {
+        throw new Error(`--route must be direct or agent, got ${value}`);
+      }
+      args.route = value;
+    },
+  ],
+  ["--tts-text", (args, value) => (args.ttsText = value)],
+  [
+    "--agent-port",
+    (args, value, flag) => (args.agentPort = parsePort(value, flag)),
+  ],
+  ["--package", (args, value) => (args.packageName = value)],
+  ["--out", (args, value) => (args.out = value)],
+  ["--wav-out", (args, value) => (args.wavOut = value)],
+  ["--log-out", (args, value) => (args.logOut = value)],
+  [
+    "--log-bytes",
+    (args, value, flag) => (args.logBytes = parsePositiveInteger(value, flag)),
+  ],
+  [
+    "--logcat-lines",
+    (args, value, flag) =>
+      (args.logcatLines = parsePositiveInteger(value, flag)),
+  ],
+  ["--serial", (args, value) => (args.serial = value)],
+]);
+
+function readOptionValue(argv, index, flag) {
+  const value = argv[index + 1];
+  if (!value || value.startsWith("--")) {
+    throw new Error(`Missing value for ${flag}`);
+  }
+  return value;
+}
+
+function applyFlagOption(args, arg) {
+  if (arg === "--full-chat") {
+    args.route = "agent";
+    return true;
+  }
+  if (arg === "--skip-tts") {
+    args.skipTts = true;
+    return true;
+  }
+  if (arg === "--no-log-capture") {
+    args.logCapture = false;
+    return true;
+  }
+  return false;
+}
+
+function applyTextInputOptions(args) {
+  if (args.textFile) {
+    args.text = fs.readFileSync(path.resolve(args.textFile), "utf8");
+  }
+  if (args.repeatText > 1) {
+    args.text = Array.from({ length: args.repeatText }, () => args.text).join(
+      "\n\n",
+    );
+  }
+}
+
 function parseArgs(argv) {
   const args = {
     agentPort: DEFAULT_AGENT_PORT,
@@ -65,52 +142,20 @@ function parseArgs(argv) {
       process.stdout.write(usage());
       process.exit(0);
     }
-    const next = () => {
-      const value = argv[index + 1];
-      if (!value || value.startsWith("--")) {
-        throw new Error(`Missing value for ${arg}`);
-      }
-      index += 1;
-      return value;
-    };
-    if (arg === "--text") args.text = next();
-    else if (arg === "--text-file") args.textFile = next();
-    else if (arg === "--repeat-text") {
-      args.repeatText = parsePositiveInteger(next(), arg);
-    } else if (arg === "--max-tokens") {
-      args.maxTokens = parsePositiveInteger(next(), arg);
-    } else if (arg === "--full-chat") args.route = "agent";
-    else if (arg === "--route") {
-      const route = next();
-      if (route !== "direct" && route !== "agent") {
-        throw new Error(`--route must be direct or agent, got ${route}`);
-      }
-      args.route = route;
-    } else if (arg === "--tts-text") args.ttsText = next();
-    else if (arg === "--skip-tts") args.skipTts = true;
-    else if (arg === "--agent-port") args.agentPort = parsePort(next(), arg);
-    else if (arg === "--package") args.packageName = next();
-    else if (arg === "--out") args.out = next();
-    else if (arg === "--wav-out") args.wavOut = next();
-    else if (arg === "--log-out") args.logOut = next();
-    else if (arg === "--log-bytes") {
-      args.logBytes = parsePositiveInteger(next(), arg);
-    } else if (arg === "--logcat-lines") {
-      args.logcatLines = parsePositiveInteger(next(), arg);
-    } else if (arg === "--no-log-capture") args.logCapture = false;
-    else if (arg === "--serial") args.serial = next();
-    else throw new Error(`Unknown argument: ${arg}`);
+
+    if (applyFlagOption(args, arg)) {
+      continue;
+    }
+
+    const valueHandler = VALUE_OPTION_HANDLERS.get(arg);
+    if (!valueHandler) {
+      throw new Error(`Unknown argument: ${arg}`);
+    }
+    valueHandler(args, readOptionValue(argv, index, arg), arg);
+    index += 1;
   }
 
-  if (args.textFile) {
-    args.text = fs.readFileSync(path.resolve(args.textFile), "utf8");
-  }
-  if (args.repeatText > 1) {
-    args.text = Array.from({ length: args.repeatText }, () => args.text).join(
-      "\n\n",
-    );
-  }
-
+  applyTextInputOptions(args);
   return args;
 }
 
@@ -312,7 +357,7 @@ async function jsonRequest(baseUrl, token, pathname, options = {}) {
     headers: authHeaders(token, {
       Accept: "application/json",
       ...(options.body == null ? {} : { "Content-Type": "application/json" }),
-      ...(options.headers ?? {}),
+      ...options.headers,
     }),
     body: options.body == null ? undefined : JSON.stringify(options.body),
   });
