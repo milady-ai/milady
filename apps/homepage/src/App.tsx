@@ -17,6 +17,7 @@ import { openWebUI, openWebUIDirect } from "./lib/open-web-ui";
 import { CLOUD_BASE, LOCAL_AGENT_BASE } from "./lib/runtime-config";
 import { useAuth } from "./lib/useAuth";
 import { type Notice, useCloudOpenFlow } from "./lib/useCloudOpenFlow";
+import { useT } from "./providers/I18nProvider";
 
 function openExternal(url: string) {
   window.open(url, "_blank", "noopener,noreferrer");
@@ -140,9 +141,12 @@ function NoticeToast({ notice }: { notice: Notice | null }) {
 }
 
 function PlatformBar({ links }: { links: PlatformLink[] }) {
+  const t = useT();
   return (
     <nav
-      aria-label="Platform downloads"
+      aria-label={t("homepage.nav.platforms.aria", {
+        defaultValue: "Platform downloads",
+      })}
       className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 font-mono text-[12px] uppercase text-white/68 sm:gap-x-7 sm:text-[13px]"
     >
       {links.map((link) =>
@@ -151,7 +155,9 @@ function PlatformBar({ links }: { links: PlatformLink[] }) {
             key={link.label}
             type="button"
             onClick={link.onClick}
-            aria-label="Open Milady web"
+            aria-label={t("homepage.nav.platforms.openWeb.aria", {
+              defaultValue: "Open Milady web",
+            })}
             className="bg-transparent p-0 font-mono uppercase text-white/68 transition hover:text-brand"
           >
             {link.label}
@@ -173,6 +179,7 @@ function PlatformBar({ links }: { links: PlatformLink[] }) {
 }
 
 function MiladyLanding() {
+  const t = useT();
   const { isAuthenticated, token } = useAuth();
   const cloudClient = useMemo(
     () => (token ? new CloudClient(token) : null),
@@ -252,10 +259,17 @@ function MiladyLanding() {
 
       <main className="relative z-10 flex min-h-[100dvh] flex-col items-center justify-center px-4 py-28 text-center">
         <h1
-          aria-label={`AGENTS THAT ${phrase}`}
+          aria-label={t("homepage.landing.headline.aria", {
+            defaultValue: "AGENTS THAT {{phrase}}",
+            phrase,
+          })}
           className="flex max-w-[72rem] flex-col items-center text-[44px] font-black uppercase leading-[0.9] text-white sm:text-[72px] md:text-[104px] lg:text-[128px]"
         >
-          <span aria-hidden="true">AGENTS THAT</span>
+          <span aria-hidden="true">
+            {t("homepage.landing.headline.prefix", {
+              defaultValue: "AGENTS THAT",
+            })}
+          </span>
           <span
             key={phrase}
             aria-live="polite"
@@ -272,12 +286,22 @@ function MiladyLanding() {
             onClick={cloudPreparing ? handleCancelCloudOpen : handleOpenCloud}
             aria-label={
               cloudPreparing
-                ? "Cancel opening Milady in the cloud"
-                : "Open Milady in the cloud"
+                ? t("homepage.landing.cloudButton.aria.cancel", {
+                    defaultValue: "Cancel opening Milady in the cloud",
+                  })
+                : t("homepage.landing.cloudButton.aria.open", {
+                    defaultValue: "Open Milady in the cloud",
+                  })
             }
             className="min-h-[44px] border border-brand bg-brand px-6 py-3 font-mono text-[12px] font-semibold uppercase text-black transition hover:bg-white hover:text-black active:scale-[0.98]"
           >
-            {cloudPreparing ? "cancel opening" : "cloud"}
+            {cloudPreparing
+              ? t("homepage.landing.cloudButton.cancel", {
+                  defaultValue: "cancel opening",
+                })
+              : t("homepage.landing.cloudButton.open", {
+                  defaultValue: "cloud",
+                })}
           </button>
           <a
             href={GITHUB_LATEST_RELEASE_URL}
@@ -285,7 +309,9 @@ function MiladyLanding() {
             rel="noreferrer"
             className="min-h-[44px] border border-white/22 px-6 py-3 font-mono text-[12px] font-semibold uppercase text-white/82 transition hover:border-white hover:text-white active:scale-[0.98]"
           >
-            latest release
+            {t("homepage.landing.latestRelease", {
+              defaultValue: "latest release",
+            })}
           </a>
         </div>
 
@@ -301,7 +327,9 @@ function MiladyLanding() {
                   rel="noreferrer"
                   className="text-brand underline underline-offset-2"
                 >
-                  Open sign-in page manually
+                  {t("homepage.signIn.manualLink", {
+                    defaultValue: "Open sign-in page manually",
+                  })}
                 </a>
               </>
             ) : null}
@@ -317,7 +345,9 @@ function MiladyLanding() {
             rel="noreferrer"
             className="transition hover:text-brand"
           >
-            download releases
+            {t("homepage.footer.downloadReleases", {
+              defaultValue: "download releases",
+            })}
           </a>
           <a
             href={GITHUB_LATEST_RELEASE_URL}
@@ -325,7 +355,9 @@ function MiladyLanding() {
             rel="noreferrer"
             className="transition hover:text-brand"
           >
-            latest releases
+            {t("homepage.footer.latestReleases", {
+              defaultValue: "latest releases",
+            })}
           </a>
           <a
             href={checksumUrl}
@@ -333,7 +365,7 @@ function MiladyLanding() {
             rel="noreferrer"
             className="transition hover:text-brand"
           >
-            checksums
+            {t("homepage.footer.checksums", { defaultValue: "checksums" })}
           </a>
           <span className="hidden sm:inline">
             {releaseData.release.tagName}
@@ -347,6 +379,7 @@ function MiladyLanding() {
 }
 
 function MiladyControlHub() {
+  const t = useT();
   const { isAuthenticated } = useAuth();
   const {
     agents,
@@ -412,7 +445,10 @@ function MiladyControlHub() {
     if (!url) {
       setNotice({
         tone: "error",
-        text: `${agent.name} does not expose a control URL yet.`,
+        text: t("homepage.notice.agent.noControlUrl", {
+          defaultValue: "{{name}} does not expose a control URL yet.",
+          name: agent.name,
+        }),
       });
       return;
     }
@@ -424,7 +460,10 @@ function MiladyControlHub() {
     if (!url) {
       setNotice({
         tone: "error",
-        text: `${agent.name} does not expose a URL yet.`,
+        text: t("homepage.notice.agent.noUrl", {
+          defaultValue: "{{name}} does not expose a URL yet.",
+          name: agent.name,
+        }),
       });
       return;
     }
@@ -432,7 +471,10 @@ function MiladyControlHub() {
       await copyToClipboard(url);
       setNotice({
         tone: "success",
-        text: `${agent.name} URL copied.`,
+        text: t("homepage.notice.agent.urlCopied", {
+          defaultValue: "{{name}} URL copied.",
+          name: agent.name,
+        }),
       });
     } catch (copyError) {
       setNotice({
@@ -440,7 +482,9 @@ function MiladyControlHub() {
         text:
           copyError instanceof Error
             ? copyError.message
-            : "Clipboard copy failed.",
+            : t("homepage.notice.clipboard.failed", {
+                defaultValue: "Clipboard copy failed.",
+              }),
       });
     }
   };
@@ -449,7 +493,10 @@ function MiladyControlHub() {
     removeRemote(agent.id);
     setNotice({
       tone: "info",
-      text: `${agent.name} removed from saved remote connections.`,
+      text: t("homepage.notice.remote.forgotten", {
+        defaultValue: "{{name}} removed from saved remote connections.",
+        name: agent.name,
+      }),
     });
   };
 
@@ -457,20 +504,34 @@ function MiladyControlHub() {
     if (!agent.cloudAgentId) {
       setNotice({
         tone: "error",
-        text: `${agent.name} has no cloud id — cannot delete.`,
+        text: t("homepage.notice.cloud.noId", {
+          defaultValue: "{{name}} has no cloud id — cannot delete.",
+          name: agent.name,
+        }),
       });
       throw new Error("missing cloudAgentId");
     }
     try {
       await deleteCloudAgent(agent.cloudAgentId);
-      setNotice({ tone: "success", text: `${agent.name} deleted.` });
+      setNotice({
+        tone: "success",
+        text: t("homepage.notice.cloud.deleted", {
+          defaultValue: "{{name}} deleted.",
+          name: agent.name,
+        }),
+      });
     } catch (err) {
       setNotice({
         tone: "error",
         text:
           err instanceof Error
-            ? `delete failed: ${err.message}`
-            : "delete failed.",
+            ? t("homepage.notice.cloud.deleteFailedWithMessage", {
+                defaultValue: "delete failed: {{message}}",
+                message: err.message,
+              })
+            : t("homepage.notice.cloud.deleteFailed", {
+                defaultValue: "delete failed.",
+              }),
       });
       throw err;
     }
@@ -481,7 +542,10 @@ function MiladyControlHub() {
       await copyToClipboard(command);
       setNotice({
         tone: "success",
-        text: `${label} install command copied.`,
+        text: t("homepage.notice.install.commandCopied", {
+          defaultValue: "{{label}} install command copied.",
+          label,
+        }),
       });
     } catch (copyError) {
       setNotice({
@@ -489,7 +553,9 @@ function MiladyControlHub() {
         text:
           copyError instanceof Error
             ? copyError.message
-            : "Clipboard copy failed.",
+            : t("homepage.notice.clipboard.failed", {
+                defaultValue: "Clipboard copy failed.",
+              }),
       });
     }
   };
@@ -502,14 +568,20 @@ function MiladyControlHub() {
     if (isLocalProbing) {
       setNotice({
         tone: "info",
-        text: "still looking for local milady\u2026 give it a moment.",
+        text: t("homepage.notice.local.stillProbing", {
+          defaultValue:
+            "still looking for local milady\u2026 give it a moment.",
+        }),
       });
       return;
     }
     scrollToInstall();
     setNotice({
       tone: "info",
-      text: "no local milady running. install below, then start the desktop app.",
+      text: t("homepage.notice.local.notRunning", {
+        defaultValue:
+          "no local milady running. install below, then start the desktop app.",
+      }),
     });
   };
 
@@ -578,7 +650,9 @@ function MiladyControlHub() {
                   rel="noreferrer"
                   className="text-brand underline underline-offset-2"
                 >
-                  Open sign-in page manually
+                  {t("homepage.signIn.manualLink", {
+                    defaultValue: "Open sign-in page manually",
+                  })}
                 </a>
               </>
             ) : null}
@@ -611,7 +685,7 @@ function MiladyControlHub() {
               onClick={clearError}
               className="shrink-0 rounded-md border border-rose-200/25 px-2 py-0.5 font-mono text-[10px] lowercase tracking-wider text-rose-50 transition hover:border-rose-200/40"
             >
-              dismiss
+              {t("homepage.error.dismiss", { defaultValue: "dismiss" })}
             </button>
           </div>
         </div>
@@ -625,7 +699,10 @@ function MiladyControlHub() {
             setShowConnectModal(false);
             setNotice({
               tone: "success",
-              text: `${data.name} attached.`,
+              text: t("homepage.notice.remote.attached", {
+                defaultValue: "{{name}} attached.",
+                name: data.name,
+              }),
             });
           }}
         />
@@ -638,7 +715,10 @@ function MiladyControlHub() {
           onProvisioned={(result) => {
             setNotice({
               tone: "success",
-              text: `agent ready: ${result.name}`,
+              text: t("homepage.notice.cloud.agentReady", {
+                defaultValue: "agent ready: {{name}}",
+                name: result.name,
+              }),
             });
           }}
           onRefreshList={() => void refresh()}

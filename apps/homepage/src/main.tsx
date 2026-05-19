@@ -2,9 +2,11 @@ import "./styles.css";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
+import { DocumentMetaManager } from "./components/DocumentMetaManager";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { consumeUrlToken } from "./lib/auth";
 import { getSpaFallbackRedirectTarget } from "./lib/spa-fallback";
+import { I18nProvider } from "./providers/I18nProvider";
 import { AppRoutes } from "./router";
 
 const spaRedirectTarget = getSpaFallbackRedirectTarget(window.location);
@@ -20,9 +22,12 @@ if (!root) throw new Error("No root element");
 createRoot(root).render(
   <ErrorBoundary>
     <StrictMode>
-      <BrowserRouter>
-        <AppRoutes />
-      </BrowserRouter>
+      <I18nProvider>
+        <DocumentMetaManager />
+        <BrowserRouter>
+          <AppRoutes />
+        </BrowserRouter>
+      </I18nProvider>
     </StrictMode>
   </ErrorBoundary>,
 );

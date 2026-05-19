@@ -1,3 +1,5 @@
+import { useT } from "../../providers/I18nProvider";
+
 export type CloudOpenState = "idle" | "preparing";
 
 export interface BrandHeroProps {
@@ -19,17 +21,28 @@ export function BrandHero({
   onCancelCloud,
   onAttachRemote,
 }: BrandHeroProps) {
+  const t = useT();
   const cloudPreparing = cloudState === "preparing";
   const primaryLabel = isLocalReady
-    ? "open local"
+    ? t("homepage.hero.primary.openLocal", { defaultValue: "open local" })
     : isLocalProbing
-      ? "looking for local\u2026"
-      : "install milady";
+      ? t("homepage.hero.primary.lookingForLocal", {
+          defaultValue: "looking for local\u2026",
+        })
+      : t("homepage.hero.primary.installMilady", {
+          defaultValue: "install milady",
+        });
   const primaryHint = isLocalReady
-    ? "local \u00b7 running"
+    ? t("homepage.hero.hint.localRunning", {
+        defaultValue: "local \u00b7 running",
+      })
     : isLocalProbing
-      ? "probing localhost"
-      : "no local runtime";
+      ? t("homepage.hero.hint.probingLocalhost", {
+          defaultValue: "probing localhost",
+        })
+      : t("homepage.hero.hint.noLocalRuntime", {
+          defaultValue: "no local runtime",
+        });
 
   return (
     <section className="relative isolate overflow-hidden">
@@ -44,7 +57,9 @@ export function BrandHero({
 
       <div className="relative max-w-[56ch]">
         <h1 className="text-[30px] font-semibold leading-[1.08] tracking-[-0.025em] text-white/95 sm:text-[40px] md:text-[48px] lg:text-[56px]">
-          your agents, in one place.
+          {t("homepage.hero.title", {
+            defaultValue: "your agents, in one place.",
+          })}
         </h1>
 
         <div className="mt-5 flex flex-wrap items-center gap-2.5 sm:mt-6 sm:gap-3">
@@ -52,7 +67,9 @@ export function BrandHero({
             <button
               type="button"
               onClick={onOpenLocal}
-              aria-label="Open local Milady runtime"
+              aria-label={t("homepage.hero.aria.openLocalRuntime", {
+                defaultValue: "Open local Milady runtime",
+              })}
               className="group inline-flex min-h-[44px] items-center gap-2 rounded-md px-4 py-2.5 text-[13px] font-semibold text-black shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_10px_24px_-10px_rgba(240,185,11,0.55)] transition duration-200 active:translate-y-0 active:scale-[0.98] sm:px-5 sm:py-3 [@media(hover:hover)]:hover:-translate-y-0.5"
               style={{ background: "var(--gold-gradient-primary)" }}
             >
@@ -70,8 +87,13 @@ export function BrandHero({
               onClick={onOpenLocal}
               aria-label={
                 isLocalProbing
-                  ? "Probing for local Milady"
-                  : "No local runtime detected. Open install instructions."
+                  ? t("homepage.hero.aria.probingLocal", {
+                      defaultValue: "Probing for local Milady",
+                    })
+                  : t("homepage.hero.aria.noLocalDetected", {
+                      defaultValue:
+                        "No local runtime detected. Open install instructions.",
+                    })
               }
               className="group inline-flex min-h-[44px] items-center gap-2 rounded-md border border-white/12 bg-white/[0.04] px-4 py-2.5 text-[13px] font-medium text-white transition duration-200 hover:border-brand/40 hover:bg-white/[0.06] active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 sm:px-5 sm:py-3 [@media(hover:hover)]:hover:-translate-y-0.5"
             >
@@ -95,8 +117,12 @@ export function BrandHero({
             onClick={cloudPreparing ? onCancelCloud : onOpenCloud}
             aria-label={
               cloudPreparing
-                ? "Cancel opening Milady in the cloud"
-                : "Open Milady in the cloud"
+                ? t("homepage.hero.aria.cancelOpenCloud", {
+                    defaultValue: "Cancel opening Milady in the cloud",
+                  })
+                : t("homepage.hero.aria.openInCloud", {
+                    defaultValue: "Open Milady in the cloud",
+                  })
             }
             className={
               cloudPreparing
@@ -124,7 +150,15 @@ export function BrandHero({
                 <path d="M17.5 19a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.6-1.6A4 4 0 0 0 6 18h11.5z" />
               </svg>
             )}
-            <span>{cloudPreparing ? "cancel opening" : "open in cloud"}</span>
+            <span>
+              {cloudPreparing
+                ? t("homepage.hero.cloudButton.cancel", {
+                    defaultValue: "cancel opening",
+                  })
+                : t("homepage.hero.cloudButton.open", {
+                    defaultValue: "open in cloud",
+                  })}
+            </span>
             <span
               aria-hidden="true"
               className="transition group-hover/cloud:translate-x-0.5"
@@ -137,7 +171,9 @@ export function BrandHero({
             onClick={onAttachRemote}
             className="inline-flex min-h-[44px] items-center rounded-md border border-border bg-white/[0.04] px-4 py-2.5 text-[13px] font-medium text-white/85 transition duration-200 hover:border-white/25 hover:bg-white/[0.06] hover:text-white active:translate-y-0 active:scale-[0.98] sm:px-5 sm:py-3 [@media(hover:hover)]:hover:-translate-y-0.5"
           >
-            attach remote
+            {t("homepage.hero.attachRemote", {
+              defaultValue: "attach remote",
+            })}
           </button>
           {isLocalProbing ? (
             <span

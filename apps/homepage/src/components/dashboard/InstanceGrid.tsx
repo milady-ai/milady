@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { ManagedAgent } from "../../lib/AgentProvider";
+import { useT } from "../../providers/I18nProvider";
 import { FilterChips } from "../ui/FilterChips";
 import { InstanceCard } from "./InstanceCard";
 
@@ -36,6 +37,7 @@ export function InstanceGrid({
   onProvisionAgent,
   canProvision,
 }: InstanceGridProps) {
+  const t = useT();
   const [filter, setFilter] = useState<GridFilter>("all");
 
   const counts = {
@@ -57,7 +59,7 @@ export function InstanceGrid({
           id="runtimes-heading"
           className="text-[15px] font-medium tracking-tight text-white/80"
         >
-          runtimes
+          {t("homepage.runtimes.heading", { defaultValue: "runtimes" })}
           {counts.all > 0 ? (
             <span className="ml-2 font-mono text-[11px] font-normal text-white/35">
               {counts.all}
@@ -68,14 +70,40 @@ export function InstanceGrid({
         {showControls ? (
           <div className="flex flex-wrap items-center gap-2">
             <FilterChips
-              ariaLabel="Filter runtimes by source"
+              ariaLabel={t("homepage.runtimes.filter.aria", {
+                defaultValue: "Filter runtimes by source",
+              })}
               value={filter}
               onChange={setFilter}
               options={[
-                { value: "all", label: "all", count: counts.all },
-                { value: "local", label: "local", count: counts.local },
-                { value: "cloud", label: "cloud", count: counts.cloud },
-                { value: "remote", label: "remote", count: counts.remote },
+                {
+                  value: "all",
+                  label: t("homepage.runtimes.filter.all", {
+                    defaultValue: "all",
+                  }),
+                  count: counts.all,
+                },
+                {
+                  value: "local",
+                  label: t("homepage.runtimes.filter.local", {
+                    defaultValue: "local",
+                  }),
+                  count: counts.local,
+                },
+                {
+                  value: "cloud",
+                  label: t("homepage.runtimes.filter.cloud", {
+                    defaultValue: "cloud",
+                  }),
+                  count: counts.cloud,
+                },
+                {
+                  value: "remote",
+                  label: t("homepage.runtimes.filter.remote", {
+                    defaultValue: "remote",
+                  }),
+                  count: counts.remote,
+                },
               ]}
             />
             {onProvisionAgent ? (
@@ -85,13 +113,21 @@ export function InstanceGrid({
                 disabled={!canProvision}
                 aria-label={
                   canProvision
-                    ? "Create new cloud agent"
-                    : "Sign in to cloud to create an agent"
+                    ? t("homepage.runtimes.newAgent.aria.enabled", {
+                        defaultValue: "Create new cloud agent",
+                      })
+                    : t("homepage.runtimes.newAgent.aria.disabled", {
+                        defaultValue: "Sign in to cloud to create an agent",
+                      })
                 }
                 title={
                   canProvision
-                    ? "Create a new cloud agent"
-                    : "Sign in to cloud to create an agent"
+                    ? t("homepage.runtimes.newAgent.title.enabled", {
+                        defaultValue: "Create a new cloud agent",
+                      })
+                    : t("homepage.runtimes.newAgent.title.disabled", {
+                        defaultValue: "Sign in to cloud to create an agent",
+                      })
                 }
                 className="group/new inline-flex h-8 items-center gap-1.5 rounded-full border border-border bg-white/[0.02] px-3 font-mono text-[11px] lowercase tracking-[0.06em] text-white/70 transition duration-200 hover:border-brand/40 hover:bg-brand/[0.05] hover:text-brand active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed"
               >
@@ -101,14 +137,20 @@ export function InstanceGrid({
                 >
                   +
                 </span>
-                <span>new agent</span>
+                <span>
+                  {t("homepage.runtimes.newAgent.label", {
+                    defaultValue: "new agent",
+                  })}
+                </span>
               </button>
             ) : null}
             <button
               type="button"
               onClick={onRefresh}
               disabled={isRefreshing}
-              aria-label="Refresh runtimes"
+              aria-label={t("homepage.runtimes.refresh.aria", {
+                defaultValue: "Refresh runtimes",
+              })}
               className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border text-white/70 transition hover:border-white/25 hover:text-white disabled:opacity-50"
             >
               <svg
@@ -168,10 +210,13 @@ export function InstanceGrid({
 }
 
 function GridSkeleton() {
+  const t = useT();
   return (
     <div
       role="status"
-      aria-label="Loading runtimes"
+      aria-label={t("homepage.runtimes.loading.aria", {
+        defaultValue: "Loading runtimes",
+      })}
       className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3"
     >
       {[0, 1, 2].map((i) => (
@@ -212,35 +257,85 @@ function EmptyState({
   onProvisionAgent?: () => void;
   canProvision: boolean;
 }) {
+  const t = useT();
   const cloudCta: ReactCTA | undefined =
     canProvision && onProvisionAgent
-      ? { label: "+ new cloud agent", onClick: onProvisionAgent, primary: true }
+      ? {
+          label: t("homepage.runtimes.empty.cloud.cta", {
+            defaultValue: "+ new cloud agent",
+          }),
+          onClick: onProvisionAgent,
+          primary: true,
+        }
       : undefined;
   const copy: Record<
     GridFilter,
     { title: string; body: string; cta?: ReactCTA }
   > = {
     all: {
-      title: "no runtimes yet.",
-      body: "open local milady, or attach a remote runtime by url.",
-      cta: { label: "open local", onClick: onOpenLocal, primary: true },
+      title: t("homepage.runtimes.empty.all.title", {
+        defaultValue: "no runtimes yet.",
+      }),
+      body: t("homepage.runtimes.empty.all.body", {
+        defaultValue: "open local milady, or attach a remote runtime by url.",
+      }),
+      cta: {
+        label: t("homepage.runtimes.empty.all.cta", {
+          defaultValue: "open local",
+        }),
+        onClick: onOpenLocal,
+        primary: true,
+      },
     },
     local: {
-      title: "no local runtime responded.",
-      body: "launch milady locally, then refresh. we scan common local ports and configured sandboxes.",
-      cta: { label: "open local", onClick: onOpenLocal, primary: true },
+      title: t("homepage.runtimes.empty.local.title", {
+        defaultValue: "no local runtime responded.",
+      }),
+      body: t("homepage.runtimes.empty.local.body", {
+        defaultValue:
+          "launch milady locally, then refresh. we scan common local ports and configured sandboxes.",
+      }),
+      cta: {
+        label: t("homepage.runtimes.empty.local.cta", {
+          defaultValue: "open local",
+        }),
+        onClick: onOpenLocal,
+        primary: true,
+      },
     },
     cloud: {
-      title: canProvision ? "no cloud runtimes yet." : "no cloud runtimes.",
+      title: canProvision
+        ? t("homepage.runtimes.empty.cloud.title.provisionable", {
+            defaultValue: "no cloud runtimes yet.",
+          })
+        : t("homepage.runtimes.empty.cloud.title.signedOut", {
+            defaultValue: "no cloud runtimes.",
+          }),
       body: canProvision
-        ? "spin up your first cloud agent and it'll show up here."
-        : "sign in to Eliza Cloud to discover hosted milady instances attached to your account.",
+        ? t("homepage.runtimes.empty.cloud.body.provisionable", {
+            defaultValue:
+              "spin up your first cloud agent and it'll show up here.",
+          })
+        : t("homepage.runtimes.empty.cloud.body.signedOut", {
+            defaultValue:
+              "sign in to Eliza Cloud to discover hosted milady instances attached to your account.",
+          }),
       cta: cloudCta,
     },
     remote: {
-      title: "no remote connections.",
-      body: "attach a vps, lan box, or any milady or elizaOS runtime by url.",
-      cta: { label: "attach remote", onClick: onAttachRemote },
+      title: t("homepage.runtimes.empty.remote.title", {
+        defaultValue: "no remote connections.",
+      }),
+      body: t("homepage.runtimes.empty.remote.body", {
+        defaultValue:
+          "attach a vps, lan box, or any milady or elizaOS runtime by url.",
+      }),
+      cta: {
+        label: t("homepage.runtimes.empty.remote.cta", {
+          defaultValue: "attach remote",
+        }),
+        onClick: onAttachRemote,
+      },
     },
   };
   const state = copy[filter];

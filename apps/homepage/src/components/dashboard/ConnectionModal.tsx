@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { useT } from "../../providers/I18nProvider";
 
 interface ConnectionModalProps {
   onSubmit: (data: {
@@ -12,6 +13,7 @@ interface ConnectionModalProps {
 }
 
 export function ConnectionModal({ onSubmit, onClose }: ConnectionModalProps) {
+  const t = useT();
   const [name, setName] = useState("");
   const [url, setUrl] = useState("");
   const [token, setToken] = useState("");
@@ -34,7 +36,9 @@ export function ConnectionModal({ onSubmit, onClose }: ConnectionModalProps) {
       {/* Overlay — click outside to close */}
       <button
         type="button"
-        aria-label="Close attach runtime dialog"
+        aria-label={t("homepage.connect.aria.closeDialog", {
+          defaultValue: "Close attach runtime dialog",
+        })}
         className="absolute inset-0 cursor-default bg-black/70 backdrop-blur-sm"
         onClick={onClose}
       />
@@ -61,16 +65,24 @@ export function ConnectionModal({ onSubmit, onClose }: ConnectionModalProps) {
           {/* Header */}
           <div className="space-y-1">
             <div className="font-mono text-[10px] lowercase tracking-[0.18em] text-white/45">
-              attach runtime
+              {t("homepage.connect.kicker", {
+                defaultValue: "attach runtime",
+              })}
             </div>
             <h2
               id="connect-modal-title"
               className="text-[17px] font-semibold tracking-tight text-white/95"
             >
-              paste any milady, elizaOS, or agent runtime url.
+              {t("homepage.connect.title", {
+                defaultValue:
+                  "paste any milady, elizaOS, or agent runtime url.",
+              })}
             </h2>
             <p className="text-[12px] text-text-muted">
-              attach an existing runtime by url and an optional access key.
+              {t("homepage.connect.description", {
+                defaultValue:
+                  "attach an existing runtime by url and an optional access key.",
+              })}
             </p>
           </div>
 
@@ -80,13 +92,17 @@ export function ConnectionModal({ onSubmit, onClose }: ConnectionModalProps) {
               htmlFor="connect-name"
               className="font-mono text-[10px] lowercase tracking-wider text-text-subtle"
             >
-              name
+              {t("homepage.connect.field.name.label", {
+                defaultValue: "name",
+              })}
             </label>
             <input
               id="connect-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="my remote agent"
+              placeholder={t("homepage.connect.field.name.placeholder", {
+                defaultValue: "my remote agent",
+              })}
               autoComplete="off"
               className="w-full h-10 px-3 font-mono text-sm bg-dark border border-border text-text-light placeholder:text-text-muted/50 focus:outline-none focus:border-brand/50"
             />
@@ -98,7 +114,9 @@ export function ConnectionModal({ onSubmit, onClose }: ConnectionModalProps) {
               htmlFor="connect-url"
               className="font-mono text-[10px] lowercase tracking-wider text-text-subtle"
             >
-              url
+              {t("homepage.connect.field.url.label", {
+                defaultValue: "url",
+              })}
             </label>
             <input
               id="connect-url"
@@ -117,7 +135,14 @@ export function ConnectionModal({ onSubmit, onClose }: ConnectionModalProps) {
               htmlFor="connect-token"
               className="font-mono text-[10px] lowercase tracking-wider text-text-subtle"
             >
-              access key <span className="text-text-muted/50">(optional)</span>
+              {t("homepage.connect.field.token.label", {
+                defaultValue: "access key",
+              })}{" "}
+              <span className="text-text-muted/50">
+                {t("homepage.connect.field.token.optional", {
+                  defaultValue: "(optional)",
+                })}
+              </span>
             </label>
             <input
               id="connect-token"
@@ -142,14 +167,14 @@ export function ConnectionModal({ onSubmit, onClose }: ConnectionModalProps) {
                   : "var(--gold-gradient-primary)",
               }}
             >
-              attach
+              {t("homepage.connect.submit", { defaultValue: "attach" })}
             </button>
             <button
               type="button"
               onClick={onClose}
               className="rounded-md px-5 py-2.5 text-[12px] text-text-muted transition hover:text-text-light focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-white/30"
             >
-              cancel
+              {t("homepage.connect.cancel", { defaultValue: "cancel" })}
             </button>
           </div>
         </form>
