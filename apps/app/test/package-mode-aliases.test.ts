@@ -132,6 +132,26 @@ describe("package mode aliases", () => {
     expect(patchScript).toContain("Electrobun agent child PATH fallback");
   });
 
+  it("patches LifeOps automation registration away from the app-core root barrel", () => {
+    const patchScript = fs.readFileSync(
+      path.resolve(appRoot, "../..", "scripts/apply-eliza-ci-patches.mjs"),
+      "utf8",
+    );
+
+    expect(patchScript).toContain(
+      "patchAppCoreAutomationNodeContributorExport",
+    );
+    expect(patchScript).toContain(
+      "patchLifeOpsAutomationContributorAppCoreImport",
+    );
+    expect(patchScript).toContain(
+      "@elizaos/app-core/api/automation-node-contributors",
+    );
+    expect(patchScript).toContain(
+      "plugin-lifeops narrow app-core automation import",
+    );
+  });
+
   it("keeps generated native module proxy stubs compatible with WebKit invariants", () => {
     const viteConfigText = fs.readFileSync(
       path.join(appRoot, "vite.config.ts"),

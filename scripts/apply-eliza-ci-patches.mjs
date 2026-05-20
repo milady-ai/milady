@@ -278,6 +278,44 @@ ${indent}}
   return next;
 }
 
+function patchAppCoreAutomationNodeContributorExport(raw) {
+  if (raw.includes('"./api/automation-node-contributors"')) {
+    return raw;
+  }
+
+  return raw.replace(
+    '    "./api/auth": {',
+    `    "./api/automation-node-contributors": {
+      "types": "./dist/api/automation-node-contributors.d.ts",
+      "import": "./dist/api/automation-node-contributors.js",
+      "default": "./dist/api/automation-node-contributors.js"
+    },
+    "./api/auth": {`,
+  );
+}
+
+function patchLifeOpsAutomationContributorAppCoreImport(raw) {
+  if (raw.includes("@elizaos/app-core/api/automation-node-contributors")) {
+    return raw;
+  }
+
+  const next = raw.replace(
+    /import \{\r?\n  type AutomationNodeContributorContext,\r?\n  registerAutomationNodeContributor,\r?\n\} from "@elizaos\/app-core";/,
+    `import {
+  type AutomationNodeContributorContext,
+  registerAutomationNodeContributor,
+} from "@elizaos/app-core/api/automation-node-contributors";`,
+  );
+
+  if (next === raw) {
+    throw new Error(
+      "Could not patch LifeOps automation contributor app-core import: expected root app-core import was not found",
+    );
+  }
+
+  return next;
+}
+
 function patchCoreTsconfigLocalPrompts(raw) {
   if (raw.includes('"@elizaos/prompts": ["../prompts/src/index.ts"]')) {
     return raw;
@@ -2548,6 +2586,24 @@ function applyReleaseSourcePatches() {
     path.join(elizaDir, "packages", "ui", "src", "state", "useApp.ts"),
     patchUiAppContextSingleton,
     "UI AppContext singleton",
+  );
+
+  replaceFileText(
+    path.join(elizaDir, "packages", "app-core", "package.json"),
+    patchAppCoreAutomationNodeContributorExport,
+    "app-core automation-node-contributors package export",
+  );
+
+  replaceFileText(
+    path.join(
+      elizaDir,
+      "plugins",
+      "plugin-lifeops",
+      "src",
+      "automation-node-contributor.ts",
+    ),
+    patchLifeOpsAutomationContributorAppCoreImport,
+    "plugin-lifeops narrow app-core automation import",
   );
 
   replaceFileText(
