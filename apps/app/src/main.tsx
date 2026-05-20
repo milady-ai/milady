@@ -55,7 +55,6 @@ import {
   getWindowNavigationPath,
   isAppWindowRoute,
   isDetachedWindowShell,
-  isPillWindowShell,
   resolveWindowShellRoute,
   shouldInstallMainWindowOnboardingPatches,
   syncDetachedShellLocation,
