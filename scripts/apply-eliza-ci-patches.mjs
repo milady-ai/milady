@@ -248,6 +248,162 @@ export const AppContext =
   return next;
 }
 
+function patchVoicePrefixWelcomeSkip(raw) {
+  if (raw.includes("voice-prefix-skip-prefix")) {
+    return raw;
+  }
+
+  const modernBefore = `      <footer className="flex items-center justify-between">
+        {previousVoicePrefixStep(props.step, tier) ? (
+          <Button
+            variant="ghost"
+            size="sm"
+            className={ELIZAOS_GHOST_BUTTON}
+            onClick={() => {
+              const prev = previousVoicePrefixStep(props.step, tier);
+              if (prev) props.onAdvance(prev);
+              else props.onBack();
+            }}
+            data-testid="voice-prefix-back"
+          >
+            Back
+          </Button>
+        ) : (
+          <span aria-hidden="true" />
+        )}
+        <div className="flex items-center gap-2">`;
+
+  const modernAfter = `      <footer className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {previousVoicePrefixStep(props.step, tier) ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              className={ELIZAOS_GHOST_BUTTON}
+              onClick={() => {
+                const prev = previousVoicePrefixStep(props.step, tier);
+                if (prev) props.onAdvance(prev);
+                else props.onBack();
+              }}
+              data-testid="voice-prefix-back"
+            >
+              Back
+            </Button>
+          ) : null}
+          {props.step === "welcome" && props.onSkipPrefix ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              className={ELIZAOS_GHOST_BUTTON}
+              onClick={props.onSkipPrefix}
+              data-testid="voice-prefix-skip-prefix"
+            >
+              Skip voice setup
+            </Button>
+          ) : null}
+        </div>
+        <div className="flex items-center gap-2">`;
+
+  const legacyBefore = `      <footer className="flex items-center justify-between">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            const prev = previousVoicePrefixStep(props.step, tier);
+            if (prev) props.onAdvance(prev);
+            else props.onBack();
+          }}
+          data-testid="voice-prefix-back"
+        >
+          Back
+        </Button>
+        <div className="flex items-center gap-2">`;
+
+  const legacyAfter = `      <footer className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              const prev = previousVoicePrefixStep(props.step, tier);
+              if (prev) props.onAdvance(prev);
+              else props.onBack();
+            }}
+            data-testid="voice-prefix-back"
+          >
+            Back
+          </Button>
+          {props.step === "welcome" && props.onSkipPrefix ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={props.onSkipPrefix}
+              data-testid="voice-prefix-skip-prefix"
+            >
+              Skip voice setup
+            </Button>
+          ) : null}
+        </div>
+        <div className="flex items-center gap-2">`;
+
+  for (const [before, after] of [
+    [modernBefore, modernAfter],
+    [legacyBefore, legacyAfter],
+  ]) {
+    const next = raw.replace(before, after);
+    if (next !== raw) return next;
+  }
+
+  throw new Error(
+    "Could not patch voice prefix welcome skip: expected footer block was not found",
+  );
+}
+
+const onboardingAvatarComponentSource = `import type { CSSProperties, JSX } from "react";
+
+import { AvatarHost } from "../../../avatar-runtime";
+
+const onboardingAvatarCanvasStyle = {
+  width: "min(270px, 78vw)",
+  height: 112,
+  pointerEvents: "none",
+} satisfies CSSProperties;
+
+export function OnboardingAvatar(): JSX.Element {
+  return (
+    <div
+      className="eliza-ob-agent-canvas"
+      style={onboardingAvatarCanvasStyle}
+      aria-hidden="true"
+    >
+      <AvatarHost />
+    </div>
+  );
+}
+`;
+
+function patchOnboardingAvatarUsage(raw) {
+  if (raw.includes("OnboardingAvatar")) {
+    return raw;
+  }
+
+  let next = raw.replace(
+    'import { AvatarHost } from "../../../avatar-runtime";',
+    'import { OnboardingAvatar } from "./OnboardingAvatar";',
+  );
+  next = next.replace(
+    /        <div\r?\n          className="eliza-ob-agent-canvas"\r?\n          style=\{\{ width: "min\(270px, 78vw\)", height: 112 \}\}\r?\n(?:          aria-hidden="true"\r?\n)?        >\r?\n          <AvatarHost \/>\r?\n        <\/div>/,
+    "        <OnboardingAvatar />",
+  );
+
+  if (next === raw || next.includes("AvatarHost")) {
+    throw new Error(
+      "Could not patch onboarding avatar usage: expected AvatarHost wrapper was not found",
+    );
+  }
+  return next;
+}
+
 function patchElectrobunAgentChildPathFallback(raw) {
   if (raw.includes("existingPathKey")) {
     return raw;
@@ -2587,6 +2743,59 @@ function applyReleaseSourcePatches() {
     patchUiAppContextSingleton,
     "UI AppContext singleton",
   );
+
+  replaceFileText(
+    path.join(
+      elizaDir,
+      "packages",
+      "ui",
+      "src",
+      "components",
+      "onboarding",
+      "VoicePrefixSteps.tsx",
+    ),
+    patchVoicePrefixWelcomeSkip,
+    "voice prefix welcome skip action",
+  );
+
+  writeFileText(
+    path.join(
+      elizaDir,
+      "packages",
+      "ui",
+      "src",
+      "components",
+      "onboarding",
+      "states",
+      "OnboardingAvatar.tsx",
+    ),
+    onboardingAvatarComponentSource,
+    "onboarding non-interactive avatar wrapper",
+  );
+
+  for (const stateFile of [
+    "StateCloudChat.tsx",
+    "StateHello.tsx",
+    "StateLocalDownload.tsx",
+    "StateMic.tsx",
+    "StateProfileLocation.tsx",
+    "StateProfileName.tsx",
+  ]) {
+    replaceFileText(
+      path.join(
+        elizaDir,
+        "packages",
+        "ui",
+        "src",
+        "components",
+        "onboarding",
+        "states",
+        stateFile,
+      ),
+      patchOnboardingAvatarUsage,
+      `onboarding avatar non-interactive wrapper (${stateFile})`,
+    );
+  }
 
   replaceFileText(
     path.join(elizaDir, "packages", "app-core", "package.json"),

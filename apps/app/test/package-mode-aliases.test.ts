@@ -121,6 +121,35 @@ describe("package mode aliases", () => {
     expect(patchScript).toContain("UI AppContext singleton");
   });
 
+  it("patches voice onboarding so users can skip the mic gate", () => {
+    const patchScript = fs.readFileSync(
+      path.resolve(appRoot, "../..", "scripts/apply-eliza-ci-patches.mjs"),
+      "utf8",
+    );
+
+    expect(patchScript).toContain("patchVoicePrefixWelcomeSkip");
+    expect(patchScript).toContain("voice-prefix-skip-prefix");
+    expect(patchScript).toContain("Skip voice setup");
+    expect(patchScript).toContain("legacyBefore");
+    expect(patchScript).toContain(
+      'props.step === "welcome" && props.onSkipPrefix',
+    );
+    expect(patchScript).toContain("voice prefix welcome skip action");
+  });
+
+  it("patches onboarding avatar canvases so they cannot block buttons", () => {
+    const patchScript = fs.readFileSync(
+      path.resolve(appRoot, "../..", "scripts/apply-eliza-ci-patches.mjs"),
+      "utf8",
+    );
+
+    expect(patchScript).toContain("patchOnboardingAvatarUsage");
+    expect(patchScript).toContain("OnboardingAvatar.tsx");
+    expect(patchScript).toContain("eliza-ob-agent-canvas");
+    expect(patchScript).toContain('pointerEvents: "none"');
+    expect(patchScript).toContain("onboarding avatar non-interactive wrapper");
+  });
+
   it("patches packaged Windows agent startup to tolerate Explorer-style Path casing", () => {
     const patchScript = fs.readFileSync(
       path.resolve(appRoot, "../..", "scripts/apply-eliza-ci-patches.mjs"),
