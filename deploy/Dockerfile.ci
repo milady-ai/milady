@@ -16,6 +16,10 @@ ARG VERSION=""
 ARG VERSION_CLEAN=""
 ARG REVISION=""
 
+# TODO(soc2 I-4): pin base image by digest, e.g.
+#   FROM node:22-slim@sha256:<digest> AS pruner
+# Trivy CI will alert when the base image becomes vulnerable; resolve the
+# CVE by bumping to a newer pinned digest, never by floating the tag.
 FROM node:${NODE_VERSION}-slim AS pruner
 WORKDIR /app
 COPY . .

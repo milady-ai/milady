@@ -1,0 +1,71 @@
+# Canonical hardened pod template — SOC2 CC6.3, A1.2.
+#
+# All Deployment / StatefulSet / DaemonSet manifests emitted by the Server CRD
+# operator (eliza/packages/cloud-infra/...) MUST inherit this securityContext.
+# Operator-generated PodSpecs that lack these fields fail the Kyverno baseline
+# policy in deploy/k8s/policy/.
+#
+# Workloads that genuinely need root (e.g., Fluent Bit DaemonSet reading
+# /var/log/containers) must add a comment explaining why and reference the
+# capabilities they require — see deploy/k8s/logging/fluent-bit.yaml.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hardened-template
+  namespace: eliza-agents
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hardened-template
+  template:
+    metadata:
+      labels:
+        app: hardened-template
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: app
+          # TODO(soc2): pin base image to digest in deploy/Dockerfile.ci.
+          image: ghcr.io/elizaos/agent:replace-with-digest-pinned-tag
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
+          resources:
+            requests:
+              memory: 256Mi
+              cpu: 100m
+            limits:
+              memory: 1Gi
+              cpu: 1000m
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: var-cache
+              mountPath: /var/cache
+            - name: var-run
+              mountPath: /var/run
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 128Mi
+        - name: var-cache
+          emptyDir:
+            sizeLimit: 128Mi
+        - name: var-run
+          emptyDir:
+            sizeLimit: 16Mi
