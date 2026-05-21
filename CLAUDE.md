@@ -8,6 +8,10 @@ Architecture commandments, QA protocol, git workflow: [AGENTS.md](AGENTS.md). Sa
 
 Write **elizaOS** (not `ElizaOS`). npm scope `@elizaos/*`. Plain language: **Eliza agents**. Exception: **Eliza Classic** plugin keeps `Eliza` (the 1966 chatbot).
 
+## Cloud frontend visual review
+
+Every UI change in `packages/cloud-frontend/` must run `bun run --cwd packages/cloud-frontend audit:cloud` and update the per-page manual-review markdown in `aesthetic-audit-output/manual-review/`. See [packages/cloud-frontend/AGENTS.md](packages/cloud-frontend/AGENTS.md).
+
 ## Scope Discipline
 
 - Do NOT invent features, grace periods, or product behaviors not explicitly requested or documented.
