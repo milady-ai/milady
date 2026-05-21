@@ -8,6 +8,10 @@ on:
         required: false
         default: develop
 
+# Default to least privilege. Override per-job where needed.
+permissions:
+  contents: read
+
 jobs:
   build:
     name: Build APK
