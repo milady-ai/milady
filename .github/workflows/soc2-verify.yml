@@ -1,0 +1,49 @@
+name: soc2-verify
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: SOC2 control verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          fetch-depth: 1
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@f4d14e03ff726c06358e5557344e1da148b56cf7 # v1.2.2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies (eliza/)
+        working-directory: eliza
+        run: bun install --frozen-lockfile || bun install
+
+      - name: Run SOC2 verification
+        working-directory: eliza
+        run: bun run packages/soc2-verify/src/cli.ts --strict-fail --out ../soc2-evidence
+        continue-on-error: false
+
+      - name: Upload evidence report
+        if: always()
+        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
+        with:
+          name: soc2-evidence-report
+          path: |
+            soc2-evidence/evidence-report.json
+            soc2-evidence/evidence-report.md
+          if-no-files-found: warn
+          retention-days: 90
