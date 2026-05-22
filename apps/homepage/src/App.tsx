@@ -202,12 +202,13 @@ function MiladyLanding() {
   const platformLinks: PlatformLink[] = [
     { label: "MAC", href: downloadUrl("macos-arm64", "macos-x64") },
     { label: "PC", href: downloadUrl("windows-x64") },
-    { label: "LINUX", href: downloadUrl("linux-x64", "linux-deb") },
+    { label: "LINUX", href: downloadUrl("linux-x64") },
     {
       label: "WEB",
       onClick: cloudPreparing ? handleCancelCloudOpen : handleOpenCloud,
     },
-    { label: "ANDROID", href: downloadUrl("android-apk") },
+    // Android APK is not yet shipped in any release tag — re-add this tile
+    // once `android-apk` lands in apps/homepage/src/generated/release-data.ts.
   ];
   const checksumUrl =
     releaseData.release.checksum?.url ?? GITHUB_LATEST_RELEASE_URL;

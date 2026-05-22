@@ -23,14 +23,13 @@ import { mockCloudApi } from "./fixtures/cloud-auth";
 const SKIP_HEAD = process.env.SKIP_DOWNLOAD_HEAD === "1";
 const SKIP_TAG_CHECK = process.env.SKIP_GITHUB_TAG_CHECK === "1";
 
-const PLATFORM_LABELS = ["MAC", "PC", "LINUX", "ANDROID"] as const;
+const PLATFORM_LABELS = ["MAC", "PC", "LINUX"] as const;
 type PlatformLabel = (typeof PLATFORM_LABELS)[number];
 
 const PLATFORM_TO_DOWNLOAD_IDS: Record<PlatformLabel, string[]> = {
   MAC: ["macos-arm64", "macos-x64"],
   PC: ["windows-x64"],
-  LINUX: ["linux-x64", "linux-deb"],
-  ANDROID: ["android-apk"],
+  LINUX: ["linux-x64"],
 };
 
 test.describe("homepage downloads", () => {
@@ -52,10 +51,9 @@ test.describe("homepage downloads", () => {
       await expect(link, `${label} link visible`).toBeVisible();
       const href = await link.getAttribute("href");
       expect(href, `${label} has href`).toBeTruthy();
-      expect(
-        href ?? "",
-        `${label} href looks like a github release`,
-      ).toMatch(/^https:\/\/github\.com\/.+\/releases\//);
+      expect(href ?? "", `${label} href looks like a github release`).toMatch(
+        /^https:\/\/github\.com\/.+\/releases\//,
+      );
     }
   });
 
@@ -69,10 +67,10 @@ test.describe("homepage downloads", () => {
       const link = nav.getByRole("link", { name: label });
       const href = (await link.getAttribute("href")) ?? "";
       const candidates = PLATFORM_TO_DOWNLOAD_IDS[label]
-        .map((id) =>
-          releaseData.release.downloads.find((d) => d.id === id)?.url,
+        .map(
+          (id) => releaseData.release.downloads.find((d) => d.id === id)?.url,
         )
-        .filter((url): url is string => Boolean(url));
+        .filter((url): url is NonNullable<typeof url> => Boolean(url));
       // ANDROID id may not exist in current release-data; if no candidates,
       // the fallback is the generic latest-release page.
       if (candidates.length === 0) {
@@ -91,7 +89,8 @@ test.describe("homepage downloads", () => {
   }) => {
     await page.goto("/");
     const nav = page.getByRole("navigation", { name: /platform downloads/i });
-    const macHref = (await nav.getByRole("link", { name: "MAC" }).getAttribute("href")) ?? "";
+    const macHref =
+      (await nav.getByRole("link", { name: "MAC" }).getAttribute("href")) ?? "";
     expect(macHref).toContain(releaseData.release.tagName);
   });
 
@@ -119,7 +118,10 @@ test.describe("homepage downloads", () => {
     const match = releaseData.release.url.match(
       /^https:\/\/github\.com\/([^/]+)\/([^/]+)\/releases\/tag\/(.+)$/,
     );
-    expect(match, `release.url shape: ${releaseData.release.url}`).not.toBeNull();
+    expect(
+      match,
+      `release.url shape: ${releaseData.release.url}`,
+    ).not.toBeNull();
     if (!match) return;
     const [, owner, repo, tag] = match;
     expect(tag).toBe(releaseData.release.tagName);
