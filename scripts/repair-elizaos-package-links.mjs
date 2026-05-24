@@ -10,8 +10,8 @@ const repoRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "..",
 );
-const nodeModulesDir = path.join(repoRoot, "node_modules");
-const bunStoreDir = path.join(nodeModulesDir, ".bun");
+const rootNodeModulesDir = path.join(repoRoot, "node_modules");
+const bunStoreDir = path.join(rootNodeModulesDir, ".bun");
 const localElizaRoot = path.join(repoRoot, "eliza");
 const scopes = ["@elizaos", "@clawville"];
 
@@ -53,7 +53,23 @@ function findBunStorePackage(scope, packageName) {
   return candidates[0] ?? null;
 }
 
-function repairScope(scope) {
+function collectNodeModulesDirs() {
+  const dirs = [rootNodeModulesDir];
+  const appsDir = path.join(repoRoot, "apps");
+  if (!fs.existsSync(appsDir)) return dirs;
+
+  for (const entry of fs.readdirSync(appsDir, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const appNodeModulesDir = path.join(appsDir, entry.name, "node_modules");
+    if (fs.existsSync(appNodeModulesDir)) {
+      dirs.push(appNodeModulesDir);
+    }
+  }
+
+  return dirs;
+}
+
+function repairScope(nodeModulesDir, scope) {
   const scopeDir = path.join(nodeModulesDir, scope);
   if (!fs.existsSync(scopeDir)) return { relinked: 0, removed: 0 };
 
@@ -137,7 +153,7 @@ function collectDeclaredScopedPackages() {
 function ensureDeclaredPackageLinks() {
   let relinked = 0;
   for (const { scope, name } of collectDeclaredScopedPackages()) {
-    const scopeDir = path.join(nodeModulesDir, scope);
+    const scopeDir = path.join(rootNodeModulesDir, scope);
     const linkPath = path.join(scopeDir, name);
     if (fs.existsSync(linkPath)) continue;
 
@@ -152,7 +168,7 @@ function ensureDeclaredPackageLinks() {
   return relinked;
 }
 
-if (!fs.existsSync(nodeModulesDir)) {
+if (!fs.existsSync(rootNodeModulesDir)) {
   console.warn(`${LOG_PREFIX} node_modules is not installed; skipping.`);
   process.exit(0);
 }
@@ -164,10 +180,12 @@ if (!isLocalElizaDisabled()) {
 
 let relinked = 0;
 let removed = 0;
-for (const scope of scopes) {
-  const result = repairScope(scope);
-  relinked += result.relinked;
-  removed += result.removed;
+for (const nodeModulesDir of collectNodeModulesDirs()) {
+  for (const scope of scopes) {
+    const result = repairScope(nodeModulesDir, scope);
+    relinked += result.relinked;
+    removed += result.removed;
+  }
 }
 relinked += ensureDeclaredPackageLinks();
 

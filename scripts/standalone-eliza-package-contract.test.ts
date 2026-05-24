@@ -45,7 +45,7 @@ test("Milady no longer tracks eliza as a submodule", () => {
 
   const rootPackage = readJson("package.json");
   assert.deepEqual(rootPackage.workspaces, ["apps/*"]);
-  assert.equal(rootPackage.scripts.preinstall, undefined);
+  assert.equal(rootPackage.scripts.preinstall, "node scripts/preinstall.mjs");
   assert.equal(
     rootPackage.scripts["setup:upstreams"],
     "node scripts/eliza-source-mode.mjs local --install",
@@ -264,7 +264,37 @@ test("package-mode install repairs stale local node_modules links", () => {
   assert.match(postinstallScript, /repair-elizaos-package-links\.mjs/);
   assert.match(repairScript, /isLocalElizaDisabled/);
   assert.match(repairScript, /localElizaRoot/);
+  assert.match(repairScript, /collectNodeModulesDirs/);
+  assert.match(repairScript, /appsDir/);
   assert.match(repairScript, /findBunStorePackage/);
+});
+
+test("repo-local install wrapper uses selectable install profiles", () => {
+  const packageJson = readJson("package.json");
+  const installWrapper = read("scripts/run-init-then-bun-install.mjs");
+  const profileHelper = read("scripts/lib/install-profiles.mjs");
+  const preinstallScript = read("scripts/preinstall.mjs");
+
+  assert.match(installWrapper, /promptInstallProfiles/);
+  assert.match(installWrapper, /buildInstallPlan/);
+  assert.match(installWrapper, /resolveInstallEnvironment/);
+  assert.match(profileHelper, /Space to select, Enter to install/);
+  assert.match(preinstallScript, /evaluateCurrentInstallEnvironment/);
+  assert.doesNotMatch(preinstallScript, /promptInstallProfiles/);
+  assert.doesNotMatch(preinstallScript, /eliza-source-mode/);
+  assert.doesNotMatch(preinstallScript, /bun install/);
+  assert.ok(
+    packageJson.files.includes("scripts/lib/install-profiles.mjs"),
+    "npm package must include the install profile helper used by ./install",
+  );
+  assert.ok(
+    packageJson.files.includes("scripts/lib/install-env.mjs"),
+    "npm package must include the install environment helper used by ./install",
+  );
+  assert.ok(
+    packageJson.files.includes("scripts/preinstall.mjs"),
+    "npm package must include the preinstall doctor used by bun install",
+  );
 });
 
 test("package-mode no longer carries migrated elizaOS package patches", () => {

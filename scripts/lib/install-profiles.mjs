@@ -1,0 +1,211 @@
+import process from "node:process";
+
+export const INSTALL_PROFILES = [
+  {
+    id: "packages",
+    label: "Published packages",
+    detail: "fast default; uses npm-published @elizaos/* packages",
+  },
+  {
+    id: "local",
+    label: "Local elizaOS source",
+    detail: "clones or restores ./eliza and links workspace packages",
+  },
+  {
+    id: "all",
+    label: "All developer paths",
+    detail: "runs packages first, then local elizaOS source mode",
+  },
+];
+
+const PROFILE_IDS = new Set(INSTALL_PROFILES.map((profile) => profile.id));
+const INSTALL_ORDER = ["packages", "local"];
+
+function uniqueProfileIds(ids) {
+  return [...new Set(ids)];
+}
+
+export function defaultInstallProfileIds() {
+  return ["packages"];
+}
+
+export function parseInstallProfileList(value) {
+  if (typeof value !== "string" || value.trim().length === 0) {
+    return [];
+  }
+
+  const ids = value
+    .split(/[\s,]+/)
+    .map((part) => part.trim().toLowerCase())
+    .filter(Boolean);
+
+  for (const id of ids) {
+    if (!PROFILE_IDS.has(id)) {
+      throw new Error(
+        `Unknown install profile "${id}". Use packages, local, or all.`,
+      );
+    }
+  }
+
+  return uniqueProfileIds(ids);
+}
+
+export function expandInstallProfileIds(ids) {
+  const expanded = new Set();
+  for (const id of ids.length > 0 ? ids : defaultInstallProfileIds()) {
+    if (id === "all") {
+      for (const orderedId of INSTALL_ORDER) {
+        expanded.add(orderedId);
+      }
+      continue;
+    }
+    expanded.add(id);
+  }
+
+  return INSTALL_ORDER.filter((id) => expanded.has(id));
+}
+
+export function buildInstallPlan(
+  profileIds,
+  bunInstallArgs,
+  env = process.env,
+) {
+  return expandInstallProfileIds(profileIds).map((id) => {
+    if (id === "packages") {
+      return {
+        id,
+        command: "bun",
+        args: ["install", ...bunInstallArgs],
+        env: {
+          ...env,
+          MILADY_ELIZA_SOURCE: env.MILADY_ELIZA_SOURCE || "packages",
+        },
+      };
+    }
+
+    return {
+      id,
+      command: process.execPath,
+      args: ["scripts/eliza-source-mode.mjs", "local", "--install"],
+      env: {
+        ...env,
+        MILADY_ELIZA_SOURCE: "local",
+        MILADY_SKIP_LOCAL_UPSTREAMS: "",
+        ELIZA_SKIP_LOCAL_UPSTREAMS: "",
+      },
+    };
+  });
+}
+
+export function normalizeInstallState(state) {
+  const cursor =
+    Number.isInteger(state.cursor) && state.cursor >= 0
+      ? state.cursor % INSTALL_PROFILES.length
+      : 0;
+  const selectedIds = uniqueProfileIds(
+    state.selectedIds.filter((id) => PROFILE_IDS.has(id)),
+  );
+
+  return {
+    cursor,
+    selectedIds:
+      selectedIds.length > 0 ? selectedIds : defaultInstallProfileIds(),
+  };
+}
+
+function moveCursor(cursor, delta) {
+  return (cursor + delta + INSTALL_PROFILES.length) % INSTALL_PROFILES.length;
+}
+
+export function applyInstallProfileKey(state, key) {
+  const current = normalizeInstallState(state);
+
+  if (key === "\u001b[A") {
+    return { ...current, cursor: moveCursor(current.cursor, -1) };
+  }
+  if (key === "\u001b[B") {
+    return { ...current, cursor: moveCursor(current.cursor, 1) };
+  }
+  if (key !== " ") {
+    return current;
+  }
+
+  const profile = INSTALL_PROFILES[current.cursor];
+  const selected = new Set(current.selectedIds);
+  if (selected.has(profile.id)) {
+    selected.delete(profile.id);
+  } else {
+    selected.add(profile.id);
+  }
+
+  return {
+    ...current,
+    selectedIds: selected.size > 0 ? [...selected] : defaultInstallProfileIds(),
+  };
+}
+
+export function renderInstallProfilePrompt(state) {
+  const current = normalizeInstallState(state);
+  const selected = new Set(current.selectedIds);
+  const lines = [
+    "Choose Milady install paths",
+    "Space to select, Enter to install",
+    "",
+  ];
+
+  INSTALL_PROFILES.forEach((profile, index) => {
+    const pointer = index === current.cursor ? ">" : " ";
+    const marker = selected.has(profile.id) ? "x" : " ";
+    lines.push(`${pointer} [${marker}] ${profile.label}`);
+    lines.push(`      ${profile.detail}`);
+  });
+
+  return `${lines.join("\n")}\n`;
+}
+
+export async function promptInstallProfiles({
+  input = process.stdin,
+  output = process.stdout,
+} = {}) {
+  let state = { cursor: 0, selectedIds: defaultInstallProfileIds() };
+  const wasRaw = input.isRaw ?? false;
+
+  function render() {
+    output.write("\u001b[2J\u001b[H");
+    output.write(renderInstallProfilePrompt(state));
+  }
+
+  if (typeof input.setRawMode === "function") {
+    input.setRawMode(true);
+  }
+  input.resume();
+  render();
+
+  return await new Promise((resolve, reject) => {
+    function cleanup() {
+      input.off("data", onData);
+      if (typeof input.setRawMode === "function") {
+        input.setRawMode(wasRaw);
+      }
+      output.write("\n");
+    }
+
+    function onData(chunk) {
+      const key = chunk.toString("utf8");
+      if (key === "\u0003") {
+        cleanup();
+        reject(new Error("Install cancelled."));
+        return;
+      }
+      if (key === "\r" || key === "\n") {
+        cleanup();
+        resolve(normalizeInstallState(state).selectedIds);
+        return;
+      }
+      state = applyInstallProfileKey(state, key);
+      render();
+    }
+
+    input.on("data", onData);
+  });
+}
