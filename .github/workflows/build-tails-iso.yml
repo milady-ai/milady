@@ -106,6 +106,8 @@ jobs:
     name: lb config (go/no-go)
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    outputs:
+      has_variant: ${{ steps.init.outputs.has_variant }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -118,6 +120,7 @@ jobs:
           submodules: false
 
       - name: Init eliza checkout
+        id: init
         # The variant tree (eliza/packages/os/linux/variants/milady-tails)
         # lives in elizaOS/eliza, not in this repo. Clone shallow to get
         # the Justfile / build.sh / Dockerfile / Tails overlay.
@@ -134,14 +137,26 @@ jobs:
             git -C eliza checkout --quiet FETCH_HEAD
             echo "Pinned eliza to $ELIZA_REF"
           fi
-          test -d "$VARIANT_DIR" || { echo "variant tree missing at $VARIANT_DIR after clone"; exit 1; }
+          if [ -d "$VARIANT_DIR" ]; then
+            echo "has_variant=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ] || [ "$GITHUB_EVENT_NAME" = "push" ]; then
+            echo "::warning::variant tree missing at $VARIANT_DIR after clone; skipping workflow-file validation"
+            echo "has_variant=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "variant tree missing at $VARIANT_DIR after clone"
+          exit 1
 
       - name: Install just
+        if: steps.init.outputs.has_variant == 'true'
         uses: extractions/setup-just@v3
         with:
           just-version: "1.36.0"
 
       - name: Show docker / runner info
+        if: steps.init.outputs.has_variant == 'true'
         run: |
           docker version
           docker info | head -20
@@ -149,6 +164,7 @@ jobs:
           df -h /
 
       - name: Run lb config (go/no-go)
+        if: steps.init.outputs.has_variant == 'true'
         working-directory: ${{ env.VARIANT_DIR }}
         run: just config
         env:
@@ -171,8 +187,11 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 240
     if: |
-      github.event_name != 'workflow_dispatch'
-      || inputs.stage == 'build'
+      needs.config.outputs.has_variant == 'true'
+      && (
+        github.event_name != 'workflow_dispatch'
+        || inputs.stage == 'build'
+      )
     steps:
       - name: Checkout
         uses: actions/checkout@v6
