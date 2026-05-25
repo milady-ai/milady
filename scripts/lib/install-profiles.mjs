@@ -182,45 +182,41 @@ export function renderInstallProfilePrompt(state) {
   return `${lines.join("\n")}\n`;
 }
 
-export async function promptInstallProfiles({
-  input = process.stdin,
-  output = process.stdout,
-  processRef = process,
-} = {}) {
-  let state = { cursor: 0, selectedIds: defaultInstallProfileIds() };
-  const wasRaw = input.isRaw ?? false;
-
-  function render() {
-    output.write("\u001b[2J\u001b[H");
-    output.write(renderInstallProfilePrompt(state));
+function setInputRawMode(input, value) {
+  if (typeof input.setRawMode === "function") {
+    input.setRawMode(value);
   }
+}
 
-  return await new Promise((resolve, reject) => {
+function createRawModeRestorer(input, wasRaw) {
+  let restored = false;
+  return () => {
+    if (restored) return;
+    restored = true;
+    setInputRawMode(input, wasRaw);
+  };
+}
+
+function waitForProfileSelection({
+  input,
+  processRef,
+  getState,
+  setState,
+  render,
+}) {
+  return new Promise((resolve, reject) => {
     let settled = false;
-    let rawModeRestored = false;
-
-    function restoreRawMode() {
-      if (rawModeRestored) return;
-      rawModeRestored = true;
-      if (typeof input.setRawMode === "function") {
-        input.setRawMode(wasRaw);
-      }
-    }
 
     function cleanup() {
-      if (settled) return;
-      settled = true;
       input.off("data", onData);
       input.off("error", onError);
       processRef.off("SIGINT", onSigint);
       processRef.off("SIGTERM", onSigterm);
-      processRef.off("beforeExit", restoreRawMode);
-      processRef.off("exit", restoreRawMode);
-      restoreRawMode();
-      output.write("\n");
     }
 
     function finish(callback, value) {
+      if (settled) return;
+      settled = true;
       cleanup();
       callback(value);
     }
@@ -244,10 +240,10 @@ export async function promptInstallProfiles({
         return;
       }
       if (key === "\r" || key === "\n") {
-        finish(resolve, normalizeInstallState(state).selectedIds);
+        finish(resolve, normalizeInstallState(getState()).selectedIds);
         return;
       }
-      state = applyInstallProfileKey(state, key);
+      setState(applyInstallProfileKey(getState(), key));
       try {
         render();
       } catch (error) {
@@ -259,17 +255,43 @@ export async function promptInstallProfiles({
     input.once("error", onError);
     processRef.once("SIGINT", onSigint);
     processRef.once("SIGTERM", onSigterm);
-    processRef.once("beforeExit", restoreRawMode);
-    processRef.once("exit", restoreRawMode);
-
-    try {
-      if (typeof input.setRawMode === "function") {
-        input.setRawMode(true);
-      }
-      input.resume();
-      render();
-    } catch (error) {
-      finish(reject, error);
-    }
   });
+}
+
+export async function promptInstallProfiles({
+  input = process.stdin,
+  output = process.stdout,
+  processRef = process,
+} = {}) {
+  let state = { cursor: 0, selectedIds: defaultInstallProfileIds() };
+  const wasRaw = input.isRaw ?? false;
+  const restoreRawMode = createRawModeRestorer(input, wasRaw);
+
+  function render() {
+    output.write("\u001b[2J\u001b[H");
+    output.write(renderInstallProfilePrompt(state));
+  }
+
+  processRef.once("beforeExit", restoreRawMode);
+  processRef.once("exit", restoreRawMode);
+
+  try {
+    setInputRawMode(input, true);
+    input.resume();
+    render();
+    return await waitForProfileSelection({
+      input,
+      processRef,
+      getState: () => state,
+      setState: (nextState) => {
+        state = nextState;
+      },
+      render,
+    });
+  } finally {
+    processRef.off("beforeExit", restoreRawMode);
+    processRef.off("exit", restoreRawMode);
+    restoreRawMode();
+    output.write("\n");
+  }
 }

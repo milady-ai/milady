@@ -27,26 +27,25 @@ function createTempDir() {
 
 function writePackageJson(packageDir: string, packageName: string) {
   mkdirSync(packageDir, { recursive: true });
-  writeFileSync(
-    path.join(packageDir, "package.json"),
-    `${JSON.stringify(
-      {
-        name: packageName,
-        scripts: {
-          build: "echo build",
-        },
+  const packageJson = JSON.stringify(
+    {
+      name: packageName,
+      scripts: {
+        build: "echo build",
       },
-      null,
-      2,
-    )}\n`,
+    },
+    null,
+    2,
   );
+  writeFileSync(path.join(packageDir, "package.json"), `${packageJson}\n`);
 }
 
 function writePackageJsonRecord(packageDir: string, packageJson: object) {
   mkdirSync(packageDir, { recursive: true });
+  const packageJsonContent = JSON.stringify(packageJson, null, 2);
   writeFileSync(
     path.join(packageDir, "package.json"),
-    `${JSON.stringify(packageJson, null, 2)}\n`,
+    `${packageJsonContent}\n`,
   );
 }
 

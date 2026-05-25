@@ -31,6 +31,12 @@ const knownWrapperOptions = new Set([
   "non-interactive",
   "yes",
 ]);
+const PROFILE_VALUE_OPTIONS = ["profile", "profiles"];
+const PROFILE_FLAG_OPTIONS = [
+  ["packages", "packages"],
+  ["local", "local"],
+  ["all", "all"],
+];
 
 function usage() {
   console.log(`usage:
@@ -71,17 +77,14 @@ function knownArgumentIndexes(tokens) {
 }
 
 function collectProfileValues(values) {
-  const profiles = [];
-  for (const value of values.profile ?? []) {
-    profiles.push(...parseInstallProfileList(value));
-  }
-  for (const value of values.profiles ?? []) {
-    profiles.push(...parseInstallProfileList(value));
-  }
-  if (values.packages) profiles.push("packages");
-  if (values.local) profiles.push("local");
-  if (values.all) profiles.push("all");
-  return profiles;
+  const profileValues = PROFILE_VALUE_OPTIONS.flatMap((option) =>
+    (values[option] ?? []).flatMap((value) => parseInstallProfileList(value)),
+  );
+  const flagValues = PROFILE_FLAG_OPTIONS.filter(
+    ([option]) => values[option],
+  ).map(([, profile]) => profile);
+
+  return [...profileValues, ...flagValues];
 }
 
 export function parseArgs(argv) {

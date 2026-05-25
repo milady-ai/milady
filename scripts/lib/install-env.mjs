@@ -147,7 +147,7 @@ export function buildPathWithNodeBin(nodeExecutable, currentPath = "") {
 }
 
 function shellQuote(value) {
-  return `'${String(value).replaceAll("'", "'\"'\"'")}'`;
+  return `'${String(value).replace(/'/g, "'\"'\"'")}'`;
 }
 
 export function writeInstallLifecycleNodeShim({
@@ -305,26 +305,42 @@ export function formatInstallReadinessError(readiness) {
   return lines.join("\n");
 }
 
+function getConfiguredPython(baseEnv) {
+  const executable = baseEnv.PYTHON || baseEnv.npm_config_python || null;
+  if (!executable) return null;
+  return (
+    probePython(executable, baseEnv) ?? {
+      executable,
+      plistlib: false,
+    }
+  );
+}
+
+function getFallbackPythonChecks(configuredPython, baseEnv) {
+  if (configuredPython) {
+    return {
+      defaultPython: null,
+      fallbackPython: null,
+    };
+  }
+
+  return {
+    defaultPython: probePython("python3", baseEnv),
+    fallbackPython: probePython("/usr/bin/python3", baseEnv),
+  };
+}
+
 export function evaluateCurrentInstallEnvironment({
   rootDir,
   baseEnv = process.env,
 } = {}) {
   const requiredVersion = readRequiredNodeVersion(rootDir ?? process.cwd());
   const activeNode = probeNode("node", baseEnv);
-  const configuredPythonExecutable =
-    baseEnv.PYTHON || baseEnv.npm_config_python || null;
-  const configuredPython = configuredPythonExecutable
-    ? (probePython(configuredPythonExecutable, baseEnv) ?? {
-        executable: configuredPythonExecutable,
-        plistlib: false,
-      })
-    : null;
-  const defaultPython = configuredPython
-    ? null
-    : probePython("python3", baseEnv);
-  const fallbackPython = configuredPython
-    ? null
-    : probePython("/usr/bin/python3", baseEnv);
+  const configuredPython = getConfiguredPython(baseEnv);
+  const { defaultPython, fallbackPython } = getFallbackPythonChecks(
+    configuredPython,
+    baseEnv,
+  );
 
   return evaluateInstallReadiness({
     requiredVersion,
