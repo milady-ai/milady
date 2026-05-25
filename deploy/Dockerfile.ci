@@ -647,7 +647,7 @@ LABEL org.opencontainers.image.title="${OCI_TITLE}" \
       org.opencontainers.image.version="${VERSION_CLEAN}" \
       org.opencontainers.image.revision="${REVISION}" \
       org.opencontainers.image.licenses="${OCI_LICENSES}"
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl ffmpeg libopus-dev \
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl ffmpeg libopus-dev libgnutls30 \
   && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY --from=pruner /app /app
