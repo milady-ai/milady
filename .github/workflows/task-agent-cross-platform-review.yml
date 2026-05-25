@@ -10,6 +10,10 @@ env:
   NODE_NO_WARNINGS: "1"
   MILADY_SKIP_LOCAL_UPSTREAMS: "1"
 
+# Default to least privilege. Override per-job where needed.
+permissions:
+  contents: read
+
 jobs:
   coordinator-platform-review:
     name: Coordinator Platform Review (${{ matrix.os }})
@@ -74,7 +78,7 @@ jobs:
         run: node eliza/packages/app-core/scripts/coordinator-cross-platform-review.mjs
 
       - name: Upload review artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: task-agent-cross-platform-review-${{ matrix.os }}
           path: .tmp/qa/

@@ -523,7 +523,21 @@ jobs:
         run: |
           yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;29.0.13113456"
+      # Link local @elizaos workspace packages into node_modules. run-mobile-build.mjs
+      # invokes vite, which imports symbols from @elizaos/ui (createVoiceCapture,
+      # VoicePill, VoicePillMessage, VoiceCaptureHandle) that ship in repo-local
+      # eliza/packages/ui but have not landed on the npm alpha dist-tag yet
+      # (currently @elizaos/ui@2.0.0-alpha.537). Without this step, vite resolves
+      # @elizaos/ui from npm and the build fails with
+      # `"createVoiceCapture" is not exported by "@elizaos/ui"`.
+      - name: Link local @elizaos workspace packages
+        run: node eliza/packages/app-core/scripts/link-docker-local-app-packages.mjs
+      # MILADY_FORCE_LOCAL_UPSTREAMS=1 forces apps/app/vite.config.ts to treat
+      # the freshly-linked eliza/ checkout as the source of truth for the
+      # @elizaos/* aliases.
       - name: Prepare Android project
+        env:
+          MILADY_FORCE_LOCAL_UPSTREAMS: "1"
         run: node eliza/packages/app-core/scripts/run-mobile-build.mjs android
       - name: Build AAB and APK
         working-directory: apps/app/android
@@ -532,7 +546,7 @@ jobs:
           ./gradlew bundleRelease assembleDebug --no-daemon
       - name: Upload AAB artifact
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: android-aab
           path: apps/app/android/app/build/outputs/bundle/release/*.aab
@@ -540,7 +554,7 @@ jobs:
           if-no-files-found: error
       - name: Upload APK artifact
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: android-apk
           path: apps/app/android/app/build/outputs/apk/debug/*.apk
@@ -622,7 +636,7 @@ jobs:
         run: sudo snap install --dangerous ${{ steps.snap.outputs.snap }}
       - name: Upload snap artifact
         if: success() && steps.snap-env.outputs.can-build == 'true' && steps.snap.outcome == 'success'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: snap-package
           path: ${{ steps.snap.outputs.snap }}
@@ -668,7 +682,7 @@ jobs:
           flatpak build-bundle repo elizaos-app.flatpak ai.elizaos.App
       - name: Upload flatpak artifact
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: flatpak-bundle
           path: eliza/packages/app-core/packaging/flatpak/elizaos-app.flatpak
@@ -706,7 +720,7 @@ jobs:
           python -m build eliza/packages/app-core/packaging/pypi/
       - name: Upload PyPI artifact
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pypi-package
           path: eliza/packages/app-core/packaging/pypi/dist/
@@ -787,7 +801,7 @@ jobs:
           cp "${debs[@]}" deb-output/
       - name: Upload deb artifact
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debian-package
           path: deb-output/
@@ -817,10 +831,23 @@ jobs:
           skip-cloud-submodule: "true"
       - name: Restore legacy electrobun compatibility path
         run: node scripts/ensure-legacy-electrobun-compat.mjs
+      # Link local @elizaos workspace packages into node_modules. run-mobile-build.mjs
+      # invokes vite, which imports symbols from @elizaos/ui (createVoiceCapture,
+      # VoicePill, VoicePillMessage, VoiceCaptureHandle) that ship in repo-local
+      # eliza/packages/ui but have not landed on the npm alpha dist-tag yet
+      # (currently @elizaos/ui@2.0.0-alpha.537). Without this step, vite resolves
+      # @elizaos/ui from npm and the build fails with
+      # `"createVoiceCapture" is not exported by "@elizaos/ui"`.
+      - name: Link local @elizaos workspace packages
+        run: node eliza/packages/app-core/scripts/link-docker-local-app-packages.mjs
+      # MILADY_FORCE_LOCAL_UPSTREAMS=1 forces apps/app/vite.config.ts to treat
+      # the freshly-linked eliza/ checkout as the source of truth for the
+      # @elizaos/* aliases.
       - name: Build iOS simulator app
         run: node eliza/packages/app-core/scripts/run-mobile-build.mjs ios
         env:
           LANG: en_US.UTF-8
+          MILADY_FORCE_LOCAL_UPSTREAMS: "1"
       - name: Verify Xcode project
         run: |
           if [ -d apps/app/ios/App ]; then
@@ -858,7 +885,22 @@ jobs:
           skip-cloud-submodule: "true"
       - name: Restore legacy electrobun compatibility path
         run: node scripts/ensure-legacy-electrobun-compat.mjs
+      # Link local @elizaos workspace packages into node_modules. `bun run build`
+      # invokes vite (via scripts/run-production-build.mjs), which imports
+      # symbols from @elizaos/ui (createVoiceCapture, VoicePill, VoicePillMessage,
+      # VoiceCaptureHandle) that ship in repo-local eliza/packages/ui but have
+      # not landed on the npm alpha dist-tag yet (currently
+      # @elizaos/ui@2.0.0-alpha.537). Without this step, vite resolves
+      # @elizaos/ui from npm and the build fails with
+      # `"createVoiceCapture" is not exported by "@elizaos/ui"`.
+      - name: Link local @elizaos workspace packages
+        run: node eliza/packages/app-core/scripts/link-docker-local-app-packages.mjs
+      # MILADY_FORCE_LOCAL_UPSTREAMS=1 forces apps/app/vite.config.ts to treat
+      # the freshly-linked eliza/ checkout as the source of truth for the
+      # @elizaos/* aliases.
       - name: Build web assets and Electrobun
+        env:
+          MILADY_FORCE_LOCAL_UPSTREAMS: "1"
         run: ELECTROBUN_SKIP_CODESIGN=1 bun run build
 
   build-homepage:

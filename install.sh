@@ -202,9 +202,57 @@ fetch_url() {
   fi
 }
 
+# SHA-256 helper. Returns the hash of stdin in lowercase hex.
+# Uses shasum on macOS, sha256sum on Linux.
+sha256_of_stdin() {
+  if command -v shasum &>/dev/null; then
+    shasum -a 256 | awk '{print $1}'
+  elif command -v sha256sum &>/dev/null; then
+    sha256sum | awk '{print $1}'
+  else
+    error "Neither shasum nor sha256sum found; cannot verify download integrity."
+    return 1
+  fi
+}
+
+# Fetch URL and verify its SHA-256 against an expected hash. Writes the
+# verified body to stdout on success, exits with non-zero on mismatch.
+# Used to gate `curl | bash` style installs of third-party bootstrap scripts.
+# SOC2 CC6.8 / CC9.2 — integrity of third-party software.
+fetch_and_verify() {
+  local url="$1" expected="$2" what="${3:-download}"
+  local body actual
+  body=$(fetch_url "$url") || {
+    error "Failed to download $what from $url"
+    return 1
+  }
+  actual=$(printf '%s' "$body" | sha256_of_stdin) || return 1
+  if [[ "$actual" != "$expected" ]]; then
+    error "SHA-256 mismatch for $what"
+    error "  url:      $url"
+    error "  expected: $expected"
+    error "  actual:   $actual"
+    error "Refusing to execute unverified content."
+    return 1
+  fi
+  printf '%s' "$body"
+}
+
 # ── Node.js check & install ─────────────────────────────────────────────────
 
 REQUIRED_NODE_VERSION="22.12.0"
+
+# Pinned SHA-256 hashes for third-party bootstrap scripts. Bump alongside
+# the corresponding pinned version when upgrading. Sourced by re-hashing
+# the upstream content with `curl -fsSL <url> | shasum -a 256`.
+NVM_INSTALL_VERSION="v0.40.2"
+NVM_INSTALL_SHA256="a909fdd01765379ebc5983674adafb8bc9de6d928bfa188761309d4a0c36be0f"
+# fnm publishes its install script at a `latest` URL with no versioned alias,
+# so we pin to the current SHA. If fnm rotates the script, this script will
+# refuse to install fnm — that's the intended fail-closed behavior. Update
+# both NVM/FNM pinned hashes only after manual review of the upstream diff.
+FNM_INSTALL_URL="https://fnm.vercel.app/install"
+FNM_INSTALL_SHA256="8431644b1c205ad25d4b09cfe10e0688944d1d2cd542f38d7b3b10e954db8ad9"
 
 check_node() {
   if command -v node &>/dev/null; then
@@ -249,8 +297,13 @@ install_node_nvm() {
   info "Installing Node.js via nvm..."
 
   if ! try_source_nvm; then
-    info "Installing nvm..."
-    fetch_url "https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.2/install.sh" | bash
+    info "Installing nvm ${NVM_INSTALL_VERSION} (verified SHA-256)..."
+    local nvm_script
+    nvm_script=$(fetch_and_verify \
+      "https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_INSTALL_VERSION}/install.sh" \
+      "$NVM_INSTALL_SHA256" \
+      "nvm install script") || return 1
+    printf '%s' "$nvm_script" | bash
     export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
     # shellcheck disable=SC1091
     source "$NVM_DIR/nvm.sh"
@@ -272,8 +325,13 @@ install_node_fnm() {
   info "Installing Node.js via fnm..."
 
   if ! command -v fnm &>/dev/null; then
-    info "Installing fnm..."
-    fetch_url "https://fnm.vercel.app/install" | bash
+    info "Installing fnm (verified SHA-256)..."
+    local fnm_script
+    fnm_script=$(fetch_and_verify \
+      "$FNM_INSTALL_URL" \
+      "$FNM_INSTALL_SHA256" \
+      "fnm install script") || return 1
+    printf '%s' "$fnm_script" | bash
     # fnm installs to different locations per platform
     for p in \
       "$HOME/.local/share/fnm" \

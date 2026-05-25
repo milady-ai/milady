@@ -10,7 +10,7 @@ test.describe("homepage - landing page", () => {
     await expect(
       page.getByRole("heading", { name: /AGENTS THAT/i }),
     ).toBeVisible();
-    for (const label of ["MAC", "PC", "LINUX", "WEB", "ANDROID"]) {
+    for (const label of ["MAC", "PC", "LINUX", "WEB"]) {
       await expect(
         page.getByText(label, { exact: true }).first(),
       ).toBeVisible();

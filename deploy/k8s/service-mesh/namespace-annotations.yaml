@@ -1,0 +1,22 @@
+# Opt-in mTLS via Linkerd. Apply ONLY after `linkerd check` is clean.
+# Each annotated namespace will get sidecar injection on next pod restart.
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: eliza-agents
+  annotations:
+    # TODO(soc2): uncomment to enable mesh injection.
+    # linkerd.io/inject: enabled
+  labels:
+    kubernetes.io/metadata.name: eliza-agents
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: eliza-infra
+  annotations:
+    # TODO(soc2): uncomment to enable mesh injection.
+    # linkerd.io/inject: enabled
+  labels:
+    kubernetes.io/metadata.name: eliza-infra

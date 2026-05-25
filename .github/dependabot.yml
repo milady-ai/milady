@@ -1,0 +1,25 @@
+version: 2
+updates:
+  # Workspace root — bun monorepo. Dependabot reads every package.json across
+  # workspaces from the root.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      dev-dependencies:
+        dependency-type: "development"
+      production-minor-patch:
+        dependency-type: "production"
+        update-types: ["minor", "patch"]
+
+  # GitHub Actions — security-critical surface; pin SHAs preferred over tags.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      actions:
+        patterns: ["*"]

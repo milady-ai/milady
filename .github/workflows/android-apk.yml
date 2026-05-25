@@ -8,6 +8,10 @@ on:
         required: false
         default: develop
 
+# Default to least privilege. Override per-job where needed.
+permissions:
+  contents: read
+
 jobs:
   build:
     name: Build APK
@@ -48,7 +52,7 @@ jobs:
           chmod +x ./gradlew
           ./gradlew assembleDebug --no-daemon
       - name: Upload APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: android-apk
           path: apps/app/android/app/build/outputs/apk/debug/*.apk

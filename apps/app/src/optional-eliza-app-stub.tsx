@@ -28,6 +28,17 @@ import type {
 import type { ComponentType } from "react";
 import * as THREE from "three";
 
+// Mirrors the confirm-dialog PromptOptions shape; this package-mode stub cannot
+// import the unpublished deep UI subpath.
+type PromptOptions = {
+  title: string;
+  description?: string;
+  placeholder?: string;
+  initialValue?: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+};
+
 const EmptyComponent: ComponentType = () => null;
 
 export function CompanionShell(_props: CompanionShellComponentProps): null {

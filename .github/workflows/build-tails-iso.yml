@@ -14,8 +14,10 @@
 #       skip_website  : "1" (default, skip rebuilding bundled docs) / "0"
 #       boot_check    : "false" (default) / "true" — boot ISO under QEMU after
 #                       build to verify it actually starts. Adds ~10-20 min.
-#   - push to develop, ONLY when paths under the variant tree change.
-#   - pull_request targeting develop, same path filter, for PRs touching it.
+#   - push to develop, ONLY when the workflow file itself changes (the
+#     variant tree lives in the upstream elizaOS/eliza repo, not here, so
+#     it can't be path-filtered from this repo's events).
+#   - pull_request targeting develop, same trigger.
 #
 # What this workflow does NOT do:
 #   - Sign or publish the ISO. The ISO is uploaded as a workflow artifact only.
@@ -56,17 +58,28 @@ on:
         required: false
         type: boolean
         default: false
+      eliza_ref:
+        description: "Optional commit SHA or tag in elizaOS/eliza to pin the variant tree to (defaults to tip of eliza_branch)"
+        required: false
+        type: string
+        default: ""
+      eliza_branch:
+        description: "Branch in elizaOS/eliza to clone when no eliza_ref is provided"
+        required: false
+        type: string
+        default: "develop"
   push:
     branches:
       - develop
     paths:
-      - "eliza/packages/os/linux/variants/milady-tails/**"
+      # The variant tree lives in elizaOS/eliza, not this repo, so it can't
+      # be path-filtered here. Trigger only on workflow file edits — full
+      # builds against new upstream commits go through workflow_dispatch.
       - ".github/workflows/build-tails-iso.yml"
   pull_request:
     branches:
       - develop
     paths:
-      - "eliza/packages/os/linux/variants/milady-tails/**"
       - ".github/workflows/build-tails-iso.yml"
 
 # One run per (workflow, ref). Newer pushes cancel older in-flight builds for
@@ -93,6 +106,8 @@ jobs:
     name: lb config (go/no-go)
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    outputs:
+      has_variant: ${{ steps.init.outputs.has_variant }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -104,12 +119,44 @@ jobs:
           # don't need recursive submodule init for this build.
           submodules: false
 
+      - name: Init eliza checkout
+        id: init
+        # The variant tree (eliza/packages/os/linux/variants/milady-tails)
+        # lives in elizaOS/eliza, not in this repo. Clone shallow to get
+        # the Justfile / build.sh / Dockerfile / Tails overlay.
+        env:
+          ELIZA_BRANCH: ${{ inputs.eliza_branch || 'develop' }}
+          ELIZA_REF: ${{ inputs.eliza_ref || '' }}
+        run: |
+          set -euo pipefail
+          if [ ! -f eliza/package.json ]; then
+            git clone --depth=1 --branch "$ELIZA_BRANCH" https://github.com/elizaOS/eliza.git eliza
+          fi
+          if [ -n "$ELIZA_REF" ]; then
+            git -C eliza fetch --depth=1 origin "$ELIZA_REF"
+            git -C eliza checkout --quiet FETCH_HEAD
+            echo "Pinned eliza to $ELIZA_REF"
+          fi
+          if [ -d "$VARIANT_DIR" ]; then
+            echo "has_variant=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ] || [ "$GITHUB_EVENT_NAME" = "push" ]; then
+            echo "::warning::variant tree missing at $VARIANT_DIR after clone; skipping workflow-file validation"
+            echo "has_variant=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "variant tree missing at $VARIANT_DIR after clone"
+          exit 1
+
       - name: Install just
+        if: steps.init.outputs.has_variant == 'true'
         uses: extractions/setup-just@v3
         with:
           just-version: "1.36.0"
 
       - name: Show docker / runner info
+        if: steps.init.outputs.has_variant == 'true'
         run: |
           docker version
           docker info | head -20
@@ -117,6 +164,7 @@ jobs:
           df -h /
 
       - name: Run lb config (go/no-go)
+        if: steps.init.outputs.has_variant == 'true'
         working-directory: ${{ env.VARIANT_DIR }}
         run: just config
         env:
@@ -139,14 +187,33 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 240
     if: |
-      github.event_name != 'workflow_dispatch'
-      || inputs.stage == 'build'
+      needs.config.outputs.has_variant == 'true'
+      && (
+        github.event_name != 'workflow_dispatch'
+        || inputs.stage == 'build'
+      )
     steps:
       - name: Checkout
         uses: actions/checkout@v6
         with:
           fetch-depth: 1
           submodules: false
+
+      - name: Init eliza checkout
+        env:
+          ELIZA_BRANCH: ${{ inputs.eliza_branch || 'develop' }}
+          ELIZA_REF: ${{ inputs.eliza_ref || '' }}
+        run: |
+          set -euo pipefail
+          if [ ! -f eliza/package.json ]; then
+            git clone --depth=1 --branch "$ELIZA_BRANCH" https://github.com/elizaOS/eliza.git eliza
+          fi
+          if [ -n "$ELIZA_REF" ]; then
+            git -C eliza fetch --depth=1 origin "$ELIZA_REF"
+            git -C eliza checkout --quiet FETCH_HEAD
+            echo "Pinned eliza to $ELIZA_REF"
+          fi
+          test -d "$VARIANT_DIR" || { echo "variant tree missing at $VARIANT_DIR after clone"; exit 1; }
 
       - name: Install just
         uses: extractions/setup-just@v3
@@ -222,7 +289,7 @@ jobs:
 
       - name: Upload ISO artifact
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: milady-tails-iso-${{ github.sha }}
           path: ${{ env.VARIANT_DIR }}/out/*.iso
@@ -231,7 +298,7 @@ jobs:
 
       - name: Upload build logs on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: milady-tails-buildlogs-${{ github.sha }}
           path: |
@@ -262,6 +329,23 @@ jobs:
           fetch-depth: 1
           submodules: false
 
+      - name: Init eliza checkout
+        # The download-artifact / qemu steps write under VARIANT_DIR, so
+        # the directory tree has to exist on disk first.
+        env:
+          ELIZA_BRANCH: ${{ inputs.eliza_branch || 'develop' }}
+          ELIZA_REF: ${{ inputs.eliza_ref || '' }}
+        run: |
+          set -euo pipefail
+          if [ ! -f eliza/package.json ]; then
+            git clone --depth=1 --branch "$ELIZA_BRANCH" https://github.com/elizaOS/eliza.git eliza
+          fi
+          if [ -n "$ELIZA_REF" ]; then
+            git -C eliza fetch --depth=1 origin "$ELIZA_REF"
+            git -C eliza checkout --quiet FETCH_HEAD
+          fi
+          test -d "$VARIANT_DIR" || { echo "variant tree missing at $VARIANT_DIR after clone"; exit 1; }
+
       - name: Install QEMU + OVMF
         run: |
           sudo apt-get update
@@ -269,7 +353,7 @@ jobs:
               qemu-system-x86 qemu-utils ovmf
 
       - name: Download ISO artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: milady-tails-iso-${{ github.sha }}
           path: ${{ env.VARIANT_DIR }}/out
@@ -278,7 +362,7 @@ jobs:
         working-directory: ${{ env.VARIANT_DIR }}
         run: |
           set -euo pipefail
-          ISO="$(ls -1 out/*.iso | head -n1)"
+          ISO="$(find out -maxdepth 1 -type f -name '*.iso' -print -quit)"
           test -n "$ISO" || { echo "no ISO found"; exit 1; }
           echo "Booting $ISO under QEMU…"
           # 90s ceiling — we're only checking the bootloader screen, not full
@@ -303,7 +387,7 @@ jobs:
 
       - name: Upload QEMU log
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: milady-tails-qemu-log-${{ github.sha }}
           path: ${{ env.VARIANT_DIR }}/qemu.log

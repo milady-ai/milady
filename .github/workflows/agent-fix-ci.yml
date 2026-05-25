@@ -28,6 +28,10 @@ env:
   MAX_FIX_ATTEMPTS: "3"
   MILADY_SKIP_LOCAL_UPSTREAMS: "1"
 
+# Default to least privilege. Override per-job where needed.
+permissions:
+  contents: read
+
 jobs:
   should-fix:
     name: Check eligibility

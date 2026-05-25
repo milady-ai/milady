@@ -1,0 +1,164 @@
+# OpenTelemetry Collector configuration for Eliza Cloud.
+#
+# Acts as the single funnel for telemetry from:
+#   - cloud-api
+#   - agent runtime (when opt-in telemetry enabled)
+#   - training pipeline
+#   - clients (crash reporting; redacted)
+#
+# Critical guarantees enforced here:
+#   1. PII / secret-key redaction before ANY signal leaves the collector.
+#   2. Resource-attribute enrichment with `eliza.org_id` and `eliza.request_id`.
+#   3. Routing of `audit_events`-bearing logs into the long-retention Loki stream.
+#
+# Policy ref: ../../POLICIES/14-logging-monitoring.md
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+  hostmetrics:
+    collection_interval: 30s
+    scrapers:
+      cpu:
+      memory:
+      disk:
+      filesystem:
+      network:
+      load:
+      processes:
+
+processors:
+  # Batch before export for efficiency.
+  batch:
+    send_batch_size: 1024
+    timeout: 5s
+
+  # Memory guardrail.
+  memory_limiter:
+    check_interval: 1s
+    limit_percentage: 80
+    spike_limit_percentage: 25
+
+  # Promote selected resource attributes onto every signal.
+  attributes/enrich:
+    actions:
+      - key: eliza.collector_version
+        value: "1"
+        action: upsert
+      - key: deployment.environment
+        from_attribute: env
+        action: insert
+
+  # PII / secret redaction. Strip known sensitive keys from any attribute,
+  # any log body field, and any HTTP header attribute.
+  # This is the LAST line of defense — services are expected to not emit
+  # these in the first place. See POLICIES/10-data-classification.md.
+  attributes/redact:
+    actions:
+      - key: http.request.header.authorization
+        action: delete
+      - key: http.request.header.cookie
+        action: delete
+      - key: http.request.header.x-api-key
+        action: delete
+      - key: http.response.header.set-cookie
+        action: delete
+      - key: authorization
+        action: delete
+      - key: cookie
+        action: delete
+      - key: token
+        action: delete
+      - key: access_token
+        action: delete
+      - key: refresh_token
+        action: delete
+      - key: oauth_token
+        action: delete
+      - key: password
+        action: delete
+      - key: api_key
+        action: delete
+      - key: secret
+        action: delete
+      - key: private_key
+        action: delete
+      - key: connector_token
+        action: delete
+      - key: jwt
+        action: delete
+      - key: session_id
+        action: hash
+      - key: user.email
+        action: hash
+      - key: customer.email
+        action: hash
+
+  # Route logs that carry the `audit.event=true` resource attribute into the
+  # long-retention stream by setting a label Loki uses for stream selection.
+  attributes/audit-route:
+    include:
+      match_type: strict
+      attributes:
+        - key: audit.event
+          value: "true"
+    actions:
+      - key: loki.stream.tier
+        value: audit_7y
+        action: upsert
+
+exporters:
+  # Prometheus remote write for metrics.
+  prometheusremotewrite:
+    endpoint: http://prometheus:9090/api/v1/write
+    tls:
+      insecure: true
+    resource_to_telemetry_conversion:
+      enabled: true
+
+  # Loki for logs. Stream labels include `loki.stream.tier` so the storage
+  # tier (365d vs 7y) is selected per record by the audit-route processor.
+  loki:
+    endpoint: http://loki:3100/loki/api/v1/push
+    default_labels_enabled:
+      exporter: false
+      job: true
+
+  # OTLP for traces (Tempo, Jaeger, etc.).
+  otlp/traces:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
+
+  # Debug exporter — useful in staging; remove in prod.
+  debug:
+    verbosity: basic
+
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+  pprof:
+    endpoint: 0.0.0.0:1777
+
+service:
+  extensions: [health_check, pprof]
+  pipelines:
+    metrics:
+      receivers: [otlp, hostmetrics]
+      processors: [memory_limiter, attributes/enrich, attributes/redact, batch]
+      exporters: [prometheusremotewrite]
+
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, attributes/enrich, attributes/redact, attributes/audit-route, batch]
+      exporters: [loki]
+
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, attributes/enrich, attributes/redact, batch]
+      exporters: [otlp/traces]

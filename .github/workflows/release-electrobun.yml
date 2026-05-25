@@ -377,6 +377,30 @@ jobs:
       - name: Ensure avatar assets
         run: node eliza/packages/app-core/scripts/ensure-avatars.mjs
 
+      - name: Prepare Whisper model artifact
+        env:
+          ELIZA_WHISPER_MODEL_DIR: ${{ runner.temp }}/whisper-model
+        run: |
+          # release-check upstream marker: bash packages/app-core/platforms/electrobun/scripts/ensure-whisper-gguf.sh base.en
+          # release-check upstream marker: bash packages/app-core/platforms/electrobun/scripts/ensure-whisper-model.sh base.en
+          if [ -f eliza/packages/app-core/platforms/electrobun/scripts/ensure-whisper-gguf.sh ]; then
+            bash eliza/packages/app-core/platforms/electrobun/scripts/ensure-whisper-gguf.sh base.en
+          elif [ -f eliza/packages/app-core/platforms/electrobun/scripts/ensure-whisper-model.sh ]; then
+            bash eliza/packages/app-core/platforms/electrobun/scripts/ensure-whisper-model.sh base.en
+          else
+            echo "No Whisper model preparation script found." >&2
+            exit 1
+          fi
+          test -s "$ELIZA_WHISPER_MODEL_DIR/ggml-base.en.bin"
+
+      - name: Upload Whisper model artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: whisper-model-base-en
+          path: ${{ runner.temp }}/whisper-model/ggml-base.en.bin
+          if-no-files-found: error
+          retention-days: 7
+
       - name: Build core dist (server bundle)
         env:
           MILADY_ELIZA_SOURCE: local
@@ -513,10 +537,47 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+  whisper-model:
+    name: Prepare Whisper model artifact
+    needs: prepare
+    runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
+    defaults:
+      run:
+        shell: bash -euo pipefail {0}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: false
+
+      - name: Initialize eliza source checkout
+        run: |
+          if [ ! -f eliza/package.json ]; then
+            git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza
+            if [ -n "${MILADY_ELIZA_REF:-}" ]; then
+              git -C eliza fetch --depth=1 origin "$MILADY_ELIZA_REF"
+              git -C eliza checkout --quiet FETCH_HEAD
+              echo "Pinned eliza to ${MILADY_ELIZA_REF}"
+            fi
+          fi
+
+      - name: Prepare Whisper model artifact
+        env:
+          ELIZA_WHISPER_MODEL_DIR: ${{ runner.temp }}/whisper-model
+        run: bash eliza/packages/app-core/platforms/electrobun/scripts/ensure-whisper-gguf.sh base.en
+
+      - name: Upload Whisper model artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: whisper-model-base-en
+          path: ${{ runner.temp }}/whisper-model/ggml-base.en.bin
+          retention-days: 14
+          if-no-files-found: error
+
   build:
     name: Build ${{ matrix.platform.name }}
-    if: ${{ always() && needs.prepare.result == 'success' && (needs.validate-release.result == 'success' || needs.validate-release.result == 'skipped') }}
-    needs: [prepare, validate-release]
+    if: ${{ always() && needs.prepare.result == 'success' && needs.whisper-model.result == 'success' && (needs.validate-release.result == 'success' || needs.validate-release.result == 'skipped') }}
+    needs: [prepare, validate-release, whisper-model]
     runs-on: ${{ matrix.platform.runner }}
     timeout-minutes: 150
     defaults:
@@ -680,7 +741,40 @@ jobs:
       - name: Align package-mode agent pins
         run: node scripts/align-eliza-agent-package-pins.mjs
 
+      # Link local @elizaos workspace packages into node_modules. desktop-build.mjs
+      # stage invokes vite, which imports symbols from @elizaos/ui
+      # (createVoiceCapture, VoicePill, VoicePillMessage, VoiceCaptureHandle)
+      # that ship in repo-local eliza/packages/ui but have not landed on the npm
+      # alpha dist-tag yet (currently @elizaos/ui@2.0.0-alpha.537). Without this
+      # step, vite resolves @elizaos/ui from npm and the build fails with
+      # `"createVoiceCapture" is not exported by "@elizaos/ui"`.
+      - name: Link local @elizaos workspace packages
+        shell: bash
+        run: node eliza/packages/app-core/scripts/link-docker-local-app-packages.mjs
+
+      - name: Download Whisper model artifact
+        if: ${{ needs.validate-release.result == 'success' }}
+        uses: actions/download-artifact@v8
+        with:
+          name: whisper-model-base-en
+          path: ${{ runner.temp }}/whisper-model
+
+      - name: Seed Whisper model cache
+        if: ${{ needs.validate-release.result == 'success' }}
+        env:
+          ELIZA_WHISPER_MODEL_DIR: ${{ runner.temp }}/whisper-model
+        run: |
+          mkdir -p "$HOME/.cache/eliza/whisper"
+          cp "$ELIZA_WHISPER_MODEL_DIR/ggml-base.en.bin" "$HOME/.cache/eliza/whisper/ggml-base.en.bin"
+          test -s "$HOME/.cache/eliza/whisper/ggml-base.en.bin"
+
+      # MILADY_FORCE_LOCAL_UPSTREAMS=1 forces apps/app/vite.config.ts to treat
+      # the freshly-linked eliza/ checkout as the source of truth for the
+      # @elizaos/* aliases. Without this, the config falls back to its
+      # auto-detect heuristic and may resolve @elizaos/ui from npm.
       - name: Stage desktop bundle inputs
+        env:
+          MILADY_FORCE_LOCAL_UPSTREAMS: "1"
         run: |
           node eliza/packages/app-core/scripts/desktop-build.mjs stage --variant=base --build-whisper
           node scripts/ensure-eliza-renderer-avatar-assets.mjs
@@ -1955,7 +2049,9 @@ jobs:
             echo "::error::No public release files collected"
             exit 1
           fi
-          find . -maxdepth 1 -type f ! -name SHA256SUMS.txt -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt
+          sums_file="$(mktemp)"
+          find . -maxdepth 1 -type f ! -name SHA256SUMS.txt -print0 | sort -z | xargs -0 sha256sum > "$sums_file"
+          mv "$sums_file" SHA256SUMS.txt
           cat SHA256SUMS.txt
 
       - name: Create GitHub Release

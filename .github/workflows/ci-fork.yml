@@ -12,6 +12,10 @@ concurrency:
 env:
   BUN_VERSION: "1.3.13"
 
+# Default to least privilege. Override per-job where needed.
+permissions:
+  contents: read
+
 jobs:
   lint:
     name: Lint & Format
@@ -119,7 +123,23 @@ jobs:
       - name: Restore eliza workspace paths for repo scripts
         run: node scripts/restore-local-eliza-workspace.mjs
 
+      # Link local @elizaos workspace packages into node_modules. `bun run build`
+      # invokes vite (via scripts/run-production-build.mjs), which imports
+      # symbols from @elizaos/ui (createVoiceCapture, VoicePill, VoicePillMessage,
+      # VoiceCaptureHandle) that ship in repo-local eliza/packages/ui but have
+      # not landed on the npm alpha dist-tag yet (currently
+      # @elizaos/ui@2.0.0-alpha.537). Without this step, vite resolves
+      # @elizaos/ui from npm and the build fails with
+      # `"createVoiceCapture" is not exported by "@elizaos/ui"`.
+      - name: Link local @elizaos workspace packages
+        run: node eliza/packages/app-core/scripts/link-docker-local-app-packages.mjs
+
+      # MILADY_FORCE_LOCAL_UPSTREAMS=1 forces apps/app/vite.config.ts to treat
+      # the freshly-linked eliza/ checkout as the source of truth for the
+      # @elizaos/* aliases.
       - name: Build project
+        env:
+          MILADY_FORCE_LOCAL_UPSTREAMS: "1"
         run: bun run build
 
       - name: Build homepage

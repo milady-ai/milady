@@ -1,0 +1,28 @@
+---
+description: Electrobun Agentic Desktop 2026 rules for Bun, TypeScript, typed RPC, sandboxing, updates, and release automation.
+globs:
+  - "**/*.ts"
+  - "**/*.tsx"
+  - "**/*.html"
+  - "**/*.css"
+- "package.json"
+- "electrobun.config.ts"
+- "eliza/packages/app-core/platforms/electrobun/**"
+- "apps/app/**"
+- "AGENTS.md"
+alwaysApply: true
+---
+
+# Electrobun Agentic Desktop 2026
+
+- Inspect `package.json`, `eliza/packages/app-core/platforms/electrobun/electrobun.config.ts`, desktop shell code, `apps/app`, tests, scripts, and relevant release settings before editing.
+- Treat root `AGENTS.md` as authoritative; this rules pack is additional desktop guidance.
+- Prefer Electrobun APIs and Bun tooling over generic Electron/Node patterns.
+- Keep Bun ↔ view RPC typed with shared request/response types.
+- Sandbox untrusted BrowserViews/webview tags, disable RPC, use navigation allowlists, and isolate partitions.
+- Use `Bun.secrets` for credentials and avoid secrets in source/logs/prompts/tests.
+- Use `bun:sqlite` or Bun SQL for local structured data unless the project already chose an ORM.
+- Agent tools require typed schemas, permission gates, timeout, cancellation, tests, and privacy review.
+- Run or provide `bun test`, `bun run typecheck`, `bun run build:dev`, or focused validation scripts after changes.
+- Do not create fake App Intents/Foundation Models/widgets/App Clips. Port Apple concepts to Electrobun equivalents only.
+- The workflow examples archived in `docs/agent-packs/electrobun-agentic-desktop-2026/.github/workflows/` are not active CI unless explicitly approved.

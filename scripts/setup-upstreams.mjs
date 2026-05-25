@@ -106,12 +106,21 @@ export const ELIZA_BUILD_STEPS = [
     args: ["run", "build"],
     label: "@elizaos/cloud-routing",
   },
+  {
+    check: path.join("packages", "app-core", "dist", "index.js"),
+    cwd: path.join("packages", "app-core"),
+    args: ["run", "build"],
+    label: "@elizaos/app-core",
+  },
 ];
 export const ELIZA_TYPESCRIPT_BUILD_DEPENDENCIES = [
   "@types/node",
   "@types/bun",
   "bun-types",
 ];
+export const CLOUD_DEPENDENT_PLUGIN_PACKAGE_NAMES = new Set([
+  "@elizaos/plugin-elizacloud",
+]);
 const ELIZA_TYPESCRIPT_AMBIENT_DEPENDENCIES = new Set(
   ELIZA_TYPESCRIPT_BUILD_DEPENDENCIES,
 );
@@ -797,7 +806,7 @@ function discoverElizaPackageDirs(elizaRoot) {
   ]);
 }
 
-function discoverPluginPackageDirs(pluginsRoot) {
+function discoverPluginPackageDirs(pluginsRoot, { excludedPackageNames } = {}) {
   if (!existsSync(pluginsRoot)) {
     return [];
   }
@@ -819,6 +828,9 @@ function discoverPluginPackageDirs(pluginsRoot) {
     const tsDir = path.join(repoDir, "typescript");
     const tsPackage = readPackageJson(tsDir);
     if (tsPackage?.name?.startsWith("@elizaos/")) {
+      if (excludedPackageNames?.has(tsPackage.name)) {
+        continue;
+      }
       packageDirs.push(tsDir);
       continue;
     }
@@ -831,6 +843,9 @@ function discoverPluginPackageDirs(pluginsRoot) {
       !rootName.endsWith("-root");
 
     if (shouldLinkRoot) {
+      if (excludedPackageNames?.has(rootName)) {
+        continue;
+      }
       packageDirs.push(repoDir);
     }
   }
@@ -862,9 +877,12 @@ export function getPluginPackageLinks(
   repoRoot = DEFAULT_REPO_ROOT,
   pluginsRoot = getRepoPluginsRoot(repoRoot),
   linkRootPaths = getPackageLinkRootPaths(repoRoot, { pluginsRoot }),
+  { excludedPackageNames } = {},
 ) {
   const links = [];
-  for (const packageDir of discoverPluginPackageDirs(pluginsRoot)) {
+  for (const packageDir of discoverPluginPackageDirs(pluginsRoot, {
+    excludedPackageNames,
+  })) {
     const packageJson = readPackageJson(packageDir);
     links.push(
       ...getPackageLinkEntries(
@@ -883,6 +901,7 @@ export function getUpstreamPackageLinks(
   {
     elizaRoot = getRepoElizaRoot(repoRoot),
     pluginsRoot = getRepoPluginsRoot(repoRoot),
+    excludedPackageNames,
   } = {},
 ) {
   const combinedByTarget = new Map();
@@ -899,6 +918,7 @@ export function getUpstreamPackageLinks(
     repoRoot,
     pluginsRoot,
     linkRootPaths,
+    { excludedPackageNames },
   )) {
     combinedByTarget.set(link.linkPath, link);
   }
@@ -1116,10 +1136,75 @@ function ensurePackageBinLinks(
   return linkedBins;
 }
 
+function parseSemverMajor(version) {
+  const match = String(version ?? "").match(/^v?(\d+)\./);
+  return match ? Number(match[1]) : null;
+}
+
+function parseBunStorePackageVersion(entryName, packagePrefix) {
+  return entryName.slice(packagePrefix.length).split("+")[0] ?? null;
+}
+
+function dependencySpecifierMatchesVersion(specifier, version) {
+  if (typeof specifier !== "string" || specifier.length === 0) {
+    return true;
+  }
+  if (
+    specifier === "*" ||
+    specifier === "latest" ||
+    /^(?:workspace|file|link|portal|github|git|https?):/.test(specifier)
+  ) {
+    return true;
+  }
+
+  for (const part of specifier.split("||").map((entry) => entry.trim())) {
+    const normalized = part.replace(/^[~^>=<\s]+/, "");
+    if (!normalized) {
+      continue;
+    }
+    if (normalized === version) {
+      return true;
+    }
+    const requestedMajor = parseSemverMajor(normalized);
+    const candidateMajor = parseSemverMajor(version);
+    if (
+      requestedMajor !== null &&
+      candidateMajor !== null &&
+      requestedMajor === candidateMajor
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function compareSemverDesc(leftVersion, rightVersion) {
+  const left = String(leftVersion ?? "")
+    .split(/[.-]/)
+    .map((part) => Number.parseInt(part, 10));
+  const right = String(rightVersion ?? "")
+    .split(/[.-]/)
+    .map((part) => Number.parseInt(part, 10));
+  const length = Math.max(left.length, right.length);
+  for (let index = 0; index < length; index += 1) {
+    const leftPart = Number.isNaN(left[index]) ? 0 : (left[index] ?? 0);
+    const rightPart = Number.isNaN(right[index]) ? 0 : (right[index] ?? 0);
+    if (leftPart !== rightPart) {
+      return rightPart - leftPart;
+    }
+  }
+  return 0;
+}
+
+function readPackageVersion(packageDir) {
+  return readPackageJson(packageDir)?.version ?? null;
+}
+
 export function findInstalledPackageDir(
   repoRoot,
   packageName,
-  preferredVersion,
+  dependencySpecifier,
   localTargetPath = null,
   { searchRoots = [repoRoot] } = {},
 ) {
@@ -1139,17 +1224,20 @@ export function findInstalledPackageDir(
     );
     try {
       const resolved = realpathSync(directPackagePath);
-      if (existsSync(resolved) && resolved !== resolvedLocalTarget) {
+      if (
+        existsSync(resolved) &&
+        resolved !== resolvedLocalTarget &&
+        dependencySpecifierMatchesVersion(
+          dependencySpecifier,
+          readPackageVersion(resolved),
+        )
+      ) {
         return directPackagePath;
       }
     } catch {}
   }
 
   const packagePrefix = `${packageName.replace("/", "+")}@`;
-  const preferredPrefix =
-    preferredVersion === undefined
-      ? null
-      : `${packageName.replace("/", "+")}@${preferredVersion}+`;
 
   for (const searchRoot of uniqueSearchRoots) {
     const bunCacheRoot = path.join(searchRoot, "node_modules", ".bun");
@@ -1174,15 +1262,21 @@ export function findInstalledPackageDir(
         continue;
       }
 
+      const version = parseBunStorePackageVersion(entry.name, packagePrefix);
       matches.push({
         candidate,
-        preferred:
-          preferredPrefix !== null && entry.name.startsWith(preferredPrefix),
+        version,
+        preferred: dependencySpecifierMatchesVersion(
+          dependencySpecifier,
+          version,
+        ),
       });
     }
 
     matches.sort(
-      (left, right) => Number(right.preferred) - Number(left.preferred),
+      (left, right) =>
+        Number(right.preferred) - Number(left.preferred) ||
+        compareSemverDesc(left.version, right.version),
     );
     if (matches[0]?.candidate) {
       return matches[0].candidate;
@@ -1195,11 +1289,14 @@ export function findInstalledPackageDir(
 export function ensurePluginDependencyLinks(
   repoRoot,
   pluginsRoot = getRepoPluginsRoot(repoRoot),
+  { excludedPackageNames } = {},
 ) {
   let linkedDependencies = 0;
   const searchRoots = [getRepoElizaRoot(repoRoot), repoRoot];
 
-  for (const packageDir of discoverPluginPackageDirs(pluginsRoot)) {
+  for (const packageDir of discoverPluginPackageDirs(pluginsRoot, {
+    excludedPackageNames,
+  })) {
     const packageJson = readPackageJson(packageDir);
     const packageName = packageJson?.name;
     if (!packageName?.startsWith("@elizaos/")) {
@@ -1223,10 +1320,11 @@ export function ensurePluginDependencyLinks(
     }
 
     for (const dependencyName of dependencyNames) {
+      const dependencySpecifier = packageDependencies[dependencyName];
       const installedDependencyDir = findInstalledPackageDir(
         repoRoot,
         dependencyName,
-        undefined,
+        dependencySpecifier,
         null,
         { searchRoots },
       );
@@ -1739,20 +1837,21 @@ export async function ensureElizaBuildOutputs(
 export async function ensurePluginBuildOutputs(
   pluginsRoot,
   {
+    excludedPackageNames,
     pathExists = existsSync,
     runCommandImpl = runCommand,
     requiredPackageNames = new Set(),
   } = {},
 ) {
-  const packageDirs = discoverPluginPackageDirs(pluginsRoot).sort(
-    (left, right) => {
-      const leftName = readPackageJson(left)?.name;
-      const rightName = readPackageJson(right)?.name;
-      const leftRequired = requiredPackageNames.has(leftName) ? 0 : 1;
-      const rightRequired = requiredPackageNames.has(rightName) ? 0 : 1;
-      return leftRequired - rightRequired || left.localeCompare(right);
-    },
-  );
+  const packageDirs = discoverPluginPackageDirs(pluginsRoot, {
+    excludedPackageNames,
+  }).sort((left, right) => {
+    const leftName = readPackageJson(left)?.name;
+    const rightName = readPackageJson(right)?.name;
+    const leftRequired = requiredPackageNames.has(leftName) ? 0 : 1;
+    const rightRequired = requiredPackageNames.has(rightName) ? 0 : 1;
+    return leftRequired - rightRequired || left.localeCompare(right);
+  });
 
   for (const packageDir of packageDirs) {
     const packageJson = readPackageJson(packageDir);
@@ -1789,18 +1888,37 @@ export function linkUpstreamPackages(
   {
     elizaRoot = getRepoElizaRoot(repoRoot),
     pluginsRoot = getRepoPluginsRoot(repoRoot),
+    excludedPackageNames,
   } = {},
 ) {
   let updatedLinks = 0;
   for (const { linkPath, targetPath } of getUpstreamPackageLinks(repoRoot, {
     elizaRoot,
     pluginsRoot,
+    excludedPackageNames,
   })) {
     if (createPackageLink(linkPath, targetPath)) {
       updatedLinks += 1;
     }
   }
   return updatedLinks;
+}
+
+export function getUnavailableLocalPluginPackageNames(
+  elizaRoot,
+  { pathExists = existsSync } = {},
+) {
+  const unavailable = new Set();
+  if (
+    !pathExists(
+      path.join(elizaRoot, "cloud", "packages", "sdk", "package.json"),
+    )
+  ) {
+    for (const packageName of CLOUD_DEPENDENT_PLUGIN_PACKAGE_NAMES) {
+      unavailable.add(packageName);
+    }
+  }
+  return unavailable;
 }
 
 export async function setupUpstreams(repoRoot = DEFAULT_REPO_ROOT) {
@@ -1859,17 +1977,31 @@ export async function setupUpstreams(repoRoot = DEFAULT_REPO_ROOT) {
       .filter((packageName) => packageName.startsWith("@elizaos/plugin-")),
   );
   requiredPluginPackageNames.add("@elizaos/plugin-zai");
+  const unavailablePluginPackageNames =
+    getUnavailableLocalPluginPackageNames(elizaRoot);
+  for (const packageName of unavailablePluginPackageNames) {
+    requiredPluginPackageNames.delete(packageName);
+  }
+  if (unavailablePluginPackageNames.size > 0) {
+    console.log(
+      `[setup-upstreams] Skipping local cloud-coupled plugin packages: ${[...unavailablePluginPackageNames].join(", ")}`,
+    );
+  }
 
   await ensureElizaDependencies(elizaRoot);
   await ensureElizaBuildOutputs(elizaRoot);
 
-  ensurePluginDependencyLinks(repoRoot, pluginsRoot);
+  ensurePluginDependencyLinks(repoRoot, pluginsRoot, {
+    excludedPackageNames: unavailablePluginPackageNames,
+  });
   ensureMiladySingletonDependencyLinks(repoRoot);
   const updatedLinks = linkUpstreamPackages(repoRoot, {
     elizaRoot,
     pluginsRoot,
+    excludedPackageNames: unavailablePluginPackageNames,
   });
   await ensurePluginBuildOutputs(pluginsRoot, {
+    excludedPackageNames: unavailablePluginPackageNames,
     requiredPackageNames: requiredPluginPackageNames,
   });
 

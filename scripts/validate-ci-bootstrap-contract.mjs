@@ -61,6 +61,9 @@ const requiredActionSnippets = [
   "name: Generate local eliza protobuf types",
   "inputs.prepare-local-eliza-runtime == 'true'",
   "bunx @bufbuild/buf@1.67.0 generate",
+  "name: Prepare package-mode eliza runtime compatibility",
+  "inputs.skip-local-upstreams-postinstall == 'true'",
+  "eliza/packages/core/dist/index.node.js",
   "run: bash scripts/install-published-workspace-fallback-deps.sh",
   "name: Build local eliza CI override packages",
   "run: node scripts/build-local-eliza-ci-overrides.mjs",
@@ -80,7 +83,7 @@ const requiredAlignScriptSnippets = [
   '"@elizaos/plugin-streaming"',
   '"@elizaos/cloud-routing"',
   '"dist/node/index.node.js"',
-  '"typescript/dist/index.js"',
+  '"src/dist/node/index.node.js"',
 ];
 
 const disableMarkers = [
@@ -145,6 +148,8 @@ assertContainsNone(
 );
 assertContainsAll(actionText, files.action, requiredActionSnippets, failures);
 assertContainsNone(actionText, files.action, forbiddenActionSnippets, failures);
+assertGitleaksUsesOssCli(failures);
+assertSoc2HydratesElizaSource(failures);
 assertContainsAll(
   alignScriptText,
   files.alignScript,
@@ -160,11 +165,13 @@ assertOrdered(
     "run: bash scripts/install-published-workspace-fallback-deps.sh",
     "run: node scripts/build-local-eliza-ci-overrides.mjs",
     "name: Run repository postinstall patches",
+    "name: Prepare package-mode eliza runtime compatibility",
   ],
   failures,
 );
 assertDisabledWorkspaceInstallsUseNoFrozen(allWorkflowPaths, failures);
 assertAgentReviewAuthBootstrap(failures);
+assertAgentReviewServiceUnavailableSoftSkip(failures);
 
 const regressionMatrixCommand =
   packageJson?.scripts?.["test:regression-matrix:pr"];
@@ -371,6 +378,13 @@ function assertCiPackageModeElizaGuards(workflowText, targetFailures) {
       jobName: "typecheck",
       stepNames: ["Build eliza packages required for typecheck"],
     },
+    {
+      jobName: "build",
+      stepNames: [
+        "Build eliza packages required for typecheck",
+        "Link local @elizaos workspace packages",
+      ],
+    },
   ];
 
   for (const { jobName, stepNames } of expected) {
@@ -392,12 +406,26 @@ function assertCiPackageModeElizaGuards(workflowText, targetFailures) {
         );
         continue;
       }
-      if (!stepMatch[1].includes("hashFiles('eliza/package.json') != ''")) {
+      if (
+        !/hashFiles\('eliza\/(?:package\.json|packages\/(?:app-core|core)\/package\.json|packages\/shared\/scripts\/generate-keywords\.mjs)'\) != ''/.test(
+          stepMatch[1],
+        )
+      ) {
         targetFailures.push(
           `.github/workflows/ci.yml ${jobName} step "${stepName}" must be skipped when eliza/ is absent`,
         );
       }
     }
+  }
+
+  const buildBlock = findWorkflowJobBlock(workflowText, "build");
+  const localUpstreamsGuard =
+    "MILADY_FORCE_LOCAL_UPSTREAMS: $" +
+    "{{ hashFiles('eliza/packages/app-core/package.json') != '' && '1' || '' }}";
+  if (buildBlock && !buildBlock.includes(localUpstreamsGuard)) {
+    targetFailures.push(
+      ".github/workflows/ci.yml build job must only force local upstreams when eliza app-core is present",
+    );
   }
 }
 
@@ -410,6 +438,10 @@ function findWorkflowJobBlock(workflowText, jobName) {
 
 function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function githubExpression(value) {
+  return `\${{ ${value} }}`;
 }
 
 function assertAgentReviewAuthBootstrap(targetFailures) {
@@ -440,6 +472,90 @@ function assertAgentReviewAuthBootstrap(targetFailures) {
       "(cd eliza/packages/core && bun run build)",
       "(cd eliza/plugins/plugin-agent-skills && bun run build)",
       "- name: Run auth test suite",
+    ],
+    targetFailures,
+  );
+
+  const buildPluginsStep =
+    /- name: Build local eliza runtime plugins\n([\s\S]*?)(?:\n {6}- name:|\n {2}[a-zA-Z0-9_-]+:|$)/.exec(
+      authBlockMatch[1],
+    );
+  if (
+    !buildPluginsStep?.[1].includes(
+      "if [ ! -f eliza/packages/core/package.json ]; then",
+    ) ||
+    !buildPluginsStep?.[1].includes(
+      "eliza core source absent; skipping local runtime plugin build",
+    )
+  ) {
+    targetFailures.push(
+      '.github/workflows/agent-review.yml "Build local eliza runtime plugins" must be skipped when eliza core source is absent',
+    );
+  }
+}
+
+function assertAgentReviewServiceUnavailableSoftSkip(targetFailures) {
+  const workflowText = readText(
+    ".github/workflows/agent-review.yml",
+    targetFailures,
+  );
+
+  assertContainsAll(
+    workflowText,
+    ".github/workflows/agent-review.yml",
+    [
+      "const serviceUnavailablePattern",
+      "credit balance is too low",
+      "allowServiceUnavailable",
+      "decision = 'SKIPPED (service unavailable)'",
+      "'service-unavailable': 'neutral'",
+    ],
+    targetFailures,
+  );
+}
+
+function assertGitleaksUsesOssCli(targetFailures) {
+  const workflowText = readText(
+    ".github/workflows/gitleaks.yml",
+    targetFailures,
+  );
+  assertContainsAll(
+    workflowText,
+    ".github/workflows/gitleaks.yml",
+    [
+      'GITLEAKS_VERSION: "8.30.1"',
+      `gitleaks git . --log-opts="${githubExpression("github.event.pull_request.base.sha")}..${githubExpression("github.event.pull_request.head.sha")}" --config .gitleaks.toml --redact --no-banner --verbose`,
+      `gitleaks git . --log-opts="${githubExpression("github.event.before")}..${githubExpression("github.sha")}" --config .gitleaks.toml --redact --no-banner --verbose`,
+      "gitleaks dir . --config .gitleaks.toml --redact --no-banner --verbose",
+    ],
+    targetFailures,
+  );
+  assertContainsNone(
+    workflowText,
+    ".github/workflows/gitleaks.yml",
+    ["gitleaks/gitleaks-action"],
+    targetFailures,
+  );
+}
+
+function assertSoc2HydratesElizaSource(targetFailures) {
+  const workflowText = readText(
+    ".github/workflows/soc2-verify.yml",
+    targetFailures,
+  );
+  assertOrdered(
+    workflowText,
+    ".github/workflows/soc2-verify.yml",
+    [
+      "name: Setup Bun",
+      "name: Initialize eliza source checkout",
+      'git clone --depth=1 --branch "$' +
+        '{MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza',
+      "name: Install dependencies (eliza/)",
+      "name: Run SOC2 verification",
+      `if [ "${githubExpression("github.event_name")}" = "pull_request" ]; then`,
+      "bun run packages/soc2-verify/src/cli.ts --out ../soc2-evidence",
+      "bun run packages/soc2-verify/src/cli.ts --strict-fail --out ../soc2-evidence",
     ],
     targetFailures,
   );

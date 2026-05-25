@@ -4,6 +4,62 @@ Milady is a local-first AI assistant built on [elizaOS](https://github.com/eliza
 
 Codex agents read this `AGENTS.md` from the workspace. When spawned by the agent orchestrator, they also receive generated task context with the current room, task, repo routes, and loopback bridge endpoints. Keep stable project rules here; keep deployment/persona policy in the runtime character/config.
 
+## Cloud frontend visual review (REQUIRED for any UI change)
+
+Any change in `eliza/packages/cloud-frontend/` MUST go through the manual-review
+loop before being declared done. Automated tests catch what they assert; hover
+regressions, palette drift, broken empty states, and mobile layout breaks slip
+through. The harness produces evidence — you produce the verdicts.
+
+### How to run
+
+```bash
+bun run --cwd eliza/packages/cloud-frontend audit:cloud
+```
+
+This runs `tests/e2e/aesthetic-audit.spec.ts` headlessly across every route in
+`src/App.tsx` (53 routes × desktop + mobile × rest + hover ≈ 200 screenshots).
+The injected-ethereum login flow is wired into the spec so dashboard pages
+render their authed content; admin pages are dev-open via `import.meta.env.DEV`.
+Output lands in:
+
+```
+eliza/packages/cloud-frontend/aesthetic-audit-output/
+  desktop/<slug>.png            rest screenshot
+  desktop/<slug>--hover.png     hover state (primary button focused)
+  mobile/<slug>.png
+  mobile/<slug>--hover.png
+  manual-review/<slug>.md       REQUIRED per-page verdict markdown
+  contact-sheet.html            grid view of every shot + flagged issues
+  report.json                   machine-readable audit data
+```
+
+### Required loop (run 5+ iterations until every page hits verdict=good)
+
+1. Run `audit:cloud`.
+2. Open `contact-sheet.html`. Walk every page touched by your change (and every
+   page reachable through transitive deps — header, footer, theme, buttons).
+3. For each page, open `manual-review/<slug>.md` and fill in:
+   - Visual issues (anything that looks wrong or off-brand)
+   - Color / hover violations (orange→black or any blue is banned)
+   - Layout breaks (viewport + element)
+   - Interaction targets the e2e suite should cover
+   - **Verdict**: `good` · `needs-work` · `needs-eyeball` · `broken`
+4. Fix the issues.
+5. Commit screenshots + reviews + code together.
+6. Re-run the audit. Repeat. Do not declare done until every page is `good`.
+
+### Hard rules
+
+- Every page must have a screenshot AND a `manual-review/<slug>.md` checked in.
+- Verdicts of `needs-work` or `broken` block "done." Fix or document why.
+- Never overwrite an existing `manual-review/<slug>.md` from automation — the
+  human notes are load-bearing. The spec only auto-stubs new routes.
+- The contact sheet is the index, NOT the review. The review is the per-page
+  markdown.
+
+Full protocol: `eliza/packages/cloud-frontend/AGENTS.md`.
+
 ## elizaOS naming
 
 - Write the framework name as **elizaOS** in prose, comments, user-facing strings, and docs — never `ElizaOS`. The npm scope remains **`@elizaos/*`** (lowercase).
@@ -32,6 +88,14 @@ Desktop dev observability (Codex cannot see the native window):
 - `GET /api/dev/cursor-screenshot` — loopback full-screen OS capture (default-on).
 
 See `eliza/docs/apps/desktop-local-development.md`.
+
+## Electrobun agentic desktop rules pack
+
+The Electrobun Agentic Desktop 2026 rules pack is applied locally for desktop-shell work. Root project guidance remains authoritative; use the pack as an additional checklist when touching `eliza/packages/app-core/platforms/electrobun`, `apps/app`, desktop RPC, webviews, tray/menu/deep-link surfaces, updater/release code, or local model/tool orchestration.
+
+Read `rules/`, `checklists/`, `hooks/README.md`, `commands/README.md`, `docs/research-brief-2026.md`, and `docs/porting-map-from-apple-swift.md` before implementing Electrobun-specific changes. The original source bundle is preserved under `docs/agent-packs/electrobun-agentic-desktop-2026/`.
+
+Do not activate the archived workflow examples under `docs/agent-packs/electrobun-agentic-desktop-2026/.github/workflows/` without explicit approval for CI/CD changes.
 
 ## Build & test
 

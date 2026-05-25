@@ -179,9 +179,16 @@ cd milady
 
 ./install                 # Unix / macOS — chmod +x install if needed
 # install.cmd on Windows
-# Both wrappers run `bun install` with MILADY_ELIZA_SOURCE=packages.
+# With no args, the wrapper opens a Space/Enter multi-select picker:
+# packages, local elizaOS source, or all developer paths.
 
-# Plain `bun install` also works once you've cloned.
+# Non-interactive examples:
+./install --profile packages
+./install --profile local
+./install --profile all
+
+# Plain `bun install` is package-mode only and runs a preflight doctor.
+# If Node/Python is outside the supported native install lane, run ./install.
 ```
 
 #### elizaOS source modes (eject / uneject)
@@ -629,10 +636,14 @@ This routes through the OpenAI plugin instead of the broken Ollama plugin. Works
 ```bash
 git clone https://github.com/milady-ai/milady.git
 cd milady
-bun install          # runs postinstall hooks (patches deps, seeds skills, etc.)
+./install            # interactive source setup picker (Space selects, Enter installs)
 bun run build
 bun run milady start
 ```
+
+For scripted package-mode setup, run `./install --profile packages`. Plain
+`bun install` remains supported when you only need the default published-package
+dependency graph.
 
 > `bun run build` runs the production build via Node ([scripts/run-production-build.mjs](scripts/run-production-build.mjs) — forks between published `@elizaos/app-core` and the local `eliza/` checkout depending on `MILADY_ELIZA_SOURCE`).
 
