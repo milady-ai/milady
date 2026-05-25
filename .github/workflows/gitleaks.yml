@@ -40,6 +40,15 @@ jobs:
           sudo install -m 0755 gitleaks /usr/local/bin/gitleaks
 
       - name: Run gitleaks
-        run: gitleaks detect --source . --config .gitleaks.toml --redact --verbose --exit-code 1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before || '' }}
+          GITLEAKS_HEAD_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          args=(detect --source . --config .gitleaks.toml --redact --verbose --exit-code 1)
+          if [ -n "$GITLEAKS_BASE_SHA" ] && [ "$GITLEAKS_BASE_SHA" != "0000000000000000000000000000000000000000" ]; then
+            args+=(--log-opts="${GITLEAKS_BASE_SHA}..${GITLEAKS_HEAD_SHA}")
+          else
+            args+=(--no-git)
+          fi
+          gitleaks "${args[@]}"

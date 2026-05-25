@@ -451,7 +451,7 @@ test("Electrobun release applies elizaOS source overlay before manual build setu
   assert.match(electrobun, /No public release files collected/);
   assert.match(
     electrobun,
-    /find \. -maxdepth 1 -type f ! -name SHA256SUMS\.txt -print0 \| sort -z \| xargs -0 sha256sum > SHA256SUMS\.txt/,
+    /checksum_file="\$\(mktemp\)"[\s\S]*?find \. -maxdepth 1 -type f ! -name SHA256SUMS\.txt -print0 \| sort -z \| xargs -0 sha256sum > "\$checksum_file"[\s\S]*?mv "\$checksum_file" SHA256SUMS\.txt/,
   );
   assert.match(copyRuntimeWrapper, /elizaElectrobunNodeModules/);
   assert.match(
