@@ -4,6 +4,7 @@
 # rules to enforce change management (SOC2 CC8.1 / CC6.1).
 #
 # IMPORTANT — operator action required:
+#   Track the real team slugs in docs/security/SOC2-OPERATOR-CHECKLIST.md.
 #   The team handles below (`@elizaos/<role>`) are PLACEHOLDERS. Before enabling
 #   branch protection with "Require review from Code Owners", replace each
 #   handle with a real GitHub team in the elizaos org. The format is

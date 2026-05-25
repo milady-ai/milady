@@ -43,4 +43,6 @@ All risks affecting Eliza-controlled systems, customer data, business continuity
 
 ## Open Items For Human Sign-Off
 
+Track the selected evidence system in [`../docs/security/SOC2-OPERATOR-CHECKLIST.md`](../docs/security/SOC2-OPERATOR-CHECKLIST.md) before patching this policy.
+
 - Confirm GRC tool (Vanta / Drata / Secureframe / none).

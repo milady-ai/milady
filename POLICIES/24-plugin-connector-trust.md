@@ -63,5 +63,7 @@ Define the trust model for third-party and first-party plugins that execute insi
 
 ## Open Items For Human Sign-Off
 
+Track plugin-trust decisions in [`../docs/security/SOC2-OPERATOR-CHECKLIST.md`](../docs/security/SOC2-OPERATOR-CHECKLIST.md) before patching this policy.
+
 - Sigstore vs in-house Ed25519 publisher key.
 - Customer install-dialog copy for "Local — at your risk".

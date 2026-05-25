@@ -45,5 +45,7 @@ All employees and contractors with access to Eliza systems.
 
 ## Open Items For Human Sign-Off
 
+Track people-ops decisions in [`../docs/security/SOC2-OPERATOR-CHECKLIST.md`](../docs/security/SOC2-OPERATOR-CHECKLIST.md) before patching this procedure.
+
 - Background-check vendor.
 - Reactivation policy variance for boomerang hires.

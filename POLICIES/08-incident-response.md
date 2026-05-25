@@ -44,6 +44,8 @@ See [`../docs/security/INCIDENT-RUNBOOK.md`](../docs/security/INCIDENT-RUNBOOK.m
 
 ## Open Items For Human Sign-Off
 
+Track incident-response decisions in [`../docs/security/SOC2-OPERATOR-CHECKLIST.md`](../docs/security/SOC2-OPERATOR-CHECKLIST.md) before patching this policy.
+
 - On-call paging tool.
 - Status page URL.
 - Customer notification template approval.

@@ -57,6 +57,8 @@ kubectl -n eliza-agents rollout restart deployment
 
 ## TODO(soc2)
 
+Track rollout and mesh-authorization decisions in [`../../../docs/security/SOC2-OPERATOR-CHECKLIST.md`](../../../docs/security/SOC2-OPERATOR-CHECKLIST.md) before patching these manifests.
+
 - Decide rollout order: start with `eliza-infra` (DB + Redis edge),
   then `eliza-agents` (API tier).
 - Add `linkerd-viz` extension for observability (separate manifest).
