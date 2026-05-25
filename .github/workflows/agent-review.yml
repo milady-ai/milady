@@ -636,11 +636,13 @@ jobs:
               return '';
             };
 
+            const serviceUnavailablePattern = /Agent Review\s+[—-]+\s+Service Unavailable|automated review unavailable|insufficient[_ -]?(quota|balance|funds|credits?)|credit balance is too low|quota exceeded|please add credits|top[_ -]?up your credits/i;
+
             const findLatest = (items, { requireRunMarker = true } = {}) => {
               const filtered = items.filter((c) => {
                 if (!c?.body) return false;
                 if (requireRunMarker && runMarker && !c.body.includes(runMarker)) return false;
-                return Boolean(extractDecision(c.body));
+                return Boolean(extractDecision(c.body)) || serviceUnavailablePattern.test(c.body);
               });
               return filtered.sort((a, b) =>
                 new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
@@ -720,12 +722,6 @@ jobs:
                 core.warning('Ignoring stale fallback APPROVE review because it does not carry the current run marker.');
               }
             }
-
-            // When both AI reviewers fail (billing exhaustion, API outage),
-            // the post-step posts a "Service Unavailable" comment that parses
-            // as REQUEST CHANGES. Treat that as a soft-skip rather than a
-            // hard reject so transient infra problems don't block PRs.
-            const serviceUnavailablePattern = /Agent Review\s+[—-]+\s+Service Unavailable|automated review unavailable|insufficient[_ -]?(quota|balance|funds|credits?)|credit balance is too low|quota exceeded|please add credits|top[_ -]?up your credits/i;
 
             if (latest) {
               const normalized = extractDecision(latest.body);
