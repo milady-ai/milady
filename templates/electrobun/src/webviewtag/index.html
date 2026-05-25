@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sandboxed content example</title>
+    <script type="module" src="views://webviewtag/index.js"></script>
+  </head>
+  <body>
+    <electrobun-webview
+      id="docs-webview"
+      src="https://trusted.example.com/"
+      sandbox
+      partition="docs-view"
+      style="display:block;width:100%;height:600px;"
+    ></electrobun-webview>
+  </body>
+</html>

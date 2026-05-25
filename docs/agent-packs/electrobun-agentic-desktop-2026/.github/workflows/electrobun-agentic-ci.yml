@@ -1,0 +1,50 @@
+name: Electrobun Agentic CI
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+
+jobs:
+  validate:
+    name: Validate (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Linux Electrobun dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake pkg-config libgtk-3-dev libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev
+      - name: Install
+        run: bun install --frozen-lockfile || bun install
+      - name: Agent doctor
+        shell: bash
+        run: scripts/electrobun-agent-doctor.sh
+      - name: Typecheck
+        shell: bash
+        run: |
+          if bun run | grep -q "typecheck"; then bun run typecheck; else echo "No typecheck script"; fi
+      - name: Tests
+        shell: bash
+        run: bun test
+      - name: Agentic validation
+        shell: bash
+        run: scripts/validate-agentic-electrobun.sh
+      - name: Security audit
+        shell: bash
+        run: scripts/security-audit.sh
+      - name: Dependency audit
+        shell: bash
+        run: scripts/dependency-audit.sh
+      - name: Build smoke
+        shell: bash
+        run: scripts/electrobun-build-test.sh
