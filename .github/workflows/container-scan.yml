@@ -35,7 +35,8 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Trivy filesystem scan (config + IaC)
-        uses: aquasecurity/trivy-action@0.24.0
+        # aquasecurity/trivy-action@v0.36.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
         with:
           scan-type: 'fs'
           scan-ref: '.'
@@ -74,7 +75,8 @@ jobs:
 
       # Hard gate: any CRITICAL fails the job.
       - name: Trivy image scan (fail on CRITICAL)
-        uses: aquasecurity/trivy-action@0.24.0
+        # aquasecurity/trivy-action@v0.36.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
         with:
           image-ref: 'localhost/eliza-agent:scan'
           severity: 'CRITICAL'
@@ -86,7 +88,8 @@ jobs:
       # the dispatcher disables allow_high.
       - name: Trivy image scan (HIGH -> SARIF)
         if: always()
-        uses: aquasecurity/trivy-action@0.24.0
+        # aquasecurity/trivy-action@v0.36.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
         with:
           image-ref: 'localhost/eliza-agent:scan'
           severity: 'HIGH'
