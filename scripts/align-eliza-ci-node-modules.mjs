@@ -354,7 +354,7 @@ ensureBuiltLocalPackage(
 ensureBuiltLocalPackage(
   "@elizaos/plugin-sql",
   "eliza/plugins/plugin-sql",
-  ["dist/node/index.node.js", "dist/index.d.ts"],
+  ["src/dist/node/index.node.js", "src/dist/index.d.ts"],
   { optional: true },
 );
 

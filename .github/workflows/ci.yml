@@ -270,7 +270,7 @@ jobs:
           if [ -f eliza/plugins/plugin-pdf/package.json ] && [ ! -f eliza/plugins/plugin-pdf/dist/index.d.ts ]; then
             (cd eliza/plugins/plugin-pdf && bun run build)
           fi
-          if [ -f eliza/plugins/plugin-sql/package.json ] && [ ! -f eliza/plugins/plugin-sql/dist/index.d.ts ]; then
+          if [ -f eliza/plugins/plugin-sql/package.json ] && [ ! -f eliza/plugins/plugin-sql/src/dist/index.d.ts ]; then
             (cd eliza/plugins/plugin-sql && bun run build)
           fi
           if [ ! -f eliza/plugins/plugin-streaming/dist/index.d.ts ]; then
