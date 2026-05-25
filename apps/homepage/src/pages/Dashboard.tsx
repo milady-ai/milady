@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { BrandHero } from "../components/dashboard/BrandHero";
 import { ConnectionModal } from "../components/dashboard/ConnectionModal";
 import { InstanceGrid } from "../components/dashboard/InstanceGrid";
@@ -15,7 +15,8 @@ import {
 import { openWebUI, openWebUIDirect } from "../lib/open-web-ui";
 import { CLOUD_BASE, LOCAL_AGENT_BASE } from "../lib/runtime-config";
 import { useAuth } from "../lib/useAuth";
-import { type Notice, useCloudOpenFlow } from "../lib/useCloudOpenFlow";
+import { useCloudOpenFlow } from "../lib/useCloudOpenFlow";
+import { useNoticeToast } from "../lib/useNoticeToast";
 
 function openExternal(url: string) {
   window.open(url, "_blank", "noopener,noreferrer");
@@ -52,7 +53,7 @@ function MiladyControlHub() {
   });
   const [showConnectModal, setShowConnectModal] = useState(false);
   const [showProvisionModal, setShowProvisionModal] = useState(false);
-  const [notice, setNotice] = useState<Notice | null>(null);
+  const { notice, setNotice } = useNoticeToast();
   const { cloudOpenState, handleCancelCloudOpen, handleOpenCloud } =
     useCloudOpenFlow({
       agents,
@@ -64,12 +65,6 @@ function MiladyControlHub() {
       setNotice,
       signIn,
     });
-
-  useEffect(() => {
-    if (!notice) return;
-    const timeout = window.setTimeout(() => setNotice(null), 4000);
-    return () => window.clearTimeout(timeout);
-  }, [notice]);
 
   const localAgent = agents.find((agent) => agent.source === "local") ?? null;
   const launchUrl =

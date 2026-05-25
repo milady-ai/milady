@@ -4,7 +4,8 @@ import { NoticeToast } from "../components/NoticeToast";
 import { releaseData } from "../generated/release-data";
 import { CloudClient } from "../lib/cloud-api";
 import { useAuth } from "../lib/useAuth";
-import { type Notice, useCloudOpenFlow } from "../lib/useCloudOpenFlow";
+import { useCloudOpenFlow } from "../lib/useCloudOpenFlow";
+import { useNoticeToast } from "../lib/useNoticeToast";
 
 const GITHUB_RELEASES_URL = "https://github.com/milady-ai/milady/releases";
 const GITHUB_LATEST_RELEASE_URL =
@@ -144,7 +145,7 @@ export function Homepage() {
     manualLoginUrl,
     signIn,
   } = useCloudLogin();
-  const [notice, setNotice] = useState<Notice | null>(null);
+  const { notice, setNotice } = useNoticeToast();
   const { cloudOpenState, handleCancelCloudOpen, handleOpenCloud } =
     useCloudOpenFlow({
       agents: [],
@@ -169,12 +170,6 @@ export function Homepage() {
   ];
   const checksumUrl =
     releaseData.release.checksum?.url ?? GITHUB_LATEST_RELEASE_URL;
-
-  useEffect(() => {
-    if (!notice) return;
-    const timeout = window.setTimeout(() => setNotice(null), 4000);
-    return () => window.clearTimeout(timeout);
-  }, [notice]);
 
   return (
     <div className="relative min-h-[100dvh] overflow-hidden bg-black text-white selection:bg-brand selection:text-black">
