@@ -171,6 +171,7 @@ assertOrdered(
 );
 assertDisabledWorkspaceInstallsUseNoFrozen(allWorkflowPaths, failures);
 assertAgentReviewAuthBootstrap(failures);
+assertAgentReviewServiceUnavailableSoftSkip(failures);
 
 const regressionMatrixCommand =
   packageJson?.scripts?.["test:regression-matrix:pr"];
@@ -491,6 +492,26 @@ function assertAgentReviewAuthBootstrap(targetFailures) {
       '.github/workflows/agent-review.yml "Build local eliza runtime plugins" must be skipped when eliza core source is absent',
     );
   }
+}
+
+function assertAgentReviewServiceUnavailableSoftSkip(targetFailures) {
+  const workflowText = readText(
+    ".github/workflows/agent-review.yml",
+    targetFailures,
+  );
+
+  assertContainsAll(
+    workflowText,
+    ".github/workflows/agent-review.yml",
+    [
+      "const serviceUnavailablePattern",
+      "credit balance is too low",
+      "allowServiceUnavailable",
+      "decision = 'SKIPPED (service unavailable)'",
+      "'service-unavailable': 'neutral'",
+    ],
+    targetFailures,
+  );
 }
 
 function assertGitleaksUsesOssCli(targetFailures) {

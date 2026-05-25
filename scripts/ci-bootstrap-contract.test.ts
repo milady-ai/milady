@@ -129,6 +129,16 @@ describe("CI bootstrap contract", () => {
     );
   });
 
+  it("soft-skips review verdicts when the AI reviewer is unavailable", () => {
+    const agentReview = workflow("agent-review.yml");
+
+    expect(agentReview).toContain("const serviceUnavailablePattern");
+    expect(agentReview).toContain("credit balance is too low");
+    expect(agentReview).toContain("allowServiceUnavailable");
+    expect(agentReview).toContain("decision = 'SKIPPED (service unavailable)'");
+    expect(agentReview).toContain("'service-unavailable': 'neutral'");
+  });
+
   it("only forces local upstreams in CI build when eliza source exists", () => {
     const ci = workflow("ci.yml");
 
