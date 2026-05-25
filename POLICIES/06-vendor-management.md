@@ -52,4 +52,6 @@ All paid and free third-party services that touch customer data, source code, bu
 
 ## Open Items For Human Sign-Off
 
+Track vendor decisions in [`../docs/security/SOC2-OPERATOR-CHECKLIST.md`](../docs/security/SOC2-OPERATOR-CHECKLIST.md) before patching this policy.
+
 - Confirm hosting provider, payment processor, observability stack vendors.

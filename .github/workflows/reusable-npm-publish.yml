@@ -30,6 +30,7 @@ on:
 # Trusted Publisher configuration on npmjs.com.
 #
 # HUMAN-IN-LOOP — operator must configure on npmjs.com:
+#   Track the final organization/package values in docs/security/SOC2-OPERATOR-CHECKLIST.md.
 #   https://docs.npmjs.com/trusted-publishers
 #   Settings -> Packages -> miladyai -> Trusted publishers -> Add
 #     Publisher:     GitHub Actions

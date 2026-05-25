@@ -69,7 +69,7 @@ runs:
         df -h /
 
     - name: Setup Python
-      uses: actions/setup-python@v6
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
       with:
         python-version: ${{ inputs.python-version }}
 
@@ -103,12 +103,12 @@ runs:
         done
 
     - name: Setup Bun
-      uses: oven-sh/setup-bun@v2
+      uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
       with:
         bun-version: ${{ inputs.bun-version }}
 
     - name: Cache Bun install
-      uses: actions/cache@v5
+      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
       with:
         path: ~/.bun/install/cache
         key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
@@ -136,10 +136,20 @@ runs:
     # Some review jobs still execute local eliza runtime scripts after the
     # published-only install rewrite. Hydrate eliza only for those jobs; normal
     # published-only CI resolves @elizaos/* versions from npm dist-tags.
-    - name: Shallow-init eliza submodule for version resolution
-      if: ${{ inputs.disable-local-eliza-workspace == 'true' && inputs.prepare-local-eliza-runtime == 'true' }}
+    - name: Shallow-init eliza checkout for local runtime scripts
+      if: ${{ inputs.prepare-local-eliza-runtime == 'true' && hashFiles('eliza/package.json') == '' }}
       shell: bash
       run: |
+        if [ "${{ inputs.disable-local-eliza-workspace }}" != "true" ]; then
+          case "${GITHUB_WORKFLOW:-}:${GITHUB_JOB:-}" in
+            "Agent Review:test-auth")
+              ;;
+            *)
+              echo "local eliza runtime checkout not needed for ${GITHUB_WORKFLOW:-unknown}:${GITHUB_JOB:-unknown}; skipping."
+              exit 0
+              ;;
+          esac
+        fi
         if [ ! -f eliza/package.json ]; then
           git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza
         fi
@@ -197,6 +207,10 @@ runs:
         fi
         if ! git -C eliza rev-parse --is-inside-work-tree >/dev/null 2>&1; then
           echo "eliza/ is not a git worktree; skipping cloud hydration."
+          exit 0
+        fi
+        if ! git -C eliza config --file .gitmodules --get submodule.cloud.path >/dev/null 2>&1; then
+          echo "eliza checkout has no cloud submodule; skipping cloud hydration."
           exit 0
         fi
         git -C eliza submodule update --init cloud
@@ -310,7 +324,7 @@ runs:
         echo "Prepared package-mode eliza runtime compatibility sentinels."
 
     - name: Install local eliza runtime dependencies
-      if: ${{ inputs.prepare-local-eliza-runtime == 'true' && inputs.disable-local-eliza-workspace == 'true' }}
+      if: ${{ inputs.prepare-local-eliza-runtime == 'true' && hashFiles('eliza/package.json') != '' }}
       shell: bash
       run: |
         bun install --cwd eliza --no-frozen-lockfile --ignore-scripts

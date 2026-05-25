@@ -25,15 +25,24 @@ jobs:
           # Full history so gitleaks can scan the PR or push diff range.
           fetch-depth: 0
 
-      - name: Run gitleaks
-        shell: bash
+      - name: Install gitleaks CLI
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITLEAKS_VERSION: "8.30.1"
         run: |
-          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" -o gitleaks.tar.gz
-          tar -xzf gitleaks.tar.gz gitleaks
+          set -euo pipefail
+          archive="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          checksums="gitleaks_${GITLEAKS_VERSION}_checksums.txt"
+          base_url="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}"
+          curl -fsSLO "${base_url}/${archive}"
+          curl -fsSLO "${base_url}/${checksums}"
+          grep " ${archive}$" "${checksums}" | sha256sum -c -
+          tar -xzf "${archive}" gitleaks
           sudo install -m 0755 gitleaks /usr/local/bin/gitleaks
+
+      - name: Run gitleaks
+        shell: bash
+        run: |
+          set -euo pipefail
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             gitleaks git . --log-opts="${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}" --config .gitleaks.toml --redact --no-banner --verbose
           elif [ -n "${{ github.event.before }}" ] && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then

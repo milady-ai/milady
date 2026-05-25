@@ -30,5 +30,7 @@ When the org name changes update `cluster-image-policy.yaml`.
 
 ## TODO(soc2)
 
+Track the final org name and enforcement date in [`../../../docs/security/SOC2-OPERATOR-CHECKLIST.md`](../../../docs/security/SOC2-OPERATOR-CHECKLIST.md) before patching this policy.
+
 - Replace `mode: warn` with `mode: enforce` after running for two weeks in
   warn-only to catch any unsigned base images / sidecars we still pull.

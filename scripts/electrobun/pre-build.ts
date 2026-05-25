@@ -11,14 +11,21 @@ if (missing.length > 0) {
 
 if (env === "stable") {
   const releaseBaseUrl = process.env.RELEASE_BASE_URL;
-  if (!releaseBaseUrl) console.warn("Stable build has no RELEASE_BASE_URL; updater artifacts may not be reachable.");
+  if (!releaseBaseUrl)
+    console.warn(
+      "Stable build has no RELEASE_BASE_URL; updater artifacts may not be reachable.",
+    );
   if (process.platform === "darwin") {
     const signing = ["ELECTROBUN_DEVELOPER_ID", "ELECTROBUN_TEAMID"];
     const missingSigning = signing.filter((name) => !process.env[name]);
     if (missingSigning.length > 0) {
-      console.warn(`Stable macOS build missing signing metadata: ${missingSigning.join(", ")}`);
+      console.warn(
+        `Stable macOS build missing signing metadata: ${missingSigning.join(", ")}`,
+      );
     }
   }
 }
 
-console.log(`preBuild OK: env=${env} os=${process.env.ELECTROBUN_OS ?? process.platform} arch=${process.env.ELECTROBUN_ARCH ?? process.arch}`);
+console.log(
+  `preBuild OK: env=${env} os=${process.env.ELECTROBUN_OS ?? process.platform} arch=${process.env.ELECTROBUN_ARCH ?? process.arch}`,
+);

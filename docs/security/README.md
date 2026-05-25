@@ -7,6 +7,7 @@ This directory contains the technical security documentation that supports the p
 | File | Purpose |
 |---|---|
 | [`SOC2-CONTROL-MATRIX.md`](SOC2-CONTROL-MATRIX.md) | Maps every Trust Service Criterion to policy + code + evidence. |
+| [`SOC2-OPERATOR-CHECKLIST.md`](SOC2-OPERATOR-CHECKLIST.md) | Canonical fill-in sheet for operator-owned SOC2 names, vendors, contact routes, and deployment values. |
 | [`THREAT-MODEL.md`](THREAT-MODEL.md) | Eliza-specific threats (plugin compromise, sub-agent escape, model poisoning, KMS compromise, supply-chain, training-data leakage, connector-token theft). |
 | [`INCIDENT-RUNBOOK.md`](INCIDENT-RUNBOOK.md) | Per-scenario playbooks (detection → triage → contain → eradicate → recover → lessons). |
 | [`KEY-LIFECYCLE.md`](KEY-LIFECYCLE.md) | Per-class key lifecycle implementing the KMS contract. |

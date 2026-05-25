@@ -92,6 +92,8 @@ Create one file per drill at `deploy/dr-drills/YYYY-QN.md`:
 
 ## TODO(soc2)
 
+Track region, datastore, and restore-drill decisions in [`../docs/security/SOC2-OPERATOR-CHECKLIST.md`](../docs/security/SOC2-OPERATOR-CHECKLIST.md) before patching this runbook.
+
 - Wire automated quarterly drill via GitHub Actions schedule that creates a
   new `eliza-pg-restore-drill-<quarter>` cluster, runs verification, posts
   evidence file via PR, and tears down.

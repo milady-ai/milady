@@ -42,5 +42,7 @@ All Eliza-controlled systems, employees, contractors, and infrastructure. Custom
 
 ## Open Items For Human Sign-Off
 
+Track decisions in [`../docs/security/SOC2-OPERATOR-CHECKLIST.md`](../docs/security/SOC2-OPERATOR-CHECKLIST.md) before patching this policy.
+
 - Designated Security Lead (named officer).
 - Board / governance oversight cadence (CC1.2).

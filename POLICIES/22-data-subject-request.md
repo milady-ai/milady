@@ -45,5 +45,7 @@ Personal data processed by Eliza Cloud. For data processed by Eliza as a process
 
 ## Open Items For Human Sign-Off
 
+Track privacy intake decisions in [`../docs/security/SOC2-OPERATOR-CHECKLIST.md`](../docs/security/SOC2-OPERATOR-CHECKLIST.md) before patching this procedure.
+
 - Confirm `privacy@elizaos.ai` inbox owner.
 - Decide in-product DSR form vs email-only.

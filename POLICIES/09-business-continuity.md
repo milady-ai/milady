@@ -42,5 +42,7 @@ Eliza Cloud services (API, auth, billing, app registry, container deploys). Loca
 
 ## Open Items For Human Sign-Off
 
+Track continuity and region decisions in [`../docs/security/SOC2-OPERATOR-CHECKLIST.md`](../docs/security/SOC2-OPERATOR-CHECKLIST.md) before patching this policy.
+
 - Confirm hosting topology (single-region vs multi-region).
 - Backup region selection.

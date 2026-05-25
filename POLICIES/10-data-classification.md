@@ -54,4 +54,6 @@ All data processed by Eliza Cloud, agent runtime, training pipeline, and clients
 
 ## Open Items For Human Sign-Off
 
+Track data-protection decisions in [`../docs/security/SOC2-OPERATOR-CHECKLIST.md`](../docs/security/SOC2-OPERATOR-CHECKLIST.md) before patching this policy.
+
 - Confirm final field-level encryption coverage in `cloud-api` schema.

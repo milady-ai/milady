@@ -140,6 +140,7 @@ jobs:
           skip-avatar-clone: "true"
           no-vision-deps: "true"
           skip-local-upstreams-postinstall: "true"
+          disable-local-eliza-workspace: "true"
           prepare-local-eliza-runtime: "true"
 
       - name: Align nested eliza package resolution
