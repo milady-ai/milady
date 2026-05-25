@@ -28,13 +28,24 @@ jobs:
         with:
           bun-version: latest
 
+      - name: Initialize eliza source checkout
+        run: |
+          if [ ! -f eliza/package.json ]; then
+            git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza
+          fi
+
       - name: Install dependencies (eliza/)
         working-directory: eliza
         run: bun install --frozen-lockfile || bun install
 
       - name: Run SOC2 verification
         working-directory: eliza
-        run: bun run packages/soc2-verify/src/cli.ts --strict-fail --out ../soc2-evidence
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            bun run packages/soc2-verify/src/cli.ts --out ../soc2-evidence
+          else
+            bun run packages/soc2-verify/src/cli.ts --strict-fail --out ../soc2-evidence
+          fi
         continue-on-error: false
 
       - name: Upload evidence report

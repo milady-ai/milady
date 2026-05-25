@@ -546,7 +546,7 @@ jobs:
           ./gradlew bundleRelease assembleDebug --no-daemon
       - name: Upload AAB artifact
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: android-aab
           path: apps/app/android/app/build/outputs/bundle/release/*.aab
@@ -554,7 +554,7 @@ jobs:
           if-no-files-found: error
       - name: Upload APK artifact
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: android-apk
           path: apps/app/android/app/build/outputs/apk/debug/*.apk
@@ -636,7 +636,7 @@ jobs:
         run: sudo snap install --dangerous ${{ steps.snap.outputs.snap }}
       - name: Upload snap artifact
         if: success() && steps.snap-env.outputs.can-build == 'true' && steps.snap.outcome == 'success'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: snap-package
           path: ${{ steps.snap.outputs.snap }}
@@ -682,7 +682,7 @@ jobs:
           flatpak build-bundle repo elizaos-app.flatpak ai.elizaos.App
       - name: Upload flatpak artifact
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: flatpak-bundle
           path: eliza/packages/app-core/packaging/flatpak/elizaos-app.flatpak
@@ -720,7 +720,7 @@ jobs:
           python -m build eliza/packages/app-core/packaging/pypi/
       - name: Upload PyPI artifact
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pypi-package
           path: eliza/packages/app-core/packaging/pypi/dist/
@@ -801,7 +801,7 @@ jobs:
           cp "${debs[@]}" deb-output/
       - name: Upload deb artifact
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debian-package
           path: deb-output/

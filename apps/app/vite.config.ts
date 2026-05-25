@@ -442,14 +442,6 @@ function resolveLocalAppCoreAliases(): Alias[] {
   const agentRootEntry = appCoreSrcRoot
     ? path.join(localElizaRoot, "packages/agent/src/index.ts")
     : emptyNodeModuleEntry;
-  const sharedDistEntry = path.join(
-    localElizaRoot,
-    "packages/shared/dist/index.js",
-  );
-  const sharedDist = fs.existsSync(sharedDistEntry) ? sharedDistEntry : null;
-  const sharedDistDir = sharedDist
-    ? path.join(localElizaRoot, "packages/shared/dist")
-    : null;
   const packageAgnosticAliases: Alias[] = [
     {
       find: /^@elizaos\/agent$/,

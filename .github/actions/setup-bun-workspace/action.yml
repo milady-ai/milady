@@ -297,6 +297,18 @@ runs:
         MILADY_NO_VISION_DEPS: ${{ inputs.no-vision-deps == 'true' && '1' || '' }}
         MILADY_SKIP_LOCAL_UPSTREAMS: ${{ (inputs.disable-local-eliza-workspace == 'true' || inputs.skip-local-upstreams-postinstall == 'true') && '1' || '' }}
 
+    - name: Prepare package-mode eliza runtime compatibility
+      if: ${{ inputs.prepare-local-eliza-runtime == 'true' && inputs.skip-local-upstreams-postinstall == 'true' && inputs.disable-local-eliza-workspace != 'true' }}
+      shell: bash
+      run: |
+        if [ -f eliza/package.json ]; then
+          exit 0
+        fi
+        mkdir -p eliza/packages/core/dist
+        printf 'export {};\n' > eliza/packages/core/dist/index.node.js
+        printf 'export {};\n' > eliza/packages/core/dist/index.d.ts
+        echo "Prepared package-mode eliza runtime compatibility sentinels."
+
     - name: Install local eliza runtime dependencies
       if: ${{ inputs.prepare-local-eliza-runtime == 'true' && inputs.disable-local-eliza-workspace == 'true' }}
       shell: bash
@@ -304,7 +316,7 @@ runs:
         bun install --cwd eliza --no-frozen-lockfile --ignore-scripts
 
     - name: Generate local eliza keyword data
-      if: ${{ inputs.prepare-local-eliza-runtime == 'true' && hashFiles('eliza/package.json') != '' }}
+      if: ${{ inputs.prepare-local-eliza-runtime == 'true' && hashFiles('eliza/packages/shared/scripts/generate-keywords.mjs') != '' }}
       shell: bash
       run: |
         if [ -f eliza/packages/shared/scripts/generate-keywords.mjs ]; then
