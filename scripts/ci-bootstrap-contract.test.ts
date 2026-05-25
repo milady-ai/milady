@@ -81,7 +81,7 @@ describe("CI bootstrap contract", () => {
     const align = "- name: Align nested eliza package resolution";
     const buildPlugins = "- name: Build local eliza runtime plugins";
     const localElizaGuard =
-      "if: $" + "{{ hashFiles('eliza/packages/core/package.json') != '' }}";
+      "if [ ! -f eliza/packages/core/package.json ]; then";
     const coreBuild = "(cd eliza/packages/core && bun run build)";
     const pluginBuild =
       "(cd eliza/plugins/plugin-agent-skills && bun run build)";
@@ -89,6 +89,9 @@ describe("CI bootstrap contract", () => {
 
     expect(agentReview).toContain(buildPlugins);
     expect(agentReview).toContain(localElizaGuard);
+    expect(agentReview).toContain(
+      "eliza core source absent; skipping local runtime plugin build",
+    );
     expect(agentReview).toContain(coreBuild);
     expect(agentReview).toContain(pluginBuild);
     expect(agentReview.indexOf(align)).toBeLessThan(

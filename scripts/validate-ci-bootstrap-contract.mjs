@@ -477,7 +477,10 @@ function assertAgentReviewAuthBootstrap(targetFailures) {
     );
   if (
     !buildPluginsStep?.[1].includes(
-      "hashFiles('eliza/packages/core/package.json') != ''",
+      "if [ ! -f eliza/packages/core/package.json ]; then",
+    ) ||
+    !buildPluginsStep?.[1].includes(
+      "eliza core source absent; skipping local runtime plugin build",
     )
   ) {
     targetFailures.push(
