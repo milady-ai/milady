@@ -848,6 +848,10 @@ function setupPlatformStyles(): void {
     document.body.classList.add("native");
   }
 
+  const chatOverlayShell = isChatOverlayShellMode();
+  root.classList.toggle("eliza-chat-overlay-shell", chatOverlayShell);
+  document.body.classList.toggle("eliza-chat-overlay-shell", chatOverlayShell);
+
   root.style.setProperty("--safe-area-top", "env(safe-area-inset-top, 0px)");
   root.style.setProperty(
     "--safe-area-bottom",
@@ -884,6 +888,17 @@ function isPhoneCompanionMode(): boolean {
     window.location.search || window.location.hash.split("?")[1] || "",
   );
   return params.get("mode") === "companion";
+}
+
+function isChatOverlayShellMode(): boolean {
+  if (typeof window === "undefined") return false;
+  const params = new URLSearchParams(
+    window.location.search || window.location.hash.split("?")[1] || "",
+  );
+  return (
+    params.get("shellMode") === "chat-overlay" ||
+    params.get("shell-mode") === "chat-overlay"
+  );
 }
 
 function resolveAppWindowSlug(): string | null {
