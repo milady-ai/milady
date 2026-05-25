@@ -80,7 +80,6 @@ const requiredAlignScriptSnippets = [
   '"@elizaos/plugin-streaming"',
   '"@elizaos/cloud-routing"',
   '"dist/node/index.node.js"',
-  '"typescript/dist/index.js"',
 ];
 
 const disableMarkers = [

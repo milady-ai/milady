@@ -136,7 +136,7 @@ function ensureBuiltLocalPackage(
   packageName,
   sourceRel,
   outputRelPaths,
-  { optional = false, allowPartialOutputs = false } = {},
+  { optional = false, runtimeBundleOnly = false } = {},
 ) {
   const source = path.join(repoRoot, sourceRel);
   if (!fs.existsSync(path.join(source, "package.json"))) {
@@ -161,26 +161,18 @@ function ensureBuiltLocalPackage(
   console.log(
     `[align-eliza-ci-node-modules] building ${packageName}; missing ${missingOutputs.join(", ")}`,
   );
-  const result = spawnSync("bun", ["run", "build"], {
+  const spawnOptions = {
     cwd: source,
     env: process.env,
     stdio: "inherit",
-  });
+  };
+  const result = runtimeBundleOnly
+    ? spawnSync("bunx", ["tsup"], spawnOptions)
+    : spawnSync("bun", ["run", "build"], spawnOptions);
   if (result.error) {
     throw result.error;
   }
   if (result.status !== 0) {
-    const outputsExist = outputRelPaths.every((outputRelPath) =>
-      fs.existsSync(path.join(source, outputRelPath)),
-    );
-    if (optional && allowPartialOutputs && outputsExist) {
-      console.log(
-        `[align-eliza-ci-node-modules] ${packageName} build exited ${
-          result.status ?? 1
-        } after creating required output(s); continuing`,
-      );
-      return;
-    }
     throw new Error(
       `build failed for ${packageName} with exit code ${result.status ?? 1}`,
     );
@@ -349,7 +341,7 @@ ensureBuiltLocalPackage(
   "@elizaos/plugin-agent-skills",
   "eliza/plugins/plugin-agent-skills",
   ["dist/index.js"],
-  { optional: true, allowPartialOutputs: true },
+  { optional: true, runtimeBundleOnly: true },
 );
 
 ensureBuiltLocalPackage(
@@ -362,7 +354,7 @@ ensureBuiltLocalPackage(
 ensureBuiltLocalPackage(
   "@elizaos/plugin-sql",
   "eliza/plugins/plugin-sql",
-  ["typescript/dist/index.js", "typescript/dist/index.d.ts"],
+  ["dist/node/index.node.js", "dist/index.d.ts"],
   { optional: true },
 );
 
