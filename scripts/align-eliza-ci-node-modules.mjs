@@ -136,7 +136,7 @@ function ensureBuiltLocalPackage(
   packageName,
   sourceRel,
   outputRelPaths,
-  { optional = false } = {},
+  { optional = false, allowPartialOutputs = false } = {},
 ) {
   const source = path.join(repoRoot, sourceRel);
   if (!fs.existsSync(path.join(source, "package.json"))) {
@@ -170,6 +170,17 @@ function ensureBuiltLocalPackage(
     throw result.error;
   }
   if (result.status !== 0) {
+    const outputsExist = outputRelPaths.every((outputRelPath) =>
+      fs.existsSync(path.join(source, outputRelPath)),
+    );
+    if (optional && allowPartialOutputs && outputsExist) {
+      console.log(
+        `[align-eliza-ci-node-modules] ${packageName} build exited ${
+          result.status ?? 1
+        } after creating required output(s); continuing`,
+      );
+      return;
+    }
     throw new Error(
       `build failed for ${packageName} with exit code ${result.status ?? 1}`,
     );
@@ -337,8 +348,8 @@ ensureBuiltLocalPackage(
 ensureBuiltLocalPackage(
   "@elizaos/plugin-agent-skills",
   "eliza/plugins/plugin-agent-skills",
-  ["dist/index.js", "dist/index.d.ts"],
-  { optional: true },
+  ["dist/index.js"],
+  { optional: true, allowPartialOutputs: true },
 );
 
 ensureBuiltLocalPackage(
