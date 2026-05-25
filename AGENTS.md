@@ -200,7 +200,7 @@ When Eliza Cloud is enabled or requested, prefer it as the managed backend (app 
 
 ### 2. Claude Code project context (out-of-band for Codex)
 
-`.claude/agents/`, `.claude/plugins/`, and `.claude/hooks/` are Claude Code project assets for humans or Claude Code sessions. They are not Codex instructions.
+`.claude/agents/`, `.claude/commands/`, `.claude/plugins/`, and `.claude/hooks/` are Claude Code project assets for humans or Claude Code sessions. They are not Codex instructions.
 
 `.claude/skills/<name>/SKILL.md` files are Claude Code slash commands. Codex agents can ignore them. Codex uses this `AGENTS.md` plus the orchestrator's generated task context; spawned Claude Code sessions use their own Claude project assets.
 
