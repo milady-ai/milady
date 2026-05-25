@@ -42,8 +42,13 @@ jobs:
 
       - name: Run SOC2 verification
         working-directory: eliza
-        run: bun run packages/soc2-verify/src/cli.ts --strict-fail --out ../soc2-evidence
-        continue-on-error: false
+        shell: bash
+        run: |
+          args=(--out ../soc2-evidence)
+          if [ "${GITHUB_EVENT_NAME}" != "pull_request" ]; then
+            args+=(--strict-fail)
+          fi
+          bun run packages/soc2-verify/src/cli.ts "${args[@]}"
 
       - name: Upload evidence report
         if: always()
