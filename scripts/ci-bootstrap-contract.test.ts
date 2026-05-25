@@ -62,17 +62,27 @@ describe("CI bootstrap contract", () => {
     const installDependencies = "- name: Install dependencies";
     const generateProtobuf = "- name: Generate local eliza protobuf types";
     const postinstallPatches = "- name: Run repository postinstall patches";
+    const packageModeCompatibility =
+      "- name: Prepare package-mode eliza runtime compatibility";
 
     expect(setupAction).toContain(generateProtobuf);
     expect(setupAction).toContain(
       "inputs.prepare-local-eliza-runtime == 'true'",
     );
     expect(setupAction).toContain("bunx @bufbuild/buf@1.67.0 generate");
+    expect(setupAction).toContain(packageModeCompatibility);
+    expect(setupAction).toContain(
+      "inputs.skip-local-upstreams-postinstall == 'true'",
+    );
+    expect(setupAction).toContain("eliza/packages/core/dist/index.node.js");
     expect(setupAction.indexOf(installDependencies)).toBeLessThan(
       setupAction.indexOf(generateProtobuf),
     );
     expect(setupAction.indexOf(generateProtobuf)).toBeLessThan(
       setupAction.indexOf(postinstallPatches),
+    );
+    expect(setupAction.indexOf(postinstallPatches)).toBeLessThan(
+      setupAction.indexOf(packageModeCompatibility),
     );
   });
 

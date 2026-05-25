@@ -61,6 +61,9 @@ const requiredActionSnippets = [
   "name: Generate local eliza protobuf types",
   "inputs.prepare-local-eliza-runtime == 'true'",
   "bunx @bufbuild/buf@1.67.0 generate",
+  "name: Prepare package-mode eliza runtime compatibility",
+  "inputs.skip-local-upstreams-postinstall == 'true'",
+  "eliza/packages/core/dist/index.node.js",
   "run: bash scripts/install-published-workspace-fallback-deps.sh",
   "name: Build local eliza CI override packages",
   "run: node scripts/build-local-eliza-ci-overrides.mjs",
@@ -162,6 +165,7 @@ assertOrdered(
     "run: bash scripts/install-published-workspace-fallback-deps.sh",
     "run: node scripts/build-local-eliza-ci-overrides.mjs",
     "name: Run repository postinstall patches",
+    "name: Prepare package-mode eliza runtime compatibility",
   ],
   failures,
 );
