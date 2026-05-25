@@ -59,6 +59,9 @@ export function expandInstallProfileIds(ids) {
       }
       continue;
     }
+    if (id === "local") {
+      expanded.add("packages");
+    }
     expanded.add(id);
   }
 
@@ -86,7 +89,7 @@ export function buildInstallPlan(
     return {
       id,
       command: process.execPath,
-      args: ["scripts/eliza-source-mode.mjs", "local", "--install"],
+      args: ["scripts/eliza-source-mode.mjs", "local"],
       env: {
         ...env,
         MILADY_ELIZA_SOURCE: "local",
@@ -166,6 +169,7 @@ export function renderInstallProfilePrompt(state) {
 export async function promptInstallProfiles({
   input = process.stdin,
   output = process.stdout,
+  processRef = process,
 } = {}) {
   let state = { cursor: 0, selectedIds: defaultInstallProfileIds() };
   const wasRaw = input.isRaw ?? false;
@@ -175,37 +179,70 @@ export async function promptInstallProfiles({
     output.write(renderInstallProfilePrompt(state));
   }
 
-  if (typeof input.setRawMode === "function") {
-    input.setRawMode(true);
-  }
-  input.resume();
-  render();
-
   return await new Promise((resolve, reject) => {
+    let settled = false;
+
     function cleanup() {
+      if (settled) return;
+      settled = true;
       input.off("data", onData);
+      input.off("error", onError);
+      processRef.off("SIGINT", onSigint);
+      processRef.off("SIGTERM", onSigterm);
       if (typeof input.setRawMode === "function") {
         input.setRawMode(wasRaw);
       }
       output.write("\n");
     }
 
+    function finish(callback, value) {
+      cleanup();
+      callback(value);
+    }
+
+    function onError(error) {
+      finish(reject, error);
+    }
+
+    function onSigint() {
+      finish(reject, new Error("Install cancelled by SIGINT."));
+    }
+
+    function onSigterm() {
+      finish(reject, new Error("Install cancelled by SIGTERM."));
+    }
+
     function onData(chunk) {
       const key = chunk.toString("utf8");
       if (key === "\u0003") {
-        cleanup();
-        reject(new Error("Install cancelled."));
+        finish(reject, new Error("Install cancelled."));
         return;
       }
       if (key === "\r" || key === "\n") {
-        cleanup();
-        resolve(normalizeInstallState(state).selectedIds);
+        finish(resolve, normalizeInstallState(state).selectedIds);
         return;
       }
       state = applyInstallProfileKey(state, key);
-      render();
+      try {
+        render();
+      } catch (error) {
+        finish(reject, error);
+      }
     }
 
     input.on("data", onData);
+    input.once("error", onError);
+    processRef.once("SIGINT", onSigint);
+    processRef.once("SIGTERM", onSigterm);
+
+    try {
+      if (typeof input.setRawMode === "function") {
+        input.setRawMode(true);
+      }
+      input.resume();
+      render();
+    } catch (error) {
+      finish(reject, error);
+    }
   });
 }

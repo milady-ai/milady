@@ -1039,6 +1039,50 @@ export function applyOverrideSpecifiers(
   return true;
 }
 
+export function removeLocalElizaOverrideSpecifiers(
+  pkg,
+  { log = console.log, label = "CI-only override" } = {},
+) {
+  if (!isStringRecord(pkg.overrides)) {
+    return false;
+  }
+
+  const removed = [];
+  for (const dependencyName of Object.keys(
+    LOCAL_ELIZA_CI_OVERRIDE_PACKAGE_PATHS,
+  )) {
+    const specifier = pkg.overrides[dependencyName];
+    if (/^file:\.\/(?:\.eliza\.ci-disabled|eliza)\//.test(specifier)) {
+      if (
+        dependencyName === "@elizaos/shared" ||
+        dependencyName === "@elizaos/ui"
+      ) {
+        const publishedSpecifier = getElizaosPackageSpecifier();
+        pkg.overrides[dependencyName] = publishedSpecifier;
+        removed.push(
+          `${dependencyName} -> ${specifier} restored ${publishedSpecifier}`,
+        );
+      } else {
+        delete pkg.overrides[dependencyName];
+        removed.push(`${dependencyName} -> ${specifier}`);
+      }
+    }
+  }
+
+  if (removed.length === 0) {
+    return false;
+  }
+
+  if (Object.keys(pkg.overrides).length === 0) {
+    delete pkg.overrides;
+  }
+
+  log(
+    `[disable-local-eliza-workspace] Removed ${removed.length} stale ${label}(s) (${removed.join(", ")})`,
+  );
+  return true;
+}
+
 /**
  * @param {PackageJsonRecord} pkg
  * @param {{ log?: typeof console.log, repoRoot?: string }} [options]
@@ -1048,7 +1092,14 @@ export function applyCiOnlyOverrides(
   pkg,
   { log = console.log, repoRoot = DEFAULT_REPO_ROOT } = {},
 ) {
-  return applyOverrideSpecifiers(pkg, resolveCiOverrideSpecifiers(repoRoot), {
+  const overrideSpecifiers = resolveCiOverrideSpecifiers(repoRoot);
+  if (Object.keys(overrideSpecifiers).length === 0) {
+    return removeLocalElizaOverrideSpecifiers(pkg, {
+      log,
+      label: "CI-only override",
+    });
+  }
+  return applyOverrideSpecifiers(pkg, overrideSpecifiers, {
     log,
     label: "CI-only override",
   });

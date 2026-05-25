@@ -269,6 +269,7 @@ test("eliza CI patches align release source helpers", () => {
   );
   assert.match(patchScript, /COPY patches \.\/patches/);
   assert.match(patchScript, /COPY cloud-sdk \.\/eliza\/cloud\/packages\/sdk/);
+  assert.match(patchScript, /ensure-whisper-gguf\.sh base\.en/);
   assert.match(patchScript, /build-patched-electrobun-cli\.mjs/);
   assert.match(patchScript, /require\.resolve\("rcedit\/package\.json"\)/);
   assert.match(patchScript, /replace\(\/\\r\\n\/g, "\\n"\)/);
@@ -694,6 +695,15 @@ test("Electrobun macOS release keeps one command path for both CPU architectures
     electrobun,
     /node eliza\/packages\/app-core\/scripts\/desktop-build\.mjs stage --variant=base --build-whisper/,
   );
+  assert.match(electrobun, /name: Prepare Whisper model artifact/);
+  assert.match(
+    electrobun,
+    /bash eliza\/packages\/app-core\/platforms\/electrobun\/scripts\/ensure-whisper-gguf\.sh base\.en/,
+  );
+  assert.match(electrobun, /name: Upload Whisper model artifact/);
+  assert.match(electrobun, /name: whisper-model-base-en/);
+  assert.match(electrobun, /name: Download Whisper model artifact/);
+  assert.match(electrobun, /name: Seed Whisper model cache/);
   assert.match(
     electrobun,
     /node eliza\/packages\/app-core\/scripts\/desktop-build\.mjs package --env=\$\{\{ needs\.prepare\.outputs\.env \}\}/,

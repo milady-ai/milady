@@ -28,6 +28,12 @@ jobs:
         with:
           bun-version: latest
 
+      - name: Initialize eliza source checkout
+        run: |
+          if [ ! -f eliza/package.json ]; then
+            git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza
+          fi
+
       - name: Install dependencies (eliza/)
         working-directory: eliza
         run: bun install --frozen-lockfile || bun install

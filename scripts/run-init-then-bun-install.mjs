@@ -8,7 +8,8 @@
  */
 import { spawnSync } from "node:child_process";
 import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import { parseArgs as parseNodeArgs } from "node:util";
 import { resolveInstallEnvironment } from "./lib/install-env.mjs";
 import {
   buildInstallPlan,
@@ -20,6 +21,16 @@ import {
 const scriptFile = fileURLToPath(import.meta.url);
 const __dirname = dirname(scriptFile);
 const rootDir = resolve(__dirname, "..");
+const knownWrapperOptions = new Set([
+  "help",
+  "profile",
+  "profiles",
+  "packages",
+  "local",
+  "all",
+  "non-interactive",
+  "yes",
+]);
 
 function usage() {
   console.log(`usage:
@@ -34,54 +45,74 @@ Profiles:
   all        Run packages first, then local source mode`);
 }
 
-function parseArgs(argv) {
-  const profiles = [];
-  const bunInstallArgs = [];
-  let interactive = true;
-
-  for (let index = 0; index < argv.length; index += 1) {
-    const arg = argv[index];
-    if (arg === "--help" || arg === "-h") {
-      return { help: true, profiles, bunInstallArgs, interactive };
-    }
-    if (arg === "--") {
-      bunInstallArgs.push(...argv.slice(index + 1));
-      break;
-    }
-    if (arg === "--profile" || arg === "--profiles") {
-      profiles.push(...parseInstallProfileList(argv[++index] ?? ""));
-      continue;
-    }
-    if (arg.startsWith("--profile=")) {
-      profiles.push(...parseInstallProfileList(arg.slice("--profile=".length)));
-      continue;
-    }
-    if (arg.startsWith("--profiles=")) {
-      profiles.push(
-        ...parseInstallProfileList(arg.slice("--profiles=".length)),
-      );
-      continue;
-    }
-    if (arg === "--packages") {
-      profiles.push("packages");
-      continue;
-    }
-    if (arg === "--local") {
-      profiles.push("local");
-      continue;
-    }
-    if (arg === "--all") {
-      profiles.push("all");
-      continue;
-    }
-    if (arg === "--non-interactive" || arg === "--yes") {
-      interactive = false;
-      continue;
-    }
-    bunInstallArgs.push(arg);
+function splitBunInstallArgs(argv) {
+  const marker = argv.indexOf("--");
+  if (marker === -1) {
+    return { wrapperArgs: argv, trailingBunArgs: [] };
   }
+  return {
+    wrapperArgs: argv.slice(0, marker),
+    trailingBunArgs: argv.slice(marker + 1),
+  };
+}
 
-  return { help: false, profiles, bunInstallArgs, interactive };
+function knownArgumentIndexes(tokens) {
+  const indexes = new Set();
+  for (const token of tokens) {
+    if (token.kind !== "option" || !knownWrapperOptions.has(token.name)) {
+      continue;
+    }
+    indexes.add(token.index);
+    if (token.value !== undefined && !token.inlineValue) {
+      indexes.add(token.index + 1);
+    }
+  }
+  return indexes;
+}
+
+function collectProfileValues(values) {
+  const profiles = [];
+  for (const value of values.profile ?? []) {
+    profiles.push(...parseInstallProfileList(value));
+  }
+  for (const value of values.profiles ?? []) {
+    profiles.push(...parseInstallProfileList(value));
+  }
+  if (values.packages) profiles.push("packages");
+  if (values.local) profiles.push("local");
+  if (values.all) profiles.push("all");
+  return profiles;
+}
+
+export function parseArgs(argv) {
+  const { wrapperArgs, trailingBunArgs } = splitBunInstallArgs(argv);
+  const parsed = parseNodeArgs({
+    args: wrapperArgs,
+    allowPositionals: true,
+    strict: false,
+    tokens: true,
+    options: {
+      help: { type: "boolean", short: "h" },
+      profile: { type: "string", multiple: true },
+      profiles: { type: "string", multiple: true },
+      packages: { type: "boolean" },
+      local: { type: "boolean" },
+      all: { type: "boolean" },
+      "non-interactive": { type: "boolean" },
+      yes: { type: "boolean" },
+    },
+  });
+  const consumed = knownArgumentIndexes(parsed.tokens);
+  const bunInstallArgs = wrapperArgs.filter(
+    (_arg, index) => !consumed.has(index),
+  );
+
+  return {
+    help: Boolean(parsed.values.help),
+    profiles: collectProfileValues(parsed.values),
+    bunInstallArgs: [...bunInstallArgs, ...trailingBunArgs],
+    interactive: !parsed.values["non-interactive"] && !parsed.values.yes,
+  };
 }
 
 function canPrompt({ profiles, bunInstallArgs, interactive }) {
@@ -163,11 +194,16 @@ async function main() {
   return 0;
 }
 
-main()
-  .then((status) => {
-    process.exit(status);
-  })
-  .catch((error) => {
-    console.error(error instanceof Error ? error.message : String(error));
-    process.exit(1);
-  });
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(resolve(process.argv[1])).href
+) {
+  main()
+    .then((status) => {
+      process.exit(status);
+    })
+    .catch((error) => {
+      console.error(error instanceof Error ? error.message : String(error));
+      process.exit(1);
+    });
+}

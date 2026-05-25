@@ -53,6 +53,23 @@ function findBunStorePackage(scope, packageName) {
   return candidates[0] ?? null;
 }
 
+function symlinkPackageDir(target, linkPath) {
+  const linkType = process.platform === "win32" ? "junction" : "dir";
+  const nextTarget =
+    linkType === "junction"
+      ? path.resolve(path.dirname(linkPath), target)
+      : target;
+  fs.symlinkSync(nextTarget, linkPath, linkType);
+}
+
+function isPathInside(parentDir, targetPath) {
+  const relative = path.relative(parentDir, targetPath);
+  return (
+    relative === "" ||
+    (relative && !relative.startsWith("..") && !path.isAbsolute(relative))
+  );
+}
+
 function collectNodeModulesDirs() {
   const dirs = [rootNodeModulesDir];
   const appsDir = path.join(repoRoot, "apps");
@@ -61,7 +78,10 @@ function collectNodeModulesDirs() {
   for (const entry of fs.readdirSync(appsDir, { withFileTypes: true })) {
     if (!entry.isDirectory()) continue;
     const appNodeModulesDir = path.join(appsDir, entry.name, "node_modules");
-    if (fs.existsSync(appNodeModulesDir)) {
+    if (
+      isPathInside(appsDir, appNodeModulesDir) &&
+      fs.existsSync(appNodeModulesDir)
+    ) {
       dirs.push(appNodeModulesDir);
     }
   }
@@ -92,7 +112,7 @@ function repairScope(nodeModulesDir, scope) {
     fs.unlinkSync(linkPath);
     if (storePackage) {
       const nextTarget = path.relative(path.dirname(linkPath), storePackage);
-      fs.symlinkSync(nextTarget, linkPath);
+      symlinkPackageDir(nextTarget, linkPath);
       relinked += 1;
     } else {
       removed += 1;
@@ -162,7 +182,7 @@ function ensureDeclaredPackageLinks() {
 
     fs.mkdirSync(scopeDir, { recursive: true });
     const nextTarget = path.relative(path.dirname(linkPath), storePackage);
-    fs.symlinkSync(nextTarget, linkPath);
+    symlinkPackageDir(nextTarget, linkPath);
     relinked += 1;
   }
   return relinked;

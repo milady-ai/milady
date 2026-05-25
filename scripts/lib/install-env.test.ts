@@ -3,6 +3,7 @@ import {
   buildPathWithNodeBin,
   evaluateInstallReadiness,
   formatInstallReadinessError,
+  parseNodeProbeOutput,
   selectNodeCandidate,
   selectPythonCandidate,
   shouldSkipInstallPreflight,
@@ -35,6 +36,17 @@ describe("install environment", () => {
     });
 
     expect(selected).toBeNull();
+  });
+
+  it("parses Windows CRLF Node probe output without carrying carriage returns", () => {
+    expect(
+      parseNodeProbeOutput(
+        "C:\\Program Files\\nodejs\\node.exe\r\nv22.22.0\r\n",
+      ),
+    ).toEqual({
+      executable: "C:\\Program Files\\nodejs\\node.exe",
+      version: "v22.22.0",
+    });
   });
 
   it("keeps an active supported Node when no exact candidate is available", () => {
@@ -88,6 +100,40 @@ describe("install environment", () => {
     );
     expect(formatInstallReadinessError(readiness)).toContain("v25.9.0");
     expect(formatInstallReadinessError(readiness)).toContain("v22.22.0/bin");
+  });
+
+  it("rejects an active Node that is too old for native install scripts", () => {
+    const readiness = evaluateInstallReadiness({
+      requiredVersion: "22.22.0",
+      activeNode: {
+        executable: "/usr/local/bin/node",
+        version: "v21.7.3",
+      },
+    });
+
+    expect(readiness.ok).toBe(false);
+    expect(readiness.code).toBe("unsupported-node");
+    expect(formatInstallReadinessError(readiness)).toContain("v21.7.3");
+  });
+
+  it("rejects configured macOS Python when plistlib cannot import", () => {
+    const readiness = evaluateInstallReadiness({
+      requiredVersion: "22.22.0",
+      activeNode: {
+        executable: "/Users/me/.nvm/versions/node/v22.22.0/bin/node",
+        version: "v22.22.0",
+      },
+      configuredPython: {
+        executable: "/opt/homebrew/bin/python3.14",
+        plistlib: false,
+      },
+    });
+
+    expect(readiness.ok).toBe(false);
+    expect(readiness.code).toBe("broken-configured-python");
+    expect(formatInstallReadinessError(readiness)).toContain(
+      "/opt/homebrew/bin/python3.14",
+    );
   });
 
   it("rejects a broken PATH python when a working system python can avoid node-gyp failures", () => {

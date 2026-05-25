@@ -452,6 +452,10 @@ const requiredElectrobunConfigSnippets`,
       "bash eliza/packages/app-core/platforms/electrobun/scripts/ensure-whisper-model.sh base.en",
     ],
     [
+      "bash packages/app-core/platforms/electrobun/scripts/ensure-whisper-gguf.sh base.en",
+      "bash eliza/packages/app-core/platforms/electrobun/scripts/ensure-whisper-gguf.sh base.en",
+    ],
+    [
       "packages/app-core/platforms/electrobun/scripts/hdiutil-wrapper.sh",
       "eliza/packages/app-core/platforms/electrobun/scripts/hdiutil-wrapper.sh",
     ],

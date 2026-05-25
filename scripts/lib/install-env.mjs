@@ -21,6 +21,15 @@ function normalizeVersion(version) {
     .replace(/^v/, "");
 }
 
+export function parseNodeProbeOutput(stdout) {
+  const [resolvedExecutable, version] = String(stdout ?? "")
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  if (!resolvedExecutable || !version) return null;
+  return { executable: resolvedExecutable, version };
+}
+
 function probeNode(executable, env) {
   if (!executable) return null;
   const result = spawnSync(
@@ -33,9 +42,7 @@ function probeNode(executable, env) {
     },
   );
   if (result.status !== 0) return null;
-  const [resolvedExecutable, version] = result.stdout.trim().split("\n");
-  if (!resolvedExecutable || !version) return null;
-  return { executable: resolvedExecutable, version };
+  return parseNodeProbeOutput(result.stdout);
 }
 
 function probePython(executable, env) {
@@ -139,6 +146,43 @@ export function shouldSkipInstallPreflight(env = process.env) {
   );
 }
 
+function readinessResult(ok, code, base) {
+  return { ok, code, ...base };
+}
+
+function getNodeReadinessCode(activeNode) {
+  const activeMajor = parseMajor(activeNode?.version);
+  if (!activeNode) return "missing-node";
+  if (
+    activeMajor === null ||
+    activeMajor < MIN_NODE_MAJOR ||
+    activeMajor > MAX_NATIVE_PREBUILD_NODE_MAJOR
+  ) {
+    return "unsupported-node";
+  }
+  return null;
+}
+
+function getPythonReadinessCode({
+  configuredPython,
+  defaultPython,
+  fallbackPython,
+}) {
+  if (configuredPython && !configuredPython.plistlib) {
+    return "broken-configured-python";
+  }
+  if (
+    !configuredPython &&
+    defaultPython &&
+    !defaultPython.plistlib &&
+    fallbackPython?.plistlib &&
+    defaultPython.executable !== fallbackPython.executable
+  ) {
+    return "broken-path-python";
+  }
+  return null;
+}
+
 export function evaluateInstallReadiness({
   requiredVersion,
   activeNode,
@@ -147,7 +191,6 @@ export function evaluateInstallReadiness({
   fallbackPython = null,
 } = {}) {
   const required = normalizeVersion(requiredVersion);
-  const activeMajor = parseMajor(activeNode?.version);
   const base = {
     requiredVersion: required,
     activeNode: activeNode ?? null,
@@ -155,34 +198,17 @@ export function evaluateInstallReadiness({
     defaultPython,
     fallbackPython,
   };
+  const code =
+    getNodeReadinessCode(activeNode) ??
+    getPythonReadinessCode({
+      configuredPython,
+      defaultPython,
+      fallbackPython,
+    });
 
-  if (!activeNode) {
-    return { ok: false, code: "missing-node", ...base };
-  }
-
-  if (
-    activeMajor === null ||
-    activeMajor < MIN_NODE_MAJOR ||
-    activeMajor > MAX_NATIVE_PREBUILD_NODE_MAJOR
-  ) {
-    return { ok: false, code: "unsupported-node", ...base };
-  }
-
-  if (configuredPython && !configuredPython.plistlib) {
-    return { ok: false, code: "broken-configured-python", ...base };
-  }
-
-  if (
-    !configuredPython &&
-    defaultPython &&
-    !defaultPython.plistlib &&
-    fallbackPython?.plistlib &&
-    defaultPython.executable !== fallbackPython.executable
-  ) {
-    return { ok: false, code: "broken-path-python", ...base };
-  }
-
-  return { ok: true, code: "ready", ...base };
+  return code
+    ? readinessResult(false, code, base)
+    : readinessResult(true, "ready", base);
 }
 
 export function formatInstallReadinessError(readiness) {
