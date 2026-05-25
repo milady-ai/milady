@@ -19,10 +19,10 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
-        # actions/checkout@v6
+        # actions/checkout pinned by SHA
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
-          # Full history so gitleaks can scan the diff range on PRs.
+          # Full history so gitleaks can scan the PR or push diff range.
           fetch-depth: 0
 
       - name: Install gitleaks CLI
@@ -40,15 +40,13 @@ jobs:
           sudo install -m 0755 gitleaks /usr/local/bin/gitleaks
 
       - name: Run gitleaks
-        env:
-          GITLEAKS_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before || '' }}
-          GITLEAKS_HEAD_SHA: ${{ github.sha }}
+        shell: bash
         run: |
           set -euo pipefail
-          args=(detect --source . --config .gitleaks.toml --redact --verbose --exit-code 1)
-          if [ -n "$GITLEAKS_BASE_SHA" ] && [ "$GITLEAKS_BASE_SHA" != "0000000000000000000000000000000000000000" ]; then
-            args+=(--log-opts="${GITLEAKS_BASE_SHA}..${GITLEAKS_HEAD_SHA}")
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            gitleaks git . --log-opts="${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}" --config .gitleaks.toml --redact --no-banner --verbose
+          elif [ -n "${{ github.event.before }}" ] && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            gitleaks git . --log-opts="${{ github.event.before }}..${{ github.sha }}" --config .gitleaks.toml --redact --no-banner --verbose
           else
-            args+=(--no-git)
+            gitleaks dir . --config .gitleaks.toml --redact --no-banner --verbose
           fi
-          gitleaks "${args[@]}"

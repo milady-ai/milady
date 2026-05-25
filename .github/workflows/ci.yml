@@ -77,12 +77,12 @@ jobs:
           fi
 
       - name: Generate i18n keyword data
-        if: ${{ hashFiles('eliza/package.json') != '' }}
+        if: ${{ hashFiles('eliza/packages/shared/scripts/generate-keywords.mjs') != '' }}
         run: node packages/shared/scripts/generate-keywords.mjs --target ts
         working-directory: eliza
 
       - name: Build eliza packages required for typecheck
-        if: ${{ hashFiles('eliza/package.json') != '' }}
+        if: ${{ hashFiles('eliza/packages/core/package.json') != '' }}
         run: |
           if [ ! -f eliza/packages/core/dist/index.node.js ] || [ ! -f eliza/packages/core/dist/index.d.ts ]; then
             (cd eliza/packages/core && bun run build)
@@ -174,12 +174,12 @@ jobs:
           fi
 
       - name: Generate i18n keyword data
-        if: ${{ hashFiles('eliza/package.json') != '' }}
+        if: ${{ hashFiles('eliza/packages/shared/scripts/generate-keywords.mjs') != '' }}
         run: node packages/shared/scripts/generate-keywords.mjs --target ts
         working-directory: eliza
 
       - name: Build eliza packages required for typecheck
-        if: ${{ hashFiles('eliza/package.json') != '' }}
+        if: ${{ hashFiles('eliza/packages/core/package.json') != '' }}
         run: |
           if [ ! -f eliza/packages/core/dist/index.node.js ] || [ ! -f eliza/packages/core/dist/index.d.ts ]; then
             (cd eliza/packages/core && bun run build)
@@ -253,7 +253,7 @@ jobs:
         run: node scripts/align-eliza-ci-node-modules.mjs
 
       - name: Build eliza packages required for typecheck
-        if: ${{ hashFiles('eliza/package.json') != '' }}
+        if: ${{ hashFiles('eliza/packages/core/package.json') != '' }}
         run: |
           if [ ! -f eliza/packages/core/dist/index.node.js ] || [ ! -f eliza/packages/core/dist/index.d.ts ]; then
             (cd eliza/packages/core && bun run build)
@@ -277,28 +277,13 @@ jobs:
             (cd eliza/plugins/plugin-streaming && bun run build)
           fi
 
-      # Link local @elizaos workspace packages into node_modules. `bun run build`
-      # invokes vite (via scripts/run-production-build.mjs), which imports
-      # symbols from @elizaos/ui (createVoiceCapture, VoicePill, VoicePillMessage,
-      # VoiceCaptureHandle) that ship in repo-local eliza/packages/ui but have
-      # not landed on the npm alpha dist-tag yet (currently
-      # @elizaos/ui@2.0.0-alpha.537). Without this step, vite resolves
-      # @elizaos/ui from npm and the build fails with
-      # `"createVoiceCapture" is not exported by "@elizaos/ui"`.
       - name: Link local @elizaos workspace packages
-        run: |
-          if [ -f eliza/packages/app-core/scripts/link-docker-local-app-packages.mjs ]; then
-            node eliza/packages/app-core/scripts/link-docker-local-app-packages.mjs
-          else
-            echo "local @elizaos workspace linker is absent; package-mode build will use installed packages."
-          fi
+        if: ${{ hashFiles('eliza/packages/app-core/package.json') != '' }}
+        run: node eliza/packages/app-core/scripts/link-docker-local-app-packages.mjs
 
-      # MILADY_FORCE_LOCAL_UPSTREAMS=1 forces apps/app/vite.config.ts to treat
-      # the freshly-linked eliza/ checkout as the source of truth for the
-      # @elizaos/* aliases.
       - name: Build project
         env:
-          MILADY_FORCE_LOCAL_UPSTREAMS: "1"
+          MILADY_FORCE_LOCAL_UPSTREAMS: ${{ hashFiles('eliza/packages/app-core/package.json') != '' && '1' || '' }}
         run: bun run build
 
       - name: Build homepage

@@ -28,6 +28,8 @@ import type {
 import type { ComponentType } from "react";
 import * as THREE from "three";
 
+// Mirrors the confirm-dialog PromptOptions shape; this package-mode stub cannot
+// import the unpublished deep UI subpath.
 type PromptOptions = {
   title: string;
   description?: string;

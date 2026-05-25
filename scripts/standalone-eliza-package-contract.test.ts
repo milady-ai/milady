@@ -45,7 +45,7 @@ test("Milady no longer tracks eliza as a submodule", () => {
 
   const rootPackage = readJson("package.json");
   assert.deepEqual(rootPackage.workspaces, ["apps/*"]);
-  assert.equal(rootPackage.scripts.preinstall, undefined);
+  assert.equal(rootPackage.scripts.preinstall, "node scripts/preinstall.mjs");
   assert.equal(
     rootPackage.scripts["setup:upstreams"],
     "node scripts/eliza-source-mode.mjs local --install",
@@ -264,7 +264,47 @@ test("package-mode install repairs stale local node_modules links", () => {
   assert.match(postinstallScript, /repair-elizaos-package-links\.mjs/);
   assert.match(repairScript, /isLocalElizaDisabled/);
   assert.match(repairScript, /localElizaRoot/);
+  assert.match(repairScript, /collectNodeModulesDirs/);
+  assert.match(repairScript, /appsDir/);
   assert.match(repairScript, /findBunStorePackage/);
+  assert.match(repairScript, /isPathInside\(appsDir, appNodeModulesDir\)/);
+  assert.match(
+    repairScript,
+    /process\.platform === "win32" \? "junction" : "dir"/,
+  );
+});
+
+test("repo-local install wrapper uses selectable install profiles", () => {
+  const packageJson = readJson("package.json");
+  const installWrapper = read("scripts/run-init-then-bun-install.mjs");
+  const profileHelper = read("scripts/lib/install-profiles.mjs");
+  const sourceModeScript = read("scripts/eliza-source-mode.mjs");
+  const preinstallScript = read("scripts/preinstall.mjs");
+
+  assert.match(installWrapper, /promptInstallProfiles/);
+  assert.match(installWrapper, /buildInstallPlan/);
+  assert.match(installWrapper, /resolveInstallEnvironment/);
+  assert.match(installWrapper, /parseArgs as parseNodeArgs/);
+  assert.match(profileHelper, /Space to select, Enter to install/);
+  assert.match(profileHelper, /expanded\.add\("packages"\)/);
+  assert.match(sourceModeScript, /installArgs/);
+  assert.doesNotMatch(sourceModeScript, /allowFailure:\s*true/);
+  assert.match(preinstallScript, /evaluateCurrentInstallEnvironment/);
+  assert.doesNotMatch(preinstallScript, /promptInstallProfiles/);
+  assert.doesNotMatch(preinstallScript, /eliza-source-mode/);
+  assert.doesNotMatch(preinstallScript, /bun install/);
+  assert.ok(
+    packageJson.files.includes("scripts/lib/install-profiles.mjs"),
+    "npm package must include the install profile helper used by ./install",
+  );
+  assert.ok(
+    packageJson.files.includes("scripts/lib/install-env.mjs"),
+    "npm package must include the install environment helper used by ./install",
+  );
+  assert.ok(
+    packageJson.files.includes("scripts/preinstall.mjs"),
+    "npm package must include the preinstall doctor used by bun install",
+  );
 });
 
 test("package-mode no longer carries migrated elizaOS package patches", () => {
@@ -341,5 +381,6 @@ test("eject and uneject scripts wire the tsconfig-mode helper", () => {
   const disableScript = read("scripts/disable-local-eliza-workspace.mjs");
   const restoreScript = read("scripts/restore-local-eliza-workspace.mjs");
   assert.match(disableScript, /applyTsconfigMode\(repoRoot, "packages"/);
+  assert.match(restoreScript, /applyTsconfigMode\(repoRoot, "packages"/);
   assert.match(restoreScript, /applyTsconfigMode\(repoRoot, "local"/);
 });

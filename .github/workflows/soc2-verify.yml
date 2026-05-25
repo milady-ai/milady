@@ -36,19 +36,18 @@ jobs:
           fi
           git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza
 
-      - name: Install eliza dependencies
+      - name: Install dependencies (eliza/)
         working-directory: eliza
         run: bun install --no-frozen-lockfile --ignore-scripts
 
       - name: Run SOC2 verification
         working-directory: eliza
-        shell: bash
         run: |
-          args=(--out ../soc2-evidence)
-          if [ "${GITHUB_EVENT_NAME}" != "pull_request" ]; then
-            args+=(--strict-fail)
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            bun run packages/soc2-verify/src/cli.ts --out ../soc2-evidence
+          else
+            bun run packages/soc2-verify/src/cli.ts --strict-fail --out ../soc2-evidence
           fi
-          bun run packages/soc2-verify/src/cli.ts "${args[@]}"
 
       - name: Upload evidence report
         if: always()

@@ -537,10 +537,47 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+  whisper-model:
+    name: Prepare Whisper model artifact
+    needs: prepare
+    runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
+    defaults:
+      run:
+        shell: bash -euo pipefail {0}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: false
+
+      - name: Initialize eliza source checkout
+        run: |
+          if [ ! -f eliza/package.json ]; then
+            git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza
+            if [ -n "${MILADY_ELIZA_REF:-}" ]; then
+              git -C eliza fetch --depth=1 origin "$MILADY_ELIZA_REF"
+              git -C eliza checkout --quiet FETCH_HEAD
+              echo "Pinned eliza to ${MILADY_ELIZA_REF}"
+            fi
+          fi
+
+      - name: Prepare Whisper model artifact
+        env:
+          ELIZA_WHISPER_MODEL_DIR: ${{ runner.temp }}/whisper-model
+        run: bash eliza/packages/app-core/platforms/electrobun/scripts/ensure-whisper-gguf.sh base.en
+
+      - name: Upload Whisper model artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: whisper-model-base-en
+          path: ${{ runner.temp }}/whisper-model/ggml-base.en.bin
+          retention-days: 14
+          if-no-files-found: error
+
   build:
     name: Build ${{ matrix.platform.name }}
-    if: ${{ always() && needs.prepare.result == 'success' && (needs.validate-release.result == 'success' || needs.validate-release.result == 'skipped') }}
-    needs: [prepare, validate-release]
+    if: ${{ always() && needs.prepare.result == 'success' && needs.whisper-model.result == 'success' && (needs.validate-release.result == 'success' || needs.validate-release.result == 'skipped') }}
+    needs: [prepare, validate-release, whisper-model]
     runs-on: ${{ matrix.platform.runner }}
     timeout-minutes: 150
     defaults:
@@ -2012,9 +2049,9 @@ jobs:
             echo "::error::No public release files collected"
             exit 1
           fi
-          checksum_file="$(mktemp)"
-          find . -maxdepth 1 -type f ! -name SHA256SUMS.txt -print0 | sort -z | xargs -0 sha256sum > "$checksum_file"
-          mv "$checksum_file" SHA256SUMS.txt
+          sums_file="$(mktemp)"
+          find . -maxdepth 1 -type f ! -name SHA256SUMS.txt -print0 | sort -z | xargs -0 sha256sum > "$sums_file"
+          mv "$sums_file" SHA256SUMS.txt
           cat SHA256SUMS.txt
 
       - name: Create GitHub Release

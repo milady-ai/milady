@@ -156,6 +156,10 @@ jobs:
 
       - name: Build local eliza runtime plugins
         run: |
+          if [ ! -f eliza/packages/core/package.json ]; then
+            echo "eliza core source absent; skipping local runtime plugin build"
+            exit 0
+          fi
           if [ ! -f eliza/packages/core/dist/index.node.js ] || [ ! -f eliza/packages/core/dist/index.d.ts ]; then
             (cd eliza/packages/core && bun run build)
           fi
@@ -617,6 +621,7 @@ jobs:
             const multilineDecisionPattern = /(?:^|\n)\s*(?:#{1,4}\s+)?(?:\d+\.\s*)?(?:\*{0,2})Decision(?:\*{0,2})?\s*:?\s*\n+\s*(?:\*{0,2})(APPROVE|REQUEST CHANGES|CLOSE)\b/i;
             const boldVerdictPattern = /\*{1,3}(APPROVE|REQUEST CHANGES|CLOSE)\b\*{1,3}/i;
             const bareLineVerdictPattern = /(?:^|\n)\s*(APPROVE|REQUEST CHANGES|CLOSE)\b/i;
+            const serviceUnavailablePattern = /Agent Review\s+[—-]+\s+Service Unavailable|automated review unavailable|insufficient[_ -]?(quota|balance|funds|credits?)|credit balance is too low|quota exceeded|please add credits|top[_ -]?up your credits/i;
             const maxAttempts = 12;
             const pollIntervalMs = 5_000;
 
@@ -636,13 +641,11 @@ jobs:
               return '';
             };
 
-            const serviceUnavailablePattern = /Agent Review\s+[—-]+\s+Service Unavailable|automated review unavailable|insufficient[_ -]?(quota|balance|funds|credits?)|credit balance is too low|quota exceeded|please add credits|top[_ -]?up your credits/i;
-
-            const findLatest = (items, { requireRunMarker = true } = {}) => {
+            const findLatest = (items, { requireRunMarker = true, allowServiceUnavailable = false } = {}) => {
               const filtered = items.filter((c) => {
                 if (!c?.body) return false;
                 if (requireRunMarker && runMarker && !c.body.includes(runMarker)) return false;
-                return Boolean(extractDecision(c.body)) || serviceUnavailablePattern.test(c.body);
+                return Boolean(extractDecision(c.body)) || (allowServiceUnavailable && serviceUnavailablePattern.test(c.body));
               });
               return filtered.sort((a, b) =>
                 new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
@@ -676,7 +679,7 @@ jobs:
                 ...comments.filter((c) => c.user?.type === 'Bot'),
                 ...normalizedReviews.filter((r) => r.user?.type === 'Bot'),
               ];
-              latest = findLatest(allBotEntries, { requireRunMarker: true });
+              latest = findLatest(allBotEntries, { requireRunMarker: true, allowServiceUnavailable: true });
 
               if (latest) {
                 break;

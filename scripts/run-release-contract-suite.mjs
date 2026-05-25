@@ -7,7 +7,6 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDir, "..");
-const appCoreRoot = path.resolve(repoRoot, "eliza", "packages", "app-core");
 const legacyElectrobunDir = path.join(repoRoot, "apps", "app", "electrobun");
 const canonicalElectrobunDir = path.join(
   repoRoot,
@@ -459,7 +458,7 @@ export function main() {
         '{"type":"module"}\n',
       );
       run("node", ["--import", "tsx", "scripts/write-build-info.ts"]);
-      run("node", ["scripts/generate-static-asset-manifest.mjs"], appCoreRoot);
+      run("node", ["scripts/generate-static-asset-manifest.mjs"]);
       run("bun", ["run", "release:check"]);
     }
   } catch (err) {
