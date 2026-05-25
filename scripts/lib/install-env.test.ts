@@ -1,3 +1,6 @@
+import { mkdtempSync, readFileSync, rmSync, statSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   buildPathWithNodeBin,
@@ -7,6 +10,7 @@ import {
   selectNodeCandidate,
   selectPythonCandidate,
   shouldSkipInstallPreflight,
+  writeInstallLifecycleNodeShim,
 } from "./install-env.mjs";
 
 describe("install environment", () => {
@@ -83,6 +87,27 @@ describe("install environment", () => {
         "/Users/me/.nvm/versions/node/v22.22.0/bin:/opt/homebrew/bin",
       ),
     ).toBe("/Users/me/.nvm/versions/node/v22.22.0/bin:/opt/homebrew/bin");
+  });
+
+  it("writes a lifecycle Node shim for dependency install scripts", () => {
+    const rootDir = mkdtempSync(join(tmpdir(), "milady-install-env-"));
+    try {
+      const shimPath = writeInstallLifecycleNodeShim({
+        rootDir,
+        nodeExecutable: "/Users/me/.nvm/versions/node/v22.22.0/bin/node",
+        pythonExecutable: "/usr/bin/python3",
+        platform: "darwin",
+      });
+      const shim = readFileSync(shimPath, "utf8");
+
+      expect(shim).toContain(
+        "exec '/Users/me/.nvm/versions/node/v22.22.0/bin/node'",
+      );
+      expect(shim).toContain("export PYTHON='/usr/bin/python3'");
+      expect(statSync(shimPath).mode & 0o111).not.toBe(0);
+    } finally {
+      rmSync(rootDir, { recursive: true, force: true });
+    }
   });
 
   it("rejects an active Node that is too new for native install scripts", () => {

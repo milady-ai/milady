@@ -1,5 +1,11 @@
 import { spawnSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import {
+  chmodSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
 import path from "node:path";
 import process from "node:process";
 
@@ -138,6 +144,54 @@ export function buildPathWithNodeBin(nodeExecutable, currentPath = "") {
   return [nodeBin, ...parts.filter((part) => part !== nodeBin)].join(
     path.delimiter,
   );
+}
+
+function shellQuote(value) {
+  return `'${String(value).replaceAll("'", "'\"'\"'")}'`;
+}
+
+export function writeInstallLifecycleNodeShim({
+  rootDir,
+  nodeExecutable,
+  pythonExecutable = null,
+  platform = process.platform,
+}) {
+  const binDir = path.join(rootDir, "node_modules", ".bin");
+  mkdirSync(binDir, { recursive: true });
+
+  if (platform === "win32") {
+    const shimPath = path.join(binDir, "node.cmd");
+    const pythonLines = pythonExecutable
+      ? [
+          `if not defined PYTHON set "PYTHON=${pythonExecutable}"`,
+          `if not defined npm_config_python set "npm_config_python=${pythonExecutable}"`,
+        ]
+      : [];
+    writeFileSync(
+      shimPath,
+      ["@echo off", ...pythonLines, `"${nodeExecutable}" %*`, ""].join("\r\n"),
+    );
+    return shimPath;
+  }
+
+  const shimPath = path.join(binDir, "node");
+  const pythonLines = pythonExecutable
+    ? [
+        `if [ -z "\${PYTHON:-}" ]; then export PYTHON=${shellQuote(pythonExecutable)}; fi`,
+        `if [ -z "\${npm_config_python:-}" ]; then export npm_config_python=${shellQuote(pythonExecutable)}; fi`,
+      ]
+    : [];
+  writeFileSync(
+    shimPath,
+    [
+      "#!/bin/sh",
+      ...pythonLines,
+      `exec ${shellQuote(nodeExecutable)} "$@"`,
+      "",
+    ].join("\n"),
+  );
+  chmodSync(shimPath, 0o755);
+  return shimPath;
 }
 
 export function shouldSkipInstallPreflight(env = process.env) {
@@ -305,6 +359,8 @@ export function resolveInstallEnvironment({
 
   if (selectedNode) {
     env.PATH = buildPathWithNodeBin(selectedNode.executable, env.PATH ?? "");
+    env.MILADY_NODE_PATH = selectedNode.executable;
+    env.npm_config_node = selectedNode.executable;
     diagnostics.push(
       `Node ${selectedNode.version} via ${selectedNode.executable}`,
     );
@@ -326,5 +382,12 @@ export function resolveInstallEnvironment({
     diagnostics.push(`Python for node-gyp via ${selectedPython.executable}`);
   }
 
-  return { ok: true, env, diagnostics, error: null };
+  return {
+    ok: true,
+    env,
+    diagnostics,
+    error: null,
+    node: selectedNode,
+    python: selectedPython ?? null,
+  };
 }

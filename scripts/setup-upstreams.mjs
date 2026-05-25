@@ -1136,10 +1136,75 @@ function ensurePackageBinLinks(
   return linkedBins;
 }
 
+function parseSemverMajor(version) {
+  const match = String(version ?? "").match(/^v?(\d+)\./);
+  return match ? Number(match[1]) : null;
+}
+
+function parseBunStorePackageVersion(entryName, packagePrefix) {
+  return entryName.slice(packagePrefix.length).split("+")[0] ?? null;
+}
+
+function dependencySpecifierMatchesVersion(specifier, version) {
+  if (typeof specifier !== "string" || specifier.length === 0) {
+    return true;
+  }
+  if (
+    specifier === "*" ||
+    specifier === "latest" ||
+    /^(?:workspace|file|link|portal|github|git|https?):/.test(specifier)
+  ) {
+    return true;
+  }
+
+  for (const part of specifier.split("||").map((entry) => entry.trim())) {
+    const normalized = part.replace(/^[~^>=<\s]+/, "");
+    if (!normalized) {
+      continue;
+    }
+    if (normalized === version) {
+      return true;
+    }
+    const requestedMajor = parseSemverMajor(normalized);
+    const candidateMajor = parseSemverMajor(version);
+    if (
+      requestedMajor !== null &&
+      candidateMajor !== null &&
+      requestedMajor === candidateMajor
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function compareSemverDesc(leftVersion, rightVersion) {
+  const left = String(leftVersion ?? "")
+    .split(/[.-]/)
+    .map((part) => Number.parseInt(part, 10));
+  const right = String(rightVersion ?? "")
+    .split(/[.-]/)
+    .map((part) => Number.parseInt(part, 10));
+  const length = Math.max(left.length, right.length);
+  for (let index = 0; index < length; index += 1) {
+    const leftPart = Number.isNaN(left[index]) ? 0 : (left[index] ?? 0);
+    const rightPart = Number.isNaN(right[index]) ? 0 : (right[index] ?? 0);
+    if (leftPart !== rightPart) {
+      return rightPart - leftPart;
+    }
+  }
+  return 0;
+}
+
+function readPackageVersion(packageDir) {
+  return readPackageJson(packageDir)?.version ?? null;
+}
+
 export function findInstalledPackageDir(
   repoRoot,
   packageName,
-  preferredVersion,
+  dependencySpecifier,
   localTargetPath = null,
   { searchRoots = [repoRoot] } = {},
 ) {
@@ -1159,17 +1224,20 @@ export function findInstalledPackageDir(
     );
     try {
       const resolved = realpathSync(directPackagePath);
-      if (existsSync(resolved) && resolved !== resolvedLocalTarget) {
+      if (
+        existsSync(resolved) &&
+        resolved !== resolvedLocalTarget &&
+        dependencySpecifierMatchesVersion(
+          dependencySpecifier,
+          readPackageVersion(resolved),
+        )
+      ) {
         return directPackagePath;
       }
     } catch {}
   }
 
   const packagePrefix = `${packageName.replace("/", "+")}@`;
-  const preferredPrefix =
-    preferredVersion === undefined
-      ? null
-      : `${packageName.replace("/", "+")}@${preferredVersion}+`;
 
   for (const searchRoot of uniqueSearchRoots) {
     const bunCacheRoot = path.join(searchRoot, "node_modules", ".bun");
@@ -1194,15 +1262,21 @@ export function findInstalledPackageDir(
         continue;
       }
 
+      const version = parseBunStorePackageVersion(entry.name, packagePrefix);
       matches.push({
         candidate,
-        preferred:
-          preferredPrefix !== null && entry.name.startsWith(preferredPrefix),
+        version,
+        preferred: dependencySpecifierMatchesVersion(
+          dependencySpecifier,
+          version,
+        ),
       });
     }
 
     matches.sort(
-      (left, right) => Number(right.preferred) - Number(left.preferred),
+      (left, right) =>
+        Number(right.preferred) - Number(left.preferred) ||
+        compareSemverDesc(left.version, right.version),
     );
     if (matches[0]?.candidate) {
       return matches[0].candidate;
@@ -1246,10 +1320,11 @@ export function ensurePluginDependencyLinks(
     }
 
     for (const dependencyName of dependencyNames) {
+      const dependencySpecifier = packageDependencies[dependencyName];
       const installedDependencyDir = findInstalledPackageDir(
         repoRoot,
         dependencyName,
-        undefined,
+        dependencySpecifier,
         null,
         { searchRoots },
       );

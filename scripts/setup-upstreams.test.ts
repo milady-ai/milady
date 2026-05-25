@@ -2,7 +2,9 @@ import {
   existsSync,
   mkdirSync,
   mkdtempSync,
+  realpathSync,
   rmSync,
+  symlinkSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
@@ -11,6 +13,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   ensureElizaBuildOutputs,
   ensurePluginBuildOutputs,
+  ensurePluginDependencyLinks,
   getUnavailableLocalPluginPackageNames,
 } from "./setup-upstreams.mjs";
 
@@ -36,6 +39,14 @@ function writePackageJson(packageDir: string, packageName: string) {
       null,
       2,
     )}\n`,
+  );
+}
+
+function writePackageJsonRecord(packageDir: string, packageJson: object) {
+  mkdirSync(packageDir, { recursive: true });
+  writeFileSync(
+    path.join(packageDir, "package.json"),
+    `${JSON.stringify(packageJson, null, 2)}\n`,
   );
 }
 
@@ -126,5 +137,54 @@ describe("setup-upstreams cloud-coupled plugins", () => {
     });
 
     expect(builtPackages).toEqual(["plugin-zai"]);
+  });
+
+  it("links plugin dependencies to an installed version that matches the requested range", () => {
+    const repoRoot = createTempDir();
+    const elizaRoot = path.join(repoRoot, "eliza");
+    const pluginsRoot = path.join(elizaRoot, "plugins");
+    const pluginRoot = path.join(pluginsRoot, "plugin-social-alpha");
+    const v3PackageDir = path.join(
+      elizaRoot,
+      "node_modules",
+      ".bun",
+      "tailwindcss@3.4.19+hash",
+      "node_modules",
+      "tailwindcss",
+    );
+    const v4PackageDir = path.join(
+      elizaRoot,
+      "node_modules",
+      ".bun",
+      "tailwindcss@4.2.4",
+      "node_modules",
+      "tailwindcss",
+    );
+    writePackageJsonRecord(v3PackageDir, {
+      name: "tailwindcss",
+      version: "3.4.19",
+    });
+    writePackageJsonRecord(v4PackageDir, {
+      name: "tailwindcss",
+      version: "4.2.4",
+    });
+    mkdirSync(path.join(elizaRoot, "node_modules"), { recursive: true });
+    symlinkSync(
+      v3PackageDir,
+      path.join(elizaRoot, "node_modules", "tailwindcss"),
+      "dir",
+    );
+    writePackageJsonRecord(pluginRoot, {
+      name: "@elizaos/plugin-social-alpha",
+      dependencies: {
+        tailwindcss: "^4.0.0",
+      },
+    });
+
+    ensurePluginDependencyLinks(repoRoot, pluginsRoot);
+
+    expect(
+      realpathSync(path.join(pluginRoot, "node_modules", "tailwindcss")),
+    ).toBe(realpathSync(v4PackageDir));
   });
 });

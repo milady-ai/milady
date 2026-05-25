@@ -38,10 +38,21 @@ describe("install profiles", () => {
   });
 
   it("expands all into the package install and local source setup paths", () => {
-    const plan = buildInstallPlan(["all"], ["--frozen-lockfile"]);
+    const plan = buildInstallPlan(["all"], ["--frozen-lockfile"], {
+      MILADY_NODE_PATH: "/Users/me/.nvm/versions/node/v22.22.0/bin/node",
+    });
 
     expect(plan.map((step) => step.id)).toEqual(["packages", "local"]);
-    expect(plan[0]?.args).toEqual(["install", "--frozen-lockfile"]);
+    expect(plan[0]?.command).toBe(
+      "/Users/me/.nvm/versions/node/v22.22.0/bin/node",
+    );
+    expect(plan[0]?.args).toEqual([
+      "scripts/eliza-source-mode.mjs",
+      "packages",
+      "--install",
+      "--",
+      "--frozen-lockfile",
+    ]);
     expect(plan[0]?.env.MILADY_ELIZA_SOURCE).toBe("packages");
     expect(plan[1]?.args).toEqual([
       "scripts/eliza-source-mode.mjs",
@@ -54,10 +65,21 @@ describe("install profiles", () => {
   });
 
   it("runs package install before local source setup for a local-only selection", () => {
-    const plan = buildInstallPlan(["local"], ["--frozen-lockfile"]);
+    const plan = buildInstallPlan(["local"], ["--frozen-lockfile"], {
+      MILADY_NODE_PATH: "/Users/me/.nvm/versions/node/v22.22.0/bin/node",
+    });
 
     expect(plan.map((step) => step.id)).toEqual(["packages", "local"]);
-    expect(plan[0]?.args).toEqual(["install", "--frozen-lockfile"]);
+    expect(plan[0]?.args).toEqual([
+      "scripts/eliza-source-mode.mjs",
+      "packages",
+      "--install",
+      "--",
+      "--frozen-lockfile",
+    ]);
+    expect(plan[1]?.command).toBe(
+      "/Users/me/.nvm/versions/node/v22.22.0/bin/node",
+    );
     expect(plan[1]?.args).toEqual([
       "scripts/eliza-source-mode.mjs",
       "local",
@@ -68,7 +90,7 @@ describe("install profiles", () => {
   });
 
   it("deduplicates profiles while preserving install order", () => {
-    const plan = buildInstallPlan(["local", "packages", "all"], []);
+    const plan = buildInstallPlan(["local", "packages", "all"], [], {});
 
     expect(plan.map((step) => step.id)).toEqual(["packages", "local"]);
   });

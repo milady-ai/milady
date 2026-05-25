@@ -73,12 +73,23 @@ export function buildInstallPlan(
   bunInstallArgs,
   env = process.env,
 ) {
+  const nodeCommand =
+    env.MILADY_NODE_PATH || env.npm_config_node || process.execPath;
+
   return expandInstallProfileIds(profileIds).map((id) => {
     if (id === "packages") {
+      const packageArgs = [
+        "scripts/eliza-source-mode.mjs",
+        "packages",
+        "--install",
+      ];
+      if (bunInstallArgs.length > 0) {
+        packageArgs.push("--", ...bunInstallArgs);
+      }
       return {
         id,
-        command: "bun",
-        args: ["install", ...bunInstallArgs],
+        command: nodeCommand,
+        args: packageArgs,
         env: {
           ...env,
           MILADY_ELIZA_SOURCE: env.MILADY_ELIZA_SOURCE || "packages",
@@ -93,7 +104,7 @@ export function buildInstallPlan(
 
     return {
       id,
-      command: process.execPath,
+      command: nodeCommand,
       args: localArgs,
       env: {
         ...env,

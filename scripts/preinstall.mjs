@@ -5,7 +5,9 @@ import { fileURLToPath } from "node:url";
 import {
   evaluateCurrentInstallEnvironment,
   formatInstallReadinessError,
+  resolveInstallEnvironment,
   shouldSkipInstallPreflight,
+  writeInstallLifecycleNodeShim,
 } from "./lib/install-env.mjs";
 
 const scriptFile = fileURLToPath(import.meta.url);
@@ -19,7 +21,25 @@ if (shouldSkipInstallPreflight(process.env)) {
 const readiness = evaluateCurrentInstallEnvironment({ rootDir });
 
 if (!readiness.ok) {
+  const installEnvironment = resolveInstallEnvironment({ rootDir });
+  if (installEnvironment.ok) {
+    const shimPath = writeInstallLifecycleNodeShim({
+      rootDir,
+      nodeExecutable: installEnvironment.node.executable,
+      pythonExecutable: installEnvironment.python?.executable ?? null,
+    });
+    console.error(formatInstallReadinessError(readiness));
+    console.error(
+      `[milady-preinstall] Prepared install lifecycle Node shim: ${shimPath}`,
+    );
+    console.error(
+      `[milady-preinstall] Dependency install scripts will use ${installEnvironment.node.version} via ${installEnvironment.node.executable}`,
+    );
+    process.exit(0);
+  }
+
   console.error(formatInstallReadinessError(readiness));
+  console.error(`[milady-preinstall] ${installEnvironment.error}`);
   process.exit(1);
 }
 
