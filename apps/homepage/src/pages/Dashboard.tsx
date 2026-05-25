@@ -15,8 +15,10 @@ import {
 import { openWebUI, openWebUIDirect } from "../lib/open-web-ui";
 import { CLOUD_BASE, LOCAL_AGENT_BASE } from "../lib/runtime-config";
 import { useAuth } from "../lib/useAuth";
-import { useCloudOpenFlow } from "../lib/useCloudOpenFlow";
+import { type Notice, useCloudOpenFlow } from "../lib/useCloudOpenFlow";
 import { useNoticeToast } from "../lib/useNoticeToast";
+
+type SetNotice = (notice: Notice | null) => void;
 
 function openExternal(url: string) {
   window.open(url, "_blank", "noopener,noreferrer");
@@ -27,6 +29,280 @@ async function copyToClipboard(text: string): Promise<void> {
     throw new Error("Clipboard access is unavailable in this browser.");
   }
   await navigator.clipboard.writeText(text);
+}
+
+function openAgentControl(agent: ManagedAgent, setNotice: SetNotice) {
+  const url = agent.webUiUrl ?? agent.sourceUrl;
+  if (!url) {
+    setNotice({
+      tone: "error",
+      text: `${agent.name} does not expose a control URL yet.`,
+    });
+    return;
+  }
+  openWebUI(url, agent.source, agent.cloudAgentId);
+}
+
+async function copyAgentUrl(agent: ManagedAgent, setNotice: SetNotice) {
+  const url = agent.webUiUrl ?? agent.sourceUrl;
+  if (!url) {
+    setNotice({
+      tone: "error",
+      text: `${agent.name} does not expose a URL yet.`,
+    });
+    return;
+  }
+  try {
+    await copyToClipboard(url);
+    setNotice({
+      tone: "success",
+      text: `${agent.name} URL copied.`,
+    });
+  } catch (copyError) {
+    setNotice({
+      tone: "error",
+      text:
+        copyError instanceof Error
+          ? copyError.message
+          : "Clipboard copy failed.",
+    });
+  }
+}
+
+function forgetRemoteAgent(
+  agent: ManagedAgent,
+  removeRemote: (id: string) => void,
+  setNotice: SetNotice,
+) {
+  removeRemote(agent.id);
+  setNotice({
+    tone: "info",
+    text: `${agent.name} removed from saved remote connections.`,
+  });
+}
+
+async function deleteCloudAgentById(
+  agent: ManagedAgent,
+  deleteCloudAgent: ReturnType<typeof useAgents>["deleteCloudAgent"],
+  setNotice: SetNotice,
+) {
+  if (!agent.cloudAgentId) {
+    setNotice({
+      tone: "error",
+      text: `${agent.name} has no cloud id \u2014 cannot delete.`,
+    });
+    throw new Error("missing cloudAgentId");
+  }
+  try {
+    await deleteCloudAgent(agent.cloudAgentId);
+    setNotice({ tone: "success", text: `${agent.name} deleted.` });
+  } catch (err) {
+    setNotice({
+      tone: "error",
+      text:
+        err instanceof Error
+          ? `delete failed: ${err.message}`
+          : "delete failed.",
+    });
+    throw err;
+  }
+}
+
+async function copyInstallCommand(
+  command: string,
+  label: string,
+  setNotice: SetNotice,
+) {
+  try {
+    await copyToClipboard(command);
+    setNotice({
+      tone: "success",
+      text: `${label} install command copied.`,
+    });
+  } catch (copyError) {
+    setNotice({
+      tone: "error",
+      text:
+        copyError instanceof Error
+          ? copyError.message
+          : "Clipboard copy failed.",
+    });
+  }
+}
+
+function agentLaunchUrl(agent: ManagedAgent | null) {
+  if (!agent) return LOCAL_AGENT_BASE;
+  return agent.webUiUrl ?? agent.sourceUrl ?? LOCAL_AGENT_BASE;
+}
+
+function isReadyLocalAgent(agent: ManagedAgent | null) {
+  if (!agent) return false;
+  return agent.status !== "stopped" && agent.status !== "unknown";
+}
+
+function localStateFor(
+  isLocalReady: boolean,
+  isLocalProbing: boolean,
+): "ready" | "probing" | "offline" {
+  if (isLocalReady) return "ready";
+  if (isLocalProbing) return "probing";
+  return "offline";
+}
+
+function getLocalAgentState(agents: ManagedAgent[], loading: boolean) {
+  const localAgent = agents.find((agent) => agent.source === "local") ?? null;
+  const isLocalReady = isReadyLocalAgent(localAgent);
+  const isLocalProbing = loading && !localAgent;
+
+  return {
+    isLocalProbing,
+    isLocalReady,
+    launchUrl: agentLaunchUrl(localAgent),
+    localState: localStateFor(isLocalReady, isLocalProbing),
+  };
+}
+
+function scrollToInstall() {
+  if (typeof document === "undefined") return;
+  const anchor = document.getElementById("quickops-heading");
+  if (anchor) {
+    anchor.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}
+
+function openLocalOrPrompt({
+  isLocalProbing,
+  isLocalReady,
+  launchUrl,
+  setNotice,
+}: {
+  isLocalProbing: boolean;
+  isLocalReady: boolean;
+  launchUrl: string;
+  setNotice: SetNotice;
+}) {
+  if (isLocalReady) {
+    openWebUIDirect(launchUrl);
+    return;
+  }
+  if (isLocalProbing) {
+    setNotice({
+      tone: "info",
+      text: "still looking for local milady\u2026 give it a moment.",
+    });
+    return;
+  }
+  scrollToInstall();
+  setNotice({
+    tone: "info",
+    text: "no local milady running. install below, then start the desktop app.",
+  });
+}
+
+function LoginErrorBanner({
+  loginError,
+  manualLoginUrl,
+}: {
+  loginError: string | null;
+  manualLoginUrl: string | null;
+}) {
+  if (!loginError) return null;
+
+  return (
+    <div className="rounded-lg border border-rose-400/30 bg-rose-400/10 px-4 py-3 text-[13px] text-rose-100">
+      {loginError}
+      {manualLoginUrl ? (
+        <>
+          {" "}
+          <a
+            href={manualLoginUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="text-brand underline underline-offset-2"
+          >
+            Open sign-in page manually
+          </a>
+        </>
+      ) : null}
+    </div>
+  );
+}
+
+function AgentErrorToast({
+  clearError,
+  error,
+}: {
+  clearError: () => void;
+  error: string | null;
+}) {
+  if (!error) return null;
+
+  return (
+    <div className="fixed bottom-20 left-1/2 z-40 w-[min(100%-2rem,32rem)] -translate-x-1/2 rounded-lg border border-rose-400/30 bg-rose-400/10 px-4 py-3 text-[13px] text-rose-100 backdrop-blur">
+      <div className="flex items-center justify-between gap-3">
+        <span className="truncate">{error}</span>
+        <button
+          type="button"
+          onClick={clearError}
+          className="shrink-0 rounded-md border border-rose-200/25 px-2 py-0.5 font-mono text-[10px] lowercase tracking-wider text-rose-50 transition hover:border-rose-200/40"
+        >
+          dismiss
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function DashboardModals({
+  addRemoteUrl,
+  cloudClient,
+  onCloseConnect,
+  onCloseProvision,
+  refresh,
+  setNotice,
+  showConnectModal,
+  showProvisionModal,
+}: {
+  addRemoteUrl: ReturnType<typeof useAgents>["addRemoteUrl"];
+  cloudClient: ReturnType<typeof useAgents>["cloudClient"];
+  onCloseConnect: () => void;
+  onCloseProvision: () => void;
+  refresh: () => Promise<void>;
+  setNotice: SetNotice;
+  showConnectModal: boolean;
+  showProvisionModal: boolean;
+}) {
+  return (
+    <>
+      {showConnectModal ? (
+        <ConnectionModal
+          onClose={onCloseConnect}
+          onSubmit={(data) => {
+            addRemoteUrl(data.name, data.url, data.token);
+            onCloseConnect();
+            setNotice({
+              tone: "success",
+              text: `${data.name} attached.`,
+            });
+          }}
+        />
+      ) : null}
+
+      {showProvisionModal ? (
+        <ProvisionAgentModal
+          cloudClient={cloudClient}
+          onClose={onCloseProvision}
+          onProvisioned={(result) => {
+            setNotice({
+              tone: "success",
+              text: `agent ready: ${result.name}`,
+            });
+          }}
+          onRefreshList={() => void refresh()}
+        />
+      ) : null}
+    </>
+  );
 }
 
 function MiladyControlHub() {
@@ -65,136 +341,15 @@ function MiladyControlHub() {
       setNotice,
       signIn,
     });
-
-  const localAgent = agents.find((agent) => agent.source === "local") ?? null;
-  const launchUrl =
-    localAgent?.webUiUrl ?? localAgent?.sourceUrl ?? LOCAL_AGENT_BASE;
-
-  const isLocalReady =
-    !!localAgent &&
-    localAgent.status !== "stopped" &&
-    localAgent.status !== "unknown";
-  const isLocalProbing = loading && !localAgent;
-
-  const scrollToInstall = () => {
-    if (typeof document === "undefined") return;
-    const anchor = document.getElementById("quickops-heading");
-    if (anchor) {
-      anchor.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  };
-
-  const handleOpenAgent = (agent: ManagedAgent) => {
-    const url = agent.webUiUrl ?? agent.sourceUrl;
-    if (!url) {
-      setNotice({
-        tone: "error",
-        text: `${agent.name} does not expose a control URL yet.`,
-      });
-      return;
-    }
-    openWebUI(url, agent.source, agent.cloudAgentId);
-  };
-
-  const handleCopyUrl = async (agent: ManagedAgent) => {
-    const url = agent.webUiUrl ?? agent.sourceUrl;
-    if (!url) {
-      setNotice({
-        tone: "error",
-        text: `${agent.name} does not expose a URL yet.`,
-      });
-      return;
-    }
-    try {
-      await copyToClipboard(url);
-      setNotice({
-        tone: "success",
-        text: `${agent.name} URL copied.`,
-      });
-    } catch (copyError) {
-      setNotice({
-        tone: "error",
-        text:
-          copyError instanceof Error
-            ? copyError.message
-            : "Clipboard copy failed.",
-      });
-    }
-  };
-
-  const handleForgetRemote = (agent: ManagedAgent) => {
-    removeRemote(agent.id);
-    setNotice({
-      tone: "info",
-      text: `${agent.name} removed from saved remote connections.`,
+  const { isLocalProbing, isLocalReady, launchUrl, localState } =
+    getLocalAgentState(agents, loading);
+  const handleOpenLocal = () =>
+    openLocalOrPrompt({
+      isLocalProbing,
+      isLocalReady,
+      launchUrl,
+      setNotice,
     });
-  };
-
-  const handleDeleteCloud = async (agent: ManagedAgent) => {
-    if (!agent.cloudAgentId) {
-      setNotice({
-        tone: "error",
-        text: `${agent.name} has no cloud id \u2014 cannot delete.`,
-      });
-      throw new Error("missing cloudAgentId");
-    }
-    try {
-      await deleteCloudAgent(agent.cloudAgentId);
-      setNotice({ tone: "success", text: `${agent.name} deleted.` });
-    } catch (err) {
-      setNotice({
-        tone: "error",
-        text:
-          err instanceof Error
-            ? `delete failed: ${err.message}`
-            : "delete failed.",
-      });
-      throw err;
-    }
-  };
-
-  const handleCopyCommand = async (command: string, label: string) => {
-    try {
-      await copyToClipboard(command);
-      setNotice({
-        tone: "success",
-        text: `${label} install command copied.`,
-      });
-    } catch (copyError) {
-      setNotice({
-        tone: "error",
-        text:
-          copyError instanceof Error
-            ? copyError.message
-            : "Clipboard copy failed.",
-      });
-    }
-  };
-
-  const handleOpenLocal = () => {
-    if (isLocalReady) {
-      openWebUIDirect(launchUrl);
-      return;
-    }
-    if (isLocalProbing) {
-      setNotice({
-        tone: "info",
-        text: "still looking for local milady\u2026 give it a moment.",
-      });
-      return;
-    }
-    scrollToInstall();
-    setNotice({
-      tone: "info",
-      text: "no local milady running. install below, then start the desktop app.",
-    });
-  };
-
-  const localState: "ready" | "probing" | "offline" = isLocalReady
-    ? "ready"
-    : isLocalProbing
-      ? "probing"
-      : "offline";
 
   const handleSignInToCloud = () => {
     if (isAuthenticated) {
@@ -229,10 +384,14 @@ function MiladyControlHub() {
           loading={loading}
           isRefreshing={isRefreshing}
           onRefresh={() => void refresh()}
-          onOpen={handleOpenAgent}
-          onCopyUrl={(agent) => void handleCopyUrl(agent)}
-          onForgetRemote={handleForgetRemote}
-          onDeleteCloud={handleDeleteCloud}
+          onOpen={(agent) => openAgentControl(agent, setNotice)}
+          onCopyUrl={(agent) => void copyAgentUrl(agent, setNotice)}
+          onForgetRemote={(agent) =>
+            forgetRemoteAgent(agent, removeRemote, setNotice)
+          }
+          onDeleteCloud={(agent) =>
+            deleteCloudAgentById(agent, deleteCloudAgent, setNotice)
+          }
           onAttachRemote={() => setShowConnectModal(true)}
           onOpenLocal={handleOpenLocal}
           onProvisionAgent={() => setShowProvisionModal(true)}
@@ -240,73 +399,31 @@ function MiladyControlHub() {
         />
 
         <QuickOpsStrip
-          onCopy={(cmd, label) => void handleCopyCommand(cmd, label)}
+          onCopy={(cmd, label) =>
+            void copyInstallCommand(cmd, label, setNotice)
+          }
         />
 
-        {loginError ? (
-          <div className="rounded-lg border border-rose-400/30 bg-rose-400/10 px-4 py-3 text-[13px] text-rose-100">
-            {loginError}
-            {manualLoginUrl ? (
-              <>
-                {" "}
-                <a
-                  href={manualLoginUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-brand underline underline-offset-2"
-                >
-                  Open sign-in page manually
-                </a>
-              </>
-            ) : null}
-          </div>
-        ) : null}
+        <LoginErrorBanner
+          loginError={loginError}
+          manualLoginUrl={manualLoginUrl}
+        />
       </div>
 
       <NoticeToast notice={notice} />
 
-      {error ? (
-        <div className="fixed bottom-20 left-1/2 z-40 w-[min(100%-2rem,32rem)] -translate-x-1/2 rounded-lg border border-rose-400/30 bg-rose-400/10 px-4 py-3 text-[13px] text-rose-100 backdrop-blur">
-          <div className="flex items-center justify-between gap-3">
-            <span className="truncate">{error}</span>
-            <button
-              type="button"
-              onClick={clearError}
-              className="shrink-0 rounded-md border border-rose-200/25 px-2 py-0.5 font-mono text-[10px] lowercase tracking-wider text-rose-50 transition hover:border-rose-200/40"
-            >
-              dismiss
-            </button>
-          </div>
-        </div>
-      ) : null}
+      <AgentErrorToast clearError={clearError} error={error} />
 
-      {showConnectModal ? (
-        <ConnectionModal
-          onClose={() => setShowConnectModal(false)}
-          onSubmit={(data) => {
-            addRemoteUrl(data.name, data.url, data.token);
-            setShowConnectModal(false);
-            setNotice({
-              tone: "success",
-              text: `${data.name} attached.`,
-            });
-          }}
-        />
-      ) : null}
-
-      {showProvisionModal ? (
-        <ProvisionAgentModal
-          cloudClient={cloudClient}
-          onClose={() => setShowProvisionModal(false)}
-          onProvisioned={(result) => {
-            setNotice({
-              tone: "success",
-              text: `agent ready: ${result.name}`,
-            });
-          }}
-          onRefreshList={() => void refresh()}
-        />
-      ) : null}
+      <DashboardModals
+        addRemoteUrl={addRemoteUrl}
+        cloudClient={cloudClient}
+        onCloseConnect={() => setShowConnectModal(false)}
+        onCloseProvision={() => setShowProvisionModal(false)}
+        refresh={refresh}
+        setNotice={setNotice}
+        showConnectModal={showConnectModal}
+        showProvisionModal={showProvisionModal}
+      />
     </DashboardShell>
   );
 }
