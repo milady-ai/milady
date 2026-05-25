@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Agentic Electrobun App</title>
+    <link rel="stylesheet" href="views://mainview/style.css" />
+    <script type="module" src="views://mainview/index.js"></script>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Agentic Electrobun App</h1>
+        <p id="model-status">Model route: deterministic fallback</p>
+      </header>
+
+      <section aria-labelledby="agent-heading">
+        <h2 id="agent-heading">Agent</h2>
+        <label for="prompt">Prompt</label>
+        <textarea id="prompt" rows="6" placeholder="Ask for a bounded, reversible task"></textarea>
+        <div class="actions">
+          <button id="run-agent" type="button">Run agent</button>
+          <button id="check-updates" type="button">Check updates</button>
+        </div>
+        <output id="result" aria-live="polite"></output>
+      </section>
+
+      <dialog id="command-palette" aria-label="Command palette">
+        <input id="command-search" type="search" placeholder="Type a command" />
+        <ul id="command-list"></ul>
+      </dialog>
+    </main>
+  </body>
+</html>

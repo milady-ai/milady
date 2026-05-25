@@ -1,0 +1,10 @@
+# Copy to bunfig.toml and tune for your release process.
+# Keep lockfiles committed and use frozen installs in CI.
+[install]
+lockfile = true
+# Prefer reproducibility over surprise updates. Raise this for stricter supply-chain posture.
+minimumReleaseAge = 86400
+
+[install.security]
+# If your organization runs an npm security scanner registry, configure it here.
+# scanner = "https://scanner.example.com/bun-security-scanner"

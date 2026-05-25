@@ -87,6 +87,20 @@ Loopback endpoints — use instead of hardcoding ports:
 - `GET /api/dev/console-log?maxLines=400` — tail of Vite + API + Electrobun logs.
 - `bun run desktop:stack-status -- --json` — one-shot probe.
 
+## Electrobun Agentic Desktop 2026
+
+The local rules pack is installed for desktop-shell work. Use root `AGENTS.md`
+as authoritative, then read `rules/`, `checklists/`, `hooks/README.md`,
+`commands/README.md`, `docs/research-brief-2026.md`, and
+`docs/porting-map-from-apple-swift.md` when changing Electrobun, desktop RPC,
+webviews, tray/menu/deep-link surfaces, updater/release code, or local
+model/tool orchestration.
+
+Milady's Electrobun workspace is `eliza/packages/app-core/platforms/electrobun`;
+the renderer app is `apps/app`. The original pack is archived at
+`docs/agent-packs/electrobun-agentic-desktop-2026/`. Its workflow examples are
+not active CI unless explicitly approved.
+
 ## Training & inference (locked)
 
 - **Training always uses APOLLO optimizer** (memory-efficient). No alternatives.

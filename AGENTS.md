@@ -87,6 +87,14 @@ Desktop dev observability (Codex cannot see the native window):
 
 See `eliza/docs/apps/desktop-local-development.md`.
 
+## Electrobun agentic desktop rules pack
+
+The Electrobun Agentic Desktop 2026 rules pack is applied locally for desktop-shell work. Root project guidance remains authoritative; use the pack as an additional checklist when touching `eliza/packages/app-core/platforms/electrobun`, `apps/app`, desktop RPC, webviews, tray/menu/deep-link surfaces, updater/release code, or local model/tool orchestration.
+
+Read `rules/`, `checklists/`, `hooks/README.md`, `commands/README.md`, `docs/research-brief-2026.md`, and `docs/porting-map-from-apple-swift.md` before implementing Electrobun-specific changes. The original source bundle is preserved under `docs/agent-packs/electrobun-agentic-desktop-2026/`.
+
+Do not activate the archived workflow examples under `docs/agent-packs/electrobun-agentic-desktop-2026/.github/workflows/` without explicit approval for CI/CD changes.
+
 ## Build & test
 
 ```bash
