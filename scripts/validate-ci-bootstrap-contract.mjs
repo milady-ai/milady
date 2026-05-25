@@ -402,7 +402,7 @@ function assertCiPackageModeElizaGuards(workflowText, targetFailures) {
         continue;
       }
       if (
-        !/hashFiles\('eliza\/(?:package\.json|packages\/app-core\/package\.json)'\) != ''/.test(
+        !/hashFiles\('eliza\/(?:package\.json|packages\/(?:app-core|core)\/package\.json|packages\/shared\/scripts\/generate-keywords\.mjs)'\) != ''/.test(
           stepMatch[1],
         )
       ) {
@@ -433,6 +433,10 @@ function findWorkflowJobBlock(workflowText, jobName) {
 
 function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function githubExpression(value) {
+  return `\${{ ${value} }}`;
 }
 
 function assertAgentReviewAuthBootstrap(targetFailures) {
@@ -472,10 +476,12 @@ function assertAgentReviewAuthBootstrap(targetFailures) {
       authBlockMatch[1],
     );
   if (
-    !buildPluginsStep?.[1].includes("hashFiles('eliza/package.json') != ''")
+    !buildPluginsStep?.[1].includes(
+      "hashFiles('eliza/packages/core/package.json') != ''",
+    )
   ) {
     targetFailures.push(
-      '.github/workflows/agent-review.yml "Build local eliza runtime plugins" must be skipped when eliza/ is absent',
+      '.github/workflows/agent-review.yml "Build local eliza runtime plugins" must be skipped when eliza core source is absent',
     );
   }
 }
@@ -490,7 +496,9 @@ function assertGitleaksUsesOssCli(targetFailures) {
     ".github/workflows/gitleaks.yml",
     [
       'GITLEAKS_VERSION: "8.30.1"',
-      "gitleaks detect --source . --config .gitleaks.toml --redact --no-banner --verbose",
+      `gitleaks git . --log-opts="${githubExpression("github.event.pull_request.base.sha")}..${githubExpression("github.event.pull_request.head.sha")}" --config .gitleaks.toml --redact --no-banner --verbose`,
+      `gitleaks git . --log-opts="${githubExpression("github.event.before")}..${githubExpression("github.sha")}" --config .gitleaks.toml --redact --no-banner --verbose`,
+      "gitleaks dir . --config .gitleaks.toml --redact --no-banner --verbose",
     ],
     targetFailures,
   );
@@ -517,6 +525,9 @@ function assertSoc2HydratesElizaSource(targetFailures) {
         '{MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza',
       "name: Install dependencies (eliza/)",
       "name: Run SOC2 verification",
+      `if [ "${githubExpression("github.event_name")}" = "pull_request" ]; then`,
+      "bun run packages/soc2-verify/src/cli.ts --out ../soc2-evidence",
+      "bun run packages/soc2-verify/src/cli.ts --strict-fail --out ../soc2-evidence",
     ],
     targetFailures,
   );

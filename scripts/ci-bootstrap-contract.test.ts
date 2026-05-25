@@ -5,6 +5,8 @@ import { describe, expect, it } from "vitest";
 const workflow = (name: string) =>
   fs.readFileSync(`.github/workflows/${name}`, "utf8");
 
+const githubExpression = (value: string) => `\${{ ${value} }}`;
+
 describe("CI bootstrap contract", () => {
   it("declares the local upstream postinstall skip before CI uses it", () => {
     const ci = workflow("ci.yml");
@@ -79,7 +81,7 @@ describe("CI bootstrap contract", () => {
     const align = "- name: Align nested eliza package resolution";
     const buildPlugins = "- name: Build local eliza runtime plugins";
     const localElizaGuard =
-      "if: $" + "{{ hashFiles('eliza/package.json') != '' }}";
+      "if: $" + "{{ hashFiles('eliza/packages/core/package.json') != '' }}";
     const coreBuild = "(cd eliza/packages/core && bun run build)";
     const pluginBuild =
       "(cd eliza/plugins/plugin-agent-skills && bun run build)";
@@ -128,10 +130,18 @@ describe("CI bootstrap contract", () => {
 
   it("runs gitleaks without the licensed org action", () => {
     const gitleaks = workflow("gitleaks.yml");
+    const prRange =
+      `gitleaks git . --log-opts="${githubExpression("github.event.pull_request.base.sha")}..` +
+      `${githubExpression("github.event.pull_request.head.sha")}" --config .gitleaks.toml --redact --no-banner --verbose`;
+    const pushRange =
+      `gitleaks git . --log-opts="${githubExpression("github.event.before")}..` +
+      `${githubExpression("github.sha")}" --config .gitleaks.toml --redact --no-banner --verbose`;
 
     expect(gitleaks).toContain('GITLEAKS_VERSION: "8.30.1"');
+    expect(gitleaks).toContain(prRange);
+    expect(gitleaks).toContain(pushRange);
     expect(gitleaks).toContain(
-      "gitleaks detect --source . --config .gitleaks.toml --redact --no-banner --verbose",
+      "gitleaks dir . --config .gitleaks.toml --redact --no-banner --verbose",
     );
     expect(gitleaks).not.toContain("gitleaks/gitleaks-action");
   });
@@ -144,6 +154,15 @@ describe("CI bootstrap contract", () => {
 
     expect(soc2).toContain("Initialize eliza source checkout");
     expect(soc2).toContain("https://github.com/elizaOS/eliza.git eliza");
+    expect(soc2).toContain(
+      `if [ "${githubExpression("github.event_name")}" = "pull_request" ]; then`,
+    );
+    expect(soc2).toContain(
+      "bun run packages/soc2-verify/src/cli.ts --out ../soc2-evidence",
+    );
+    expect(soc2).toContain(
+      "bun run packages/soc2-verify/src/cli.ts --strict-fail --out ../soc2-evidence",
+    );
     expect(soc2.indexOf(clone)).toBeLessThan(soc2.indexOf(install));
     expect(soc2.indexOf(install)).toBeLessThan(soc2.indexOf(verify));
   });

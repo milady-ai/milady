@@ -393,6 +393,10 @@ test("npm release builds generate gitignored eliza i18n data before bundling", (
     releaseContractSuite,
     /scripts\/run-tsdown\.mjs[\s\S]*?MILADY_ELIZA_SOURCE:\s*"local"/,
   );
+  assert.match(
+    releaseContractSuite,
+    /run\("node", \["scripts\/generate-static-asset-manifest\.mjs"\]\);/,
+  );
 });
 
 test("release workflows use the checked-in tsdown runner", () => {
@@ -450,10 +454,12 @@ test("Electrobun release applies elizaOS source overlay before manual build setu
     /find release-files -mindepth 1 -maxdepth 1 -type d -exec rm -rf \{\} \+/,
   );
   assert.match(electrobun, /No public release files collected/);
+  assert.match(electrobun, /sums_file="\$\(mktemp\)"/);
   assert.match(
     electrobun,
-    /find \. -maxdepth 1 -type f ! -name SHA256SUMS\.txt -print0 \| sort -z \| xargs -0 sha256sum > SHA256SUMS\.txt/,
+    /find \. -maxdepth 1 -type f ! -name SHA256SUMS\.txt -print0 \| sort -z \| xargs -0 sha256sum > "\$sums_file"/,
   );
+  assert.match(electrobun, /mv "\$sums_file" SHA256SUMS\.txt/);
   assert.match(copyRuntimeWrapper, /elizaElectrobunNodeModules/);
   assert.match(
     copyRuntimeWrapper,

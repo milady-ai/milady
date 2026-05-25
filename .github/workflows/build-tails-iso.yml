@@ -270,7 +270,7 @@ jobs:
 
       - name: Upload ISO artifact
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: milady-tails-iso-${{ github.sha }}
           path: ${{ env.VARIANT_DIR }}/out/*.iso
@@ -279,7 +279,7 @@ jobs:
 
       - name: Upload build logs on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: milady-tails-buildlogs-${{ github.sha }}
           path: |
@@ -334,7 +334,7 @@ jobs:
               qemu-system-x86 qemu-utils ovmf
 
       - name: Download ISO artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: milady-tails-iso-${{ github.sha }}
           path: ${{ env.VARIANT_DIR }}/out
@@ -343,7 +343,7 @@ jobs:
         working-directory: ${{ env.VARIANT_DIR }}
         run: |
           set -euo pipefail
-          ISO="$(ls -1 out/*.iso | head -n1)"
+          ISO="$(find out -maxdepth 1 -type f -name '*.iso' -print -quit)"
           test -n "$ISO" || { echo "no ISO found"; exit 1; }
           echo "Booting $ISO under QEMU…"
           # 90s ceiling — we're only checking the bootloader screen, not full
@@ -368,7 +368,7 @@ jobs:
 
       - name: Upload QEMU log
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: milady-tails-qemu-log-${{ github.sha }}
           path: ${{ env.VARIANT_DIR }}/qemu.log

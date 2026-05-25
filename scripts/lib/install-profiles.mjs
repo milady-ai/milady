@@ -86,10 +86,15 @@ export function buildInstallPlan(
       };
     }
 
+    const localArgs = ["scripts/eliza-source-mode.mjs", "local"];
+    if (bunInstallArgs.length > 0) {
+      localArgs.push("--install", "--", ...bunInstallArgs);
+    }
+
     return {
       id,
       command: process.execPath,
-      args: ["scripts/eliza-source-mode.mjs", "local"],
+      args: localArgs,
       env: {
         ...env,
         MILADY_ELIZA_SOURCE: "local",
@@ -181,6 +186,15 @@ export async function promptInstallProfiles({
 
   return await new Promise((resolve, reject) => {
     let settled = false;
+    let rawModeRestored = false;
+
+    function restoreRawMode() {
+      if (rawModeRestored) return;
+      rawModeRestored = true;
+      if (typeof input.setRawMode === "function") {
+        input.setRawMode(wasRaw);
+      }
+    }
 
     function cleanup() {
       if (settled) return;
@@ -189,9 +203,9 @@ export async function promptInstallProfiles({
       input.off("error", onError);
       processRef.off("SIGINT", onSigint);
       processRef.off("SIGTERM", onSigterm);
-      if (typeof input.setRawMode === "function") {
-        input.setRawMode(wasRaw);
-      }
+      processRef.off("beforeExit", restoreRawMode);
+      processRef.off("exit", restoreRawMode);
+      restoreRawMode();
       output.write("\n");
     }
 
@@ -234,6 +248,8 @@ export async function promptInstallProfiles({
     input.once("error", onError);
     processRef.once("SIGINT", onSigint);
     processRef.once("SIGTERM", onSigterm);
+    processRef.once("beforeExit", restoreRawMode);
+    processRef.once("exit", restoreRawMode);
 
     try {
       if (typeof input.setRawMode === "function") {

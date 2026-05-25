@@ -43,7 +43,13 @@ describe("install profiles", () => {
     expect(plan.map((step) => step.id)).toEqual(["packages", "local"]);
     expect(plan[0]?.args).toEqual(["install", "--frozen-lockfile"]);
     expect(plan[0]?.env.MILADY_ELIZA_SOURCE).toBe("packages");
-    expect(plan[1]?.args).toEqual(["scripts/eliza-source-mode.mjs", "local"]);
+    expect(plan[1]?.args).toEqual([
+      "scripts/eliza-source-mode.mjs",
+      "local",
+      "--install",
+      "--",
+      "--frozen-lockfile",
+    ]);
     expect(plan[1]?.env.MILADY_ELIZA_SOURCE).toBe("local");
   });
 
@@ -52,7 +58,13 @@ describe("install profiles", () => {
 
     expect(plan.map((step) => step.id)).toEqual(["packages", "local"]);
     expect(plan[0]?.args).toEqual(["install", "--frozen-lockfile"]);
-    expect(plan[1]?.args).toEqual(["scripts/eliza-source-mode.mjs", "local"]);
+    expect(plan[1]?.args).toEqual([
+      "scripts/eliza-source-mode.mjs",
+      "local",
+      "--install",
+      "--",
+      "--frozen-lockfile",
+    ]);
   });
 
   it("deduplicates profiles while preserving install order", () => {
@@ -114,6 +126,19 @@ describe("install profiles", () => {
     processRef.emit("SIGTERM", "SIGTERM");
 
     await expect(profiles).rejects.toThrow("SIGTERM");
+    expect(input.rawModes).toEqual([true, false]);
+  });
+
+  it("restores raw mode on process exit", async () => {
+    const input = new FakeInput();
+    const output = new FakeOutput();
+    const processRef = new EventEmitter();
+    const profiles = promptInstallProfiles({ input, output, processRef });
+
+    processRef.emit("exit");
+    input.emit("data", Buffer.from("\r"));
+
+    await expect(profiles).resolves.toEqual(["packages"]);
     expect(input.rawModes).toEqual([true, false]);
   });
 });

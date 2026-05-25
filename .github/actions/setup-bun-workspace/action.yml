@@ -304,7 +304,7 @@ runs:
         bun install --cwd eliza --no-frozen-lockfile --ignore-scripts
 
     - name: Generate local eliza keyword data
-      if: ${{ inputs.prepare-local-eliza-runtime == 'true' && hashFiles('eliza/package.json') != '' }}
+      if: ${{ inputs.prepare-local-eliza-runtime == 'true' && hashFiles('eliza/packages/shared/scripts/generate-keywords.mjs') != '' }}
       shell: bash
       run: |
         if [ -f eliza/packages/shared/scripts/generate-keywords.mjs ]; then
