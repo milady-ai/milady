@@ -136,10 +136,20 @@ runs:
     # Some review jobs still execute local eliza runtime scripts after the
     # published-only install rewrite. Hydrate eliza only for those jobs; normal
     # published-only CI resolves @elizaos/* versions from npm dist-tags.
-    - name: Shallow-init eliza submodule for version resolution
-      if: ${{ inputs.disable-local-eliza-workspace == 'true' && inputs.prepare-local-eliza-runtime == 'true' }}
+    - name: Shallow-init eliza checkout for local runtime scripts
+      if: ${{ inputs.prepare-local-eliza-runtime == 'true' && hashFiles('eliza/package.json') == '' }}
       shell: bash
       run: |
+        if [ "${{ inputs.disable-local-eliza-workspace }}" != "true" ]; then
+          case "${GITHUB_WORKFLOW:-}:${GITHUB_JOB:-}" in
+            "Agent Review:test-auth")
+              ;;
+            *)
+              echo "local eliza runtime checkout not needed for ${GITHUB_WORKFLOW:-unknown}:${GITHUB_JOB:-unknown}; skipping."
+              exit 0
+              ;;
+          esac
+        fi
         if [ ! -f eliza/package.json ]; then
           git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza
         fi
@@ -298,7 +308,7 @@ runs:
         MILADY_SKIP_LOCAL_UPSTREAMS: ${{ (inputs.disable-local-eliza-workspace == 'true' || inputs.skip-local-upstreams-postinstall == 'true') && '1' || '' }}
 
     - name: Install local eliza runtime dependencies
-      if: ${{ inputs.prepare-local-eliza-runtime == 'true' && inputs.disable-local-eliza-workspace == 'true' }}
+      if: ${{ inputs.prepare-local-eliza-runtime == 'true' && hashFiles('eliza/package.json') != '' }}
       shell: bash
       run: |
         bun install --cwd eliza --no-frozen-lockfile --ignore-scripts
