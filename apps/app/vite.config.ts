@@ -253,6 +253,15 @@ function resolveLocalUiAliases(): Alias[] {
       replacement: path.join(uiPkgRoot, "src/browser.ts"),
     },
     {
+      find: /^@elizaos\/ui\/api$/,
+      replacement: path.join(uiPkgRoot, "src/api/index.ts"),
+    },
+    {
+      find: /^@elizaos\/ui\/api\/(.+)$/,
+      replacement: `${uiPkgRoot}/src/api/$1.ts`,
+      customResolver: resolveExistingUiSourceModule,
+    },
+    {
       find: /^@elizaos\/ui\/components\/ui\/(.*)$/,
       replacement: `${uiPkgRoot}/src/components/ui/$1.tsx`,
       customResolver: resolveExistingUiSourceModule,
@@ -290,6 +299,24 @@ function resolveLocalUiAliases(): Alias[] {
     {
       find: /^@elizaos\/ui\/layouts\/(.+)\/([^/]+)$/,
       replacement: `${uiPkgRoot}/src/layouts/$1/$2.tsx`,
+    },
+    {
+      find: /^@elizaos\/ui\/platform$/,
+      replacement: path.join(uiPkgRoot, "src/platform/index.ts"),
+    },
+    {
+      find: /^@elizaos\/ui\/platform\/(.+)$/,
+      replacement: `${uiPkgRoot}/src/platform/$1.ts`,
+      customResolver: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/state$/,
+      replacement: path.join(uiPkgRoot, "src/state/index.ts"),
+    },
+    {
+      find: /^@elizaos\/ui\/state\/(.+)$/,
+      replacement: `${uiPkgRoot}/src/state/$1.ts`,
+      customResolver: resolveExistingUiSourceModule,
     },
     {
       find: /^@elizaos\/ui\/lib\/(.*)$/,
