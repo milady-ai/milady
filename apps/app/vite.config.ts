@@ -113,6 +113,9 @@ const appCoreNativePluginEntrypoints = (() => {
 const uiPkgRoot = hasLocalElizaWorkspace
   ? path.join(localElizaRoot, "packages/ui")
   : null;
+const vaultPkgRoot = hasLocalElizaWorkspace
+  ? path.join(localElizaRoot, "packages/vault")
+  : null;
 // Other Capacitor packages imported by eliza/packages/app-core sources.
 // Resolved here (apps/app scope) so Rollup can find them when bundling
 // files from within the eliza submodule tree where bun may not hoist them.
@@ -287,6 +290,22 @@ function resolveLocalUiAliases(): Alias[] {
   ];
 }
 
+function resolveLocalVaultAliases(): Alias[] {
+  if (
+    !vaultPkgRoot ||
+    !fs.existsSync(path.join(vaultPkgRoot, "package.json"))
+  ) {
+    return [];
+  }
+
+  return [
+    {
+      find: /^@elizaos\/vault$/,
+      replacement: path.join(vaultPkgRoot, "src/index.ts"),
+    },
+  ];
+}
+
 function resolveLocalElizaAppAliases(): Alias[] {
   if (!hasLocalElizaWorkspace) return [];
 
@@ -400,15 +419,31 @@ function resolveLocalSharedAliases(): Alias[] {
     exports?: Record<string, unknown>;
   };
   const aliases: Alias[] = [];
+
+  function resolveSharedExportTarget(value: unknown): string | null {
+    if (typeof value === "string") return value;
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+      return null;
+    }
+    const record = value as Record<string, unknown>;
+    for (const condition of ["source", "import", "default", "types"]) {
+      const target = record[condition];
+      if (typeof target === "string") return target;
+    }
+    return null;
+  }
+
   for (const [key, value] of Object.entries(sharedPkg.exports || {})) {
-    if (typeof value !== "string") continue;
+    if (key.includes("*")) continue;
+    const exportTarget = resolveSharedExportTarget(value);
+    if (!exportTarget) continue;
     const aliasKey =
       key === "."
         ? "@elizaos/shared"
         : `@elizaos/shared/${key.replace(/^\.\//, "")}`;
     aliases.push({
       find: new RegExp(`^${escapeRegExp(aliasKey)}$`),
-      replacement: path.resolve(sharedPkgDir, value),
+      replacement: path.resolve(sharedPkgDir, exportTarget),
     });
   }
   return aliases;
@@ -428,7 +463,7 @@ function resolveBuiltLocalSharedAliases(): Alias[] {
     },
     {
       find: /^@elizaos\/shared\/(.+)$/,
-      replacement: `${sharedDistDir}/$1`,
+      replacement: `${sharedDistDir}/$1.js`,
     },
   ];
 }
@@ -466,7 +501,7 @@ function resolveLocalAppCoreAliases(): Alias[] {
   }
 
   const appCorePkgDir = path.dirname(appCorePkgPath);
-  const appCoreBrowserEntry = path.join(appCorePkgDir, "src/browser.ts");
+  const appCoreBrowserEntry = path.join(here, "src/app-core-browser-compat.js");
   const appCorePkg = JSON.parse(fs.readFileSync(appCorePkgPath, "utf8")) as {
     exports?: Record<string, unknown>;
   };
@@ -2658,6 +2693,7 @@ export default defineConfig({
       // Local source aliases are only installed when the eliza checkout exists.
       // Published-only builds should resolve normal @elizaos package exports.
       ...resolveLocalUiAliases(),
+      ...resolveLocalVaultAliases(),
       ...resolveLocalSharedAliases(),
       ...resolveLocalAppCoreAliases(),
     ],
