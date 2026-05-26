@@ -11,6 +11,24 @@ const repoRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "..",
 );
+const exportCandidates = [
+  {
+    types: "./dist/character-presets.d.ts",
+    import: "./dist/character-presets.js",
+  },
+  {
+    types: "./character-presets.d.ts",
+    import: "./character-presets.js",
+  },
+  {
+    types: "./dist/onboarding-presets.d.ts",
+    import: "./dist/onboarding-presets.js",
+  },
+  {
+    types: "./onboarding-presets.d.ts",
+    import: "./onboarding-presets.js",
+  },
+];
 
 function resolvePackageDir(packageName) {
   try {
@@ -55,29 +73,52 @@ function isRecord(value) {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function patchSharedPackage(packageDir) {
-  const packageJsonPath = path.join(packageDir, "package.json");
-  const characterPresetsPath = path.join(
-    packageDir,
-    "dist",
-    "character-presets.js",
-  );
-  if (!fs.existsSync(characterPresetsPath)) {
+function relativeTargetExists(packageDir, target) {
+  return fs.existsSync(path.join(packageDir, target));
+}
+
+function exportTargetExists(packageDir, value) {
+  if (typeof value === "string") {
+    return relativeTargetExists(packageDir, value);
+  }
+  if (!isRecord(value)) {
     return false;
   }
+  const target = value.import ?? value.default;
+  return typeof target === "string" && relativeTargetExists(packageDir, target);
+}
+
+function resolveExportTarget(packageDir) {
+  return exportCandidates.find((candidate) =>
+    relativeTargetExists(packageDir, candidate.import),
+  );
+}
+
+function patchSharedPackage(packageDir) {
+  const packageJsonPath = path.join(packageDir, "package.json");
 
   const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
   if (!isRecord(packageJson.exports)) {
     packageJson.exports = {};
   }
-  if (packageJson.exports["./character-presets"]) {
+  if (
+    exportTargetExists(packageDir, packageJson.exports["./character-presets"])
+  ) {
+    return false;
+  }
+
+  const exportTarget = resolveExportTarget(packageDir);
+  if (!exportTarget) {
+    console.warn(
+      `${LOG_PREFIX} ${path.relative(process.cwd(), packageDir)} has no character/onboarding presets entry; skipping.`,
+    );
     return false;
   }
 
   packageJson.exports["./character-presets"] = {
-    types: "./dist/character-presets.d.ts",
-    import: "./dist/character-presets.js",
-    default: "./dist/character-presets.js",
+    types: exportTarget.types,
+    import: exportTarget.import,
+    default: exportTarget.import,
   };
   fs.writeFileSync(
     packageJsonPath,

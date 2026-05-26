@@ -212,6 +212,16 @@ test("optional app stubs satisfy route plugin and runtime hook imports", () => {
   }
 });
 
+test("shared character preset patch bridges the published onboarding export", () => {
+  const patchScript = read(
+    "scripts/patch-elizaos-shared-character-presets.mjs",
+  );
+
+  assert.match(patchScript, /onboarding-presets\.js/);
+  assert.match(patchScript, /exportTargetExists/);
+  assert.match(patchScript, /resolveExportTarget/);
+});
+
 test("elizaOS package channel is configurable instead of alpha-only", () => {
   const helper = read("scripts/lib/eliza-package-mode.mjs");
   const disableScript = read("scripts/disable-local-eliza-workspace.mjs");
