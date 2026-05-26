@@ -245,6 +245,14 @@ function resolveLocalUiAliases(): Alias[] {
       replacement: path.join(uiPkgRoot, "src/index.ts"),
     },
     {
+      find: /^@elizaos\/ui\/browser$/,
+      replacement: path.join(uiPkgRoot, "src/browser.ts"),
+    },
+    {
+      find: /^@elizaos\/ui\/browser\.js$/,
+      replacement: path.join(uiPkgRoot, "src/browser.ts"),
+    },
+    {
       find: /^@elizaos\/ui\/components\/ui\/(.*)$/,
       replacement: `${uiPkgRoot}/src/components/ui/$1.tsx`,
       customResolver: resolveExistingUiSourceModule,
