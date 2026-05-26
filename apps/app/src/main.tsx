@@ -428,11 +428,21 @@ try {
     for (const key of STALE_BOOTSTRAP_KEYS) {
       try {
         window.localStorage.removeItem(key);
-      } catch {}
+      } catch (err) {
+        console.warn(`${APP_LOG_PREFIX} Failed to clear stale bootstrap key:`, {
+          key,
+          error: err instanceof Error ? err.message : String(err),
+        });
+      }
     }
     try {
       window.localStorage.setItem(SELF_HOSTED_TOKEN_KEY, fragmentToken);
-    } catch {}
+    } catch (err) {
+      console.warn(
+        `${APP_LOG_PREFIX} Failed to persist fragment bootstrap token:`,
+        err instanceof Error ? err.message : err,
+      );
+    }
   }
   if (fragmentToken || hasQueryToken) {
     url.hash = "";
@@ -443,7 +453,12 @@ try {
     try {
       const saved = window.localStorage.getItem(SELF_HOSTED_TOKEN_KEY)?.trim();
       if (saved) bootstrapToken = saved;
-    } catch {}
+    } catch (err) {
+      console.warn(
+        `${APP_LOG_PREFIX} Failed to read persisted bootstrap token:`,
+        err instanceof Error ? err.message : err,
+      );
+    }
   }
   // On AOSP/Milady the agent runs in the same APK and exposes its
   // per-boot bearer through `window.ElizaNative.getLocalAgentToken()`
@@ -465,16 +480,31 @@ try {
         // the bridge to be available at that moment.
         try {
           window.localStorage.setItem(SELF_HOSTED_TOKEN_KEY, nativeToken);
-        } catch {}
+        } catch (err) {
+          console.warn(
+            `${APP_LOG_PREFIX} Failed to persist native bootstrap token:`,
+            err instanceof Error ? err.message : err,
+          );
+        }
       }
-    } catch {}
+    } catch (err) {
+      console.warn(
+        `${APP_LOG_PREFIX} Failed to load native bootstrap token:`,
+        err instanceof Error ? err.message : err,
+      );
+    }
   }
   if (bootstrapToken) {
     appBootConfig.apiToken = bootstrapToken;
     appBootConfig.apiBase ??= window.location.origin;
     try {
       client.setToken(bootstrapToken);
-    } catch {}
+    } catch (err) {
+      console.warn(
+        `${APP_LOG_PREFIX} Failed to install bootstrap token on API client:`,
+        err instanceof Error ? err.message : err,
+      );
+    }
   }
 } catch (err) {
   console.warn(
@@ -526,7 +556,12 @@ forceDesktopDevLocalActiveServer();
         client.setToken(token);
         try {
           window.localStorage.setItem(SELF_HOSTED_TOKEN_KEY, token);
-        } catch {}
+        } catch (err) {
+          console.warn(
+            `${APP_LOG_PREFIX} Failed to persist watchdog bootstrap token:`,
+            err instanceof Error ? err.message : err,
+          );
+        }
         return;
       }
     } catch (err) {
