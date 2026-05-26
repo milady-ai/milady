@@ -431,11 +431,7 @@ function ensureLocalWorkspaceDists() {
       "plugin-polymarket-app",
       "dist/plugin.js",
     ],
-    [
-      "eliza/plugins/plugin-shopify-ui",
-      "plugin-shopify-ui",
-      "dist/plugin.js",
-    ],
+    ["eliza/plugins/plugin-shopify-ui", "plugin-shopify-ui", "dist/plugin.js"],
     ["eliza/plugins/plugin-signal", "plugin-signal", "dist/index.js"],
     [
       "eliza/plugins/plugin-steward-app",
@@ -771,7 +767,9 @@ function patchPackagedRuntimeExportConditions(targetDist: string): void {
     }
 
     const sanitizedExports = sanitizeExportConditions(packageJson.exports);
-    if (JSON.stringify(sanitizedExports) === JSON.stringify(packageJson.exports)) {
+    if (
+      JSON.stringify(sanitizedExports) === JSON.stringify(packageJson.exports)
+    ) {
       continue;
     }
 
@@ -816,10 +814,7 @@ function copyPackageRuntimeSubset(
 
 function restoreRequiredPackagedRuntimePackages(targetDist: string): void {
   const restored = [
-    [
-      "@elizaos/plugin-x402",
-      path.join(elizaPluginsDir, "plugin-x402"),
-    ],
+    ["@elizaos/plugin-x402", path.join(elizaPluginsDir, "plugin-x402")],
   ]
     .filter(([packageName, packageDir]) =>
       copyPackageRuntimeSubset(targetDist, packageName, packageDir),

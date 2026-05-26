@@ -14,11 +14,6 @@ export const LOCAL_ELIZA_CI_OVERRIDE_PACKAGES = [
     packageDir: "eliza/packages/skills",
     entrypoint: "dist/index.js",
   },
-  {
-    name: "@elizaos/plugin-signal",
-    packageDir: "eliza/plugins/plugin-signal",
-    entrypoint: "dist/index.js",
-  },
 ];
 
 function isPackageJsonWithBuildScript(value) {

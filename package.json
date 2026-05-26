@@ -33,6 +33,7 @@
     "scripts/patch-eliza-electrobun-windows-smoke-startup.mjs",
     "scripts/patch-elizaos-package-styles.mjs",
     "scripts/patch-elizaos-plugin-browser-bridge-package.mjs",
+    "scripts/patch-elizaos-shared-character-presets.mjs",
     "scripts/repair-elizaos-package-links.mjs",
     "scripts/run-app-web-build.mjs",
     "scripts/run-eliza-app-core-script.mjs",

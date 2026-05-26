@@ -142,6 +142,7 @@ test("root build resolves app-core entries from packages by default", () => {
   assert.match(resolver, /preferLocal && existsSync/);
   assert.match(tsdownConfig, /"packages"/);
   assert.match(tsdownConfig, /require\.resolve\(packageSubpath\)/);
+  assert.match(tsdownConfig, /packageDistEntry/);
   assert.doesNotMatch(tsdownConfig, /entry:\s*["']eliza\/packages\/app-core/);
 });
 

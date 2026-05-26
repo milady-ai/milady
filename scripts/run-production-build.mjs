@@ -55,6 +55,9 @@ if (!isLocalElizaDisabled()) {
     "scripts/patch-elizaos-plugin-browser-bridge-package.mjs",
   ]);
   await run(process.execPath, [
+    "scripts/patch-elizaos-shared-character-presets.mjs",
+  ]);
+  await run(process.execPath, [
     tsdownCli,
     "--config-loader",
     "native",

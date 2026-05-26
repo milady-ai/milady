@@ -149,20 +149,10 @@ describe("setup-upstreams cloud-coupled plugins", () => {
             path.join("packages", "security", "dist", "index.js"),
           ) ||
           targetPath.endsWith(
-            path.join(
-              "packages",
-              "plugin-remote-manifest",
-              "dist",
-              "index.js",
-            ),
+            path.join("packages", "plugin-remote-manifest", "dist", "index.js"),
           ) ||
           targetPath.endsWith(
-            path.join(
-              "packages",
-              "plugin-worker-runtime",
-              "dist",
-              "index.js",
-            ),
+            path.join("packages", "plugin-worker-runtime", "dist", "index.js"),
           )
         ) {
           return false;

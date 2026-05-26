@@ -21,10 +21,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const REPO_ROOT = resolve(__dirname, "..");
 
-const PORTS_FILE = resolve(
-  REPO_ROOT,
-  ".cache/milady/local-cloud-ports.json",
-);
+const PORTS_FILE = resolve(REPO_ROOT, ".cache/milady/local-cloud-ports.json");
 const CLOUD_DIR = resolve(REPO_ROOT, "eliza/cloud");
 
 /**
