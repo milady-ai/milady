@@ -197,7 +197,7 @@ Findings format after path: `axis:short-note, axis:short-note`.
 - [x] `eliza/packages/app-core/scripts/find-collisions.mjs` — referenced by app-core test helpers
 - [x] `eliza/packages/app-core/scripts/find-duplicate-components.mjs` — referenced via proxy as `find-dupes`
 - [x] `eliza/packages/app-core/scripts/fix-workspace-deps.mjs` — referenced via proxy as `workspace:deps:*` (3 callers)
-- [x] `eliza/packages/app-core/scripts/generate-onboarding-voicelines.mjs` — invoked by content pipeline
+- [x] `eliza/packages/app-core/scripts/generate-first-run-voicelines.mjs` — invoked by content pipeline
 - [x] `eliza/packages/app-core/scripts/generate-static-asset-manifest.mjs` — referenced via proxy as `cdn:manifest`
 - [x] `eliza/packages/app-core/scripts/init-submodules.mjs` — canonical app-core version (root is forked)
 - [x] `eliza/packages/app-core/scripts/lib/allocate-loopback-port.mjs` — port allocation primitive

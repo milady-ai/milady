@@ -30,7 +30,7 @@ For this milestone, wire structured profile data into the agent's trajectory log
 - Thermal state at each turn
 - Battery level delta at each turn (`UIDevice.batteryLevel`)
 
-Output goes to `Documents/.milady/profile/<session-id>.jsonl` for later analysis.
+Output goes to `<stateDir>/profile/<session-id>.jsonl` for later analysis.
 
 ## Test plan
 

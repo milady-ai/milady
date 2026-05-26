@@ -171,8 +171,8 @@ What is explicitly **not** implemented yet (deliberate scope):
 - Cloud relay extension for arbitrary HTTP/WS proxying (the existing
   `cloud-managed-gateway-relay` is message-RPC only, not a general
   tunnel).
-- UI for choosing `tunnel-to-mobile` in onboarding (the
-  `MobileRuntimeMode` enum is extended; the onboarding picker can pick
+- UI for choosing `tunnel-to-mobile` in first-run (the
+  `MobileRuntimeMode` enum is extended; the first-run picker can pick
   it up in a separate change).
 - Battery/lifetime hardening (foreground service notifications, etc.)
 
@@ -191,7 +191,7 @@ What is explicitly **not** implemented yet (deliberate scope):
    issue auth-keys via the existing
    `POST /api/v1/apis/tunnels/tailscale/auth-key` endpoint, and switch
    the connection model to direct dial.
-4. **P3**: onboarding UI + first-class settings toggle, mDNS discovery
+4. **P3**: first-run UI + first-class settings toggle, mDNS discovery
    for same-LAN dial (skip the tunnel when both devices are on the
    same network), battery/lifetime hardening per platform.
 

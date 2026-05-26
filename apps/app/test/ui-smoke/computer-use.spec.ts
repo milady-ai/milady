@@ -30,13 +30,13 @@ test("settings exposes computer use capability controls", async ({ page }) => {
   ).toBeVisible();
 });
 
-test("onboarding starts with setup choices before capability settings", async ({
+test("first-run starts with setup choices before capability settings", async ({
   page,
 }) => {
   await seedAppStorage(page, {
-    "eliza:onboarding-complete": "0",
-    "elizaos:onboarding:force-fresh": "1",
-    "eliza:onboarding:step": "features",
+    "eliza:first-run-complete": "0",
+    "elizaos:first-run:force-fresh": "1",
+    "eliza:setup:step": "capabilities",
     "elizaos:active-server": "",
   });
 

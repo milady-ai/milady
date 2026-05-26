@@ -17,8 +17,8 @@ type EvaluatedReadyCheck = {
 };
 
 const DEFAULT_APP_STORAGE: Record<string, string> = {
-  "eliza:onboarding-complete": "1",
-  "eliza:onboarding:step": "activate",
+  "eliza:first-run-complete": "1",
+  "eliza:setup:step": "model",
   "eliza:ui-shell-mode": "native",
   "elizaos:active-server": JSON.stringify({
     id: "local:embedded",
@@ -43,8 +43,8 @@ async function expectRootReady(page: Page): Promise<void> {
   await expect(page.locator("#root")).toBeVisible({ timeout: ROOT_TIMEOUT_MS });
 }
 
-async function expectNoOnboardingRedirect(page: Page): Promise<void> {
-  await expect(page).not.toHaveURL(/onboarding/, { timeout: NAV_TIMEOUT_MS });
+async function expectNoFirstRunRedirect(page: Page): Promise<void> {
+  await expect(page).not.toHaveURL(/first-run/, { timeout: NAV_TIMEOUT_MS });
 }
 
 export async function openAppPath(
@@ -53,7 +53,7 @@ export async function openAppPath(
 ): Promise<void> {
   await page.goto(targetPath, { waitUntil: "domcontentloaded" });
   await expectRootReady(page);
-  await expectNoOnboardingRedirect(page);
+  await expectNoFirstRunRedirect(page);
 }
 
 export async function readLocalStorage(

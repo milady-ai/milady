@@ -201,7 +201,6 @@
     "llama-cpp-capacitor@0.1.5": "patches/llama-cpp-capacitor@0.1.5.patch",
     "tsup@8.5.1": "patches/tsup@8.5.1.patch",
     "proper-lockfile@4.1.2": "patches/proper-lockfile@4.1.2.patch",
-    "@elizaos/app-core@2.0.0-alpha.537": "patches/@elizaos%2Fapp-core@2.0.0-alpha.537.patch",
     "@pixiv/three-vrm@3.5.2": "patches/@pixiv%2Fthree-vrm@3.5.2.patch",
   },
   "overrides": {

@@ -54,7 +54,7 @@ those files are the source of truth.
   │ TrainingTrigger │    │ Privacy filter  │       │ drive_eliza.py      │
   │ Service         │    │ MANDATORY       │       │ + together_synth.py │
   │ (100/task,12h)  │    │                 │       │ + rule-based synth  │
-  │                 │    │ ~/.eliza/       │       │                     │
+  │                 │    │ ~/.local/state/eliza/       │       │                     │
   │ ↓               │    │  training/      │       │ ~50k records mixed  │
   │ Privacy filter  │    │  datasets/      │       │ rule + LLM + drive  │
   │ MANDATORY       │    │  <YYYY-MM-DD>/  │       │                     │
@@ -68,7 +68,7 @@ those files are the source of truth.
   │   ⚠ stub        │    │                 │       │                     │
   │                 │    │                 │       │                     │
   │ ↓ JSON artifact │    │                 │       │                     │
-  │ ~/.eliza/       │    │                 │       │                     │
+  │ ~/.local/state/eliza/       │    │                 │       │                     │
   │  optimized-     │    │                 │       │                     │
   │  prompts/       │    │                 │       │                     │
   │  <task>/        │    │                 │       │                     │
@@ -262,7 +262,7 @@ Two distinct things named "privacy" live in the repo:
 ### 2.3 Prompt optimization
 - **Service.** `packages/core/src/services/optimized-prompt.ts`
   (`OptimizedPromptService`). Loads JSON artifacts from
-  `~/.eliza/optimized-prompts/<task>/` at boot, exposes a runtime cache.
+  `~/.local/state/eliza/optimized-prompts/<task>/` at boot, exposes a runtime cache.
 - **Backends.**
   - **Native** — real implementations of MIPRO-style instruction-search,
     GEPA-style prompt-evolution, and bootstrap-fewshot. Runs in-process. Dispatches
@@ -341,7 +341,7 @@ Coverage matrix:
 - Bridge HTTP endpoints `/api/coding-agents/<sessionId>/{parent-context,memory,
   active-workspaces}` are **read-only**: sub-agent pulls context, parent does
   not push state.
-- Workspace logs (`~/.milady/workspaces/<sessionId>/.claude/session-logs/`) are
+- Workspace logs (`~/.local/state/milady/workspaces/<sessionId>/.claude/session-logs/`) are
   **written by the sub-agent and never read by the parent**. This is the
   single biggest capture gap.
 
@@ -368,7 +368,7 @@ Coverage matrix:
 
 ### 2.8 HuggingFace integration
 - **Download.** 4 hardcoded eliza-1 models from `elizalabs/*` repos with SHA256
-  validation. Stored in `~/.eliza/local-inference/`.
+  validation. Stored in `~/.local/state/eliza/local-inference/`.
 - **Upload.** `eliza/packages/training/scripts/push_model_to_hf.py` and
   `push_dataset_to_hf.py`. Privacy filter mandatory on the dataset path.
 - **No release automation.** No code promotes a candidate to `latest`. No
@@ -408,7 +408,7 @@ Coverage matrix:
 4. Privacy filter applied (mandatory)
 5. Trajectories bucketized to per-task JSONL
 6. Native backend optimizer runs (MIPRO / GEPA / bootstrap-fewshot)
-7. JSON artifact written to `~/.eliza/optimized-prompts/<task>/`
+7. JSON artifact written to `~/.local/state/eliza/optimized-prompts/<task>/`
 8. `OptimizedPromptService` picks up on next boot (or hot reload)
 9. **Only the `action_planner` artifact is read by the runtime**
 
@@ -420,7 +420,7 @@ Coverage matrix:
 5. (Manual) `bash train_vast.sh pull-checkpoints --latest-only`
 6. (Manual) evaluation — but **no unified benchmark harness**
 7. (Manual) `push_model_to_hf.py` to publish
-8. (Manual) update `~/.eliza/local-inference/` registry to point at new GGUF
+8. (Manual) update `~/.local/state/eliza/local-inference/` registry to point at new GGUF
 9. **No automated promotion gate, no comparison vs current best, no release notes.**
 
 ---

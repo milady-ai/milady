@@ -20,7 +20,7 @@ Any proposal MUST respect these:
    - `eliza/packages/app-core/platforms/electrobun/src/native/agent.ts` (Electrobun main process)
 2. **`scripts/patch-deps.mjs` bun-exports patch stays** — removes dead `exports["."].bun` entries in `@elizaos/*` pointing to missing `src/`. Removing it breaks Bun plugin resolution.
 3. **Electrobun startup try/catch guards** in `eliza/packages/app-core/platforms/electrobun/src/native/agent.ts` stay.
-4. **Namespace `milady`** — state dir `~/.milady/`, config `~/.milady/milady.json`. `ELIZA_NAMESPACE=milady` set in `run-node.mjs` and `dev-ui.mjs`.
+4. **Namespace `milady`** — state dir `~/.local/state/milady/`, config `~/.local/state/milady/milady.json`. `ELIZA_NAMESPACE=milady` set in `run-node.mjs` and `dev-ui.mjs`.
 5. **Ports**: API 31337, UI 2138, Gateway 18789, Home 2142, WeChat 18790. Orchestrator auto-shifts to next free + syncs env — never hardcode downstream.
 6. **uiShellMode**: defaults to `"companion"` on load; `"native"` is "dev mode" in UI copy.
 7. **elizaOS naming**: lowercase `elizaOS` in prose; `@elizaos/*` scope; "Eliza agents" colloquially; "Eliza Classic" plugin is the only exception.

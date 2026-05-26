@@ -1,6 +1,6 @@
 # Switching providers mid-flight
 
-You picked a provider during onboarding. Maybe it's fine. Maybe it's slow, or expensive, or the model just doesn't talk the way you want it to. Or maybe you want to route chat to one provider and voice to another. This page covers how to move without breaking your current setup.
+You picked a provider during first-run setup. Maybe it's fine. Maybe it's slow, or expensive, or the model just doesn't talk the way you want it to. Or maybe you want to route chat to one provider and voice to another. This page covers how to move without breaking your current setup.
 
 **What you'll learn:** how to switch your chat provider, how to configure separate providers for voice and embeddings, and what happens to your existing conversations when you switch.
 
@@ -10,7 +10,7 @@ Milady separates providers by **what they power**. There are four slots:
 
 | Slot | What it does | Default if unset |
 | --- | --- | --- |
-| **Chat** | Your main conversation model. Every message goes through here. | Whatever you picked at onboarding. |
+| **Chat** | Your main conversation model. Every message goes through here. | Whatever you picked during first run. |
 | **Voice (TTS)** | Text-to-speech for spoken responses. | Edge TTS (free, decent). |
 | **Voice (STT)** | Speech-to-text for talk mode. | System default (Whisper for most). |
 | **Embeddings** | The model that turns text into vectors for knowledge search and memory. | Whatever your chat provider offers. |

@@ -8,7 +8,7 @@
  * Phase 2: inserts three fixture user_characters via direct SQL so the
  *          homepage's character list has something to render.
  *
- * Reads .milady/cache/local-cloud-ports.json (written by dev-local-cloud.mjs)
+ * Reads .cache/milady/local-cloud-ports.json (written by dev-local-cloud.mjs)
  * for connection details, falling back to defaults.
  */
 
@@ -21,7 +21,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const REPO_ROOT = resolve(__dirname, "..");
 
-const PORTS_FILE = resolve(REPO_ROOT, ".milady/cache/local-cloud-ports.json");
+const PORTS_FILE = resolve(
+  REPO_ROOT,
+  ".cache/milady/local-cloud-ports.json",
+);
 const CLOUD_DIR = resolve(REPO_ROOT, "eliza/cloud");
 
 /**

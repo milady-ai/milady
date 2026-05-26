@@ -34,7 +34,7 @@ Milady ships with native **BNB Smart Chain (BSC)** support — your agent can tr
 
 The built-in `EXECUTE_TRADE` action lets your agent swap tokens on BSC via PancakeSwap. Supports buy/sell with configurable slippage.
 
-To enable BSC trading, add to your `.env` or `~/.milady/.env`:
+To enable BSC trading, add to your `.env` or `~/.local/state/milady/.env`:
 
 ```bash
 EVM_PRIVATE_KEY=0x...                    # wallet private key (hex, 0x-prefixed)
@@ -94,7 +94,7 @@ shasum -a 256 --check --ignore-missing SHA256SUMS.txt
 
 ### Desktop: reset app data
 
-**Milady → Reset Milady…** (menu bar) confirms in the **native** dialog, then the **main process** calls **`POST /api/agent/reset`**, restarts the agent (embedded or external API), and tells the renderer to apply the **same local state wipe** as the end of Settings reset (onboarding, API client, cloud UI, conversations). **Why main does HTTP:** on macOS/WKWebView, the webview can fail to run **`fetch`** immediately after a native dialog, so a renderer-only reset looked stuck. **Why the renderer still runs teardown:** one implementation of “clear UI + `MiladyClient`” avoids duplicating logic in TypeScript main vs React.
+**Milady → Reset Milady…** (menu bar) confirms in the **native** dialog, then the **main process** calls **`POST /api/agent/reset`**, restarts the agent (embedded or external API), and tells the renderer to apply the **same local state wipe** as the end of Settings reset (first-run state, API client, cloud UI, conversations). **Why main does HTTP:** on macOS/WKWebView, the webview can fail to run **`fetch`** immediately after a native dialog, so a renderer-only reset looked stuck. **Why the renderer still runs teardown:** one implementation of “clear UI + `MiladyClient`” avoids duplicating logic in TypeScript main vs React.
 
 - **Docs:** [Desktop app](docs/apps/desktop.md) (native application menu section), [Main-process reset — WHYs](docs/apps/desktop-main-process-reset.md)
 - **Optional network / TTS:** with the agent orchestrator loaded, Edge TTS may call **Microsoft’s cloud** unless you set **`MILADY_DISABLE_EDGE_TTS=1`** — see [Environment variables](docs/cli/environment.mdx#runtime-behavior) and [TTS plugin](docs/plugin-registry/tts.md)
@@ -116,7 +116,7 @@ Then start Milady:
 milady
 ```
 
-First run walks you through onboarding:
+First run walks you through first-run setup:
 
 ```
 ┌  WELCOME TO MILADY!
@@ -313,14 +313,15 @@ echo "MILADY_API_TOKEN=$(openssl rand -hex 32)" >> .env
 
 Without a token on a public bind, anyone who can reach the server gets full access to the dashboard, agent, and wallet endpoints.
 
-### Hosting Modes
+### First-Run Runtime
 
-On first run, onboarding now asks where the backend should live:
+First run asks the minimum needed to start:
 
-- `Local` — run the backend on the current machine, exactly like the existing local flow.
-- `Cloud` — either use `Eliza Cloud` or attach to a `Remote Milady` backend with its address and access key.
+- `Local` — start the bundled agent on this device.
+- `Cloud` — sign in and provision a managed Eliza Cloud agent.
+- `Remote` — attach to an existing agent API with its address and access key.
 
-If you choose `Eliza Cloud`, the app provisions and connects to a managed backend. If you choose `Remote Milady`, the frontend rebinds to the backend you specify and continues against that API.
+The choice is persisted as the active server target and can be changed later from Runtime settings.
 
 ### Remote Backend Deployment
 
@@ -341,7 +342,7 @@ export MILADY_ALLOWED_ORIGINS="https://app.milady.ai,https://milady.ai,https://e
 milady start
 ```
 
-The access key the user enters in onboarding is the value of `MILADY_API_TOKEN`.
+The access key the user enters in first-run setup is the value of `MILADY_API_TOKEN`.
 
 If you want to connect from the desktop shell instead of the web frontend:
 
@@ -365,7 +366,7 @@ If you intentionally want a public Tailscale URL:
 tailscale funnel --https=443 http://127.0.0.1:2138
 ```
 
-Then use the Tailscale HTTPS URL as the backend address in onboarding and keep using the same `MILADY_API_TOKEN` as the access key.
+Then use the Tailscale HTTPS URL as the backend address in first-run setup and keep using the same `MILADY_API_TOKEN` as the access key.
 
 ### Eliza Cloud
 
@@ -535,7 +536,7 @@ MILADY_GATEWAY_PORT=19000 MILADY_PORT=3000 milady start
 
 ## Config
 
-Lives at `~/.milady/milady.json` (override with `MILADY_CONFIG_PATH` or `MILADY_STATE_DIR`)
+Lives at `~/.local/state/milady/milady.json` (override with `MILADY_CONFIG_PATH` or `MILADY_STATE_DIR`)
 
 ```json5
 {
@@ -549,7 +550,7 @@ Lives at `~/.milady/milady.json` (override with `MILADY_CONFIG_PATH` or `MILADY_
 }
 ```
 
-Or use `~/.milady/.env` for secrets.
+Or use `~/.local/state/milady/.env` for secrets.
 
 ---
 
@@ -591,7 +592,7 @@ ollama pull gemma3:4b
 
 > **⚠️ Known issue:** The `@elizaos/plugin-ollama` has an SDK version incompatibility with the current AI SDK. Use Ollama's **OpenAI-compatible endpoint** as a workaround:
 
-Edit `~/.milady/milady.json`:
+Edit `~/.local/state/milady/milady.json`:
 
 ```json5
 {
@@ -669,7 +670,7 @@ bun run dev:desktop:watch  # + Vite dev server and MILADY_RENDERER_URL (HMR for 
 
 **Why a separate flow:** the desktop stack runs **multiple processes** (orchestrator, Vite and/or built assets, API, Electrobun). The orchestrator **pre-allocates** free **API** and **Vite** ports when defaults are taken so every child gets consistent env—**why:** misaligned ports cause blank UI or 502s on `/api`. See **[docs/apps/desktop-local-development.md](docs/apps/desktop-local-development.md)** (including [when default ports are busy](docs/apps/desktop-local-development.md#when-default-ports-are-busy)) for signals, shutdown when you quit the app, and env vars.
 
-**IDE / agent hooks** — Editors and agents do not see the native window or auto-discover localhost. **Why we added hooks:** with desktop dev running, the API exposes **`GET /api/dev/stack`** (JSON: ports, renderer URL, which features are on). **`bun run desktop:stack-status -- --json`** probes ports and merges stack + health + status. By default, **`.milady/desktop-dev-console.log`** mirrors prefixed child logs and **`GET /api/dev/cursor-screenshot`** (loopback) returns a full-screen PNG via OS capture — both are opt-out via env (see doc). Cursor uses **`.cursor/rules/milady-desktop-dev-observability.mdc`** plus that guide.
+**IDE / agent hooks** — Editors and agents do not see the native window or auto-discover localhost. **Why we added hooks:** with desktop dev running, the API exposes **`GET /api/dev/stack`** (JSON: ports, renderer URL, which features are on). **`bun run desktop:stack-status -- --json`** probes ports and merges stack + health + status. By default, **`<stateDir>/desktop-dev-console.log`** mirrors prefixed child logs and **`GET /api/dev/cursor-screenshot`** (loopback) returns a full-screen PNG via OS capture — both are opt-out via env (see doc). Cursor uses **`.cursor/rules/milady-desktop-dev-observability.mdc`** plus that guide.
 
 ```bash
 bun run verify       # typecheck + lint + test (run before committing; `check` aliases this)

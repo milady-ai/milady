@@ -191,7 +191,7 @@ function writeChecklist(surface, dir, prompts) {
   );
   lines.push("");
   lines.push(
-    "Source: docs/QA-onboarding.md M5 row + eliza/packages/ui/src/platform/desktop-permissions-client.ts and mobile-permissions-client.ts. Drive each prompt with the computer-use MCP from within a Claude Code session; this script only scaffolds and validates the report directory.",
+    "Source: docs/QA-first-run.md M5 row + eliza/packages/ui/src/platform/desktop-permissions-client.ts and mobile-permissions-client.ts. Drive each prompt with the computer-use MCP from within a Claude Code session; this script only scaffolds and validates the report directory.",
   );
   lines.push("");
   lines.push(

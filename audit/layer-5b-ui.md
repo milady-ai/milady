@@ -83,15 +83,9 @@ app-core's own re-export surface (and via the source-mode aliasing in
   scale + the legacy aliases `SELECT_FLOATING_LAYER_NAME` /
   `SELECT_FLOATING_LAYER_Z_INDEX`. Single source of truth — every
   z-index in the codebase should come from here. Clean.
-- [!] `eliza/packages/ui/src/types/onboarding.ts` — 25 LOC. Defines
-  `OnboardingStep` and `ONBOARDING_STEPS` with i18n key labels.
-  boundaries:Layer 5a's `shared/src/contracts/onboarding.ts:74` defines
-  `OnboardingProviderId` (the open-union one); this is a *separate*
-  notion (the wizard's three top-level steps), so no duplication —
-  but the file is the single non-component file under `src/types/`,
-  and the directory exists *only* for this. Inline candidate or move
-  to a `composites/onboarding/` sub-barrel when a real onboarding
-  composite lands.
+- [x] `eliza/packages/ui/src/state/types.ts` — now owns `SetupStep` and
+  `SETUP_STEPS` for the internal setup track. The user-facing first-run
+  surface uses the direct first-run vocabulary.
 
 ### Styles (2 files — not in `find` count, but referenced)
 
@@ -359,7 +353,7 @@ app-core's own re-export surface (and via the source-mode aliasing in
   - `IconTooltip` (40 LOC) — group-hover CSS-only tooltip. dead:**zero
     consumers**.
   - `Spotlight` + `useGuidedTour` + `TourStep` (158 LOC) — an entire
-    onboarding-tour module with a clip-path mask spotlight, dot pager,
+    first-run-tour module with a clip-path mask spotlight, dot pager,
     next/prev/skip flow. dead:**zero consumers**. (The only `Spotlight`
     in the repo is `eliza/cloud/packages/ui/src/components/spotlight.tsx`
     — a different file.)
@@ -703,10 +697,7 @@ casts in production source files. The systemic patterns are:
    or — simpler — derive `XProps` from `VariantProps<typeof
    xVariants>` (cva ships this helper) and drop the hand-written
    props interfaces entirely.
-2. **`OnboardingStep` open-string union** — `types/onboarding.ts:1`
-   uses literal union `"deployment" | "providers" | "features"` —
-   correctly closed. Good. (Layer 5a `OnboardingProviderId` does NOT
-   close — see 5a finding.)
+2. **`SetupStep` union** — closed as `"connection" | "model" | "capabilities"`.
 3. **`ConnectionStatus` aria-live / role** — typed as `string` from
    `HTMLAttributes`. Could be narrowed to literal union
    `"polite" | "assertive" | "off" | undefined` and `"alert" | "status"`

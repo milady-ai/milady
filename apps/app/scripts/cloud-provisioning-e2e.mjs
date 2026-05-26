@@ -570,7 +570,7 @@ async function runWebSurface(context) {
           "elizaos:active-server",
           JSON.stringify(activeServer),
         );
-        localStorage.setItem("eliza:onboarding-complete", "1");
+        localStorage.setItem("eliza:first-run-complete", "1");
         localStorage.setItem("eliza:mobile-runtime-mode", "cloud");
         globalThis.__ELIZA_CLOUD_AUTH_TOKEN__ = cloudToken;
         globalThis.__ELIZAOS_API_BASE__ = activeServer.apiBase;
@@ -763,7 +763,7 @@ async function runAndroidSurface(context) {
       })};
       const cloudToken = ${JSON.stringify(requireToken())};
       localStorage.setItem("elizaos:active-server", JSON.stringify(activeServer));
-      localStorage.setItem("eliza:onboarding-complete", "1");
+      localStorage.setItem("eliza:first-run-complete", "1");
       localStorage.setItem("eliza:mobile-runtime-mode", "cloud");
       window.__ELIZA_CLOUD_AUTH_TOKEN__ = cloudToken;
       window.__ELIZAOS_API_BASE__ = activeServer.apiBase;

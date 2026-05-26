@@ -317,9 +317,9 @@ const useCloudStatePath = path.join(
   "packages/app-core/src/state/useCloudState.js",
 );
 
-const useOnboardingCallbacksPath = path.join(
+const useFirstRunCallbacksPath = path.join(
   appCoreDir,
-  "packages/app-core/src/state/useOnboardingCallbacks.js",
+  "packages/app-core/src/state/useFirstRunCallbacks.js",
 );
 
 const clientCloudPath = path.join(
@@ -583,12 +583,12 @@ changed =
   }) || changed;
 
 changed =
-  patchFile(useOnboardingCallbacksPath, (source) => {
+  patchFile(useFirstRunCallbacksPath, (source) => {
     let next = source;
 
     next = next.replace(
-      '                    await client.provisionCloudSandbox({\n                        cloudApiBase,\n                        authToken,\n                        name: onboardingName,\n                        bio: style?.bio ?? ["An autonomous AI agent."],\n                        onProgress: (status, detail) => {\n                            console.log(`[Sandbox] ${status}: ${detail ?? ""}`);\n                        },\n                    });\n                    client.setBaseUrl(cloudApiBase);',
-      '                    const provisionedAgent = await client.provisionCloudSandbox({\n                        cloudApiBase,\n                        authToken,\n                        name: onboardingName,\n                        bio: style?.bio ?? ["An autonomous AI agent."],\n                        onProgress: (status, detail) => {\n                            console.log(`[Sandbox] ${status}: ${detail ?? ""}`);\n                        },\n                    });\n                    client.setBaseUrl(provisionedAgent.bridgeUrl);',
+      '                    await client.provisionCloudSandbox({\n                        cloudApiBase,\n                        authToken,\n                        name: firstRunName,\n                        bio: style?.bio ?? ["An autonomous AI agent."],\n                        onProgress: (status, detail) => {\n                            console.log(`[Sandbox] ${status}: ${detail ?? ""}`);\n                        },\n                    });\n                    client.setBaseUrl(cloudApiBase);',
+      '                    const provisionedAgent = await client.provisionCloudSandbox({\n                        cloudApiBase,\n                        authToken,\n                        name: firstRunName,\n                        bio: style?.bio ?? ["An autonomous AI agent."],\n                        onProgress: (status, detail) => {\n                            console.log(`[Sandbox] ${status}: ${detail ?? ""}`);\n                        },\n                    });\n                    client.setBaseUrl(provisionedAgent.bridgeUrl);',
     );
 
     next = next.replace(

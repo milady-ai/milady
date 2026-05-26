@@ -10,7 +10,7 @@ import { createRealTestRuntime } from "../../../../eliza/packages/app-core/test/
 
 export interface TestApiServerOptions {
   port?: number;
-  onboardingComplete?: boolean;
+  firstRunComplete?: boolean;
 }
 
 export interface TestApiServer {
@@ -68,15 +68,15 @@ export async function startLiveApiServer(
     });
     const upstreamBaseUrl = `http://127.0.0.1:${upstream.port}`;
 
-    if (options.onboardingComplete) {
-      const response = await fetch(`${upstreamBaseUrl}/api/onboarding`, {
+    if (options.firstRunComplete) {
+      const response = await fetch(`${upstreamBaseUrl}/api/first-run`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ name: "Packaged Desktop" }),
       });
       if (!response.ok) {
         throw new Error(
-          `Failed to seed live onboarding state (${response.status}): ${await response.text()}`,
+          `Failed to seed live first-run state (${response.status}): ${await response.text()}`,
         );
       }
     }

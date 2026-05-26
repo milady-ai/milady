@@ -127,7 +127,7 @@ const capacitorKeyboardEntry = tryResolve("@capacitor/keyboard");
 const capacitorPreferencesEntry = tryResolve("@capacitor/preferences");
 const capacitorAppEntry = tryResolve("@capacitor/app");
 // `@elizaos/app-core` is always real. `@elizaos/app-wallet` is required by
-// onboarding callbacks + AppContext (useWalletState), so resolve it real
+// first-run callbacks + AppContext (useWalletState), so resolve it real
 // when present. `app-hyperscape` is real when its package is present.
 // Auto-detect by walking node_modules/@elizaos/* directly (don't follow
 // symlinks via require.resolve — those land at the real source path,
@@ -242,6 +242,32 @@ function resolveLocalUiAliases(): Alias[] {
       replacement: path.join(uiPkgRoot, "src/index.ts"),
     },
     {
+      find: /^@elizaos\/ui\/api$/,
+      replacement: path.join(uiPkgRoot, "src/api/index.ts"),
+    },
+    {
+      find: /^@elizaos\/ui\/api\/(.*)$/,
+      replacement: `${uiPkgRoot}/src/api/$1.ts`,
+      customResolver: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/browser$/,
+      replacement: path.join(uiPkgRoot, "src/browser.ts"),
+    },
+    {
+      find: /^@elizaos\/ui\/bridge$/,
+      replacement: path.join(uiPkgRoot, "src/bridge/index.ts"),
+    },
+    {
+      find: /^@elizaos\/ui\/bridge\/(.*)$/,
+      replacement: `${uiPkgRoot}/src/bridge/$1.ts`,
+      customResolver: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/build-variant$/,
+      replacement: path.join(uiPkgRoot, "src/build-variant.ts"),
+    },
+    {
       find: /^@elizaos\/ui\/components\/ui\/(.*)$/,
       replacement: `${uiPkgRoot}/src/components/ui/$1.tsx`,
       customResolver: resolveExistingUiSourceModule,
@@ -283,6 +309,70 @@ function resolveLocalUiAliases(): Alias[] {
     {
       find: /^@elizaos\/ui\/lib\/(.*)$/,
       replacement: `${uiPkgRoot}/src/lib/$1.ts`,
+    },
+    {
+      find: /^@elizaos\/ui\/config$/,
+      replacement: path.join(uiPkgRoot, "src/config/index.ts"),
+    },
+    {
+      find: /^@elizaos\/ui\/config\/(.*)$/,
+      replacement: `${uiPkgRoot}/src/config/$1.ts`,
+      customResolver: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/events$/,
+      replacement: path.join(uiPkgRoot, "src/events/index.ts"),
+    },
+    {
+      find: /^@elizaos\/ui\/navigation$/,
+      replacement: path.join(uiPkgRoot, "src/navigation/index.ts"),
+    },
+    {
+      find: /^@elizaos\/ui\/navigation\/(.*)$/,
+      replacement: `${uiPkgRoot}/src/navigation/$1.ts`,
+      customResolver: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/platform$/,
+      replacement: path.join(uiPkgRoot, "src/platform/index.ts"),
+    },
+    {
+      find: /^@elizaos\/ui\/platform\/(.*)$/,
+      replacement: `${uiPkgRoot}/src/platform/$1.ts`,
+      customResolver: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/state$/,
+      replacement: path.join(uiPkgRoot, "src/state/index.ts"),
+    },
+    {
+      find: /^@elizaos\/ui\/state\/(.*)$/,
+      replacement: `${uiPkgRoot}/src/state/$1.ts`,
+      customResolver: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/first-run\/(.*)$/,
+      replacement: `${uiPkgRoot}/src/first-run/$1.ts`,
+      customResolver: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/slots\/(.*)$/,
+      replacement: `${uiPkgRoot}/src/slots/$1.ts`,
+      customResolver: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/utils$/,
+      replacement: path.join(uiPkgRoot, "src/utils/index.ts"),
+    },
+    {
+      find: /^@elizaos\/ui\/utils\/(.*)$/,
+      replacement: `${uiPkgRoot}/src/utils/$1.ts`,
+      customResolver: resolveExistingUiSourceModule,
+    },
+    {
+      find: /^@elizaos\/ui\/(.*)$/,
+      replacement: `${uiPkgRoot}/src/$1`,
+      customResolver: resolveExistingUiSourceModule,
     },
   ];
 }
@@ -401,14 +491,23 @@ function resolveLocalSharedAliases(): Alias[] {
   };
   const aliases: Alias[] = [];
   for (const [key, value] of Object.entries(sharedPkg.exports || {})) {
-    if (typeof value !== "string") continue;
+    const exportTarget =
+      typeof value === "string"
+        ? value
+        : typeof value === "object" && value !== null
+          ? ((value as Record<string, string>).import ??
+            (value as Record<string, string>).default ??
+            (value as Record<string, string>).types ??
+            null)
+          : null;
+    if (!exportTarget) continue;
     const aliasKey =
       key === "."
         ? "@elizaos/shared"
         : `@elizaos/shared/${key.replace(/^\.\//, "")}`;
     aliases.push({
       find: new RegExp(`^${escapeRegExp(aliasKey)}$`),
-      replacement: path.resolve(sharedPkgDir, value),
+      replacement: path.resolve(sharedPkgDir, exportTarget),
     });
   }
   return aliases;
@@ -475,9 +574,9 @@ function resolveLocalAppCoreAliases(): Alias[] {
 
   // Bare `@elizaos/app-core` resolves to `src/browser.ts` which now
   // re-exports the full `dist/index.js` surface (so milady's `main.tsx`
-  // sees `DesktopOnboardingRuntime`, `AppProvider`, etc.) plus the
+  // sees `FirstRunShell`, `AppProvider`, etc.) plus the
   // hand-written browser shims on top. The server-only re-exports
-  // inside dist (account-pool, onboarding-routes, …) are kept
+  // inside dist (account-pool, first-run-routes, …) are kept
   // renderer-safe by aliasing the underlying `@elizaos/agent` and
   // `@elizaos/plugin-elizacloud` server packages to their browser-side
   // stubs in `nativeModuleStubPlugin` + the empty-node-module bake-in.
@@ -1336,7 +1435,7 @@ function generateNodeBuiltinStub(moduleId: string, req = _require): string {
     //   * mutation traps (set / defineProperty) don't throw under strict mode
     //   * `instanceof`, `default`, `__esModule` resolve sensibly for ESM<->CJS
     "function noopFn() { return noop; }",
-    "const handler = { get(t, p) { if (typeof p === 'symbol') return undefined; if (p === '__esModule') return true; if (p === 'default') return noop; if (p === 'prototype') return {}; if (p in t) return t[p]; return noop; }, set(t, p, v) { try { t[p] = v; } catch {} return true; }, has() { return true; }, ownKeys() { return []; }, getOwnPropertyDescriptor() { return { configurable: true, enumerable: true }; }, apply() { return noop; }, construct() { return noop; }, defineProperty(t, p, d) { try { Object.defineProperty(t, p, { configurable: true, writable: true, enumerable: true, ...d }); } catch {} return true; } };",
+    "const handler = { get(t, p) { if (typeof p === 'symbol') return undefined; if (p === '__esModule') return true; if (p === 'default') return noop; if (p in t) return Reflect.get(t, p); return noop; }, set(t, p, v) { try { t[p] = v; } catch {} return true; }, has() { return true; }, ownKeys(t) { return Reflect.ownKeys(t); }, getOwnPropertyDescriptor(t, p) { return Reflect.getOwnPropertyDescriptor(t, p) ?? { configurable: true, enumerable: true }; }, apply() { return noop; }, construct() { return noop; }, defineProperty(t, p, d) { try { Object.defineProperty(t, p, { configurable: true, writable: true, enumerable: true, ...d }); } catch {} return true; } };",
     "const noop = new Proxy(noopFn, handler);",
     "const stub = noop;",
     "const asyncNoop = () => Promise.resolve();",
@@ -1744,7 +1843,7 @@ function generateNamedExportStub(names: readonly string[]): string {
 const PLUGIN_ELIZACLOUD_STUB_NAMES = [
   "__resetCloudBaseUrlCache",
   "clearCloudSecrets",
-  "CloudOnboardingResult",
+  "CloudFirstRunResult",
   "CloudRouteState",
   "CloudWalletDescriptor",
   "CloudWalletProvider",
@@ -1821,10 +1920,10 @@ const ELIZA_AGENT_ARRAY_STUB_NAMES = [
 ] as const;
 
 const ELIZA_AGENT_FUNCTION_STUB_NAMES = [
-  "applyCanonicalOnboardingConfig",
+  "applyCanonicalFirstRunConfig",
   "applyCloudConfigToEnv",
   "applyN8nConfigToEnv",
-  "applyOnboardingCredentialPersistence",
+  "applyFirstRunCredentialPersistence",
   "applyPluginRuntimeMutation",
   "bootElizaRuntime",
   "buildCharacterFromConfig",
@@ -1832,7 +1931,7 @@ const ELIZA_AGENT_FUNCTION_STUB_NAMES = [
   "buildTriggerMetadata",
   "checkForUpdate",
   "classifyRegistryPluginRelease",
-  "clearPersistedOnboardingConfig",
+  "clearPersistedFirstRunConfig",
   "cloneWithoutBlockedObjectKeys",
   "collectConfigEnvVars",
   "collectConnectorEnvVars",
@@ -2180,7 +2279,7 @@ function nativeModuleStubPlugin(): Plugin {
         return VIRTUAL_PREFIX + id;
       }
       // Plugin-elizacloud is server-only (cloud secrets, TTS routing).
-      // The renderer reaches it transitively through `dist/api/onboarding-routes.js`
+      // The renderer reaches it transitively through `dist/api/first-run-routes.js`
       // re-exports; stub the entire surface so static named-import scans pass.
       if (id === "@elizaos/plugin-elizacloud") {
         return appCoreSrcRoot
@@ -2293,8 +2392,8 @@ function nativeModuleStubPlugin(): Plugin {
       const missingExports: Record<string, string> = {
         resolveSecretKeyAlias: "function(k){return k}",
         SECRET_KEY_ALIASES: "{}",
-        OnboardingStateMachine: "function(){}",
-        isOnboardingComplete: "function(){return false}",
+        SetupStateMachine: "function(){}",
+        isSetupComplete: "function(){return false}",
         AgentEventService: "function(){}",
         AutonomyService: "function(){}",
         createBasicCapabilitiesPlugin: "function(){return{name:'stub'}}",

@@ -83,7 +83,7 @@ sessions and are being discarded. We see only ANSI-stripped final stdout.
 **Why it matters.** Without reasoning, tool-call structure, and token usage we
 cannot do SFT on agentic problem-solving — only on text completions of stripped
 summaries.
-**Fix.** Read `~/.milady/workspaces/<sessionId>/.claude/session-logs/*.json` on
+**Fix.** Read `~/.local/state/milady/workspaces/<sessionId>/.claude/session-logs/*.json` on
 `task_complete`. Parse Codex `--output-last-message` JSON. For OpenCode, enable
 its streaming JSON output and parse. Merge into the parent trajectory as
 `childSteps[]` with full step records, not just IDs.
@@ -266,7 +266,7 @@ backfills judge scores.
 
 ### M19. HF model catalog is hardcoded [hardcoded]
 4 entries in code; adding a new model requires a code change.
-**Fix.** A JSON registry at `~/.eliza/local-inference/registry.json`
+**Fix.** A JSON registry at `~/.local/state/eliza/local-inference/registry.json`
 (updateable via API) or a remote manifest fetched from HF.
 
 ### M20. No HF release automation [missing]
@@ -361,7 +361,7 @@ the active codebase; the deprecated upstream fallback has been deleted
 along with its env vars, scripts, and docs.
 
 ### M38. Mobile runtime hardening test untracked from git [partial]
-`packages/ui/src/onboarding/__tests__/mobile-runtime-mode-hardening.test.ts`
+`packages/ui/src/first-run/__tests__/mobile-runtime-mode-hardening.test.ts`
 shows up in git status (untracked).
 **Fix.** Commit and ensure it runs in CI.
 

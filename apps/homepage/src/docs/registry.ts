@@ -76,7 +76,7 @@ export const docsRegistry: DocEntry[] = [
     slug: "first-run",
     title: "Your first launch",
     description:
-      "What happens the first time you open Milady — server picker, first agent, onboarding steps.",
+      "What happens the first time you open Milady — name, runtime target, and launch.",
     tier: "beginner",
     order: 3,
     path: "/docs/beginner/first-run",

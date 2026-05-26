@@ -86,6 +86,109 @@ describe("setup-upstreams cloud-coupled plugins", () => {
     expect(builtLabels).toContain("bun run build (@elizaos/app-core)");
   });
 
+  it("always rebuilds shared before linking local upstream packages", async () => {
+    const repoRoot = createTempDir();
+    const elizaRoot = path.join(repoRoot, "eliza");
+    const builtLabels: string[] = [];
+
+    await ensureElizaBuildOutputs(elizaRoot, {
+      pathExists: () => true,
+      runCommandImpl: async (
+        _command: string,
+        _args: string[],
+        options: { label?: string },
+      ) => {
+        if (options.label) {
+          builtLabels.push(options.label);
+        }
+      },
+    });
+
+    expect(builtLabels).toContain("bun run build (@elizaos/shared)");
+  });
+
+  it("builds vault before linking local upstream packages", async () => {
+    const repoRoot = createTempDir();
+    const elizaRoot = path.join(repoRoot, "eliza");
+    const builtLabels: string[] = [];
+
+    await ensureElizaBuildOutputs(elizaRoot, {
+      pathExists: (targetPath: string) => {
+        if (
+          targetPath.endsWith(
+            path.join("packages", "vault", "dist", "index.js"),
+          )
+        ) {
+          return false;
+        }
+        return true;
+      },
+      runCommandImpl: async (
+        _command: string,
+        _args: string[],
+        options: { label?: string },
+      ) => {
+        if (options.label) {
+          builtLabels.push(options.label);
+        }
+      },
+    });
+
+    expect(builtLabels).toContain("bun run build (@elizaos/vault)");
+  });
+
+  it("builds desktop remote runtime packages before linking local upstream packages", async () => {
+    const repoRoot = createTempDir();
+    const elizaRoot = path.join(repoRoot, "eliza");
+    const builtLabels: string[] = [];
+
+    await ensureElizaBuildOutputs(elizaRoot, {
+      pathExists: (targetPath: string) => {
+        if (
+          targetPath.endsWith(
+            path.join("packages", "security", "dist", "index.js"),
+          ) ||
+          targetPath.endsWith(
+            path.join(
+              "packages",
+              "plugin-remote-manifest",
+              "dist",
+              "index.js",
+            ),
+          ) ||
+          targetPath.endsWith(
+            path.join(
+              "packages",
+              "plugin-worker-runtime",
+              "dist",
+              "index.js",
+            ),
+          )
+        ) {
+          return false;
+        }
+        return true;
+      },
+      runCommandImpl: async (
+        _command: string,
+        _args: string[],
+        options: { label?: string },
+      ) => {
+        if (options.label) {
+          builtLabels.push(options.label);
+        }
+      },
+    });
+
+    expect(builtLabels).toEqual(
+      expect.arrayContaining([
+        "bun run build (@elizaos/security)",
+        "bun run build (@elizaos/plugin-remote-manifest)",
+        "bun run build (@elizaos/plugin-worker-runtime)",
+      ]),
+    );
+  });
+
   it("marks elizaCloud unavailable when cloud SDK source is absent", () => {
     const repoRoot = createTempDir();
     const elizaRoot = path.join(repoRoot, "eliza");

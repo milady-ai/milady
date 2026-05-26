@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Local-dev mobile onboarding screenshot walkthrough.
+ * Local-dev mobile first-run screenshot walkthrough.
  *
  * This script is the report scaffolding for a computer-use-driven walkthrough
  * of the iOS simulator or Android emulator. The actual screen drives happen
@@ -10,7 +10,7 @@
  * Operator workflow (in a Claude Code session with computer-use MCP):
  *   1. Boot the sim/emulator (scripts/qa/ios-sim-smoke.sh handles the boot+launch).
  *   2. Run this script with --init to scaffold the per-surface report directory
- *      and the M1–M5 checklist (see docs/QA-onboarding.md, Mobile section).
+ *      and the M1–M5 checklist (see docs/QA-first-run.md, Mobile section).
  *   3. At each step, call `mcp__computer-use__screenshot` and save the PNG into
  *      reports/qa/<date>/mobile/<surface>/<step>.png using the filenames listed
  *      in the generated CHECKLIST.md.
@@ -47,7 +47,7 @@ const REPO_ROOT = resolve(__dirname, "..", "..");
 
 const SURFACES = new Set(["ios", "android"]);
 
-// The five mobile steps from docs/QA-onboarding.md. Each one becomes a row in
+// The five mobile steps from docs/QA-first-run.md. Each one becomes a row in
 // the generated CHECKLIST.md and an expected screenshot filename for --finalize.
 const STEPS = [
   {
@@ -68,14 +68,14 @@ const STEPS = [
     file: "M3-pre-seed.png",
     title: "Android pre-seed (or iOS equivalent state)",
     notes:
-      "See packages/ui/src/onboarding/mobile-runtime-mode.ts. Android pre-seeds a local agent before the provider step.",
+      "See packages/ui/src/first-run/mobile-runtime-mode.ts. Android pre-seeds a local agent before first-run target selection.",
   },
   {
     id: "M4",
     file: "M4-deep-link-provider.png",
-    title: "Deep link entry — milady://onboard/step/provider",
+    title: "Deep link entry — milady://first-run/runtime/local",
     notes:
-      "Trigger the deep link from the sim/emu shell, then screenshot the provider step.",
+      "Trigger the deep link from the sim/emu shell, then screenshot the local first-run target.",
   },
   {
     id: "M5",
@@ -124,13 +124,13 @@ function reportDir(surface) {
 
 function writeChecklist(surface, dir) {
   const lines = [];
-  lines.push(`# Mobile onboarding screenshot checklist — ${surface}`);
+  lines.push(`# Mobile first-run screenshot checklist — ${surface}`);
   lines.push("");
   lines.push(`Date: ${today()}`);
   lines.push(`Surface: ${surface}`);
   lines.push("");
   lines.push(
-    "Source: docs/QA-onboarding.md (Mobile section). Drive each step with the computer-use MCP from within a Claude Code session; this script only scaffolds and validates the report directory.",
+    "Source: docs/QA-first-run.md (Mobile section). Drive each step with the computer-use MCP from within a Claude Code session; this script only scaffolds and validates the report directory.",
   );
   lines.push("");
   lines.push("| Step | Status | Expected screenshot | Title | Notes |");
@@ -206,7 +206,7 @@ function finalize(surface) {
   }
 
   const lines = [];
-  lines.push(`# Mobile onboarding screenshot summary — ${surface}`);
+  lines.push(`# Mobile first-run screenshot summary — ${surface}`);
   lines.push("");
   lines.push(`Date: ${today()}`);
   lines.push(`Surface: ${surface}`);

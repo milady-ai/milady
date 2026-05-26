@@ -240,7 +240,7 @@ function writeChecklist(dir, prompts) {
   lines.push(`Prompts: ${prompts.length} (D1-D7)`);
   lines.push("");
   lines.push(
-    "Source: docs/QA-onboarding.md D-row table + eliza/packages/ui/src/platform/desktop-permissions-client.ts (`installDesktopPermissionsClientPatch`). Drive each prompt with the computer-use MCP from within a Claude Code session; this script only scaffolds and validates the report directory.",
+    "Source: docs/QA-first-run.md D-row table + eliza/packages/ui/src/platform/desktop-permissions-client.ts (`installDesktopPermissionsClientPatch`). Drive each prompt with the computer-use MCP from within a Claude Code session; this script only scaffolds and validates the report directory.",
   );
   lines.push("");
   lines.push("## Operator pre-flight (macOS)");

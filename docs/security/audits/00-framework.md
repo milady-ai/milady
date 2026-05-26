@@ -213,7 +213,7 @@ These are the non-standard risks that make Eliza's SOC2 harder than a typical Sa
 
 - **Phase 0 — Foundation (weeks 0–2):** Pick GRC tool, draft master Info Sec Policy, designate CISO/Security Lead, security@ inbox + responsible disclosure.
 - **Phase 1 — Critical technical gaps (weeks 2–6):** P0 items from all reports — secrets out of repo, MFA on prod, encryption-at-rest verified, audit log, prod access tiering, branch protection.
-- **Phase 2 — Process & policy (weeks 4–8):** Write all 24 policies; onboarding/offboarding workflow; vendor inventory; risk register; incident runbook + tabletop.
+- **Phase 2 — Process & policy (weeks 4–8):** Write all 24 policies; first-run/offboarding workflow; vendor inventory; risk register; incident runbook + tabletop.
 - **Phase 3 — High technical gaps (weeks 6–12):** P1 items — plugin trust model, connector token KMS encryption, log retention ≥365d, DR test, dependency scanning, signed releases.
 - **Phase 4 — Type I readiness check (week ~14):** External auditor engages, point-in-time assessment, design of controls.
 - **Phase 5 — Type II observation window (months 4–10):** Continuous control operation; quarterly access reviews; monthly vuln scans; tabletop incident drill.

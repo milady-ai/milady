@@ -113,7 +113,7 @@ await maybeHydrateFromBundle();
 const path = resolveFirstLightPath();
 if (!path) {
   // Hand control to the chat UI: it should kick off the download
-  // onboarding flow (see FIRST_LAUNCH_DOWNLOAD.md).
+  // first-run download (see FIRST_LAUNCH_DOWNLOAD.md).
   throw new ModelNotPresentError("first-light");
 }
 const { context_id } = await bridge.llama_load_model({ path });
@@ -132,7 +132,7 @@ throws `ModelNotPresentError` (or returns a structured `error` from
      the absolute paths it checked and a hint to run
      `download-first-light.sh`. Do **not** start a download — dev builds
      should fail loudly, not paper over a missing bundle.
-   - `appstore`: enter the onboarding download flow described in
+   - `appstore`: enter the first-run download flow described in
      `FIRST_LAUNCH_DOWNLOAD.md`. On successful download + SHA verify,
      re-call `llama_load_model` with the new path.
 
@@ -143,7 +143,7 @@ throws `ModelNotPresentError` (or returns a structured `error` from
 3. After a successful first load, persist a `models/manifest.json` next
    to `first-light.gguf` (see schema in `FIRST_LAUNCH_DOWNLOAD.md`). On
    subsequent boots, verify the on-disk file matches the manifest before
-   calling `llama_load_model`. On mismatch, re-run the onboarding flow.
+   calling `llama_load_model`. On mismatch, run the first-run download again.
 
 ## Build-time constant injection
 

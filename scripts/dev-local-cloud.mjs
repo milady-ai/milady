@@ -11,8 +11,8 @@
  * remap the host-side ports.
  *
  * Output:
- *   .milady/cache/local-cloud-overrides.yml  generated compose override
- *   .milady/cache/local-cloud-ports.json     chosen port map for downstream
+ *   .cache/milady/local-cloud-overrides.yml  generated compose override
+ *   .cache/milady/local-cloud-ports.json     chosen port map for downstream
  */
 
 import { spawnSync } from "node:child_process";
@@ -27,7 +27,7 @@ const REPO_ROOT = resolve(__dirname, "..");
 
 const COMPOSE_FILE = resolve(REPO_ROOT, "eliza/cloud/docker-compose.yml");
 const STEWARD_PATH = resolve(REPO_ROOT, "eliza/steward");
-const CACHE_DIR = resolve(REPO_ROOT, ".milady/cache");
+const CACHE_DIR = resolve(REPO_ROOT, ".cache/milady");
 const OVERRIDE_FILE = resolve(CACHE_DIR, "local-cloud-overrides.yml");
 const PORTS_FILE = resolve(CACHE_DIR, "local-cloud-ports.json");
 

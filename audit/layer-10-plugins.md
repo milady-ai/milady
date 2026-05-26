@@ -109,7 +109,7 @@ twitch, vertex, wallet, web-search, wechat, whatsapp, x, xmtp
 **Connectors** (discord, telegram, x, slack, etc.) are wired through the
 **channel-keyed** auto-enable map at `eliza/packages/agent/src/config/plugin-auto-enable.ts`,
 not the dashboard registry. That's correct — the registry is for
-user-toggleable plugins; connectors enable per-onboarding.
+user-toggleable plugins; connectors enable per-first-run.
 
 The handful of utility plugins in this list (`action-bench`, `executecode`,
 `browser-bridge`, etc.) **do** have callers and load through other paths. Not

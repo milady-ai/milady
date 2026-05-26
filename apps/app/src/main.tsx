@@ -35,17 +35,17 @@ import {
   TRAY_ACTION_EVENT,
 } from "@elizaos/app-core";
 import {
-  applyForceFreshOnboardingReset,
+  applyForceFreshFirstRunReset,
   applyLaunchConnectionFromUrl,
   applyLaunchConnection,
   installDesktopPermissionsClientPatch,
-  installForceFreshOnboardingClientPatch,
+  installForceFreshFirstRunClientPatch,
   installLocalProviderCloudPreferencePatch,
   isAppWindowRoute,
   isDetachedWindowShell,
   getWindowNavigationPath,
   resolveWindowShellRoute,
-  shouldInstallMainWindowOnboardingPatches,
+  shouldInstallMainWindowFirstRunPatches,
   syncDetachedShellLocation,
 } from "@elizaos/app-core";
 // Pill / voice-capture symbols live in upstream @elizaos/ui source but are
@@ -210,7 +210,7 @@ const APP_BRANDING: Partial<BrandingConfig> = {
   ...APP_BRANDING_BASE,
   // The hosted web bundle stays cloud-only in production. Desktop shells and
   // other hosts inject an explicit API base before React boots, and that host
-  // backend should control onboarding capabilities instead.
+  // backend should control first-run capabilities instead.
   cloudOnly: shouldUseCloudOnlyBranding({
     isDev: import.meta.env.DEV ?? false,
     injectedApiBase:
@@ -279,11 +279,11 @@ if (shouldEnableElectrobunMacWindowDrag()) {
   document.documentElement.classList.add("eliza-electrobun-frameless");
 }
 
-// Dev escape hatch: ?reset forces a truly fresh onboarding session by clearing
+// Dev escape hatch: ?reset forces a truly fresh first-run session by clearing
 // persisted state and temporarily suppressing stale backend resume config.
-if (shouldInstallMainWindowOnboardingPatches(windowShellRoute)) {
-  applyForceFreshOnboardingReset();
-  installForceFreshOnboardingClientPatch(client);
+if (shouldInstallMainWindowFirstRunPatches(windowShellRoute)) {
+  applyForceFreshFirstRunReset();
+  installForceFreshFirstRunClientPatch(client);
 }
 installLocalProviderCloudPreferencePatch(client);
 installDesktopPermissionsClientPatch(client);
@@ -292,7 +292,7 @@ installDesktopPermissionsClientPatch(client);
 window.__ELIZA_APP_CHARACTER_EDITOR__ = CharacterEditor;
 getAppWindow()[BRANDED_WINDOW_KEYS.characterEditor] = CharacterEditor;
 
-import { getStylePresets } from "@elizaos/shared/onboarding-presets";
+import { getStylePresets } from "@elizaos/shared/character-presets";
 
 // Derive VRM roster from STYLE_PRESETS so character names stay in one place.
 const APP_STYLE_PRESETS = getStylePresets();
@@ -310,7 +310,6 @@ const appBootConfig: AppBootConfig = {
     undefined,
   cloudApiBase: IOS_RUNTIME_ENV_CONFIG.cloudApiBase,
   vrmAssets: APP_VRM_ASSETS,
-  onboardingStyles: APP_STYLE_PRESETS,
   characterEditor: CharacterEditor,
   companionShell: CompanionShell,
   resolveCompanionInferenceNotice,
@@ -337,8 +336,8 @@ const appBootConfig: AppBootConfig = {
   appBlockerSettingsCard: AppBlockerSettingsCard,
   websiteBlockerSettingsCard: WebsiteBlockerSettingsCard,
   clientMiddleware: {
-    forceFreshOnboarding:
-      shouldInstallMainWindowOnboardingPatches(windowShellRoute),
+    forceFreshFirstRun:
+      shouldInstallMainWindowFirstRunPatches(windowShellRoute),
     preferLocalProvider: true,
     desktopPermissions: isDesktopPlatform(),
   },
@@ -863,7 +862,7 @@ function setupPlatformStyles(): void {
   // Sizing on native: pin the React mount to the full visual viewport
   // so the chat composer + keyboard-resize interaction stays clamped.
   // We deliberately do NOT set `paddingTop / paddingLeft / paddingRight`
-  // here — the @elizaos/ui shell components (StartupShell, RuntimeGate,
+  // here — the @elizaos/ui shell components (StartupShell, FirstRunShell,
   // Header, page-layout-mobile-drawer, dialog, drawer-sheet) all apply
   // their own `var(--safe-area-*)` padding from the CSS variables set
   // a few lines above. Adding a second layer on `#root` doubles the
@@ -1604,13 +1603,13 @@ async function main(): Promise<void> {
   }
 
   // MiladyOS only: pre-seed the on-device agent as the default runtime so
-  // the RuntimeGate "Choose your setup" picker is bypassed entirely on first
-  // launch. The same APK installed on a stock Android device falls through
-  // to the picker — those users actively choose Cloud / Remote / Local.
+  // the first-run runtime choice is bypassed entirely on first launch. The
+  // same APK installed on a stock Android device falls through to first-run
+  // setup — those users actively choose Cloud / Remote / Local.
   // Detection: `isMiladyOS` reads the `MiladyOS/<tag>` user-agent suffix
   // that `MainActivity` appends when `ro.miladyos.product` is set by the
   // AOSP product config. Settings ▸ Runtime exposes a deliberate
-  // `?runtime=picker` re-entry on MiladyOS for users who want to switch.
+  // `?runtime=first-run` re-entry on MiladyOS for users who want to switch.
   // No-op when the user already has a persisted runtime mode or active
   // server, so a deliberate cloud/remote choice — including one applied by
   // `applyLaunchConnectionFromUrl` above — is never clobbered.

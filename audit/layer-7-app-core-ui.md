@@ -93,8 +93,8 @@ but the *roles* are clearly distinct.
 - [!] `eliza/packages/app-core/src/shell/DetachedShellRoot.tsx` — the
       top-level for detached/popout windows (browser shell, music
       player, etc.). Gated by `shell-params`.
-- [!] `eliza/packages/app-core/src/shell/DesktopOnboardingRuntime.tsx` —
-      Electrobun-side onboarding runtime hook.
+- [!] `eliza/packages/app-core/src/shell/FirstRunShell.tsx` —
+      Electrobun-side first-run runtime hook.
 - [!] `eliza/packages/app-core/src/shell/DesktopSurfaceNavigationRuntime.tsx`
       — Electrobun shell navigation surface.
 - [!] `eliza/packages/app-core/src/shell/DesktopTrayRuntime.tsx` —
@@ -122,22 +122,12 @@ chrome"**. See *Shell seam clarification* in the summary.
 
 ### `src/components/shell/` (18 files — in-window React chrome)
 
-- [!] `eliza/packages/app-core/src/components/shell/RuntimeGate.tsx` —
-      **1882 LOC**. Already partly audited in Layer 1 (the
-      `resolveLocalAgentApiBase()` extraction landed in eliza commit
-      `2dc3b6459f`). What still lives here that doesn't belong:
-      `discoverGatewayEndpoints` orchestration (lines ~37–41),
-      `persistMobileRuntimeModeForServerTarget`, `addAgentProfile`,
-      `clearPersistedActiveServer`, `savePersistedActiveServer`, plus
-      the *URL query flag override* `RUNTIME_GATE_PICKER_OVERRIDE_PARAM`
-      (lines 93-109) that is reused from `Settings ▸ Runtime`. Realistic
-      split: `runtime-gate/` folder with `RuntimeGate.tsx` (the form),
-      `runtime-gate/cloud-flow.tsx` (Eliza Cloud login + agent picker),
-      `runtime-gate/local-flow.tsx` (start-local-agent UX),
-      `runtime-gate/remote-flow.tsx` (point at URL), and
-      `runtime-gate/picker-override.ts` (the URL flag). The 1882 LOC is
-      three flows + a chrome wrapper + URL override + form state —
-      each flow is ~400 LOC, the wrapper ~150.
+- [!] retired runtime-selection gate —
+      **1882 LOC**. This surface has been replaced by the first-run
+      controller + `FirstRunShell` split. Keep this audit note only as
+      history for the port-lock bug class: runtime choice, local launch,
+      remote URL handling, cloud login, profile persistence, and URL
+      overrides must not re-converge in one renderer module again.
 - [!] `eliza/packages/app-core/src/components/shell/Header.tsx` —
       header chrome with `mobileLeft`, `mobileCenter`, `pageRightExtras`,
       `tasksEventsPanelOpen` props. App.tsx is the only meaningful
@@ -150,13 +140,12 @@ chrome"**. See *Shell seam clarification* in the summary.
       good pattern.
 - [!] `eliza/packages/app-core/src/components/shell/StartupShell.tsx` —
       renders the non-`ready` startup-coordinator phases (loading,
-      pairing, onboarding, error). Right home for it.
+      pairing, first-run, error). Right home for it.
 - [!] `eliza/packages/app-core/src/components/shell/StartupFailureView.tsx`
       — render-only; receives `error` + `onRetry`. Clean.
 - [!] `eliza/packages/app-core/src/components/shell/PairingView.tsx` —
       pairing flow render. Clean.
-- [!] `eliza/packages/app-core/src/components/shell/SplashServerChooser.tsx`
-      — the server picker that runs *under* the splash. Clean.
+- [-] retired startup picker — replaced by the first-run setup shell.
 - [!] `eliza/packages/app-core/src/components/shell/LoadingScreen.tsx` —
       37 LOC. Clean.
 - [!] `eliza/packages/app-core/src/components/shell/ConnectionLostOverlay.tsx`
@@ -437,12 +426,12 @@ ConnectorModeSelector). Each panel is feature-specific. Sample inspection
 shows clean patterns; `DiscordLocalConnectorPanel.tsx` has 6 try/catch
 blocks (errors-axis follow-up).
 
-### `src/components/onboarding/` (5 files)
+### `src/components/first-run/` (5 files)
 
 `BootstrapStep.tsx`, `PasswordSetupStep.tsx`, +
-`identity-preview-tts.ts`, `onboarding-form-primitives.tsx`,
-`onboarding-step-chrome.tsx`. boundaries:onboarding lives in two
-places — here for the steps and `src/onboarding/` (Layer 9) for the
+`identity-preview-tts.ts`, `setup-form-primitives.tsx`,
+`setup-step-chrome.tsx`. boundaries:first-run lives in two
+places — here for the steps and `src/first-run/` (Layer 9) for the
 flow controller. Layer 9 owns the contract; Layer 7 owns the pixels.
 
 ### `src/components/local-inference/` (15 files)
@@ -577,8 +566,8 @@ coherent seam with one folder per role**:
 | Folder | Role | Files | Audience |
 |--------|------|-------|----------|
 | `src/navigation/` | Tab type + path resolver | 1 | Any code that maps URLs ↔ tab IDs |
-| `src/shell/` | Electrobun-renderer runtime entries (popouts, detached shells, tray, onboarding runtime, surface nav) | 5 + index | The Electrobun main process spawns these as window roots |
-| `src/components/shell/` | In-window React chrome (header, banners, modals, overlays, splash, RuntimeGate) | 18 | App.tsx and other root mounts |
+| `src/shell/` | Electrobun-renderer runtime entries (popouts, detached shells, tray, first-run runtime, surface nav) | 5 + index | The Electrobun main process spawns these as window roots |
+| `src/components/shell/` | In-window React chrome (header, banners, modals, overlays, first-run shell) | 18 | App.tsx and other root mounts |
 | `src/app-shell/` | Slot registry for coding-agent UI surfaces (`task-coordinator-slots`) | 1 | Coding-agent plugins call `register*Slot()` at boot |
 
 The seam *works* but the names mislead. The minimal rename that makes
@@ -686,7 +675,7 @@ across `eliza/`, `apps/`, `scripts/`, excluding `node_modules`/`dist`/
 `build`):
 
 - **27 files** have ≤1 reference (i.e. only the file itself).
-- **1 file is truly orphan** — `components/onboarding/identity-preview-tts.ts`
+- **1 file is truly orphan** — `components/first-run/identity-preview-tts.ts`
   (zero references). Verified via direct `import` grep — no consumers.
   **Delete candidate (high confidence).**
 - The other 26 are mostly **co-located helpers** (e.g.
@@ -735,7 +724,7 @@ arguably be pre-formatted DTO fields, but neither is a *derivation*.
    - `BrowserWorkspaceView` (2566) → `browser-workspace/` folder, 4
      sub-files.
    - `GameView` (2175) → `apps/game-view/` folder, 4 sub-files.
-   - `RuntimeGate` (1882) → `runtime-gate/` folder, 4 sub-files.
+   - Retired runtime-selection gate (1882) → replaced by first-run controller + shell split.
    - `config-field.tsx` (1997) + `ui-renderer.tsx` (1775) →
      `config-ui/{fields,renderer}/` per field type.
 3. **Settings folder collapse** — fold `pages/settings/` (2 files) into
@@ -756,7 +745,7 @@ files have **one** local `EmptyState`, **one** local `StatusBadge`, and
 is sized differently: it's not "many parallel copies of small
 components" — it's "**a few mega-components that own everything**"
 (`AutomationsView` 5949, `BrowserWorkspaceView` 2566, `config-field`
-1997, `RuntimeGate` 1882, `GameView` 2175). The same architectural
+1997, retired runtime-selection gate 1882, `GameView` 2175). The same architectural
 disease, expressed through *concentration* instead of *replication*.
 
 The other surprise: `as any` is **completely absent** from these 267

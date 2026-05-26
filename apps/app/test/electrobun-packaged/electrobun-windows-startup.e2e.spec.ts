@@ -30,7 +30,7 @@ windowsTest?.(
     let harness: PackagedDesktopHarness | null = null;
 
     try {
-      api = await startLiveApiServer({ onboardingComplete: true, port: 0 });
+      api = await startLiveApiServer({ firstRunComplete: false, port: 0 });
       harness = new PackagedDesktopHarness({
         tempRoot,
         launcherPath: launcherPath as string,
@@ -51,6 +51,7 @@ windowsTest?.(
                 isPackagedRendererBootstrapProbeReady(
                   lastProbe,
                   api?.baseUrl ?? "",
+                  { expectedFirstRunComplete: false },
                 ) && hasPackagedRendererBootstrapRequests(api?.requests ?? [])
               );
             },

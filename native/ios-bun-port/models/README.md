@@ -124,7 +124,7 @@ time (read by the dev tooling and by the chat UI's first-launch flow):
 ### App Store — `MILADY_DISTRIBUTION_TIER=appstore`
 
 - The `.ipa` ships **without** the GGUF.
-- On first launch the chat UI shows a one-screen onboarding flow that
+- On first launch the chat UI shows a one-screen first-run download that
   downloads to
   `~/Library/Application Support/Milady/models/first-light.gguf`
   via `URLSession`, verifies the SHA256, and marks the file as

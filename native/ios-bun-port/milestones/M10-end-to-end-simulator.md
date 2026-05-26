@@ -26,7 +26,7 @@ This is "iOS local agent fully working end to end" per the original product ask.
 - [ ] First-time cold launch takes <60 seconds (model load).
 - [ ] Chat UI loads, shows "Ready" indicator after agent boot.
 - [ ] User types "hello" → reply streams in within 5 seconds (first token).
-- [ ] Conversation persists across app restart (PGlite at `Documents/.milady/db.pglite`).
+- [ ] Conversation persists across app restart (PGlite at `<stateDir>/workspace/.elizadb`).
 - [ ] No console errors during normal use (warnings ok).
 - [ ] Reproducible on a fresh Mac with only Xcode + bun + bun install run.
 

@@ -61,6 +61,41 @@ export const ELIZA_BUILD_STEPS = [
     cwd: path.join("packages", "shared"),
     args: ["run", "build"],
     label: "@elizaos/shared",
+    alwaysRun: true,
+  },
+  {
+    check: path.join("packages", "vault", "dist", "index.js"),
+    cwd: path.join("packages", "vault"),
+    args: ["run", "build"],
+    label: "@elizaos/vault",
+  },
+  {
+    check: path.join("packages", "security", "dist", "index.js"),
+    cwd: path.join("packages", "security"),
+    args: ["run", "build"],
+    label: "@elizaos/security",
+  },
+  {
+    check: path.join(
+      "packages",
+      "plugin-remote-manifest",
+      "dist",
+      "index.js",
+    ),
+    cwd: path.join("packages", "plugin-remote-manifest"),
+    args: ["run", "build"],
+    label: "@elizaos/plugin-remote-manifest",
+  },
+  {
+    check: path.join(
+      "packages",
+      "plugin-worker-runtime",
+      "dist",
+      "index.js",
+    ),
+    cwd: path.join("packages", "plugin-worker-runtime"),
+    args: ["run", "build"],
+    label: "@elizaos/plugin-worker-runtime",
   },
   {
     // @elizaos/prompts ships a node script package. Older versions exposed a

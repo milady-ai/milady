@@ -58,7 +58,7 @@ Documenting the correction here rather than padding the count to 99.
 
 ### test/utils — get-free-port triple
 
-- [!] `apps/app/test/utils/get-free-port.ts` — 24 LOC. Typed implementation. Imported by `test/design-review/run-design-review.ts:16` and `test/design-review/run-onboarding-review.ts:23` and the local `.test.ts` sibling.
+- [!] `apps/app/test/utils/get-free-port.ts` — 24 LOC. Typed implementation. Imported by `test/design-review/run-design-review.ts:16` and the local `.test.ts` sibling.
 - [!] `apps/app/test/utils/get-free-port.mjs` — 19 LOC. **Untyped duplicate of the same implementation.** Imported by `apps/app/scripts/run-ui-playwright.mjs:6` only. dedup:**three files, one function.** The `.mjs` exists because `scripts/run-ui-playwright.mjs` is plain ESM-Node and can't import a `.ts` file directly without tsx. boundaries:legitimate split; consolidating would require running playwright through tsx. **Action:** keep both, or move `run-ui-playwright.mjs` to `.ts` + run via `tsx` like `design-review/`. Pick one and delete the other; current state is the worst of both worlds.
 - [x] `apps/app/test/utils/get-free-port.test.ts` — 25 LOC. Two-test vitest spec that imports from `./get-free-port` (the `.ts` flavor). Clean.
 
@@ -75,7 +75,7 @@ Documenting the correction here rather than padding the count to 99.
 ### test/design-review (2 files — node tsx scripts, NOT vitest)
 
 - [!] `apps/app/test/design-review/run-design-review.ts` — Per `package.json:design-review`, run via `node --import tsx test/design-review/run-design-review.ts`. Imports `getFreePort`. Headless playwright + visual capture flow. dead:`design-review` script entry in package.json is the only invocation; not run in CI. boundaries:lives under `test/` but is really a tooling script — could move to `scripts/` (Layer 0). Status: keep, but reclassify.
-- [!] `apps/app/test/design-review/run-onboarding-review.ts` — Same pattern, scoped to onboarding flow. dead:no `package.json` script invokes this — it's a sibling of `run-design-review.ts` but unwired. **Verify:** if no script runs this, it's a dead tooling script. Top deletion candidate after grep confirmation.
+- [-] retired first-run visual review script — removed from the active first-run verification path.
 
 ### test/electrobun-packaged (7 files)
 
@@ -132,7 +132,7 @@ All 7 files form the `playwright.electrobun.packaged.config.ts` test suite (`tes
 - [!] `apps/homepage/src/lib/connections.ts` — Saved-remote-agents storage helpers (localStorage-backed). Used by `AgentProvider`.
 - [!] `apps/homepage/src/lib/format.ts` — Date/byte formatting helpers. dedup:check overlap with `@elizaos/app-core/utils` and `@elizaos/shared` formatters; if functionally identical, import instead of redefine.
 - [!] `apps/homepage/src/lib/open-web-ui.ts` — Opens the Milady web UI for a specific agent. Has companion test at `__tests__/open-web-ui.test.ts`.
-- [!] `apps/homepage/src/lib/runtime-config.ts` — `CLOUD_BASE`, `LOCAL_AGENT_BASE` constants + env wiring. Has companion test at `__tests__/runtime-config.test.ts`. dedup:**`LOCAL_AGENT_BASE` here is the third loopback default** (Layer 1 inventory: `RuntimeGate.tsx` had `http://127.0.0.1:31337`, `probe-local-agent.ts:18` has `DEFAULT_LOCAL_AGENT_HEALTH_URL`, `mobile-runtime-mode.ts:12` has `ANDROID_LOCAL_AGENT_API_BASE`). Four copies of the same loopback string across the repo.
+- [!] `apps/homepage/src/lib/runtime-config.ts` — `CLOUD_BASE`, `LOCAL_AGENT_BASE` constants + env wiring. Has companion test at `__tests__/runtime-config.test.ts`. dedup:**`LOCAL_AGENT_BASE` here is the third loopback default** (Layer 1 inventory: the retired runtime-selection gate had `http://127.0.0.1:31337`, `probe-local-agent.ts:18` has `DEFAULT_LOCAL_AGENT_HEALTH_URL`, `mobile-runtime-mode.ts:12` has `ANDROID_LOCAL_AGENT_API_BASE`). Four copies of the same loopback string across the repo.
 - [!] `apps/homepage/src/lib/spa-fallback.ts` — GitHub Pages 404 → SPA route handler. Single-purpose.
 - [!] `apps/homepage/src/lib/useAuth.ts` — Auth state hook. dedup:**"use auth" appears across the codebase as `useAuth` here, in `@elizaos/app-core/hooks/`, etc.** — but they describe different auth surfaces (homepage cloud auth vs in-app cloud auth). Keep separate; document the boundary.
 - [!] `apps/homepage/src/lib/useCloudOpenFlow.ts` — Cloud-agent-open orchestration hook (poll status, error toasts).

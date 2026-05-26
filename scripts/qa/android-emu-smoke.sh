@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # ------------------------------------------------------------------------------
-# Milady — Android Emulator onboarding smoke test (LOCAL DEV ONLY)
+# Milady — Android Emulator first-run smoke test (LOCAL DEV ONLY)
 #
 # This script is NOT wired into CI. It exists for engineers to verify the
 # Capacitor Android build boots to the BootstrapStep on a local Android
 # emulator and to capture a screenshot for QA evidence.
 #
-# Covers row M2 of docs/QA-onboarding.md (mobile walkthrough).
+# Covers row M2 of docs/QA-first-run.md (mobile walkthrough).
 #
 # Requirements (script gracefully degrades and exits 0 if any are missing):
 #   - Android SDK platform-tools (adb)
@@ -153,10 +153,10 @@ log "Installing $APK"
 log "Launching $PKG_ID"
 "$ADB_BIN" shell monkey -p "$PKG_ID" -c android.intent.category.LAUNCHER 1 >/dev/null
 
-log "Waiting 10s for splash + first paint"
+log "Waiting 10s for native launch + first paint"
 sleep 10
 
-SCREENSHOT="/tmp/milady-android-onboarding-$(date +%s).png"
+SCREENSHOT="/tmp/milady-android-first-run-$(date +%s).png"
 "$ADB_BIN" exec-out screencap -p > "$SCREENSHOT"
 
 if [[ ! -s "$SCREENSHOT" ]]; then

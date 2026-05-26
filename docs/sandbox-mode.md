@@ -199,16 +199,16 @@ when it looks like a project workspace (see CLAUDE.md), state dir fallback.
 
 `MILADY_STATE_DIR` / `ELIZA_STATE_DIR` is the per-user state root (PGlite,
 trajectories, optimized prompts, curated skills, auth tokens). Default
-`~/.milady`. STATUS: state-dir resolver consolidation in flight (State dir
+`~/.local/state/milady`. STATUS: state-dir resolver consolidation in flight (State dir
 agent) — single resolver, no per-call ad-hoc paths.
 
 In sandbox builds the state dir lives inside the OS app container
-(`~/Library/Containers/<bundle-id>/Data/.milady` on macOS,
-`%LOCALAPPDATA%\Packages\<pkg>\LocalState\.milady` on Windows,
-`~/.var/app/<flatpak-id>/.milady` on Flatpak). It is invisible from Finder /
+(`~/Library/Containers/<bundle-id>/Data/.local/state/milady` on macOS,
+`%LOCALAPPDATA%\Packages\<pkg>\LocalState\.local\state\milady` on Windows,
+`~/.var/app/<flatpak-id>/.local/state/milady` on Flatpak). It is invisible from Finder /
 Explorer / Files outside that container — see §12.
 
-The AOSP runtime sets `ELIZA_STATE_DIR` to the service's `.eliza` subdirectory
+The AOSP runtime sets `ELIZA_STATE_DIR` to the service's state subdirectory
 under `getFilesDir()` (see `ElizaAgentService.java` line 760).
 
 ## 9. Coding agents under sandbox
@@ -251,7 +251,7 @@ sandbox release. See §13.
 The state dir paths differ between variants (system home vs. container path),
 so a switch is not transparent.
 
-- **Direct → store** — copy `~/.milady` into the new sandbox container path on
+- **Direct → store** — copy `~/.local/state/milady` into the new sandbox container path on
   first run of the store build. A one-shot importer ("Import from direct
   install?") detects the legacy path and offers the copy.
 - **Store → direct** — symmetric. The direct build offers to import from the
@@ -270,7 +270,7 @@ simultaneously without conflict because the state dirs do not overlap.
   llama.cpp are direct-only; store builds always go to Cloud for inference.
 - **Coding agents only on direct builds.** See §9.
 - **State dir invisible in Finder/Explorer/Files for store builds.** Users
-  who expect to inspect `~/.milady` find an empty path — the actual store
+  who expect to inspect `~/.local/state/milady` find an empty path — the actual store
   data is under `~/Library/Containers/...` (or the OS-equivalent). The mode
   picker explains this; the importer (§11) eases the transition.
 - **MAS first-submission timing.** The JIT entitlement explanation usually

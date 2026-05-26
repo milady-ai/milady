@@ -27,15 +27,14 @@ listening on `31338` (orchestrator port-shifted because something
 else was on 31337). 245 `Load failed` / 404 errors in the dev log.
 The chat request never reached the API.
 
-Cause: `RuntimeGate.tsx:67` had `LOCAL_AGENT_API_BASE = "http://127.0.0.1:31337"`
-hardcoded. Once `client.setBaseUrl()` locks (`_userSetBase = true`),
-it stops re-reading the boot config / window globals — so the
-Electrobun-pushed `apiBaseUpdate` (which had the correct port) was
-ignored.
+Cause: the retired runtime-selection gate had
+`LOCAL_AGENT_API_BASE = "http://127.0.0.1:31337"` hardcoded. Once
+`client.setBaseUrl()` locked (`_userSetBase = true`), it stopped
+re-reading the boot config / window globals — so the Electrobun-pushed
+`apiBaseUpdate` (which had the correct port) was ignored.
 
 **Hot fix already landed (this session):**
-- `RuntimeGate.tsx` — `resolveLocalAgentApiBase()` now reads
-  `getElizaApiBase()` at click time.
+- first-run runtime selection now reads `getElizaApiBase()` at launch time.
 - `startup-phase-restore.ts` — `reconcilePersistedApiBaseWithLive()`
   rewrites a stale persisted loopback base to the live one on restore.
 
@@ -84,7 +83,7 @@ DONE     OOB smoke test (Phase 2 task 11)       enforces the contract forever
 ```
 
 Each phase is a precondition for the next. Phase 2 needs Phase 1's
-vault. Phase 3's API-base owner needs Phase 2's onboarding-flag-in-vault
+vault. Phase 3's API-base owner needs Phase 2's first-run-flag-in-vault
 to know what state to push. Phase 4 needs Phase 3's deterministic API
 plumbing so we can trust which failures are actually provider failures.
 
@@ -116,7 +115,7 @@ being green.
 | 10 | Define & document OOB-correct end state         | Without this, every later task is undefined-done           |
 | 11 | OOB smoke-test script                           | Lets every later task ship with proof                      |
 | 15 | Delete `.vault-hydrated.json` marker            | Cheapest cleanup; one less special-case                    |
-| 12 | Onboarding-complete flag into vault prefs       | Removes one persistence layer; unlocks 13 + 14             |
+| 12 | First-run completion flag into vault prefs       | Removes one persistence layer; unlocks 13 + 14             |
 | 17 | Trim `cloud.apiKey` duplication                 | One place owns auth; unlocks clean reset                   |
 | 13 | "Use local" atomic + actually disconnects cloud | Fixes the user's prior bug class (cloud bleeds into local) |
 | 14 | Collapse reset cascade to one op                | Possible only after 12 + 17                                |
@@ -231,14 +230,14 @@ A fresh user, on a clean machine:
 
 1. `git clone … && bun install`
 2. `bun run dev:desktop`
-3. Window opens. Splash → onboarding → "Use local" tile.
+3. Window opens directly into first-run setup.
 4. Click. Lands in chat. Composer is enabled (or shows "Set up an
    LLM provider" if no provider configured — never a "provider
    issue" lie).
 5. Says "hey". Gets a real reply within 30s. Or, if no provider is
    configured, gets a clear "Set up a provider in Settings" message.
 6. Closes app. Reopens. Lands in chat. "hey" still works.
-7. Settings → Reset. Onboarding fresh. Repeat from step 3.
+7. Settings → Reset. First-run fresh. Repeat from step 3.
 
 Smoke test (Phase 2 task 11) automates steps 1–6 and gates every
 PR going forward. CI runs it on macOS/Linux/Windows.

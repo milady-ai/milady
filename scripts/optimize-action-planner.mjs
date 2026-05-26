@@ -5,7 +5,7 @@
  * Kicks the native instruction-search optimizer against the
  * benchmark-derived action_planner dataset, then reports
  * before/after scores from the artifact written to
- * ~/.milady/optimized-prompts/action_planner/.
+ * <stateDir>/optimized-prompts/action_planner/.
  *
  * Usage:
  *   node scripts/optimize-action-planner.mjs               # uses defaults
@@ -42,7 +42,12 @@ const DEFAULT_DATASET = join(
   "action_planner_from_benchmark.jsonl",
 );
 const ARTIFACT_DIR = join(
-  process.env.MILADY_STATE_DIR || join(homedir(), ".milady"),
+  process.env.MILADY_STATE_DIR ||
+    process.env.ELIZA_STATE_DIR ||
+    join(
+      process.env.XDG_STATE_HOME || join(homedir(), ".local", "state"),
+      "milady",
+    ),
   "optimized-prompts",
   "action_planner",
 );

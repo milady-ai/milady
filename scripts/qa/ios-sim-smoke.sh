@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # ------------------------------------------------------------------------------
-# Milady — iOS Simulator onboarding smoke test (LOCAL DEV ONLY)
+# Milady — iOS Simulator first-run smoke test (LOCAL DEV ONLY)
 #
 # This script is NOT wired into CI. It exists for engineers to verify the
 # Capacitor iOS build boots to the BootstrapStep on a local iOS simulator and
 # to capture a screenshot for QA evidence.
 #
-# Covers row M1 of docs/QA-onboarding.md (mobile walkthrough).
+# Covers row M1 of docs/QA-first-run.md (mobile walkthrough).
 #
 # Requirements (script gracefully degrades and exits 0 if any are missing):
 #   - macOS host
@@ -132,10 +132,10 @@ xcrun simctl install "$DEVICE" "$APP_BUNDLE"
 log "Launching $BUNDLE_ID"
 xcrun simctl launch "$DEVICE" "$BUNDLE_ID" >/dev/null
 
-log "Waiting 10s for splash + first paint"
+log "Waiting 10s for native launch + first paint"
 sleep 10
 
-SCREENSHOT="/tmp/milady-ios-onboarding-$(date +%s).png"
+SCREENSHOT="/tmp/milady-ios-first-run-$(date +%s).png"
 xcrun simctl io "$DEVICE" screenshot "$SCREENSHOT"
 
 if [[ ! -s "$SCREENSHOT" ]]; then

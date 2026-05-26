@@ -59,10 +59,10 @@ What works, what throws, what is forbidden, on the iOS Bun port.
 
 | Logical              | iOS path                                                  | Notes                              |
 |----------------------|-----------------------------------------------------------|------------------------------------|
-| Agent state          | `Documents/.milady/state/`                                | Backed up to iCloud unless excluded |
-| PGlite database      | `Documents/.milady/db.pglite`                             | DB file marked NOT-excluded from backup |
-| Trajectories         | `Application Support/Milady/trajectories/`                | Excluded from backup                |
-| Optimized prompts    | `Application Support/Milady/optimized-prompts/`           | Excluded from backup                |
+| Agent state          | `Application Support/Milady/.local/state/milady/`         | Backed up to iCloud unless excluded |
+| PGlite database      | `<stateDir>/workspace/.elizadb`                           | DB file marked NOT-excluded from backup |
+| Trajectories         | `<stateDir>/trajectories/`                                | Excluded from backup                |
+| Optimized prompts    | `<stateDir>/optimized-prompts/`                           | Excluded from backup                |
 | Models (bundled)     | `<.app>/agent/models/`                                    | Read-only, ships with app           |
 | Models (downloaded)  | `Application Support/Milady/models/`                      | Excluded from backup                |
 | Temp                 | `NSTemporaryDirectory()`                                  | OS may purge                        |

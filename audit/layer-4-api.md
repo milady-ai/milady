@@ -94,7 +94,7 @@ the upstream agent package.
 
 ### Server-side request entry + glue (10 files)
 
-- [!] `eliza/packages/app-core/src/api/server.ts` — **1194 LOC** glue file. dedup:re-exports from 6 split-out modules (`server-cloud-tts`, `server-config-filter`, `server-cors`, `server-html`, `server-security`, `server-startup`, `server-wallet-trade`) plus 14 named upstream re-exports from `@elizaos/agent` plus 1 import from `@elizaos/agent/config` — this is a barrel masquerading as an entry. boundaries:`handleCompatRoute` at line 705 is **246 LOC** of compat router that fans out to 14 sub-handlers (`handleAuthBootstrapRoutes`, `handleAuthSessionRoutes`, `handleCatalogRoutes`, `handleDatabaseRowsCompatRoute`, `handleDevCompatRoutes`, `handleLocalInferenceCompatRoutes`, `handleOnboardingCompatRoute`, `handlePluginsCompatRoutes`, `handleSecretsInventoryRoute`, `handleSecretsManagerRoute`, `handleWorkbenchCompatRoutes`, `handleAutomationsCompatRoutes`, plus inline status patches and reset). errors:`hydrateWalletOsStoreFlagFromConfig` (line 188), `clearCompatRuntimeStateViaApi` (363, 386, 406) all log-and-continue on every catch — exactly the swallowing pattern AGENTS.md axis 5 forbids. types:15 `} catch` blocks; `parsed = JSON.parse(bodyText) as unknown` (line 488) widens. legacy:lines 138-143 admit "Wallet market overview route extracted to @elizaos/plugin-wallet/routes" + "Steward compat routes → app-steward/src/plugin.ts" — comments narrate prior refactor instead of being removed. dead:`_PACKAGE_ROOT_NAMES` (line 176) underscore-prefixed const, `_getTableColumnNames` (579) underscore-prefixed function — both signal "kept for future use." dedup:`compatLoopbackFetchJson` + `compatLoopbackRequest` + `buildCompatLoopbackHeaders` + `resolveCompatLoopbackApiBase` are an inline mini-client that duplicates `client-base.ts`'s fetch wrapper.
+- [!] `eliza/packages/app-core/src/api/server.ts` — **1194 LOC** glue file. dedup:re-exports from 6 split-out modules (`server-cloud-tts`, `server-config-filter`, `server-cors`, `server-html`, `server-security`, `server-startup`, `server-wallet-trade`) plus 14 named upstream re-exports from `@elizaos/agent` plus 1 import from `@elizaos/agent/config` — this is a barrel masquerading as an entry. boundaries:`handleCompatRoute` at line 705 is **246 LOC** of compat router that fans out to 14 sub-handlers (`handleAuthBootstrapRoutes`, `handleAuthSessionRoutes`, `handleCatalogRoutes`, `handleDatabaseRowsCompatRoute`, `handleDevCompatRoutes`, `handleLocalInferenceCompatRoutes`, `handleFirstRunCompatRoute`, `handlePluginsCompatRoutes`, `handleSecretsInventoryRoute`, `handleSecretsManagerRoute`, `handleWorkbenchCompatRoutes`, `handleAutomationsCompatRoutes`, plus inline status patches and reset). errors:`hydrateWalletOsStoreFlagFromConfig` (line 188), `clearCompatRuntimeStateViaApi` (363, 386, 406) all log-and-continue on every catch — exactly the swallowing pattern AGENTS.md axis 5 forbids. types:15 `} catch` blocks; `parsed = JSON.parse(bodyText) as unknown` (line 488) widens. legacy:lines 138-143 admit "Wallet market overview route extracted to @elizaos/plugin-wallet/routes" + "Steward compat routes → app-steward/src/plugin.ts" — comments narrate prior refactor instead of being removed. dead:`_PACKAGE_ROOT_NAMES` (line 176) underscore-prefixed const, `_getTableColumnNames` (579) underscore-prefixed function — both signal "kept for future use." dedup:`compatLoopbackFetchJson` + `compatLoopbackRequest` + `buildCompatLoopbackHeaders` + `resolveCompatLoopbackApiBase` are an inline mini-client that duplicates `client-base.ts`'s fetch wrapper.
 - [!] `eliza/packages/app-core/src/api/compat-route-shared.ts` — 373 LOC. dedup:`isLoopbackRemoteAddress` defined here AND identical copy in `trusted-local-request.ts:5-17` (5-line literal duplicate). `firstHeaderValue` defined here AND in `trusted-local-request.ts` AND `extractHeaderValue` is the same shape in `auth.ts:26-31`. The `CLIENT_IP_PROXY_HEADERS` set + `isClientIpProxyHeaderName` + `extractForwardedForCandidates` + `extractProxyClientAddressCandidates` block (lines 66-130+) is also fully duplicated in `trusted-local-request.ts`. types:1 `as unknown` cast (line 289). errors:catch around `for await (chunk of req)` body reader uses generic message "request body too large" without preserving the underlying error.
 - [!] `eliza/packages/app-core/src/api/trusted-local-request.ts` — 211 LOC. **dedup:near-100% overlap with `compat-route-shared.ts`** for `isLoopbackRemoteAddress`, `CLIENT_IP_PROXY_HEADERS`, `firstHeaderValue`, `headerValues`, `isClientIpProxyHeaderName`, `extractForwardedForCandidates`, `extractProxyClientAddressCandidates`. Should either delete this file or move shared helpers to a single `request-context.ts`.
 - [x] `eliza/packages/app-core/src/api/response.ts` — 47 LOC. Clean. `scrubStackFields` strips `stack`/`stackTrace` from any nested object — good defence-in-depth for accidental error leakage.
@@ -108,7 +108,7 @@ the upstream agent package.
 ### server-* split-out helpers (4 files)
 
 - [x] `eliza/packages/app-core/src/api/server-cloud-tts.ts` — 21 LOC. **Re-export shim** for `@elizaos/plugin-elizacloud/lib/server-cloud-tts`. legacy:exists only because `server.ts` and `server-wallet-trade.ts` use the relative path; once those import from the plugin directly this file is deletable.
-- [x] `eliza/packages/app-core/src/api/server-onboarding-helpers.ts` — 383 LOC. Helpers used by `onboarding-routes.ts` (replay body, extract+persist API key, etc). Clean — no audit issues other than the standard `} catch { /* non-fatal */ }` pattern (3 sites) that should be reviewed during the error-handling pass. (Renamed 2026-05-11 from `server-onboarding-compat.ts`.)
+- [x] `eliza/packages/app-core/src/api/server-first-run-helpers.ts` — 383 LOC. Helpers used by `first-run-routes.ts` (replay body, extract+persist API key, etc). Clean — no audit issues other than the standard `} catch { /* non-fatal */ }` pattern (3 sites) that should be reviewed during the error-handling pass. (Renamed 2026-05-11 from `server-first-run-compat.ts`.)
 - [x] `eliza/packages/app-core/src/api/server-wallet-trade.ts` — 115 LOC. Hardened wallet-export guard composition + per-op env mutation around the upstream rejection resolver. errors:`runWithCompatAuthContext` mutates env in finally — leaky boundary, same disease as `server-security.ts`. dedup:`normalizeCompatRejection` + `normalizeCompatReason` are no-ops on `reason` — leftover from a real normalisation that no longer happens? Or pre-emptive infrastructure? Either delete the no-op chain or document the kept-for-future-use intent.
 - [x] `eliza/packages/app-core/src/api/cloud-secrets.ts` — 13 LOC. **Re-export shim** for `@elizaos/plugin-elizacloud/lib/cloud-secrets`. Same legacy:bin pattern as `server-cloud-tts.ts`; deletable when consumers migrate.
 - [x] `eliza/packages/app-core/src/api/cloud-connection.ts` — 22 LOC. **Re-export shim** for `@elizaos/plugin-elizacloud/lib/cloud-connection`. Same pattern.
@@ -138,7 +138,7 @@ the upstream agent package.
 
 - [!] `eliza/packages/app-core/src/api/automations-compat-routes.ts` — **907 LOC**. boundaries:huge static `STATIC_AUTOMATION_NODE_SPECS` list (~250 LOC of literals starting line 87) belongs in a data file, not a route handler. types:`as unknown as Pick<Room, "metadata">` (line 334) and `as unknown as Record<string, unknown>` (line 359). legacy:`BLOCKED_AUTOMATION_PROVIDER_NODES` set hides what would be a per-node `enabled` flag — should be metadata not a deny-list.
 - [!] `eliza/packages/app-core/src/api/plugins-routes.ts` — **1651 LOC** — the second-largest file in the layer. boundaries:14+ exported helpers (`maskValue`, `normalizePluginCategory`, `resolveCompatPluginEnabledForList`, `analyzePluginStateDrift`, `buildPluginListResponse`, `validateCompatPluginConfig`, `persistCompatPluginMutation`, `resolvePluginManifestPath`, `resolveAdvancedCapabilityCompatStatus`, etc.) plus 30+ private helpers — this is a *plugin-management module* not a *route handler*. Should split: `plugins/registry.ts` (manifest + drift), `plugins/mutations.ts` (validate + persist), `plugins-routes.ts` (the actual route mux). types:1 `as unknown as CompatPluginRecord[]` (line 566). errors:6 `} catch` blocks. dead:`shortPluginIdFromNpmName` is internal but exported. (Renamed 2026-05-11 from `plugins-compat-routes.ts`.)
-- [!] `eliza/packages/app-core/src/api/onboarding-routes.ts` — 242 LOC. errors:line 92-94 catches and silently returns when re-saving `cloud.apiKey` to the config file fails — exactly the "best effort" pattern AGENTS.md axis 5 calls out. legacy:`scheduleCloudApiKeyResave` (line 77) is a 3-second `setTimeout` workaround "after upstream handler clobbered it" — a workaround for a bug in the upstream handler, not a fix. Should fix the upstream handler and delete this. dedup:loopback fetch on line 65 duplicates `compatLoopbackFetchJson` in `server.ts` — should call the shared helper. (Renamed 2026-05-11 from `onboarding-compat-routes.ts`.)
+- [!] `eliza/packages/app-core/src/api/first-run-routes.ts` — 242 LOC. errors:line 92-94 catches and silently returns when re-saving `cloud.apiKey` to the config file fails — exactly the "best effort" pattern AGENTS.md axis 5 calls out. legacy:`scheduleCloudApiKeyResave` (line 77) is a 3-second `setTimeout` workaround "after upstream handler clobbered it" — a workaround for a bug in the upstream handler, not a fix. Should fix the upstream handler and delete this. dedup:loopback fetch on line 65 duplicates `compatLoopbackFetchJson` in `server.ts` — should call the shared helper. (Renamed 2026-05-11 from `first-run-compat-routes.ts`.)
 - [x] `eliza/packages/app-core/src/api/dev-compat-routes.ts` — 169 LOC. Clean. **Only file** with `NODE_ENV === "production"` guard for full-route disable (line 37). Loopback gate + auth gate on every dev endpoint. SSRF guard on the screenshot proxy (lines 79-94) is correct.
 - [!] `eliza/packages/app-core/src/api/local-inference-compat-routes.ts` — 606 LOC. types:1 `as unknown as CatalogModel` cast (line 233). dedup:duplicates download-job, hardware-probe, model-management surface that exists in the local-inference plugin runtime — confirm the boundary; if these routes are strictly compat shims they should be very thin.
 - [!] `eliza/packages/app-core/src/api/database-rows-compat-routes.ts` — 174 LOC. **Database read/write through the API** is a sharp tool; needs a careful read in a future pass to confirm column-name + identifier sanitization is correct.
@@ -246,12 +246,12 @@ the call boundary.
 |  451 | `workbench-compat-routes.ts`          | ?        | Defer detailed audit |
 |  443 | `auth.ts`                             | 6 gates  | **Reduce to 1–2 gates**      |
 |  421 | `auth/sessions.ts`                    | clean    | —                            |
-|  383 | `server-onboarding-helpers.ts`        | clean    | —                            |
+|  383 | `server-first-run-helpers.ts`        | clean    | —                            |
 |  373 | `compat-route-shared.ts`              | dup      | Merge with `trusted-local-request.ts` |
 |  343 | `credential-resolver.ts`              | clean    | —                            |
 |  328 | `wallet-export-guard.ts`              | clean    | `logger.warn` over `console.warn` |
 |  290 | `auth-pairing-routes.ts`              | clean    | —                            |
-|  242 | `onboarding-routes.ts`                | 1        | Delete `scheduleCloudApiKeyResave` workaround |
+|  242 | `first-run-routes.ts`                | 1        | Delete `scheduleCloudApiKeyResave` workaround |
 |  234 | `auth-bootstrap-routes.ts`            | clean    | —                            |
 |  223 | `auth/bootstrap-token.ts`             | clean    | —                            |
 |  211 | `trusted-local-request.ts`            | dup      | Delete or merge              |
@@ -395,7 +395,7 @@ exempt** (lines 219-271).
 - `secrets-manager-routes.ts` — every state-mutating route routes through `ensureRouteAuthorized` (verify in detailed pass).
 - `dev-compat-routes.ts` — only GETs; CSRF not applicable.
 - `wallet-market-overview-route.ts` — only GETs; CSRF not applicable.
-- `onboarding-routes.ts` — `POST /api/onboarding` uses `ensureRouteAuthorized` (line 109) — CSRF enforced via the gate's default behaviour.
+- `first-run-routes.ts` — `POST /api/first-run` uses `ensureRouteAuthorized` (line 109) — CSRF enforced via the gate's default behaviour.
 
 **Confirmed gap:** the route wrappers (`agent-admin-routes.ts`,
 `character-routes.ts`, `permissions-routes.ts`, etc) delegate to
@@ -421,7 +421,7 @@ upstream's gate choice — needs a Layer 6 audit trace.
    14-day grace window for `ELIZA_API_TOKEN`. Delete once all current
    deploys are post-grace, plus the call sites in `auth.ts:233-269`,
    `auth-context.ts:127-152`.
-7. **`onboarding-routes.ts:77-96` `scheduleCloudApiKeyResave`** —
+7. **`first-run-routes.ts:77-96` `scheduleCloudApiKeyResave`** —
    `setTimeout(... 3000)` workaround "after upstream handler clobbered
    it". Fix the upstream handler in Layer 6, then delete this. Also
    delete the swallowed `try { ... } catch { /* Non-fatal */ }`.
@@ -507,7 +507,7 @@ upstream's gate choice — needs a Layer 6 audit trace.
   caller.
 
 - **Hand-rolled fetch+headers+token logic** appears in `server.ts`
-  (compat loopback), `onboarding-routes.ts:65`, `client-base.ts`,
+  (compat loopback), `first-run-routes.ts:65`, `client-base.ts`,
   `csrf-client.ts:fetchWithCsrf`, `auth-client.ts`. Should be one
   request helper used everywhere.
 

@@ -1,6 +1,6 @@
 # Your first chat
 
-You've finished onboarding and you're staring at the chat view. Time to send something.
+You've finished first-run setup and you're staring at the chat view. Time to send something.
 
 **What you'll learn:** how to send a message, what happens when you do, how voice works, and where your conversation actually lives.
 
@@ -27,7 +27,7 @@ That's the round trip. Do it a few times to get a feel for how your agent respon
 
 ## Turn voice on (or off)
 
-By default, voice is on — Milady speaks responses aloud using the voice you picked during onboarding. If you'd rather read in silence, there's a speaker icon near the chat that toggles it.
+By default, voice is on — Milady speaks responses aloud using the voice you picked during first-run setup. If you'd rather read in silence, there's a speaker icon near the chat that toggles it.
 
 <Callout kind="tip">
 Headphones are strongly recommended the first time you hear it. The default voices are good, and hearing an AI talk back through laptop speakers in a quiet room is a weirder experience than you might expect.
@@ -47,14 +47,14 @@ Talk mode uses your system microphone and Milady's speech-to-text pipeline. Firs
 
 ## Where does the conversation live?
 
-Right on your machine, in a local database under `~/.milady/` (Windows: `%USERPROFILE%\.milady\`).
+Right on your machine, in a local database under `~/.local/state/milady/` (Windows: `%USERPROFILE%\.local\state\milady\`).
 
 That means:
 
 - You can close Milady and reopen it later — the conversation is still there.
 - Your messages aren't synced to a Milady-owned cloud. There isn't one.
 - If you're using a cloud language model (like OpenAI), the message gets sent to them *during inference*, but the transcript is stored with you, not them.
-- Backups and migrations are your responsibility. If you want to move Milady to a new machine, copy the `~/.milady/` directory and you're done.
+- Backups and migrations are your responsibility. If you want to move Milady to a new machine, copy the `~/.local/state/milady/` directory and you're done.
 
 ## Starting a new conversation
 
@@ -74,4 +74,4 @@ A few prompts that show off different capabilities:
 
 ## What's next
 
-[Picking a provider](/docs/beginner/picking-a-provider) — a deeper look at the provider choice you made during onboarding, and how to pick something different if it's not working out.
+[Picking a provider](/docs/beginner/picking-a-provider) — a deeper look at the provider choice you made during first-run setup, and how to pick something different if it's not working out.

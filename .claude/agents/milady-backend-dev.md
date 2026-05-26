@@ -29,7 +29,7 @@ packages/app-core/src/
 
 1. **NODE_PATH in `runtime/eliza.ts`** is set at module level, before any dynamic plugin import. Do not reorder.
 2. **`buildCharacterFromConfig()`** in `runtime/eliza.ts` builds the agent system prompt — changes here affect every response. Be deliberate.
-3. **Namespace is `milady`**: state dir `~/.milady/`, config file `milady.json`. Config path resolution: `MILADY_CONFIG_PATH` → `MILADY_STATE_DIR` → `ELIZA_CONFIG_PATH` → `ELIZA_STATE_DIR` → default.
+3. **Namespace is `milady`**: state dir `~/.local/state/milady/`, config file `milady.json`. Config path resolution: `MILADY_CONFIG_PATH` → `MILADY_STATE_DIR` → `ELIZA_CONFIG_PATH` → `ELIZA_STATE_DIR` → default.
 4. **Port env vars** (never hardcode): `MILADY_API_PORT` (31337), `MILADY_PORT` (2138), `MILADY_GATEWAY_PORT` (18789), `MILADY_HOME_PORT` (2142), `MILADY_WECHAT_WEBHOOK_PORT` (18790). Dev orchestrator auto-shifts to next free and syncs env.
 5. **API loopback exception**: some routes (e.g., agent reset when no API token configured) allow loopback — see commit `8df00e725`. Respect that pattern.
 6. **TS strict mode**, Biome lint. No `any` without comment explaining why.

@@ -22,7 +22,7 @@ discrepancy is **intentional**:
 
 - **10 top-level orphans** (`App.tsx`, `account-pool.ts`,
   `app-shell-components.ts`, `browser.ts`, `capacitor-shell.ts`,
-  `character-catalog.ts`, `entry.ts`, `index.ts`, `onboarding-config.ts`,
+  `character-catalog.ts`, `entry.ts`, `index.ts`, `first-run-config.ts`,
   `shell-params.ts`) are already audited under Layer 1 §boot orphans
   and §App.tsx extraction map. We do **not** double-count them here.
 - The remaining ~20 unaccounted files are component subdirectories
@@ -40,7 +40,7 @@ find eliza/packages/app-core/src -type f \( -name "*.ts" -o -name "*.tsx" \) \
   -not -path "*/shell/*" -not -path "*/chat/*" \
   -not -path "*/navigation/*" -not -path "*/state/*" \
   -not -path "*/config/*" -not -path "*/providers/*" \
-  -not -path "*/registry/*" -not -path "*/onboarding/*" \
+  -not -path "*/registry/*" -not -path "*/first-run/*" \
   -not -path "*/bridge/*" -not -path "*/cli/*"
 ```
 
@@ -244,7 +244,7 @@ Status per file. Files are listed in subdirectory order. `[!]` = audited, findin
 ### platform/ — 12 files, all live
 
 - [x] `platform/empty-node-module.ts` — vite resolver alias for browser builds (referenced by `apps/app/vite.config.ts:83-84` and `eliza/packages/app/vite.config.ts`). Live.
-- [x] `platform/browser-launch.ts`, `cloud-preference-patch.ts`, `desktop-permissions-client.ts`, `index.ts`, `init.ts`, `ios-runtime.ts`, `is-native-server.ts`, `native-plugin-entrypoints.ts`, `onboarding-reset.ts`, `types.ts`, `window-shell.ts` — all live.
+- [x] `platform/browser-launch.ts`, `cloud-preference-patch.ts`, `desktop-permissions-client.ts`, `index.ts`, `init.ts`, `ios-runtime.ts`, `is-native-server.ts`, `native-plugin-entrypoints.ts`, `first-run-reset.ts`, `types.ts`, `window-shell.ts` — all live.
 
 ### security/ — 7 files, all live, hardened
 
@@ -339,7 +339,7 @@ find eliza/packages/app-core/src -type f \( -name "*.ts" -o -name "*.tsx" \) \
   -not -path "*/shell/*" -not -path "*/chat/*" \
   -not -path "*/navigation/*" -not -path "*/state/*" \
   -not -path "*/config/*" -not -path "*/providers/*" \
-  -not -path "*/registry/*" -not -path "*/onboarding/*" \
+  -not -path "*/registry/*" -not -path "*/first-run/*" \
   -not -path "*/bridge/*" -not -path "*/cli/*" | sort
 # → 179 files
 

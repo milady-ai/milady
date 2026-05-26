@@ -2,17 +2,16 @@
 /**
  * scripts/smoke-oob.mjs — out-of-the-box smoke test.
  *
- * Verifies the contract from MASTER.md §5 Definition of Done:
+ * Verifies the first-run startup contract:
  *   1. Fresh install → API spins up
  *   2. /api/health reports ready
  *   3. POST /v1/chat/completions returns a real response (not the
- *      misnomer "Sorry, I'm having a provider issue" that path #1
- *      of MASTER.md §3 Phase 4 patched)
+ *      misnomer "Sorry, I'm having a provider issue")
  *   4. /api/agent/reset succeeds
  *   5. Repeat (3) — a second chat after reset still works
  *
  * Runs the API in an isolated tmpdir state dir so it doesn't touch
- * the developer's actual ~/.milady. Tears the API down on exit.
+ * the developer's actual XDG state. Tears the API down on exit.
  *
  * Usage:
  *   node scripts/smoke-oob.mjs                 # run once, exit 0/1
@@ -45,6 +44,8 @@ const CHAT_TIMEOUT_MS = 60_000;
 const RESET_ATTEMPT_TIMEOUT_MS = 30_000;
 const _RESET_MAX_ATTEMPTS = 3;
 const PROVIDER_ISSUE_TEXT = "Sorry, I'm having a provider issue";
+const TRANSIENT_FAILURE_TEXT =
+  "Something went wrong on my end. Please try again.";
 const OOB_SKIP_PLUGINS = [
   "@elizaos/plugin-n8n-workflow",
   "n8n-workflow",
@@ -216,15 +217,25 @@ async function waitForReady(baseUrl, timeoutMs) {
       });
       if (res.ok) {
         const body = await res.json().catch(() => null);
-        if (body && typeof body.state === "string") {
+        const state =
+          body && typeof body.state === "string"
+            ? body.state
+            : body && typeof body.agentState === "string"
+              ? body.agentState
+              : body && typeof body.startup?.phase === "string"
+                ? body.startup.phase
+                : body?.ready === true
+                  ? "running"
+                  : null;
+        if (body && typeof state === "string") {
           lastBody = body;
-          debugLog(`/api/status state=${body.state}`);
-          if (READY_STATES.has(body.state)) {
+          debugLog(`/api/health state=${state}`);
+          if (READY_STATES.has(state)) {
             return body;
           }
-          if (FAILED_STATES.has(body.state)) {
+          if (FAILED_STATES.has(state)) {
             throw new Error(
-              `Agent reached terminal state="${body.state}" before becoming ready: ${JSON.stringify(body).slice(0, 200)}`,
+              `Agent reached terminal state="${state}" before becoming ready: ${JSON.stringify(body).slice(0, 200)}`,
             );
           }
           // "starting" / "restarting" / unknown — keep polling.
@@ -317,6 +328,11 @@ function assertReplyOk(label, outcome) {
         "Either an actual provider throw is happening or Phase 4's split regressed.",
     );
   }
+  if (reply.trim() === TRANSIENT_FAILURE_TEXT) {
+    throw new Error(
+      `${label}: chat reply is the generic transient-failure fallback (${JSON.stringify(reply)}); fresh installs without credentials should return the structured no_provider gate.`,
+    );
+  }
   if (reply.trim().length === 0) {
     throw new Error(`${label}: chat reply was empty`);
   }
@@ -343,7 +359,6 @@ async function reset(baseUrl) {
       `/api/agent/reset HTTP ${res.status}: ${text.slice(0, 200)}`,
     );
   }
-  throw lastErr instanceof Error ? lastErr : new Error(String(lastErr));
 }
 
 async function _requestReset(baseUrl) {
@@ -436,6 +451,8 @@ const PROVIDER_ENV_KEYS = [
   "OPENAI_API_KEY",
   "OPENAI_ORGANIZATION",
   "OPENAI_BASE_URL",
+  "OPENAI_EMBEDDING_MODEL",
+  "OPENAI_EMBEDDING_DIMENSIONS",
   "OPENAI_LARGE_MODEL",
   "OPENAI_SMALL_MODEL",
   // Anthropic
@@ -454,6 +471,11 @@ const PROVIDER_ENV_KEYS = [
   "CODEX_API_KEY",
   "CLAUDE_CODE_API_KEY",
   // Misc commonly-set provider knobs
+  "EMBEDDING_PROVIDER",
+  "TEXT_PROVIDER",
+  "TEXT_EMBEDDING_MODEL",
+  "LOCAL_EMBEDDING_MODEL",
+  "LOCAL_EMBEDDING_DIMENSIONS",
   "OPENROUTER_API_KEY",
   "GROQ_API_KEY",
   "MISTRAL_API_KEY",
@@ -494,7 +516,7 @@ async function main() {
         // false to keep the n8n child off the smoke critical path on dev
         // machines whose Node version isn't supported by n8n LTS.
         n8n: { enabled: false, localEnabled: false },
-        meta: { onboardingComplete: false },
+        meta: { firstRunComplete: false },
       },
       null,
       2,

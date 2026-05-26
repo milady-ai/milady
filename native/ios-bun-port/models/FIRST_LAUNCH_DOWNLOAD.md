@@ -42,9 +42,9 @@ resourceValues.isExcludedFromBackup = true
 try fileURL.setResourceValues(resourceValues)
 ```
 
-## Onboarding flow
+## First-run flow
 
-A three-screen onboarding sequence runs the first time the app is
+A three-screen first-run sequence runs the first time the app is
 launched with no valid model on disk:
 
 ### Screen 1 — Welcome
@@ -170,7 +170,7 @@ After the file lands and is marked excluded-from-backup, write
 
 The chat UI reads this on every boot before calling `llama_load_model`.
 If the file is missing, the size mismatches, or the SHA fails, the
-onboarding flow re-runs.
+first-run download runs again.
 
 ## Error states
 
@@ -205,7 +205,7 @@ LLM-call traces.
 
 ## Permission to skip download
 
-Power users (and CI smoke tests) can bypass the onboarding download
+Power users (and CI smoke tests) can bypass the first-run download
 by side-loading the file via Finder → iTunes File Sharing or by running
 `download-first-light.sh` on a dev build. The app's boot sequence
 checks for a valid `first-light.gguf` first (whether bundled or in

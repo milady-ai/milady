@@ -101,8 +101,8 @@ declare module "@elizaos/app-core" {
     listener: (payload: unknown) => void;
   }): () => void;
 
-  // Onboarding / launch-connection / patch helpers.
-  export function applyForceFreshOnboardingReset(...args: unknown[]): void;
+  // First-run / launch-connection / patch helpers.
+  export function applyForceFreshFirstRunReset(...args: unknown[]): void;
   // `applyLaunchConnection` returns the resolved connection record so main.tsx
   // can dispatch a CONNECT_EVENT with the resolved apiBase / token. Shape is
   // narrowed enough to satisfy the destructuring at the call site without
@@ -119,13 +119,13 @@ declare module "@elizaos/app-core" {
   export function installDesktopPermissionsClientPatch(
     ...args: unknown[]
   ): void;
-  export function installForceFreshOnboardingClientPatch(
+  export function installForceFreshFirstRunClientPatch(
     ...args: unknown[]
   ): void;
   export function installLocalProviderCloudPreferencePatch(
     ...args: unknown[]
   ): void;
-  export function shouldInstallMainWindowOnboardingPatches(
+  export function shouldInstallMainWindowFirstRunPatches(
     ...args: unknown[]
   ): boolean;
 
@@ -233,9 +233,9 @@ declare module "@elizaos/app-core/api" {
   export type WhitelistStatus = unknown;
 }
 
-declare module "@elizaos/shared/onboarding-presets" {
+declare module "@elizaos/shared/character-presets" {
   // Minimal shape needed by character-catalog.ts and main.tsx.
-  // buildElizaCharacterCatalog is the real export from onboarding-presets.ts;
+  // buildElizaCharacterCatalog is the real export from character-presets.ts;
   // the dist publish may lag the workspace source, so it is shimmed here.
   export interface StylePreset {
     name: string;

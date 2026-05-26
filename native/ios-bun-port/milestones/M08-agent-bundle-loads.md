@@ -20,7 +20,7 @@
 - [ ] `curl http://127.0.0.1:31337/api/agents` (called from the WKWebView) returns valid JSON.
 - [ ] Agent's `startEliza()` returns a runtime object with all expected services registered.
 - [ ] All `node:*` imports resolve (Bun's built-in compat handles them).
-- [ ] PGlite opens its database file at `Documents/.milady/db.pglite`.
+- [ ] PGlite opens its database file at `<stateDir>/workspace/.elizadb`.
 - [ ] Plugin auto-resolution via `STATIC_ELIZA_PLUGINS` succeeds for the core plugin set.
 
 ## Pre-flight work

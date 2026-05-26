@@ -14,7 +14,7 @@
  *    crash-loops: "API exited with code 1 — relaunching".
  *
  * 2. **Stale PGlite lock with no holder.** Crash-killed Bun processes
- *    leave `.eliza/.elizadb/eliza-pglite.lock` behind. PGlite refuses
+ *    leave `.elizadb/eliza-pglite.lock` behind. PGlite refuses
  *    to open the data dir even though nothing is actually using it.
  *
  * Safety: lock removal is gated on `lsof` showing zero open handles
@@ -31,12 +31,13 @@ import path from "node:path";
 
 const HOME = os.homedir();
 
-// PGlite data dir resolution mirrors `eliza/packages/core/src/utils/paths.ts`:
+// PGlite data dir resolution mirrors the runtime state-dir defaults:
 //   PGLITE_DATA_DIR (full path) → ELIZA_DATABASE_DIR (full path)
-//   → (ELIZA_DATA_DIR || process.cwd() + "/.eliza") + "/.elizadb"
+//   → ELIZA_DATA_DIR/.elizadb
+//   → ELIZA_STATE_DIR/workspace/.elizadb
+//   → ~/.local/state/eliza/workspace/.elizadb
 // We collect every candidate we can derive so a stale lock from any
-// previous data-dir layout (project-relative cwd, ~/.eliza legacy)
-// gets swept on preflight.
+// previous data-dir layout gets swept on preflight.
 function resolveCandidateDataDirs() {
   const candidates = new Set();
   if (process.env.PGLITE_DATA_DIR) candidates.add(process.env.PGLITE_DATA_DIR);
@@ -46,7 +47,17 @@ function resolveCandidateDataDirs() {
   const baseDataDir =
     process.env.ELIZA_DATA_DIR || path.join(process.cwd(), ".eliza");
   candidates.add(path.join(baseDataDir, ".elizadb"));
-  // Legacy fallback — older builds wrote into the user-home `.eliza`.
+  const xdgStateHome =
+    process.env.XDG_STATE_HOME || path.join(HOME, ".local", "state");
+  const stateNamespace = process.env.ELIZA_NAMESPACE || "eliza";
+  const stateRoot =
+    process.env.ELIZA_STATE_DIR || path.join(xdgStateHome, stateNamespace);
+  candidates.add(path.join(stateRoot, "workspace", ".elizadb"));
+  candidates.add(path.join(xdgStateHome, "milady", "workspace", ".elizadb"));
+  candidates.add(path.join(stateRoot, "workspace", ".eliza", ".elizadb"));
+  candidates.add(
+    path.join(xdgStateHome, "milady", "workspace", ".eliza", ".elizadb"),
+  );
   candidates.add(path.join(HOME, ".eliza", ".elizadb"));
   return [...candidates];
 }

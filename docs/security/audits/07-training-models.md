@@ -9,7 +9,7 @@
 
 The Eliza monorepo implements a **production-grade training pipeline** (`packages/training`) with native privacy filtering, HuggingFace artifact management, and quantization infrastructure. However, **critical SOC2 compliance gaps** exist around customer data handling, artifact integrity verification, and training infrastructure access control.
 
-**Key Finding:** Training uses **user-generated trajectories** collected nightly from the Eliza runtime (`~/.eliza/training/datasets/<YYYY-MM-DD>/`). While a **local privacy filter** is implemented, **no explicit consent mechanism** is documented, and **no data lineage tracking** connects trained models back to their original data sources for customer/DPA compliance.
+**Key Finding:** Training uses **user-generated trajectories** collected nightly from the Eliza runtime (`~/.local/state/eliza/training/datasets/<YYYY-MM-DD>/`). While a **local privacy filter** is implemented, **no explicit consent mechanism** is documented, and **no data lineage tracking** connects trained models back to their original data sources for customer/DPA compliance.
 
 ---
 
@@ -18,7 +18,7 @@ The Eliza monorepo implements a **production-grade training pipeline** (`package
 ### 1. **NO Explicit Customer Consent / Data Use Agreement (CC6.1, PI1.1-PI1.5, C1.1)**
 
 **Finding:**  
-- Nightly trajectory exports are collected from running Eliza instances into `~/.eliza/training/datasets/`.
+- Nightly trajectory exports are collected from running Eliza instances into `~/.local/state/eliza/training/datasets/`.
 - `datasets.yaml` lists `eliza-nightly-*` sources as **proprietary** but does **not document**:
   - Whether end-users opted into trajectory collection for training
   - Whether a Data Processing Agreement (DPA) exists with customers
@@ -121,8 +121,8 @@ Token compromise allows unauthorized model uploads or GPU rental.
 ### 5. **Optimized Prompts Writable Without Integrity Check (CC6.8, Inference-time risk)**
 
 **Finding:**  
-- DSPy/MIPRO optimized prompts are written to `~/.eliza/optimized-prompts/<task>/` as JSON.
-- **No write permission check**: any process that can write to `~/.eliza/` can poison prompts.
+- DSPy/MIPRO optimized prompts are written to `~/.local/state/eliza/optimized-prompts/<task>/` as JSON.
+- **No write permission check**: any process that can write to `~/.local/state/eliza/` can poison prompts.
 - **No signature or checksum** of optimized prompt artifacts.
 - At inference time, the runtime loads from `current` symlink without validation.
 - Malicious actor with local filesystem access can substitute an adversarial prompt.
@@ -140,7 +140,7 @@ Attacker can rewrite prompts to exfiltrate data, change model behavior, or cause
 - [ ] Implement HMAC-SHA256 on optimized prompt JSON (`"hmac": sha256(json_content, key)`)
 - [ ] Load key from secure store (not hardcoded)
 - [ ] Verify HMAC on `getPrompt()` before returning artifact (line 656–676)
-- [ ] Restrict write access to `~/.eliza/optimized-prompts/` to trusted optimizer process only
+- [ ] Restrict write access to `~/.local/state/eliza/optimized-prompts/` to trusted optimizer process only
 - [ ] Add audit logging of prompt mutations
 
 ---
@@ -260,13 +260,13 @@ Attacker can submit a PR with a malicious scenario that exfils training data or 
 ### 11. **Nightly Trajectory Exports: No Retention / Deletion Policy (PI1.3, PI1.4)**
 
 **Finding:**  
-- `~/.eliza/training/datasets/<YYYY-MM-DD>/` accumulates indefinitely.
+- `~/.local/state/eliza/training/datasets/<YYYY-MM-DD>/` accumulates indefinitely.
 - **No documented retention period** (e.g., "delete after 30 days" or "retain for 1 year").
 - **No automated purge** of old export directories.
 
 **Remediation:**
 - [ ] Document retention policy in AGENTS.md (recommend 90 days for compliance)
-- [ ] Implement automated deletion cron (e.g., `find ~/.eliza/training/datasets -mtime +90 -delete`)
+- [ ] Implement automated deletion cron (e.g., `find ~/.local/state/eliza/training/datasets -mtime +90 -delete`)
 - [ ] Log deletions for audit trail
 
 ---

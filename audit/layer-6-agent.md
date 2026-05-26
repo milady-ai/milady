@@ -316,7 +316,7 @@ Deep audit is "I read the relevant body and walked the 8 axes."
 - [!] `eliza/packages/agent/src/runtime/prompt-optimization.ts` — 989
   LOC. Defer deep read.
 - [!] `eliza/packages/agent/src/runtime/first-time-setup.ts` — 826 LOC.
-  Defer deep read; relevant to MASTER.md Phase 2 onboarding work.
+  Defer deep read; relevant to MASTER.md Phase 2 first-run work.
 - [!] `eliza/packages/agent/src/runtime/index.ts` — 18 LOC. **dedup:
   every export is already covered by `src/index.ts`.** If no consumer
   imports `@elizaos/agent/runtime` as a sub-path, delete this file.
@@ -363,7 +363,7 @@ Deep audit is "I read the relevant body and walked the 8 axes."
   modules without subtracting from the parent. Either complete the
   split (move all helpers into the sub-files and reduce
   `server-helpers.ts` to a barrel) or undo the split.
-- [!] `eliza/packages/agent/src/api/onboarding-routes.ts` — 845 LOC.
+- [!] `eliza/packages/agent/src/api/first-run-routes.ts` — 845 LOC.
   Highly relevant to MASTER.md Phase 2. Deserves a deep audit when
   Phase 2 work resumes.
 - [!] `eliza/packages/agent/src/api/cloud-routes.ts` — 975 LOC.

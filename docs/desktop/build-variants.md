@@ -48,9 +48,9 @@ You have two ways forward:
 
 1. Install the other build (Direct from milady.so, or Store from your OS's
    store).
-2. Open it and you'll be greeted by onboarding.
+2. Open it and you'll be greeted by first-run.
 3. Pick **"Import settings from existing Milady installation"** and point it
-   at your existing `~/.milady` (or whichever folder your other build uses).
+   at your existing `~/.local/state/milady` (or whichever folder your other build uses).
 
 The import is non-destructive — it copies your settings, agents, and skills
 into the new install without overwriting anything you've already created
