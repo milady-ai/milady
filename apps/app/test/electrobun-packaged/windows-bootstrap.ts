@@ -110,32 +110,9 @@ export function isPackagedRendererBootstrapProbeReady(
 export function hasPackagedRendererBootstrapRequests(
   requests: readonly string[],
 ): boolean {
-  if (hasRequestForPath(requests, "/api/status")) {
-    return true;
-  }
-
-  if (hasRequestForPath(requests, "/api/first-run/status")) {
-    return true;
-  }
-
-  // First-run startup can pause after the renderer fetches config but before
-  // it reaches stream/drop endpoints. /api/config is renderer-owned in this
-  // packaged bootstrap path; main-process heartbeat traffic does not hit it.
-  if (hasRequestForPath(requests, "/api/config")) {
-    return true;
-  }
-
-  // On a fresh install the renderer can stay in first-run setup before chat
-  // endpoints are reached. The main process still fires heartbeat menu refresh
-  // immediately on launch, which hits /api/triggers. Accepting this as a valid
-  // bootstrap signal proves the packaged app started and is communicating with
-  // the overridden API base (MILADY_DESKTOP_TEST_API_BASE).
-  if (hasRequestForPath(requests, "/api/triggers")) {
-    return true;
-  }
-
   return (
-    hasRequestForPath(requests, "/api/drop/status") ||
-    hasRequestForPath(requests, "/api/stream/settings")
+    hasRequestForPath(requests, "/api/status") ||
+    hasRequestForPath(requests, "/api/first-run/status") ||
+    hasRequestForPath(requests, "/api/config")
   );
 }

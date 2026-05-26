@@ -36,4 +36,16 @@ describe("windows packaged bootstrap probe", () => {
       hasPackagedRendererBootstrapRequests(["GET /api/first-run/status"]),
     ).toBe(true);
   });
+
+  it("rejects main-process heartbeat requests as renderer bootstrap proof", () => {
+    expect(hasPackagedRendererBootstrapRequests(["GET /api/triggers"])).toBe(
+      false,
+    );
+    expect(
+      hasPackagedRendererBootstrapRequests(["GET /api/stream/settings"]),
+    ).toBe(false);
+    expect(hasPackagedRendererBootstrapRequests(["GET /api/drop/status"])).toBe(
+      false,
+    );
+  });
 });
