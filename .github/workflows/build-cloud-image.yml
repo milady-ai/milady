@@ -60,10 +60,9 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  # Pin upstream eliza checkout to a known-good SHA. Upstream develop landed a
-  # cloud-migration squash that broke milady CI; pinning here keeps reproducibility.
-  # Bump after upstream stabilizes (or override with MILADY_ELIZA_REF env var).
-  MILADY_ELIZA_REF: "f7a4e0bc50f966174ea42c41db787359ca6d8e67"
+  # Pin the canonical elizaOS/eliza checkout to the latest verified develop SHA.
+  # Override with MILADY_ELIZA_REF only for a specific upstream release test.
+  MILADY_ELIZA_REF: "f4991bc6059514f10a0fc1a8ec3f199478c415ae"
   REGISTRY: ghcr.io
   IMAGE_NAME: milady-ai/milady/agent
   MILADY_SKIP_LOCAL_UPSTREAMS: "1"

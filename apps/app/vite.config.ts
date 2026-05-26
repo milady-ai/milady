@@ -2047,6 +2047,15 @@ function generateEsbuildStub(): string {
   return generateNamedExportStub(ESBUILD_STUB_NAMES);
 }
 
+function generateDrizzleOrmStub(): string {
+  return [
+    "const noop = () => {};",
+    "const stubProxy = new Proxy(noop, { get: () => stubProxy, apply: () => stubProxy });",
+    "export default stubProxy;",
+    "export { stubProxy as boolean, stubProxy as integer, stubProxy as bigint, stubProxy as text, stubProxy as varchar, stubProxy as char, stubProxy as serial, stubProxy as bigserial, stubProxy as smallint, stubProxy as smallserial, stubProxy as decimal, stubProxy as numeric, stubProxy as real, stubProxy as doublePrecision, stubProxy as date, stubProxy as time, stubProxy as timestamp, stubProxy as interval, stubProxy as uuid, stubProxy as json, stubProxy as jsonb, stubProxy as pgTable, stubProxy as pgEnum, stubProxy as pgSchema, stubProxy as pgView, stubProxy as pgMaterializedView, stubProxy as pgSequence, stubProxy as foreignKey, stubProxy as primaryKey, stubProxy as uniqueIndex, stubProxy as unique, stubProxy as index, stubProxy as check, stubProxy as customType, stubProxy as relations, stubProxy as one, stubProxy as many, stubProxy as eq, stubProxy as ne, stubProxy as gt, stubProxy as gte, stubProxy as lt, stubProxy as lte, stubProxy as and, stubProxy as or, stubProxy as not, stubProxy as inArray, stubProxy as notInArray, stubProxy as isNull, stubProxy as isNotNull, stubProxy as like, stubProxy as ilike, stubProxy as notLike, stubProxy as between, stubProxy as exists, stubProxy as notExists, stubProxy as sql, stubProxy as desc, stubProxy as asc, stubProxy as count, stubProxy as sum, stubProxy as avg, stubProxy as min, stubProxy as max, stubProxy as drizzle, stubProxy as getTableConfig, stubProxy as getTableName, stubProxy as is, stubProxy as alias, stubProxy as except, stubProxy as union, stubProxy as unionAll, stubProxy as intersect, stubProxy as raw, stubProxy as placeholder, stubProxy as param, stubProxy as Column, stubProxy as Table, stubProxy as TableAliasProxy };",
+  ].join("\n");
+}
+
 const NATIVE_MODULE_STUB_GENERATORS = new Map<
   string,
   (strippedId: string) => string
@@ -2061,6 +2070,7 @@ const NATIVE_MODULE_STUB_GENERATORS = new Map<
   ["@elizaos/plugin-elizacloud", generatePluginElizacloudStub],
   ["@elizaos/plugin-local-inference", generatePluginLocalInferenceStub],
   ["esbuild", generateEsbuildStub],
+  ["drizzle-orm", generateDrizzleOrmStub],
   // @node-rs/argon2's server-side Rust binding is referenced by
   // app-core's password-hashing helpers. Renderer never executes them
   // (auth happens in the API child); stub the named exports.
@@ -2183,6 +2193,7 @@ function nativeModuleStubPlugin(): Plugin {
     // happens server-side in the API child anyway.
     "@node-rs/argon2-wasm32-wasi",
     "@node-rs/argon2",
+    "drizzle-orm",
     // esbuild is a build-time dep that drizzle-kit and friends pull in
     // transitively. Its `lib/main.js` does `process.versions.node.split(".")`
     // at module init, which throws in the renderer (process.versions.node

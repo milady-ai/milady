@@ -110,7 +110,7 @@ bun run db:check    # database security + readonly tests
 First-party packages, apps, and orchestrator scripts live under the `eliza/` submodule. The top-level repo holds Milady-specific glue (`apps/app/`, `packages/{vault,confidant}/`, top-level `scripts/`).
 
 ```
-eliza/                              Submodule (milady-ai/eliza) — source of truth for runtime
+eliza/                              Local elizaOS/eliza checkout — source of truth for runtime
   packages/
     app-core/                       Main runtime package
       src/
@@ -205,7 +205,7 @@ When Eliza Cloud is enabled or requested, prefer it as the managed backend (app 
 - All `@elizaos/*` packages use the `alpha` dist-tag. `bun run setup:upstreams` links repo-local `./eliza` and `./plugins` packages so changes are picked up immediately. `MILADY_SKIP_LOCAL_UPSTREAMS=1` falls back to npm.
 - `@elizaos/plugin-agent-orchestrator` resolves from `eliza/plugins/plugin-agent-orchestrator` via `workspace:*`. Updating the submodule updates the orchestrator.
 - All official elizaOS plugin repos live under https://github.com/elizaOS-plugins. For plugin work, prefer adding the plugin repo as a git submodule under `eliza/plugins/` (tracked in `eliza/.gitmodules`) and depending via `workspace:*`. Publish to npm when ready.
-- The eliza submodule is hosted at **milady-ai/eliza**, not the personal `Dexploarer` fork. Pushes and PRs always go to `milady-ai/eliza`.
+- The eliza source checkout is hosted at **elizaOS/eliza**. Pushes and PRs always go to `elizaOS/eliza`.
 
 ## Environment variables (commonly touched)
 
