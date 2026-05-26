@@ -292,7 +292,7 @@ installDesktopPermissionsClientPatch(client);
 window.__ELIZA_APP_CHARACTER_EDITOR__ = CharacterEditor;
 getAppWindow()[BRANDED_WINDOW_KEYS.characterEditor] = CharacterEditor;
 
-import { getStylePresets } from "@elizaos/shared/character-presets";
+import { getStylePresets } from "@elizaos/shared/onboarding-presets";
 
 // Derive VRM roster from STYLE_PRESETS so character names stay in one place.
 const APP_STYLE_PRESETS = getStylePresets();

@@ -449,6 +449,23 @@ function resolveLocalSharedAliases(): Alias[] {
   return aliases;
 }
 
+function resolveLocalSharedCompatAliases(): Alias[] {
+  if (!hasLocalElizaWorkspace) return [];
+
+  const characterPresetsEntry = path.join(
+    localElizaRoot,
+    "packages/shared/src/character-presets.ts",
+  );
+  if (!fs.existsSync(characterPresetsEntry)) return [];
+
+  return [
+    {
+      find: /^@elizaos\/shared\/onboarding-presets$/,
+      replacement: characterPresetsEntry,
+    },
+  ];
+}
+
 function resolveBuiltLocalSharedAliases(): Alias[] {
   if (!hasLocalElizaWorkspace) return [];
 
@@ -2694,6 +2711,7 @@ export default defineConfig({
       // Published-only builds should resolve normal @elizaos package exports.
       ...resolveLocalUiAliases(),
       ...resolveLocalVaultAliases(),
+      ...resolveLocalSharedCompatAliases(),
       ...resolveLocalSharedAliases(),
       ...resolveLocalAppCoreAliases(),
     ],
