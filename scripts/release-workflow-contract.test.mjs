@@ -690,15 +690,6 @@ test("package-mode production build reapplies native app-core patch before Vite"
   assert.match(nativePatch, /eliza",\s*"packages",\s*"app-core"/);
 });
 
-test("package-mode app web build reapplies window shell patch before Vite", () => {
-  const appBuild = fs.readFileSync("scripts/run-app-web-build.mjs", "utf8");
-
-  assert.match(
-    appBuild,
-    /patch-elizaos-app-core-native-browser-package\.mjs[\s\S]*patch-elizaos-app-core-windows-shell\.mjs[\s\S]*vite\.js", "build"/,
-  );
-});
-
 test("Electrobun macOS release keeps one command path for both CPU architectures", () => {
   const electrobun = workflow("release-electrobun.yml");
 

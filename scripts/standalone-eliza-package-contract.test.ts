@@ -137,9 +137,8 @@ test("root build resolves app-core entries from packages by default", () => {
   assert.match(read("scripts/run-app-web-build.mjs"), /isLocalElizaDisabled/);
   assert.match(
     read("scripts/run-app-web-build.mjs"),
-    /patch-elizaos-app-core-native-browser-package\.mjs/,
+    /patch-elizaos-app-core-native-browser-package\.mjs[\s\S]*patch-elizaos-app-core-windows-shell\.mjs[\s\S]*vite\.js", "build"/,
   );
-  assert.match(read("scripts/run-app-web-build.mjs"), /vite\.js", "build"/);
   assert.match(resolver, /preferLocal && existsSync/);
   assert.match(runner, /MILADY_REPO_ROOT/);
   assert.match(tsdownConfig, /"packages"/);
