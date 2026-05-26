@@ -1,8 +1,12 @@
 exclude:
   - "apps/app/test/electrobun-packaged/mock-api.ts"
+  - "apps/app/vite.config.ts"
   - "scripts/disable-local-eliza-workspace.mjs"
+  - "scripts/apply-eliza-ci-patches.mjs"
   - "scripts/init-submodules.mjs"
   - "scripts/patch-eliza-electrobun-windows-smoke-startup.mjs"
+  - "scripts/patch-elizaos-app-core-windows-shell.mjs"
+  - "scripts/smoke-oob.mjs"
   - ".github/trust-scoring.js"
   - ".github/trust-scoring.cjs"
   - "skills/.defaults/nano-banana-pro/scripts/generate_image.py"

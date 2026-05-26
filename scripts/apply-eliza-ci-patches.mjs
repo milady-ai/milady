@@ -557,6 +557,71 @@ const requiredElectrobunConfigSnippets`,
   return patched;
 }
 
+function patchValidateRegressionMatrix(raw) {
+  let patched = raw;
+
+  if (!patched.includes("MILADY_REPO_ROOT")) {
+    patched = patched.replace(
+      "function findRepoRoot(startDir) {\n",
+      `function findRepoRoot(startDir) {
+  const explicitRoot = process.env.MILADY_REPO_ROOT?.trim();
+  if (
+    explicitRoot &&
+    fs.existsSync(path.join(explicitRoot, "package.json")) &&
+    fs.existsSync(path.join(explicitRoot, ".github", "workflows"))
+  ) {
+    return explicitRoot;
+  }
+
+`,
+    );
+  }
+
+  if (!patched.includes("function resolveRepoRelativePath")) {
+    patched = patched.replace(
+      `function normalisePath(filePath) {
+  return filePath.split(path.sep).join("/");
+}
+`,
+      `function normalisePath(filePath) {
+  return filePath.split(path.sep).join("/");
+}
+
+function resolveRepoRelativePath(relativePath) {
+  const directPath = path.join(REPO_ROOT, relativePath);
+  if (fs.existsSync(directPath)) return relativePath;
+
+  if (relativePath.startsWith("packages/docs/")) {
+    const miladyDocsPath = relativePath.replace(/^packages\\/docs\\//, "docs/");
+    if (fs.existsSync(path.join(REPO_ROOT, miladyDocsPath))) {
+      return miladyDocsPath;
+    }
+  }
+
+  const nestedElizaPath = path.join("eliza", relativePath);
+  if (fs.existsSync(path.join(REPO_ROOT, nestedElizaPath))) {
+    return nestedElizaPath;
+  }
+
+  return relativePath;
+}
+`,
+    );
+  }
+
+  patched = patched.replace(
+    '  return fs.readFileSync(path.join(REPO_ROOT, relativePath), "utf8");',
+    '  return fs.readFileSync(path.join(REPO_ROOT, resolveRepoRelativePath(relativePath)), "utf8");',
+  );
+
+  patched = patched.replace(
+    "  const checklistPath = path.join(REPO_ROOT, manifest.manualChecklistDoc);",
+    "  const checklistPath = path.join(\n    REPO_ROOT,\n    resolveRepoRelativePath(manifest.manualChecklistDoc),\n  );",
+  );
+
+  return patched;
+}
+
 function patchStartApiServerCatchBlock(raw) {
   if (raw.includes("console.error(apiErrMsg)")) {
     return raw;
@@ -1140,6 +1205,18 @@ function applyReleaseSourcePatches() {
     path.join(elizaDir, "packages", "app-core", "scripts", "release-check.ts"),
     patchAppCoreReleaseCheck,
     "app-core release-check Milady wrappers",
+  );
+
+  replaceFileText(
+    path.join(
+      elizaDir,
+      "packages",
+      "app-core",
+      "scripts",
+      "validate-regression-matrix.mjs",
+    ),
+    patchValidateRegressionMatrix,
+    "app-core regression matrix Milady root",
   );
 
   replaceFileText(

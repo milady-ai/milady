@@ -67,6 +67,9 @@ if (!isLocalElizaDisabled()) {
   await run(process.execPath, [
     "scripts/patch-elizaos-app-core-native-browser-package.mjs",
   ]);
+  await run(process.execPath, [
+    "scripts/patch-elizaos-app-core-windows-shell.mjs",
+  ]);
   await run(
     process.execPath,
     [viteCli, "build"],

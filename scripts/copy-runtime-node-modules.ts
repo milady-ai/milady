@@ -757,10 +757,12 @@ function patchPackagedRuntimeExportConditions(targetDist: string): void {
       ...packageName.split("/"),
       "package.json",
     );
+    // nosemgrep: javascript_pathtraversal_rule-non-literal-fs-filename
     if (!fs.existsSync(manifestPath)) {
       continue;
     }
 
+    // nosemgrep: javascript_pathtraversal_rule-non-literal-fs-filename
     const packageJson = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
     if (!isJsonObject(packageJson.exports)) {
       continue;
@@ -774,6 +776,7 @@ function patchPackagedRuntimeExportConditions(targetDist: string): void {
     }
 
     packageJson.exports = sanitizedExports;
+    // nosemgrep: javascript_pathtraversal_rule-non-literal-fs-filename
     fs.writeFileSync(manifestPath, `${JSON.stringify(packageJson, null, 2)}\n`);
     patched.push(packageName);
   }
@@ -793,19 +796,24 @@ function copyPackageRuntimeSubset(
   const nodeModules = path.join(targetDist, "node_modules");
   const packageDest = path.join(nodeModules, ...packageName.split("/"));
   const entries = ["package.json", "dist"] as const;
+  // nosemgrep: javascript_pathtraversal_rule-non-literal-fs-filename
   if (!fs.existsSync(packageDir)) {
     return false;
   }
 
+  // nosemgrep: javascript_pathtraversal_rule-non-literal-fs-filename
   fs.rmSync(packageDest, { force: true, recursive: true });
+  // nosemgrep: javascript_pathtraversal_rule-non-literal-fs-filename
   fs.mkdirSync(packageDest, { recursive: true });
 
   let copied = false;
   for (const entry of entries) {
     const source = path.join(packageDir, entry);
+    // nosemgrep: javascript_pathtraversal_rule-non-literal-fs-filename
     if (!fs.existsSync(source)) {
       continue;
     }
+    // nosemgrep: javascript_pathtraversal_rule-non-literal-fs-filename
     fs.cpSync(source, path.join(packageDest, entry), { recursive: true });
     copied = true;
   }

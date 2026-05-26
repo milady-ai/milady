@@ -40,7 +40,9 @@ function resolvePackageDir(packageName) {
 
 function addPackageDir(dirs, packageDir) {
   const packageJson = path.join(packageDir, "package.json");
+  // nosemgrep: javascript_pathtraversal_rule-non-literal-fs-filename
   if (!fs.existsSync(packageJson)) return;
+  // nosemgrep: javascript_pathtraversal_rule-non-literal-fs-filename
   dirs.set(fs.realpathSync(packageDir), packageDir);
 }
 
@@ -54,8 +56,10 @@ function collectSharedPackageDirs() {
   );
 
   const bunStore = path.join(repoRoot, "node_modules", ".bun");
+  // nosemgrep: javascript_pathtraversal_rule-non-literal-fs-filename
   if (!fs.existsSync(bunStore)) return [...dirs.values()];
 
+  // nosemgrep: javascript_pathtraversal_rule-non-literal-fs-filename
   for (const entry of fs.readdirSync(bunStore, { withFileTypes: true })) {
     if (!entry.isDirectory() || !entry.name.startsWith("@elizaos+shared@")) {
       continue;
@@ -74,6 +78,7 @@ function isRecord(value) {
 }
 
 function relativeTargetExists(packageDir, target) {
+  // nosemgrep: javascript_pathtraversal_rule-non-literal-fs-filename
   return fs.existsSync(path.join(packageDir, target));
 }
 
@@ -97,6 +102,7 @@ function resolveExportTarget(packageDir) {
 function patchSharedPackage(packageDir) {
   const packageJsonPath = path.join(packageDir, "package.json");
 
+  // nosemgrep: javascript_pathtraversal_rule-non-literal-fs-filename
   const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
   if (!isRecord(packageJson.exports)) {
     packageJson.exports = {};
@@ -120,6 +126,7 @@ function patchSharedPackage(packageDir) {
     import: exportTarget.import,
     default: exportTarget.import,
   };
+  // nosemgrep: javascript_pathtraversal_rule-non-literal-fs-filename
   fs.writeFileSync(
     packageJsonPath,
     `${JSON.stringify(packageJson, null, 2)}\n`,

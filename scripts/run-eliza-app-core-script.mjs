@@ -64,7 +64,10 @@ const child = spawn(
   [resolvedScriptPath, ...scriptArgs],
   {
     cwd: repoRoot,
-    env: process.env,
+    env: {
+      ...process.env,
+      MILADY_REPO_ROOT: process.env.MILADY_REPO_ROOT ?? repoRoot,
+    },
     stdio: "inherit",
   },
 );

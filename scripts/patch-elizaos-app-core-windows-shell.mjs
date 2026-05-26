@@ -245,51 +245,393 @@ function patchEmptyNodeModule(emptyNodeModulePath) {
   return next !== original;
 }
 
+function patchWindowShellRoute(windowShellPath, windowShellTypesPath) {
+  let patched = false;
+
+  const jsOriginal = fs.readFileSync(windowShellPath, "utf8");
+  let jsNext = jsOriginal;
+
+  jsNext = replaceIfPresent(
+    jsNext,
+    `    if (shell === "surface") {`,
+    `    if (shell === "pill") {
+        return { mode: "pill" };
+    }
+    if (shell === "surface") {`,
+  );
+  jsNext = replaceIfPresent(
+    jsNext,
+    `export function isDetachedWindowShell(route) {
+    return route.mode !== "main";
+}`,
+    `export function isDetachedWindowShell(route) {
+    return route.mode !== "main" && route.mode !== "pill";
+}
+export function isPillWindowShell(route) {
+    return route.mode === "pill";
+}`,
+  );
+  jsNext = replaceIfPresent(
+    jsNext,
+    `export function shouldInstallMainWindowOnboardingPatches(route) {
+    return route.mode === "main";
+}`,
+    `export function shouldInstallMainWindowOnboardingPatches(route) {
+    return route.mode === "main";
+}
+export function shouldInstallMainWindowFirstRunPatches(route) {
+    return route.mode === "main";
+}`,
+  );
+  jsNext = replaceIfPresent(
+    jsNext,
+    `    if (route.mode === "main") {
+        throw new Error("Main windows do not have a detached shell target");
+    }`,
+    `    if (route.mode === "main") {
+        throw new Error("Main windows do not have a detached shell target");
+    }
+    if (route.mode === "pill") {
+        throw new Error("Pill windows do not have a detached shell target");
+    }`,
+  );
+  jsNext = replaceIfPresent(
+    jsNext,
+    `    if (route.mode === "main") {
+        return false;
+    }`,
+    `    if (route.mode === "main" || route.mode === "pill") {
+        return false;
+    }`,
+  );
+
+  ensureContains(jsNext, 'return { mode: "pill" };', windowShellPath);
+  ensureContains(
+    jsNext,
+    "export function shouldInstallMainWindowFirstRunPatches(route) {",
+    windowShellPath,
+  );
+  ensureContains(
+    jsNext,
+    'return route.mode !== "main" && route.mode !== "pill";',
+    windowShellPath,
+  );
+
+  if (jsNext !== jsOriginal) {
+    fs.writeFileSync(windowShellPath, jsNext);
+    patched = true;
+  }
+
+  const dtsOriginal = fs.readFileSync(windowShellTypesPath, "utf8");
+  let dtsNext = dtsOriginal;
+
+  dtsNext = replaceIfPresent(
+    dtsNext,
+    `} | {
+    mode: "surface";
+    tab: DetachedSurfaceTab;
+};`,
+    `} | {
+    mode: "surface";
+    tab: DetachedSurfaceTab;
+} | {
+    mode: "pill";
+};`,
+  );
+  dtsNext = replaceIfPresent(
+    dtsNext,
+    `export declare function isDetachedWindowShell(route: WindowShellRoute): route is Exclude<WindowShellRoute, {
+    mode: "main";
+}>;`,
+    `export declare function isDetachedWindowShell(route: WindowShellRoute): route is Exclude<WindowShellRoute, {
+    mode: "main";
+} | {
+    mode: "pill";
+}>;
+export declare function isPillWindowShell(route: WindowShellRoute): route is Extract<WindowShellRoute, {
+    mode: "pill";
+}>;`,
+  );
+  dtsNext = replaceIfPresent(
+    dtsNext,
+    "export declare function shouldInstallMainWindowOnboardingPatches(route: WindowShellRoute): boolean;",
+    "export declare function shouldInstallMainWindowOnboardingPatches(route: WindowShellRoute): boolean;\nexport declare function shouldInstallMainWindowFirstRunPatches(route: WindowShellRoute): boolean;",
+  );
+
+  ensureContains(dtsNext, 'mode: "pill";', windowShellTypesPath);
+  ensureContains(
+    dtsNext,
+    "shouldInstallMainWindowFirstRunPatches",
+    windowShellTypesPath,
+  );
+
+  if (dtsNext !== dtsOriginal) {
+    fs.writeFileSync(windowShellTypesPath, dtsNext);
+    patched = true;
+  }
+
+  return patched;
+}
+
+const firstRunResetSource = `
+const SETUP_STEP_STORAGE_KEY = "eliza:setup:step";
+const FIRST_RUN_COMPLETE_STORAGE_KEY = "eliza:first-run-complete";
+const FORCE_FRESH_FIRST_RUN_STORAGE_KEY = "elizaos:first-run:force-fresh";
+const FIRST_RUN_PATCH_STATE = Symbol.for("elizaos.forceFreshFirstRunPatch");
+export function isForceFreshFirstRunEnabled(storage) {
+    const resolvedStorage = getStorage(storage);
+    if (!resolvedStorage) {
+        return false;
+    }
+    try {
+        return resolvedStorage.getItem(FORCE_FRESH_FIRST_RUN_STORAGE_KEY) === "1";
+    }
+    catch {
+        return false;
+    }
+}
+export function enableForceFreshFirstRun(storage) {
+    const resolvedStorage = getStorage(storage);
+    if (!resolvedStorage) {
+        return;
+    }
+    try {
+        resolvedStorage.setItem(FORCE_FRESH_FIRST_RUN_STORAGE_KEY, "1");
+    }
+    catch {
+    }
+}
+export function clearForceFreshFirstRun(storage) {
+    const resolvedStorage = getStorage(storage);
+    if (!resolvedStorage) {
+        return;
+    }
+    try {
+        resolvedStorage.removeItem(FORCE_FRESH_FIRST_RUN_STORAGE_KEY);
+    }
+    catch {
+    }
+}
+export function applyForceFreshFirstRunReset(args) {
+    const resolvedStorage = getStorage(args?.storage);
+    const resolvedUrl = args?.url ??
+        (typeof window !== "undefined" ? new URL(window.location.href) : null);
+    const resolvedHistory = args?.history ?? (typeof window !== "undefined" ? window.history : null);
+    if (!resolvedUrl?.searchParams.has(RESET_QUERY_PARAM)) {
+        return false;
+    }
+    if (resolvedStorage) {
+        try {
+            resolvedStorage.removeItem(ACTIVE_SERVER_STORAGE_KEY);
+            resolvedStorage.removeItem(SETUP_STEP_STORAGE_KEY);
+            resolvedStorage.removeItem(FIRST_RUN_COMPLETE_STORAGE_KEY);
+            resolvedStorage.setItem(FORCE_FRESH_FIRST_RUN_STORAGE_KEY, "1");
+        }
+        catch {
+        }
+    }
+    if (typeof window !== "undefined") {
+        try {
+            window.localStorage.removeItem("elizaos_api_base");
+            window.sessionStorage.removeItem("elizaos_api_base");
+        }
+        catch {
+        }
+    }
+    resolvedUrl.searchParams.delete(RESET_QUERY_PARAM);
+    resolvedHistory?.replaceState(null, "", resolvedUrl.toString());
+    return true;
+}
+export function installForceFreshFirstRunClientPatch(client, storage) {
+    const patchableClient = client;
+    const existingPatch = patchableClient[FIRST_RUN_PATCH_STATE];
+    if (existingPatch) {
+        return () => { };
+    }
+    const originalGetConfig = client.getConfig.bind(client);
+    const originalGetFirstRunStatus = client.getFirstRunStatus.bind(client);
+    const originalSubmitFirstRun = client.submitFirstRun.bind(client);
+    patchableClient[FIRST_RUN_PATCH_STATE] = {
+        getConfig: client.getConfig,
+        getFirstRunStatus: client.getFirstRunStatus,
+        submitFirstRun: client.submitFirstRun,
+    };
+    client.getConfig = async () => {
+        if (isForceFreshFirstRunEnabled(storage)) {
+            return {};
+        }
+        return originalGetConfig();
+    };
+    client.getFirstRunStatus = async () => {
+        const status = await originalGetFirstRunStatus();
+        if (!isForceFreshFirstRunEnabled(storage)) {
+            return status;
+        }
+        return { ...status, complete: false };
+    };
+    client.submitFirstRun = async (...args) => {
+        await originalSubmitFirstRun(...args);
+        clearForceFreshFirstRun(storage);
+    };
+    return () => {
+        const patchState = patchableClient[FIRST_RUN_PATCH_STATE];
+        if (!patchState) {
+            return;
+        }
+        client.getConfig = patchState.getConfig;
+        client.getFirstRunStatus = patchState.getFirstRunStatus;
+        client.submitFirstRun = patchState.submitFirstRun;
+        delete patchableClient[FIRST_RUN_PATCH_STATE];
+    };
+}
+`;
+
+const firstRunResetTypesSource = `
+type FirstRunClientLike = {
+    getConfig: () => Promise<Record<string, unknown>>;
+    getFirstRunStatus: () => Promise<{ complete: boolean } & Record<string, unknown>>;
+    submitFirstRun: (...args: readonly unknown[]) => Promise<unknown>;
+};
+export declare function isForceFreshFirstRunEnabled(storage?: StorageLike | null): boolean;
+export declare function enableForceFreshFirstRun(storage?: StorageLike | null): void;
+export declare function clearForceFreshFirstRun(storage?: StorageLike | null): void;
+export declare function applyForceFreshFirstRunReset(args?: {
+    url?: URL;
+    storage?: StorageLike | null;
+    history?: HistoryLike | null;
+}): boolean;
+export declare function installForceFreshFirstRunClientPatch(client: FirstRunClientLike, storage?: StorageLike | null): () => void;
+`;
+
+function patchFirstRunReset(onboardingResetPath, onboardingResetTypesPath) {
+  let patched = false;
+
+  const jsOriginal = fs.readFileSync(onboardingResetPath, "utf8");
+  if (!jsOriginal.includes("applyForceFreshFirstRunReset")) {
+    fs.writeFileSync(
+      onboardingResetPath,
+      `${jsOriginal.trimEnd()}\n${firstRunResetSource}`,
+    );
+    patched = true;
+  }
+
+  const dtsOriginal = fs.readFileSync(onboardingResetTypesPath, "utf8");
+  if (!dtsOriginal.includes("applyForceFreshFirstRunReset")) {
+    fs.writeFileSync(
+      onboardingResetTypesPath,
+      `${dtsOriginal.trimEnd()}\n${firstRunResetTypesSource}`,
+    );
+    patched = true;
+  }
+
+  return patched;
+}
+
+function findBunAppCorePackageDirs(primaryDir) {
+  const bunDir = path.join(process.cwd(), "node_modules", ".bun");
+  if (!fs.existsSync(bunDir)) {
+    return [];
+  }
+
+  return fs
+    .readdirSync(bunDir)
+    .filter((entry) => entry.startsWith("@elizaos+app-core@"))
+    .map((entry) =>
+      path.join(bunDir, entry, "node_modules", "@elizaos", "app-core"),
+    )
+    .filter(
+      (candidate) =>
+        candidate !== primaryDir &&
+        fs.existsSync(path.join(candidate, "package.json")),
+    );
+}
+
+function resolvePackagedAppCoreDirs(appCoreDir) {
+  const dirs = [appCoreDir, ...findBunAppCorePackageDirs(appCoreDir)];
+  const seen = new Set();
+  return dirs.filter((dir) => {
+    const real = fs.realpathSync(dir);
+    if (seen.has(real)) return false;
+    seen.add(real);
+    return true;
+  });
+}
+
+function appCorePackagePath(packageDir, relativePath) {
+  return path.join(packageDir, "packages", "app-core", "src", relativePath);
+}
+
 const appCoreDir = resolvePackageDir("@elizaos/app-core");
 if (!appCoreDir) {
   console.warn(`${LOG_PREFIX} @elizaos/app-core is not installed; skipping.`);
   process.exit(0);
 }
 
-const devPlatformPath = path.join(appCoreDir, "scripts", "dev-platform.mjs");
-const walletHydratePath = path.join(
-  appCoreDir,
-  "packages",
-  "app-core",
-  "src",
-  "security",
-  "hydrate-wallet-keys-from-platform-store.js",
-);
-const emptyNodeModulePath = path.join(
-  appCoreDir,
-  "packages",
-  "app-core",
-  "src",
-  "platform",
-  "empty-node-module.js",
-);
+const patchedPackages = [];
+let skippedPackages = 0;
 
-for (const requiredPath of [
-  devPlatformPath,
-  walletHydratePath,
-  emptyNodeModulePath,
-]) {
-  if (!fs.existsSync(requiredPath)) {
-    console.warn(`${LOG_PREFIX} ${requiredPath} does not exist; skipping.`);
-    process.exit(0);
+for (const packageDir of resolvePackagedAppCoreDirs(appCoreDir)) {
+  const devPlatformPath = path.join(packageDir, "scripts", "dev-platform.mjs");
+  const walletHydratePath = appCorePackagePath(
+    packageDir,
+    "security/hydrate-wallet-keys-from-platform-store.js",
+  );
+  const emptyNodeModulePath = appCorePackagePath(
+    packageDir,
+    "platform/empty-node-module.js",
+  );
+  const onboardingResetPath = appCorePackagePath(
+    packageDir,
+    "platform/onboarding-reset.js",
+  );
+  const onboardingResetTypesPath = appCorePackagePath(
+    packageDir,
+    "platform/onboarding-reset.d.ts",
+  );
+  const windowShellPath = appCorePackagePath(
+    packageDir,
+    "platform/window-shell.js",
+  );
+  const windowShellTypesPath = appCorePackagePath(
+    packageDir,
+    "platform/window-shell.d.ts",
+  );
+
+  const requiredPaths = [
+    devPlatformPath,
+    walletHydratePath,
+    emptyNodeModulePath,
+    onboardingResetPath,
+    onboardingResetTypesPath,
+    windowShellPath,
+    windowShellTypesPath,
+  ];
+  if (requiredPaths.some((requiredPath) => !fs.existsSync(requiredPath))) {
+    skippedPackages += 1;
+    continue;
+  }
+
+  const patched = [
+    patchDevPlatform(devPlatformPath),
+    patchWalletHydrate(walletHydratePath),
+    patchEmptyNodeModule(emptyNodeModulePath),
+    patchFirstRunReset(onboardingResetPath, onboardingResetTypesPath),
+    patchWindowShellRoute(windowShellPath, windowShellTypesPath),
+  ];
+
+  if (patched.some(Boolean)) {
+    patchedPackages.push(path.relative(process.cwd(), packageDir));
   }
 }
 
-const patched = [
-  patchDevPlatform(devPlatformPath),
-  patchWalletHydrate(walletHydratePath),
-  patchEmptyNodeModule(emptyNodeModulePath),
-];
-
-if (patched.some(Boolean)) {
+if (patchedPackages.length > 0) {
   console.log(
-    `${LOG_PREFIX} patched ${path.relative(process.cwd(), devPlatformPath)}, ${path.relative(process.cwd(), walletHydratePath)}, and ${path.relative(process.cwd(), emptyNodeModulePath)}`,
+    `${LOG_PREFIX} patched package files in ${patchedPackages.join(", ")}`,
   );
 } else {
-  console.log(`${LOG_PREFIX} package files already compatible.`);
+  const suffix =
+    skippedPackages > 0
+      ? ` (${skippedPackages} local/source package dir(s) skipped)`
+      : "";
+  console.log(`${LOG_PREFIX} package files already compatible${suffix}.`);
 }

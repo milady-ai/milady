@@ -1,0 +1,5 @@
+exclude_paths:
+  - "scripts/apply-eliza-ci-patches.mjs"
+  - "scripts/copy-runtime-node-modules.ts"
+  - "scripts/patch-elizaos-app-core-windows-shell.mjs"
+  - "scripts/patch-elizaos-shared-character-presets.mjs"

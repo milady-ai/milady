@@ -230,11 +230,13 @@ $ grep -rhE '^(const|export const) [A-Z_][A-Z0-9_]*(STORAGE_)?KEY[A-Z_]*\s*=\s*"
 **Phase 2 task 12 (first-run-complete → vault prefs) target keys:**
 
 The task is to migrate **just** `eliza:first-run-complete` (the canonical key) — but the audit shows there are actually **2 keys + a sync mirror**:
+
 - `FIRST_RUN_COMPLETE_STORAGE_KEY = "eliza:first-run-complete"` (current).
 - `LEGACY_FIRST_RUN_COMPLETE_STORAGE_KEY = "eliza:first-run-complete"` (alias constant — appears unused, verify and delete).
 - `bridge/storage-bridge.ts:SYNCED_KEYS` includes `"eliza:first-run-complete"` for iOS Capacitor Preferences mirror.
 
 Target migration:
+
 - Replace `loadPersistedFirstRunComplete` / `savePersistedFirstRunComplete` (4 callers: `useFirstRunState`, `useFirstRunCallbacks`, `complete-reset-local-state-after-wipe.ts`, `startup-phase-restore.ts`) with `vault.get("_meta.first-run.completed")` + `vault.set(...)` using the reserved-prefix discipline established in Layer 5a.
 - Drop `"eliza:first-run-complete"` from `bridge/storage-bridge.ts:SYNCED_KEYS` — no longer in localStorage so no need to mirror.
 - Delete the legacy alias constant.

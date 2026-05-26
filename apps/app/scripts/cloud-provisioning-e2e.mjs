@@ -300,7 +300,7 @@ async function cloudRequest(pathname, init = {}) {
     Accept: "application/json",
     "Content-Type": "application/json",
     Authorization: `Bearer ${authToken}`,
-    ...(init.headers ?? {}),
+    ...init.headers,
   };
   const response = await fetch(url, {
     ...init,
