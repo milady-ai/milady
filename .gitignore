@@ -86,6 +86,7 @@ os/android/vendor/eliza/apps/Eliza/*.apk.idsig
 
 # Local untracked files
 .local/
+.understand-anything/
 .vscode/
 .claude/settings.local.json
 .claude/scheduled_tasks.lock
