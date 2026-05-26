@@ -167,6 +167,7 @@ jobs:
             git -C eliza \
               -c submodule.cloud.update=none \
               -c submodule.plugins/plugin-elizacloud.update=none \
+              -c submodule.plugins/plugin-local-inference/native/omnivoice.cpp.update=none \
               submodule update --init --recursive --depth=1
           fi
           node --input-type=module <<'NODE'
