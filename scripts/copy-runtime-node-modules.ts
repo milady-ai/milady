@@ -26,6 +26,18 @@ const elizaCloudPackagesDir = path.resolve(
   "packages",
 );
 const elizaAgentDir = path.resolve(repoRoot, "eliza", "packages", "agent");
+const elizaPluginRemoteManifestDir = path.resolve(
+  repoRoot,
+  "eliza",
+  "packages",
+  "plugin-remote-manifest",
+);
+const elizaPluginWorkerRuntimeDir = path.resolve(
+  repoRoot,
+  "eliza",
+  "packages",
+  "plugin-worker-runtime",
+);
 const elizaElectrobunDir = path.resolve(
   elizaAppCoreDir,
   "platforms",
@@ -38,6 +50,14 @@ const elizaElectrobunNodeModules = path.join(
   "node_modules",
 );
 const elizaAgentNodeModules = path.join(elizaAgentDir, "node_modules");
+const elizaPluginRemoteManifestNodeModules = path.join(
+  elizaPluginRemoteManifestDir,
+  "node_modules",
+);
+const elizaPluginWorkerRuntimeNodeModules = path.join(
+  elizaPluginWorkerRuntimeDir,
+  "node_modules",
+);
 const miladyRootNodeModules = path.join(repoRoot, "node_modules");
 const miladyRootBunStore = path.join(miladyRootNodeModules, ".bun");
 const elizaRootNodeModules = path.join(repoRoot, "eliza", "node_modules");
@@ -367,7 +387,25 @@ function ensureLocalWorkspaceDists() {
       "dist/index.js",
       { allowExistingMarkerAfterFailure: true },
     ],
+    ["eliza/plugins/plugin-app-control", "plugin-app-control", "dist/index.js"],
+    ["eliza/plugins/app-model-tester", "app-model-tester", "dist/plugin.js"],
+    ["eliza/plugins/plugin-companion", "plugin-companion", "dist/index.js"],
+    [
+      "eliza/plugins/plugin-device-filesystem",
+      "plugin-device-filesystem",
+      "dist/index.js",
+    ],
+    ["eliza/plugins/plugin-documents", "plugin-documents", "dist/plugin.js"],
+    ["eliza/plugins/plugin-google", "plugin-google", "dist/index.js"],
+    ["eliza/plugins/plugin-health", "plugin-health", "dist/index.js"],
+    [
+      "eliza/plugins/plugin-hyperliquid-app",
+      "plugin-hyperliquid-app",
+      "dist/plugin.js",
+    ],
+    ["eliza/plugins/plugin-lifeops", "plugin-lifeops", "dist/index.js"],
     ["eliza/plugins/plugin-browser", "plugin-browser", "dist/index.js"],
+    ["eliza/plugins/plugin-calendly", "plugin-calendly", "dist/index.js"],
     [
       "eliza/plugins/plugin-capacitor-bridge",
       "plugin-capacitor-bridge",
@@ -388,10 +426,32 @@ function ensureLocalWorkspaceDists() {
       "dist/index.js",
     ],
     ["eliza/plugins/plugin-mcp", "plugin-mcp", "dist/node/index.js"],
+    [
+      "eliza/plugins/plugin-polymarket-app",
+      "plugin-polymarket-app",
+      "dist/plugin.js",
+    ],
+    [
+      "eliza/plugins/plugin-shopify-ui",
+      "plugin-shopify-ui",
+      "dist/plugin.js",
+    ],
     ["eliza/plugins/plugin-signal", "plugin-signal", "dist/index.js"],
+    [
+      "eliza/plugins/plugin-steward-app",
+      "plugin-steward-app",
+      "dist/plugin.js",
+    ],
     ["eliza/plugins/plugin-streaming", "plugin-streaming", "dist/index.js"],
+    [
+      "eliza/plugins/plugin-training",
+      "plugin-training",
+      "dist/setup-routes.js",
+    ],
+    ["eliza/plugins/plugin-vincent", "plugin-vincent", "dist/plugin.js"],
     ["eliza/plugins/plugin-whatsapp", "plugin-whatsapp", "dist/index.js"],
     ["eliza/plugins/plugin-wallet", "plugin-wallet", "dist/index.mjs"],
+    ["eliza/plugins/plugin-wallet-ui", "plugin-wallet-ui", "dist/index.js"],
     ["eliza/plugins/plugin-workflow", "plugin-workflow", "dist/index.js"],
     ["eliza/plugins/plugin-x402", "plugin-x402", "dist/index.js"],
   ] as const;
@@ -406,6 +466,7 @@ function ensureLocalWorkspaceDists() {
       path.join(elizaPackagesDir, "shared"),
       "dist/index.js",
     ],
+    ["eliza/packages/ui", path.join(elizaPackagesDir, "ui"), "dist/index.js"],
     [
       "eliza/packages/vault",
       path.join(elizaPackagesDir, "vault"),
@@ -425,6 +486,16 @@ function ensureLocalWorkspaceDists() {
       "eliza/packages/agent",
       path.join(elizaPackagesDir, "agent"),
       "dist/services/app-package-modules.js",
+    ],
+    [
+      "eliza/packages/plugin-remote-manifest",
+      elizaPluginRemoteManifestDir,
+      "dist/index.js",
+    ],
+    [
+      "eliza/packages/plugin-worker-runtime",
+      elizaPluginWorkerRuntimeDir,
+      "dist/index.js",
     ],
     ["eliza/packages/app-core", elizaAppCoreDir, "dist/api/auth.js"],
     [
@@ -481,7 +552,17 @@ function linkLocalElizaWorkspacePackages() {
     "plugin-agent-skills",
     "plugin-registry",
     "plugin-app-manager",
+    "plugin-app-control",
+    "app-model-tester",
+    "plugin-companion",
+    "plugin-device-filesystem",
+    "plugin-documents",
+    "plugin-google",
+    "plugin-health",
+    "plugin-hyperliquid-app",
+    "plugin-lifeops",
     "plugin-browser",
+    "plugin-calendly",
     "plugin-capacitor-bridge",
     "plugin-coding-tools",
     "plugin-computeruse",
@@ -489,10 +570,16 @@ function linkLocalElizaWorkspacePackages() {
     "plugin-imessage",
     "plugin-local-inference",
     "plugin-mcp",
+    "plugin-polymarket-app",
+    "plugin-shopify-ui",
     "plugin-signal",
+    "plugin-steward-app",
     "plugin-streaming",
+    "plugin-training",
+    "plugin-vincent",
     "plugin-whatsapp",
     "plugin-wallet",
+    "plugin-wallet-ui",
     "plugin-workflow",
     "plugin-x402",
   ] as const;
@@ -500,6 +587,8 @@ function linkLocalElizaWorkspacePackages() {
     miladyRootNodeModules,
     elizaPackagesNodeModules,
     elizaAgentNodeModules,
+    elizaPluginRemoteManifestNodeModules,
+    elizaPluginWorkerRuntimeNodeModules,
     elizaAppCoreNodeModules,
     elizaElectrobunNodeModules,
     path.join(elizaPluginsDir, "plugin-elizacloud", "node_modules"),
@@ -512,6 +601,9 @@ function linkLocalElizaWorkspacePackages() {
     ["@elizaos/shared", path.join(elizaPackagesDir, "shared")],
     ["@elizaos/agent", path.join(elizaPackagesDir, "agent")],
     ["@elizaos/app-core", elizaAppCoreDir],
+    ["@elizaos/ui", path.join(elizaPackagesDir, "ui")],
+    ["@elizaos/plugin-remote-manifest", elizaPluginRemoteManifestDir],
+    ["@elizaos/plugin-worker-runtime", elizaPluginWorkerRuntimeDir],
     ["@elizaos/cloud-sdk", path.join(elizaCloudPackagesDir, "sdk")],
     ["@elizaos/cloud-routing", path.join(elizaPackagesDir, "cloud-routing")],
     [
@@ -603,9 +695,154 @@ for (let i = 0; i < incoming.length; i += 1) {
   args.push(arg);
 }
 
+function readFlagValue(values: readonly string[], flag: string): string | null {
+  for (let i = 0; i < values.length; i += 1) {
+    const arg = values[i];
+    if (arg === flag) {
+      return values[i + 1] ?? null;
+    }
+    const prefix = `${flag}=`;
+    if (arg.startsWith(prefix)) {
+      return arg.slice(prefix.length);
+    }
+  }
+  return null;
+}
+
+function isJsonObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function sanitizeExportConditions(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map((entry) => sanitizeExportConditions(entry));
+  }
+  if (!isJsonObject(value)) {
+    return value;
+  }
+
+  const importTarget =
+    typeof value.import === "string"
+      ? value.import
+      : typeof value.default === "string"
+        ? value.default
+        : null;
+  const defaultTarget =
+    typeof value.default === "string" ? value.default : importTarget;
+  const typeTarget = typeof value.types === "string" ? value.types : null;
+  const next: Record<string, unknown> = {};
+
+  for (const [key, entry] of Object.entries(value)) {
+    if (key === "eliza-source") {
+      continue;
+    }
+    if (key === "bun" && importTarget) {
+      next.bun = {
+        ...(typeTarget ? { types: typeTarget } : {}),
+        import: importTarget,
+        default: defaultTarget ?? importTarget,
+      };
+      continue;
+    }
+    next[key] = sanitizeExportConditions(entry);
+  }
+
+  return next;
+}
+
+function patchPackagedRuntimeExportConditions(targetDist: string): void {
+  const nodeModules = path.join(targetDist, "node_modules");
+  const packagesToPatch = ["@elizaos/agent", "@elizaos/security"] as const;
+  const patched: string[] = [];
+
+  for (const packageName of packagesToPatch) {
+    const manifestPath = path.join(
+      nodeModules,
+      ...packageName.split("/"),
+      "package.json",
+    );
+    if (!fs.existsSync(manifestPath)) {
+      continue;
+    }
+
+    const packageJson = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+    if (!isJsonObject(packageJson.exports)) {
+      continue;
+    }
+
+    const sanitizedExports = sanitizeExportConditions(packageJson.exports);
+    if (JSON.stringify(sanitizedExports) === JSON.stringify(packageJson.exports)) {
+      continue;
+    }
+
+    packageJson.exports = sanitizedExports;
+    fs.writeFileSync(manifestPath, `${JSON.stringify(packageJson, null, 2)}\n`);
+    patched.push(packageName);
+  }
+
+  if (patched.length > 0) {
+    console.log(
+      `[copy-runtime-node-modules wrapper] patched packaged Bun export conditions for ${patched.join(", ")}`,
+    );
+  }
+}
+
+function copyPackageRuntimeSubset(
+  targetDist: string,
+  packageName: string,
+  packageDir: string,
+): boolean {
+  const nodeModules = path.join(targetDist, "node_modules");
+  const packageDest = path.join(nodeModules, ...packageName.split("/"));
+  const entries = ["package.json", "dist"] as const;
+  if (!fs.existsSync(packageDir)) {
+    return false;
+  }
+
+  fs.rmSync(packageDest, { force: true, recursive: true });
+  fs.mkdirSync(packageDest, { recursive: true });
+
+  let copied = false;
+  for (const entry of entries) {
+    const source = path.join(packageDir, entry);
+    if (!fs.existsSync(source)) {
+      continue;
+    }
+    fs.cpSync(source, path.join(packageDest, entry), { recursive: true });
+    copied = true;
+  }
+  return copied;
+}
+
+function restoreRequiredPackagedRuntimePackages(targetDist: string): void {
+  const restored = [
+    [
+      "@elizaos/plugin-x402",
+      path.join(elizaPluginsDir, "plugin-x402"),
+    ],
+  ]
+    .filter(([packageName, packageDir]) =>
+      copyPackageRuntimeSubset(targetDist, packageName, packageDir),
+    )
+    .map(([packageName]) => packageName);
+
+  if (restored.length > 0) {
+    console.log(
+      `[copy-runtime-node-modules wrapper] restored required packaged runtime package(s): ${restored.join(", ")}`,
+    );
+  }
+}
+
 const result = spawnSync(
   process.execPath,
   ["--import", "tsx", target, ...args],
   { stdio: "inherit", env: process.env },
 );
+if (result.status === 0) {
+  const targetDist = readFlagValue(args, "--target-dist");
+  if (targetDist) {
+    restoreRequiredPackagedRuntimePackages(targetDist);
+    patchPackagedRuntimeExportConditions(targetDist);
+  }
+}
 process.exit(result.status ?? 1);
