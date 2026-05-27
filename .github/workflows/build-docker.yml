@@ -78,7 +78,7 @@ concurrency:
 env:
   # Pin the canonical elizaOS/eliza checkout to the latest verified develop SHA.
   # Override with MILADY_ELIZA_REF only for a specific upstream release test.
-  MILADY_ELIZA_REF: "f4991bc6059514f10a0fc1a8ec3f199478c415ae"
+  MILADY_ELIZA_REF: "4080c835ffa6a5a72b7a9b3233fe0f607dd0403c"
   REGISTRY: ghcr.io
   IMAGE_NAME: milady-ai/agent
 
