@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 env:
-  MILADY_ELIZA_REF: "849090ae478c7c5c1998533f1c6431837124d6e8"
+  MILADY_ELIZA_REF: "f4b99db41fad7720dead6b89376057fbe02c65b2"
 
 jobs:
   verify:
