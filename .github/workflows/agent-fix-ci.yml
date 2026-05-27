@@ -49,14 +49,14 @@ jobs:
       attempt: ${{ steps.check.outputs.attempt }}
     steps:
       - name: Checkout (for trust-scoring.cjs)
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           sparse-checkout: .github
           fetch-depth: 1
 
       - name: Check PR eligibility
         id: check
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
           script: |
             const { computeTrustScore, DEFAULT_CONFIG, createContributorState, expandState } = require('./.github/trust-scoring.cjs');
@@ -191,20 +191,20 @@ jobs:
       checks: read
     steps:
       - name: Checkout PR branch
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           ref: ${{ github.event.workflow_run.head_branch }}
           fetch-depth: 0
           submodules: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # v6
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
         with:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org'
 
       - name: Setup Bun
-        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6  # v2
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
@@ -225,7 +225,7 @@ jobs:
           MILADY_NO_VISION_DEPS: "1"
 
       - name: Post fix-attempt marker
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
           script: |
             await github.rest.issues.createComment({
@@ -236,7 +236,7 @@ jobs:
             });
 
       - name: Run Claude to fix CI
-        uses: anthropics/claude-code-action@094bd24d575e7b30ac1576024817bf1a97c81262 # v1
+        uses: anthropics/claude-code-action@094bd24d575e7b30ac1576024817bf1a97c81262
         env:
           NPM_CONFIG_REGISTRY: 'https://registry.npmjs.org'
           PR_NUMBER: ${{ needs.should-fix.outputs.pr_number }}

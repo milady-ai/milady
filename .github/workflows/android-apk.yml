@@ -17,15 +17,15 @@ jobs:
     name: Build APK
     runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           ref: ${{ inputs.ref }}
           submodules: false
-      - uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9  # v4
+      - uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9
         with:
           distribution: temurin
           java-version: 21
-      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # v6
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
         with:
           node-version: 22
       - name: Setup workspace dependencies
@@ -52,7 +52,7 @@ jobs:
           chmod +x ./gradlew
           ./gradlew assembleDebug --no-daemon
       - name: Upload APK
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: android-apk
           path: apps/app/android/app/build/outputs/apk/debug/*.apk
