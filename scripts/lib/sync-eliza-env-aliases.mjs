@@ -68,19 +68,27 @@ function buildEnvPairs(brandedPrefix) {
  * need to resolve one canonical namespace internally.
  */
 export function syncElizaEnvAliases(options = {}) {
+  const env = options.env ?? process.env;
   const brandedPrefix = normalizeBrandedPrefix(options.brandedPrefix);
   const pairs = buildEnvPairs(brandedPrefix);
   for (const [from, to] of pairs) {
-    if (process.env[to] === undefined && process.env[from] !== undefined) {
-      process.env[to] = process.env[from];
+    if (env[to] === undefined && env[from] !== undefined) {
+      env[to] = env[from];
     }
   }
-  if (!process.env.ELIZA_CLOUD_MANAGED_AGENTS_API_SEGMENT) {
-    process.env.ELIZA_CLOUD_MANAGED_AGENTS_API_SEGMENT =
+  if (
+    options.defaultNamespace &&
+    env.ELIZA_NAMESPACE === undefined &&
+    env[`${brandedPrefix}_NAMESPACE`] === undefined
+  ) {
+    env.ELIZA_NAMESPACE = options.defaultNamespace;
+  }
+  if (!env.ELIZA_CLOUD_MANAGED_AGENTS_API_SEGMENT) {
+    env.ELIZA_CLOUD_MANAGED_AGENTS_API_SEGMENT =
       options.cloudManagedAgentsApiSegment ?? "milady";
   }
-  if (!process.env.ELIZA_APP_ROUTE_PLUGIN_MODULES) {
-    process.env.ELIZA_APP_ROUTE_PLUGIN_MODULES = (
+  if (!env.ELIZA_APP_ROUTE_PLUGIN_MODULES) {
+    env.ELIZA_APP_ROUTE_PLUGIN_MODULES = (
       options.appRoutePluginModules ?? DEFAULT_APP_ROUTE_PLUGIN_MODULES
     ).join(",");
   }

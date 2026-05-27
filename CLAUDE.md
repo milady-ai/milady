@@ -104,7 +104,7 @@ not active CI unless explicitly approved.
 ## Training & inference (locked)
 
 - **Training always uses APOLLO optimizer** (memory-efficient). No alternatives.
-- **Inference always applies every optimization** we have (DSPy artifacts under `~/.milady/optimized-prompts/<task>/` auto-load at boot via `OptimizedPromptService`).
+- **Inference always applies every optimization** we have (DSPy artifacts under `~/.local/state/milady/optimized-prompts/<task>/` auto-load at boot via `OptimizedPromptService`).
 - **Recommended local model: `eliza-1`** — not enforced. Users can search + download any HuggingFace model via the models surface.
 
 ## Deployment topologies
@@ -120,7 +120,7 @@ Prefer Cloud primitives over inventing custom backend infra.
 
 ## Environment variables
 
-- `MILADY_STATE_DIR` / `ELIZA_STATE_DIR` — per-user state root. Default `~/.milady`.
+- `MILADY_STATE_DIR` / `ELIZA_STATE_DIR` — per-user state root. Default `~/.local/state/milady`.
 - `MILADY_WORKSPACE_DIR` / `ELIZA_WORKSPACE_DIR` — override agent workspace (else follows runtime `cwd` if it has `package.json` / `AGENTS.md` / `skills/`).
 - `ELIZA_DISABLE_TRAJECTORY_LOGGING=1` — opt out of trajectory writes (also off when `NODE_ENV=test`).
 - Ports (never hardcode — orchestrator auto-shifts + syncs): `MILADY_API_PORT` (31337), `MILADY_PORT` (2138), `MILADY_GATEWAY_PORT` (18789), `MILADY_HOME_PORT` (2142), `MILADY_WECHAT_WEBHOOK_PORT` (18790).

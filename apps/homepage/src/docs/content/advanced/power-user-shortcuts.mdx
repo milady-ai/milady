@@ -128,7 +128,7 @@ A few environment variables you can set when starting Milady from a terminal:
 | **`MILADY_API_PORT`** | Override the default API port (31337) |
 | **`MILADY_PORT`** | Override the default dashboard UI port (2138) |
 | **`MILADY_CONFIG_PATH`** | Use a specific config file path instead of the default |
-| **`MILADY_STATE_DIR`** | Use a specific state directory instead of `~/.milady/` |
+| **`MILADY_STATE_DIR`** | Use a specific state directory instead of `~/.local/state/milady/` |
 | **`MILADY_TTS_DEBUG=1`** | Verbose TTS pipeline logging |
 | **`MILADY_PROMPT_TRACE=1`** | Log prompt compaction stats |
 
@@ -145,12 +145,12 @@ $env:MILADY_TTS_DEBUG=1
 milady start
 ```
 
-## The `.milady` directory layout
+## State Directory Layout
 
 Quick reference if you ever need to poke around by hand:
 
 ```
-~/.milady/
+~/.local/state/milady/
 ├── milady.json            Main config (safe to inspect, risky to hand-edit)
 ├── characters/            Your character files
 ├── avatars/               VRM files you've uploaded
@@ -160,7 +160,7 @@ Quick reference if you ever need to poke around by hand:
 └── .keys/                 Encrypted credentials (don't touch)
 ```
 
-Back up the whole directory before doing anything destructive. If you want to start over, rename it to `.milady.old` instead of deleting it.
+Back up the whole directory before doing anything destructive. If you want to start over, rename it to `milady.old` instead of deleting it.
 
 ## What's next
 

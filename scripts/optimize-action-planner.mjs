@@ -5,7 +5,7 @@
  * Kicks the native instruction-search optimizer against the
  * benchmark-derived action_planner dataset, then reports
  * before/after scores from the artifact written to
- * ~/.milady/optimized-prompts/action_planner/.
+ * ~/.local/state/milady/optimized-prompts/action_planner/.
  *
  * Usage:
  *   node scripts/optimize-action-planner.mjs               # uses defaults
@@ -26,12 +26,15 @@
 import { spawnSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { homedir } from "node:os";
-import { dirname, join, resolve } from "node:path";
+import { dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { syncElizaEnvAliases } from "./lib/sync-eliza-env-aliases.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const REPO_ROOT = resolve(__dirname, "..");
+
+syncElizaEnvAliases({ defaultNamespace: "milady" });
 
 const DEFAULT_DATASET = join(
   REPO_ROOT,
@@ -41,8 +44,24 @@ const DEFAULT_DATASET = join(
   "datasets",
   "action_planner_from_benchmark.jsonl",
 );
+function resolveMiladyStateDir(env = process.env) {
+  const explicit = env.ELIZA_STATE_DIR?.trim() || env.MILADY_STATE_DIR?.trim();
+  if (explicit) return resolve(explicit.replace(/^~(?=$|[\\/])/, homedir()));
+  const xdgStateHome = env.XDG_STATE_HOME?.trim();
+  const stateHome = xdgStateHome
+    ? resolve(
+        xdgStateHome.startsWith("~")
+          ? xdgStateHome.replace(/^~(?=$|[\\/])/, homedir())
+          : isAbsolute(xdgStateHome)
+            ? xdgStateHome
+            : join(homedir(), xdgStateHome),
+      )
+    : join(homedir(), ".local", "state");
+  return join(stateHome, env.ELIZA_NAMESPACE?.trim() || "milady");
+}
+
 const ARTIFACT_DIR = join(
-  process.env.MILADY_STATE_DIR || join(homedir(), ".milady"),
+  resolveMiladyStateDir(),
   "optimized-prompts",
   "action_planner",
 );

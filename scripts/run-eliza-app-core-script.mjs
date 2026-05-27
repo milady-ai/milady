@@ -4,6 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { resolveElizaAppCoreScript } from "./lib/resolve-eliza-app-core-script.mjs";
+import { syncElizaEnvAliases } from "./lib/sync-eliza-env-aliases.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..");
@@ -41,6 +42,8 @@ if (!scriptName) {
   );
   process.exit(1);
 }
+
+syncElizaEnvAliases({ defaultNamespace: "milady" });
 
 const scriptPath = resolveElizaAppCoreScript(scriptName, { repoRoot });
 const localScriptPath = path.join(

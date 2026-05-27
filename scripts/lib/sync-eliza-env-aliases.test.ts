@@ -18,6 +18,7 @@ describe("syncElizaEnvAliases", () => {
     "MILADY_API_TOKEN",
     "ELIZA_API_TOKEN",
     "ELIZA_CLOUD_MANAGED_AGENTS_API_SEGMENT",
+    "ELIZA_APP_ROUTE_PLUGIN_MODULES",
     "ORBIT_API_PORT",
     "ORBIT_PORT",
   ];
@@ -47,6 +48,34 @@ describe("syncElizaEnvAliases", () => {
     expect(process.env.ELIZA_NAMESPACE).toBe("milady");
     expect(process.env.ELIZA_STATE_DIR).toBe("/tmp/milady-state");
     expect(process.env.ELIZA_API_PORT).toBe("31337");
+  });
+
+  it("can set the Milady namespace default before app-core scripts run", () => {
+    syncElizaEnvAliases({ defaultNamespace: "milady" });
+
+    expect(process.env.ELIZA_NAMESPACE).toBe("milady");
+  });
+
+  it("does not override an explicit branded namespace with the default", () => {
+    process.env.MILADY_NAMESPACE = "custom";
+
+    syncElizaEnvAliases({ defaultNamespace: "milady" });
+
+    expect(process.env.ELIZA_NAMESPACE).toBe("custom");
+  });
+
+  it("can sync a provided env object without mutating process.env", () => {
+    const env: Record<string, string | undefined> = {
+      MILADY_NAMESPACE: "milady",
+      MILADY_STATE_DIR: "/state",
+    };
+
+    syncElizaEnvAliases({ env });
+
+    expect(env.ELIZA_NAMESPACE).toBe("milady");
+    expect(env.ELIZA_STATE_DIR).toBe("/state");
+    expect(process.env.ELIZA_NAMESPACE).toBeUndefined();
+    expect(process.env.ELIZA_STATE_DIR).toBeUndefined();
   });
 
   it("does not overwrite existing ELIZA_* values", () => {

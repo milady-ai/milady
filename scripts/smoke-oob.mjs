@@ -12,7 +12,7 @@
  *   5. Repeat (3) — a second chat after reset still works
  *
  * Runs the API in an isolated tmpdir state dir so it doesn't touch
- * the developer's actual ~/.milady. Tears the API down on exit.
+ * the developer's actual ~/.local/state/milady. Tears the API down on exit.
  *
  * Usage:
  *   node scripts/smoke-oob.mjs                 # run once, exit 0/1
