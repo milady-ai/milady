@@ -177,12 +177,12 @@ jobs:
       url: https://pypi.org/project/elizaos-app/${{ needs.prepare.outputs.pypi_version }}/
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
         with:
           submodules: recursive
 
       - name: Setup Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6
         with:
           python-version: "3.14"
 
@@ -222,7 +222,7 @@ jobs:
           "
 
       - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b  # release/v1
         with:
           packages-dir: eliza/packages/app-core/packaging/pypi/dist/
           # Falls back to API token when OIDC trusted publishing is not
@@ -241,7 +241,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
         with:
           submodules: recursive
 
@@ -270,7 +270,7 @@ jobs:
           fi
 
       - name: Build snap
-        uses: snapcore/action-build@v1
+        uses: snapcore/action-build@3bdaa03e1ba6bf59a65f84a751d943d549a54e79  # v1
         id: snapcraft
 
       - name: Test snap
@@ -281,7 +281,7 @@ jobs:
 
       - name: Publish to Snap Store
         if: success() && needs.prepare.outputs.snap_store_ready == 'true'
-        uses: snapcore/action-publish@v1
+        uses: snapcore/action-publish@214b86e5ca036ead1668c79afb81e550e6c54d40  # v1
         env:
           SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAP_STORE_CREDENTIALS }}
         with:
@@ -298,7 +298,7 @@ jobs:
       contents: write  # gh release upload
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
         with:
           submodules: recursive
 
@@ -358,7 +358,7 @@ jobs:
           elizaos-app --version || echo "Version check completed"
 
       - name: Upload .deb artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
         with:
           name: debian-package
           path: deb-output/
@@ -413,7 +413,7 @@ jobs:
       contents: write  # gh release upload
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
         with:
           submodules: recursive
 
@@ -438,7 +438,7 @@ jobs:
           flatpak run ai.elizaos.App --version || echo "Version check completed"
 
       - name: Upload Flatpak bundle
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
         with:
           name: flatpak-bundle
           path: eliza/packages/app-core/packaging/flatpak/elizaos-app.flatpak

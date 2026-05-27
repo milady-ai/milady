@@ -21,7 +21,7 @@ jobs:
     steps:
       - name: Classify contribution
         id: classify
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9
         with:
           script: |
             const isPR = !!context.payload.pull_request;
@@ -125,7 +125,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Checkout PR head
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 1
@@ -184,13 +184,13 @@ jobs:
       issues: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
         with:
           ref: ${{ github.event.pull_request.base.sha }}
           fetch-depth: 0
 
       - name: Setup Node.js (npm registry)
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # v6
         with:
           node-version: '22'
           check-latest: false
@@ -200,7 +200,7 @@ jobs:
 
       - name: Fetch contributor trust context
         id: trust-context
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9
         with:
           script: |
             const author = context.payload.pull_request.user.login;
@@ -231,7 +231,7 @@ jobs:
       - name: Run Claude Review
         id: claude-review
         continue-on-error: true
-        uses: anthropics/claude-code-action@v1
+        uses: anthropics/claude-code-action@787c5a0ce96a9a6cfb050ea0c8f4c05f2447c251  # v1
         env:
           NPM_CONFIG_REGISTRY: 'https://registry.npmjs.org'
         with:
@@ -376,7 +376,7 @@ jobs:
         id: codex-review
         if: steps.claude-review.outcome == 'failure'
         continue-on-error: true
-        uses: openai/codex-action@v1
+        uses: openai/codex-action@e0fdf01220eb9a88167c4898839d273e3f2609d1  # v1
         with:
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
           model: gpt-5.3-codex
@@ -476,7 +476,7 @@ jobs:
 
       - name: Post Codex review comment
         if: steps.codex-review.outcome == 'success'
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9
         with:
           script: |
             const runId = process.env.GITHUB_RUN_ID || context.runId;
@@ -504,7 +504,7 @@ jobs:
 
       - name: Ensure review comment was posted
         if: always()
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9
         with:
           script: |
             const fs = require('fs');
@@ -608,7 +608,7 @@ jobs:
       - name: Extract review decision from PR comments
         id: extract-verdict
         if: always()
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9
         with:
           script: |
             const owner = context.repo.owner;
@@ -778,14 +778,14 @@ jobs:
       statuses: write
     steps:
       - name: Checkout trusted base ref
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
         with:
           ref: ${{ github.event.pull_request.base.sha }}
           fetch-depth: 1
 
       - name: Create review check run
         if: always()
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9
         with:
           script: |
             const verdict = '${{ needs.review-pr.outputs.verdict }}';
@@ -840,7 +840,7 @@ jobs:
 
       - name: Apply contributor trust label
         if: always()
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9
         with:
           script: |
             // ─── Architecture ────────────────────────────────────────────────────────────
@@ -1090,7 +1090,7 @@ jobs:
       issues: write
     steps:
       - name: Extract follow-up recommendations and open issues
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9
         with:
           script: |
             const crypto = require('crypto');
@@ -1291,19 +1291,19 @@ jobs:
       issues: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
         with:
           fetch-depth: 1
 
       - name: Setup Node.js (npm registry)
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # v6
         with:
           node-version: '22'
           check-latest: false
           registry-url: 'https://registry.npmjs.org'
 
       - name: Triage Issue
-        uses: anthropics/claude-code-action@v1
+        uses: anthropics/claude-code-action@787c5a0ce96a9a6cfb050ea0c8f4c05f2447c251  # v1
         env:
           NPM_CONFIG_REGISTRY: 'https://registry.npmjs.org'
         with:

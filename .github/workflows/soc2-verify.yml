@@ -10,6 +10,9 @@ on:
 permissions:
   contents: read
 
+env:
+  MILADY_ELIZA_REF: "849090ae478c7c5c1998533f1c6431837124d6e8"
+
 jobs:
   verify:
     name: SOC2 control verification
@@ -35,6 +38,11 @@ jobs:
             exit 0
           fi
           git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza
+          if [ -n "${MILADY_ELIZA_REF:-}" ]; then
+            git -C eliza fetch --depth=1 origin "$MILADY_ELIZA_REF"
+            git -C eliza checkout --detach "$MILADY_ELIZA_REF"
+            echo "Pinned eliza to ${MILADY_ELIZA_REF}"
+          fi
 
       - name: Install dependencies (eliza/)
         working-directory: eliza
