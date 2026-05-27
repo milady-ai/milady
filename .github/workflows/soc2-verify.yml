@@ -11,7 +11,8 @@ permissions:
   contents: read
 
 env:
-  MILADY_ELIZA_REF: "f4b99db41fad7720dead6b89376057fbe02c65b2"
+  MILADY_ELIZA_REF: "5a4e719c43bab975ae0835f06380ceeb05c2332d"
+  SOC2_GITLEAKS_LOG_OPTS: "origin/develop..HEAD"
 
 jobs:
   verify:
@@ -39,7 +40,7 @@ jobs:
           fi
           git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza
           if [ -n "${MILADY_ELIZA_REF:-}" ]; then
-            git -C eliza fetch --depth=1 origin "$MILADY_ELIZA_REF"
+            git -C eliza fetch --depth=100 origin "$MILADY_ELIZA_REF"
             git -C eliza checkout --detach "$MILADY_ELIZA_REF"
             echo "Pinned eliza to ${MILADY_ELIZA_REF}"
           fi
