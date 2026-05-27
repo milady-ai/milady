@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 env:
-  MILADY_ELIZA_REF: "71db7b8de5ca4d982ca44cc06bb4d2e58ecca796"
+  MILADY_ELIZA_REF: "af1ce6f60af409e28efd0844526d1a60904d3a51"
   SOC2_GITLEAKS_LOG_OPTS: "origin/develop..HEAD"
 
 jobs:
