@@ -113,6 +113,9 @@ const appCoreNativePluginEntrypoints = (() => {
 const uiPkgRoot = hasLocalElizaWorkspace
   ? path.join(localElizaRoot, "packages/ui")
   : null;
+const vaultPkgRoot = hasLocalElizaWorkspace
+  ? path.join(localElizaRoot, "packages/vault")
+  : null;
 // Other Capacitor packages imported by eliza/packages/app-core sources.
 // Resolved here (apps/app scope) so Rollup can find them when bundling
 // files from within the eliza submodule tree where bun may not hoist them.
@@ -242,30 +245,21 @@ function resolveLocalUiAliases(): Alias[] {
       replacement: path.join(uiPkgRoot, "src/index.ts"),
     },
     {
-      find: /^@elizaos\/ui\/api$/,
-      replacement: path.join(uiPkgRoot, "src/api/index.ts"),
-    },
-    {
-      find: /^@elizaos\/ui\/api\/(.*)$/,
-      replacement: `${uiPkgRoot}/src/api/$1.ts`,
-      customResolver: resolveExistingUiSourceModule,
-    },
-    {
       find: /^@elizaos\/ui\/browser$/,
       replacement: path.join(uiPkgRoot, "src/browser.ts"),
     },
     {
-      find: /^@elizaos\/ui\/bridge$/,
-      replacement: path.join(uiPkgRoot, "src/bridge/index.ts"),
+      find: /^@elizaos\/ui\/browser\.js$/,
+      replacement: path.join(uiPkgRoot, "src/browser.ts"),
     },
     {
-      find: /^@elizaos\/ui\/bridge\/(.*)$/,
-      replacement: `${uiPkgRoot}/src/bridge/$1.ts`,
+      find: /^@elizaos\/ui\/api$/,
+      replacement: path.join(uiPkgRoot, "src/api/index.ts"),
+    },
+    {
+      find: /^@elizaos\/ui\/api\/(.+)$/,
+      replacement: `${uiPkgRoot}/src/api/$1.ts`,
       customResolver: resolveExistingUiSourceModule,
-    },
-    {
-      find: /^@elizaos\/ui\/build-variant$/,
-      replacement: path.join(uiPkgRoot, "src/build-variant.ts"),
     },
     {
       find: /^@elizaos\/ui\/components\/ui\/(.*)$/,
@@ -307,37 +301,11 @@ function resolveLocalUiAliases(): Alias[] {
       replacement: `${uiPkgRoot}/src/layouts/$1/$2.tsx`,
     },
     {
-      find: /^@elizaos\/ui\/lib\/(.*)$/,
-      replacement: `${uiPkgRoot}/src/lib/$1.ts`,
-    },
-    {
-      find: /^@elizaos\/ui\/config$/,
-      replacement: path.join(uiPkgRoot, "src/config/index.ts"),
-    },
-    {
-      find: /^@elizaos\/ui\/config\/(.*)$/,
-      replacement: `${uiPkgRoot}/src/config/$1.ts`,
-      customResolver: resolveExistingUiSourceModule,
-    },
-    {
-      find: /^@elizaos\/ui\/events$/,
-      replacement: path.join(uiPkgRoot, "src/events/index.ts"),
-    },
-    {
-      find: /^@elizaos\/ui\/navigation$/,
-      replacement: path.join(uiPkgRoot, "src/navigation/index.ts"),
-    },
-    {
-      find: /^@elizaos\/ui\/navigation\/(.*)$/,
-      replacement: `${uiPkgRoot}/src/navigation/$1.ts`,
-      customResolver: resolveExistingUiSourceModule,
-    },
-    {
       find: /^@elizaos\/ui\/platform$/,
       replacement: path.join(uiPkgRoot, "src/platform/index.ts"),
     },
     {
-      find: /^@elizaos\/ui\/platform\/(.*)$/,
+      find: /^@elizaos\/ui\/platform\/(.+)$/,
       replacement: `${uiPkgRoot}/src/platform/$1.ts`,
       customResolver: resolveExistingUiSourceModule,
     },
@@ -346,33 +314,34 @@ function resolveLocalUiAliases(): Alias[] {
       replacement: path.join(uiPkgRoot, "src/state/index.ts"),
     },
     {
-      find: /^@elizaos\/ui\/state\/(.*)$/,
+      find: /^@elizaos\/ui\/state\/(.+)$/,
       replacement: `${uiPkgRoot}/src/state/$1.ts`,
       customResolver: resolveExistingUiSourceModule,
     },
     {
-      find: /^@elizaos\/ui\/first-run\/(.*)$/,
-      replacement: `${uiPkgRoot}/src/first-run/$1.ts`,
-      customResolver: resolveExistingUiSourceModule,
+      find: /^@elizaos\/ui\/lib\/(.*)$/,
+      replacement: `${uiPkgRoot}/src/lib/$1.ts`,
     },
     {
-      find: /^@elizaos\/ui\/slots\/(.*)$/,
-      replacement: `${uiPkgRoot}/src/slots/$1.ts`,
+      find: /^@elizaos\/ui\/(.+)$/,
+      replacement: `${uiPkgRoot}/src/$1.ts`,
       customResolver: resolveExistingUiSourceModule,
     },
+  ];
+}
+
+function resolveLocalVaultAliases(): Alias[] {
+  if (
+    !vaultPkgRoot ||
+    !fs.existsSync(path.join(vaultPkgRoot, "package.json"))
+  ) {
+    return [];
+  }
+
+  return [
     {
-      find: /^@elizaos\/ui\/utils$/,
-      replacement: path.join(uiPkgRoot, "src/utils/index.ts"),
-    },
-    {
-      find: /^@elizaos\/ui\/utils\/(.*)$/,
-      replacement: `${uiPkgRoot}/src/utils/$1.ts`,
-      customResolver: resolveExistingUiSourceModule,
-    },
-    {
-      find: /^@elizaos\/ui\/(.*)$/,
-      replacement: `${uiPkgRoot}/src/$1`,
-      customResolver: resolveExistingUiSourceModule,
+      find: /^@elizaos\/vault$/,
+      replacement: path.join(vaultPkgRoot, "src/index.ts"),
     },
   ];
 }
@@ -490,16 +459,23 @@ function resolveLocalSharedAliases(): Alias[] {
     exports?: Record<string, unknown>;
   };
   const aliases: Alias[] = [];
+
+  function resolveSharedExportTarget(value: unknown): string | null {
+    if (typeof value === "string") return value;
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+      return null;
+    }
+    const record = value as Record<string, unknown>;
+    for (const condition of ["source", "import", "default", "types"]) {
+      const target = record[condition];
+      if (typeof target === "string") return target;
+    }
+    return null;
+  }
+
   for (const [key, value] of Object.entries(sharedPkg.exports || {})) {
-    const exportTarget =
-      typeof value === "string"
-        ? value
-        : typeof value === "object" && value !== null
-          ? ((value as Record<string, string>).import ??
-            (value as Record<string, string>).default ??
-            (value as Record<string, string>).types ??
-            null)
-          : null;
+    if (key.includes("*")) continue;
+    const exportTarget = resolveSharedExportTarget(value);
     if (!exportTarget) continue;
     const aliasKey =
       key === "."
@@ -511,6 +487,23 @@ function resolveLocalSharedAliases(): Alias[] {
     });
   }
   return aliases;
+}
+
+function resolveLocalSharedCompatAliases(): Alias[] {
+  if (!hasLocalElizaWorkspace) return [];
+
+  const characterPresetsEntry = path.join(
+    localElizaRoot,
+    "packages/shared/src/character-presets.ts",
+  );
+  if (!fs.existsSync(characterPresetsEntry)) return [];
+
+  return [
+    {
+      find: /^@elizaos\/shared\/onboarding-presets$/,
+      replacement: characterPresetsEntry,
+    },
+  ];
 }
 
 function resolveBuiltLocalSharedAliases(): Alias[] {
@@ -527,7 +520,7 @@ function resolveBuiltLocalSharedAliases(): Alias[] {
     },
     {
       find: /^@elizaos\/shared\/(.+)$/,
-      replacement: `${sharedDistDir}/$1`,
+      replacement: `${sharedDistDir}/$1.js`,
     },
   ];
 }
@@ -565,7 +558,7 @@ function resolveLocalAppCoreAliases(): Alias[] {
   }
 
   const appCorePkgDir = path.dirname(appCorePkgPath);
-  const appCoreBrowserEntry = path.join(appCorePkgDir, "src/browser.ts");
+  const appCoreBrowserEntry = path.join(here, "src/app-core-browser-compat.js");
   const appCorePkg = JSON.parse(fs.readFileSync(appCorePkgPath, "utf8")) as {
     exports?: Record<string, unknown>;
   };
@@ -952,9 +945,30 @@ function elizaCoreAlphaPrerelease(dir: string): number {
 function resolveExistingUiSourceModule(id: string) {
   const candidates = [id];
   if (id.endsWith(".tsx")) {
-    candidates.push(`${id.slice(0, -4)}.ts`);
+    const base = id.slice(0, -4);
+    candidates.push(
+      `${base}.ts`,
+      base,
+      path.join(base, "index.ts"),
+      path.join(base, "index.tsx"),
+    );
   } else if (id.endsWith(".ts")) {
-    candidates.push(`${id.slice(0, -3)}.tsx`);
+    const base = id.slice(0, -3);
+    candidates.push(
+      `${base}.tsx`,
+      base,
+      path.join(base, "index.ts"),
+      path.join(base, "index.tsx"),
+    );
+  } else if (id.endsWith(".js")) {
+    const base = id.slice(0, -3);
+    candidates.push(
+      `${base}.ts`,
+      `${base}.tsx`,
+      base,
+      path.join(base, "index.ts"),
+      path.join(base, "index.tsx"),
+    );
   } else if (!path.extname(id)) {
     candidates.push(
       `${id}.ts`,
@@ -965,7 +979,7 @@ function resolveExistingUiSourceModule(id: string) {
   }
 
   for (const candidate of candidates) {
-    if (fs.existsSync(candidate)) {
+    if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
       return candidate;
     }
   }
@@ -2094,6 +2108,15 @@ function generateEsbuildStub(): string {
   return generateNamedExportStub(ESBUILD_STUB_NAMES);
 }
 
+function generateDrizzleOrmStub(): string {
+  return [
+    "const noop = () => {};",
+    "const stubProxy = new Proxy(noop, { get: () => stubProxy, apply: () => stubProxy });",
+    "export default stubProxy;",
+    "export { stubProxy as boolean, stubProxy as integer, stubProxy as bigint, stubProxy as text, stubProxy as varchar, stubProxy as char, stubProxy as serial, stubProxy as bigserial, stubProxy as smallint, stubProxy as smallserial, stubProxy as decimal, stubProxy as numeric, stubProxy as real, stubProxy as doublePrecision, stubProxy as date, stubProxy as time, stubProxy as timestamp, stubProxy as interval, stubProxy as uuid, stubProxy as json, stubProxy as jsonb, stubProxy as pgTable, stubProxy as pgEnum, stubProxy as pgSchema, stubProxy as pgView, stubProxy as pgMaterializedView, stubProxy as pgSequence, stubProxy as foreignKey, stubProxy as primaryKey, stubProxy as uniqueIndex, stubProxy as unique, stubProxy as index, stubProxy as check, stubProxy as customType, stubProxy as relations, stubProxy as one, stubProxy as many, stubProxy as eq, stubProxy as ne, stubProxy as gt, stubProxy as gte, stubProxy as lt, stubProxy as lte, stubProxy as and, stubProxy as or, stubProxy as not, stubProxy as inArray, stubProxy as notInArray, stubProxy as isNull, stubProxy as isNotNull, stubProxy as like, stubProxy as ilike, stubProxy as notLike, stubProxy as between, stubProxy as exists, stubProxy as notExists, stubProxy as sql, stubProxy as desc, stubProxy as asc, stubProxy as count, stubProxy as sum, stubProxy as avg, stubProxy as min, stubProxy as max, stubProxy as drizzle, stubProxy as getTableConfig, stubProxy as getTableName, stubProxy as is, stubProxy as alias, stubProxy as except, stubProxy as union, stubProxy as unionAll, stubProxy as intersect, stubProxy as raw, stubProxy as placeholder, stubProxy as param, stubProxy as Column, stubProxy as Table, stubProxy as TableAliasProxy };",
+  ].join("\n");
+}
+
 const NATIVE_MODULE_STUB_GENERATORS = new Map<
   string,
   (strippedId: string) => string
@@ -2108,6 +2131,7 @@ const NATIVE_MODULE_STUB_GENERATORS = new Map<
   ["@elizaos/plugin-elizacloud", generatePluginElizacloudStub],
   ["@elizaos/plugin-local-inference", generatePluginLocalInferenceStub],
   ["esbuild", generateEsbuildStub],
+  ["drizzle-orm", generateDrizzleOrmStub],
   // @node-rs/argon2's server-side Rust binding is referenced by
   // app-core's password-hashing helpers. Renderer never executes them
   // (auth happens in the API child); stub the named exports.
@@ -2230,6 +2254,7 @@ function nativeModuleStubPlugin(): Plugin {
     // happens server-side in the API child anyway.
     "@node-rs/argon2-wasm32-wasi",
     "@node-rs/argon2",
+    "drizzle-orm",
     // esbuild is a build-time dep that drizzle-kit and friends pull in
     // transitively. Its `lib/main.js` does `process.versions.node.split(".")`
     // at module init, which throws in the renderer (process.versions.node
@@ -2757,6 +2782,8 @@ export default defineConfig({
       // Local source aliases are only installed when the eliza checkout exists.
       // Published-only builds should resolve normal @elizaos package exports.
       ...resolveLocalUiAliases(),
+      ...resolveLocalVaultAliases(),
+      ...resolveLocalSharedCompatAliases(),
       ...resolveLocalSharedAliases(),
       ...resolveLocalAppCoreAliases(),
     ],

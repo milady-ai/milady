@@ -1,4 +1,3 @@
-import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 
@@ -190,11 +189,20 @@ describe("CI bootstrap contract", () => {
     expect(soc2.indexOf(install)).toBeLessThan(soc2.indexOf(verify));
   });
 
-  it("lets elizaCloud patch version drift skip cleanly", () => {
-    const output = execFileSync(process.execPath, [
-      "scripts/patch-elizacloud.mjs",
-    ]).toString();
+  it("lets elizaCloud patch version drift skip cleanly", async () => {
+    const { main } = await import("./patch-elizacloud.mjs");
+    const output: string[] = [];
+    const originalLog: typeof console.log = console.log;
 
-    expect(output).toMatch(/\[patch-elizacloud\].*skipping/);
+    try {
+      console.log = (...args: unknown[]) => {
+        output.push(args.map(String).join(" "));
+      };
+      main();
+    } finally {
+      console.log = originalLog;
+    }
+
+    expect(output.join("\n")).toMatch(/\[patch-elizacloud\].*skipping/);
   });
 });

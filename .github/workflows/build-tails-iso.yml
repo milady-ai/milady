@@ -110,7 +110,7 @@ jobs:
       has_variant: ${{ steps.init.outputs.has_variant }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           fetch-depth: 1
           # The Tails source is vendored directly under the variant
@@ -151,7 +151,7 @@ jobs:
 
       - name: Install just
         if: steps.init.outputs.has_variant == 'true'
-        uses: extractions/setup-just@v3
+        uses: extractions/setup-just@f8a3cce218d9f83db3a2ecd90e41ac3de6cdfd9b
         with:
           just-version: "1.36.0"
 
@@ -194,7 +194,7 @@ jobs:
       )
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           fetch-depth: 1
           submodules: false
@@ -216,7 +216,7 @@ jobs:
           test -d "$VARIANT_DIR" || { echo "variant tree missing at $VARIANT_DIR after clone"; exit 1; }
 
       - name: Install just
-        uses: extractions/setup-just@v3
+        uses: extractions/setup-just@f8a3cce218d9f83db3a2ecd90e41ac3de6cdfd9b
         with:
           just-version: "1.36.0"
 
@@ -241,7 +241,7 @@ jobs:
       # handled by GitHub's 7-day cache eviction.
       - name: Restore apt-cacher-ng volume cache
         id: acng-cache
-        uses: actions/cache@v5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
         with:
           path: ~/acng-cache
           key: tails-acng-v1-${{ github.ref_name }}
@@ -289,7 +289,7 @@ jobs:
 
       - name: Upload ISO artifact
         if: success()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: milady-tails-iso-${{ github.sha }}
           path: ${{ env.VARIANT_DIR }}/out/*.iso
@@ -298,7 +298,7 @@ jobs:
 
       - name: Upload build logs on failure
         if: failure()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: milady-tails-buildlogs-${{ github.sha }}
           path: |
@@ -324,7 +324,7 @@ jobs:
       && inputs.stage == 'build'
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           fetch-depth: 1
           submodules: false
@@ -353,7 +353,7 @@ jobs:
               qemu-system-x86 qemu-utils ovmf
 
       - name: Download ISO artifact
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
           name: milady-tails-iso-${{ github.sha }}
           path: ${{ env.VARIANT_DIR }}/out
@@ -387,7 +387,7 @@ jobs:
 
       - name: Upload QEMU log
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: milady-tails-qemu-log-${{ github.sha }}
           path: ${{ env.VARIANT_DIR }}/qemu.log
