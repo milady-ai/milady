@@ -322,6 +322,11 @@ function resolveLocalUiAliases(): Alias[] {
       find: /^@elizaos\/ui\/lib\/(.*)$/,
       replacement: `${uiPkgRoot}/src/lib/$1.ts`,
     },
+    {
+      find: /^@elizaos\/ui\/(.+)$/,
+      replacement: `${uiPkgRoot}/src/$1.ts`,
+      customResolver: resolveExistingUiSourceModule,
+    },
   ];
 }
 
@@ -940,9 +945,30 @@ function elizaCoreAlphaPrerelease(dir: string): number {
 function resolveExistingUiSourceModule(id: string) {
   const candidates = [id];
   if (id.endsWith(".tsx")) {
-    candidates.push(`${id.slice(0, -4)}.ts`);
+    const base = id.slice(0, -4);
+    candidates.push(
+      `${base}.ts`,
+      base,
+      path.join(base, "index.ts"),
+      path.join(base, "index.tsx"),
+    );
   } else if (id.endsWith(".ts")) {
-    candidates.push(`${id.slice(0, -3)}.tsx`);
+    const base = id.slice(0, -3);
+    candidates.push(
+      `${base}.tsx`,
+      base,
+      path.join(base, "index.ts"),
+      path.join(base, "index.tsx"),
+    );
+  } else if (id.endsWith(".js")) {
+    const base = id.slice(0, -3);
+    candidates.push(
+      `${base}.ts`,
+      `${base}.tsx`,
+      base,
+      path.join(base, "index.ts"),
+      path.join(base, "index.tsx"),
+    );
   } else if (!path.extname(id)) {
     candidates.push(
       `${id}.ts`,
@@ -953,7 +979,7 @@ function resolveExistingUiSourceModule(id: string) {
   }
 
   for (const candidate of candidates) {
-    if (fs.existsSync(candidate)) {
+    if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
       return candidate;
     }
   }
