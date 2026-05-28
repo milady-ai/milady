@@ -4,6 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
+const repoRoot = path.resolve(here, "..");
 const target = path.resolve(
   here,
   "..",
@@ -16,6 +17,6 @@ const target = path.resolve(
 
 const result = spawnSync(process.execPath, [target, ...process.argv.slice(2)], {
   stdio: "inherit",
-  env: process.env,
+  env: { ...process.env, ELIZA_CDN_ROOT_DIR: repoRoot },
 });
 process.exit(result.status ?? 1);

@@ -618,6 +618,14 @@ const requiredElectrobunConfigSnippets`,
   return patched;
 }
 
+function patchValidateCdnAssetsRootDir(raw) {
+  if (raw.includes("ELIZA_CDN_ROOT_DIR")) return raw;
+  return raw.replace(
+    "  await main();\n}",
+    "  const overrideRoot = process.env.ELIZA_CDN_ROOT_DIR;\n  await main({ cwd: overrideRoot ? path.resolve(overrideRoot) : repoRoot });\n}",
+  );
+}
+
 function patchStartApiServerCatchBlock(raw) {
   if (raw.includes("console.error(apiErrMsg)")) {
     return raw;
@@ -1201,6 +1209,18 @@ function applyReleaseSourcePatches() {
     path.join(elizaDir, "packages", "app-core", "scripts", "release-check.ts"),
     patchAppCoreReleaseCheck,
     "app-core release-check Milady wrappers",
+  );
+
+  replaceFileText(
+    path.join(
+      elizaDir,
+      "packages",
+      "app-core",
+      "scripts",
+      "validate-cdn-assets.mjs",
+    ),
+    patchValidateCdnAssetsRootDir,
+    "validate-cdn-assets ELIZA_CDN_ROOT_DIR override",
   );
 
   replaceFileText(
