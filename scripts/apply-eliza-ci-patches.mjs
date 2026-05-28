@@ -417,6 +417,10 @@ function patchAppCoreReleaseCheck(raw) {
       "release-check: release workflow is missing required release wiring:",
     )
     .replace(
+      '"ELIZA_TEST_WINDOWS_PROOF_INSTALL_DIR: $" +\n    "{{ runner.temp }}\\\\el-proof",',
+      '"ELIZA_TEST_WINDOWS_PROOF_INSTALL_DIR: $" + "{{ runner.temp }}\\\\el-smoke-proof",',
+    )
+    .replace(
       '"ELIZA_TEST_WINDOWS_PROOF_INSTALL_DIR: $" + "{{ runner.temp }}\\\\el-proof",',
       '"ELIZA_TEST_WINDOWS_PROOF_INSTALL_DIR: $" + "{{ runner.temp }}\\\\el-smoke-proof",',
     )
