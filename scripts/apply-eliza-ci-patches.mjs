@@ -327,10 +327,17 @@ export async function runIosBridgeCli(
 }
 
 function patchRuntimeCopyTarSafeHoists(raw) {
-  let next = raw.replace(
-    'const ALWAYS_HOISTED_PACKAGES = new Set(["@elizaos/core"]);',
-    'const ALWAYS_HOISTED_PACKAGES = new Set(["@elizaos/core", "commander"]);',
-  );
+  let next = raw
+    // eliza refs that only have @elizaos/core
+    .replace(
+      'const ALWAYS_HOISTED_PACKAGES = new Set(["@elizaos/core"]);',
+      'const ALWAYS_HOISTED_PACKAGES = new Set(["@elizaos/core", "commander", "pg", "pg-pool"]);',
+    )
+    // eliza refs (e.g. f4991bc6+) that already include commander
+    .replace(
+      'const ALWAYS_HOISTED_PACKAGES = new Set(["@elizaos/core", "commander"]);',
+      'const ALWAYS_HOISTED_PACKAGES = new Set(["@elizaos/core", "commander", "pg", "pg-pool"]);',
+    );
   if (!next.includes("function shouldHoistRuntimePackage")) {
     next = next.replace(
       "\ntype CopyTargetOptions = {",
