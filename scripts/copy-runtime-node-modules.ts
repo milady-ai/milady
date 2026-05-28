@@ -479,6 +479,7 @@ function ensureWorkspacePluginDistsByPackageJsonMain(baseDir: string) {
       name?: string;
       main?: unknown;
       module?: unknown;
+      exports?: unknown;
       scripts?: Record<string, unknown>;
     };
     try {
@@ -489,15 +490,23 @@ function ensureWorkspacePluginDistsByPackageJsonMain(baseDir: string) {
 
     if (!pkg?.scripts || typeof pkg.scripts.build !== "string") continue;
 
-    const marker = typeof pkg.main === "string" ? pkg.main : pkg.module;
-    if (typeof marker !== "string" || !marker.startsWith("dist")) continue;
+    // Collect every declared runtime JS entry from main, module, and exports.
+    // Mirrors eliza's assertRequiredBundledPackagesLanded so we build whenever
+    // any entry the assertion will look for is missing on disk — not just the
+    // top-level `main`. Plugins like plugin-companion declare both `dist/index.js`
+    // and a separate `./plugin` subpath at `dist/plugin.js`; checking only main
+    // missed those and the assertion fired on the unbuilt sibling entry.
+    const declaredEntries = collectDeclaredRuntimeEntries(pkg);
+    if (declaredEntries.length === 0) continue;
 
-    const markerAbs = path.join(packageDir, marker);
-    if (fs.existsSync(markerAbs)) continue;
+    const missingEntries = declaredEntries.filter(
+      (relPath) => !fs.existsSync(path.join(packageDir, relPath)),
+    );
+    if (missingEntries.length === 0) continue;
 
     const label = `${path.relative(repoRoot, packageDir)} (${pkg.name ?? entry.name})`;
     console.log(
-      `[copy-runtime-node-modules wrapper] building ${label}: ${marker} missing`,
+      `[copy-runtime-node-modules wrapper] building ${label}: ${missingEntries.length} declared entr${missingEntries.length === 1 ? "y" : "ies"} missing (e.g. ${missingEntries[0]})`,
     );
     const result = spawnSync(bunExecutable, ["run", "build"], {
       cwd: packageDir,
@@ -510,6 +519,55 @@ function ensureWorkspacePluginDistsByPackageJsonMain(baseDir: string) {
       );
     }
   }
+}
+
+function collectDeclaredRuntimeEntries(pkg: {
+  main?: unknown;
+  module?: unknown;
+  exports?: unknown;
+}): string[] {
+  const entries = new Set<string>();
+
+  for (const candidate of [pkg.main, pkg.module]) {
+    if (typeof candidate === "string" && isRuntimeJsEntryPath(candidate)) {
+      entries.add(stripLeadingDotSlash(candidate));
+    }
+  }
+
+  walkExportsField(pkg.exports, entries);
+
+  return [...entries].sort();
+}
+
+function walkExportsField(value: unknown, entries: Set<string>): void {
+  if (typeof value === "string") {
+    if (isRuntimeJsEntryPath(value)) {
+      entries.add(stripLeadingDotSlash(value));
+    }
+    return;
+  }
+  if (Array.isArray(value)) {
+    for (const item of value) walkExportsField(item, entries);
+    return;
+  }
+  if (value && typeof value === "object") {
+    for (const [key, item] of Object.entries(
+      value as Record<string, unknown>,
+    )) {
+      if (key === "types" || key === "typings") continue;
+      walkExportsField(item, entries);
+    }
+  }
+}
+
+function isRuntimeJsEntryPath(value: string): boolean {
+  if (!value || value === "." || value === "./") return false;
+  if (value.includes("*")) return false;
+  return /\.(?:[cm]?js)$/i.test(value);
+}
+
+function stripLeadingDotSlash(value: string): string {
+  return value.startsWith("./") ? value.slice(2) : value;
 }
 
 function linkLocalScopedPackage(
