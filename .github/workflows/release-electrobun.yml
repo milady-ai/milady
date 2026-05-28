@@ -670,6 +670,8 @@ jobs:
         # subsequent bunx electrobun build cannot resolve the import until tsc
         # has run. Build the dist here so the symlinked workspace package has
         # the expected entry point before the desktop build kicks off.
+        # Guard: the package may not exist in newer eliza checkouts.
+        if: hashFiles('eliza/packages/electrobun-carrots/package.json') != ''
         shell: bash
         working-directory: eliza/packages/electrobun-carrots
         run: bun run build
