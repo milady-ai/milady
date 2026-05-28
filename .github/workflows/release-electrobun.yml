@@ -753,6 +753,18 @@ jobs:
         shell: bash
         run: node eliza/packages/app-core/scripts/link-docker-local-app-packages.mjs
 
+      # bun's bundler walks up looking for `react` / `react-dom` / `@types/react`
+      # when transforming JSX-flagged tsconfig contexts (electrobun's
+      # tsconfig.json uses jsx:"react-jsx"). When invoked from
+      # eliza/packages/app-core/platforms/electrobun the nested node_modules
+      # only contains workspace symlinks, not react, so bun falls through to
+      # the @types/react .d.ts and crashes on `export as namespace React`.
+      # ci.yml + agent-review.yml run this script for exactly this reason; the
+      # release workflow needs the same alignment before any bun-bundle step.
+      - name: Align nested eliza package resolution
+        shell: bash
+        run: node scripts/align-eliza-ci-node-modules.mjs
+
       - name: Download Whisper model artifact
         if: ${{ needs.validate-release.result == 'success' }}
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
