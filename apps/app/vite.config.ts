@@ -2,18 +2,24 @@ import fs from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { colorizeDevSettingsStartupBanner } from "@elizaos/shared/dev-settings-banner-style";
-import { prependDevSubsystemFigletHeading } from "@elizaos/shared/dev-settings-figlet-heading";
+// Keep workspace-relative TS imports in this config so Vite transpiles them
+// while bundling the config instead of asking Node to load package-exported
+// .ts files directly in CI. Removing this workaround (commit b3060bf16) is
+// what broke the desktop release pipeline on 2026-05-04: Vite's esbuild config
+// loader resolves `@elizaos/shared/<subpath>` to the source `src/<subpath>.ts`,
+// which then fails on TypeScript ESM self-imports like `./env-utils.js`.
+import { colorizeDevSettingsStartupBanner } from "../../eliza/packages/shared/src/dev-settings-banner-style.ts";
+import { prependDevSubsystemFigletHeading } from "../../eliza/packages/shared/src/dev-settings-figlet-heading.ts";
 import {
   type DevSettingsRow,
   formatDevSettingsTable,
-} from "@elizaos/shared/dev-settings-table";
+} from "../../eliza/packages/shared/src/dev-settings-table.ts";
 import {
   resolveDesktopApiPort,
   resolveDesktopApiPortPreference,
   resolveDesktopUiPort,
   resolveDesktopUiPortPreference,
-} from "@elizaos/shared/runtime-env";
+} from "../../eliza/packages/shared/src/runtime-env.ts";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react-swc";
 import {
