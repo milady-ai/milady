@@ -17,6 +17,11 @@ const target = path.resolve(
 
 const result = spawnSync(process.execPath, [target, ...process.argv.slice(2)], {
   stdio: "inherit",
-  env: { ...process.env, ELIZA_CDN_ROOT_DIR: repoRoot },
+  env: {
+    ...process.env,
+    ELIZA_CDN_ROOT_DIR: repoRoot,
+    ELIZA_CDN_APP_ASSET_ROOT: "apps/app/public",
+    ELIZA_CDN_HOMEPAGE_ASSET_ROOT: "apps/homepage/public",
+  },
 });
 process.exit(result.status ?? 1);

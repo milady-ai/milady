@@ -620,10 +620,45 @@ const requiredElectrobunConfigSnippets`,
 
 function patchValidateCdnAssetsRootDir(raw) {
   if (raw.includes("ELIZA_CDN_ROOT_DIR")) return raw;
-  return raw.replace(
+  // Patch the CLI entry point to accept a root dir override
+  let patched = raw.replace(
     "  await main();\n}",
     "  const overrideRoot = process.env.ELIZA_CDN_ROOT_DIR;\n  await main({ cwd: overrideRoot ? path.resolve(overrideRoot) : repoRoot });\n}",
   );
+  // Patch validateGroup calls to accept asset root overrides via env
+  patched = patched.replace(
+    `  const [missingApp, missingHomepage] = await Promise.all([
+    validateGroup(manifest.app, {
+      repository,
+      releaseTag: effectiveRef,
+      assetRoot: "packages/app/public",
+      retryPolicy,
+    }),
+    validateGroup(manifest.homepage, {
+      repository,
+      releaseTag: effectiveRef,
+      assetRoot: "packages/homepage/public",
+      retryPolicy,
+    }),
+  ]);`,
+    `  const appAssetRoot = env.ELIZA_CDN_APP_ASSET_ROOT || "packages/app/public";
+  const homepageAssetRoot = env.ELIZA_CDN_HOMEPAGE_ASSET_ROOT || "packages/homepage/public";
+  const [missingApp, missingHomepage] = await Promise.all([
+    validateGroup(manifest.app, {
+      repository,
+      releaseTag: effectiveRef,
+      assetRoot: appAssetRoot,
+      retryPolicy,
+    }),
+    validateGroup(manifest.homepage, {
+      repository,
+      releaseTag: effectiveRef,
+      assetRoot: homepageAssetRoot,
+      retryPolicy,
+    }),
+  ]);`,
+  );
+  return patched;
 }
 
 function patchStartApiServerCatchBlock(raw) {
