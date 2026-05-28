@@ -206,6 +206,36 @@ function patchCoreStateTypes(raw) {
   return raw.replace('format: "JSON";', 'format: "JSON" | "TOON";');
 }
 
+function patchElectrobunAgentChildPathFallback(raw) {
+  if (raw.includes("existingPathKey")) {
+    return raw;
+  }
+
+  const next = raw.replace(
+    /([ \t]*)const bunDir = path\.dirname\(bunExecutable\);\r?\n\1const existingPath = childEnv\.PATH(?: \?\? "")?;\r?\n\1if \(!existingPath\.split\(path\.delimiter\)\.includes\(bunDir\)\) \{\r?\n\1[ \t]*childEnv\.PATH = bunDir \+ path\.delimiter \+ existingPath;\r?\n\1[ \t]*diagnosticLog\(`\[Agent\] Prepended bun dir to child PATH: \$\{bunDir\}`\);\r?\n\1\}\r?\n/,
+    (_, indent) => `${indent}const bunDir = path.dirname(bunExecutable);
+${indent}const existingPathKey =
+${indent}  childEnv.PATH !== undefined ? "PATH" : "Path";
+${indent}const existingPath =
+${indent}  childEnv[existingPathKey] ?? process.env.PATH ?? process.env.Path ?? "";
+${indent}if (!existingPath.split(path.delimiter).includes(bunDir)) {
+${indent}  childEnv[existingPathKey] = existingPath
+${indent}    ? bunDir + path.delimiter + existingPath
+${indent}    : bunDir;
+${indent}  diagnosticLog(\`[Agent] Prepended bun dir to child PATH: \${bunDir}\`);
+${indent}}
+`,
+  );
+
+  if (next === raw) {
+    throw new Error(
+      "Could not patch Electrobun agent PATH fallback: expected child PATH block was not found",
+    );
+  }
+
+  return next;
+}
+
 function patchComputerUseVisionContextProvider(raw) {
   const providerPath = path.join(
     elizaDir,
@@ -1152,6 +1182,21 @@ function applyReleaseSourcePatches() {
     path.join(elizaDir, "packages", "agent", "src", "runtime", "eliza.ts"),
     patchStartApiServerCatchBlock,
     "agent API startup error visibility",
+  );
+
+  replaceFileText(
+    path.join(
+      elizaDir,
+      "packages",
+      "app-core",
+      "platforms",
+      "electrobun",
+      "src",
+      "native",
+      "agent.ts",
+    ),
+    patchElectrobunAgentChildPathFallback,
+    "Electrobun agent child PATH fallback",
   );
 
   replaceFileText(

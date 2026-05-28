@@ -77,6 +77,7 @@ describe("install environment", () => {
       buildPathWithNodeBin(
         "/Users/me/.nvm/versions/node/v22.22.0/bin/node",
         "/opt/homebrew/bin:/usr/bin",
+        ":",
       ),
     ).toBe(
       "/Users/me/.nvm/versions/node/v22.22.0/bin:/opt/homebrew/bin:/usr/bin",
@@ -85,6 +86,7 @@ describe("install environment", () => {
       buildPathWithNodeBin(
         "/Users/me/.nvm/versions/node/v22.22.0/bin/node",
         "/Users/me/.nvm/versions/node/v22.22.0/bin:/opt/homebrew/bin",
+        ":",
       ),
     ).toBe("/Users/me/.nvm/versions/node/v22.22.0/bin:/opt/homebrew/bin");
   });
@@ -104,7 +106,9 @@ describe("install environment", () => {
         "exec '/Users/me/.nvm/versions/node/v22.22.0/bin/node'",
       );
       expect(shim).toContain("export PYTHON='/usr/bin/python3'");
-      expect(statSync(shimPath).mode & 0o111).not.toBe(0);
+      if (process.platform !== "win32") {
+        expect(statSync(shimPath).mode & 0o111).not.toBe(0);
+      }
     } finally {
       rmSync(rootDir, { recursive: true, force: true });
     }

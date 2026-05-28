@@ -138,12 +138,14 @@ export function selectPythonCandidate(candidates) {
   return candidates.find((candidate) => candidate.plistlib) ?? null;
 }
 
-export function buildPathWithNodeBin(nodeExecutable, currentPath = "") {
+export function buildPathWithNodeBin(
+  nodeExecutable,
+  currentPath = "",
+  delimiter = path.delimiter,
+) {
   const nodeBin = path.dirname(nodeExecutable);
-  const parts = currentPath.split(path.delimiter).filter(Boolean);
-  return [nodeBin, ...parts.filter((part) => part !== nodeBin)].join(
-    path.delimiter,
-  );
+  const parts = currentPath.split(delimiter).filter(Boolean);
+  return [nodeBin, ...parts.filter((part) => part !== nodeBin)].join(delimiter);
 }
 
 function shellQuote(value) {
