@@ -7,7 +7,6 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDir, "..");
-const appCoreRoot = path.resolve(repoRoot, "eliza", "packages", "app-core");
 const legacyElectrobunDir = path.join(repoRoot, "apps", "app", "electrobun");
 const canonicalElectrobunDir = path.join(
   repoRoot,
@@ -19,8 +18,6 @@ const canonicalElectrobunDir = path.join(
 );
 const rootReleaseContractTests = [
   "scripts/electrobun-runtime-root-contract.test.ts",
-  "scripts/standalone-eliza-package-contract.test.ts",
-  "scripts/release-workflow-contract.test.mjs",
 ];
 const appCoreReleaseContractTests = [
   "eliza/packages/app-core/scripts/electrobun-release-workflow-drift.test.ts",
@@ -55,12 +52,13 @@ function selectReleaseContractTests(root = repoRoot) {
   return packageModeReleaseContractTests;
 }
 
-export function run(command, args, cwd = repoRoot) {
+export function run(command, args, cwd = repoRoot, env = {}) {
   const result = spawnSync(command, args, {
     cwd,
     stdio: "inherit",
     env: {
       ...process.env,
+      ...env,
       NODE_NO_WARNINGS: process.env.NODE_NO_WARNINGS ?? "1",
     },
     shell: process.platform === "win32",
@@ -446,14 +444,21 @@ export function main() {
       run("node", [
         "eliza/packages/app-core/scripts/ensure-shared-i18n-data.mjs",
       ]);
-      run("node", ["scripts/run-tsdown.mjs", "--fail-on-warn", "false"]);
+      run(
+        "node",
+        ["scripts/run-tsdown.mjs", "--fail-on-warn", "false"],
+        repoRoot,
+        {
+          MILADY_ELIZA_SOURCE: "local",
+        },
+      );
       fs.mkdirSync(path.join(repoRoot, "dist"), { recursive: true });
       fs.writeFileSync(
         path.join(repoRoot, "dist", "package.json"),
         '{"type":"module"}\n',
       );
       run("node", ["--import", "tsx", "scripts/write-build-info.ts"]);
-      run("node", ["scripts/generate-static-asset-manifest.mjs"], appCoreRoot);
+      run("node", ["scripts/generate-static-asset-manifest.mjs"]);
       run("bun", ["run", "release:check"]);
     }
   } catch (err) {

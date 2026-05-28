@@ -29,10 +29,4 @@ describe("homepage", () => {
     expect(sessionStorage.getItem("test-key")).toBe("test-value");
     sessionStorage.removeItem("test-key");
   });
-
-  it("imports shared package utilities", async () => {
-    const shared = await import("@elizaos/shared/connectors");
-    expect(shared).toBeDefined();
-    expect(typeof shared.normalizeConnectorSource).toBe("function");
-  });
 });

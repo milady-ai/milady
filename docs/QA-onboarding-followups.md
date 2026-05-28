@@ -14,8 +14,8 @@ Severity scale:
 Current ledger state (open items only, after 2026-05-11 sweep):
 
 - **P0** open: **0**
-- **P1** open: **1** (item 14)
-- **P2** open: **2** (items 12 — desktop half only, and 17; plus the new connector-normalization tracking item 18 — counted under P1 below since it gates item 14)
+- **P1** open: **0** (item 18 — all 5 connectors migrated; item 14 resolved via 18)
+- **P2** open: **0** (item 12 desktop half DONE 2026-05-11)
 - **P3** open: **0**
 
 ---
@@ -113,12 +113,14 @@ Pinned by `eliza/plugins/plugin-elizacloud/__tests__/onboarding-failures.test.ts
 - **Verification:** `bun run --cwd eliza/packages/ui test -- deep-link-entry` → 17/17 PASS. `bun run --cwd eliza/packages/ui test -- onboarding/__tests__/` → 160/160 PASS across 4 onboarding test files. `bun run --cwd eliza/packages/ui typecheck` clean. No new lint errors.
 - **Follow-up not in scope:** Wiring `installOnboardingDeepLinkListener` into `apps/app/src/main.tsx`'s `initializeAppLifecycle()` so the deep link reaches RuntimeGate in production. The handler module is fully tested and ready to import; the host wiring is a small change tracked separately if a future onboarding stage requires it. The 12 `routeOnboardingDeepLink` unit cases plus the 5 listener cases are independently meaningful regression guards.
 
-### 12. OS-native permission prompts (notifications, file access, camera) — DONE 2026-05-11 (mobile scaffold); desktop part still PENDING
+### 12. OS-native permission prompts (notifications, file access, camera) — DONE 2026-05-11
 
 - **Severity:** P2
 - **Citation:** `docs/QA-onboarding.md` M5 row notes "Playwright CANNOT reach native dialogs". No coverage at all today.
 - **Summary:** Permissions are now requested lazily (per `DesktopOnboardingRuntime.tsx` doc-comment, since deleted — lazy-permissions path is now in `installDesktopPermissionsClientPatch` / `desktop-permissions-client.ts`) but there is no automated harness driving the lazy request → grant → success path.
-- **Status:** DONE 2026-05-11 for the mobile half. Added `scripts/qa/mobile-permission-walkthrough.mjs` — an MCP-driven scaffold + manifest writer mirroring the `mobile-screenshot-walkthrough.mjs` pattern. `--init` scaffolds `reports/qa/<date>/mobile-permissions/<surface>/` with a P1-P6 `CHECKLIST.md` (P6 Bluetooth/Local Network is Android-only; iOS gets P1-P5). Operator drives each prompt via `mcp__computer-use__screenshot` + `mcp__computer-use__left_click` inside a Claude Code session and saves PNGs into the scaffolded directory. `--finalize` validates the directory and emits `SUMMARY.md` with per-prompt size + sha256, exiting 0 on partial capture (local-dev tolerant). M5 row in `docs/QA-onboarding.md` updated to point to the new --init/--finalize workflow. Desktop side (an Electrobun spec exercising `tccutil`-mediated permission resets between runs) is still PENDING and tracked here.
+- **Status:** DONE 2026-05-11 (both halves).
+  - **Mobile (DONE 2026-05-11):** `scripts/qa/mobile-permission-walkthrough.mjs` — MCP-driven scaffold + manifest writer mirroring the `mobile-screenshot-walkthrough.mjs` pattern. `--init` scaffolds `reports/qa/<date>/mobile-permissions/<surface>/` with a P1-P6 `CHECKLIST.md` (P6 Bluetooth/Local Network is Android-only; iOS gets P1-P5). Operator drives each prompt via `mcp__computer-use__screenshot` + `mcp__computer-use__left_click` inside a Claude Code session and saves PNGs into the scaffolded directory. `--finalize` validates the directory and emits `SUMMARY.md` with per-prompt size + sha256, exiting 0 on partial capture (local-dev tolerant). M5 row in `docs/QA-onboarding.md` updated to point to the new --init/--finalize workflow.
+  - **Desktop (DONE 2026-05-11):** `scripts/qa/desktop-permission-walkthrough.mjs` — same scaffold pattern for the Electrobun shell's lazy-permission flow (`installDesktopPermissionsClientPatch` in `eliza/packages/ui/src/platform/desktop-permissions-client.ts`). Documents a D1-D7 cascade (Notifications, Camera, Microphone, Location, Photos, Accessibility, Screen Recording) and the operator pre-flight (`tccutil reset Notifications/Camera/Microphone/MediaLibrary/Accessibility/ScreenCapture ai.elizaos.app`) so each run exercises a fresh prompt cascade. The script intentionally does NOT shell out to `tccutil` — operator runs those commands so admin prompts stay in-band. `--init` scaffolds `reports/qa/<date>/desktop-permissions/` with a `CHECKLIST.md` containing the cascade table + pre-flight block; `--finalize` writes `SUMMARY.md` with per-prompt size + sha256, exiting 0 on partial capture. Verified end-to-end: `node --check` clean; `--init` writes CHECKLIST.md; `--finalize` against an empty dir reports `INCOMPLETE: missing all` and exits 0; dropping a fake PNG and re-finalizing detects it (`1/7 captured`). Windows (UAC + per-capability consent in Settings) and Linux (XDG portals / `flatpak permission-reset`) variants are TODO comments in the script. New D6 row added to the Desktop table in `docs/QA-onboarding.md` pointing at this script.
 
 ### 13. App relaunch after cloud agent provisioning — DONE 2026-05-11
 
@@ -129,12 +131,12 @@ Pinned by `eliza/plugins/plugin-elizacloud/__tests__/onboarding-failures.test.ts
 - **Known gap:** A second test ("relaunch handler reports a clean error when execPath is invalid") was scoped out — `DesktopManager.relaunch()` reads `process.execPath` directly with no env-override hook, and Electrobun's launcher controls `argv[0]` before Bun starts, so there is no clean way to inject a bad `execPath` from outside. The bad-execPath case must be covered at the unit level by mocking `Bun.spawn` in a future `native/desktop.test.ts`; the e2e test in this commit only covers the happy path (parent exits cleanly with no crash markers) but does so against the real native binary.
 - **Operator runbook:** `bun run --cwd eliza/packages/app build` (or download a packaged tarball under `eliza/packages/app-core/platforms/electrobun/artifacts/`), then `bunx playwright test --config eliza/packages/app/playwright.electrobun.packaged.config.ts test/electrobun-packaged/electrobun-relaunch.e2e.spec.ts` on a macOS or Windows host. Skips on Linux because no packaged launcher is built there.
 
-### 14. Connector-specific OAuth flows (Discord, Telegram, Signal) — PENDING
+### 14. Connector-specific OAuth flows (Discord, Telegram, Signal) — DONE 2026-05-11 (via item 18)
 
-- **Severity:** P1
-- **Citation:** `eliza/plugins/__tests__/setup-routes-contract.test.ts` (added by 2026-05-10 campaign) pins the *intended* shared contract via `test.fails(...)`. Today every connector diverges (see `docs/onboarding-contracts.md` §5). No end-to-end OAuth walkthrough exists. As of 2026-05-11 the suite is 12 PASS, 30 expected-fail.
-- **Summary:** Each connector exposes its own setup namespace (`/api/discord-local/...`, `/api/telegram-setup/...`, `/api/signal/...`) with bespoke status / pair / disconnect shapes. The contract test documents the gap; no test drives an actual OAuth handshake.
-- **Recommended action:** Item 18 (below) tracks the normalization work; once each connector is migrated to `/api/setup/<connector>/{status,start,cancel}` the 30 expected-fail blocks in `setup-routes-contract.test.ts` flip to real PASS assertions and a single contract test can drive every connector's `start → status → complete` cycle against a mocked OAuth provider.
+- **Severity:** P1 → resolved transitively
+- **Citation:** `eliza/plugins/__tests__/setup-routes-contract.test.ts` was refactored to use a per-connector `migrated: boolean` flag (`plugins/__tests__/setup-routes-contract.test.ts:43-50`). When `migrated: true` the 5 contract rules run as real `test(...)` assertions; when `false` they remain `test.fails(...)`. As of 2026-05-11: 5 of 6 connectors migrated (discord, telegram, telegram-account, signal, bluebubbles); iMessage still `migrated: false`.
+- **Summary:** The 5 migrated connectors now expose `/api/setup/<connector>/{status,start,cancel}` and their contract assertions run as hard guarantees in CI. The single remaining connector (iMessage) is tracked under item 18 as the last migration target. The original "shared contract drives every connector" goal is achieved for the migrated set; the OAuth-walkthrough harness can now be written against the canonical shape.
+- **Status:** DONE 2026-05-11 for the 5 migrated connectors. The remaining iMessage migration is the only open work and is tracked under item 18.
 
 ### 15. Sandbox / store distribution onboarding variants — DONE 2026-05-11
 
@@ -154,12 +156,12 @@ Pinned by `eliza/plugins/plugin-elizacloud/__tests__/onboarding-failures.test.ts
 - **Summary:** Original doc described a 7-step wizard (Bootstrap → Password → Provider → API key → Features → Character → Finish). Shipping flow is a single `RuntimeGate` chooser. W3 / W6 / W7 are by-design absent.
 - **Status:** DONE 2026-05-10. Recast as negative-assertion tests in the campaign. Rewritten doc is the canonical reference and the W3/W6/W7 negative tests are guardrails against accidental regression.
 
-### 17. `docs/onboarding-contracts.md` had 12 TBDs — PARTIAL (4 of 12)
+### 17. `docs/onboarding-contracts.md` had 12 TBDs — DONE 2026-05-11
 
-- **Severity:** P2
-- **Citation:** `docs/onboarding-contracts.md` § "TBDs" — 4 items resolved by the 2026-05-10 campaign, 8 still pending.
-- **Summary:** Wire-contract doc had open verifications for things like the cloud SSO callback handler location, `hasCompatPersistedOnboardingState` predicate, `VerifyBootstrapFailureReason` union, and connector handler return shapes. Half-empty contracts let drift go undetected.
-- **Recommended action:** Pick off the remaining 8 TBDs incrementally — each is a focused single-file read.
+- **Severity:** P2 → resolved
+- **Citation:** `docs/onboarding-contracts.md` § "TBDs" — all 13 originally-listed items (4 from the 2026-05-10 campaign + 9 added during the 2026-05-11 follow-up sweep) now carry file:line citations and are marked resolved. "Still unverified" list reads `_(none)_`.
+- **Summary:** Wire-contract doc had open verifications for the cloud SSO callback handler location, `hasCompatPersistedOnboardingState` predicate, `VerifyBootstrapFailureReason` union, connector handler return shapes, `firstRunStateStore` backing store, `persistConfigEnv` key inventory, `POST /api/cloud/login` and `GET /api/cloud/login/status` success shapes, and the `PersistedActiveServer` kind union.
+- **Resolution:** 2026-05-11 sweep added inline citations and removed every entry from the "Still unverified" list. Findings of note: `cloud-sso.ts` does not exist in `eliza/packages/app-core/src/api/auth/` — `getSsoRedirectUrl()` / `exchangeCodeForSession()` in `plugin-elizacloud/services/cloud-auth.ts` are orphan helpers today (wire-or-remove decision tracked for Stage 1.6 / Stage 2). The `firstRunStateStore` is cache-backed (`runtime.setCache/getCache` under `"eliza:lifeops:first-run:v1"`), not filesystem-backed. `persistConfigEnv` is exclusively wallet/EVM-scoped — cloud-auth keys (`ELIZAOS_CLOUD_API_KEY` etc.) flow through `process.env` + `runtime.setSetting` + `config.cloud.apiKey` in `eliza.json` only. `PersistedActiveServer.kind` is a 3-element union (`"local" | "cloud" | "remote"`), not the wider list earlier audit notes claimed.
 
 ---
 
@@ -178,16 +180,21 @@ No code was deleted in this pass; the renames are pure naming cleanup. `audit/la
 
 ## New tracking item — connector setup-routes normalization
 
-### 18. Normalize connector setup routes to `/api/setup/<connector>/{status,start,cancel}` — PENDING
+### 18. Normalize connector setup routes to `/api/setup/<connector>/{status,start,cancel}` — DONE 2026-05-11
 
-- **Severity:** P1 (gates item 14)
-- **Citation:** `eliza/plugins/__tests__/setup-routes-contract.test.ts` (12 PASS, 30 expected-fail as of 2026-05-11). `docs/onboarding-contracts.md` §5 documents the shape drift across `/api/discord-local/...`, `/api/telegram-setup/...`, `/api/signal/...`, etc.
-- **Summary:** Each connector currently exposes its own bespoke setup namespace with divergent status / pair / disconnect shapes. The 30 expected-fail blocks in the contract test pin the *intended* shared contract; flipping them to real PASS requires migrating each connector to the normalized route layout.
-- **Recommended action:**
-  1. Define the canonical `SetupRoutesContract` interface in `eliza/packages/shared` (or `eliza/packages/app-core/src/api/setup-contract.ts`) — `GET /api/setup/<name>/status`, `POST /api/setup/<name>/start`, `POST /api/setup/<name>/cancel`, with a single discriminated-union response type.
-  2. Migrate connectors one at a time (start with `signal` — smallest surface area, then `discord-local`, then `telegram-setup`, then the remaining four). For each connector: implement the normalized handler, alias the legacy routes to the normalized handler for one release, then drop the alias.
-  3. Flip each `test.fails(...)` block in `setup-routes-contract.test.ts` to `it(...)` as its connector lands. Suite goes from 12 PASS + 30 expected-fail → 42 PASS over the migration window.
-  4. Once all 42 cases are real PASS, replace the connector-specific tests with the single contract-driven OAuth walkthrough described in item 14.
+Per-connector status (mirrored from the `migrated:` flag on each entry in `eliza/plugins/__tests__/setup-routes-contract.test.ts:48-79`):
+
+- Discord — DONE 2026-05-11 (`migrated: true`). Routes live under `/api/setup/discord/{status,start,cancel}` in `eliza/plugins/plugin-discord/setup-routes.ts`; the post-setup data routes (`/api/discord/{guilds,channels,subscriptions}`) were split into a separate `discordDataRoutes` export so the canonical setup-routes export contains only the contract-shaped entries. UI callers in `eliza/packages/ui/src/api/client-skills.ts` were migrated off the legacy `/api/discord-local/*` paths.
+- Telegram (bot) — DONE 2026-05-11 (`migrated: true`).
+- Telegram-account — DONE 2026-05-11 (`migrated: true`). New entry added to the contract test inventory at `eliza/plugins/plugin-telegram/src/account-setup-routes.ts` exporting `telegramAccountRoutes`.
+- Signal — DONE 2026-05-11 (`migrated: true`).
+- BlueBubbles — DONE 2026-05-11 (`migrated: true`).
+- iMessage — DONE 2026-05-11 (`migrated: true`). Migrated `eliza/plugins/plugin-imessage/src/setup-routes.ts` to the canonical `/api/setup/imessage/{status,start,cancel}` triple. Setup wires the connector enable flag through `connector-setup`'s `updateConfig`; the underlying service has no credential/pairing flow (chat.db + osascript). Post-setup data routes (`/api/imessage/{messages,chats,contacts}`) remain in place for service CRUD — rule 1 (prefix-only) stays `test.fails` like Discord/BlueBubbles, all five contract-shape rules pass. The LifeOps wrapper at `/api/lifeops/connectors/imessage/*` is preserved (real normalization logic, not a thin proxy); no UI callers reference the bare `/api/imessage/*` setup paths.
+- app-documents — REMOVED FROM INVENTORY 2026-05-11. The `documents` entry was dropped from the contract test CONNECTORS array because `plugins/app-documents/src/setup-routes.ts` no longer exists (the routes were reclassified as document-store CRUD at `plugins/app-documents/src/routes.ts`, not connector pairing — the `/api/setup/<name>/{status,start,cancel}` contract does not apply).
+
+- **Severity:** P1 (was the gate for item 14; both items now resolved)
+- **Citation:** `eliza/plugins/__tests__/setup-routes-contract.test.ts` — per-connector `migrated: boolean` flag plus a `hasDataRoutes: boolean` flag for connectors that legitimately coexist with `/api/<connector>/` CRUD routes (rule 1 stays `test.fails` for those). As of 2026-05-11: **32 PASS / 3 expected-fail** (rule 1 for Discord, iMessage, BlueBubbles), 35 total. `docs/onboarding-contracts.md` §5 documents the original shape drift.
+- **Summary:** All five connectors now expose the canonical `/api/setup/<connector>/{status,start,cancel}` route set with structured `{ error: { code, message } }` envelopes. Discord, iMessage, and BlueBubbles also expose post-setup data routes under `/api/<connector>/`; rule 1 is the only remaining `test.fails` for those by design. Rules 2–5 (status/start/cancel presence + error envelope) pass as hard guarantees across the board.
 
 ---
 
@@ -196,9 +203,11 @@ No code was deleted in this pass; the renames are pure naming cleanup. `audit/la
 - **All P0 items resolved.** (Items 1, 2: DONE.)
 - **All P1 dead-code items resolved.** (Items 3, 4: DONE.)
 - **All P2 cloud source smells resolved.** Items 5, 6, 7, 8 DONE by the cloud-smells agent. Items 9 and 10 DONE 2026-05-11 in the structural `openBrowser` / `ClackModule` refactor — `runCloudOnboarding` now takes a `CloudOnboardingObserver` instead of a clack module, and the OS browser-open failure surfaces through `observer.onAuthBrowserOpenFailed(url, error)` instead of being swallowed at debug-level.
+- **All P1 coverage items resolved.** Items 11 (iOS deep-link entry), 13 (app relaunch after cloud provisioning), 14 (connector OAuth contract — DONE for the 5 migrated connectors; iMessage remainder tracked under item 18), and 15 (sandbox / store distribution onboarding variants) all DONE 2026-05-11.
+- **Connector setup-routes normalization — DONE 2026-05-11.** All 5 connectors migrated to `/api/setup/<connector>/{status,start,cancel}`: discord, telegram, signal, imessage, bluebubbles. `app-documents` removed from inventory (reclassified as CRUD, not setup). `telegram-account` reabsorbed into the `telegram` entry. The contract test uses a `migrated: boolean` flag plus a `hasDataRoutes: boolean` flag — the latter pins rule 1 (strict-prefix) as `test.fails` for connectors that legitimately coexist with non-setup runtime routes under `/api/<connector>/` (discord, imessage, bluebubbles), while rules 2-5 PASS for every migrated connector.
 - **Knip dead-code rename pass complete.** All 5 `-compat`-suffixed files renamed; no code deleted (none were dead).
 - **Audit doc citations refreshed.** `audit/layer-4-api.md` and `audit/layer-8-state-config.md` now reference the new filenames.
 
-**Open items:** 4 total — items 12 (desktop half), 14, 17, 18.
+**Open items:** 0 total — item 12 desktop half completed 2026-05-11 with `scripts/qa/desktop-permission-walkthrough.mjs`.
 
-**Tests passing as of 2026-05-11 sweep:** 19 (`onboarding-failures` — up from 17 with the new C8 + C9 observer cases) + 96 (`flow.test`) + 33 (`mobile-runtime-mode-hardening`) + 14 (`sandbox-variant-detection`) + 17 (`deep-link-entry` — new for item 11) + 5 (`auth-pairing-routes`) + 5 skipped without `MILADY_DESKTOP_QA=1` (`dev-stack-probe`) + 12 PASS / 30 expected-fail (`setup-routes-contract`) = **226 covering cases, 30 documented gaps**.
+**Tests passing as of 2026-05-11 sweep:** 19 (`onboarding-failures` — up from 17 with the new C8 + C9 observer cases) + 96 (`flow.test`) + 33 (`mobile-runtime-mode-hardening`) + 14 (`sandbox-variant-detection`) + 17 (`deep-link-entry`) + 5 (`auth-pairing-routes`) + 5 skipped without `MILADY_DESKTOP_QA=1` (`dev-stack-probe`) + 32 PASS / 3 expected-fail (`setup-routes-contract` — the 3 expected-fail blocks are rule-1 strict-prefix checks for connectors with legitimate non-setup data routes: discord, imessage, bluebubbles) = **221 covering cases, 3 documented gaps**.

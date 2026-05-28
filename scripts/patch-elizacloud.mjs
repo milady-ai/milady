@@ -6,17 +6,22 @@
  * Once that PR merges and a compatible package is published, delete this script,
  * the eliza/patches/milady/elizacloud-patchset/ directory, and the postinstall hook entry.
  *
- * The static patch targets the repo-local `/responses` implementation. Package
- * artifacts can move independently across alpha/beta/main channels, so this
- * script detects the installed dist shape instead of pinning a single version.
- * If the local patch file is unavailable in package-only mode, postinstall skips
- * this optional bridge patch instead of requiring the elizaOS source checkout.
+ * Pinned to @elizaos/plugin-elizacloud@2.0.0-alpha.8 — skips other versions
+ * because the patch context lines may have shifted.
+ *
+ * The alpha.8 registry artifact and the repo-local alpha.8 workspace package
+ * have diverged in the wild. The static patch targets the repo-local
+ * `/responses` implementation. Published-only CI can still install an older
+ * AI SDK based artifact under the same version; that implementation has its
+ * own JSON response path and fence repair, so this bridge patch should skip it
+ * instead of failing postinstall before CI can run.
  */
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+const PINNED_VERSION = "2.0.0-alpha.8";
 const PATCH_REL_PATH =
   "eliza/patches/milady/elizacloud-patchset/0001-json-output-enforcement-and-fence-strip.patch";
 const DIST_ENTRYPOINTS = ["dist/node/index.node.js", "dist/cjs/index.node.cjs"];
@@ -96,6 +101,24 @@ export function main() {
   const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, "utf8"));
   const usesLegacyAiSdkObjectGeneration =
     distUsesLegacyAiSdkObjectGeneration(pluginRoot);
+  if (pkg.version !== PINNED_VERSION) {
+    if (distAlreadyHasBridgeFixes(pluginRoot)) {
+      log(
+        `installed version ${pkg.version} already contains the bridge fixes - skipping`,
+      );
+      return;
+    }
+    if (usesLegacyAiSdkObjectGeneration) {
+      log(
+        `installed version ${pkg.version} uses legacy AI SDK object generation - skipping direct /responses bridge patch`,
+      );
+      return;
+    }
+    log(
+      `installed version ${pkg.version} does not match pinned ${PINNED_VERSION} - skipping bridge patch`,
+    );
+    return;
+  }
 
   if (distAlreadyHasBridgeFixes(pluginRoot)) {
     log(
@@ -114,6 +137,15 @@ export function main() {
       `local bridge patch file missing for installed version ${pkg.version} - skipping optional patch`,
     );
     return;
+  }
+
+  if (distAlreadyHasBridgeFixes(pluginRoot)) {
+    log("bridge fixes already present in built dist - skipping patch");
+    return;
+  }
+
+  if (!fs.existsSync(patchPath)) {
+    fail(`patch file missing: ${path.relative(repoRoot, patchPath)}`);
   }
 
   // Reverse-check first: if patches are already applied, exit cleanly.

@@ -1,0 +1,12 @@
+c68e345e6250f928923cce2017b3540053735f4a37b53aa2e17acc260a7c897d  ./@elizaos%2Fagent@2.0.0-alpha.537.patch
+e72cc2f7d08dd280ebe21f7c8f37c313e09f56920ebd5dd71eacd85e88c3597b  ./@elizaos%2Fapp-core@2.0.0-alpha.537.patch
+7a8e78c08d8c5e4baa592d93d26cc853683a09edda398b848accf7734429a831  ./@elizaos%2Fcapacitor-llama@0.1.0.patch
+84fa635d479dd76df738ca1e6245876a0e815582e5ae12b45d957ee35543e310  ./@elizaos%2Fcore@2.0.0-alpha.537.patch
+4c12672d4c78ae5eaa671c2ba230b078ef358945e502595623efd80028c566bf  ./@noble%2Fcurves@2.0.1.patch
+4f6e9e597f09ad5aaf8b03e73b666b588db5209370774debb03c8619e23dbfe8  ./@pixiv%2Fthree-vrm@3.5.2.patch
+ccde54ea5b08e5370e7795c6db77c05616aca4cee0cd8552d4e6500119bc86f8  ./coding-agent-adapters@0.16.3.patch
+8e112e92681de2bcee90500358b8a3d66f2e4b2a04582ce6a8f424177aef3d3a  ./electrobun@1.16.0.patch
+105f26f13507c2de69e819b0161ca6796cc23f1b6a227085e07c43f940b39b63  ./llama-cpp-capacitor@0.1.5.patch
+2749b1e994de87fd46965252426390fa9ea5d242459d729e51a4b4911aa95efc  ./proper-lockfile@4.1.2.patch
+60f943d60d7ddc28a537b15617dd377ddfc92864db8cea55e9ffa9768d417dd6  ./pty-manager@1.11.0.patch
+8ad81f17da40044c79bea7d63f64740bf6c066384fdc5ed10c34d3d70858b0b7  ./tsup@8.5.1.patch

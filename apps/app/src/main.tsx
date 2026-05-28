@@ -14,7 +14,6 @@ import {
   isElectrobunRuntime,
 } from "@elizaos/app-core";
 import type { BrandingConfig } from "@elizaos/app-core";
-import { MILADY_DEFAULT_THEME } from "@elizaos/shared";
 import {
   type AppBootConfig,
   getBootConfig,
@@ -49,6 +48,17 @@ import {
   shouldInstallMainWindowOnboardingPatches,
   syncDetachedShellLocation,
 } from "@elizaos/app-core";
+// Pill / voice-capture symbols live in upstream @elizaos/ui source but are
+// not yet published on the `alpha` dist-tag. Route through the local stub so
+// package-mode builds stay green; see apps/app/src/pill-stubs.tsx.
+import {
+  type ConversationMessage,
+  createVoiceCapture,
+  type VoiceCaptureHandle,
+  VoicePill,
+  type VoicePillMessage,
+  normalizePillMessage,
+} from "./pill-stubs";
 import { AppWindowRenderer } from "@elizaos/app-core";
 import { dispatchQueuedLifeOpsGithubCallbackFromUrl } from "@elizaos/app-lifeops/platform";
 import type { ShareTargetPayload } from "@elizaos/app-core/platform";
@@ -66,7 +76,7 @@ import {
   startDeviceBridgeClient,
   type DeviceBridgeClient,
 } from "@elizaos/capacitor-llama";
-import { StrictMode } from "react";
+import { StrictMode, useCallback, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { CompanionShell } from "@elizaos/app-companion/ui";
 import {
@@ -132,13 +142,13 @@ import {
 import { APP_ENV_ALIASES, APP_ENV_PREFIX } from "./brand-env";
 import { APP_CHARACTER_CATALOG } from "./character-catalog";
 import { bootIosLocalRuntimeIfApplicable } from "./ios-local-runtime-boot";
+import { bootAndroidLocalRuntimeIfApplicable } from "./android-local-runtime-boot";
 import {
   apiBaseToDeviceBridgeUrl,
   type IosRuntimeConfig,
   type IosRuntimeMode,
   resolveIosRuntimeConfig,
 } from "@elizaos/app-core";
-
 import { CharacterEditor } from "@elizaos/app-core/components/character/CharacterEditor";
 
 declare global {
@@ -198,7 +208,6 @@ function getInjectedAppApiBase(): string | undefined {
 
 const APP_BRANDING: Partial<BrandingConfig> = {
   ...APP_BRANDING_BASE,
-  theme: MILADY_DEFAULT_THEME,
   // The hosted web bundle stays cloud-only in production. Desktop shells and
   // other hosts inject an explicit API base before React boots, and that host
   // backend should control onboarding capabilities instead.
@@ -210,9 +219,6 @@ const APP_BRANDING: Partial<BrandingConfig> = {
   }),
 };
 
-/**
- * Platform detection utilities
- */
 const platform = Capacitor.getPlatform();
 const isNative = Capacitor.isNativePlatform();
 const isIOS = platform === "ios";
@@ -238,6 +244,23 @@ function isDesktopPlatform(): boolean {
 }
 
 const windowShellRoute = resolveWindowShellRoute();
+
+// `isPillWindowShell` is not yet exported from the published @elizaos/app-core
+// alpha. The pill window is launched with `?shell=pill` by the Electrobun
+// host, so we detect that locally until the upstream helper ships.
+function isPillWindowShellRoute(route: unknown): boolean {
+  if (route && typeof route === "object") {
+    const kind = (route as { kind?: unknown }).kind;
+    if (typeof kind === "string" && kind === "pill") return true;
+  }
+  if (typeof window === "undefined") return false;
+  try {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("shell") === "pill";
+  } catch {
+    return false;
+  }
+}
 
 /**
  * Adds `eliza-electrobun-frameless` for CSS `-webkit-app-region` (Chromium/CEF).
@@ -383,7 +406,12 @@ function forceDesktopDevLocalActiveServer(): void {
     console.warn(
       `${APP_LOG_PREFIX} Desktop dev ignored stale remote active server; using local agent.`,
     );
-  } catch {}
+  } catch (err) {
+    console.warn(
+      `${APP_LOG_PREFIX} forceDesktopDevLocalActiveServer failed:`,
+      err instanceof Error ? err.message : err,
+    );
+  }
 }
 try {
   const url = new URL(window.location.href);
@@ -400,11 +428,21 @@ try {
     for (const key of STALE_BOOTSTRAP_KEYS) {
       try {
         window.localStorage.removeItem(key);
-      } catch {}
+      } catch (err) {
+        console.warn(`${APP_LOG_PREFIX} Failed to clear stale bootstrap key:`, {
+          key,
+          error: err instanceof Error ? err.message : String(err),
+        });
+      }
     }
     try {
       window.localStorage.setItem(SELF_HOSTED_TOKEN_KEY, fragmentToken);
-    } catch {}
+    } catch (err) {
+      console.warn(
+        `${APP_LOG_PREFIX} Failed to persist fragment bootstrap token:`,
+        err instanceof Error ? err.message : err,
+      );
+    }
   }
   if (fragmentToken || hasQueryToken) {
     url.hash = "";
@@ -415,7 +453,12 @@ try {
     try {
       const saved = window.localStorage.getItem(SELF_HOSTED_TOKEN_KEY)?.trim();
       if (saved) bootstrapToken = saved;
-    } catch {}
+    } catch (err) {
+      console.warn(
+        `${APP_LOG_PREFIX} Failed to read persisted bootstrap token:`,
+        err instanceof Error ? err.message : err,
+      );
+    }
   }
   // On AOSP/Milady the agent runs in the same APK and exposes its
   // per-boot bearer through `window.ElizaNative.getLocalAgentToken()`
@@ -432,20 +475,43 @@ try {
       const nativeToken = native?.getLocalAgentToken?.()?.trim();
       if (nativeToken) {
         bootstrapToken = nativeToken;
+        // Persist to the same key the fragment-token path uses so any
+        // later re-load through localStorage finds it without needing
+        // the bridge to be available at that moment.
         try {
           window.localStorage.setItem(SELF_HOSTED_TOKEN_KEY, nativeToken);
-        } catch {}
+        } catch (err) {
+          console.warn(
+            `${APP_LOG_PREFIX} Failed to persist native bootstrap token:`,
+            err instanceof Error ? err.message : err,
+          );
+        }
       }
-    } catch {}
+    } catch (err) {
+      console.warn(
+        `${APP_LOG_PREFIX} Failed to load native bootstrap token:`,
+        err instanceof Error ? err.message : err,
+      );
+    }
   }
   if (bootstrapToken) {
     appBootConfig.apiToken = bootstrapToken;
     appBootConfig.apiBase ??= window.location.origin;
     try {
       client.setToken(bootstrapToken);
-    } catch {}
+    } catch (err) {
+      console.warn(
+        `${APP_LOG_PREFIX} Failed to install bootstrap token on API client:`,
+        err instanceof Error ? err.message : err,
+      );
+    }
   }
-} catch {}
+} catch (err) {
+  console.warn(
+    `${APP_LOG_PREFIX} Bootstrap token resolution failed:`,
+    err instanceof Error ? err.message : err,
+  );
+}
 // On desktop, the Electrobun shell injects the local agent's HTTP origin
 // (e.g. `http://127.0.0.1:31337`) onto window before the renderer mounts.
 // Push it into the boot config so the React shell talks to that origin
@@ -464,14 +530,14 @@ forceDesktopDevLocalActiveServer();
 // On AOSP/Milady, ElizaNativeBridge.getLocalAgentToken() returns null
 // for the first ~30-50s of app launch — the on-device agent process is
 // still booting and hasn't written its per-boot bearer to its volatile
-// static yet. The synchronous bootstrap above fires BEFORE the agent is
-// up, so it sees null and the React shell falls into PairingView even
-// though the bearer is in fact about to be available.
+// static yet. The synchronous bootstrap above + applyRestoredConnection
+// both fire BEFORE the agent is up, so they see null and the React shell
+// falls into PairingView even though the bearer is about to be available.
 //
 // Poll the bridge for up to 90s after launch; the first non-null read
-// applies the bearer to the client + localStorage and stops. Stock
+// applies the bearer to the boot config + client and stops. Stock
 // Capacitor builds never expose `window.ElizaNative` so the watchdog
-// exits immediately.
+// exits immediately on the first tick.
 (function installOnDeviceBearerWatchdog() {
   if (typeof window === "undefined") return;
   const bridge = (
@@ -490,10 +556,21 @@ forceDesktopDevLocalActiveServer();
         client.setToken(token);
         try {
           window.localStorage.setItem(SELF_HOSTED_TOKEN_KEY, token);
-        } catch {}
+        } catch (err) {
+          console.warn(
+            `${APP_LOG_PREFIX} Failed to persist watchdog bootstrap token:`,
+            err instanceof Error ? err.message : err,
+          );
+        }
         return;
       }
-    } catch {}
+    } catch (err) {
+      console.warn(
+        `${APP_LOG_PREFIX} On-device bearer watchdog tick failed:`,
+        err instanceof Error ? err.message : err,
+      );
+      return; // Stop polling if the bridge itself is throwing.
+    }
     if (Date.now() < deadline) setTimeout(tick, 500);
   };
   setTimeout(tick, 500);
@@ -558,6 +635,11 @@ async function initializePlatform(): Promise<void> {
     // here. No-ops on Android, on iOS cloud/cloud-hybrid/remote-mac, and
     // when the native plugin isn't compiled into the binary.
     void bootIosLocalRuntimeIfApplicable();
+    // Android local runtime: when mobile-runtime-mode is "local", calls
+    // ElizaBunRuntimePlugin.start() which triggers ElizaAgentService to
+    // start the Bun backend and polls until /api/health reports ready.
+    // No-ops on iOS and when the plugin isn't compiled into the APK.
+    void bootAndroidLocalRuntimeIfApplicable();
   }
 
   if (isDesktopPlatform()) {
@@ -812,6 +894,23 @@ function setupPlatformStyles(): void {
     "env(safe-area-inset-right, 0px)",
   );
   root.style.setProperty("--keyboard-height", "0px");
+
+  // Sizing on native: pin the React mount to the full visual viewport
+  // so the chat composer + keyboard-resize interaction stays clamped.
+  // We deliberately do NOT set `paddingTop / paddingLeft / paddingRight`
+  // here — the @elizaos/ui shell components (StartupShell, RuntimeGate,
+  // Header, page-layout-mobile-drawer, dialog, drawer-sheet) all apply
+  // their own `var(--safe-area-*)` padding from the CSS variables set
+  // a few lines above. Adding a second layer on `#root` doubles the
+  // top inset and leaves a visible black band below the status bar.
+  if (isNative) {
+    const reactRoot = document.getElementById("root");
+    if (reactRoot) {
+      reactRoot.style.boxSizing = "border-box";
+      reactRoot.style.minHeight = "100dvh";
+      reactRoot.style.maxHeight = "100dvh";
+    }
+  }
 }
 
 function isPhoneCompanionMode(): boolean {
@@ -834,6 +933,374 @@ function resolveAppWindowSlug(): string | null {
     .replace(/[?#].*$/, "")
     .split("/")[0];
   return slug.length > 0 ? slug : null;
+}
+
+// The pill is a compact overlay, not a full chat surface. Cap the tail we
+// render so a long conversation can't blow the panel out.
+const PILL_MESSAGE_TAIL = 20;
+// localStorage key for the sticky pill conversation id. The pill window runs
+// in its own Electrobun renderer process with no access to the main shell's
+// active conversation state, so we keep its own session pinned to localStorage.
+const PILL_CONVERSATION_STORAGE_KEY = "milady.pill.activeConversationId";
+
+/**
+ * Map a chat-API `ConversationMessage` to the trimmed `VoicePillMessage` shape
+ * the pill renders. Skips entries with no display text and collapses message
+ * roles to the binary user/agent split the pill UI expects.
+ */
+function toPillMessage(message: ConversationMessage): VoicePillMessage | null {
+  const text = message.text?.trim() ?? "";
+  if (!text) return null;
+  return {
+    id: message.id,
+    role: message.role === "user" ? "user" : "agent",
+    text,
+  };
+}
+
+function projectPillMessages(
+  messages: ConversationMessage[],
+): VoicePillMessage[] {
+  const tail = messages.slice(-PILL_MESSAGE_TAIL);
+  const projected: VoicePillMessage[] = [];
+  for (const message of tail) {
+    const pill = toPillMessage(message);
+    if (pill) projected.push(pill);
+  }
+  return projected;
+}
+
+function readPillConversationId(): string | null {
+  try {
+    return window.localStorage.getItem(PILL_CONVERSATION_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function writePillConversationId(id: string | null): void {
+  try {
+    if (id) {
+      window.localStorage.setItem(PILL_CONVERSATION_STORAGE_KEY, id);
+    } else {
+      window.localStorage.removeItem(PILL_CONVERSATION_STORAGE_KEY);
+    }
+  } catch {
+    /* sticky id is best-effort — pill still works without it */
+  }
+}
+
+/**
+ * Minimal shape of a conversation list entry the pill cares about. Kept local
+ * (rather than imported from `@elizaos/ui`) because the app-core dist surface
+ * exposes a slightly looser variant of `Conversation`, and the pill only
+ * needs id + updatedAt to pick a "newest" conversation to attach to.
+ */
+type PillConversationSummary = {
+  id: string;
+  updatedAt?: number | string;
+};
+
+/**
+ * Pick the most-recently-updated conversation from a server snapshot. Returns
+ * null when the list is empty. The pill uses this to re-attach to the
+ * conversation the user just left off in when no sticky pill id is set.
+ */
+function pickNewestConversation(
+  conversations: PillConversationSummary[],
+): PillConversationSummary | null {
+  if (conversations.length === 0) return null;
+  let best = conversations[0];
+  for (let i = 1; i < conversations.length; i++) {
+    const candidate = conversations[i];
+    if (conversationUpdatedAtMs(candidate) > conversationUpdatedAtMs(best)) {
+      best = candidate;
+    }
+  }
+  return best;
+}
+
+function conversationUpdatedAtMs(c: PillConversationSummary): number {
+  if (typeof c.updatedAt === "number") return c.updatedAt;
+  if (typeof c.updatedAt === "string") {
+    const t = Date.parse(c.updatedAt);
+    return Number.isFinite(t) ? t : 0;
+  }
+  return 0;
+}
+
+/**
+ * Pill renderer for the Electrobun overlay window.
+ *
+ * The pill window is its own renderer process — no AppProvider, no shared
+ * React state with the main shell. We talk to the same local agent the main
+ * composer talks to via the shared `client` singleton (already configured
+ * against the local API base by the boot-config block at module top), reuse
+ * the messaging routes (`createConversation`, `getConversationMessages`,
+ * `sendConversationMessageStream`), and subscribe to the same
+ * `proactive-message` WebSocket event the main app uses for out-of-band
+ * agent turns.
+ */
+function PillRoot() {
+  const [messages, setMessages] = useState<ConversationMessage[]>([]);
+  const conversationIdRef = useRef<string | null>(readPillConversationId());
+  const sendInFlightRef = useRef<boolean>(false);
+  const voiceCaptureRef = useRef<VoiceCaptureHandle | null>(null);
+  const handleSubmitRef = useRef<((text: string) => void) | null>(null);
+
+  // Append-or-replace by id so streaming token updates collapse onto a single
+  // assistant turn without flicker.
+  const upsertMessage = useCallback((next: ConversationMessage) => {
+    setMessages((prev) => {
+      const index = prev.findIndex((entry) => entry.id === next.id);
+      if (index < 0) return [...prev, next];
+      const copy = prev.slice();
+      copy[index] = next;
+      return copy;
+    });
+  }, []);
+
+  // Resolve which conversation the pill should attach to: prefer the sticky
+  // pill id if it still exists on the server, otherwise fall back to the
+  // most-recently-updated conversation. If the list is empty, return null
+  // and let the first send create a fresh conversation.
+  const resolveConversationId = useCallback(async (): Promise<
+    string | null
+  > => {
+    const sticky = conversationIdRef.current;
+    const { conversations } = await client.listConversations();
+    if (
+      sticky &&
+      conversations.some((c: PillConversationSummary) => c.id === sticky)
+    ) {
+      return sticky;
+    }
+    const newest = pickNewestConversation(conversations);
+    if (newest) {
+      conversationIdRef.current = newest.id;
+      writePillConversationId(newest.id);
+      return newest.id;
+    }
+    return null;
+  }, []);
+
+  // Hydrate the pill on mount with the existing conversation tail so the
+  // overlay opens in-context instead of blank.
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const convId = await resolveConversationId();
+      if (cancelled || !convId) return;
+      const { messages: history } =
+        await client.getConversationMessages(convId);
+      if (cancelled) return;
+      setMessages(history.map(normalizePillMessage));
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [resolveConversationId]);
+
+  // Subscribe to proactive (agent-initiated) messages — autonomy ticks,
+  // connector inbox forwards, etc. — so they show up in the pill the same
+  // way they show up in the main composer.
+  useEffect(() => {
+    client.connectWs();
+    const unsubscribe = client.onWsEvent(
+      "proactive-message",
+      (event: unknown) => {
+        if (!event || typeof event !== "object") return;
+        const payload = event as {
+          conversationId?: unknown;
+          message?: unknown;
+        };
+        if (typeof payload.conversationId !== "string") return;
+        if (payload.conversationId !== conversationIdRef.current) return;
+        const raw = payload.message;
+        if (!raw || typeof raw !== "object") return;
+        const candidate = raw as { id?: unknown };
+        if (typeof candidate.id !== "string") return;
+        upsertMessage(normalizePillMessage(raw));
+      },
+    );
+    return () => {
+      unsubscribe();
+    };
+  }, [upsertMessage]);
+
+  const handleSubmit = useCallback(
+    (text: string): void => {
+      const trimmed = text.trim();
+      if (!trimmed || sendInFlightRef.current) return;
+      sendInFlightRef.current = true;
+      void (async () => {
+        try {
+          let convId = conversationIdRef.current;
+          if (!convId) {
+            const created = await client.createConversation();
+            convId = created.conversation.id;
+            conversationIdRef.current = convId;
+            writePillConversationId(convId);
+          }
+
+          const now = Date.now();
+          const userMsgId = `pill-user-${now}`;
+          const assistantMsgId = `pill-asst-${now}`;
+          upsertMessage({
+            id: userMsgId,
+            role: "user",
+            text: trimmed,
+            timestamp: now,
+          });
+          upsertMessage({
+            id: assistantMsgId,
+            role: "assistant",
+            text: "",
+            timestamp: now,
+          });
+
+          const result = await client.sendConversationMessageStream(
+            convId,
+            trimmed,
+            (_token: string, accumulatedText?: string) => {
+              if (typeof accumulatedText !== "string") return;
+              upsertMessage({
+                id: assistantMsgId,
+                role: "assistant",
+                text: accumulatedText,
+                timestamp: now,
+              });
+            },
+          );
+
+          upsertMessage({
+            id: assistantMsgId,
+            role: "assistant",
+            text: result.text ?? "",
+            timestamp: Date.now(),
+            ...(result.failureKind ? { failureKind: result.failureKind } : {}),
+          });
+        } finally {
+          sendInFlightRef.current = false;
+        }
+      })();
+    },
+    [upsertMessage],
+  );
+
+  // Keep a live ref to handleSubmit so the voice-capture callback (which is
+  // installed once when the recorder lazily constructs) always routes finals
+  // through the current closure, not the one captured at first use.
+  useEffect(() => {
+    handleSubmitRef.current = handleSubmit;
+  }, [handleSubmit]);
+
+  // Tear the recorder down on unmount. start/stop themselves are driven by
+  // `handleRecordingChange` below.
+  useEffect(() => {
+    return () => {
+      voiceCaptureRef.current?.dispose();
+      voiceCaptureRef.current = null;
+    };
+  }, []);
+
+  // Voice capture via createVoiceCapture from @elizaos/ui — see eliza/packages/ui/src/voice/voice-capture-factory.ts
+  const handleRecordingChange = useCallback((recording: boolean): void => {
+    if (recording) {
+      if (!voiceCaptureRef.current) {
+        voiceCaptureRef.current = createVoiceCapture({
+          onTranscript: (segment) => {
+            if (!segment.final) {
+              // Interim segments are best-guess partials — useful for a future
+              // live caption surface but not safe to submit. Log only.
+              console.info(
+                `${APP_LOG_PREFIX} [pill] voice interim`,
+                segment.text,
+              );
+              return;
+            }
+            const submit = handleSubmitRef.current;
+            if (!submit) return;
+            submit(segment.text);
+          },
+          onStateChange: (state, error) => {
+            if (error) {
+              console.warn(
+                `${APP_LOG_PREFIX} [pill] voice ${state}`,
+                error.message,
+              );
+              return;
+            }
+            console.info(`${APP_LOG_PREFIX} [pill] voice ${state}`);
+          },
+        });
+      }
+      void voiceCaptureRef.current.start();
+      return;
+    }
+    void voiceCaptureRef.current?.stop();
+  }, []);
+
+  const pillMessages = projectPillMessages(messages);
+
+  return (
+    <VoicePill
+      messages={pillMessages}
+      onSubmit={handleSubmit}
+      onRecordingChange={handleRecordingChange}
+    />
+  );
+}
+
+function injectPillRendererStyles(): void {
+  const style = document.createElement("style");
+  style.dataset.elizaPillReset = "1";
+  style.textContent = `
+html, body, #root {
+  background: transparent !important;
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+html, body {
+  /* Allow the user to grab any non-interactive area to drag the window. */
+  -webkit-app-region: drag;
+}
+.elizaos-voice-pill,
+.elizaos-voice-pill__hit,
+.elizaos-voice-pill__chat,
+.elizaos-voice-pill__composer,
+.elizaos-voice-pill__input,
+.elizaos-voice-pill__ctrl,
+.elizaos-voice-pill__send,
+button,
+input,
+textarea {
+  -webkit-app-region: no-drag;
+}
+#root {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 12px;
+  box-sizing: border-box;
+}
+`;
+  document.head.appendChild(style);
+}
+
+function mountPillWindow(): void {
+  const rootEl = document.getElementById("root");
+  if (!rootEl) throw new Error("Root element #root not found");
+  injectPillRendererStyles();
+
+  createRoot(rootEl).render(
+    <ErrorBoundary>
+      <StrictMode>
+        <PillRoot />
+      </StrictMode>
+    </ErrorBoundary>,
+  );
 }
 
 function mountReactApp(): void {
@@ -860,9 +1327,6 @@ function mountReactApp(): void {
             </div>
           ) : (
             <>
-              {/* DesktopOnboardingRuntime was deleted upstream but main.tsx
-                  still referenced it. The surface-navigation + tray runtimes
-                  cover the desktop chrome bits we still need. */}
               <DesktopSurfaceNavigationRuntime />
               <DesktopTrayRuntime />
               <LifeOpsActivitySignalsEffect />
@@ -1013,7 +1477,11 @@ function resolveDeviceBridgeUrl(config: IosRuntimeConfig): string | null {
   if (!apiBase) return null;
   try {
     return apiBaseToDeviceBridgeUrl(apiBase);
-  } catch {
+  } catch (err) {
+    console.warn(
+      `${APP_LOG_PREFIX} Could not derive device bridge URL from apiBase:`,
+      err instanceof Error ? err.message : err,
+    );
     return null;
   }
 }
@@ -1184,6 +1652,15 @@ async function main(): Promise<void> {
   if (isMiladyOS()) {
     await registerMiladyOsSystemApps();
     preSeedAndroidLocalRuntimeIfFresh();
+  }
+
+  if (isPillWindowShellRoute(windowShellRoute)) {
+    // Pill overlay window: minimal renderer that only mounts <VoicePill>.
+    // No AppProvider, no chrome, no platform init — the pill is a standalone
+    // OS-level overlay launched alongside the main shell from the Electrobun
+    // process. The same renderer bundle serves it via `?shell=pill`.
+    mountPillWindow();
+    return;
   }
 
   if (isPopoutWindow()) {

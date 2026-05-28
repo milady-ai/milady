@@ -1,0 +1,395 @@
+# =============================================================================
+# build-tails-iso.yml — Build the Milady Tails (elizaOS Live) ISO on a native
+# x86_64 Linux runner.
+#
+# Why CI: the build only works on Linux x86_64. Apple Silicon (Rosetta + QEMU
+# translation of a privileged Docker build) is 4-8+ hours and unreliable.
+# GitHub's ubuntu-24.04 runner is native amd64 and finishes in ~60-90 min cold,
+# ~10-20 min warm (apt-cacher-ng volume cached).
+#
+# Triggers:
+#   - workflow_dispatch (manual), with inputs:
+#       stage         : "config" (fast go/no-go, default) or "build" (full ISO)
+#       fast          : "1" (default, low-compression squashfs) / "0"
+#       skip_website  : "1" (default, skip rebuilding bundled docs) / "0"
+#       boot_check    : "false" (default) / "true" — boot ISO under QEMU after
+#                       build to verify it actually starts. Adds ~10-20 min.
+#   - push to develop, ONLY when the workflow file itself changes (the
+#     variant tree lives in the upstream elizaOS/eliza repo, not here, so
+#     it can't be path-filtered from this repo's events).
+#   - pull_request targeting develop, same trigger.
+#
+# What this workflow does NOT do:
+#   - Sign or publish the ISO. The ISO is uploaded as a workflow artifact only.
+#     Releases / signing happen in a separate workflow with access to keys.
+# =============================================================================
+
+name: Build Tails ISO
+
+on:
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: "Build stage — 'config' for fast go/no-go, 'build' for the full ISO"
+        required: false
+        type: choice
+        default: "config"
+        options:
+          - config
+          - build
+      fast:
+        description: "Low-compression squashfs (faster, larger ISO). 1=on, 0=off"
+        required: false
+        type: choice
+        default: "1"
+        options:
+          - "1"
+          - "0"
+      skip_website:
+        description: "Skip rebuilding the bundled offline Tails website (much faster). 1=skip, 0=build"
+        required: false
+        type: choice
+        default: "1"
+        options:
+          - "1"
+          - "0"
+      boot_check:
+        description: "After build, boot the ISO under QEMU as a smoke test (adds ~10-20 min)"
+        required: false
+        type: boolean
+        default: false
+      eliza_ref:
+        description: "Optional commit SHA or tag in elizaOS/eliza to pin the variant tree to (defaults to tip of eliza_branch)"
+        required: false
+        type: string
+        default: ""
+      eliza_branch:
+        description: "Branch in elizaOS/eliza to clone when no eliza_ref is provided"
+        required: false
+        type: string
+        default: "develop"
+  push:
+    branches:
+      - develop
+    paths:
+      # The variant tree lives in elizaOS/eliza, not this repo, so it can't
+      # be path-filtered here. Trigger only on workflow file edits — full
+      # builds against new upstream commits go through workflow_dispatch.
+      - ".github/workflows/build-tails-iso.yml"
+  pull_request:
+    branches:
+      - develop
+    paths:
+      - ".github/workflows/build-tails-iso.yml"
+
+# One run per (workflow, ref). Newer pushes cancel older in-flight builds for
+# the same ref — duplicate triggers shouldn't pile up given how long this is.
+concurrency:
+  group: build-tails-iso-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  VARIANT_DIR: eliza/packages/os/linux/variants/milady-tails
+
+jobs:
+  # ───────────────────────────────────────────────────────────────────────────
+  # 1) config — fast go/no-go. Always runs.
+  #
+  # For push/PR/dispatch triggers this runs `lb config` in the build container
+  # without producing an ISO. If it fails, the full build won't run.
+  # ───────────────────────────────────────────────────────────────────────────
+  config:
+    name: lb config (go/no-go)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    outputs:
+      has_variant: ${{ steps.init.outputs.has_variant }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          fetch-depth: 1
+          # The Tails source is vendored directly under the variant
+          # (tails/config, tails/auto, …). build.sh fetches live-build at a
+          # pinned revision when tails/submodules/live-build is absent, so we
+          # don't need recursive submodule init for this build.
+          submodules: false
+
+      - name: Init eliza checkout
+        id: init
+        # The variant tree (eliza/packages/os/linux/variants/milady-tails)
+        # lives in elizaOS/eliza, not in this repo. Clone shallow to get
+        # the Justfile / build.sh / Dockerfile / Tails overlay.
+        env:
+          ELIZA_BRANCH: ${{ inputs.eliza_branch || 'develop' }}
+          ELIZA_REF: ${{ inputs.eliza_ref || '' }}
+        run: |
+          set -euo pipefail
+          if [ ! -f eliza/package.json ]; then
+            git clone --depth=1 --branch "$ELIZA_BRANCH" https://github.com/elizaOS/eliza.git eliza
+          fi
+          if [ -n "$ELIZA_REF" ]; then
+            git -C eliza fetch --depth=1 origin "$ELIZA_REF"
+            git -C eliza checkout --quiet FETCH_HEAD
+            echo "Pinned eliza to $ELIZA_REF"
+          fi
+          if [ -d "$VARIANT_DIR" ]; then
+            echo "has_variant=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ] || [ "$GITHUB_EVENT_NAME" = "push" ]; then
+            echo "::warning::variant tree missing at $VARIANT_DIR after clone; skipping workflow-file validation"
+            echo "has_variant=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "variant tree missing at $VARIANT_DIR after clone"
+          exit 1
+
+      - name: Install just
+        if: steps.init.outputs.has_variant == 'true'
+        uses: extractions/setup-just@f8a3cce218d9f83db3a2ecd90e41ac3de6cdfd9b
+        with:
+          just-version: "1.36.0"
+
+      - name: Show docker / runner info
+        if: steps.init.outputs.has_variant == 'true'
+        run: |
+          docker version
+          docker info | head -20
+          uname -a
+          df -h /
+
+      - name: Run lb config (go/no-go)
+        if: steps.init.outputs.has_variant == 'true'
+        working-directory: ${{ env.VARIANT_DIR }}
+        run: just config
+        env:
+          # config stage doesn't produce a squashfs, but pass the same env the
+          # full build would use so a misconfigured env still trips this gate.
+          MT_FAST: ${{ inputs.fast || '1' }}
+          ELIZAOS_SKIP_WEBSITE: ${{ inputs.skip_website || '1' }}
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # 2) build — full ISO build. Runs when:
+  #   - workflow_dispatch chose stage=build, OR
+  #   - push to develop with a change under the variant tree, OR
+  #   - pull_request with a change under the variant tree.
+  #
+  # Skipped when manual dispatch chose stage=config (fast go/no-go only).
+  # ───────────────────────────────────────────────────────────────────────────
+  build:
+    name: Full ISO build
+    needs: config
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    if: |
+      needs.config.outputs.has_variant == 'true'
+      && (
+        github.event_name != 'workflow_dispatch'
+        || inputs.stage == 'build'
+      )
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          fetch-depth: 1
+          submodules: false
+
+      - name: Init eliza checkout
+        env:
+          ELIZA_BRANCH: ${{ inputs.eliza_branch || 'develop' }}
+          ELIZA_REF: ${{ inputs.eliza_ref || '' }}
+        run: |
+          set -euo pipefail
+          if [ ! -f eliza/package.json ]; then
+            git clone --depth=1 --branch "$ELIZA_BRANCH" https://github.com/elizaOS/eliza.git eliza
+          fi
+          if [ -n "$ELIZA_REF" ]; then
+            git -C eliza fetch --depth=1 origin "$ELIZA_REF"
+            git -C eliza checkout --quiet FETCH_HEAD
+            echo "Pinned eliza to $ELIZA_REF"
+          fi
+          test -d "$VARIANT_DIR" || { echo "variant tree missing at $VARIANT_DIR after clone"; exit 1; }
+
+      - name: Install just
+        uses: extractions/setup-just@f8a3cce218d9f83db3a2ecd90e41ac3de6cdfd9b
+        with:
+          just-version: "1.36.0"
+
+      - name: Reclaim disk space on runner
+        # The ubuntu-24.04 runner ships ~14GB free on /. A full Tails build
+        # squashfs/chroot eats ~10GB. Prune the preinstalled toolchains we
+        # don't need (Android SDK, .NET, Haskell, big browsers) so the build
+        # doesn't OOM-disk halfway through.
+        run: |
+          df -h /
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+              /usr/local/share/boost "$AGENT_TOOLSDIRECTORY" || true
+          sudo docker system prune -af || true
+          df -h /
+
+      # Cache the apt-cacher-ng Docker volume between runs. The volume is
+      # populated on first build and reused thereafter, cutting subsequent
+      # runs from ~60 min to ~10-20 min for the apt phase alone.
+      #
+      # Cache key is intentionally stable per-branch: the package set changes
+      # rarely; we want re-hydration most of the time. A weekly refresh is
+      # handled by GitHub's 7-day cache eviction.
+      - name: Restore apt-cacher-ng volume cache
+        id: acng-cache
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
+        with:
+          path: ~/acng-cache
+          key: tails-acng-v1-${{ github.ref_name }}
+          restore-keys: |
+            tails-acng-v1-
+
+      - name: Hydrate apt-cacher-ng Docker volume from cache
+        if: steps.acng-cache.outputs.cache-hit == 'true'
+        run: |
+          docker volume create elizaos-tails-acng >/dev/null
+          # Copy cached files into the named volume via a throwaway container.
+          docker run --rm \
+              -v elizaos-tails-acng:/dest \
+              -v "$HOME/acng-cache":/src:ro \
+              alpine sh -c 'cp -a /src/. /dest/ 2>/dev/null || true; ls /dest | head'
+
+      - name: Run full ISO build
+        working-directory: ${{ env.VARIANT_DIR }}
+        run: just build
+        env:
+          MT_FAST: ${{ inputs.fast || '1' }}
+          ELIZAOS_SKIP_WEBSITE: ${{ inputs.skip_website || '1' }}
+          # Don't try to build the Milady desktop app on this runner — the
+          # iso-stage / milady-app recipe expects a pre-built electrobun bundle.
+          # CI uses the no-op staging path; the app gets injected by a separate
+          # release workflow that has the bundle handy.
+          ELIZAOS_BUILD_MILADY_APP: "0"
+
+      - name: List ISO artifacts
+        if: always()
+        working-directory: ${{ env.VARIANT_DIR }}
+        run: |
+          ls -lh out/ 2>/dev/null || echo "no out/ dir"
+          ls -lh out/*.iso 2>/dev/null || echo "no .iso produced"
+
+      - name: Dump apt-cacher-ng volume to cache path
+        if: always()
+        run: |
+          mkdir -p "$HOME/acng-cache"
+          docker run --rm \
+              -v elizaos-tails-acng:/src:ro \
+              -v "$HOME/acng-cache":/dest \
+              alpine sh -c 'cp -a /src/. /dest/ 2>/dev/null || true; du -sh /dest || true' \
+              || echo "acng volume dump skipped (no volume)"
+
+      - name: Upload ISO artifact
+        if: success()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: milady-tails-iso-${{ github.sha }}
+          path: ${{ env.VARIANT_DIR }}/out/*.iso
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload build logs on failure
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: milady-tails-buildlogs-${{ github.sha }}
+          path: |
+            ${{ env.VARIANT_DIR }}/tails/*.buildlog
+            ${{ env.VARIANT_DIR }}/tails/binary.log
+            ${{ env.VARIANT_DIR }}/out/*.log
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # 3) boot-smoke — optional. Boots the freshly built ISO under QEMU and
+  # checks the bootloader screen renders. Gated behind boot_check input so it
+  # never runs on push/PR by default (adds 10-20 min).
+  # ───────────────────────────────────────────────────────────────────────────
+  boot-smoke:
+    name: QEMU boot smoke
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    if: |
+      github.event_name == 'workflow_dispatch'
+      && inputs.boot_check == true
+      && inputs.stage == 'build'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          fetch-depth: 1
+          submodules: false
+
+      - name: Init eliza checkout
+        # The download-artifact / qemu steps write under VARIANT_DIR, so
+        # the directory tree has to exist on disk first.
+        env:
+          ELIZA_BRANCH: ${{ inputs.eliza_branch || 'develop' }}
+          ELIZA_REF: ${{ inputs.eliza_ref || '' }}
+        run: |
+          set -euo pipefail
+          if [ ! -f eliza/package.json ]; then
+            git clone --depth=1 --branch "$ELIZA_BRANCH" https://github.com/elizaOS/eliza.git eliza
+          fi
+          if [ -n "$ELIZA_REF" ]; then
+            git -C eliza fetch --depth=1 origin "$ELIZA_REF"
+            git -C eliza checkout --quiet FETCH_HEAD
+          fi
+          test -d "$VARIANT_DIR" || { echo "variant tree missing at $VARIANT_DIR after clone"; exit 1; }
+
+      - name: Install QEMU + OVMF
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+              qemu-system-x86 qemu-utils ovmf
+
+      - name: Download ISO artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          name: milady-tails-iso-${{ github.sha }}
+          path: ${{ env.VARIANT_DIR }}/out
+
+      - name: Boot ISO under QEMU (headless)
+        working-directory: ${{ env.VARIANT_DIR }}
+        run: |
+          set -euo pipefail
+          ISO="$(find out -maxdepth 1 -type f -name '*.iso' -print -quit)"
+          test -n "$ISO" || { echo "no ISO found"; exit 1; }
+          echo "Booting $ISO under QEMU…"
+          # 90s ceiling — we're only checking the bootloader screen, not full
+          # boot. A real graphical boot under software emulation would take
+          # much longer; this catches catastrophic boot failures cheaply.
+          timeout 90 qemu-system-x86_64 \
+              -m 2048 -smp 2 \
+              -bios /usr/share/OVMF/OVMF_CODE.fd \
+              -cdrom "$ISO" \
+              -boot d \
+              -nographic \
+              -serial mon:stdio \
+              -display none \
+              | tee qemu.log || true
+          if grep -qiE "isolinux|grub|tails|milady" qemu.log; then
+              echo "Boot smoke: bootloader marker found."
+          else
+              echo "Boot smoke: no recognizable bootloader marker. Inspect qemu.log."
+              tail -50 qemu.log
+              exit 1
+          fi
+
+      - name: Upload QEMU log
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: milady-tails-qemu-log-${{ github.sha }}
+          path: ${{ env.VARIANT_DIR }}/qemu.log
+          if-no-files-found: ignore
+          retention-days: 7

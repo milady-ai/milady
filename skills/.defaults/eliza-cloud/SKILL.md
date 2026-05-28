@@ -42,15 +42,14 @@ For existing app work:
 For static-hosted apps, do not deploy a container unless the app truly needs its
 own server. Register the public static URL as the Cloud app, store the returned
 `appId` in non-secret local config, and use a same-origin proxy to call Cloud
-APIs. The config's `cloudUrl` is the browser-facing Cloud frontend/OAuth base
-that serves `/app-auth/authorize`; it must come from
-`ELIZA_CLOUD_PUBLIC_URL`, then `ELIZA_CLOUD_URL`, then `ELIZA_CLOUD_BASE_URL`
-only when that same origin serves the frontend too. Do not point `cloudUrl` at
-an API-only local worker such as `:8787`, and do not silently mix a localhost
-API base with production OAuth. In private local testing, `apiBase:
-http://localhost:8787/api/v1` pairs with `cloudUrl:
-http://127.0.0.1:3000`; if `ELIZA_CLOUD_PUBLIC_URL` is set, use that public
-frontend/OAuth origin instead.
+APIs. The config's `cloudUrl` is the
+browser-facing Cloud frontend/OAuth base that serves `/app-auth/authorize`; it
+must come from `ELIZA_CLOUD_PUBLIC_URL`, then `ELIZA_CLOUD_URL`, then
+`ELIZA_CLOUD_BASE_URL` only when that same origin serves the frontend too. Do
+not point `cloudUrl` at an API-only local worker such as `:8787`, and do not
+silently mix a localhost API base with production OAuth. In local testing,
+`apiBase: http://localhost:8787/api/v1` pairs with `cloudUrl:
+http://127.0.0.1:3000`.
 
 AI inference apps are monetized apps by default. They must use app auth plus the
 app-specific chat endpoint:
@@ -58,7 +57,7 @@ app-specific chat endpoint:
 - Browser starts sign-in at `/app-auth/authorize` with `app_id`, `redirect_uri`, and `state`.
 - Browser stores only the returned user token, never an owner API key.
 - Browser calls the app's same-origin proxy with `x-user-token`.
-- Proxy forwards to `/api/v1/apps/{id}/chat` with `Authorization: Bearer <user_jwt>` and optional `x-affiliate-code`.
+- Proxy forwards to `/api/v1/apps/{id}/chat` with `Authorization: Bearer <user_jwt>` and optional `x-affiliate-code`. The app id belongs in the route path, not in an `x-app-id` header.
 - Monetization uses `PUT /api/v1/apps/{id}/monetization` with markup/share fields.
 
 ## Important Reality Check

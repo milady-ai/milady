@@ -1,6 +1,6 @@
 ---
 name: eliza-cloud-buy-domain
-description: "Use whenever a user wants to register or buy a custom domain for an Eliza Cloud app — including in the same request as building the app (\"build me X and put it on Y.com\"). Uses Cloudflare as registrar after explicit user confirmation, paid from the user's existing cloud credit balance. Pairs with `build-monetized-app` (build first, then buy domain) and `eliza-cloud-manage-domain` (post-purchase: list, edit dns records, detach). Skip when the user is fine with the auto-assigned `*.apps.elizacloud.ai` subdomain."
+description: "Use whenever a user wants to register or buy a custom domain for an Eliza Cloud app — including in the same request as building the app (\"build me X and put it on Y.com\"). Uses cloudflare as registrar, no human in the loop, paid from the user's existing cloud credit balance. Pairs with `build-monetized-app` (build first, then buy domain) and `eliza-cloud-manage-domain` (post-purchase: list, edit dns records, detach). Skip when the user is fine with the auto-assigned `*.apps.elizacloud.ai` subdomain."
 ---
 
 # Buy a domain for your app on Eliza Cloud
@@ -45,12 +45,10 @@ const totalUsd = quote.price.totalUsdCents / 100;
 
 // 3. buy — atomic on the cloud side: debit credits → register via cloudflare
 //    → write managed_domains row + attach to app → CNAME the new zone at
-//    the app's container url. Refunds credits if registration fails. If the
-//    domain is already owned by this org, this returns alreadyRegistered
-//    without charging again.
+//    the app's container url. Refunds credits if registration fails.
 const result = await cloud.routes.postApiV1AppsByIdDomainsBuy({
-	appId,
-	json: { domain: "myapp.com" },
+  appId,
+  json: { domain: "myapp.com" },
 });
 
 // 4. (optional) poll status until verified — cloudflare registration is
@@ -70,13 +68,11 @@ The buy route handles refunds and surfaces specific HTTP statuses; treat them li
 | 400 | invalid domain format | re-prompt user for valid domain |
 | 402 | insufficient credit balance | tell user to top up at /dashboard/billing |
 | 404 | app not found / wrong org | re-check appId |
-| 409 | domain unavailable or owned by another org | suggest alternates or add a suffix |
+| 409 | domain already registered | suggest alternates or add a suffix |
 | 502 | cloudflare returned an error (refund issued) | retry with different domain |
+| 500 | partial failure (rare; user owns the domain but DNS not set) | escalate — manual DNS may be needed |
 
-The buy route is idempotent for domains already owned by the same org. If a
-previous run reached Cloudflare but local zone/status metadata arrived late,
-retry the same canonical `/buy` route once; report `alreadyRegistered: true` or
-`pendingZoneProvisioning: true` honestly. Never try alternate guessed buy routes.
+The skill assumes idempotency at the step boundary: if step 3 fails after the credit debit, eliza cloud automatically refunds. If the user retries, they get a fresh credit-debit attempt.
 
 ## Read these references in order
 

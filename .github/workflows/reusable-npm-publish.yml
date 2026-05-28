@@ -17,11 +17,36 @@ on:
         required: false
         type: boolean
         default: true
+    # NPM_TOKEN is no longer required — publish uses npm OIDC trusted
+    # publishing (id-token: write). Kept as an *optional* secret for the
+    # transition window; once the npm "Trusted Publishers" entry is live for
+    # this workflow, remove the secret entirely.
     secrets:
       NPM_TOKEN:
-        required: true
+        required: false
+
+# Required for npm OIDC trusted publishing. The publish job mints a short-lived
+# OIDC token via GitHub's id-token endpoint; npm verifies the token against the
+# Trusted Publisher configuration on npmjs.com.
+#
+# HUMAN-IN-LOOP — operator must configure on npmjs.com:
+#   Track the final organization/package values in docs/security/SOC2-OPERATOR-CHECKLIST.md.
+#   https://docs.npmjs.com/trusted-publishers
+#   Settings -> Packages -> miladyai -> Trusted publishers -> Add
+#     Publisher:     GitHub Actions
+#     Organization:  elizaos (or current owner)
+#     Repository:    milady
+#     Workflow:      .github/workflows/reusable-npm-publish.yml
+#     Environment:   (leave blank unless we add one)
+# Until this is configured npm publish will fall back to NPM_TOKEN.
+permissions:
+  contents: read
+  id-token: write
 
 env:
+  # Pin the canonical elizaOS/eliza checkout to the latest verified develop SHA.
+  # Override with MILADY_ELIZA_REF only for a specific upstream release test.
+  MILADY_ELIZA_REF: "f4991bc6059514f10a0fc1a8ec3f199478c415ae"
   MILADY_SKIP_LOCAL_UPSTREAMS: "1"
 
 jobs:
@@ -31,12 +56,12 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           submodules: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
         with:
           node-version: "22"
           check-latest: false
@@ -56,6 +81,11 @@ jobs:
         run: |
           if [ ! -f eliza/package.json ]; then
             git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza
+            if [ -n "${MILADY_ELIZA_REF:-}" ]; then
+              git -C eliza fetch --depth=1 origin "$MILADY_ELIZA_REF"
+              git -C eliza checkout --quiet FETCH_HEAD
+              echo "Pinned eliza to ${MILADY_ELIZA_REF}"
+            fi
           fi
 
       - name: Set version in package.json
@@ -78,8 +108,20 @@ jobs:
       - name: Validate package
         if: inputs.run_validation
         run: |
-          PACK_OUTPUT=$(npm pack --dry-run 2>&1)
+          # --ignore-scripts: the prepack script would run `rt.mjs run build` which
+          # only resolves correctly inside a milady workspace install. We've already
+          # built dist/ explicitly above, so skip lifecycle scripts during pack.
+          # set +e: surface npm pack's output even when it exits non-zero, instead
+          # of letting set -e kill the script with no diagnostics.
+          set +e
+          PACK_OUTPUT=$(npm pack --dry-run --ignore-scripts 2>&1)
+          PACK_EXIT=$?
+          set -e
           echo "$PACK_OUTPUT"
+          if [[ $PACK_EXIT -ne 0 ]]; then
+            echo "::error::npm pack --dry-run exited with code $PACK_EXIT"
+            exit $PACK_EXIT
+          fi
           for required in "milady.mjs" "dist/index.js" "package.json"; do
             if ! echo "$PACK_OUTPUT" | grep -q "$required"; then
               echo "::error::Required file '$required' missing from package contents"
@@ -88,6 +130,16 @@ jobs:
           done
 
       - name: Publish
-        run: npm publish --tag ${{ inputs.dist_tag }} --access public
+        # --ignore-scripts: dist/ was already built above; the prepack lifecycle
+        # would re-invoke `rt.mjs run build` which expects a milady workspace
+        # install, not the CI ./dist staging.
+        #
+        # Auth: prefers npm OIDC trusted publishing (id-token: write above);
+        # NODE_AUTH_TOKEN is the transition fallback and can be removed once
+        # the Trusted Publisher is verified on npmjs.com.
+        # NPM_CONFIG_PROVENANCE=true emits an SLSA provenance attestation
+        # alongside the package tarball (SOC2 CC9.2).
+        run: npm publish --tag ${{ inputs.dist_tag }} --access public --ignore-scripts
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: "true"

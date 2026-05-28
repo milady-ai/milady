@@ -1,0 +1,72 @@
+# SOC2 CC8.1 / A1.2 — supply chain integrity via cosign keyless signing.
+# Uses Sigstore Fulcio (ephemeral certs from GitHub OIDC) + Rekor (transparency
+# log). No long-lived signing keys are stored anywhere.
+#
+# Verify signatures with:
+#   cosign verify <image> \
+#     --certificate-identity-regexp 'https://github.com/<org>/<repo>/.github/workflows/sign-images.yml@.*' \
+#     --certificate-oidc-issuer https://token.actions.githubusercontent.com
+name: sign-images
+
+on:
+  workflow_run:
+    workflows: ["build-cloud-image", "build-cloud-agent"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      image:
+        description: 'Image reference (registry/name@sha256:<digest>) to sign'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write    # required for keyless OIDC
+  packages: write    # required to read GHCR metadata
+  actions: read
+
+jobs:
+  cosign:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install cosign
+        uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac
+        with:
+          cosign-release: 'v2.4.0'
+
+      - name: Resolve image refs to sign
+        id: refs
+        run: |
+          set -euo pipefail
+          if [[ -n "${{ github.event.inputs.image }}" ]]; then
+            echo "images=${{ github.event.inputs.image }}" >> "$GITHUB_OUTPUT"
+          else
+            # TODO(soc2): wire build workflows to upload a digest artifact
+            # named "image-digests" containing one ref per line. For now,
+            # operator must supply via workflow_dispatch.
+            echo "No automated digest list yet; dispatch manually." >&2
+            exit 1
+          fi
+
+      - name: Sign images (keyless OIDC)
+        env:
+          COSIGN_EXPERIMENTAL: "1"
+        run: |
+          set -euo pipefail
+          while read -r ref; do
+            [[ -z "$ref" ]] && continue
+            echo "Signing $ref"
+            cosign sign --yes "$ref"
+          done <<< "${{ steps.refs.outputs.images }}"
+
+      - name: Attest SLSA provenance
+        env:
+          COSIGN_EXPERIMENTAL: "1"
+        run: |
+          set -euo pipefail
+          while read -r ref; do
+            [[ -z "$ref" ]] && continue
+            cosign attest --yes --predicate <(echo '{"buildType":"github-actions"}') \
+              --type slsaprovenance "$ref"
+          done <<< "${{ steps.refs.outputs.images }}"

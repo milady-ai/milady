@@ -76,6 +76,9 @@ concurrency:
   cancel-in-progress: false
 
 env:
+  # Pin the canonical elizaOS/eliza checkout to an exact verified upstream SHA.
+  # Prefer a develop SHA after the matching elizaOS PR merges.
+  MILADY_ELIZA_REF: "f2f6970becc7fdcf6136d939207434c22a1506d8"
   REGISTRY: ghcr.io
   IMAGE_NAME: milady-ai/agent
 
@@ -93,7 +96,7 @@ jobs:
     steps:
       # ── 1. Checkout ─────────────────────────────────────────────────────────
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           fetch-depth: 0
           ref: ${{ inputs.source_sha || github.event.release.tag_name || github.sha }}
@@ -101,19 +104,19 @@ jobs:
 
       # ── 2. Set up Node 22 ───────────────────────────────────────────────────
       - name: Setup Node.js 22
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
         with:
           node-version: "22"
 
       # ── 3. Set up Bun ───────────────────────────────────────────────────────
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
         with:
           bun-version: "1.3.13"
 
       # ── 4. Restore cached bun store ─────────────────────────────────────────
       - name: Cache bun store
-        uses: actions/cache@v5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
         with:
           path: ~/.bun/install/cache
           key: bun-store-${{ runner.os }}-${{ hashFiles('bun.lock') }}
@@ -128,6 +131,11 @@ jobs:
         run: |
           if [ ! -f eliza/package.json ]; then
             git clone --depth=1 --branch "${MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza
+            if [ -n "${MILADY_ELIZA_REF:-}" ]; then
+              git -C eliza fetch --depth=1 origin "$MILADY_ELIZA_REF"
+              git -C eliza checkout --quiet FETCH_HEAD
+              echo "Pinned eliza to ${MILADY_ELIZA_REF}"
+            fi
           fi
 
       - name: Initialize tracked workspace submodules
@@ -138,10 +146,28 @@ jobs:
       - name: Prepare eliza source workspace
         run: |
           if [ -f eliza/.gitmodules ]; then
+            # Untrack orphan gitlinks (160000 entries in the tree that aren't
+            # declared in .gitmodules) so the recursive submodule init doesn't
+            # die with "fatal: No url found for submodule path …". Upstream
+            # eliza currently has e.g. swe-bench-workspace-opencode/* orphans.
+            mapfile -t TREE_GITLINKS < <(git -C eliza ls-files --stage | awk '$1=="160000"{print $4}')
+            mapfile -t GITMODULES_PATHS < <(git -C eliza config -f .gitmodules --get-regexp '^submodule\..*\.path$' | awk '{print $2}')
+            for path in "${TREE_GITLINKS[@]}"; do
+              found=0
+              for known in "${GITMODULES_PATHS[@]}"; do
+                if [ "$path" = "$known" ]; then found=1; break; fi
+              done
+              if [ "$found" = "0" ]; then
+                echo "Untracking orphan gitlink not in .gitmodules: $path"
+                git -C eliza rm --cached -r --force --quiet "$path" || true
+              fi
+            done
+
             git -C eliza submodule sync --recursive
             git -C eliza \
               -c submodule.cloud.update=none \
               -c submodule.plugins/plugin-elizacloud.update=none \
+              -c submodule.plugins/plugin-local-inference/native/omnivoice.cpp.update=none \
               submodule update --init --recursive --depth=1
           fi
           node --input-type=module <<'NODE'
@@ -155,6 +181,48 @@ jobs:
           NODE
         env:
           MILADY_SKIP_CLOUD_SUBMODULE: "1"
+
+      # Stub any localPackages entry from link-docker-local-app-packages.mjs
+      # that has no package.json on disk. Upstream eliza periodically renames
+      # or adds entries (cloud-sdk, plugin-native-activity-tracker) faster than
+      # the actual file moves land, leaving the linker pointing at non-existent
+      # paths. The agent image doesn't actually use these stubs at runtime —
+      # they exist solely to satisfy resolveLocalPackageDir().
+      - name: Stub missing eliza local-package entries for docker context
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          import path from "node:path";
+          const linker = "eliza/packages/app-core/scripts/link-docker-local-app-packages.mjs";
+          if (!fs.existsSync(linker)) process.exit(0);
+          const src = fs.readFileSync(linker, "utf8");
+          const arrayMatch = src.match(/const localPackages = \[([\s\S]*?)\];/);
+          if (!arrayMatch) {
+            console.log("[stub-local-packages] localPackages array not found in linker; skipping");
+            process.exit(0);
+          }
+          const entries = [...arrayMatch[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]);
+          for (const entry of entries) {
+            const candidates = [entry];
+            if (entry.startsWith("eliza/")) candidates.push(entry.slice("eliza/".length));
+            const found = candidates.some((c) => fs.existsSync(path.join(c, "package.json")));
+            if (found) continue;
+            const stubDir = entry;
+            fs.mkdirSync(stubDir, { recursive: true });
+            const inferredName = "@elizaos/" + path.basename(entry);
+            const pkg = {
+              name: inferredName,
+              version: "0.0.0-stub",
+              private: true,
+              description: "Stub injected by milady CI for missing upstream eliza local-package entry.",
+              main: "index.js",
+              exports: { ".": "./index.js" },
+            };
+            fs.writeFileSync(path.join(stubDir, "package.json"), JSON.stringify(pkg, null, 2) + "\n");
+            fs.writeFileSync(path.join(stubDir, "index.js"), "// stub for docker build context\n");
+            console.log(`[stub-local-packages] stubbed ${stubDir} as ${inferredName}`);
+          }
+          NODE
 
       - name: Apply elizaOS source CI patches
         run: node scripts/apply-eliza-ci-patches.mjs
@@ -261,6 +329,27 @@ jobs:
           cd eliza/packages/app-core
           bun run build
 
+      - name: Reapply app-core package style patches
+        run: node scripts/patch-elizaos-package-styles.mjs
+
+      # ── 8. Link local @elizaos workspace packages into node_modules ─────────
+      # The vite build below imports symbols from @elizaos/ui (createVoiceCapture,
+      # VoicePill, VoicePillMessage, VoiceCaptureHandle) that ship in the
+      # repo-local eliza/packages/ui but have not yet landed on the npm alpha
+      # dist-tag (currently @elizaos/ui@2.0.0-alpha.537). Without this step,
+      # vite resolves @elizaos/ui from npm and the build fails with
+      # `"createVoiceCapture" is not exported by "@elizaos/ui"`.
+      #
+      # Postinstall skips elizaOS's repo-local link step under
+      # MILADY_SKIP_LOCAL_UPSTREAMS=1, so we invoke the linker explicitly here
+      # — after the local eliza packages have been built — to symlink every
+      # local @elizaos/* workspace package over the npm-installed copy. The
+      # script also rewrites each package's `exports` to point at TS source
+      # when the dist artifact is absent, which is what lets vite import the
+      # ui package directly from `eliza/packages/ui/src`.
+      - name: Link local @elizaos workspace packages
+        run: node eliza/packages/app-core/scripts/link-docker-local-app-packages.mjs
+
       # ── 9. Build runtime (tsdown) ───────────────────────────────────────────
       - name: Build runtime (tsdown)
         run: |
@@ -340,6 +429,12 @@ jobs:
           } >> "$GITHUB_ENV"
 
       # ── 11. Build UI (vite) ─────────────────────────────────────────────────
+      # MILADY_FORCE_LOCAL_UPSTREAMS=1 forces apps/app/vite.config.ts to treat
+      # the freshly-linked eliza/ checkout as the source of truth for the
+      # @elizaos/* aliases (created by the "Link local @elizaos workspace
+      # packages" step above). Without this, the config falls back to the
+      # auto-detect heuristic and may resolve @elizaos/ui from npm, which
+      # lacks the createVoiceCapture / VoicePill exports used by main.tsx.
       - name: Build UI (vite)
         run: |
           cd apps/app
@@ -348,6 +443,7 @@ jobs:
           MILADY_RELEASE_TAG: ${{ steps.version.outputs.is_release == 'true' && steps.version.outputs.version || '' }}
           VITE_ASSET_BASE_URL: ${{ steps.version.outputs.is_release == 'true' && format('https://raw.githubusercontent.com/milady-ai/milady/{0}/apps/app/public/', steps.version.outputs.version) || '' }}
           NODE_ENV: production
+          MILADY_FORCE_LOCAL_UPSTREAMS: "1"
 
       # ── 12. Override dockerignore to include pre-built dist/ ────────────────
       # The repo's .dockerignore excludes dist/ to keep developer Docker builds clean.
@@ -358,11 +454,11 @@ jobs:
         run: cp eliza/packages/app-core/deploy/.dockerignore.ci .dockerignore
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5
 
       # ── 13. Login to GHCR ───────────────────────────────────────────────────
       - name: Login to GHCR
-        uses: docker/login-action@v4
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee
         if: ${{ github.event_name == 'push' || inputs.push_image != false }}
         with:
           registry: ${{ env.REGISTRY }}
@@ -372,7 +468,7 @@ jobs:
       # ── 14. Docker image metadata ───────────────────────────────────────────
       - name: Docker metadata
         id: meta
-        uses: docker/metadata-action@v6
+        uses: docker/metadata-action@80c7e94dd9b9319bd5eb7a0e0fe9291e23a2a2e9
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
@@ -382,7 +478,7 @@ jobs:
 
       # ── 15. Build and push Docker image ────────────────────────────────────
       - name: Build and push Docker image
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf
         with:
           context: .
           file: eliza/packages/app-core/deploy/Dockerfile.ci

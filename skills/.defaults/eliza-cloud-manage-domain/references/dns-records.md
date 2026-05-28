@@ -1,26 +1,34 @@
-# DNS Record Guidance
+# dns records — when to use which
 
-Cloudflare-managed zones support these record types through Cloud:
+Default rule: if the user just wants their app to work at `myapp.com` and they bought the domain through us, the buy flow already created the right A/CNAME records pointing at the app's container. Don't add records unless asked.
 
-- `A`: hostname to IPv4 address.
-- `AAAA`: hostname to IPv6 address.
-- `CNAME`: hostname alias to another hostname.
-- `TXT`: text records, including verification records.
-- `MX`: mail exchanger. Requires `priority`.
-- `SRV`: service records.
-- `CAA`: certificate authority authorization.
+| Type | Use for | Common content |
+|---|---|---|
+| A | Point a name at an IPv4 | `203.0.113.5` |
+| AAAA | Point a name at an IPv6 | `2001:db8::1` |
+| CNAME | Alias one name to another | `app.elizacloud.ai` |
+| TXT | Verification, SPF, DKIM, arbitrary text | `v=spf1 include:_spf.google.com ~all` |
+| MX | Mail routing | `aspmx.l.google.com` (set priority) |
+| SRV | Service location (sip, xmpp, etc.) | `_proto._service.target` |
+| CAA | Restrict who can issue SSL certs | `0 issue "letsencrypt.org"` |
 
-Use `ttl: 1` for Cloudflare automatic TTL unless the user asks for a fixed TTL.
-Use `proxied: true` for web traffic that should pass through Cloudflare. Do not
-proxy records that are not HTTP-facing unless the user knows what they are
-doing.
+## Naming conventions
 
-For apex app hosting, prefer the Cloud API's automatic setup from `/domains/buy`
-or `/domains/sync`. Do not manually overwrite apex records unless the user asked
-for a DNS edit.
+- Apex (`myapp.com` itself): `name: "@"` or `name: "myapp.com"`
+- Subdomain (`www.myapp.com`): `name: "www"` (cloudflare auto-appends the zone)
+- Wildcard (`*.myapp.com`): `name: "*"`
 
-For destructive DNS edits:
+## TTL
 
-1. List current records first.
-2. Show the exact record name/type/content that will change.
-3. Ask for explicit confirmation before delete or broad replacement.
+Cloudflare's TTL field is in seconds. **`1` is special and means "automatic"** — cloudflare picks the TTL based on whether the record is proxied. Default to `1` unless the user has a reason for a fixed TTL.
+
+## proxied (orange cloud vs grey cloud)
+
+- `proxied: true` (orange cloud) — cloudflare's edge sits in front. SSL, DDoS protection, caching. Use for HTTP/HTTPS records pointing at an origin.
+- `proxied: false` (grey cloud, "DNS only") — bare DNS, no proxy. Use for records that need direct address resolution: MX, SRV, TXT, mail/IMAP A records, SSH targets, etc.
+
+If the user is not sure, default `true` for A/AAAA/CNAME on web subdomains and `false` for everything else.
+
+## priority
+
+Only MX records use `priority`. Lower number = higher priority. Common values: 1, 5, 10, 20.

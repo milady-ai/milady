@@ -34,6 +34,17 @@ const allowNavigation: CapacitorAllowNavigation = [
   ),
 ];
 
+// Live-reload dev mode: when MILADY_LIVE_RELOAD_URL points at a
+// reachable Vite dev server (e.g. `http://192.168.1.71:5173`), the
+// Capacitor WebView loads the React UI from that URL instead of the
+// bundled APK assets. Save a `.tsx` on the host → see it on the
+// on-device WebView in ~200 ms via Vite HMR. The agent stays on the
+// device on `127.0.0.1:31337`, the ElizaNativeBridge + AOSP plugins
+// stay real, llama.cpp keeps running on-device hardware. Only the
+// renderer comes from the host.
+//
+// Production builds leave MILADY_LIVE_RELOAD_URL unset → the WebView
+// loads from bundled assets and `cleartext` stays off.
 const liveReloadUrl = process.env.MILADY_LIVE_RELOAD_URL?.trim();
 const liveReloadEnabled = !!liveReloadUrl;
 
@@ -47,14 +58,12 @@ const config: CapacitorConfig = {
     // Self-hosters add their own domains via MILADY_ALLOWED_HOSTS
     // (build-time env, comma-separated). Listed entries are baseline.
     allowNavigation,
-    // Live-reload dev mode: MILADY_LIVE_RELOAD_URL=http://<host>:<port>
-    // points the on-device WebView at a running vite dev server on the
-    // host machine. The APK native layer (agent, llama, bridge) stays
-    // on-device; only the React renderer is served remotely. Build with
-    // `MILADY_LIVE_RELOAD_URL=http://192.168.x.x:5173 bun run build:android`.
     ...(liveReloadEnabled
       ? {
           url: liveReloadUrl,
+          // Vite dev servers default to plain HTTP; allow it for the
+          // dev URL only. Production builds have this off (mTLS / https
+          // via Capacitor's own scheme).
           cleartext: true,
         }
       : {}),
@@ -76,12 +85,13 @@ const config: CapacitorConfig = {
   },
   android: {
     backgroundColor: "#0a0a0a",
-    // Allow mixed content when doing live-reload dev (vite serves over plain
-    // HTTP from the host LAN; the APK shell loads it over cleartext).
+    // Mixed-content allowed in live-reload mode so http://<host>:5173
+    // can fetch https://localhost subresources without WebView upgrade
+    // warnings. Production builds keep mixed-content off.
     allowMixedContent: liveReloadEnabled,
     captureInput: true,
-    // Enable WebContents debugging in live-reload mode so Chrome DevTools can
-    // attach to the on-device WebView while developing.
+    // WebView Chrome DevTools enabled in live-reload mode so we can
+    // chrome://inspect into the device WebView during dev iterations.
     webContentsDebuggingEnabled: liveReloadEnabled,
   },
 };

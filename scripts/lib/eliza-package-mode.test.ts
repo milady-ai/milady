@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  DEFAULT_ELIZAOS_PACKAGE_DIST_TAG,
   getElizaGitBranch,
   getElizaGitUrl,
   getElizaosPackageSpecifier,
@@ -40,7 +41,9 @@ describe("eliza package mode helpers", () => {
   });
 
   it("selects configurable elizaOS package tags and exact versions", () => {
-    expect(getElizaosPackageSpecifier({})).toBe("alpha");
+    expect(getElizaosPackageSpecifier({})).toBe(
+      DEFAULT_ELIZAOS_PACKAGE_DIST_TAG,
+    );
     expect(
       getElizaosPackageSpecifier({ MILADY_ELIZAOS_DIST_TAG: "beta" }),
     ).toBe("beta");
@@ -58,7 +61,7 @@ describe("eliza package mode helpers", () => {
 
   it("selects registry versions from the configured dist-tag", () => {
     expect(selectRegistryPackageVersion(registryInfo, { env: {} })).toBe(
-      "2.0.0-alpha.1",
+      registryInfo["dist-tags"][DEFAULT_ELIZAOS_PACKAGE_DIST_TAG],
     );
     expect(
       selectRegistryPackageVersion(registryInfo, {

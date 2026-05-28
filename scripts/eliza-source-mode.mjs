@@ -17,8 +17,8 @@ const repoRoot = path.resolve(__dirname, "..");
 
 function usage() {
   console.log(`usage:
-  node scripts/eliza-source-mode.mjs local [--install]
-  node scripts/eliza-source-mode.mjs packages [--tag <dist-tag>] [--version <exact>] [--rename] [--install]
+  node scripts/eliza-source-mode.mjs local [--install] [-- <bun install args>]
+  node scripts/eliza-source-mode.mjs packages [--tag <dist-tag>] [--version <exact>] [--rename] [--install] [-- <bun install args>]
 
 Modes:
   local      Restore or clone repo-local elizaOS source and link workspace packages.
@@ -44,10 +44,15 @@ function parseArgs(argv) {
     rename: false,
     tag: null,
     version: null,
+    installArgs: [],
   };
 
   for (let index = 0; index < rest.length; index += 1) {
     const arg = rest[index];
+    if (arg === "--") {
+      options.installArgs.push(...rest.slice(index + 1));
+      break;
+    }
     if (arg === "--install") {
       options.install = true;
       continue;
@@ -132,16 +137,20 @@ async function runLocalMode(options) {
     ELIZA_SKIP_LOCAL_UPSTREAMS: "",
   };
 
+  if (options.install) {
+    const packageEnv = {
+      ...process.env,
+      MILADY_ELIZA_SOURCE: "packages",
+      MILADY_SKIP_LOCAL_UPSTREAMS: "1",
+      MILADY_DISABLE_LOCAL_UPSTREAMS: "force",
+    };
+    await runNode("scripts/disable-local-eliza-workspace.mjs", [], packageEnv);
+    await run("bun", ["install", ...options.installArgs], packageEnv);
+  }
+
   restoreLocalElizaWorkspace(repoRoot);
   await cloneLocalElizaIfMissing(env);
   await runNode("scripts/setup-upstreams.mjs", [], env);
-
-  if (options.install) {
-    // Tolerate harmless EEXIST link collisions (file: deps vs. manually-
-    // linked @elizaos/* symlinks). The links get created; bun exits 1 only
-    // because of the duplicate-attempt warning.
-    await run("bun", ["install"], env, { allowFailure: true });
-  }
 
   console.log("[eliza-source-mode] local elizaOS source mode is ready.");
 }
@@ -167,7 +176,11 @@ async function runPackageMode(options) {
   await runNode("scripts/disable-local-eliza-workspace.mjs", [], env);
 
   if (options.install) {
-    await run("bun", ["install", "--no-frozen-lockfile"], env);
+    const installArgs =
+      options.installArgs.length > 0
+        ? options.installArgs
+        : ["--no-frozen-lockfile"];
+    await run("bun", ["install", ...installArgs], env);
   }
 
   console.log(

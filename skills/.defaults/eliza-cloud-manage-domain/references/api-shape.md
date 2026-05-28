@@ -1,73 +1,110 @@
-# Domain Management API Shape
+# api shapes — manage-domain skill
 
-Use these routes after a domain is already attached to an app.
+All endpoints assume `Authorization: Bearer <ELIZAOS_CLOUD_API_KEY>` and return `{ success: true, ... }` on the happy path; failures return `{ success: false, error: <message> }` with a 4xx/5xx status.
 
-## List Domains
+## GET /api/v1/domains
 
-Org-wide:
+Org-wide list of every managed domain.
 
-`GET /api/v1/domains`
-
-Per app:
-
-`GET /api/v1/apps/{appId}/domains`
-
-## External Domain Attach
-
-For a domain the user already owns elsewhere:
-
-`POST /api/v1/apps/{appId}/domains`
-
+Response:
 ```json
-{ "domain": "myapp.com" }
+{
+  "success": true,
+  "domains": [
+    {
+      "id": "...",
+      "domain": "myapp.com",
+      "registrar": "cloudflare",            // or "external"
+      "status": "active",                    // pending | active | expired | suspended | transferring
+      "verified": true,
+      "sslStatus": "active",                 // pending | provisioning | active | error
+      "expiresAt": "2027-01-01T00:00:00Z",
+      "autoRenew": true,
+      "resourceType": "app",                 // app | container | agent | mcp | null (detached)
+      "appId": "...",
+      "containerId": null,
+      "agentId": null,
+      "mcpId": null,
+      "cloudflareZoneId": "..."
+    }
+  ]
+}
 ```
 
-Cloud returns a verification TXT challenge. The user adds it at their DNS
-provider, then you call verify.
+## GET /api/v1/apps/:appId/domains
 
-## Verify Or Sync
+Per-app list. Same shape as the org-wide list but only domains attached to that app.
 
-`POST /api/v1/apps/{appId}/domains/verify`
+## GET /api/v1/apps/:appId/domains/:domain/dns
 
+List dns records on a cloudflare-managed zone. Returns 409 for external-registrar domains.
+
+Response:
 ```json
-{ "domain": "myapp.com" }
+{
+  "success": true,
+  "domain": "myapp.com",
+  "records": [
+    {
+      "id": "abc...",
+      "type": "A",
+      "name": "myapp.com",
+      "content": "203.0.113.5",
+      "ttl": 1,
+      "proxied": true,
+      "createdOn": "2026-...",
+      "modifiedOn": "2026-..."
+    }
+  ]
+}
 ```
 
-`POST /api/v1/apps/{appId}/domains/status`
+## POST /api/v1/apps/:appId/domains/:domain/dns
 
+Add a record. Body:
 ```json
-{ "domain": "myapp.com" }
+{
+  "type": "A",                  // A | AAAA | CNAME | TXT | MX | SRV | CAA
+  "name": "www",                // subdomain or "@" for apex
+  "content": "203.0.113.5",
+  "ttl": 1,                     // 1 = automatic
+  "proxied": true,              // false = grey cloud (DNS only)
+  "priority": 10                // MX records only
+}
+```
+Response: `{ success: true, record: { ...new record... } }` (status 201)
+
+## GET /api/v1/apps/:appId/domains/:domain/dns/:recordId
+
+Read one record. Same shape as the list entries above.
+
+## PATCH /api/v1/apps/:appId/domains/:domain/dns/:recordId
+
+Edit one record. Body is a partial — include only the fields you want to change.
+
+## DELETE /api/v1/apps/:appId/domains/:domain/dns/:recordId
+
+Remove a record. Response:
+```json
+{ "success": true, "recordId": "abc..." }
 ```
 
-`POST /api/v1/apps/{appId}/domains/sync`
+## POST /api/v1/apps/:appId/domains/sync
 
-No body required. Refreshes Cloudflare-backed domain metadata for the app.
+Refresh registrar status into the managed_domains row from cloudflare.
 
-## DNS Records
+Body: `{ "domain": "myapp.com" }`
 
-List:
+Response: `{ success: true, domain, status, sslStatus, ... }`
 
-`GET /api/v1/apps/{appId}/domains/{domain}/dns`
+## POST /api/v1/apps/:appId/domains/verify
 
-Create:
+For external domains only. Re-check the user's `_eliza-cloud-verify.<domain>` TXT record.
 
-`POST /api/v1/apps/{appId}/domains/{domain}/dns`
+Body: `{ "domain": "myapp.com" }`
 
-```json
-{ "type": "CNAME", "name": "www", "content": "target.example.com", "ttl": 1, "proxied": true }
-```
+Response: `{ success: true, verified: boolean, ... }`
 
-Update:
+## DELETE /api/v1/apps/:appId/domains
 
-`PATCH /api/v1/apps/{appId}/domains/{domain}/dns/{recordId}`
-
-```json
-{ "content": "203.0.113.10", "ttl": 300 }
-```
-
-Delete:
-
-`DELETE /api/v1/apps/{appId}/domains/{domain}/dns/{recordId}`
-
-DNS CRUD only works for Cloudflare-registered domains managed by Cloud.
-External domains return 409 and must be edited at the user's DNS provider.
+Detach a domain from the app. Body: `{ "domain": "myapp.com" }`. The registration itself stays active until expiration.

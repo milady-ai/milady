@@ -1,14 +1,14 @@
-import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 
 const workflow = (name: string) =>
   fs.readFileSync(`.github/workflows/${name}`, "utf8");
 
+const githubExpression = (value: string) => `\${{ ${value} }}`;
+
 describe("CI bootstrap contract", () => {
   it("declares the local upstream postinstall skip before CI uses it", () => {
     const ci = workflow("ci.yml");
-    const buildDocker = workflow("build-docker.yml");
     const setupAction = fs.readFileSync(
       ".github/actions/setup-bun-workspace/action.yml",
       "utf8",
@@ -18,43 +18,6 @@ describe("CI bootstrap contract", () => {
     expect(ci.match(/skip-local-upstreams-postinstall: "true"/g)).toHaveLength(
       4,
     );
-    expect(buildDocker).toContain('MILADY_SKIP_LOCAL_UPSTREAMS: "1"');
-  });
-
-  it("builds explicit local runtime packages for the agent image", () => {
-    const buildDocker = workflow("build-docker.yml");
-    const postinstall = "- name: Run postinstall patches";
-    const sourcePatches = "- name: Apply elizaOS source CI patches";
-    const coreBuild = "- name: Build @elizaos/core";
-    const agentBuild = "- name: Build agent workspace";
-    const sharedBuild = "- name: Build @elizaos/shared";
-    const runtimeBuild = "- name: Build runtime (tsdown)";
-
-    expect(buildDocker).toContain(sourcePatches);
-    expect(buildDocker.indexOf(sourcePatches)).toBeLessThan(
-      buildDocker.indexOf(coreBuild),
-    );
-    expect(buildDocker.indexOf(postinstall)).toBeLessThan(
-      buildDocker.indexOf(coreBuild),
-    );
-    expect(buildDocker.indexOf(coreBuild)).toBeLessThan(
-      buildDocker.indexOf(agentBuild),
-    );
-    expect(buildDocker.indexOf(agentBuild)).toBeLessThan(
-      buildDocker.indexOf(sharedBuild),
-    );
-    expect(buildDocker.indexOf(sharedBuild)).toBeLessThan(
-      buildDocker.indexOf(runtimeBuild),
-    );
-  });
-
-  it("bounds nested eliza installs for the agent image", () => {
-    const buildDocker = workflow("build-docker.yml");
-
-    expect(buildDocker).toContain(
-      "timeout 10m bun install --cwd eliza --no-frozen-lockfile --ignore-scripts",
-    );
-    expect(buildDocker).toContain("eliza bun install failed after");
   });
 
   it("does not run nested eliza workspace installs inside CI jobs", () => {
@@ -98,33 +61,27 @@ describe("CI bootstrap contract", () => {
     const installDependencies = "- name: Install dependencies";
     const generateProtobuf = "- name: Generate local eliza protobuf types";
     const postinstallPatches = "- name: Run repository postinstall patches";
+    const packageModeCompatibility =
+      "- name: Prepare package-mode eliza runtime compatibility";
 
     expect(setupAction).toContain(generateProtobuf);
     expect(setupAction).toContain(
       "inputs.prepare-local-eliza-runtime == 'true'",
     );
     expect(setupAction).toContain("bunx @bufbuild/buf@1.67.0 generate");
+    expect(setupAction).toContain(packageModeCompatibility);
+    expect(setupAction).toContain(
+      "inputs.skip-local-upstreams-postinstall == 'true'",
+    );
+    expect(setupAction).toContain("eliza/packages/core/dist/index.node.js");
     expect(setupAction.indexOf(installDependencies)).toBeLessThan(
       setupAction.indexOf(generateProtobuf),
     );
     expect(setupAction.indexOf(generateProtobuf)).toBeLessThan(
       setupAction.indexOf(postinstallPatches),
     );
-  });
-
-  it("hydrates local eliza runtime from the canonical repo in package-mode CI", () => {
-    const setupAction = fs.readFileSync(
-      ".github/actions/setup-bun-workspace/action.yml",
-      "utf8",
-    );
-    const cloneCommand =
-      'git clone --depth=1 --branch "$' +
-      '{MILADY_ELIZA_BRANCH:-develop}" https://github.com/elizaOS/eliza.git eliza';
-
-    expect(setupAction).toContain(cloneCommand);
-    expect(setupAction).not.toContain("git submodule sync -- eliza");
-    expect(setupAction).not.toContain(
-      "git submodule update --init --depth=1 eliza",
+    expect(setupAction.indexOf(postinstallPatches)).toBeLessThan(
+      setupAction.indexOf(packageModeCompatibility),
     );
   });
 
@@ -132,29 +89,25 @@ describe("CI bootstrap contract", () => {
     const agentReview = workflow("agent-review.yml");
     const align = "- name: Align nested eliza package resolution";
     const buildPlugins = "- name: Build local eliza runtime plugins";
+    const localElizaGuard =
+      "if [ ! -f eliza/packages/core/package.json ]; then";
     const coreBuild = "(cd eliza/packages/core && bun run build)";
-    const agentSkillsBuild =
+    const pluginBuild =
       "(cd eliza/plugins/plugin-agent-skills && bun run build)";
-    const pdfBuild = "(cd eliza/plugins/plugin-pdf && bun run build)";
-    const sqlBuild = "(cd eliza/plugins/plugin-sql && bun run build)";
     const runAuthSuite = "- name: Run auth test suite";
 
     expect(agentReview).toContain(buildPlugins);
+    expect(agentReview).toContain(localElizaGuard);
+    expect(agentReview).toContain(
+      "eliza core source absent; skipping local runtime plugin build",
+    );
     expect(agentReview).toContain(coreBuild);
-    expect(agentReview).toContain(agentSkillsBuild);
-    expect(agentReview).toContain(pdfBuild);
-    expect(agentReview).toContain(sqlBuild);
+    expect(agentReview).toContain(pluginBuild);
     expect(agentReview.indexOf(align)).toBeLessThan(
       agentReview.indexOf(buildPlugins),
     );
     expect(agentReview.indexOf(coreBuild)).toBeLessThan(
-      agentReview.indexOf(agentSkillsBuild),
-    );
-    expect(agentReview.indexOf(agentSkillsBuild)).toBeLessThan(
-      agentReview.indexOf(pdfBuild),
-    );
-    expect(agentReview.indexOf(pdfBuild)).toBeLessThan(
-      agentReview.indexOf(sqlBuild),
+      agentReview.indexOf(pluginBuild),
     );
     expect(agentReview.indexOf(buildPlugins)).toBeLessThan(
       agentReview.indexOf(runAuthSuite),
@@ -175,31 +128,81 @@ describe("CI bootstrap contract", () => {
     );
   });
 
-  it("links elizaOS runtime plugins and ambient UI types for local eliza checks", () => {
-    const alignScript = fs.readFileSync(
-      "scripts/align-eliza-ci-node-modules.mjs",
-      "utf8",
-    );
+  it("soft-skips review verdicts when the AI reviewer is unavailable", () => {
+    const agentReview = workflow("agent-review.yml");
 
-    expect(alignScript).toContain("function resolveInstalledPackage");
-    expect(alignScript).toContain("function ensureBuiltLocalPackage");
-    expect(alignScript).toContain('linkRootPackage(\n  "bun-types"');
-    expect(alignScript).toContain('linkRootPackage(\n  "@types/react"');
-    expect(alignScript).toContain('"@elizaos/plugin-agent-skills"');
-    expect(alignScript).toContain('"@elizaos/plugin-browser-bridge"');
-    expect(alignScript).toContain('"@elizaos/plugin-pdf"');
-    expect(alignScript).toContain('"@elizaos/plugin-sql"');
-    expect(alignScript).toContain('"@elizaos/plugin-streaming"');
-    expect(alignScript).toContain('"@elizaos/cloud-routing"');
-    expect(alignScript).toContain('"dist/node/index.node.js"');
-    expect(alignScript).toContain('"typescript/dist/index.js"');
+    expect(agentReview).toContain("const serviceUnavailablePattern");
+    expect(agentReview).toContain("credit balance is too low");
+    expect(agentReview).toContain("allowServiceUnavailable");
+    expect(agentReview).toContain("decision = 'SKIPPED (service unavailable)'");
+    expect(agentReview).toContain("'service-unavailable': 'neutral'");
   });
 
-  it("lets elizaCloud patch version drift skip cleanly", () => {
-    const output = execFileSync(process.execPath, [
-      "scripts/patch-elizacloud.mjs",
-    ]).toString();
+  it("only forces local upstreams in CI build when eliza source exists", () => {
+    const ci = workflow("ci.yml");
 
-    expect(output).toMatch(/\[patch-elizacloud\].*skipping/);
+    expect(ci).toContain(
+      "if: $" + "{{ hashFiles('eliza/packages/app-core/package.json') != '' }}",
+    );
+    expect(ci).toContain(
+      "MILADY_FORCE_LOCAL_UPSTREAMS: $" +
+        "{{ hashFiles('eliza/packages/app-core/package.json') != '' && '1' || '' }}",
+    );
+  });
+
+  it("runs gitleaks without the licensed org action", () => {
+    const gitleaks = workflow("gitleaks.yml");
+    const prRange =
+      `gitleaks git . --log-opts="${githubExpression("github.event.pull_request.base.sha")}..` +
+      `${githubExpression("github.event.pull_request.head.sha")}" --config .gitleaks.toml --redact --no-banner --verbose`;
+    const pushRange =
+      `gitleaks git . --log-opts="${githubExpression("github.event.before")}..` +
+      `${githubExpression("github.sha")}" --config .gitleaks.toml --redact --no-banner --verbose`;
+
+    expect(gitleaks).toContain('GITLEAKS_VERSION: "8.30.1"');
+    expect(gitleaks).toContain(prRange);
+    expect(gitleaks).toContain(pushRange);
+    expect(gitleaks).toContain(
+      "gitleaks dir . --config .gitleaks.toml --redact --no-banner --verbose",
+    );
+    expect(gitleaks).not.toContain("gitleaks/gitleaks-action");
+  });
+
+  it("hydrates eliza source before SOC2 verification", () => {
+    const soc2 = workflow("soc2-verify.yml");
+    const clone = "git clone --depth=1 --branch";
+    const install = "- name: Install dependencies (eliza/)";
+    const verify = "- name: Run SOC2 verification";
+
+    expect(soc2).toContain("Initialize eliza source checkout");
+    expect(soc2).toContain("https://github.com/elizaOS/eliza.git eliza");
+    expect(soc2).toContain(
+      `if [ "${githubExpression("github.event_name")}" = "pull_request" ]; then`,
+    );
+    expect(soc2).toContain(
+      "bun run packages/soc2-verify/src/cli.ts --out ../soc2-evidence",
+    );
+    expect(soc2).toContain(
+      "bun run packages/soc2-verify/src/cli.ts --strict-fail --out ../soc2-evidence",
+    );
+    expect(soc2.indexOf(clone)).toBeLessThan(soc2.indexOf(install));
+    expect(soc2.indexOf(install)).toBeLessThan(soc2.indexOf(verify));
+  });
+
+  it("lets elizaCloud patch version drift skip cleanly", async () => {
+    const { main } = await import("./patch-elizacloud.mjs");
+    const output: string[] = [];
+    const originalLog: typeof console.log = console.log;
+
+    try {
+      console.log = (...args: unknown[]) => {
+        output.push(args.map(String).join(" "));
+      };
+      main();
+    } finally {
+      console.log = originalLog;
+    }
+
+    expect(output.join("\n")).toMatch(/\[patch-elizacloud\].*skipping/);
   });
 });

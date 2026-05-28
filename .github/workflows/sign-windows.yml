@@ -1,0 +1,108 @@
+# SOC2 L-5: Windows code-signing pipeline.
+#
+# Signs the Windows artifact produced by the desktop build pipeline using
+# an EV code-signing certificate. Triggered after a successful build that
+# uploaded an unsigned `.exe` / `.msi` artifact.
+#
+# HUMAN-IN-LOOP REQUIRED:
+#   1. Procure an EV code-signing certificate from a trusted CA
+#      (DigiCert, Sectigo, etc.). EV certs require hardware-token shipment
+#      and identity-verification calls — allow 2-3 weeks.
+#   2. Store the cert + password in the org GitHub secrets as:
+#        WINDOWS_CODE_SIGNING_CERT_PFX_BASE64
+#        WINDOWS_CODE_SIGNING_CERT_PASSWORD
+#      (PFX bundle, base64-encoded so it can live in a secret string.)
+#   3. Optionally configure HSM-backed signing via Azure Key Vault Signtool;
+#      that flow is out of scope for this initial workflow.
+#
+# Until the secrets are configured the workflow skips signing and emits a
+# warning so PR CI does not break.
+#
+# Coordination note: file name chosen to avoid collision with the SDLC
+# agent's `sign-images.yml`. If a future agent adds `windows-sign.yml`,
+# delete one and reconcile.
+
+name: sign-windows
+
+on:
+  workflow_run:
+    workflows: ["build-desktop"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      artifact_name:
+        description: "Name of the unsigned Windows artifact to sign"
+        required: true
+        default: "milady-windows-unsigned"
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  sign:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: windows-latest
+    steps:
+      - name: Download unsigned artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          name: ${{ github.event.inputs.artifact_name || 'milady-windows-unsigned' }}
+          path: ./unsigned
+
+      - name: Check signing secrets are configured
+        id: check_secrets
+        shell: pwsh
+        env:
+          PFX_B64: ${{ secrets.WINDOWS_CODE_SIGNING_CERT_PFX_BASE64 }}
+        run: |
+          if ([string]::IsNullOrEmpty($env:PFX_B64)) {
+            Write-Warning "WINDOWS_CODE_SIGNING_CERT_PFX_BASE64 not set — skipping signing."
+            "skip=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          } else {
+            "skip=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          }
+
+      - name: Restore certificate
+        if: steps.check_secrets.outputs.skip == 'false'
+        shell: pwsh
+        env:
+          PFX_B64: ${{ secrets.WINDOWS_CODE_SIGNING_CERT_PFX_BASE64 }}
+        run: |
+          $bytes = [Convert]::FromBase64String($env:PFX_B64)
+          [IO.File]::WriteAllBytes("$env:RUNNER_TEMP\code-signing.pfx", $bytes)
+
+      - name: Sign artifacts with signtool
+        if: steps.check_secrets.outputs.skip == 'false'
+        shell: pwsh
+        env:
+          PFX_PASS: ${{ secrets.WINDOWS_CODE_SIGNING_CERT_PASSWORD }}
+        run: |
+          $signtool = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\signtool.exe" |
+            Sort-Object FullName -Descending | Select-Object -First 1
+          if (-not $signtool) { throw "signtool.exe not found on the runner" }
+          Get-ChildItem ./unsigned -Recurse -Include *.exe,*.msi | ForEach-Object {
+            & $signtool.FullName sign `
+              /fd SHA256 `
+              /tr http://timestamp.digicert.com `
+              /td SHA256 `
+              /f "$env:RUNNER_TEMP\code-signing.pfx" `
+              /p $env:PFX_PASS `
+              $_.FullName
+            & $signtool.FullName verify /pa /all $_.FullName
+          }
+
+      - name: Upload signed artifact
+        if: steps.check_secrets.outputs.skip == 'false'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: milady-windows-signed
+          path: ./unsigned
+
+      - name: Clean up certificate
+        if: always()
+        shell: pwsh
+        run: |
+          Remove-Item -Force -ErrorAction SilentlyContinue "$env:RUNNER_TEMP\code-signing.pfx"

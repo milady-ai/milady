@@ -1,0 +1,183 @@
+# SOC2 CC7.1 / CC7.4 — centralized log shipping.
+# Default sink: GCP Cloud Logging (cluster runs on GKE Autopilot).
+# To swap to Loki or S3-with-object-lock, replace the [OUTPUT] stanza
+# in the ConfigMap below — Fluent Bit ships outputs for both.
+#
+# Fluent Bit must run as root to read /var/log/containers/* — this is the
+# documented exception to the non-root rule (CC6.3). It is restricted to
+# CAP_DAC_READ_SEARCH only.
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: logging
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: fluent-bit
+  namespace: logging
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: fluent-bit-read
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "namespaces"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: fluent-bit-read
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: fluent-bit-read
+subjects:
+  - kind: ServiceAccount
+    name: fluent-bit
+    namespace: logging
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluent-bit-config
+  namespace: logging
+data:
+  fluent-bit.conf: |
+    [SERVICE]
+        Flush         5
+        Log_Level     info
+        Daemon        off
+        Parsers_File  parsers.conf
+        HTTP_Server   On
+        HTTP_Listen   0.0.0.0
+        HTTP_Port     2020
+
+    [INPUT]
+        Name              tail
+        Path              /var/log/containers/*.log
+        Parser            cri
+        Tag               kube.*
+        Refresh_Interval  5
+        Mem_Buf_Limit     50MB
+        Skip_Long_Lines   On
+
+    [FILTER]
+        Name                kubernetes
+        Match               kube.*
+        Kube_URL            https://kubernetes.default.svc:443
+        Merge_Log           On
+        Keep_Log            Off
+        K8S-Logging.Parser  On
+        K8S-Logging.Exclude On
+
+    # Default sink: GCP Cloud Logging (Stackdriver).
+    # TODO(soc2): operator supplies GCP_PROJECT_ID via env / fieldRef.
+    [OUTPUT]
+        Name        stackdriver
+        Match       kube.*
+        resource    k8s_container
+        # k8s_cluster_name / location auto-detected via metadata server.
+
+    # ---- ALTERNATIVE: Loki ----
+    # [OUTPUT]
+    #     Name   loki
+    #     Match  kube.*
+    #     host   loki.logging.svc
+    #     port   3100
+    #     labels job=fluentbit, $kubernetes['namespace_name']
+
+    # ---- ALTERNATIVE: S3 with Object Lock ----
+    # [OUTPUT]
+    #     Name                         s3
+    #     Match                        kube.*
+    #     bucket                       eliza-prod-logs-immutable
+    #     region                       us-east-1
+    #     total_file_size              50M
+    #     upload_timeout               10m
+    #     use_put_object               On
+    #     s3_key_format                /year=%Y/month=%m/day=%d/hour=%H/%H%M%S-$UUID.gz
+    #     compression                  gzip
+
+  parsers.conf: |
+    [PARSER]
+        Name   cri
+        Format regex
+        Regex  ^(?<time>[^ ]+) (?<stream>stdout|stderr) (?<logtag>[^ ]+) (?<log>.*)$
+        Time_Key time
+        Time_Format %Y-%m-%dT%H:%M:%S.%L%z
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fluent-bit
+  namespace: logging
+  labels:
+    app.kubernetes.io/name: fluent-bit
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: fluent-bit
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: fluent-bit
+    spec:
+      serviceAccountName: fluent-bit
+      tolerations:
+        - operator: Exists
+          effect: NoSchedule
+        - operator: Exists
+          effect: NoExecute
+      # Fluent Bit DaemonSet is the documented exception to the non-root
+      # rule (SOC2 CC6.3) — it must read /var/log/containers as root.
+      # Capabilities are narrowed to the minimum needed.
+      containers:
+        - name: fluent-bit
+          # TODO(soc2): pin to digest.
+          image: cr.fluentbit.io/fluent/fluent-bit:3.1.7
+          ports:
+            - containerPort: 2020
+          securityContext:
+            runAsUser: 0
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+              add: ["DAC_READ_SEARCH"]
+            seccompProfile:
+              type: RuntimeDefault
+          resources:
+            requests:
+              cpu: 50m
+              memory: 100Mi
+            limits:
+              cpu: 200m
+              memory: 300Mi
+          volumeMounts:
+            - name: varlog
+              mountPath: /var/log
+              readOnly: true
+            - name: varlibdockercontainers
+              mountPath: /var/lib/docker/containers
+              readOnly: true
+            - name: config
+              mountPath: /fluent-bit/etc/
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: varlog
+          hostPath:
+            path: /var/log
+        - name: varlibdockercontainers
+          hostPath:
+            path: /var/lib/docker/containers
+        - name: config
+          configMap:
+            name: fluent-bit-config
+        - name: tmp
+          emptyDir:
+            sizeLimit: 64Mi

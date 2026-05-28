@@ -1,21 +1,74 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Edit|Write|MultiEdit",
-        "hooks": [
-          { "type": "command", "command": ".claude/hooks/check-node-path.sh" },
-          { "type": "command", "command": ".claude/hooks/check-actionlint.sh" },
-          { "type": "command", "command": ".claude/hooks/check-rpc-schema-sync.sh" }
-        ]
-      }
-    ]
-  },
-
   "// enabledPlugins": "Project-level overrides. Milady is Bun + Electrobun + elizaOS with zero Vercel/Next.js. The Vercel plugins' workflow skill uses an over-broad '*workflow*' glob that incorrectly matches .github/workflows/*.yml (GitHub Actions) as if it were Vercel Workflow DevKit files, producing false-positive validator errors about require()/setTimeout inside actions/github-script@v7 blocks — that action has full CommonJS Node support, so the rules don't apply. Both Vercel plugins are also injecting irrelevant Vercel/Next.js guidance into every prompt in this project. Disable them here; keep them enabled globally for other projects that actually use Vercel.",
   "enabledPlugins": {
     "vercel@claude-plugins-official": false,
     "vercel-plugin@vercel-vercel-plugin": false
+  },
+  "// hooks.Stop": "End-of-turn typecheck + lint via `bun run verify`. asyncRewake means: runs in background (does NOT block the user), silent on success, and wakes the model with the tailed error output on failure (exit 2). Catches type errors before they compound across phases without the latency of a synchronous hook on this 953-file monorepo.",
+  "// hooks.Electrobun": "Local Electrobun agentic desktop hooks from docs/agent-packs/electrobun-agentic-desktop-2026. The guard hooks block obvious destructive/secret-exposing operations and print focused follow-up checks; they do not replace Milady's background verify hook.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/pre-bash-guard.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/pre-edit-guard.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/post-edit-validate.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/post-bash-summary.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "out=$(bun run verify 2>&1); rc=$?; if [ $rc -ne 0 ]; then echo \"$out\" | tail -40; exit 2; fi",
+            "asyncRewake": true,
+            "timeout": 240,
+            "statusMessage": "Running bun run verify (background)"
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/stop-checklist.sh"
+          }
+        ]
+      }
+    ]
   }
 }

@@ -173,7 +173,6 @@ export function request(
   else if (optsOrCb && typeof optsOrCb === "object") {
     if (typeof optsOrUrl === "string" || optsOrUrl instanceof URL) {
       const base = normalizeRequestOptions(optsOrUrl);
-      opts = { ...optsOrCb, ...base } as RequestOptions;
       const merged: RequestOptions = {
         ...optsOrCb,
         protocol: undefined,
