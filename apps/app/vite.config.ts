@@ -2,6 +2,16 @@ import fs from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import tailwindcss from "@tailwindcss/vite";
+import react from "@vitejs/plugin-react-swc";
+import {
+  type Alias,
+  createLogger,
+  defineConfig,
+  type Plugin,
+  type ServerOptions,
+  transformWithEsbuild,
+} from "vite";
 // Keep workspace-relative TS imports in this config so Vite transpiles them
 // while bundling the config instead of asking Node to load package-exported
 // .ts files directly in CI. Removing this workaround (commit b3060bf16) is
@@ -20,16 +30,6 @@ import {
   resolveDesktopUiPort,
   resolveDesktopUiPortPreference,
 } from "../../eliza/packages/shared/src/runtime-env.ts";
-import tailwindcss from "@tailwindcss/vite";
-import react from "@vitejs/plugin-react-swc";
-import {
-  type Alias,
-  createLogger,
-  defineConfig,
-  type Plugin,
-  type ServerOptions,
-  transformWithEsbuild,
-} from "vite";
 import { syncElizaEnvAliases } from "../../scripts/lib/sync-eliza-env-aliases.mjs";
 import appConfig from "./app.config";
 import { resolveViteDevServerRuntime } from "./vite-dev-origin.ts";
