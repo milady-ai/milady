@@ -211,7 +211,34 @@ function patchElectrobunAgentChildPathFallback(raw) {
     return raw;
   }
 
-  const next = raw.replace(
+  // Pattern A: newer eliza (f4991bc6+) uses a prependDesktopChildPathDirectory helper
+  const helperPatched = raw.replace(
+    /export function prependDesktopChildPathDirectory\(\r?\n([ \t]*)childEnv: Record<string, string \| undefined>,\r?\n[ \t]*directory: string,\r?\n[ \t]*\): boolean \{\r?\n[ \t]*const existingPath = childEnv\.PATH\?\.trim\(\);\r?\n[ \t]*if \(!existingPath\) \{\r?\n[ \t]*childEnv\.PATH = directory;\r?\n[ \t]*return true;\r?\n[ \t]*\}\r?\n[ \t]*if \(existingPath\.split\(path\.delimiter\)\.includes\(directory\)\) \{\r?\n[ \t]*return false;\r?\n[ \t]*\}\r?\n[ \t]*childEnv\.PATH = `\$\{directory\}\$\{path\.delimiter\}\$\{existingPath\}`;\r?\n[ \t]*return true;\r?\n[ \t]*\}/,
+    (_, indent) =>
+      `export function prependDesktopChildPathDirectory(
+${indent}childEnv: Record<string, string | undefined>,
+${indent}directory: string,
+): boolean {
+${indent}const existingPathKey = childEnv.PATH !== undefined ? "PATH" : "Path";
+${indent}const existingPath = childEnv[existingPathKey]?.trim();
+${indent}if (!existingPath) {
+${indent}  childEnv[existingPathKey] = directory;
+${indent}  return true;
+${indent}}
+${indent}if (existingPath.split(path.delimiter).includes(directory)) {
+${indent}  return false;
+${indent}}
+${indent}childEnv[existingPathKey] = \`\${directory}\${path.delimiter}\${existingPath}\`;
+${indent}return true;
+}`,
+  );
+
+  if (helperPatched !== raw) {
+    return helperPatched;
+  }
+
+  // Pattern B: older eliza has the PATH prepend inline in the spawn block
+  const inlinePatched = raw.replace(
     /([ \t]*)const bunDir = path\.dirname\(bunExecutable\);\r?\n\1const existingPath = childEnv\.PATH(?: \?\? "")?;\r?\n\1if \(!existingPath\.split\(path\.delimiter\)\.includes\(bunDir\)\) \{\r?\n\1[ \t]*childEnv\.PATH = bunDir \+ path\.delimiter \+ existingPath;\r?\n\1[ \t]*diagnosticLog\(`\[Agent\] Prepended bun dir to child PATH: \$\{bunDir\}`\);\r?\n\1\}\r?\n/,
     (_, indent) => `${indent}const bunDir = path.dirname(bunExecutable);
 ${indent}const existingPathKey =
@@ -227,13 +254,13 @@ ${indent}}
 `,
   );
 
-  if (next === raw) {
-    throw new Error(
-      "Could not patch Electrobun agent PATH fallback: expected child PATH block was not found",
-    );
+  if (inlinePatched !== raw) {
+    return inlinePatched;
   }
 
-  return next;
+  throw new Error(
+    "Could not patch Electrobun agent PATH fallback: neither helper function nor inline block matched",
+  );
 }
 
 function patchComputerUseVisionContextProvider(raw) {
