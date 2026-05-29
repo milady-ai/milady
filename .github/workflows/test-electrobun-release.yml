@@ -71,6 +71,16 @@ jobs:
 
       - name: Run regression matrix contract
         run: bun run test:regression-matrix:release-contract
+        env:
+          # On pull_request, actions/checkout does not create refs/remotes/origin/develop,
+          # so the changed-files diff against origin/develop throws "Unable to resolve
+          # changed files". validate-regression-matrix.mjs prefers GITHUB_BASE_SHA (a
+          # non-default var); supply the PR base SHA (present in the merge ref's ancestry
+          # under fetch-depth:0) so the diff resolves. Empty on push, where the script
+          # early-returns with no changed files.
+          GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
 
       - name: Run release contract suite
         run: bun run test:release:contract
+        env:
+          GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
