@@ -438,10 +438,14 @@ test("Electrobun release applies elizaOS source overlay before manual build setu
     electrobun,
     /name: Probe Electrobun bun entry build[\s\S]*?node "\$GITHUB_WORKSPACE\/scripts\/copy-runtime-node-modules\.ts" --link-only[\s\S]*?bun build src\/index\.ts --target=bun/,
   );
-  assert.match(electrobun, /--external "\*\.node"/);
-  assert.match(electrobun, /--external @node-llama-cpp\/mac-arm64-metal/);
-  assert.match(electrobun, /--external @node-llama-cpp\/linux-x64/);
-  assert.match(electrobun, /--external @node-llama-cpp\/win-x64/);
+  // Match upstream eliza's release-electrobun.yml: the probe externalizes
+  // EVERY npm package via --packages=external instead of hand-rolling
+  // per-arch @node-llama-cpp and *.node exclusions. This subsumes the prior
+  // narrower assertions (native modules, llama variants) and additionally
+  // covers react/react-dom, which the previous flag set silently bundled
+  // and which broke the probe under eliza f4991bc6+ via the
+  // jsx:"react-jsx" tsconfig + ambient-modules.d.ts `import type from "react"`.
+  assert.match(electrobun, /--packages=external/);
   assert.match(electrobun, /-name "\*\.app\.tar\.gz"/);
   assert.match(electrobun, /-name "\*\.tar\.zst"/);
   assert.match(electrobun, /-name "eliza-\*\.exe\.zip"/);
