@@ -626,7 +626,14 @@ const requiredElectrobunConfigSnippets`,
 }
 
 function patchWhisperBuildWindowsConfig(raw) {
-  if (raw.includes('"--config"')) return raw;
+  // Normalize CRLF -> LF so multi-line anchors match on Windows runners,
+  // where `git clone` of the eliza submodule applies autocrlf=true (the
+  // default on the Windows GitHub Actions runner image). Single-line
+  // replaces survive CRLF, but the multi-line ?: ternaries below would
+  // silently miss. We write the file back with LF; Node treats both the
+  // same when executing .mjs.
+  const normalized = raw.replace(/\r\n/g, "\n");
+  if (normalized.includes('"--config"')) return raw;
 
   // MSBuild (the default Windows generator) is multi-config, so the cmake
   // configure-time CMAKE_BUILD_TYPE=Release flag is ignored; without --config
@@ -634,7 +641,7 @@ function patchWhisperBuildWindowsConfig(raw) {
   // subdirs that the post-build search probes never look at. Force Release at
   // build time on Windows, and broaden the candidate lookup so both Release
   // and Debug subdirs resolve (covers stale local caches too).
-  let patched = raw.replace(
+  let patched = normalized.replace(
     `  const buildArgs = [
     "--build",
     buildPath,
@@ -654,6 +661,14 @@ function patchWhisperBuildWindowsConfig(raw) {
           ]`,
     `      : process.platform === "win32"
         ? [
+            // CMake on Windows routes shared library outputs (whisper.dll,
+            // ggml.dll etc.) to RUNTIME_OUTPUT_DIRECTORY = <buildPath>/bin/
+            // and into a <config>/ subdir under MSBuild. Search those first,
+            // then fall back to the layout the Linux/macOS branches expect.
+            // Observed in CI: "whisper.vcxproj -> ...build-whisper/bin/Debug/whisper.dll".
+            path.join(buildPath, "bin", "Release", "whisper.dll"),
+            path.join(buildPath, "bin", "Debug", "whisper.dll"),
+            path.join(buildPath, "bin", "whisper.dll"),
             path.join(subBuild, "src", "Release", "whisper.dll"),
             path.join(subBuild, "src", "Debug", "whisper.dll"),
             path.join(subBuild, "src", "whisper.dll"),
