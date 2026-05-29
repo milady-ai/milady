@@ -49,7 +49,7 @@ jobs:
       - name: Setup workspace dependencies
         uses: ./.github/actions/setup-bun-workspace
         with:
-          bun-version: "1.3.13"
+          bun-version: "1.3.14"
           disable-local-eliza-workspace: "true"
           install-command: bun install --ignore-scripts --no-frozen-lockfile
           run-postinstall: ${{ inputs.run_postinstall }}
