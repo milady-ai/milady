@@ -10,10 +10,12 @@ Write **elizaOS** (not `ElizaOS`). npm scope `@elizaos/*`. Plain language: **Eli
 
 ## Cloud frontend visual review (REQUIRED for any UI change)
 
-For ANY change in `packages/cloud-frontend/` (or any shared package whose UI bleeds into cloud-frontend), follow this loop until every touched page reaches verdict `good`:
+> Path/mode note: `cloud-frontend` lives at `eliza/packages/cloud-frontend` and is on disk only in **local mode** (`bun run eliza:local`). Every `packages/cloud-frontend/…` path in this section is relative to `eliza/packages/cloud-frontend/`.
+
+For ANY change in `eliza/packages/cloud-frontend/` (or any shared package whose UI bleeds into cloud-frontend), follow this loop until every touched page reaches verdict `good`:
 
 ```bash
-bun run --cwd packages/cloud-frontend audit:cloud
+bun run --cwd eliza/packages/cloud-frontend audit:cloud
 ```
 
 This boots the dev server, performs an injected-ethereum login (synthetic JWT in `localStorage.steward_session_token`), visits every route in `src/App.tsx` at desktop + mobile, captures rest + hover screenshots, and writes:
@@ -143,9 +145,13 @@ Two skill systems — don't conflate.
 
 ## Project layout
 
+# Runtime source-of-truth is the @elizaos/* packages: consumed from npm (packages
+# mode, the default) or from the gitignored eliza/ clone (local mode). Root
+# packages/ does NOT exist — only apps/, scripts/, and (in local mode) eliza/ are
+# on disk at the repo root. The eliza/packages/* paths below exist only in local mode.
 ```
-packages/
-  app-core/     Main runtime (source of truth)
+eliza/packages/     Runtime source (local mode) == published @elizaos/* (packages mode)
+  app-core/         Main runtime
     src/entry.ts             CLI bootstrap
     src/cli/                 Commander CLI (milady)
     src/runtime/eliza.ts     Agent loader (sets NODE_PATH, loads plugins)
@@ -154,13 +160,13 @@ packages/
     src/config/              Plugin auto-enable, schemas
     src/connectors/          Connector code
     src/services/            Business logic
-  agent/        Upstream elizaOS agent
-  ui/           Shared component library
-  shared/       Shared utils
-apps/
+  agent/          Upstream elizaOS agent
+  ui/             Shared component library
+  shared/         Shared utils (runtime-env, dev-settings, env aliases)
+apps/             Milady-owned client (committable in this repo)
   app/          Web + desktop UI (Vite + React); electrobun/ = desktop shell
   homepage/     Marketing site
-scripts/
+scripts/          Milady-owned automation (committable in this repo)
   dev-ui.mjs                Dev orchestrator (API + Vite)
   eliza-source-mode.mjs     local ↔ packages mode
   setup-upstreams.mjs       Init repo-local upstreams (eliza:local)
