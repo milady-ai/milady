@@ -242,6 +242,14 @@ function resolveLocalUiAliases(): Alias[] {
       replacement: path.join(uiPkgRoot, "src/index.ts"),
     },
     {
+      find: /^@elizaos\/ui\/api$/,
+      replacement: path.join(uiPkgRoot, "src/api/index.ts"),
+    },
+    {
+      find: /^@elizaos\/ui\/browser$/,
+      replacement: path.join(uiPkgRoot, "src/browser.ts"),
+    },
+    {
       find: /^@elizaos\/ui\/components\/ui\/(.*)$/,
       replacement: `${uiPkgRoot}/src/components/ui/$1.tsx`,
       customResolver: resolveExistingUiSourceModule,
@@ -283,6 +291,11 @@ function resolveLocalUiAliases(): Alias[] {
     {
       find: /^@elizaos\/ui\/lib\/(.*)$/,
       replacement: `${uiPkgRoot}/src/lib/$1.ts`,
+    },
+    {
+      find: /^@elizaos\/ui\/(.+)$/,
+      replacement: `${uiPkgRoot}/src/$1`,
+      customResolver: resolveExistingUiSourceModule,
     },
   ];
 }
@@ -874,7 +887,7 @@ function resolveExistingUiSourceModule(id: string) {
   }
 
   for (const candidate of candidates) {
-    if (fs.existsSync(candidate)) {
+    if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
       return candidate;
     }
   }

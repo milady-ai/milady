@@ -17,10 +17,6 @@ import type { BrandingConfig } from "@elizaos/app-core";
 import {
   type AppBootConfig,
   getBootConfig,
-  ANDROID_LOCAL_AGENT_API_BASE,
-  MOBILE_RUNTIME_MODE_STORAGE_KEY,
-  normalizeMobileRuntimeMode,
-  preSeedAndroidLocalRuntimeIfFresh,
   setBootConfig,
 } from "@elizaos/app-core";
 import {
@@ -35,19 +31,31 @@ import {
   TRAY_ACTION_EVENT,
 } from "@elizaos/app-core";
 import {
-  applyForceFreshOnboardingReset,
-  applyLaunchConnectionFromUrl,
-  applyLaunchConnection,
-  installDesktopPermissionsClientPatch,
-  installForceFreshOnboardingClientPatch,
-  installLocalProviderCloudPreferencePatch,
-  isAppWindowRoute,
-  isDetachedWindowShell,
+  ANDROID_LOCAL_AGENT_API_BASE,
+  MOBILE_RUNTIME_MODE_STORAGE_KEY,
+  normalizeMobileRuntimeMode,
+} from "@elizaos/ui/first-run/mobile-runtime-mode";
+import { preSeedAndroidLocalRuntimeIfFresh } from "@elizaos/ui/first-run/pre-seed-local-runtime";
+import {
   getWindowNavigationPath,
+  isAppWindowRoute,
+} from "@elizaos/ui/navigation/index";
+import {
+  applyLaunchConnection,
+  applyLaunchConnectionFromUrl,
+} from "@elizaos/ui/platform/browser-launch";
+import { installLocalProviderCloudPreferencePatch } from "@elizaos/ui/platform/cloud-preference-patch";
+import { installDesktopPermissionsClientPatch } from "@elizaos/ui/platform/desktop-permissions-client";
+import {
+  applyForceFreshFirstRunReset as applyForceFreshOnboardingReset,
+  installForceFreshFirstRunClientPatch as installForceFreshOnboardingClientPatch,
+} from "@elizaos/ui/platform/first-run-reset";
+import {
+  isDetachedWindowShell,
   resolveWindowShellRoute,
-  shouldInstallMainWindowOnboardingPatches,
+  shouldInstallMainWindowFirstRunPatches as shouldInstallMainWindowOnboardingPatches,
   syncDetachedShellLocation,
-} from "@elizaos/app-core";
+} from "@elizaos/ui/platform/window-shell";
 // Pill / voice-capture symbols live in upstream @elizaos/ui source but are
 // not yet published on the `alpha` dist-tag. Route through the local stub so
 // package-mode builds stay green; see apps/app/src/pill-stubs.tsx.
@@ -292,7 +300,7 @@ installDesktopPermissionsClientPatch(client);
 window.__ELIZA_APP_CHARACTER_EDITOR__ = CharacterEditor;
 getAppWindow()[BRANDED_WINDOW_KEYS.characterEditor] = CharacterEditor;
 
-import { getStylePresets } from "@elizaos/shared/onboarding-presets";
+import { getStylePresets } from "@elizaos/shared";
 
 // Derive VRM roster from STYLE_PRESETS so character names stay in one place.
 const APP_STYLE_PRESETS = getStylePresets();

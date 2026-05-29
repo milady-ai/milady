@@ -251,9 +251,9 @@ git config --global core.longPaths true
 ### Homebrew (macOS / Linux)
 
 ```bash
-brew tap milady-ai/milady
-brew install milady          # CLI
-brew install --cask milady   # Desktop app (macOS only)
+brew tap milady-ai/tap
+brew install milady-ai/tap/milady          # CLI
+brew install --cask milady-ai/tap/milady   # Desktop app (macOS only)
 ```
 
 ### Snap
