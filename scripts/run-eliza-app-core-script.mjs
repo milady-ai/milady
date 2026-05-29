@@ -67,7 +67,17 @@ const child = spawn(
   [resolvedScriptPath, ...scriptArgs],
   {
     cwd: repoRoot,
-    env: process.env,
+    // app-core scripts that diff/validate the consuming repo (e.g.
+    // validate-regression-matrix.mjs) resolve their repo root via
+    // `git rev-parse --show-toplevel`, which points at the nested eliza/
+    // checkout in CI rather than this milady workspace. Anchor them to the
+    // milady root so the regression-matrix contract validates milady's
+    // workflows and resolves the milady base SHA. Only this script reads the
+    // var, so setting it for every app-core invocation has no other effect.
+    env: {
+      ...process.env,
+      MILADY_REPO_ROOT: process.env.MILADY_REPO_ROOT ?? repoRoot,
+    },
     stdio: "inherit",
   },
 );
