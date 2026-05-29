@@ -76,7 +76,7 @@ const child = spawn(
     // var, so setting it for every app-core invocation has no other effect.
     env: {
       ...process.env,
-      MILADY_REPO_ROOT: process.env.MILADY_REPO_ROOT ?? repoRoot,
+      MILADY_REPO_ROOT: process.env.MILADY_REPO_ROOT?.trim() || repoRoot,
     },
     stdio: "inherit",
   },

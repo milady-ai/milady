@@ -315,6 +315,11 @@ function ensureElizaCoreRuntimeDeps(elizaSourceRoot) {
         coreManifest.dependencies?.[dep] ??
         coreManifest.devDependencies?.[dep] ??
         coreManifest.peerDependencies?.[dep];
+      if (!version) {
+        console.warn(
+          `[hydrate-windows-playwright-deps] ${dep} has no version declared in @elizaos/core; installing latest`,
+        );
+      }
       missing.push(version ? `${dep}@${version}` : dep);
     }
   }
