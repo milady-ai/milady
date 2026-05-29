@@ -998,21 +998,17 @@ jobs:
           out_dir="$RUNNER_TEMP/electrobun-entry-probe"
           rm -rf "$out_dir"
           node "$GITHUB_WORKSPACE/scripts/copy-runtime-node-modules.ts" --link-only
-          bun build src/index.ts --target=bun --outdir "$out_dir" \
-            --external "*.node" \
-            --external @node-llama-cpp/mac-arm64-metal \
-            --external @node-llama-cpp/mac-x64 \
-            --external @node-llama-cpp/linux-x64-cuda \
-            --external @node-llama-cpp/linux-x64-cuda-ext \
-            --external @node-llama-cpp/linux-x64-vulkan \
-            --external @node-llama-cpp/linux-x64 \
-            --external @node-llama-cpp/linux-arm64 \
-            --external @node-llama-cpp/linux-armv7l \
-            --external @node-llama-cpp/win-x64-cuda \
-            --external @node-llama-cpp/win-x64-cuda-ext \
-            --external @node-llama-cpp/win-x64-vulkan \
-            --external @node-llama-cpp/win-x64 \
-            --external @node-llama-cpp/win-arm64
+          # Match upstream eliza release-electrobun.yml verbatim:
+          # `--packages=external` tells bun to externalize EVERY npm package,
+          # which is what this probe wants — we only need to verify the entry
+          # transpiles, not actually bundle the dependency tree. Without it,
+          # bun follows tsconfig path mappings + jsx:"react-jsx" into
+          # ambient-modules.d.ts (which contains an `import type from "react"`),
+          # finds @types/react instead of react in the bun store, and crashes
+          # parsing `export as namespace React`. The previous explicit
+          # --external "*.node" + per-arch @node-llama-cpp filters were a
+          # subset of this and missed react/react-dom entirely.
+          bun build src/index.ts --target=bun --packages=external --outdir "$out_dir"
 
       - name: Build patched Electrobun CLI
         shell: bash
