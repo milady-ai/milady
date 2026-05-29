@@ -1,0 +1,84 @@
+{
+  "batchIndex": 183,
+  "nodes": [
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/docs/agentic-desktop-security-model.md",
+      "type": "document",
+      "name": "agentic-desktop-security-model.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/docs/agentic-desktop-security-model.md",
+      "summary": "agentic-desktop-security-model.md documents docs/agent-packs/electrobun-agentic-desktop-2026/docs with 22 lines of reference material.",
+      "languageNotes": "markdown; docs; 22 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/docs/electrobun-architecture-playbook.md",
+      "type": "document",
+      "name": "electrobun-architecture-playbook.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/docs/electrobun-architecture-playbook.md",
+      "summary": "electrobun-architecture-playbook.md documents docs/agent-packs/electrobun-agentic-desktop-2026/docs with 58 lines of reference material.",
+      "languageNotes": "markdown; docs; 58 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/docs/limitations-and-non-equivalents.md",
+      "type": "document",
+      "name": "limitations-and-non-equivalents.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/docs/limitations-and-non-equivalents.md",
+      "summary": "limitations-and-non-equivalents.md documents docs/agent-packs/electrobun-agentic-desktop-2026/docs with 29 lines of reference material.",
+      "languageNotes": "markdown; docs; 29 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/docs/porting-map-from-apple-swift.md",
+      "type": "document",
+      "name": "porting-map-from-apple-swift.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/docs/porting-map-from-apple-swift.md",
+      "summary": "porting-map-from-apple-swift.md documents docs/agent-packs/electrobun-agentic-desktop-2026/docs with 59 lines of reference material.",
+      "languageNotes": "markdown; docs; 59 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/docs/research-brief-2026.md",
+      "type": "document",
+      "name": "research-brief-2026.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/docs/research-brief-2026.md",
+      "summary": "research-brief-2026.md documents docs/agent-packs/electrobun-agentic-desktop-2026/docs with 48 lines of reference material.",
+      "languageNotes": "markdown; docs; 48 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/docs/source-map.md",
+      "type": "document",
+      "name": "source-map.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/docs/source-map.md",
+      "summary": "source-map.md documents docs/agent-packs/electrobun-agentic-desktop-2026/docs with 19 lines of reference material.",
+      "languageNotes": "markdown; docs; 19 lines"
+    }
+  ],
+  "edges": []
+}

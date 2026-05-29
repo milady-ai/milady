@@ -1,0 +1,45 @@
+{
+  "batchIndex": 228,
+  "nodes": [
+    {
+      "tags": [
+        "configuration",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/plugin-remote-manifest/package.json",
+      "type": "config",
+      "name": "package.json",
+      "filePath": "eliza/packages/plugin-remote-manifest/package.json",
+      "summary": "package.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 71 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/plugin-remote-manifest/tsconfig.build.json",
+      "type": "config",
+      "name": "tsconfig.build.json",
+      "filePath": "eliza/packages/plugin-remote-manifest/tsconfig.build.json",
+      "summary": "tsconfig.build.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 17 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/plugin-remote-manifest/tsconfig.json",
+      "type": "config",
+      "name": "tsconfig.json",
+      "filePath": "eliza/packages/plugin-remote-manifest/tsconfig.json",
+      "summary": "tsconfig.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 15 lines"
+    }
+  ],
+  "edges": []
+}

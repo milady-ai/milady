@@ -1,0 +1,798 @@
+{
+  "batchIndex": 352,
+  "nodes": [
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:scripts/run-tsdown.mjs",
+      "type": "file",
+      "name": "run-tsdown.mjs",
+      "filePath": "scripts/run-tsdown.mjs",
+      "summary": "run-tsdown.mjs is a javascript source file in the Milady codebase.",
+      "languageNotes": "javascript; code; 28 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:scripts/scenario-creds-pull.mjs",
+      "type": "file",
+      "name": "scenario-creds-pull.mjs",
+      "filePath": "scripts/scenario-creds-pull.mjs",
+      "summary": "scenario-creds-pull.mjs is a javascript source file in the Milady codebase. It contains 5 functions.",
+      "languageNotes": "javascript; code; 336 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/scenario-creds-pull.mjs:getFlag",
+      "type": "function",
+      "name": "getFlag",
+      "filePath": "scripts/scenario-creds-pull.mjs",
+      "summary": "getFlag is a function defined in scripts/scenario-creds-pull.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/scenario-creds-pull.mjs:opRead",
+      "type": "function",
+      "name": "opRead",
+      "filePath": "scripts/scenario-creds-pull.mjs",
+      "summary": "opRead is a function defined in scripts/scenario-creds-pull.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/scenario-creds-pull.mjs:ensureServiceAccount",
+      "type": "function",
+      "name": "ensureServiceAccount",
+      "filePath": "scripts/scenario-creds-pull.mjs",
+      "summary": "ensureServiceAccount is a function defined in scripts/scenario-creds-pull.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/scenario-creds-pull.mjs:ensureOp",
+      "type": "function",
+      "name": "ensureOp",
+      "filePath": "scripts/scenario-creds-pull.mjs",
+      "summary": "ensureOp is a function defined in scripts/scenario-creds-pull.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/scenario-creds-pull.mjs:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "scripts/scenario-creds-pull.mjs",
+      "summary": "main is a function defined in scripts/scenario-creds-pull.mjs."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:scripts/security/coverage-gate.awk",
+      "type": "file",
+      "name": "coverage-gate.awk",
+      "filePath": "scripts/security/coverage-gate.awk",
+      "summary": "coverage-gate.awk is a awk source file in the Milady codebase.",
+      "languageNotes": "awk; code; 81 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:scripts/seed-local-cloud.mjs",
+      "type": "file",
+      "name": "seed-local-cloud.mjs",
+      "filePath": "scripts/seed-local-cloud.mjs",
+      "summary": "seed-local-cloud.mjs is a javascript source file in the Milady codebase. It contains 7 functions.",
+      "languageNotes": "javascript; code; 244 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/seed-local-cloud.mjs:loadPostgresConfig",
+      "type": "function",
+      "name": "loadPostgresConfig",
+      "filePath": "scripts/seed-local-cloud.mjs",
+      "summary": "loadPostgresConfig is a function defined in scripts/seed-local-cloud.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/seed-local-cloud.mjs:log",
+      "type": "function",
+      "name": "log",
+      "filePath": "scripts/seed-local-cloud.mjs",
+      "summary": "log is a function defined in scripts/seed-local-cloud.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/seed-local-cloud.mjs:fail",
+      "type": "function",
+      "name": "fail",
+      "filePath": "scripts/seed-local-cloud.mjs",
+      "summary": "fail is a function defined in scripts/seed-local-cloud.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/seed-local-cloud.mjs:runInherit",
+      "type": "function",
+      "name": "runInherit",
+      "filePath": "scripts/seed-local-cloud.mjs",
+      "summary": "runInherit is a function defined in scripts/seed-local-cloud.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/seed-local-cloud.mjs:runPhase1Seed",
+      "type": "function",
+      "name": "runPhase1Seed",
+      "filePath": "scripts/seed-local-cloud.mjs",
+      "summary": "runPhase1Seed is a function defined in scripts/seed-local-cloud.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "complex",
+      "id": "function:scripts/seed-local-cloud.mjs:runPhase2Seed",
+      "type": "function",
+      "name": "runPhase2Seed",
+      "filePath": "scripts/seed-local-cloud.mjs",
+      "summary": "runPhase2Seed is a function defined in scripts/seed-local-cloud.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/seed-local-cloud.mjs:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "scripts/seed-local-cloud.mjs",
+      "summary": "main is a function defined in scripts/seed-local-cloud.mjs."
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:scripts/soc2/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "scripts/soc2/README.md",
+      "summary": "README.md documents scripts/soc2 with 12 lines of reference material.",
+      "languageNotes": "markdown; docs; 12 lines"
+    },
+    {
+      "tags": [
+        "script"
+      ],
+      "complexity": "simple",
+      "id": "file:scripts/soc2/verify.sh",
+      "type": "file",
+      "name": "verify.sh",
+      "filePath": "scripts/soc2/verify.sh",
+      "summary": "verify.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 10 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:scripts/templates/tsconfig.local-mode.json",
+      "type": "config",
+      "name": "tsconfig.local-mode.json",
+      "filePath": "scripts/templates/tsconfig.local-mode.json",
+      "summary": "tsconfig.local-mode.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 169 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:scripts/templates/tsconfig.packages-mode.json",
+      "type": "config",
+      "name": "tsconfig.packages-mode.json",
+      "filePath": "scripts/templates/tsconfig.packages-mode.json",
+      "summary": "tsconfig.packages-mode.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 66 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:scripts/test-auth-gate.mjs",
+      "type": "file",
+      "name": "test-auth-gate.mjs",
+      "filePath": "scripts/test-auth-gate.mjs",
+      "summary": "test-auth-gate.mjs is a javascript source file in the Milady codebase. It contains 5 functions.",
+      "languageNotes": "javascript; code; 153 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/test-auth-gate.mjs:assert",
+      "type": "function",
+      "name": "assert",
+      "filePath": "scripts/test-auth-gate.mjs",
+      "summary": "assert is a function defined in scripts/test-auth-gate.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/test-auth-gate.mjs:base64UrlJson",
+      "type": "function",
+      "name": "base64UrlJson",
+      "filePath": "scripts/test-auth-gate.mjs",
+      "summary": "base64UrlJson is a function defined in scripts/test-auth-gate.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/test-auth-gate.mjs:signJwt",
+      "type": "function",
+      "name": "signJwt",
+      "filePath": "scripts/test-auth-gate.mjs",
+      "summary": "signJwt is a function defined in scripts/test-auth-gate.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/test-auth-gate.mjs:loadVerifyBootstrapToken",
+      "type": "function",
+      "name": "loadVerifyBootstrapToken",
+      "filePath": "scripts/test-auth-gate.mjs",
+      "summary": "loadVerifyBootstrapToken is a function defined in scripts/test-auth-gate.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "complex",
+      "id": "function:scripts/test-auth-gate.mjs:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "scripts/test-auth-gate.mjs",
+      "summary": "main is a function defined in scripts/test-auth-gate.mjs."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:scripts/validate-cdn-assets.mjs",
+      "type": "file",
+      "name": "validate-cdn-assets.mjs",
+      "filePath": "scripts/validate-cdn-assets.mjs",
+      "summary": "validate-cdn-assets.mjs is a javascript source file in the Milady codebase.",
+      "languageNotes": "javascript; code; 21 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:skills/.defaults/1password/references/cli-examples.md",
+      "type": "document",
+      "name": "cli-examples.md",
+      "filePath": "skills/.defaults/1password/references/cli-examples.md",
+      "summary": "cli-examples.md documents skills/.defaults/1password/references with 29 lines of reference material.",
+      "languageNotes": "markdown; docs; 29 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:skills/.defaults/1password/references/get-started.md",
+      "type": "document",
+      "name": "get-started.md",
+      "filePath": "skills/.defaults/1password/references/get-started.md",
+      "summary": "get-started.md documents skills/.defaults/1password/references with 17 lines of reference material.",
+      "languageNotes": "markdown; docs; 17 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:skills/.defaults/1password/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "skills/.defaults/1password/SKILL.md",
+      "summary": "SKILL.md documents skills/.defaults/1password with 70 lines of reference material.",
+      "languageNotes": "markdown; docs; 70 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:skills/.defaults/apple-notes/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "skills/.defaults/apple-notes/SKILL.md",
+      "summary": "SKILL.md documents skills/.defaults/apple-notes with 77 lines of reference material.",
+      "languageNotes": "markdown; docs; 77 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:skills/.defaults/apple-reminders/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "skills/.defaults/apple-reminders/SKILL.md",
+      "summary": "SKILL.md documents skills/.defaults/apple-reminders with 96 lines of reference material.",
+      "languageNotes": "markdown; docs; 96 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:skills/.defaults/blucli/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "skills/.defaults/blucli/SKILL.md",
+      "summary": "SKILL.md documents skills/.defaults/blucli with 47 lines of reference material.",
+      "languageNotes": "markdown; docs; 47 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:skills/.defaults/bluebubbles/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "skills/.defaults/bluebubbles/SKILL.md",
+      "summary": "SKILL.md documents skills/.defaults/bluebubbles with 131 lines of reference material.",
+      "languageNotes": "markdown; docs; 131 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:skills/.defaults/build-monetized-app/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "skills/.defaults/build-monetized-app/SKILL.md",
+      "summary": "SKILL.md documents skills/.defaults/build-monetized-app with 108 lines of reference material.",
+      "languageNotes": "markdown; docs; 108 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:skills/.defaults/camsnap/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "skills/.defaults/camsnap/SKILL.md",
+      "summary": "SKILL.md documents skills/.defaults/camsnap with 45 lines of reference material.",
+      "languageNotes": "markdown; docs; 45 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:skills/.defaults/canvas/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "skills/.defaults/canvas/SKILL.md",
+      "summary": "SKILL.md documents skills/.defaults/canvas with 203 lines of reference material.",
+      "languageNotes": "markdown; docs; 203 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:skills/.defaults/coding-agent/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "skills/.defaults/coding-agent/SKILL.md",
+      "summary": "SKILL.md documents skills/.defaults/coding-agent with 284 lines of reference material.",
+      "languageNotes": "markdown; docs; 284 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "complex",
+      "id": "document:skills/.defaults/discord/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "skills/.defaults/discord/SKILL.md",
+      "summary": "SKILL.md documents skills/.defaults/discord with 578 lines of reference material.",
+      "languageNotes": "markdown; docs; 578 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:skills/.defaults/eliza-app-development/references/repo-map.md",
+      "type": "document",
+      "name": "repo-map.md",
+      "filePath": "skills/.defaults/eliza-app-development/references/repo-map.md",
+      "summary": "repo-map.md documents skills/.defaults/eliza-app-development/references with 70 lines of reference material.",
+      "languageNotes": "markdown; docs; 70 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:skills/.defaults/eliza-app-development/references/runtime-and-cloud.md",
+      "type": "document",
+      "name": "runtime-and-cloud.md",
+      "filePath": "skills/.defaults/eliza-app-development/references/runtime-and-cloud.md",
+      "summary": "runtime-and-cloud.md documents skills/.defaults/eliza-app-development/references with 61 lines of reference material.",
+      "languageNotes": "markdown; docs; 61 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:skills/.defaults/eliza-app-development/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "skills/.defaults/eliza-app-development/SKILL.md",
+      "summary": "SKILL.md documents skills/.defaults/eliza-app-development with 70 lines of reference material.",
+      "languageNotes": "markdown; docs; 70 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/scenario-creds-pull.mjs",
+      "target": "function:scripts/scenario-creds-pull.mjs:getFlag",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/scenario-creds-pull.mjs",
+      "target": "function:scripts/scenario-creds-pull.mjs:opRead",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/scenario-creds-pull.mjs",
+      "target": "function:scripts/scenario-creds-pull.mjs:ensureServiceAccount",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/scenario-creds-pull.mjs",
+      "target": "function:scripts/scenario-creds-pull.mjs:ensureOp",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/scenario-creds-pull.mjs",
+      "target": "function:scripts/scenario-creds-pull.mjs:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/scenario-creds-pull.mjs:ensureOp",
+      "target": "function:scripts/scenario-creds-pull.mjs:ensureServiceAccount",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/scenario-creds-pull.mjs:main",
+      "target": "function:scripts/scenario-creds-pull.mjs:ensureOp",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/scenario-creds-pull.mjs:main",
+      "target": "function:scripts/scenario-creds-pull.mjs:opRead",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/seed-local-cloud.mjs",
+      "target": "function:scripts/seed-local-cloud.mjs:loadPostgresConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/seed-local-cloud.mjs",
+      "target": "function:scripts/seed-local-cloud.mjs:log",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/seed-local-cloud.mjs",
+      "target": "function:scripts/seed-local-cloud.mjs:fail",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/seed-local-cloud.mjs",
+      "target": "function:scripts/seed-local-cloud.mjs:runInherit",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/seed-local-cloud.mjs",
+      "target": "function:scripts/seed-local-cloud.mjs:runPhase1Seed",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/seed-local-cloud.mjs",
+      "target": "function:scripts/seed-local-cloud.mjs:runPhase2Seed",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/seed-local-cloud.mjs",
+      "target": "function:scripts/seed-local-cloud.mjs:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/seed-local-cloud.mjs:runPhase1Seed",
+      "target": "function:scripts/seed-local-cloud.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/seed-local-cloud.mjs:runPhase1Seed",
+      "target": "function:scripts/seed-local-cloud.mjs:runInherit",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/seed-local-cloud.mjs:runPhase1Seed",
+      "target": "function:scripts/seed-local-cloud.mjs:fail",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/seed-local-cloud.mjs:runPhase1Seed",
+      "target": "function:scripts/seed-local-cloud.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/seed-local-cloud.mjs:runPhase2Seed",
+      "target": "function:scripts/seed-local-cloud.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/seed-local-cloud.mjs:runPhase2Seed",
+      "target": "function:scripts/seed-local-cloud.mjs:fail",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/seed-local-cloud.mjs:runPhase2Seed",
+      "target": "function:scripts/seed-local-cloud.mjs:fail",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/seed-local-cloud.mjs:runPhase2Seed",
+      "target": "function:scripts/seed-local-cloud.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/seed-local-cloud.mjs:runPhase2Seed",
+      "target": "function:scripts/seed-local-cloud.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/seed-local-cloud.mjs:main",
+      "target": "function:scripts/seed-local-cloud.mjs:loadPostgresConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/seed-local-cloud.mjs:main",
+      "target": "function:scripts/seed-local-cloud.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/seed-local-cloud.mjs:main",
+      "target": "function:scripts/seed-local-cloud.mjs:runPhase1Seed",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/seed-local-cloud.mjs:main",
+      "target": "function:scripts/seed-local-cloud.mjs:runPhase2Seed",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/seed-local-cloud.mjs:main",
+      "target": "function:scripts/seed-local-cloud.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/test-auth-gate.mjs",
+      "target": "function:scripts/test-auth-gate.mjs:assert",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/test-auth-gate.mjs",
+      "target": "function:scripts/test-auth-gate.mjs:base64UrlJson",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/test-auth-gate.mjs",
+      "target": "function:scripts/test-auth-gate.mjs:signJwt",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/test-auth-gate.mjs",
+      "target": "function:scripts/test-auth-gate.mjs:loadVerifyBootstrapToken",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/test-auth-gate.mjs",
+      "target": "function:scripts/test-auth-gate.mjs:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/test-auth-gate.mjs:signJwt",
+      "target": "function:scripts/test-auth-gate.mjs:base64UrlJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/test-auth-gate.mjs:signJwt",
+      "target": "function:scripts/test-auth-gate.mjs:base64UrlJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/test-auth-gate.mjs:main",
+      "target": "function:scripts/test-auth-gate.mjs:loadVerifyBootstrapToken",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/test-auth-gate.mjs:main",
+      "target": "function:scripts/test-auth-gate.mjs:signJwt",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/test-auth-gate.mjs:main",
+      "target": "function:scripts/test-auth-gate.mjs:assert",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/test-auth-gate.mjs:main",
+      "target": "function:scripts/test-auth-gate.mjs:assert",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/test-auth-gate.mjs:main",
+      "target": "function:scripts/test-auth-gate.mjs:assert",
+      "type": "calls"
+    }
+  ]
+}

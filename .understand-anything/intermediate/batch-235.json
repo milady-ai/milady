@@ -1,0 +1,102 @@
+{
+  "batchIndex": 235,
+  "nodes": [
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "complex",
+      "id": "config:eliza/packages/ui/src/i18n/locales/en.json",
+      "type": "config",
+      "name": "en.json",
+      "filePath": "eliza/packages/ui/src/i18n/locales/en.json",
+      "summary": "en.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 4653 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "complex",
+      "id": "config:eliza/packages/ui/src/i18n/locales/es.json",
+      "type": "config",
+      "name": "es.json",
+      "filePath": "eliza/packages/ui/src/i18n/locales/es.json",
+      "summary": "es.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 4652 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "complex",
+      "id": "config:eliza/packages/ui/src/i18n/locales/ja.json",
+      "type": "config",
+      "name": "ja.json",
+      "filePath": "eliza/packages/ui/src/i18n/locales/ja.json",
+      "summary": "ja.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 4652 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "complex",
+      "id": "config:eliza/packages/ui/src/i18n/locales/ko.json",
+      "type": "config",
+      "name": "ko.json",
+      "filePath": "eliza/packages/ui/src/i18n/locales/ko.json",
+      "summary": "ko.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 4652 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "complex",
+      "id": "config:eliza/packages/ui/src/i18n/locales/pt.json",
+      "type": "config",
+      "name": "pt.json",
+      "filePath": "eliza/packages/ui/src/i18n/locales/pt.json",
+      "summary": "pt.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 4652 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "complex",
+      "id": "config:eliza/packages/ui/src/i18n/locales/tl.json",
+      "type": "config",
+      "name": "tl.json",
+      "filePath": "eliza/packages/ui/src/i18n/locales/tl.json",
+      "summary": "tl.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 4652 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "complex",
+      "id": "config:eliza/packages/ui/src/i18n/locales/vi.json",
+      "type": "config",
+      "name": "vi.json",
+      "filePath": "eliza/packages/ui/src/i18n/locales/vi.json",
+      "summary": "vi.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 4652 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "complex",
+      "id": "config:eliza/packages/ui/src/i18n/locales/zh-CN.json",
+      "type": "config",
+      "name": "zh-CN.json",
+      "filePath": "eliza/packages/ui/src/i18n/locales/zh-CN.json",
+      "summary": "zh-CN.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 4652 lines"
+    }
+  ],
+  "edges": []
+}

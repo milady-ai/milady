@@ -1,0 +1,90 @@
+{
+  "batchIndex": 245,
+  "nodes": [
+    {
+      "tags": [
+        "documentation",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "complex",
+      "id": "document:eliza/plugins/plugin-local-inference/native/AGENTS.md",
+      "type": "document",
+      "name": "AGENTS.md",
+      "filePath": "eliza/plugins/plugin-local-inference/native/AGENTS.md",
+      "summary": "AGENTS.md documents eliza/plugins/plugin-local-inference/native with 720 lines of reference material.",
+      "languageNotes": "markdown; docs; 720 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/plugins/plugin-local-inference/native/CLAUDE.md",
+      "type": "document",
+      "name": "CLAUDE.md",
+      "filePath": "eliza/plugins/plugin-local-inference/native/CLAUDE.md",
+      "summary": "CLAUDE.md documents eliza/plugins/plugin-local-inference/native with 23 lines of reference material.",
+      "languageNotes": "markdown; docs; 23 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "document:eliza/plugins/plugin-local-inference/native/PRECACHE.md",
+      "type": "document",
+      "name": "PRECACHE.md",
+      "filePath": "eliza/plugins/plugin-local-inference/native/PRECACHE.md",
+      "summary": "PRECACHE.md documents eliza/plugins/plugin-local-inference/native with 170 lines of reference material.",
+      "languageNotes": "markdown; docs; 170 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "complex",
+      "id": "document:eliza/plugins/plugin-local-inference/native/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "eliza/plugins/plugin-local-inference/native/README.md",
+      "summary": "README.md documents eliza/plugins/plugin-local-inference/native with 672 lines of reference material.",
+      "languageNotes": "markdown; docs; 672 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/plugins/plugin-local-inference/native/package.json",
+      "type": "config",
+      "name": "package.json",
+      "filePath": "eliza/plugins/plugin-local-inference/native/package.json",
+      "summary": "package.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 39 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/plugins/plugin-local-inference/native/tsconfig.json",
+      "type": "config",
+      "name": "tsconfig.json",
+      "filePath": "eliza/plugins/plugin-local-inference/native/tsconfig.json",
+      "summary": "tsconfig.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 13 lines"
+    }
+  ],
+  "edges": []
+}

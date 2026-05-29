@@ -1,0 +1,1970 @@
+{
+  "batchIndex": 66,
+  "nodes": [
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/ui/dropdown-menu.tsx",
+      "type": "file",
+      "name": "dropdown-menu.tsx",
+      "filePath": "eliza/packages/ui/src/components/ui/dropdown-menu.tsx",
+      "summary": "dropdown-menu.tsx is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 198 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/dropdown-menu.tsx:DropdownMenuShortcut",
+      "type": "function",
+      "name": "DropdownMenuShortcut",
+      "filePath": "eliza/packages/ui/src/components/ui/dropdown-menu.tsx",
+      "summary": "DropdownMenuShortcut is a function defined in eliza/packages/ui/src/components/ui/dropdown-menu.tsx."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/ui/empty-state.tsx",
+      "type": "file",
+      "name": "empty-state.tsx",
+      "filePath": "eliza/packages/ui/src/components/ui/empty-state.tsx",
+      "summary": "empty-state.tsx is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 68 lines"
+    },
+    {
+      "tags": [
+        "class"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/components/ui/error-boundary.tsx",
+      "type": "file",
+      "name": "error-boundary.tsx",
+      "filePath": "eliza/packages/ui/src/components/ui/error-boundary.tsx",
+      "summary": "error-boundary.tsx is a typescript source file in the Milady codebase. It contains 1 class, 1 imports.",
+      "languageNotes": "typescript; code; 67 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/ui/src/components/ui/error-boundary.tsx:ErrorBoundary",
+      "type": "class",
+      "name": "ErrorBoundary",
+      "filePath": "eliza/packages/ui/src/components/ui/error-boundary.tsx",
+      "summary": "ErrorBoundary is a class or type declared in eliza/packages/ui/src/components/ui/error-boundary.tsx."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/components/ui/field-switch.tsx",
+      "type": "file",
+      "name": "field-switch.tsx",
+      "filePath": "eliza/packages/ui/src/components/ui/field-switch.tsx",
+      "summary": "field-switch.tsx is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 59 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/ui/field.tsx",
+      "type": "file",
+      "name": "field.tsx",
+      "filePath": "eliza/packages/ui/src/components/ui/field.tsx",
+      "summary": "field.tsx is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 70 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/components/ui/form-select.tsx",
+      "type": "file",
+      "name": "form-select.tsx",
+      "filePath": "eliza/packages/ui/src/components/ui/form-select.tsx",
+      "summary": "form-select.tsx is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 64 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/form-select.tsx:FormSelect",
+      "type": "function",
+      "name": "FormSelect",
+      "filePath": "eliza/packages/ui/src/components/ui/form-select.tsx",
+      "summary": "FormSelect is a function defined in eliza/packages/ui/src/components/ui/form-select.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/ui/form.tsx",
+      "type": "file",
+      "name": "form.tsx",
+      "filePath": "eliza/packages/ui/src/components/ui/form.tsx",
+      "summary": "form.tsx is a typescript source file in the Milady codebase. It contains 7 functions, 2 imports.",
+      "languageNotes": "typescript; code; 209 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/form.tsx:FormField",
+      "type": "function",
+      "name": "FormField",
+      "filePath": "eliza/packages/ui/src/components/ui/form.tsx",
+      "summary": "FormField is a function defined in eliza/packages/ui/src/components/ui/form.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/form.tsx:useFormField",
+      "type": "function",
+      "name": "useFormField",
+      "filePath": "eliza/packages/ui/src/components/ui/form.tsx",
+      "summary": "useFormField is a function defined in eliza/packages/ui/src/components/ui/form.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/form.tsx:FormItem",
+      "type": "function",
+      "name": "FormItem",
+      "filePath": "eliza/packages/ui/src/components/ui/form.tsx",
+      "summary": "FormItem is a function defined in eliza/packages/ui/src/components/ui/form.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/form.tsx:FormLabel",
+      "type": "function",
+      "name": "FormLabel",
+      "filePath": "eliza/packages/ui/src/components/ui/form.tsx",
+      "summary": "FormLabel is a function defined in eliza/packages/ui/src/components/ui/form.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/form.tsx:FormControl",
+      "type": "function",
+      "name": "FormControl",
+      "filePath": "eliza/packages/ui/src/components/ui/form.tsx",
+      "summary": "FormControl is a function defined in eliza/packages/ui/src/components/ui/form.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/form.tsx:FormDescription",
+      "type": "function",
+      "name": "FormDescription",
+      "filePath": "eliza/packages/ui/src/components/ui/form.tsx",
+      "summary": "FormDescription is a function defined in eliza/packages/ui/src/components/ui/form.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/form.tsx:FormMessage",
+      "type": "function",
+      "name": "FormMessage",
+      "filePath": "eliza/packages/ui/src/components/ui/form.tsx",
+      "summary": "FormMessage is a function defined in eliza/packages/ui/src/components/ui/form.tsx."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/components/ui/grid.tsx",
+      "type": "file",
+      "name": "grid.tsx",
+      "filePath": "eliza/packages/ui/src/components/ui/grid.tsx",
+      "summary": "grid.tsx is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 43 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/components/ui/hover-card.tsx",
+      "type": "file",
+      "name": "hover-card.tsx",
+      "filePath": "eliza/packages/ui/src/components/ui/hover-card.tsx",
+      "summary": "hover-card.tsx is a typescript source file in the Milady codebase. It contains 3 functions, 1 imports.",
+      "languageNotes": "typescript; code; 48 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/hover-card.tsx:HoverCard",
+      "type": "function",
+      "name": "HoverCard",
+      "filePath": "eliza/packages/ui/src/components/ui/hover-card.tsx",
+      "summary": "HoverCard is a function defined in eliza/packages/ui/src/components/ui/hover-card.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/hover-card.tsx:HoverCardTrigger",
+      "type": "function",
+      "name": "HoverCardTrigger",
+      "filePath": "eliza/packages/ui/src/components/ui/hover-card.tsx",
+      "summary": "HoverCardTrigger is a function defined in eliza/packages/ui/src/components/ui/hover-card.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/hover-card.tsx:HoverCardContent",
+      "type": "function",
+      "name": "HoverCardContent",
+      "filePath": "eliza/packages/ui/src/components/ui/hover-card.tsx",
+      "summary": "HoverCardContent is a function defined in eliza/packages/ui/src/components/ui/hover-card.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/ui/input-group.tsx",
+      "type": "file",
+      "name": "input-group.tsx",
+      "filePath": "eliza/packages/ui/src/components/ui/input-group.tsx",
+      "summary": "input-group.tsx is a typescript source file in the Milady codebase. It contains 6 functions, 4 imports.",
+      "languageNotes": "typescript; code; 176 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/input-group.tsx:InputGroup",
+      "type": "function",
+      "name": "InputGroup",
+      "filePath": "eliza/packages/ui/src/components/ui/input-group.tsx",
+      "summary": "InputGroup is a function defined in eliza/packages/ui/src/components/ui/input-group.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/input-group.tsx:InputGroupAddon",
+      "type": "function",
+      "name": "InputGroupAddon",
+      "filePath": "eliza/packages/ui/src/components/ui/input-group.tsx",
+      "summary": "InputGroupAddon is a function defined in eliza/packages/ui/src/components/ui/input-group.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/input-group.tsx:InputGroupButton",
+      "type": "function",
+      "name": "InputGroupButton",
+      "filePath": "eliza/packages/ui/src/components/ui/input-group.tsx",
+      "summary": "InputGroupButton is a function defined in eliza/packages/ui/src/components/ui/input-group.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/input-group.tsx:InputGroupText",
+      "type": "function",
+      "name": "InputGroupText",
+      "filePath": "eliza/packages/ui/src/components/ui/input-group.tsx",
+      "summary": "InputGroupText is a function defined in eliza/packages/ui/src/components/ui/input-group.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/input-group.tsx:InputGroupInput",
+      "type": "function",
+      "name": "InputGroupInput",
+      "filePath": "eliza/packages/ui/src/components/ui/input-group.tsx",
+      "summary": "InputGroupInput is a function defined in eliza/packages/ui/src/components/ui/input-group.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/input-group.tsx:InputGroupTextarea",
+      "type": "function",
+      "name": "InputGroupTextarea",
+      "filePath": "eliza/packages/ui/src/components/ui/input-group.tsx",
+      "summary": "InputGroupTextarea is a function defined in eliza/packages/ui/src/components/ui/input-group.tsx."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/components/ui/input.tsx",
+      "type": "file",
+      "name": "input.tsx",
+      "filePath": "eliza/packages/ui/src/components/ui/input.tsx",
+      "summary": "input.tsx is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 55 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/components/ui/label.tsx",
+      "type": "file",
+      "name": "label.tsx",
+      "filePath": "eliza/packages/ui/src/components/ui/label.tsx",
+      "summary": "label.tsx is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 21 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/components/ui/new-action-button.tsx",
+      "type": "file",
+      "name": "new-action-button.tsx",
+      "filePath": "eliza/packages/ui/src/components/ui/new-action-button.tsx",
+      "summary": "new-action-button.tsx is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 36 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/new-action-button.tsx:normalizeNewActionLabel",
+      "type": "function",
+      "name": "normalizeNewActionLabel",
+      "filePath": "eliza/packages/ui/src/components/ui/new-action-button.tsx",
+      "summary": "normalizeNewActionLabel is a function defined in eliza/packages/ui/src/components/ui/new-action-button.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/ui/pagination.tsx",
+      "type": "file",
+      "name": "pagination.tsx",
+      "filePath": "eliza/packages/ui/src/components/ui/pagination.tsx",
+      "summary": "pagination.tsx is a typescript source file in the Milady codebase. It contains 7 functions, 2 imports.",
+      "languageNotes": "typescript; code; 130 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/pagination.tsx:Pagination",
+      "type": "function",
+      "name": "Pagination",
+      "filePath": "eliza/packages/ui/src/components/ui/pagination.tsx",
+      "summary": "Pagination is a function defined in eliza/packages/ui/src/components/ui/pagination.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/pagination.tsx:PaginationContent",
+      "type": "function",
+      "name": "PaginationContent",
+      "filePath": "eliza/packages/ui/src/components/ui/pagination.tsx",
+      "summary": "PaginationContent is a function defined in eliza/packages/ui/src/components/ui/pagination.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/pagination.tsx:PaginationItem",
+      "type": "function",
+      "name": "PaginationItem",
+      "filePath": "eliza/packages/ui/src/components/ui/pagination.tsx",
+      "summary": "PaginationItem is a function defined in eliza/packages/ui/src/components/ui/pagination.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/pagination.tsx:PaginationLink",
+      "type": "function",
+      "name": "PaginationLink",
+      "filePath": "eliza/packages/ui/src/components/ui/pagination.tsx",
+      "summary": "PaginationLink is a function defined in eliza/packages/ui/src/components/ui/pagination.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/pagination.tsx:PaginationPrevious",
+      "type": "function",
+      "name": "PaginationPrevious",
+      "filePath": "eliza/packages/ui/src/components/ui/pagination.tsx",
+      "summary": "PaginationPrevious is a function defined in eliza/packages/ui/src/components/ui/pagination.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/pagination.tsx:PaginationNext",
+      "type": "function",
+      "name": "PaginationNext",
+      "filePath": "eliza/packages/ui/src/components/ui/pagination.tsx",
+      "summary": "PaginationNext is a function defined in eliza/packages/ui/src/components/ui/pagination.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/pagination.tsx:PaginationEllipsis",
+      "type": "function",
+      "name": "PaginationEllipsis",
+      "filePath": "eliza/packages/ui/src/components/ui/pagination.tsx",
+      "summary": "PaginationEllipsis is a function defined in eliza/packages/ui/src/components/ui/pagination.tsx."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/components/ui/popover.tsx",
+      "type": "file",
+      "name": "popover.tsx",
+      "filePath": "eliza/packages/ui/src/components/ui/popover.tsx",
+      "summary": "popover.tsx is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 29 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/components/ui/progress.tsx",
+      "type": "file",
+      "name": "progress.tsx",
+      "filePath": "eliza/packages/ui/src/components/ui/progress.tsx",
+      "summary": "progress.tsx is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 31 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/progress.tsx:Progress",
+      "type": "function",
+      "name": "Progress",
+      "filePath": "eliza/packages/ui/src/components/ui/progress.tsx",
+      "summary": "Progress is a function defined in eliza/packages/ui/src/components/ui/progress.tsx."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/components/ui/save-footer.tsx",
+      "type": "file",
+      "name": "save-footer.tsx",
+      "filePath": "eliza/packages/ui/src/components/ui/save-footer.tsx",
+      "summary": "save-footer.tsx is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 56 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/ui/scroll-area.tsx",
+      "type": "file",
+      "name": "scroll-area.tsx",
+      "filePath": "eliza/packages/ui/src/components/ui/scroll-area.tsx",
+      "summary": "scroll-area.tsx is a typescript source file in the Milady codebase. It contains 2 functions, 1 imports.",
+      "languageNotes": "typescript; code; 68 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/scroll-area.tsx:ScrollArea",
+      "type": "function",
+      "name": "ScrollArea",
+      "filePath": "eliza/packages/ui/src/components/ui/scroll-area.tsx",
+      "summary": "ScrollArea is a function defined in eliza/packages/ui/src/components/ui/scroll-area.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/scroll-area.tsx:ScrollBar",
+      "type": "function",
+      "name": "ScrollBar",
+      "filePath": "eliza/packages/ui/src/components/ui/scroll-area.tsx",
+      "summary": "ScrollBar is a function defined in eliza/packages/ui/src/components/ui/scroll-area.tsx."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/ui/section-card.tsx",
+      "type": "file",
+      "name": "section-card.tsx",
+      "filePath": "eliza/packages/ui/src/components/ui/section-card.tsx",
+      "summary": "section-card.tsx is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 84 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/ui/segmented-control.tsx",
+      "type": "file",
+      "name": "segmented-control.tsx",
+      "filePath": "eliza/packages/ui/src/components/ui/segmented-control.tsx",
+      "summary": "segmented-control.tsx is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 69 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/segmented-control.tsx:SegmentedControl",
+      "type": "function",
+      "name": "SegmentedControl",
+      "filePath": "eliza/packages/ui/src/components/ui/segmented-control.tsx",
+      "summary": "SegmentedControl is a function defined in eliza/packages/ui/src/components/ui/segmented-control.tsx."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/ui/select.tsx",
+      "type": "file",
+      "name": "select.tsx",
+      "filePath": "eliza/packages/ui/src/components/ui/select.tsx",
+      "summary": "select.tsx is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 161 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/components/ui/separator.tsx",
+      "type": "file",
+      "name": "separator.tsx",
+      "filePath": "eliza/packages/ui/src/components/ui/separator.tsx",
+      "summary": "separator.tsx is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 29 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/ui/settings-controls.tsx",
+      "type": "file",
+      "name": "settings-controls.tsx",
+      "filePath": "eliza/packages/ui/src/components/ui/settings-controls.tsx",
+      "summary": "settings-controls.tsx is a typescript source file in the Milady codebase. It contains 10 functions, 5 imports.",
+      "languageNotes": "typescript; code; 165 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/settings-controls.tsx:settingsSelectTriggerClassName",
+      "type": "function",
+      "name": "settingsSelectTriggerClassName",
+      "filePath": "eliza/packages/ui/src/components/ui/settings-controls.tsx",
+      "summary": "settingsSelectTriggerClassName is a function defined in eliza/packages/ui/src/components/ui/settings-controls.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/settings-controls.tsx:settingsInputClassName",
+      "type": "function",
+      "name": "settingsInputClassName",
+      "filePath": "eliza/packages/ui/src/components/ui/settings-controls.tsx",
+      "summary": "settingsInputClassName is a function defined in eliza/packages/ui/src/components/ui/settings-controls.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/settings-controls.tsx:SettingsSelectTrigger",
+      "type": "function",
+      "name": "SettingsSelectTrigger",
+      "filePath": "eliza/packages/ui/src/components/ui/settings-controls.tsx",
+      "summary": "SettingsSelectTrigger is a function defined in eliza/packages/ui/src/components/ui/settings-controls.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/settings-controls.tsx:SettingsInput",
+      "type": "function",
+      "name": "SettingsInput",
+      "filePath": "eliza/packages/ui/src/components/ui/settings-controls.tsx",
+      "summary": "SettingsInput is a function defined in eliza/packages/ui/src/components/ui/settings-controls.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/settings-controls.tsx:SettingsTextarea",
+      "type": "function",
+      "name": "SettingsTextarea",
+      "filePath": "eliza/packages/ui/src/components/ui/settings-controls.tsx",
+      "summary": "SettingsTextarea is a function defined in eliza/packages/ui/src/components/ui/settings-controls.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/settings-controls.tsx:SettingsSegmentedGroup",
+      "type": "function",
+      "name": "SettingsSegmentedGroup",
+      "filePath": "eliza/packages/ui/src/components/ui/settings-controls.tsx",
+      "summary": "SettingsSegmentedGroup is a function defined in eliza/packages/ui/src/components/ui/settings-controls.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/settings-controls.tsx:SettingsMutedText",
+      "type": "function",
+      "name": "SettingsMutedText",
+      "filePath": "eliza/packages/ui/src/components/ui/settings-controls.tsx",
+      "summary": "SettingsMutedText is a function defined in eliza/packages/ui/src/components/ui/settings-controls.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/settings-controls.tsx:SettingsField",
+      "type": "function",
+      "name": "SettingsField",
+      "filePath": "eliza/packages/ui/src/components/ui/settings-controls.tsx",
+      "summary": "SettingsField is a function defined in eliza/packages/ui/src/components/ui/settings-controls.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/settings-controls.tsx:SettingsFieldLabel",
+      "type": "function",
+      "name": "SettingsFieldLabel",
+      "filePath": "eliza/packages/ui/src/components/ui/settings-controls.tsx",
+      "summary": "SettingsFieldLabel is a function defined in eliza/packages/ui/src/components/ui/settings-controls.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/settings-controls.tsx:SettingsFieldDescription",
+      "type": "function",
+      "name": "SettingsFieldDescription",
+      "filePath": "eliza/packages/ui/src/components/ui/settings-controls.tsx",
+      "summary": "SettingsFieldDescription is a function defined in eliza/packages/ui/src/components/ui/settings-controls.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/ui/sheet.tsx",
+      "type": "file",
+      "name": "sheet.tsx",
+      "filePath": "eliza/packages/ui/src/components/ui/sheet.tsx",
+      "summary": "sheet.tsx is a typescript source file in the Milady codebase. It contains 10 functions, 1 imports.",
+      "languageNotes": "typescript; code; 143 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/sheet.tsx:Sheet",
+      "type": "function",
+      "name": "Sheet",
+      "filePath": "eliza/packages/ui/src/components/ui/sheet.tsx",
+      "summary": "Sheet is a function defined in eliza/packages/ui/src/components/ui/sheet.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/sheet.tsx:SheetTrigger",
+      "type": "function",
+      "name": "SheetTrigger",
+      "filePath": "eliza/packages/ui/src/components/ui/sheet.tsx",
+      "summary": "SheetTrigger is a function defined in eliza/packages/ui/src/components/ui/sheet.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/sheet.tsx:SheetClose",
+      "type": "function",
+      "name": "SheetClose",
+      "filePath": "eliza/packages/ui/src/components/ui/sheet.tsx",
+      "summary": "SheetClose is a function defined in eliza/packages/ui/src/components/ui/sheet.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/sheet.tsx:SheetPortal",
+      "type": "function",
+      "name": "SheetPortal",
+      "filePath": "eliza/packages/ui/src/components/ui/sheet.tsx",
+      "summary": "SheetPortal is a function defined in eliza/packages/ui/src/components/ui/sheet.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/sheet.tsx:SheetOverlay",
+      "type": "function",
+      "name": "SheetOverlay",
+      "filePath": "eliza/packages/ui/src/components/ui/sheet.tsx",
+      "summary": "SheetOverlay is a function defined in eliza/packages/ui/src/components/ui/sheet.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/sheet.tsx:SheetContent",
+      "type": "function",
+      "name": "SheetContent",
+      "filePath": "eliza/packages/ui/src/components/ui/sheet.tsx",
+      "summary": "SheetContent is a function defined in eliza/packages/ui/src/components/ui/sheet.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/sheet.tsx:SheetHeader",
+      "type": "function",
+      "name": "SheetHeader",
+      "filePath": "eliza/packages/ui/src/components/ui/sheet.tsx",
+      "summary": "SheetHeader is a function defined in eliza/packages/ui/src/components/ui/sheet.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/sheet.tsx:SheetFooter",
+      "type": "function",
+      "name": "SheetFooter",
+      "filePath": "eliza/packages/ui/src/components/ui/sheet.tsx",
+      "summary": "SheetFooter is a function defined in eliza/packages/ui/src/components/ui/sheet.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/sheet.tsx:SheetTitle",
+      "type": "function",
+      "name": "SheetTitle",
+      "filePath": "eliza/packages/ui/src/components/ui/sheet.tsx",
+      "summary": "SheetTitle is a function defined in eliza/packages/ui/src/components/ui/sheet.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/sheet.tsx:SheetDescription",
+      "type": "function",
+      "name": "SheetDescription",
+      "filePath": "eliza/packages/ui/src/components/ui/sheet.tsx",
+      "summary": "SheetDescription is a function defined in eliza/packages/ui/src/components/ui/sheet.tsx."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/components/ui/skeleton.tsx",
+      "type": "file",
+      "name": "skeleton.tsx",
+      "filePath": "eliza/packages/ui/src/components/ui/skeleton.tsx",
+      "summary": "skeleton.tsx is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 23 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/components/ui/slider.tsx",
+      "type": "file",
+      "name": "slider.tsx",
+      "filePath": "eliza/packages/ui/src/components/ui/slider.tsx",
+      "summary": "slider.tsx is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 30 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/components/ui/spinner.tsx",
+      "type": "file",
+      "name": "spinner.tsx",
+      "filePath": "eliza/packages/ui/src/components/ui/spinner.tsx",
+      "summary": "spinner.tsx is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 21 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/components/ui/stack.tsx",
+      "type": "file",
+      "name": "stack.tsx",
+      "filePath": "eliza/packages/ui/src/components/ui/stack.tsx",
+      "summary": "stack.tsx is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 55 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/ui/status-badge.tsx",
+      "type": "file",
+      "name": "status-badge.tsx",
+      "filePath": "eliza/packages/ui/src/components/ui/status-badge.tsx",
+      "summary": "status-badge.tsx is a typescript source file in the Milady codebase. It contains 6 functions, 1 imports.",
+      "languageNotes": "typescript; code; 194 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/status-badge.tsx:statusToneForBoolean",
+      "type": "function",
+      "name": "statusToneForBoolean",
+      "filePath": "eliza/packages/ui/src/components/ui/status-badge.tsx",
+      "summary": "statusToneForBoolean is a function defined in eliza/packages/ui/src/components/ui/status-badge.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/status-badge.tsx:statusToneForState",
+      "type": "function",
+      "name": "statusToneForState",
+      "filePath": "eliza/packages/ui/src/components/ui/status-badge.tsx",
+      "summary": "statusToneForState is a function defined in eliza/packages/ui/src/components/ui/status-badge.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/status-badge.tsx:statusLabelForState",
+      "type": "function",
+      "name": "statusLabelForState",
+      "filePath": "eliza/packages/ui/src/components/ui/status-badge.tsx",
+      "summary": "statusLabelForState is a function defined in eliza/packages/ui/src/components/ui/status-badge.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/status-badge.tsx:normalizeStatusVariant",
+      "type": "function",
+      "name": "normalizeStatusVariant",
+      "filePath": "eliza/packages/ui/src/components/ui/status-badge.tsx",
+      "summary": "normalizeStatusVariant is a function defined in eliza/packages/ui/src/components/ui/status-badge.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/status-badge.tsx:statusBadgeClasses",
+      "type": "function",
+      "name": "statusBadgeClasses",
+      "filePath": "eliza/packages/ui/src/components/ui/status-badge.tsx",
+      "summary": "statusBadgeClasses is a function defined in eliza/packages/ui/src/components/ui/status-badge.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/status-badge.tsx:statusDotClasses",
+      "type": "function",
+      "name": "statusDotClasses",
+      "filePath": "eliza/packages/ui/src/components/ui/status-badge.tsx",
+      "summary": "statusDotClasses is a function defined in eliza/packages/ui/src/components/ui/status-badge.tsx."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/ui/switch.tsx",
+      "type": "file",
+      "name": "switch.tsx",
+      "filePath": "eliza/packages/ui/src/components/ui/switch.tsx",
+      "summary": "switch.tsx is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 76 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/ui/table.tsx",
+      "type": "file",
+      "name": "table.tsx",
+      "filePath": "eliza/packages/ui/src/components/ui/table.tsx",
+      "summary": "table.tsx is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 128 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/components/ui/tabs.tsx",
+      "type": "file",
+      "name": "tabs.tsx",
+      "filePath": "eliza/packages/ui/src/components/ui/tabs.tsx",
+      "summary": "tabs.tsx is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 53 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/ui/tag-editor.tsx",
+      "type": "file",
+      "name": "tag-editor.tsx",
+      "filePath": "eliza/packages/ui/src/components/ui/tag-editor.tsx",
+      "summary": "tag-editor.tsx is a typescript source file in the Milady codebase. It contains 2 functions, 4 imports.",
+      "languageNotes": "typescript; code; 105 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/ui/tag-editor.tsx:normalizeTagValue",
+      "type": "function",
+      "name": "normalizeTagValue",
+      "filePath": "eliza/packages/ui/src/components/ui/tag-editor.tsx",
+      "summary": "normalizeTagValue is a function defined in eliza/packages/ui/src/components/ui/tag-editor.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/components/ui/tag-editor.tsx:TagEditor",
+      "type": "function",
+      "name": "TagEditor",
+      "filePath": "eliza/packages/ui/src/components/ui/tag-editor.tsx",
+      "summary": "TagEditor is a function defined in eliza/packages/ui/src/components/ui/tag-editor.tsx."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/components/ui/textarea.tsx",
+      "type": "file",
+      "name": "textarea.tsx",
+      "filePath": "eliza/packages/ui/src/components/ui/textarea.tsx",
+      "summary": "textarea.tsx is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 54 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/dropdown-menu.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/dropdown-menu.tsx:DropdownMenuShortcut",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/error-boundary.tsx",
+      "target": "class:eliza/packages/ui/src/components/ui/error-boundary.tsx:ErrorBoundary",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/form-select.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/form-select.tsx:FormSelect",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/form.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/form.tsx:FormField",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/form.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/form.tsx:useFormField",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/form.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/form.tsx:FormItem",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/form.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/form.tsx:FormLabel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/form.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/form.tsx:FormControl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/form.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/form.tsx:FormDescription",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/form.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/form.tsx:FormMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/ui/form.tsx:FormLabel",
+      "target": "function:eliza/packages/ui/src/components/ui/form.tsx:useFormField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/ui/form.tsx:FormControl",
+      "target": "function:eliza/packages/ui/src/components/ui/form.tsx:useFormField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/ui/form.tsx:FormDescription",
+      "target": "function:eliza/packages/ui/src/components/ui/form.tsx:useFormField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/ui/form.tsx:FormMessage",
+      "target": "function:eliza/packages/ui/src/components/ui/form.tsx:useFormField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/hover-card.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/hover-card.tsx:HoverCard",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/hover-card.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/hover-card.tsx:HoverCardTrigger",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/hover-card.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/hover-card.tsx:HoverCardContent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/input-group.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/input-group.tsx:InputGroup",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/input-group.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/input-group.tsx:InputGroupAddon",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/input-group.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/input-group.tsx:InputGroupButton",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/input-group.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/input-group.tsx:InputGroupText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/input-group.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/input-group.tsx:InputGroupInput",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/input-group.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/input-group.tsx:InputGroupTextarea",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/new-action-button.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/new-action-button.tsx:normalizeNewActionLabel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/pagination.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/pagination.tsx:Pagination",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/pagination.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/pagination.tsx:PaginationContent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/pagination.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/pagination.tsx:PaginationItem",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/pagination.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/pagination.tsx:PaginationLink",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/pagination.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/pagination.tsx:PaginationPrevious",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/pagination.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/pagination.tsx:PaginationNext",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/pagination.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/pagination.tsx:PaginationEllipsis",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/progress.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/progress.tsx:Progress",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/scroll-area.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/scroll-area.tsx:ScrollArea",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/scroll-area.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/scroll-area.tsx:ScrollBar",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/segmented-control.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/segmented-control.tsx:SegmentedControl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/settings-controls.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/settings-controls.tsx:settingsSelectTriggerClassName",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/settings-controls.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/settings-controls.tsx:settingsInputClassName",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/settings-controls.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/settings-controls.tsx:SettingsSelectTrigger",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/settings-controls.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/settings-controls.tsx:SettingsInput",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/settings-controls.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/settings-controls.tsx:SettingsTextarea",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/settings-controls.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/settings-controls.tsx:SettingsSegmentedGroup",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/settings-controls.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/settings-controls.tsx:SettingsMutedText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/settings-controls.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/settings-controls.tsx:SettingsField",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/settings-controls.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/settings-controls.tsx:SettingsFieldLabel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/settings-controls.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/settings-controls.tsx:SettingsFieldDescription",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/ui/settings-controls.tsx:SettingsSelectTrigger",
+      "target": "function:eliza/packages/ui/src/components/ui/settings-controls.tsx:settingsSelectTriggerClassName",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/ui/settings-controls.tsx:SettingsInput",
+      "target": "function:eliza/packages/ui/src/components/ui/settings-controls.tsx:settingsInputClassName",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/sheet.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/sheet.tsx:Sheet",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/sheet.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/sheet.tsx:SheetTrigger",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/sheet.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/sheet.tsx:SheetClose",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/sheet.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/sheet.tsx:SheetPortal",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/sheet.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/sheet.tsx:SheetOverlay",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/sheet.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/sheet.tsx:SheetContent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/sheet.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/sheet.tsx:SheetHeader",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/sheet.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/sheet.tsx:SheetFooter",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/sheet.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/sheet.tsx:SheetTitle",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/sheet.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/sheet.tsx:SheetDescription",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/status-badge.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/status-badge.tsx:statusToneForBoolean",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/status-badge.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/status-badge.tsx:statusToneForState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/status-badge.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/status-badge.tsx:statusLabelForState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/status-badge.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/status-badge.tsx:normalizeStatusVariant",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/status-badge.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/status-badge.tsx:statusBadgeClasses",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/status-badge.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/status-badge.tsx:statusDotClasses",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/ui/status-badge.tsx:statusBadgeClasses",
+      "target": "function:eliza/packages/ui/src/components/ui/status-badge.tsx:normalizeStatusVariant",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/ui/status-badge.tsx:statusDotClasses",
+      "target": "function:eliza/packages/ui/src/components/ui/status-badge.tsx:normalizeStatusVariant",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/tag-editor.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/tag-editor.tsx:normalizeTagValue",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/ui/tag-editor.tsx",
+      "target": "function:eliza/packages/ui/src/components/ui/tag-editor.tsx:TagEditor",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/ui/tag-editor.tsx:TagEditor",
+      "target": "function:eliza/packages/ui/src/components/ui/tag-editor.tsx:normalizeTagValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/ui/tag-editor.tsx:TagEditor",
+      "target": "function:eliza/packages/ui/src/components/ui/tag-editor.tsx:normalizeTagValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/dropdown-menu.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/empty-state.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/error-boundary.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/button.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/field-switch.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/field.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/label.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/field.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/form-select.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/select.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/form-select.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/form.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/label.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/form.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/grid.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/hover-card.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/input-group.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/button.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/input-group.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/input.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/input-group.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/textarea.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/input-group.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/input.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/label.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/new-action-button.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/button.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/new-action-button.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/pagination.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/button.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/pagination.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/popover.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/progress.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/save-footer.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/button.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/save-footer.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/scroll-area.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/section-card.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/button.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/section-card.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/segmented-control.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/select.tsx",
+      "target": "file:eliza/packages/ui/src/lib/floating-layers.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/select.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/separator.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/settings-controls.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/field.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/settings-controls.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/input.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/settings-controls.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/select.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/settings-controls.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/textarea.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/settings-controls.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/sheet.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/skeleton.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/slider.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/spinner.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/stack.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/status-badge.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/switch.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/table.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/tabs.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/tag-editor.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/button.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/tag-editor.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/input.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/tag-editor.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/label.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/tag-editor.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/ui/textarea.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    }
+  ]
+}

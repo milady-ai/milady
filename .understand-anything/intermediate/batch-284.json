@@ -1,0 +1,327 @@
+{
+  "batchIndex": 284,
+  "nodes": [
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/platforms/ios/App/App/WebsiteBlockerContentExtension/Info.plist",
+      "type": "config",
+      "name": "Info.plist",
+      "filePath": "eliza/packages/app-core/platforms/ios/App/App/WebsiteBlockerContentExtension/Info.plist",
+      "summary": "Info.plist configures xml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "xml; config; 29 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/ios/App/App/WebsiteBlockerContentExtension/PrivacyInfo.xcprivacy",
+      "type": "file",
+      "name": "PrivacyInfo.xcprivacy",
+      "filePath": "eliza/packages/app-core/platforms/ios/App/App/WebsiteBlockerContentExtension/PrivacyInfo.xcprivacy",
+      "summary": "PrivacyInfo.xcprivacy is a xcprivacy source file in the Milady codebase.",
+      "languageNotes": "xcprivacy; code; 23 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/ios/App/App/WebsiteBlockerContentExtension/WebsiteBlockerContentExtension.entitlements",
+      "type": "file",
+      "name": "WebsiteBlockerContentExtension.entitlements",
+      "filePath": "eliza/packages/app-core/platforms/ios/App/App/WebsiteBlockerContentExtension/WebsiteBlockerContentExtension.entitlements",
+      "summary": "WebsiteBlockerContentExtension.entitlements is a entitlements source file in the Milady codebase.",
+      "languageNotes": "entitlements; code; 10 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/ios/App/BroadcastExtension/SampleHandler.swift",
+      "type": "file",
+      "name": "SampleHandler.swift",
+      "filePath": "eliza/packages/app-core/platforms/ios/App/BroadcastExtension/SampleHandler.swift",
+      "summary": "SampleHandler.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 100 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/platforms/ios/App/ExportOptions.plist",
+      "type": "config",
+      "name": "ExportOptions.plist",
+      "filePath": "eliza/packages/app-core/platforms/ios/App/ExportOptions.plist",
+      "summary": "ExportOptions.plist configures xml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "xml; config; 18 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/ios/App/Podfile",
+      "type": "file",
+      "name": "Podfile",
+      "filePath": "eliza/packages/app-core/platforms/ios/App/Podfile",
+      "summary": "Podfile is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 54 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/ios/fastlane/Appfile",
+      "type": "file",
+      "name": "Appfile",
+      "filePath": "eliza/packages/app-core/platforms/ios/fastlane/Appfile",
+      "summary": "Appfile is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 4 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/ios/fastlane/Fastfile",
+      "type": "file",
+      "name": "Fastfile",
+      "filePath": "eliza/packages/app-core/platforms/ios/fastlane/Fastfile",
+      "summary": "Fastfile is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 94 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/ios/fastlane/Matchfile",
+      "type": "file",
+      "name": "Matchfile",
+      "filePath": "eliza/packages/app-core/platforms/ios/fastlane/Matchfile",
+      "summary": "Matchfile is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 12 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/ios/Gemfile",
+      "type": "file",
+      "name": "Gemfile",
+      "filePath": "eliza/packages/app-core/platforms/ios/Gemfile",
+      "summary": "Gemfile is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 6 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/platforms/macos/.codex/environments/environment.toml",
+      "type": "config",
+      "name": "environment.toml",
+      "filePath": "eliza/packages/app-core/platforms/macos/.codex/environments/environment.toml",
+      "summary": "environment.toml configures toml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "toml; config; 11 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/macos/Package.swift",
+      "type": "file",
+      "name": "Package.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Package.swift",
+      "summary": "Package.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 25 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:eliza/packages/app-core/platforms/macos/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "eliza/packages/app-core/platforms/macos/README.md",
+      "summary": "README.md documents eliza/packages/app-core/platforms/macos with 227 lines of reference material.",
+      "languageNotes": "markdown; docs; 227 lines"
+    },
+    {
+      "tags": [
+        "script",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/macos/script/build_and_run.sh",
+      "type": "file",
+      "name": "build_and_run.sh",
+      "filePath": "eliza/packages/app-core/platforms/macos/script/build_and_run.sh",
+      "summary": "build_and_run.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 77 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/macos/script/build_and_run.sh:open_app",
+      "type": "function",
+      "name": "open_app",
+      "filePath": "eliza/packages/app-core/platforms/macos/script/build_and_run.sh",
+      "summary": "open_app is a function defined in eliza/packages/app-core/platforms/macos/script/build_and_run.sh."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/macos/Sources/ElizaMac/App/AppDelegate.swift",
+      "type": "file",
+      "name": "AppDelegate.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Sources/ElizaMac/App/AppDelegate.swift",
+      "summary": "AppDelegate.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 8 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/macos/Sources/ElizaMac/App/ElizaMacApp.swift",
+      "type": "file",
+      "name": "ElizaMacApp.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Sources/ElizaMac/App/ElizaMacApp.swift",
+      "summary": "ElizaMacApp.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 116 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Services/MacAutomationService.swift",
+      "type": "file",
+      "name": "MacAutomationService.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Services/MacAutomationService.swift",
+      "summary": "MacAutomationService.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 61 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Services/MacNotificationService.swift",
+      "type": "file",
+      "name": "MacNotificationService.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Services/MacNotificationService.swift",
+      "summary": "MacNotificationService.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 60 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Services/ProfilePreferences.swift",
+      "type": "file",
+      "name": "ProfilePreferences.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Services/ProfilePreferences.swift",
+      "summary": "ProfilePreferences.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 28 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Services/ThemePreferences.swift",
+      "type": "file",
+      "name": "ThemePreferences.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Services/ThemePreferences.swift",
+      "summary": "ThemePreferences.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 28 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Stores/AppModel.swift",
+      "type": "file",
+      "name": "AppModel.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Stores/AppModel.swift",
+      "summary": "AppModel.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 949 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Support/ThemeRendering.swift",
+      "type": "file",
+      "name": "ThemeRendering.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Support/ThemeRendering.swift",
+      "summary": "ThemeRendering.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 145 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Support/WindowTransparencyBridge.swift",
+      "type": "file",
+      "name": "WindowTransparencyBridge.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Support/WindowTransparencyBridge.swift",
+      "summary": "WindowTransparencyBridge.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 59 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Views/AgentsView.swift",
+      "type": "file",
+      "name": "AgentsView.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Views/AgentsView.swift",
+      "summary": "AgentsView.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 74 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Views/ApprovalsView.swift",
+      "type": "file",
+      "name": "ApprovalsView.swift",
+      "filePath": "eliza/packages/app-core/platforms/macos/Sources/ElizaMac/Views/ApprovalsView.swift",
+      "summary": "ApprovalsView.swift is a swift source file in the Milady codebase.",
+      "languageNotes": "swift; code; 34 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/macos/script/build_and_run.sh",
+      "target": "function:eliza/packages/app-core/platforms/macos/script/build_and_run.sh:open_app",
+      "type": "contains"
+    }
+  ]
+}

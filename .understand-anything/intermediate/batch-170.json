@@ -1,0 +1,199 @@
+{
+  "batchIndex": 170,
+  "nodes": [
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:apps/homepage/src/docs/content/intermediate/connect-signal.mdx",
+      "type": "document",
+      "name": "connect-signal.mdx",
+      "filePath": "apps/homepage/src/docs/content/intermediate/connect-signal.mdx",
+      "summary": "connect-signal.mdx documents apps/homepage/src/docs/content/intermediate with 91 lines of reference material.",
+      "languageNotes": "markdown; docs; 91 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:apps/homepage/src/docs/content/intermediate/connect-slack.mdx",
+      "type": "document",
+      "name": "connect-slack.mdx",
+      "filePath": "apps/homepage/src/docs/content/intermediate/connect-slack.mdx",
+      "summary": "connect-slack.mdx documents apps/homepage/src/docs/content/intermediate with 96 lines of reference material.",
+      "languageNotes": "markdown; docs; 96 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:apps/homepage/src/docs/content/intermediate/connect-telegram.mdx",
+      "type": "document",
+      "name": "connect-telegram.mdx",
+      "filePath": "apps/homepage/src/docs/content/intermediate/connect-telegram.mdx",
+      "summary": "connect-telegram.mdx documents apps/homepage/src/docs/content/intermediate with 83 lines of reference material.",
+      "languageNotes": "markdown; docs; 83 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:apps/homepage/src/docs/content/intermediate/connect-tlon.mdx",
+      "type": "document",
+      "name": "connect-tlon.mdx",
+      "filePath": "apps/homepage/src/docs/content/intermediate/connect-tlon.mdx",
+      "summary": "connect-tlon.mdx documents apps/homepage/src/docs/content/intermediate with 60 lines of reference material.",
+      "languageNotes": "markdown; docs; 60 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:apps/homepage/src/docs/content/intermediate/connect-twilio.mdx",
+      "type": "document",
+      "name": "connect-twilio.mdx",
+      "filePath": "apps/homepage/src/docs/content/intermediate/connect-twilio.mdx",
+      "summary": "connect-twilio.mdx documents apps/homepage/src/docs/content/intermediate with 118 lines of reference material.",
+      "languageNotes": "markdown; docs; 118 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:apps/homepage/src/docs/content/intermediate/connect-twitch.mdx",
+      "type": "document",
+      "name": "connect-twitch.mdx",
+      "filePath": "apps/homepage/src/docs/content/intermediate/connect-twitch.mdx",
+      "summary": "connect-twitch.mdx documents apps/homepage/src/docs/content/intermediate with 90 lines of reference material.",
+      "languageNotes": "markdown; docs; 90 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:apps/homepage/src/docs/content/intermediate/connect-twitter.mdx",
+      "type": "document",
+      "name": "connect-twitter.mdx",
+      "filePath": "apps/homepage/src/docs/content/intermediate/connect-twitter.mdx",
+      "summary": "connect-twitter.mdx documents apps/homepage/src/docs/content/intermediate with 108 lines of reference material.",
+      "languageNotes": "markdown; docs; 108 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:apps/homepage/src/docs/content/intermediate/connect-wechat.mdx",
+      "type": "document",
+      "name": "connect-wechat.mdx",
+      "filePath": "apps/homepage/src/docs/content/intermediate/connect-wechat.mdx",
+      "summary": "connect-wechat.mdx documents apps/homepage/src/docs/content/intermediate with 120 lines of reference material.",
+      "languageNotes": "markdown; docs; 120 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:apps/homepage/src/docs/content/intermediate/connect-whatsapp.mdx",
+      "type": "document",
+      "name": "connect-whatsapp.mdx",
+      "filePath": "apps/homepage/src/docs/content/intermediate/connect-whatsapp.mdx",
+      "summary": "connect-whatsapp.mdx documents apps/homepage/src/docs/content/intermediate with 131 lines of reference material.",
+      "languageNotes": "markdown; docs; 131 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:apps/homepage/src/docs/content/intermediate/connect-zalo.mdx",
+      "type": "document",
+      "name": "connect-zalo.mdx",
+      "filePath": "apps/homepage/src/docs/content/intermediate/connect-zalo.mdx",
+      "summary": "connect-zalo.mdx documents apps/homepage/src/docs/content/intermediate with 74 lines of reference material.",
+      "languageNotes": "markdown; docs; 74 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:apps/homepage/src/docs/content/intermediate/connect-zalouser.mdx",
+      "type": "document",
+      "name": "connect-zalouser.mdx",
+      "filePath": "apps/homepage/src/docs/content/intermediate/connect-zalouser.mdx",
+      "summary": "connect-zalouser.mdx documents apps/homepage/src/docs/content/intermediate with 69 lines of reference material.",
+      "languageNotes": "markdown; docs; 69 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:apps/homepage/src/docs/content/intermediate/local-ai.mdx",
+      "type": "document",
+      "name": "local-ai.mdx",
+      "filePath": "apps/homepage/src/docs/content/intermediate/local-ai.mdx",
+      "summary": "local-ai.mdx documents apps/homepage/src/docs/content/intermediate with 55 lines of reference material.",
+      "languageNotes": "markdown; docs; 55 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:apps/homepage/src/docs/content/intermediate/local-ollama.mdx",
+      "type": "document",
+      "name": "local-ollama.mdx",
+      "filePath": "apps/homepage/src/docs/content/intermediate/local-ollama.mdx",
+      "summary": "local-ollama.mdx documents apps/homepage/src/docs/content/intermediate with 74 lines of reference material.",
+      "languageNotes": "markdown; docs; 74 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:apps/homepage/src/docs/content/intermediate/memory-and-knowledge.mdx",
+      "type": "document",
+      "name": "memory-and-knowledge.mdx",
+      "filePath": "apps/homepage/src/docs/content/intermediate/memory-and-knowledge.mdx",
+      "summary": "memory-and-knowledge.mdx documents apps/homepage/src/docs/content/intermediate with 95 lines of reference material.",
+      "languageNotes": "markdown; docs; 95 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:apps/homepage/src/docs/content/intermediate/switching-providers.mdx",
+      "type": "document",
+      "name": "switching-providers.mdx",
+      "filePath": "apps/homepage/src/docs/content/intermediate/switching-providers.mdx",
+      "summary": "switching-providers.mdx documents apps/homepage/src/docs/content/intermediate with 85 lines of reference material.",
+      "languageNotes": "markdown; docs; 85 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "voice"
+      ],
+      "complexity": "moderate",
+      "id": "document:apps/homepage/src/docs/content/intermediate/voice-and-tts.mdx",
+      "type": "document",
+      "name": "voice-and-tts.mdx",
+      "filePath": "apps/homepage/src/docs/content/intermediate/voice-and-tts.mdx",
+      "summary": "voice-and-tts.mdx documents apps/homepage/src/docs/content/intermediate with 107 lines of reference material.",
+      "languageNotes": "markdown; docs; 107 lines"
+    }
+  ],
+  "edges": []
+}

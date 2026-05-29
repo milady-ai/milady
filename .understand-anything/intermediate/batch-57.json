@@ -1,0 +1,3638 @@
+{
+  "batchIndex": 57,
+  "nodes": [
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/chat/AgentActivityBox.tsx",
+      "type": "file",
+      "name": "AgentActivityBox.tsx",
+      "filePath": "eliza/packages/ui/src/components/chat/AgentActivityBox.tsx",
+      "summary": "AgentActivityBox.tsx is a typescript source file in the Milady codebase. It contains 2 functions, 3 imports.",
+      "languageNotes": "typescript; code; 92 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/AgentActivityBox.tsx:deriveActivity",
+      "type": "function",
+      "name": "deriveActivity",
+      "filePath": "eliza/packages/ui/src/components/chat/AgentActivityBox.tsx",
+      "summary": "deriveActivity is a function defined in eliza/packages/ui/src/components/chat/AgentActivityBox.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/AgentActivityBox.tsx:AgentActivityBox",
+      "type": "function",
+      "name": "AgentActivityBox",
+      "filePath": "eliza/packages/ui/src/components/chat/AgentActivityBox.tsx",
+      "summary": "AgentActivityBox is a function defined in eliza/packages/ui/src/components/chat/AgentActivityBox.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/components/chat/AppsSection.tsx",
+      "type": "file",
+      "name": "AppsSection.tsx",
+      "filePath": "eliza/packages/ui/src/components/chat/AppsSection.tsx",
+      "summary": "AppsSection.tsx is a typescript source file in the Milady codebase. It contains 3 functions, 10 imports.",
+      "languageNotes": "typescript; code; 369 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/AppsSection.tsx:getRunRingClass",
+      "type": "function",
+      "name": "getRunRingClass",
+      "filePath": "eliza/packages/ui/src/components/chat/AppsSection.tsx",
+      "summary": "getRunRingClass is a function defined in eliza/packages/ui/src/components/chat/AppsSection.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/AppsSection.tsx:isOverlayLaunchApp",
+      "type": "function",
+      "name": "isOverlayLaunchApp",
+      "filePath": "eliza/packages/ui/src/components/chat/AppsSection.tsx",
+      "summary": "isOverlayLaunchApp is a function defined in eliza/packages/ui/src/components/chat/AppsSection.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/components/chat/AppsSection.tsx:AppsSection",
+      "type": "function",
+      "name": "AppsSection",
+      "filePath": "eliza/packages/ui/src/components/chat/AppsSection.tsx",
+      "summary": "AppsSection is a function defined in eliza/packages/ui/src/components/chat/AppsSection.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/chat/ConnectorAccountPicker.tsx",
+      "type": "file",
+      "name": "ConnectorAccountPicker.tsx",
+      "filePath": "eliza/packages/ui/src/components/chat/ConnectorAccountPicker.tsx",
+      "summary": "ConnectorAccountPicker.tsx is a typescript source file in the Milady codebase. It contains 3 functions, 7 imports.",
+      "languageNotes": "typescript; code; 221 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/ConnectorAccountPicker.tsx:accountStatusLabel",
+      "type": "function",
+      "name": "accountStatusLabel",
+      "filePath": "eliza/packages/ui/src/components/chat/ConnectorAccountPicker.tsx",
+      "summary": "accountStatusLabel is a function defined in eliza/packages/ui/src/components/chat/ConnectorAccountPicker.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/ConnectorAccountPicker.tsx:accountSecondaryText",
+      "type": "function",
+      "name": "accountSecondaryText",
+      "filePath": "eliza/packages/ui/src/components/chat/ConnectorAccountPicker.tsx",
+      "summary": "accountSecondaryText is a function defined in eliza/packages/ui/src/components/chat/ConnectorAccountPicker.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/components/chat/ConnectorAccountPicker.tsx:ConnectorAccountPicker",
+      "type": "function",
+      "name": "ConnectorAccountPicker",
+      "filePath": "eliza/packages/ui/src/components/chat/ConnectorAccountPicker.tsx",
+      "summary": "ConnectorAccountPicker is a function defined in eliza/packages/ui/src/components/chat/ConnectorAccountPicker.tsx."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/components/chat/MessageContent.sensitive-request.test.tsx",
+      "type": "file",
+      "name": "MessageContent.sensitive-request.test.tsx",
+      "filePath": "eliza/packages/ui/src/components/chat/MessageContent.sensitive-request.test.tsx",
+      "summary": "MessageContent.sensitive-request.test.tsx is a typescript source file in the Milady codebase. It contains 5 functions, 4 imports.",
+      "languageNotes": "typescript; code; 284 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/MessageContent.sensitive-request.test.tsx:baseMessage",
+      "type": "function",
+      "name": "baseMessage",
+      "filePath": "eliza/packages/ui/src/components/chat/MessageContent.sensitive-request.test.tsx",
+      "summary": "baseMessage is a function defined in eliza/packages/ui/src/components/chat/MessageContent.sensitive-request.test.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/MessageContent.sensitive-request.test.tsx:permissionState",
+      "type": "function",
+      "name": "permissionState",
+      "filePath": "eliza/packages/ui/src/components/chat/MessageContent.sensitive-request.test.tsx",
+      "summary": "permissionState is a function defined in eliza/packages/ui/src/components/chat/MessageContent.sensitive-request.test.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/MessageContent.sensitive-request.test.tsx:renderWithApp",
+      "type": "function",
+      "name": "renderWithApp",
+      "filePath": "eliza/packages/ui/src/components/chat/MessageContent.sensitive-request.test.tsx",
+      "summary": "renderWithApp is a function defined in eliza/packages/ui/src/components/chat/MessageContent.sensitive-request.test.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/MessageContent.sensitive-request.test.tsx:pendingPublicSecretRequest",
+      "type": "function",
+      "name": "pendingPublicSecretRequest",
+      "filePath": "eliza/packages/ui/src/components/chat/MessageContent.sensitive-request.test.tsx",
+      "summary": "pendingPublicSecretRequest is a function defined in eliza/packages/ui/src/components/chat/MessageContent.sensitive-request.test.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/MessageContent.sensitive-request.test.tsx:pendingOwnerInlineSecretRequest",
+      "type": "function",
+      "name": "pendingOwnerInlineSecretRequest",
+      "filePath": "eliza/packages/ui/src/components/chat/MessageContent.sensitive-request.test.tsx",
+      "summary": "pendingOwnerInlineSecretRequest is a function defined in eliza/packages/ui/src/components/chat/MessageContent.sensitive-request.test.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "type": "file",
+      "name": "MessageContent.tsx",
+      "filePath": "eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "summary": "MessageContent.tsx is a typescript source file in the Milady codebase. It contains 18 functions, 18 imports.",
+      "languageNotes": "typescript; code; 1332 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:createSafeRecord",
+      "type": "function",
+      "name": "createSafeRecord",
+      "filePath": "eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "summary": "createSafeRecord is a function defined in eliza/packages/ui/src/components/chat/MessageContent.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:sanitizePatchValue",
+      "type": "function",
+      "name": "sanitizePatchValue",
+      "filePath": "eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "summary": "sanitizePatchValue is a function defined in eliza/packages/ui/src/components/chat/MessageContent.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:isSafeNormalizedPluginId",
+      "type": "function",
+      "name": "isSafeNormalizedPluginId",
+      "filePath": "eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "summary": "isSafeNormalizedPluginId is a function defined in eliza/packages/ui/src/components/chat/MessageContent.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:normalizeDisplayText",
+      "type": "function",
+      "name": "normalizeDisplayText",
+      "filePath": "eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "summary": "normalizeDisplayText is a function defined in eliza/packages/ui/src/components/chat/MessageContent.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:tryParse",
+      "type": "function",
+      "name": "tryParse",
+      "filePath": "eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "summary": "tryParse is a function defined in eliza/packages/ui/src/components/chat/MessageContent.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:isUiSpec",
+      "type": "function",
+      "name": "isUiSpec",
+      "filePath": "eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "summary": "isUiSpec is a function defined in eliza/packages/ui/src/components/chat/MessageContent.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:looksLikePatch",
+      "type": "function",
+      "name": "looksLikePatch",
+      "filePath": "eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "summary": "looksLikePatch is a function defined in eliza/packages/ui/src/components/chat/MessageContent.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:tryParsePatch",
+      "type": "function",
+      "name": "tryParsePatch",
+      "filePath": "eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "summary": "tryParsePatch is a function defined in eliza/packages/ui/src/components/chat/MessageContent.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:compilePatches",
+      "type": "function",
+      "name": "compilePatches",
+      "filePath": "eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "summary": "compilePatches is a function defined in eliza/packages/ui/src/components/chat/MessageContent.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:findPatchRegions",
+      "type": "function",
+      "name": "findPatchRegions",
+      "filePath": "eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "summary": "findPatchRegions is a function defined in eliza/packages/ui/src/components/chat/MessageContent.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:parseSegments",
+      "type": "function",
+      "name": "parseSegments",
+      "filePath": "eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "summary": "parseSegments is a function defined in eliza/packages/ui/src/components/chat/MessageContent.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:normalizePluginId",
+      "type": "function",
+      "name": "normalizePluginId",
+      "filePath": "eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "summary": "normalizePluginId is a function defined in eliza/packages/ui/src/components/chat/MessageContent.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:buildInlinePluginConfigModel",
+      "type": "function",
+      "name": "buildInlinePluginConfigModel",
+      "filePath": "eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "summary": "buildInlinePluginConfigModel is a function defined in eliza/packages/ui/src/components/chat/MessageContent.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:InlinePluginConfig",
+      "type": "function",
+      "name": "InlinePluginConfig",
+      "filePath": "eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "summary": "InlinePluginConfig is a function defined in eliza/packages/ui/src/components/chat/MessageContent.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:UiSpecBlock",
+      "type": "function",
+      "name": "UiSpecBlock",
+      "filePath": "eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "summary": "UiSpecBlock is a function defined in eliza/packages/ui/src/components/chat/MessageContent.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:sensitiveRequestStatusLabel",
+      "type": "function",
+      "name": "sensitiveRequestStatusLabel",
+      "filePath": "eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "summary": "sensitiveRequestStatusLabel is a function defined in eliza/packages/ui/src/components/chat/MessageContent.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:SensitiveRequestBlock",
+      "type": "function",
+      "name": "SensitiveRequestBlock",
+      "filePath": "eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "summary": "SensitiveRequestBlock is a function defined in eliza/packages/ui/src/components/chat/MessageContent.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:MessageContent",
+      "type": "function",
+      "name": "MessageContent",
+      "filePath": "eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "summary": "MessageContent is a function defined in eliza/packages/ui/src/components/chat/MessageContent.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/chat/SaveCommandModal.tsx",
+      "type": "file",
+      "name": "SaveCommandModal.tsx",
+      "filePath": "eliza/packages/ui/src/components/chat/SaveCommandModal.tsx",
+      "summary": "SaveCommandModal.tsx is a typescript source file in the Milady codebase. It contains 1 function, 4 imports.",
+      "languageNotes": "typescript; code; 157 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/components/chat/SaveCommandModal.tsx:SaveCommandModal",
+      "type": "function",
+      "name": "SaveCommandModal",
+      "filePath": "eliza/packages/ui/src/components/chat/SaveCommandModal.tsx",
+      "summary": "SaveCommandModal is a function defined in eliza/packages/ui/src/components/chat/SaveCommandModal.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/components/chat/TasksEventsPanel.tsx",
+      "type": "file",
+      "name": "TasksEventsPanel.tsx",
+      "filePath": "eliza/packages/ui/src/components/chat/TasksEventsPanel.tsx",
+      "summary": "TasksEventsPanel.tsx is a typescript source file in the Milady codebase. It contains 1 function, 8 imports.",
+      "languageNotes": "typescript; code; 273 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/components/chat/TasksEventsPanel.tsx:TasksEventsPanel",
+      "type": "function",
+      "name": "TasksEventsPanel",
+      "filePath": "eliza/packages/ui/src/components/chat/TasksEventsPanel.tsx",
+      "summary": "TasksEventsPanel is a function defined in eliza/packages/ui/src/components/chat/TasksEventsPanel.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/chat/WidgetVisibilityPanel.tsx",
+      "type": "file",
+      "name": "WidgetVisibilityPanel.tsx",
+      "filePath": "eliza/packages/ui/src/components/chat/WidgetVisibilityPanel.tsx",
+      "summary": "WidgetVisibilityPanel.tsx is a typescript source file in the Milady codebase. It contains 2 functions, 4 imports.",
+      "languageNotes": "typescript; code; 127 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/WidgetVisibilityPanel.tsx:buildAppsSectionVisibilityCandidate",
+      "type": "function",
+      "name": "buildAppsSectionVisibilityCandidate",
+      "filePath": "eliza/packages/ui/src/components/chat/WidgetVisibilityPanel.tsx",
+      "summary": "buildAppsSectionVisibilityCandidate is a function defined in eliza/packages/ui/src/components/chat/WidgetVisibilityPanel.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/components/chat/WidgetVisibilityPanel.tsx:WidgetVisibilityEditor",
+      "type": "function",
+      "name": "WidgetVisibilityEditor",
+      "filePath": "eliza/packages/ui/src/components/chat/WidgetVisibilityPanel.tsx",
+      "summary": "WidgetVisibilityEditor is a function defined in eliza/packages/ui/src/components/chat/WidgetVisibilityPanel.tsx."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/components/chat/chat-source-registration.tsx",
+      "type": "file",
+      "name": "chat-source-registration.tsx",
+      "filePath": "eliza/packages/ui/src/components/chat/chat-source-registration.tsx",
+      "summary": "chat-source-registration.tsx is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 1 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/chat/connector-send-as.test.ts",
+      "type": "file",
+      "name": "connector-send-as.test.ts",
+      "filePath": "eliza/packages/ui/src/components/chat/connector-send-as.test.ts",
+      "summary": "connector-send-as.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 111 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/connector-send-as.test.ts:account",
+      "type": "function",
+      "name": "account",
+      "filePath": "eliza/packages/ui/src/components/chat/connector-send-as.test.ts",
+      "summary": "account is a function defined in eliza/packages/ui/src/components/chat/connector-send-as.test.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/chat/connector-send-as.ts",
+      "type": "file",
+      "name": "connector-send-as.ts",
+      "filePath": "eliza/packages/ui/src/components/chat/connector-send-as.ts",
+      "summary": "connector-send-as.ts is a typescript source file in the Milady codebase. It contains 8 functions, 1 imports.",
+      "languageNotes": "typescript; code; 162 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/connector-send-as.ts:normalizeConnectorSendAsContext",
+      "type": "function",
+      "name": "normalizeConnectorSendAsContext",
+      "filePath": "eliza/packages/ui/src/components/chat/connector-send-as.ts",
+      "summary": "normalizeConnectorSendAsContext is a function defined in eliza/packages/ui/src/components/chat/connector-send-as.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/connector-send-as.ts:connectorAccountDisplayName",
+      "type": "function",
+      "name": "connectorAccountDisplayName",
+      "filePath": "eliza/packages/ui/src/components/chat/connector-send-as.ts",
+      "summary": "connectorAccountDisplayName is a function defined in eliza/packages/ui/src/components/chat/connector-send-as.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/connector-send-as.ts:isConnectorAccountUsable",
+      "type": "function",
+      "name": "isConnectorAccountUsable",
+      "filePath": "eliza/packages/ui/src/components/chat/connector-send-as.ts",
+      "summary": "isConnectorAccountUsable is a function defined in eliza/packages/ui/src/components/chat/connector-send-as.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/connector-send-as.ts:shouldShowConnectorAccountPicker",
+      "type": "function",
+      "name": "shouldShowConnectorAccountPicker",
+      "filePath": "eliza/packages/ui/src/components/chat/connector-send-as.ts",
+      "summary": "shouldShowConnectorAccountPicker is a function defined in eliza/packages/ui/src/components/chat/connector-send-as.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/connector-send-as.ts:buildConnectorSendAsMetadata",
+      "type": "function",
+      "name": "buildConnectorSendAsMetadata",
+      "filePath": "eliza/packages/ui/src/components/chat/connector-send-as.ts",
+      "summary": "buildConnectorSendAsMetadata is a function defined in eliza/packages/ui/src/components/chat/connector-send-as.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/connector-send-as.ts:mergeConnectorSendAsMetadata",
+      "type": "function",
+      "name": "mergeConnectorSendAsMetadata",
+      "filePath": "eliza/packages/ui/src/components/chat/connector-send-as.ts",
+      "summary": "mergeConnectorSendAsMetadata is a function defined in eliza/packages/ui/src/components/chat/connector-send-as.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/connector-send-as.ts:connectorWriteConfirmationKey",
+      "type": "function",
+      "name": "connectorWriteConfirmationKey",
+      "filePath": "eliza/packages/ui/src/components/chat/connector-send-as.ts",
+      "summary": "connectorWriteConfirmationKey is a function defined in eliza/packages/ui/src/components/chat/connector-send-as.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/connector-send-as.ts:isLikelyAccountRequiredError",
+      "type": "function",
+      "name": "isLikelyAccountRequiredError",
+      "filePath": "eliza/packages/ui/src/components/chat/connector-send-as.ts",
+      "summary": "isLikelyAccountRequiredError is a function defined in eliza/packages/ui/src/components/chat/connector-send-as.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/chat/message-choice-parser.ts",
+      "type": "file",
+      "name": "message-choice-parser.ts",
+      "filePath": "eliza/packages/ui/src/components/chat/message-choice-parser.ts",
+      "summary": "message-choice-parser.ts is a typescript source file in the Milady codebase. It contains 3 functions, 1 imports.",
+      "languageNotes": "typescript; code; 67 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/message-choice-parser.ts:generateChoiceId",
+      "type": "function",
+      "name": "generateChoiceId",
+      "filePath": "eliza/packages/ui/src/components/chat/message-choice-parser.ts",
+      "summary": "generateChoiceId is a function defined in eliza/packages/ui/src/components/chat/message-choice-parser.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/message-choice-parser.ts:parseChoiceBody",
+      "type": "function",
+      "name": "parseChoiceBody",
+      "filePath": "eliza/packages/ui/src/components/chat/message-choice-parser.ts",
+      "summary": "parseChoiceBody is a function defined in eliza/packages/ui/src/components/chat/message-choice-parser.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/message-choice-parser.ts:findChoiceRegions",
+      "type": "function",
+      "name": "findChoiceRegions",
+      "filePath": "eliza/packages/ui/src/components/chat/message-choice-parser.ts",
+      "summary": "findChoiceRegions is a function defined in eliza/packages/ui/src/components/chat/message-choice-parser.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/chat/widgets/ChoiceWidget.tsx",
+      "type": "file",
+      "name": "ChoiceWidget.tsx",
+      "filePath": "eliza/packages/ui/src/components/chat/widgets/ChoiceWidget.tsx",
+      "summary": "ChoiceWidget.tsx is a typescript source file in the Milady codebase. It contains 2 functions, 1 imports.",
+      "languageNotes": "typescript; code; 101 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/widgets/ChoiceWidget.tsx:isCancelLike",
+      "type": "function",
+      "name": "isCancelLike",
+      "filePath": "eliza/packages/ui/src/components/chat/widgets/ChoiceWidget.tsx",
+      "summary": "isCancelLike is a function defined in eliza/packages/ui/src/components/chat/widgets/ChoiceWidget.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/widgets/ChoiceWidget.tsx:ChoiceWidget",
+      "type": "function",
+      "name": "ChoiceWidget",
+      "filePath": "eliza/packages/ui/src/components/chat/widgets/ChoiceWidget.tsx",
+      "summary": "ChoiceWidget is a function defined in eliza/packages/ui/src/components/chat/widgets/ChoiceWidget.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx",
+      "type": "file",
+      "name": "agent-orchestrator.tsx",
+      "filePath": "eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx",
+      "summary": "agent-orchestrator.tsx is a typescript source file in the Milady codebase. It contains 10 functions, 11 imports.",
+      "languageNotes": "typescript; code; 549 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx:relativeTime",
+      "type": "function",
+      "name": "relativeTime",
+      "filePath": "eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx",
+      "summary": "relativeTime is a function defined in eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx:relativeDuration",
+      "type": "function",
+      "name": "relativeDuration",
+      "filePath": "eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx",
+      "summary": "relativeDuration is a function defined in eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx:fallbackTranslate",
+      "type": "function",
+      "name": "fallbackTranslate",
+      "filePath": "eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx",
+      "summary": "fallbackTranslate is a function defined in eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx:formatIsoTime",
+      "type": "function",
+      "name": "formatIsoTime",
+      "filePath": "eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx",
+      "summary": "formatIsoTime is a function defined in eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx:ActivityItemsContent",
+      "type": "function",
+      "name": "ActivityItemsContent",
+      "filePath": "eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx",
+      "summary": "ActivityItemsContent is a function defined in eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx:getClientErrorMessage",
+      "type": "function",
+      "name": "getClientErrorMessage",
+      "filePath": "eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx",
+      "summary": "getClientErrorMessage is a function defined in eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx:getAppRunIdentity",
+      "type": "function",
+      "name": "getAppRunIdentity",
+      "filePath": "eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx",
+      "summary": "getAppRunIdentity is a function defined in eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx:AppRunCard",
+      "type": "function",
+      "name": "AppRunCard",
+      "filePath": "eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx",
+      "summary": "AppRunCard is a function defined in eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx:AppRunsWidget",
+      "type": "function",
+      "name": "AppRunsWidget",
+      "filePath": "eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx",
+      "summary": "AppRunsWidget is a function defined in eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx:OrchestratorActivityWidget",
+      "type": "function",
+      "name": "OrchestratorActivityWidget",
+      "filePath": "eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx",
+      "summary": "OrchestratorActivityWidget is a function defined in eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/chat/widgets/browser-status.tsx",
+      "type": "file",
+      "name": "browser-status.tsx",
+      "filePath": "eliza/packages/ui/src/components/chat/widgets/browser-status.tsx",
+      "summary": "browser-status.tsx is a typescript source file in the Milady codebase. It contains 3 functions, 4 imports.",
+      "languageNotes": "typescript; code; 162 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/widgets/browser-status.tsx:tabLabel",
+      "type": "function",
+      "name": "tabLabel",
+      "filePath": "eliza/packages/ui/src/components/chat/widgets/browser-status.tsx",
+      "summary": "tabLabel is a function defined in eliza/packages/ui/src/components/chat/widgets/browser-status.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/widgets/browser-status.tsx:tabStatus",
+      "type": "function",
+      "name": "tabStatus",
+      "filePath": "eliza/packages/ui/src/components/chat/widgets/browser-status.tsx",
+      "summary": "tabStatus is a function defined in eliza/packages/ui/src/components/chat/widgets/browser-status.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/components/chat/widgets/browser-status.tsx:BrowserStatusSidebarWidget",
+      "type": "function",
+      "name": "BrowserStatusSidebarWidget",
+      "filePath": "eliza/packages/ui/src/components/chat/widgets/browser-status.tsx",
+      "summary": "BrowserStatusSidebarWidget is a function defined in eliza/packages/ui/src/components/chat/widgets/browser-status.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/chat/widgets/music-player.tsx",
+      "type": "file",
+      "name": "music-player.tsx",
+      "filePath": "eliza/packages/ui/src/components/chat/widgets/music-player.tsx",
+      "summary": "music-player.tsx is a typescript source file in the Milady codebase. It contains 2 functions, 4 imports.",
+      "languageNotes": "typescript; code; 224 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/widgets/music-player.tsx:statusLabel",
+      "type": "function",
+      "name": "statusLabel",
+      "filePath": "eliza/packages/ui/src/components/chat/widgets/music-player.tsx",
+      "summary": "statusLabel is a function defined in eliza/packages/ui/src/components/chat/widgets/music-player.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/components/chat/widgets/music-player.tsx:MusicPlayerSidebarWidget",
+      "type": "function",
+      "name": "MusicPlayerSidebarWidget",
+      "filePath": "eliza/packages/ui/src/components/chat/widgets/music-player.tsx",
+      "summary": "MusicPlayerSidebarWidget is a function defined in eliza/packages/ui/src/components/chat/widgets/music-player.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/chat/widgets/shared.tsx",
+      "type": "file",
+      "name": "shared.tsx",
+      "filePath": "eliza/packages/ui/src/components/chat/widgets/shared.tsx",
+      "summary": "shared.tsx is a typescript source file in the Milady codebase. It contains 2 functions.",
+      "languageNotes": "typescript; code; 75 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/widgets/shared.tsx:WidgetSection",
+      "type": "function",
+      "name": "WidgetSection",
+      "filePath": "eliza/packages/ui/src/components/chat/widgets/shared.tsx",
+      "summary": "WidgetSection is a function defined in eliza/packages/ui/src/components/chat/widgets/shared.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/widgets/shared.tsx:EmptyWidgetState",
+      "type": "function",
+      "name": "EmptyWidgetState",
+      "filePath": "eliza/packages/ui/src/components/chat/widgets/shared.tsx",
+      "summary": "EmptyWidgetState is a function defined in eliza/packages/ui/src/components/chat/widgets/shared.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/chat/widgets/todo.tsx",
+      "type": "file",
+      "name": "todo.tsx",
+      "filePath": "eliza/packages/ui/src/components/chat/widgets/todo.tsx",
+      "summary": "todo.tsx is a typescript source file in the Milady codebase. It contains 6 functions, 7 imports.",
+      "languageNotes": "typescript; code; 210 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/widgets/todo.tsx:fallbackTranslate",
+      "type": "function",
+      "name": "fallbackTranslate",
+      "filePath": "eliza/packages/ui/src/components/chat/widgets/todo.tsx",
+      "summary": "fallbackTranslate is a function defined in eliza/packages/ui/src/components/chat/widgets/todo.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/widgets/todo.tsx:sortTodosForWidget",
+      "type": "function",
+      "name": "sortTodosForWidget",
+      "filePath": "eliza/packages/ui/src/components/chat/widgets/todo.tsx",
+      "summary": "sortTodosForWidget is a function defined in eliza/packages/ui/src/components/chat/widgets/todo.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/widgets/todo.tsx:dedupeTodos",
+      "type": "function",
+      "name": "dedupeTodos",
+      "filePath": "eliza/packages/ui/src/components/chat/widgets/todo.tsx",
+      "summary": "dedupeTodos is a function defined in eliza/packages/ui/src/components/chat/widgets/todo.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/widgets/todo.tsx:TodoRow",
+      "type": "function",
+      "name": "TodoRow",
+      "filePath": "eliza/packages/ui/src/components/chat/widgets/todo.tsx",
+      "summary": "TodoRow is a function defined in eliza/packages/ui/src/components/chat/widgets/todo.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/widgets/todo.tsx:TodoItemsContent",
+      "type": "function",
+      "name": "TodoItemsContent",
+      "filePath": "eliza/packages/ui/src/components/chat/widgets/todo.tsx",
+      "summary": "TodoItemsContent is a function defined in eliza/packages/ui/src/components/chat/widgets/todo.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/chat/widgets/todo.tsx:TodoSidebarWidget",
+      "type": "function",
+      "name": "TodoSidebarWidget",
+      "filePath": "eliza/packages/ui/src/components/chat/widgets/todo.tsx",
+      "summary": "TodoSidebarWidget is a function defined in eliza/packages/ui/src/components/chat/widgets/todo.tsx."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/components/chat/widgets/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "eliza/packages/ui/src/components/chat/widgets/types.ts",
+      "summary": "types.ts is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 21 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/cloud/CloudSourceControls.tsx",
+      "type": "file",
+      "name": "CloudSourceControls.tsx",
+      "filePath": "eliza/packages/ui/src/components/cloud/CloudSourceControls.tsx",
+      "summary": "CloudSourceControls.tsx is a typescript source file in the Milady codebase. It contains 2 functions, 3 imports.",
+      "languageNotes": "typescript; code; 96 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/cloud/CloudSourceControls.tsx:CloudSourceModeToggle",
+      "type": "function",
+      "name": "CloudSourceModeToggle",
+      "filePath": "eliza/packages/ui/src/components/cloud/CloudSourceControls.tsx",
+      "summary": "CloudSourceModeToggle is a function defined in eliza/packages/ui/src/components/cloud/CloudSourceControls.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/cloud/CloudSourceControls.tsx:CloudConnectionStatus",
+      "type": "function",
+      "name": "CloudConnectionStatus",
+      "filePath": "eliza/packages/ui/src/components/cloud/CloudSourceControls.tsx",
+      "summary": "CloudConnectionStatus is a function defined in eliza/packages/ui/src/components/cloud/CloudSourceControls.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx",
+      "type": "file",
+      "name": "CloudStatusBadge.tsx",
+      "filePath": "eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx",
+      "summary": "CloudStatusBadge.tsx is a typescript source file in the Milady codebase. It contains 5 functions, 1 imports.",
+      "languageNotes": "typescript; code; 195 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx:trimTrailingZeroes",
+      "type": "function",
+      "name": "trimTrailingZeroes",
+      "filePath": "eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx",
+      "summary": "trimTrailingZeroes is a function defined in eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx:formatCompactCloudCredits",
+      "type": "function",
+      "name": "formatCompactCloudCredits",
+      "filePath": "eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx",
+      "summary": "formatCompactCloudCredits is a function defined in eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx:resolveCloudStatusBadgeState",
+      "type": "function",
+      "name": "resolveCloudStatusBadgeState",
+      "filePath": "eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx",
+      "summary": "resolveCloudStatusBadgeState is a function defined in eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx:resolveCloudStatusToneStyle",
+      "type": "function",
+      "name": "resolveCloudStatusToneStyle",
+      "filePath": "eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx",
+      "summary": "resolveCloudStatusToneStyle is a function defined in eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx:CloudStatusBadge",
+      "type": "function",
+      "name": "CloudStatusBadge",
+      "filePath": "eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx",
+      "summary": "CloudStatusBadge is a function defined in eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/components/cloud/FlaminaGuide.tsx",
+      "type": "file",
+      "name": "FlaminaGuide.tsx",
+      "filePath": "eliza/packages/ui/src/components/cloud/FlaminaGuide.tsx",
+      "summary": "FlaminaGuide.tsx is a typescript source file in the Milady codebase. It contains 2 functions, 3 imports.",
+      "languageNotes": "typescript; code; 242 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/cloud/FlaminaGuide.tsx:FlaminaGuideCard",
+      "type": "function",
+      "name": "FlaminaGuideCard",
+      "filePath": "eliza/packages/ui/src/components/cloud/FlaminaGuide.tsx",
+      "summary": "FlaminaGuideCard is a function defined in eliza/packages/ui/src/components/cloud/FlaminaGuide.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/components/cloud/FlaminaGuide.tsx:DeferredSetupChecklist",
+      "type": "function",
+      "name": "DeferredSetupChecklist",
+      "filePath": "eliza/packages/ui/src/components/cloud/FlaminaGuide.tsx",
+      "summary": "DeferredSetupChecklist is a function defined in eliza/packages/ui/src/components/cloud/FlaminaGuide.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/cloud/StripeEmbeddedCheckout.tsx",
+      "type": "file",
+      "name": "StripeEmbeddedCheckout.tsx",
+      "filePath": "eliza/packages/ui/src/components/cloud/StripeEmbeddedCheckout.tsx",
+      "summary": "StripeEmbeddedCheckout.tsx is a typescript source file in the Milady codebase. It contains 2 functions.",
+      "languageNotes": "typescript; code; 155 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/cloud/StripeEmbeddedCheckout.tsx:loadStripeFactory",
+      "type": "function",
+      "name": "loadStripeFactory",
+      "filePath": "eliza/packages/ui/src/components/cloud/StripeEmbeddedCheckout.tsx",
+      "summary": "loadStripeFactory is a function defined in eliza/packages/ui/src/components/cloud/StripeEmbeddedCheckout.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/cloud/StripeEmbeddedCheckout.tsx:StripeEmbeddedCheckout",
+      "type": "function",
+      "name": "StripeEmbeddedCheckout",
+      "filePath": "eliza/packages/ui/src/components/cloud/StripeEmbeddedCheckout.tsx",
+      "summary": "StripeEmbeddedCheckout is a function defined in eliza/packages/ui/src/components/cloud/StripeEmbeddedCheckout.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/components/companion/injected.tsx",
+      "type": "file",
+      "name": "injected.tsx",
+      "filePath": "eliza/packages/ui/src/components/companion/injected.tsx",
+      "summary": "injected.tsx is a typescript source file in the Milady codebase. It contains 4 functions, 2 imports.",
+      "languageNotes": "typescript; code; 48 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/companion/injected.tsx:resolveCompanionInferenceNotice",
+      "type": "function",
+      "name": "resolveCompanionInferenceNotice",
+      "filePath": "eliza/packages/ui/src/components/companion/injected.tsx",
+      "summary": "resolveCompanionInferenceNotice is a function defined in eliza/packages/ui/src/components/companion/injected.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/companion/injected.tsx:CompanionInferenceAlertButton",
+      "type": "function",
+      "name": "CompanionInferenceAlertButton",
+      "filePath": "eliza/packages/ui/src/components/companion/injected.tsx",
+      "summary": "CompanionInferenceAlertButton is a function defined in eliza/packages/ui/src/components/companion/injected.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/companion/injected.tsx:CompanionGlobalOverlay",
+      "type": "function",
+      "name": "CompanionGlobalOverlay",
+      "filePath": "eliza/packages/ui/src/components/companion/injected.tsx",
+      "summary": "CompanionGlobalOverlay is a function defined in eliza/packages/ui/src/components/companion/injected.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/companion/injected.tsx:useCompanionSceneStatus",
+      "type": "function",
+      "name": "useCompanionSceneStatus",
+      "filePath": "eliza/packages/ui/src/components/companion/injected.tsx",
+      "summary": "useCompanionSceneStatus is a function defined in eliza/packages/ui/src/components/companion/injected.tsx."
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/components/composites/OwnerBadge.test.tsx",
+      "type": "file",
+      "name": "OwnerBadge.test.tsx",
+      "filePath": "eliza/packages/ui/src/components/composites/OwnerBadge.test.tsx",
+      "summary": "OwnerBadge.test.tsx is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 56 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/composites/OwnerBadge.tsx",
+      "type": "file",
+      "name": "OwnerBadge.tsx",
+      "filePath": "eliza/packages/ui/src/components/composites/OwnerBadge.tsx",
+      "summary": "OwnerBadge.tsx is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 78 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/composites/OwnerBadge.tsx:OwnerBadge",
+      "type": "function",
+      "name": "OwnerBadge",
+      "filePath": "eliza/packages/ui/src/components/composites/OwnerBadge.tsx",
+      "summary": "OwnerBadge is a function defined in eliza/packages/ui/src/components/composites/OwnerBadge.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/components/composites/chat/chat-attachment-strip.tsx",
+      "type": "file",
+      "name": "chat-attachment-strip.tsx",
+      "filePath": "eliza/packages/ui/src/components/composites/chat/chat-attachment-strip.tsx",
+      "summary": "chat-attachment-strip.tsx is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 54 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/composites/chat/chat-attachment-strip.tsx:ChatAttachmentStrip",
+      "type": "function",
+      "name": "ChatAttachmentStrip",
+      "filePath": "eliza/packages/ui/src/components/composites/chat/chat-attachment-strip.tsx",
+      "summary": "ChatAttachmentStrip is a function defined in eliza/packages/ui/src/components/composites/chat/chat-attachment-strip.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/components/composites/chat/chat-bubble.tsx",
+      "type": "file",
+      "name": "chat-bubble.tsx",
+      "filePath": "eliza/packages/ui/src/components/composites/chat/chat-bubble.tsx",
+      "summary": "chat-bubble.tsx is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 37 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/composites/chat/chat-bubble.tsx:ChatBubble",
+      "type": "function",
+      "name": "ChatBubble",
+      "filePath": "eliza/packages/ui/src/components/composites/chat/chat-bubble.tsx",
+      "summary": "ChatBubble is a function defined in eliza/packages/ui/src/components/composites/chat/chat-bubble.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/composites/chat/chat-composer-shell.tsx",
+      "type": "file",
+      "name": "chat-composer-shell.tsx",
+      "filePath": "eliza/packages/ui/src/components/composites/chat/chat-composer-shell.tsx",
+      "summary": "chat-composer-shell.tsx is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 81 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/composites/chat/chat-composer-shell.tsx:assignRef",
+      "type": "function",
+      "name": "assignRef",
+      "filePath": "eliza/packages/ui/src/components/composites/chat/chat-composer-shell.tsx",
+      "summary": "assignRef is a function defined in eliza/packages/ui/src/components/composites/chat/chat-composer-shell.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/composites/chat/chat-composer-shell.tsx:ChatComposerShell",
+      "type": "function",
+      "name": "ChatComposerShell",
+      "filePath": "eliza/packages/ui/src/components/composites/chat/chat-composer-shell.tsx",
+      "summary": "ChatComposerShell is a function defined in eliza/packages/ui/src/components/composites/chat/chat-composer-shell.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/components/composites/chat/chat-composer.tsx",
+      "type": "file",
+      "name": "chat-composer.tsx",
+      "filePath": "eliza/packages/ui/src/components/composites/chat/chat-composer.tsx",
+      "summary": "chat-composer.tsx is a typescript source file in the Milady codebase. It contains 4 functions, 5 imports.",
+      "languageNotes": "typescript; code; 800 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/composites/chat/chat-composer.tsx:getTextareaVerticalPadding",
+      "type": "function",
+      "name": "getTextareaVerticalPadding",
+      "filePath": "eliza/packages/ui/src/components/composites/chat/chat-composer.tsx",
+      "summary": "getTextareaVerticalPadding is a function defined in eliza/packages/ui/src/components/composites/chat/chat-composer.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/composites/chat/chat-composer.tsx:getTextareaLineHeight",
+      "type": "function",
+      "name": "getTextareaLineHeight",
+      "filePath": "eliza/packages/ui/src/components/composites/chat/chat-composer.tsx",
+      "summary": "getTextareaLineHeight is a function defined in eliza/packages/ui/src/components/composites/chat/chat-composer.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/composites/chat/chat-composer.tsx:measureInlineTextarea",
+      "type": "function",
+      "name": "measureInlineTextarea",
+      "filePath": "eliza/packages/ui/src/components/composites/chat/chat-composer.tsx",
+      "summary": "measureInlineTextarea is a function defined in eliza/packages/ui/src/components/composites/chat/chat-composer.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/components/composites/chat/chat-composer.tsx:ChatComposer",
+      "type": "function",
+      "name": "ChatComposer",
+      "filePath": "eliza/packages/ui/src/components/composites/chat/chat-composer.tsx",
+      "summary": "ChatComposer is a function defined in eliza/packages/ui/src/components/composites/chat/chat-composer.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/components/composites/chat/chat-conversation-item.tsx",
+      "type": "file",
+      "name": "chat-conversation-item.tsx",
+      "filePath": "eliza/packages/ui/src/components/composites/chat/chat-conversation-item.tsx",
+      "summary": "chat-conversation-item.tsx is a typescript source file in the Milady codebase. It contains 2 functions, 4 imports.",
+      "languageNotes": "typescript; code; 334 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/composites/chat/chat-conversation-item.tsx:TruncatingConversationTitle",
+      "type": "function",
+      "name": "TruncatingConversationTitle",
+      "filePath": "eliza/packages/ui/src/components/composites/chat/chat-conversation-item.tsx",
+      "summary": "TruncatingConversationTitle is a function defined in eliza/packages/ui/src/components/composites/chat/chat-conversation-item.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/components/composites/chat/chat-conversation-item.tsx:ChatConversationItem",
+      "type": "function",
+      "name": "ChatConversationItem",
+      "filePath": "eliza/packages/ui/src/components/composites/chat/chat-conversation-item.tsx",
+      "summary": "ChatConversationItem is a function defined in eliza/packages/ui/src/components/composites/chat/chat-conversation-item.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/composites/chat/chat-conversation-rename-dialog.tsx",
+      "type": "file",
+      "name": "chat-conversation-rename-dialog.tsx",
+      "filePath": "eliza/packages/ui/src/components/composites/chat/chat-conversation-rename-dialog.tsx",
+      "summary": "chat-conversation-rename-dialog.tsx is a typescript source file in the Milady codebase. It contains 1 function, 4 imports.",
+      "languageNotes": "typescript; code; 131 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/components/composites/chat/chat-conversation-rename-dialog.tsx:ChatConversationRenameDialog",
+      "type": "function",
+      "name": "ChatConversationRenameDialog",
+      "filePath": "eliza/packages/ui/src/components/composites/chat/chat-conversation-rename-dialog.tsx",
+      "summary": "ChatConversationRenameDialog is a function defined in eliza/packages/ui/src/components/composites/chat/chat-conversation-rename-dialog.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/composites/chat/chat-empty-state.tsx",
+      "type": "file",
+      "name": "chat-empty-state.tsx",
+      "filePath": "eliza/packages/ui/src/components/composites/chat/chat-empty-state.tsx",
+      "summary": "chat-empty-state.tsx is a typescript source file in the Milady codebase. It contains 1 function, 3 imports.",
+      "languageNotes": "typescript; code; 95 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/composites/chat/chat-empty-state.tsx:ChatEmptyState",
+      "type": "function",
+      "name": "ChatEmptyState",
+      "filePath": "eliza/packages/ui/src/components/composites/chat/chat-empty-state.tsx",
+      "summary": "ChatEmptyState is a function defined in eliza/packages/ui/src/components/composites/chat/chat-empty-state.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/composites/chat/chat-message-actions.tsx",
+      "type": "file",
+      "name": "chat-message-actions.tsx",
+      "filePath": "eliza/packages/ui/src/components/composites/chat/chat-message-actions.tsx",
+      "summary": "chat-message-actions.tsx is a typescript source file in the Milady codebase. It contains 1 function, 3 imports.",
+      "languageNotes": "typescript; code; 91 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/composites/chat/chat-message-actions.tsx:ChatMessageActions",
+      "type": "function",
+      "name": "ChatMessageActions",
+      "filePath": "eliza/packages/ui/src/components/composites/chat/chat-message-actions.tsx",
+      "summary": "ChatMessageActions is a function defined in eliza/packages/ui/src/components/composites/chat/chat-message-actions.tsx."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/AgentActivityBox.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/AgentActivityBox.tsx:deriveActivity",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/AgentActivityBox.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/AgentActivityBox.tsx:AgentActivityBox",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/AgentActivityBox.tsx:AgentActivityBox",
+      "target": "function:eliza/packages/ui/src/components/chat/AgentActivityBox.tsx:deriveActivity",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/AppsSection.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/AppsSection.tsx:getRunRingClass",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/AppsSection.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/AppsSection.tsx:isOverlayLaunchApp",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/AppsSection.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/AppsSection.tsx:AppsSection",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/AppsSection.tsx:AppsSection",
+      "target": "function:eliza/packages/ui/src/components/chat/AppsSection.tsx:isOverlayLaunchApp",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/AppsSection.tsx:AppsSection",
+      "target": "function:eliza/packages/ui/src/components/chat/AppsSection.tsx:getRunRingClass",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/ConnectorAccountPicker.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/ConnectorAccountPicker.tsx:accountStatusLabel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/ConnectorAccountPicker.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/ConnectorAccountPicker.tsx:accountSecondaryText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/ConnectorAccountPicker.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/ConnectorAccountPicker.tsx:ConnectorAccountPicker",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/ConnectorAccountPicker.tsx:ConnectorAccountPicker",
+      "target": "function:eliza/packages/ui/src/components/chat/ConnectorAccountPicker.tsx:accountStatusLabel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/ConnectorAccountPicker.tsx:ConnectorAccountPicker",
+      "target": "function:eliza/packages/ui/src/components/chat/ConnectorAccountPicker.tsx:accountStatusLabel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/ConnectorAccountPicker.tsx:ConnectorAccountPicker",
+      "target": "function:eliza/packages/ui/src/components/chat/ConnectorAccountPicker.tsx:accountSecondaryText",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.sensitive-request.test.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.sensitive-request.test.tsx:baseMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.sensitive-request.test.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.sensitive-request.test.tsx:permissionState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.sensitive-request.test.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.sensitive-request.test.tsx:renderWithApp",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.sensitive-request.test.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.sensitive-request.test.tsx:pendingPublicSecretRequest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.sensitive-request.test.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.sensitive-request.test.tsx:pendingOwnerInlineSecretRequest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:createSafeRecord",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:sanitizePatchValue",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:isSafeNormalizedPluginId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:normalizeDisplayText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:tryParse",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:isUiSpec",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:looksLikePatch",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:tryParsePatch",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:compilePatches",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:findPatchRegions",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:parseSegments",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:normalizePluginId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:buildInlinePluginConfigModel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:InlinePluginConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:UiSpecBlock",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:sensitiveRequestStatusLabel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:SensitiveRequestBlock",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:MessageContent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:sanitizePatchValue",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:createSafeRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:tryParsePatch",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:looksLikePatch",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:compilePatches",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:createSafeRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:compilePatches",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:sanitizePatchValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:compilePatches",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:createSafeRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:compilePatches",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:createSafeRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:compilePatches",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:sanitizePatchValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:compilePatches",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:isUiSpec",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:findPatchRegions",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:looksLikePatch",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:findPatchRegions",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:tryParsePatch",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:findPatchRegions",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:tryParsePatch",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:parseSegments",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:normalizeDisplayText",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:parseSegments",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:tryParse",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:parseSegments",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:isUiSpec",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:parseSegments",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:findPatchRegions",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:InlinePluginConfig",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:normalizePluginId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:InlinePluginConfig",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:buildInlinePluginConfigModel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:SensitiveRequestBlock",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:sensitiveRequestStatusLabel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:MessageContent",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:parseSegments",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:MessageContent",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:isSafeNormalizedPluginId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:MessageContent",
+      "target": "function:eliza/packages/ui/src/components/chat/MessageContent.tsx:normalizePluginId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/SaveCommandModal.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/SaveCommandModal.tsx:SaveCommandModal",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/TasksEventsPanel.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/TasksEventsPanel.tsx:TasksEventsPanel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/WidgetVisibilityPanel.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/WidgetVisibilityPanel.tsx:buildAppsSectionVisibilityCandidate",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/WidgetVisibilityPanel.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/WidgetVisibilityPanel.tsx:WidgetVisibilityEditor",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/connector-send-as.test.ts",
+      "target": "function:eliza/packages/ui/src/components/chat/connector-send-as.test.ts:account",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/connector-send-as.ts",
+      "target": "function:eliza/packages/ui/src/components/chat/connector-send-as.ts:normalizeConnectorSendAsContext",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/connector-send-as.ts",
+      "target": "function:eliza/packages/ui/src/components/chat/connector-send-as.ts:connectorAccountDisplayName",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/connector-send-as.ts",
+      "target": "function:eliza/packages/ui/src/components/chat/connector-send-as.ts:isConnectorAccountUsable",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/connector-send-as.ts",
+      "target": "function:eliza/packages/ui/src/components/chat/connector-send-as.ts:shouldShowConnectorAccountPicker",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/connector-send-as.ts",
+      "target": "function:eliza/packages/ui/src/components/chat/connector-send-as.ts:buildConnectorSendAsMetadata",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/connector-send-as.ts",
+      "target": "function:eliza/packages/ui/src/components/chat/connector-send-as.ts:mergeConnectorSendAsMetadata",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/connector-send-as.ts",
+      "target": "function:eliza/packages/ui/src/components/chat/connector-send-as.ts:connectorWriteConfirmationKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/connector-send-as.ts",
+      "target": "function:eliza/packages/ui/src/components/chat/connector-send-as.ts:isLikelyAccountRequiredError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/connector-send-as.ts:shouldShowConnectorAccountPicker",
+      "target": "function:eliza/packages/ui/src/components/chat/connector-send-as.ts:normalizeConnectorSendAsContext",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/connector-send-as.ts:buildConnectorSendAsMetadata",
+      "target": "function:eliza/packages/ui/src/components/chat/connector-send-as.ts:normalizeConnectorSendAsContext",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/connector-send-as.ts:connectorWriteConfirmationKey",
+      "target": "function:eliza/packages/ui/src/components/chat/connector-send-as.ts:normalizeConnectorSendAsContext",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/message-choice-parser.ts",
+      "target": "function:eliza/packages/ui/src/components/chat/message-choice-parser.ts:generateChoiceId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/message-choice-parser.ts",
+      "target": "function:eliza/packages/ui/src/components/chat/message-choice-parser.ts:parseChoiceBody",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/message-choice-parser.ts",
+      "target": "function:eliza/packages/ui/src/components/chat/message-choice-parser.ts:findChoiceRegions",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/message-choice-parser.ts:findChoiceRegions",
+      "target": "function:eliza/packages/ui/src/components/chat/message-choice-parser.ts:generateChoiceId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/message-choice-parser.ts:findChoiceRegions",
+      "target": "function:eliza/packages/ui/src/components/chat/message-choice-parser.ts:parseChoiceBody",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/ChoiceWidget.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/ChoiceWidget.tsx:isCancelLike",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/ChoiceWidget.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/ChoiceWidget.tsx:ChoiceWidget",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/widgets/ChoiceWidget.tsx:ChoiceWidget",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/ChoiceWidget.tsx:isCancelLike",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx:relativeTime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx:relativeDuration",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx:fallbackTranslate",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx:formatIsoTime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx:ActivityItemsContent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx:getClientErrorMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx:getAppRunIdentity",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx:AppRunCard",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx:AppRunsWidget",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx:OrchestratorActivityWidget",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx:formatIsoTime",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx:relativeTime",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx:ActivityItemsContent",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx:relativeDuration",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx:AppRunCard",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx:formatIsoTime",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx:AppRunsWidget",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx:getAppRunIdentity",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx:AppRunsWidget",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx:getAppRunIdentity",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/browser-status.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/browser-status.tsx:tabLabel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/browser-status.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/browser-status.tsx:tabStatus",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/browser-status.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/browser-status.tsx:BrowserStatusSidebarWidget",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/widgets/browser-status.tsx:BrowserStatusSidebarWidget",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/browser-status.tsx:tabLabel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/widgets/browser-status.tsx:BrowserStatusSidebarWidget",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/browser-status.tsx:tabStatus",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/music-player.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/music-player.tsx:statusLabel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/music-player.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/music-player.tsx:MusicPlayerSidebarWidget",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/widgets/music-player.tsx:MusicPlayerSidebarWidget",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/music-player.tsx:statusLabel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/shared.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/shared.tsx:WidgetSection",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/shared.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/shared.tsx:EmptyWidgetState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/todo.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/todo.tsx:fallbackTranslate",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/todo.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/todo.tsx:sortTodosForWidget",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/todo.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/todo.tsx:dedupeTodos",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/todo.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/todo.tsx:TodoRow",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/todo.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/todo.tsx:TodoItemsContent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/todo.tsx",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/todo.tsx:TodoSidebarWidget",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/widgets/todo.tsx:dedupeTodos",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/todo.tsx:sortTodosForWidget",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/widgets/todo.tsx:TodoSidebarWidget",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/todo.tsx:dedupeTodos",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/widgets/todo.tsx:TodoSidebarWidget",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/todo.tsx:dedupeTodos",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/widgets/todo.tsx:TodoSidebarWidget",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/todo.tsx:dedupeTodos",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/chat/widgets/todo.tsx:TodoSidebarWidget",
+      "target": "function:eliza/packages/ui/src/components/chat/widgets/todo.tsx:dedupeTodos",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/cloud/CloudSourceControls.tsx",
+      "target": "function:eliza/packages/ui/src/components/cloud/CloudSourceControls.tsx:CloudSourceModeToggle",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/cloud/CloudSourceControls.tsx",
+      "target": "function:eliza/packages/ui/src/components/cloud/CloudSourceControls.tsx:CloudConnectionStatus",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx",
+      "target": "function:eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx:trimTrailingZeroes",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx",
+      "target": "function:eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx:formatCompactCloudCredits",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx",
+      "target": "function:eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx:resolveCloudStatusBadgeState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx",
+      "target": "function:eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx:resolveCloudStatusToneStyle",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx",
+      "target": "function:eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx:CloudStatusBadge",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx:formatCompactCloudCredits",
+      "target": "function:eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx:trimTrailingZeroes",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx:formatCompactCloudCredits",
+      "target": "function:eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx:trimTrailingZeroes",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx:formatCompactCloudCredits",
+      "target": "function:eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx:trimTrailingZeroes",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx:formatCompactCloudCredits",
+      "target": "function:eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx:trimTrailingZeroes",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx:resolveCloudStatusBadgeState",
+      "target": "function:eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx:formatCompactCloudCredits",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx:CloudStatusBadge",
+      "target": "function:eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx:resolveCloudStatusBadgeState",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx:CloudStatusBadge",
+      "target": "function:eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx:resolveCloudStatusToneStyle",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/cloud/FlaminaGuide.tsx",
+      "target": "function:eliza/packages/ui/src/components/cloud/FlaminaGuide.tsx:FlaminaGuideCard",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/cloud/FlaminaGuide.tsx",
+      "target": "function:eliza/packages/ui/src/components/cloud/FlaminaGuide.tsx:DeferredSetupChecklist",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/cloud/StripeEmbeddedCheckout.tsx",
+      "target": "function:eliza/packages/ui/src/components/cloud/StripeEmbeddedCheckout.tsx:loadStripeFactory",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/cloud/StripeEmbeddedCheckout.tsx",
+      "target": "function:eliza/packages/ui/src/components/cloud/StripeEmbeddedCheckout.tsx:StripeEmbeddedCheckout",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/companion/injected.tsx",
+      "target": "function:eliza/packages/ui/src/components/companion/injected.tsx:resolveCompanionInferenceNotice",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/companion/injected.tsx",
+      "target": "function:eliza/packages/ui/src/components/companion/injected.tsx:CompanionInferenceAlertButton",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/companion/injected.tsx",
+      "target": "function:eliza/packages/ui/src/components/companion/injected.tsx:CompanionGlobalOverlay",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/companion/injected.tsx",
+      "target": "function:eliza/packages/ui/src/components/companion/injected.tsx:useCompanionSceneStatus",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/composites/OwnerBadge.tsx",
+      "target": "function:eliza/packages/ui/src/components/composites/OwnerBadge.tsx:OwnerBadge",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-attachment-strip.tsx",
+      "target": "function:eliza/packages/ui/src/components/composites/chat/chat-attachment-strip.tsx:ChatAttachmentStrip",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-bubble.tsx",
+      "target": "function:eliza/packages/ui/src/components/composites/chat/chat-bubble.tsx:ChatBubble",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-composer-shell.tsx",
+      "target": "function:eliza/packages/ui/src/components/composites/chat/chat-composer-shell.tsx:assignRef",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-composer-shell.tsx",
+      "target": "function:eliza/packages/ui/src/components/composites/chat/chat-composer-shell.tsx:ChatComposerShell",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/composites/chat/chat-composer-shell.tsx:ChatComposerShell",
+      "target": "function:eliza/packages/ui/src/components/composites/chat/chat-composer-shell.tsx:assignRef",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/composites/chat/chat-composer-shell.tsx:ChatComposerShell",
+      "target": "function:eliza/packages/ui/src/components/composites/chat/chat-composer-shell.tsx:assignRef",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-composer.tsx",
+      "target": "function:eliza/packages/ui/src/components/composites/chat/chat-composer.tsx:getTextareaVerticalPadding",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-composer.tsx",
+      "target": "function:eliza/packages/ui/src/components/composites/chat/chat-composer.tsx:getTextareaLineHeight",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-composer.tsx",
+      "target": "function:eliza/packages/ui/src/components/composites/chat/chat-composer.tsx:measureInlineTextarea",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-composer.tsx",
+      "target": "function:eliza/packages/ui/src/components/composites/chat/chat-composer.tsx:ChatComposer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/composites/chat/chat-composer.tsx:measureInlineTextarea",
+      "target": "function:eliza/packages/ui/src/components/composites/chat/chat-composer.tsx:getTextareaVerticalPadding",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/composites/chat/chat-composer.tsx:measureInlineTextarea",
+      "target": "function:eliza/packages/ui/src/components/composites/chat/chat-composer.tsx:getTextareaLineHeight",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/composites/chat/chat-composer.tsx:ChatComposer",
+      "target": "function:eliza/packages/ui/src/components/composites/chat/chat-composer.tsx:measureInlineTextarea",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/composites/chat/chat-composer.tsx:ChatComposer",
+      "target": "function:eliza/packages/ui/src/components/composites/chat/chat-composer.tsx:measureInlineTextarea",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-conversation-item.tsx",
+      "target": "function:eliza/packages/ui/src/components/composites/chat/chat-conversation-item.tsx:TruncatingConversationTitle",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-conversation-item.tsx",
+      "target": "function:eliza/packages/ui/src/components/composites/chat/chat-conversation-item.tsx:ChatConversationItem",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-conversation-rename-dialog.tsx",
+      "target": "function:eliza/packages/ui/src/components/composites/chat/chat-conversation-rename-dialog.tsx:ChatConversationRenameDialog",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-empty-state.tsx",
+      "target": "function:eliza/packages/ui/src/components/composites/chat/chat-empty-state.tsx:ChatEmptyState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-message-actions.tsx",
+      "target": "function:eliza/packages/ui/src/components/composites/chat/chat-message-actions.tsx:ChatMessageActions",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/AgentActivityBox.tsx",
+      "target": "file:eliza/packages/ui/src/api/client-types-cloud.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/AgentActivityBox.tsx",
+      "target": "file:eliza/packages/ui/src/chat/coding-agent-session-state.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/AgentActivityBox.tsx",
+      "target": "file:eliza/packages/ui/src/state/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/AppsSection.tsx",
+      "target": "file:eliza/packages/ui/src/api/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/AppsSection.tsx",
+      "target": "file:eliza/packages/ui/src/components/apps/app-identity.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/AppsSection.tsx",
+      "target": "file:eliza/packages/ui/src/components/apps/catalog-loader.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/AppsSection.tsx",
+      "target": "file:eliza/packages/ui/src/components/apps/helpers.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/AppsSection.tsx",
+      "target": "file:eliza/packages/ui/src/components/apps/internal-tool-apps.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/AppsSection.tsx",
+      "target": "file:eliza/packages/ui/src/components/apps/overlay-app-registry.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/AppsSection.tsx",
+      "target": "file:eliza/packages/ui/src/components/chat/widgets/shared.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/AppsSection.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/dropdown-menu.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/AppsSection.tsx",
+      "target": "file:eliza/packages/ui/src/state/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/AppsSection.tsx",
+      "target": "file:eliza/packages/ui/src/utils/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/ConnectorAccountPicker.tsx",
+      "target": "file:eliza/packages/ui/src/api/client-agent.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/ConnectorAccountPicker.tsx",
+      "target": "file:eliza/packages/ui/src/components/chat/connector-send-as.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/ConnectorAccountPicker.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/button.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/ConnectorAccountPicker.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/dropdown-menu.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/ConnectorAccountPicker.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/spinner.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/ConnectorAccountPicker.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/status-badge.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/ConnectorAccountPicker.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.sensitive-request.test.tsx",
+      "target": "file:eliza/packages/shared/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.sensitive-request.test.tsx",
+      "target": "file:eliza/packages/ui/src/api/client-types-chat.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.sensitive-request.test.tsx",
+      "target": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.sensitive-request.test.tsx",
+      "target": "file:eliza/packages/ui/src/state/useApp.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "target": "file:eliza/packages/shared/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "target": "file:eliza/packages/ui/src/api/client-types-chat.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "target": "file:eliza/packages/ui/src/api/client-types-config.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "target": "file:eliza/packages/ui/src/api/client.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "target": "file:eliza/packages/ui/src/components/chat/message-choice-parser.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "target": "file:eliza/packages/ui/src/components/chat/widgets/ChoiceWidget.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "target": "file:eliza/packages/ui/src/components/composites/chat/permission-card.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "target": "file:eliza/packages/ui/src/components/config-ui/config-renderer.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "target": "file:eliza/packages/ui/src/components/config-ui/ui-renderer.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "target": "file:eliza/packages/ui/src/components/pages/plugin-list-utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/button.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "target": "file:eliza/packages/ui/src/config/config-catalog.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "target": "file:eliza/packages/ui/src/config/ui-spec.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "target": "file:eliza/packages/ui/src/hooks/useRenderGuard.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "target": "file:eliza/packages/ui/src/platform/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "target": "file:eliza/packages/ui/src/platform/mobile-permissions-client.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "target": "file:eliza/packages/ui/src/state/useApp.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/MessageContent.tsx",
+      "target": "file:eliza/packages/ui/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/SaveCommandModal.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/button.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/SaveCommandModal.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/dialog.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/SaveCommandModal.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/input.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/SaveCommandModal.tsx",
+      "target": "file:eliza/packages/ui/src/state/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/TasksEventsPanel.tsx",
+      "target": "file:eliza/packages/ui/src/components/chat/AppsSection.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/TasksEventsPanel.tsx",
+      "target": "file:eliza/packages/ui/src/components/chat/WidgetVisibilityPanel.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/TasksEventsPanel.tsx",
+      "target": "file:eliza/packages/ui/src/hooks/useActivityEvents.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/TasksEventsPanel.tsx",
+      "target": "file:eliza/packages/ui/src/state/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/TasksEventsPanel.tsx",
+      "target": "file:eliza/packages/ui/src/widgets/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/TasksEventsPanel.tsx",
+      "target": "file:eliza/packages/ui/src/widgets/useChatSidebarVisibility.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/TasksEventsPanel.tsx",
+      "target": "file:eliza/packages/ui/src/widgets/visibility.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/TasksEventsPanel.tsx",
+      "target": "file:eliza/packages/ui/src/widgets/WidgetHost.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/WidgetVisibilityPanel.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/button.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/WidgetVisibilityPanel.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/switch.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/WidgetVisibilityPanel.tsx",
+      "target": "file:eliza/packages/ui/src/widgets/useChatSidebarVisibility.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/WidgetVisibilityPanel.tsx",
+      "target": "file:eliza/packages/ui/src/widgets/visibility.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/connector-send-as.test.ts",
+      "target": "file:eliza/packages/ui/src/api/client-agent.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/connector-send-as.test.ts",
+      "target": "file:eliza/packages/ui/src/components/chat/connector-send-as.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/connector-send-as.ts",
+      "target": "file:eliza/packages/ui/src/api/client-agent.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/message-choice-parser.ts",
+      "target": "file:eliza/packages/ui/src/components/chat/widgets/ChoiceWidget.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/ChoiceWidget.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/button.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx",
+      "target": "file:eliza/packages/ui/src/api/client-types-cloud.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx",
+      "target": "file:eliza/packages/ui/src/api/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx",
+      "target": "file:eliza/packages/ui/src/components/apps/app-identity.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx",
+      "target": "file:eliza/packages/ui/src/components/apps/catalog-loader.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx",
+      "target": "file:eliza/packages/ui/src/components/apps/run-attention.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx",
+      "target": "file:eliza/packages/ui/src/components/chat/widgets/shared.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx",
+      "target": "file:eliza/packages/ui/src/components/chat/widgets/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/button.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx",
+      "target": "file:eliza/packages/ui/src/hooks/useActivityEvents.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx",
+      "target": "file:eliza/packages/ui/src/state/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/agent-orchestrator.tsx",
+      "target": "file:eliza/packages/ui/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/browser-status.tsx",
+      "target": "file:eliza/packages/ui/src/api/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/browser-status.tsx",
+      "target": "file:eliza/packages/ui/src/components/chat/widgets/shared.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/browser-status.tsx",
+      "target": "file:eliza/packages/ui/src/components/chat/widgets/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/browser-status.tsx",
+      "target": "file:eliza/packages/ui/src/state/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/music-player.tsx",
+      "target": "file:eliza/packages/ui/src/api/csrf-client.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/music-player.tsx",
+      "target": "file:eliza/packages/ui/src/components/chat/widgets/shared.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/music-player.tsx",
+      "target": "file:eliza/packages/ui/src/components/chat/widgets/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/music-player.tsx",
+      "target": "file:eliza/packages/ui/src/utils/asset-url.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/todo.tsx",
+      "target": "file:eliza/packages/ui/src/api/client-types-config.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/todo.tsx",
+      "target": "file:eliza/packages/ui/src/api/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/todo.tsx",
+      "target": "file:eliza/packages/ui/src/components/chat/widgets/shared.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/todo.tsx",
+      "target": "file:eliza/packages/ui/src/components/chat/widgets/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/todo.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/badge.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/todo.tsx",
+      "target": "file:eliza/packages/ui/src/state/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/todo.tsx",
+      "target": "file:eliza/packages/ui/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/types.ts",
+      "target": "file:eliza/packages/ui/src/api/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/chat/widgets/types.ts",
+      "target": "file:eliza/packages/ui/src/hooks/useActivityEvents.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/cloud/CloudSourceControls.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/button.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/cloud/CloudSourceControls.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/connection-status.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/cloud/CloudSourceControls.tsx",
+      "target": "file:eliza/packages/ui/src/state/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/cloud/CloudStatusBadge.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/button.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/cloud/FlaminaGuide.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/button.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/cloud/FlaminaGuide.tsx",
+      "target": "file:eliza/packages/ui/src/state/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/cloud/FlaminaGuide.tsx",
+      "target": "file:eliza/packages/ui/src/state/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/companion/injected.tsx",
+      "target": "file:eliza/packages/ui/src/config/boot-config-react.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/companion/injected.tsx",
+      "target": "file:eliza/packages/ui/src/config/boot-config.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/composites/OwnerBadge.test.tsx",
+      "target": "file:eliza/packages/ui/src/components/composites/OwnerBadge.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/composites/OwnerBadge.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-attachment-strip.tsx",
+      "target": "file:eliza/packages/ui/src/components/composites/chat/chat-types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-attachment-strip.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/button.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-bubble.tsx",
+      "target": "file:eliza/packages/ui/src/components/composites/chat/chat-source.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-bubble.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-composer-shell.tsx",
+      "target": "file:eliza/packages/ui/src/components/composites/chat/chat-types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-composer-shell.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-composer.tsx",
+      "target": "file:eliza/packages/ui/src/components/composites/chat/chat-types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-composer.tsx",
+      "target": "file:eliza/packages/ui/src/components/composites/chat/create-task-popover.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-composer.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/button.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-composer.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/textarea.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-composer.tsx",
+      "target": "file:eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-conversation-item.tsx",
+      "target": "file:eliza/packages/ui/src/components/composites/chat/chat-types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-conversation-item.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/button.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-conversation-item.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/tooltip.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-conversation-item.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-conversation-rename-dialog.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/button.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-conversation-rename-dialog.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/dialog.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-conversation-rename-dialog.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/input.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-conversation-rename-dialog.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/label.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-empty-state.tsx",
+      "target": "file:eliza/packages/ui/src/components/composites/chat/chat-types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-empty-state.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/button.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-empty-state.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-message-actions.tsx",
+      "target": "file:eliza/packages/ui/src/components/composites/chat/chat-types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-message-actions.tsx",
+      "target": "file:eliza/packages/ui/src/components/composites/page-panel/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/composites/chat/chat-message-actions.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/button.tsx",
+      "type": "imports"
+    }
+  ]
+}

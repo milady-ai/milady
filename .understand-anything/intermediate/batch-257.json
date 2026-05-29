@@ -1,0 +1,258 @@
+{
+  "batchIndex": 257,
+  "nodes": [
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:native/ios-bun-port/models/FIRST_LAUNCH_DOWNLOAD.md",
+      "type": "document",
+      "name": "FIRST_LAUNCH_DOWNLOAD.md",
+      "filePath": "native/ios-bun-port/models/FIRST_LAUNCH_DOWNLOAD.md",
+      "summary": "FIRST_LAUNCH_DOWNLOAD.md documents native/ios-bun-port/models with 212 lines of reference material.",
+      "languageNotes": "markdown; docs; 212 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:native/ios-bun-port/models/INTEGRATION.md",
+      "type": "document",
+      "name": "INTEGRATION.md",
+      "filePath": "native/ios-bun-port/models/INTEGRATION.md",
+      "summary": "INTEGRATION.md documents native/ios-bun-port/models with 194 lines of reference material.",
+      "languageNotes": "markdown; docs; 194 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:native/ios-bun-port/models/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "native/ios-bun-port/models/README.md",
+      "summary": "README.md documents native/ios-bun-port/models with 171 lines of reference material.",
+      "languageNotes": "markdown; docs; 171 lines"
+    },
+    {
+      "tags": [
+        "script",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:native/ios-bun-port/models/download-first-light.sh",
+      "type": "file",
+      "name": "download-first-light.sh",
+      "filePath": "native/ios-bun-port/models/download-first-light.sh",
+      "summary": "download-first-light.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 319 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:native/ios-bun-port/models/download-first-light.sh:log",
+      "type": "function",
+      "name": "log",
+      "filePath": "native/ios-bun-port/models/download-first-light.sh",
+      "summary": "log is a function defined in native/ios-bun-port/models/download-first-light.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:native/ios-bun-port/models/download-first-light.sh:ok",
+      "type": "function",
+      "name": "ok",
+      "filePath": "native/ios-bun-port/models/download-first-light.sh",
+      "summary": "ok is a function defined in native/ios-bun-port/models/download-first-light.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:native/ios-bun-port/models/download-first-light.sh:warn",
+      "type": "function",
+      "name": "warn",
+      "filePath": "native/ios-bun-port/models/download-first-light.sh",
+      "summary": "warn is a function defined in native/ios-bun-port/models/download-first-light.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:native/ios-bun-port/models/download-first-light.sh:err",
+      "type": "function",
+      "name": "err",
+      "filePath": "native/ios-bun-port/models/download-first-light.sh",
+      "summary": "err is a function defined in native/ios-bun-port/models/download-first-light.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:native/ios-bun-port/models/download-first-light.sh:sha256_of",
+      "type": "function",
+      "name": "sha256_of",
+      "filePath": "native/ios-bun-port/models/download-first-light.sh",
+      "summary": "sha256_of is a function defined in native/ios-bun-port/models/download-first-light.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:native/ios-bun-port/models/download-first-light.sh:size_of",
+      "type": "function",
+      "name": "size_of",
+      "filePath": "native/ios-bun-port/models/download-first-light.sh",
+      "summary": "size_of is a function defined in native/ios-bun-port/models/download-first-light.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:native/ios-bun-port/models/download-first-light.sh:manifest_get",
+      "type": "function",
+      "name": "manifest_get",
+      "filePath": "native/ios-bun-port/models/download-first-light.sh",
+      "summary": "manifest_get is a function defined in native/ios-bun-port/models/download-first-light.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:native/ios-bun-port/models/download-first-light.sh:verify_file",
+      "type": "function",
+      "name": "verify_file",
+      "filePath": "native/ios-bun-port/models/download-first-light.sh",
+      "summary": "verify_file is a function defined in native/ios-bun-port/models/download-first-light.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:native/ios-bun-port/models/download-first-light.sh:download_to_cache",
+      "type": "function",
+      "name": "download_to_cache",
+      "filePath": "native/ios-bun-port/models/download-first-light.sh",
+      "summary": "download_to_cache is a function defined in native/ios-bun-port/models/download-first-light.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:native/ios-bun-port/models/download-first-light.sh:stage_to_xcode",
+      "type": "function",
+      "name": "stage_to_xcode",
+      "filePath": "native/ios-bun-port/models/download-first-light.sh",
+      "summary": "stage_to_xcode is a function defined in native/ios-bun-port/models/download-first-light.sh."
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:native/ios-bun-port/models/manifest.json",
+      "type": "config",
+      "name": "manifest.json",
+      "filePath": "native/ios-bun-port/models/manifest.json",
+      "summary": "manifest.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 26 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:native/ios-bun-port/models/download-first-light.sh",
+      "target": "function:native/ios-bun-port/models/download-first-light.sh:log",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:native/ios-bun-port/models/download-first-light.sh",
+      "target": "function:native/ios-bun-port/models/download-first-light.sh:ok",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:native/ios-bun-port/models/download-first-light.sh",
+      "target": "function:native/ios-bun-port/models/download-first-light.sh:warn",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:native/ios-bun-port/models/download-first-light.sh",
+      "target": "function:native/ios-bun-port/models/download-first-light.sh:err",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:native/ios-bun-port/models/download-first-light.sh",
+      "target": "function:native/ios-bun-port/models/download-first-light.sh:sha256_of",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:native/ios-bun-port/models/download-first-light.sh",
+      "target": "function:native/ios-bun-port/models/download-first-light.sh:size_of",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:native/ios-bun-port/models/download-first-light.sh",
+      "target": "function:native/ios-bun-port/models/download-first-light.sh:manifest_get",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:native/ios-bun-port/models/download-first-light.sh",
+      "target": "function:native/ios-bun-port/models/download-first-light.sh:verify_file",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:native/ios-bun-port/models/download-first-light.sh",
+      "target": "function:native/ios-bun-port/models/download-first-light.sh:download_to_cache",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:native/ios-bun-port/models/download-first-light.sh",
+      "target": "function:native/ios-bun-port/models/download-first-light.sh:stage_to_xcode",
+      "type": "contains"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "batchIndex": 197,
+  "nodes": [
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/platforms/android/app/src/main/res/xml/eliza_accessibility_service.xml",
+      "type": "config",
+      "name": "eliza_accessibility_service.xml",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/res/xml/eliza_accessibility_service.xml",
+      "summary": "eliza_accessibility_service.xml configures xml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "xml; config; 9 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/platforms/android/app/src/main/res/xml/file_paths.xml",
+      "type": "config",
+      "name": "file_paths.xml",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/res/xml/file_paths.xml",
+      "summary": "file_paths.xml configures xml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "xml; config; 5 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/platforms/android/app/src/main/res/xml/shortcuts.xml",
+      "type": "config",
+      "name": "shortcuts.xml",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/res/xml/shortcuts.xml",
+      "summary": "shortcuts.xml configures xml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "xml; config; 121 lines"
+    }
+  ],
+  "edges": []
+}

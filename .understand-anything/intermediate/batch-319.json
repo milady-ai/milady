@@ -1,0 +1,2052 @@
+{
+  "batchIndex": 319,
+  "nodes": [
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/test/live/orchestrator-failover-review.ts",
+      "type": "file",
+      "name": "orchestrator-failover-review.ts",
+      "filePath": "eliza/packages/core/test/live/orchestrator-failover-review.ts",
+      "summary": "orchestrator-failover-review.ts is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 256 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/test/live/orchestrator-failover-review.ts:runCommand",
+      "type": "function",
+      "name": "runCommand",
+      "filePath": "eliza/packages/core/test/live/orchestrator-failover-review.ts",
+      "summary": "runCommand is a function defined in eliza/packages/core/test/live/orchestrator-failover-review.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/vitest.config.ts",
+      "type": "file",
+      "name": "vitest.config.ts",
+      "filePath": "eliza/packages/core/vitest.config.ts",
+      "summary": "vitest.config.ts is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 52 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/plugin-remote-manifest/examples/hello-remote-plugin/install.test.ts",
+      "type": "file",
+      "name": "install.test.ts",
+      "filePath": "eliza/packages/plugin-remote-manifest/examples/hello-remote-plugin/install.test.ts",
+      "summary": "install.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 134 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/plugin-remote-manifest/examples/hello-remote-plugin/plugin.json",
+      "type": "config",
+      "name": "plugin.json",
+      "filePath": "eliza/packages/plugin-remote-manifest/examples/hello-remote-plugin/plugin.json",
+      "summary": "plugin.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 21 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/plugin-remote-manifest/examples/hello-remote-plugin/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "eliza/packages/plugin-remote-manifest/examples/hello-remote-plugin/README.md",
+      "summary": "README.md documents eliza/packages/plugin-remote-manifest/examples/hello-remote-plugin with 44 lines of reference material.",
+      "languageNotes": "markdown; docs; 44 lines"
+    },
+    {
+      "tags": [
+        "frontend",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/plugin-remote-manifest/examples/hello-remote-plugin/view/index.html",
+      "type": "file",
+      "name": "index.html",
+      "filePath": "eliza/packages/plugin-remote-manifest/examples/hello-remote-plugin/view/index.html",
+      "summary": "index.html is a html source file in the Milady codebase.",
+      "languageNotes": "html; markup; 16 lines"
+    },
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/plugin-remote-manifest/examples/hello-remote-plugin/worker.mjs",
+      "type": "file",
+      "name": "worker.mjs",
+      "filePath": "eliza/packages/plugin-remote-manifest/examples/hello-remote-plugin/worker.mjs",
+      "summary": "worker.mjs is a javascript source file in the Milady codebase.",
+      "languageNotes": "javascript; code; 63 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/plugin-remote-manifest/examples/remote-plugin-clock/install.test.ts",
+      "type": "file",
+      "name": "install.test.ts",
+      "filePath": "eliza/packages/plugin-remote-manifest/examples/remote-plugin-clock/install.test.ts",
+      "summary": "install.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 47 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/plugin-remote-manifest/examples/remote-plugin-clock/plugin.json",
+      "type": "config",
+      "name": "plugin.json",
+      "filePath": "eliza/packages/plugin-remote-manifest/examples/remote-plugin-clock/plugin.json",
+      "summary": "plugin.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 22 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/plugin-remote-manifest/examples/remote-plugin-clock/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "eliza/packages/plugin-remote-manifest/examples/remote-plugin-clock/README.md",
+      "summary": "README.md documents eliza/packages/plugin-remote-manifest/examples/remote-plugin-clock with 20 lines of reference material.",
+      "languageNotes": "markdown; docs; 20 lines"
+    },
+    {
+      "tags": [
+        "frontend",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/plugin-remote-manifest/examples/remote-plugin-clock/view/index.html",
+      "type": "file",
+      "name": "index.html",
+      "filePath": "eliza/packages/plugin-remote-manifest/examples/remote-plugin-clock/view/index.html",
+      "summary": "index.html is a html source file in the Milady codebase.",
+      "languageNotes": "html; markup; 58 lines"
+    },
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/plugin-remote-manifest/examples/remote-plugin-clock/worker.mjs",
+      "type": "file",
+      "name": "worker.mjs",
+      "filePath": "eliza/packages/plugin-remote-manifest/examples/remote-plugin-clock/worker.mjs",
+      "summary": "worker.mjs is a javascript source file in the Milady codebase.",
+      "languageNotes": "javascript; code; 23 lines"
+    },
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/plugin-remote-manifest/src/index.d.ts",
+      "type": "file",
+      "name": "index.d.ts",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/index.d.ts",
+      "summary": "index.d.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 14 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/plugin-remote-manifest/src/index.test.ts",
+      "type": "file",
+      "name": "index.test.ts",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/index.test.ts",
+      "summary": "index.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 20 lines"
+    },
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/plugin-remote-manifest/src/json.d.ts",
+      "type": "file",
+      "name": "json.d.ts",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/json.d.ts",
+      "summary": "json.d.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 3 lines"
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/plugin-remote-manifest/src/json.ts",
+      "type": "file",
+      "name": "json.ts",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/json.ts",
+      "summary": "json.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 12 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/json.ts:isJsonObject",
+      "type": "function",
+      "name": "isJsonObject",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/json.ts",
+      "summary": "isJsonObject is a function defined in eliza/packages/plugin-remote-manifest/src/json.ts."
+    },
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/plugin-remote-manifest/src/manifest.d.ts",
+      "type": "file",
+      "name": "manifest.d.ts",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/manifest.d.ts",
+      "summary": "manifest.d.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 21 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/plugin-remote-manifest/src/manifest.test.ts",
+      "type": "file",
+      "name": "manifest.test.ts",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/manifest.test.ts",
+      "summary": "manifest.test.ts is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 92 lines"
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/plugin-remote-manifest/src/manifest.ts",
+      "type": "file",
+      "name": "manifest.ts",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/manifest.ts",
+      "summary": "manifest.ts is a typescript source file in the Milady codebase. It contains 5 functions, 2 imports.",
+      "languageNotes": "typescript; code; 99 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/manifest.ts:enabledHostPermissions",
+      "type": "function",
+      "name": "enabledHostPermissions",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/manifest.ts",
+      "summary": "enabledHostPermissions is a function defined in eliza/packages/plugin-remote-manifest/src/manifest.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/manifest.ts:enabledBunPermissions",
+      "type": "function",
+      "name": "enabledBunPermissions",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/manifest.ts",
+      "summary": "enabledBunPermissions is a function defined in eliza/packages/plugin-remote-manifest/src/manifest.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/manifest.ts:diffRemotePluginPermissions",
+      "type": "function",
+      "name": "diffRemotePluginPermissions",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/manifest.ts",
+      "summary": "diffRemotePluginPermissions is a function defined in eliza/packages/plugin-remote-manifest/src/manifest.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/manifest.ts:getRemotePluginManifestPermissionTags",
+      "type": "function",
+      "name": "getRemotePluginManifestPermissionTags",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/manifest.ts",
+      "summary": "getRemotePluginManifestPermissionTags is a function defined in eliza/packages/plugin-remote-manifest/src/manifest.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/manifest.ts:buildRemotePluginPermissionConsentRequest",
+      "type": "function",
+      "name": "buildRemotePluginPermissionConsentRequest",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/manifest.ts",
+      "summary": "buildRemotePluginPermissionConsentRequest is a function defined in eliza/packages/plugin-remote-manifest/src/manifest.ts."
+    },
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/plugin-remote-manifest/src/permissions.d.ts",
+      "type": "file",
+      "name": "permissions.d.ts",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/permissions.d.ts",
+      "summary": "permissions.d.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 14 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/plugin-remote-manifest/src/permissions.test.ts",
+      "type": "file",
+      "name": "permissions.test.ts",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/permissions.test.ts",
+      "summary": "permissions.test.ts is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 110 lines"
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/plugin-remote-manifest/src/permissions.ts",
+      "type": "file",
+      "name": "permissions.ts",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/permissions.ts",
+      "summary": "permissions.ts is a typescript source file in the Milady codebase. It contains 11 functions, 1 imports.",
+      "languageNotes": "typescript; code; 169 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:isHostPermission",
+      "type": "function",
+      "name": "isHostPermission",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/permissions.ts",
+      "summary": "isHostPermission is a function defined in eliza/packages/plugin-remote-manifest/src/permissions.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:isBunPermission",
+      "type": "function",
+      "name": "isBunPermission",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/permissions.ts",
+      "summary": "isBunPermission is a function defined in eliza/packages/plugin-remote-manifest/src/permissions.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:isRemotePluginIsolation",
+      "type": "function",
+      "name": "isRemotePluginIsolation",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/permissions.ts",
+      "summary": "isRemotePluginIsolation is a function defined in eliza/packages/plugin-remote-manifest/src/permissions.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:normalizeRemotePluginPermissions",
+      "type": "function",
+      "name": "normalizeRemotePluginPermissions",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/permissions.ts",
+      "summary": "normalizeRemotePluginPermissions is a function defined in eliza/packages/plugin-remote-manifest/src/permissions.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:flattenRemotePluginPermissions",
+      "type": "function",
+      "name": "flattenRemotePluginPermissions",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/permissions.ts",
+      "summary": "flattenRemotePluginPermissions is a function defined in eliza/packages/plugin-remote-manifest/src/permissions.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:mergeRemotePluginPermissions",
+      "type": "function",
+      "name": "mergeRemotePluginPermissions",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/permissions.ts",
+      "summary": "mergeRemotePluginPermissions is a function defined in eliza/packages/plugin-remote-manifest/src/permissions.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:hasHostPermission",
+      "type": "function",
+      "name": "hasHostPermission",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/permissions.ts",
+      "summary": "hasHostPermission is a function defined in eliza/packages/plugin-remote-manifest/src/permissions.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:hasBunPermission",
+      "type": "function",
+      "name": "hasBunPermission",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/permissions.ts",
+      "summary": "hasBunPermission is a function defined in eliza/packages/plugin-remote-manifest/src/permissions.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:toBunWorkerPermissions",
+      "type": "function",
+      "name": "toBunWorkerPermissions",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/permissions.ts",
+      "summary": "toBunWorkerPermissions is a function defined in eliza/packages/plugin-remote-manifest/src/permissions.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:parseRemotePluginPermissionTag",
+      "type": "function",
+      "name": "parseRemotePluginPermissionTag",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/permissions.ts",
+      "summary": "parseRemotePluginPermissionTag is a function defined in eliza/packages/plugin-remote-manifest/src/permissions.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:isRemotePluginPermissionTag",
+      "type": "function",
+      "name": "isRemotePluginPermissionTag",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/permissions.ts",
+      "summary": "isRemotePluginPermissionTag is a function defined in eliza/packages/plugin-remote-manifest/src/permissions.ts."
+    },
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/plugin-remote-manifest/src/store.d.ts",
+      "type": "file",
+      "name": "store.d.ts",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.d.ts",
+      "summary": "store.d.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 89 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/plugin-remote-manifest/src/store.test.ts",
+      "type": "file",
+      "name": "store.test.ts",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.test.ts",
+      "summary": "store.test.ts is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 303 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.test.ts:withTempDir",
+      "type": "function",
+      "name": "withTempDir",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.test.ts",
+      "summary": "withTempDir is a function defined in eliza/packages/plugin-remote-manifest/src/store.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.test.ts:writePayload",
+      "type": "function",
+      "name": "writePayload",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.test.ts",
+      "summary": "writePayload is a function defined in eliza/packages/plugin-remote-manifest/src/store.test.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "type": "file",
+      "name": "store.ts",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "store.ts is a typescript source file in the Milady codebase. It contains 40 functions, 1 class, 5 imports.",
+      "languageNotes": "typescript; code; 860 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseJsonFile",
+      "type": "function",
+      "name": "parseJsonFile",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "parseJsonFile is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:ensureStoreRoot",
+      "type": "function",
+      "name": "ensureStoreRoot",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "ensureStoreRoot is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:stringField",
+      "type": "function",
+      "name": "stringField",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "stringField is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:numberField",
+      "type": "function",
+      "name": "numberField",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "numberField is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:optionalBooleanField",
+      "type": "function",
+      "name": "optionalBooleanField",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "optionalBooleanField is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:nullableStringField",
+      "type": "function",
+      "name": "nullableStringField",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "nullableStringField is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:optionalNullableStringField",
+      "type": "function",
+      "name": "optionalNullableStringField",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "optionalNullableStringField is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseOptionalNumberOrNull",
+      "type": "function",
+      "name": "parseOptionalNumberOrNull",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "parseOptionalNumberOrNull is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseBooleanRecord",
+      "type": "function",
+      "name": "parseBooleanRecord",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "parseBooleanRecord is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parsePermissionGrant",
+      "type": "function",
+      "name": "parsePermissionGrant",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "parsePermissionGrant is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseInstallSource",
+      "type": "function",
+      "name": "parseInstallSource",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "parseInstallSource is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:registryPath",
+      "type": "function",
+      "name": "registryPath",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "registryPath is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:normalizeInstallSource",
+      "type": "function",
+      "name": "normalizeInstallSource",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "normalizeInstallSource is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:normalizeInstallRecord",
+      "type": "function",
+      "name": "normalizeInstallRecord",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "normalizeInstallRecord is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseInstallRecord",
+      "type": "function",
+      "name": "parseInstallRecord",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "parseInstallRecord is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseRegistry",
+      "type": "function",
+      "name": "parseRegistry",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "parseRegistry is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:getRemotePluginStorePaths",
+      "type": "function",
+      "name": "getRemotePluginStorePaths",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "getRemotePluginStorePaths is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:resolveRemotePluginPathInside",
+      "type": "function",
+      "name": "resolveRemotePluginPathInside",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "resolveRemotePluginPathInside is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:toRemotePluginViewUrl",
+      "type": "function",
+      "name": "toRemotePluginViewUrl",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "toRemotePluginViewUrl is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:readRemotePluginManifestAt",
+      "type": "function",
+      "name": "readRemotePluginManifestAt",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "readRemotePluginManifestAt is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:assertRemotePluginPayload",
+      "type": "function",
+      "name": "assertRemotePluginPayload",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "assertRemotePluginPayload is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:readRemotePluginRegistry",
+      "type": "function",
+      "name": "readRemotePluginRegistry",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "readRemotePluginRegistry is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:writeRemotePluginRegistry",
+      "type": "function",
+      "name": "writeRemotePluginRegistry",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "writeRemotePluginRegistry is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:listInstalledRemotePluginDirectories",
+      "type": "function",
+      "name": "listInstalledRemotePluginDirectories",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "listInstalledRemotePluginDirectories is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:readRemotePluginInstallRecord",
+      "type": "function",
+      "name": "readRemotePluginInstallRecord",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "readRemotePluginInstallRecord is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:writeRemotePluginInstallRecord",
+      "type": "function",
+      "name": "writeRemotePluginInstallRecord",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "writeRemotePluginInstallRecord is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:buildRemotePluginRuntimeContext",
+      "type": "function",
+      "name": "buildRemotePluginRuntimeContext",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "buildRemotePluginRuntimeContext is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:writeRemotePluginWorkerBootstrap",
+      "type": "function",
+      "name": "writeRemotePluginWorkerBootstrap",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "writeRemotePluginWorkerBootstrap is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:loadInstalledRemotePluginRecord",
+      "type": "function",
+      "name": "loadInstalledRemotePluginRecord",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "loadInstalledRemotePluginRecord is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:loadInstalledRemotePlugin",
+      "type": "function",
+      "name": "loadInstalledRemotePlugin",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "loadInstalledRemotePlugin is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:syncRemotePluginRegistry",
+      "type": "function",
+      "name": "syncRemotePluginRegistry",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "syncRemotePluginRegistry is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:loadInstalledRemotePlugins",
+      "type": "function",
+      "name": "loadInstalledRemotePlugins",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "loadInstalledRemotePlugins is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:toInstalledRemotePluginSnapshot",
+      "type": "function",
+      "name": "toInstalledRemotePluginSnapshot",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "toInstalledRemotePluginSnapshot is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:toRemotePluginListEntry",
+      "type": "function",
+      "name": "toRemotePluginListEntry",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "toRemotePluginListEntry is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:loadRemotePluginStoreSnapshot",
+      "type": "function",
+      "name": "loadRemotePluginStoreSnapshot",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "loadRemotePluginStoreSnapshot is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:loadRemotePluginListEntries",
+      "type": "function",
+      "name": "loadRemotePluginListEntries",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "loadRemotePluginListEntries is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:installPrebuiltRemotePlugin",
+      "type": "function",
+      "name": "installPrebuiltRemotePlugin",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "installPrebuiltRemotePlugin is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:uninstallInstalledRemotePlugin",
+      "type": "function",
+      "name": "uninstallInstalledRemotePlugin",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "uninstallInstalledRemotePlugin is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:isRemotePluginSourceDirectory",
+      "type": "function",
+      "name": "isRemotePluginSourceDirectory",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "isRemotePluginSourceDirectory is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/plugin-remote-manifest/src/store.ts:ensureRemotePluginSourceDirectory",
+      "type": "function",
+      "name": "ensureRemotePluginSourceDirectory",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "ensureRemotePluginSourceDirectory is a function defined in eliza/packages/plugin-remote-manifest/src/store.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/plugin-remote-manifest/src/store.ts:RemotePluginStoreError",
+      "type": "class",
+      "name": "RemotePluginStoreError",
+      "filePath": "eliza/packages/plugin-remote-manifest/src/store.ts",
+      "summary": "RemotePluginStoreError is a class or type declared in eliza/packages/plugin-remote-manifest/src/store.ts."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/test/live/orchestrator-failover-review.ts",
+      "target": "function:eliza/packages/core/test/live/orchestrator-failover-review.ts:runCommand",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/json.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/json.ts:isJsonObject",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/manifest.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/manifest.ts:enabledHostPermissions",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/manifest.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/manifest.ts:enabledBunPermissions",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/manifest.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/manifest.ts:diffRemotePluginPermissions",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/manifest.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/manifest.ts:getRemotePluginManifestPermissionTags",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/manifest.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/manifest.ts:buildRemotePluginPermissionConsentRequest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/manifest.ts:diffRemotePluginPermissions",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/manifest.ts:enabledHostPermissions",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/manifest.ts:diffRemotePluginPermissions",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/manifest.ts:enabledBunPermissions",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/manifest.ts:buildRemotePluginPermissionConsentRequest",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/manifest.ts:diffRemotePluginPermissions",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/permissions.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:isHostPermission",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/permissions.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:isBunPermission",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/permissions.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:isRemotePluginIsolation",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/permissions.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:normalizeRemotePluginPermissions",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/permissions.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:flattenRemotePluginPermissions",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/permissions.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:mergeRemotePluginPermissions",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/permissions.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:hasHostPermission",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/permissions.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:hasBunPermission",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/permissions.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:toBunWorkerPermissions",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/permissions.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:parseRemotePluginPermissionTag",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/permissions.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:isRemotePluginPermissionTag",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:normalizeRemotePluginPermissions",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:isHostPermission",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:flattenRemotePluginPermissions",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:normalizeRemotePluginPermissions",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:mergeRemotePluginPermissions",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:normalizeRemotePluginPermissions",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:mergeRemotePluginPermissions",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:normalizeRemotePluginPermissions",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:hasHostPermission",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:normalizeRemotePluginPermissions",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:hasBunPermission",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:normalizeRemotePluginPermissions",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:toBunWorkerPermissions",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:normalizeRemotePluginPermissions",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:parseRemotePluginPermissionTag",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:isHostPermission",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:parseRemotePluginPermissionTag",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:isBunPermission",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:parseRemotePluginPermissionTag",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:isRemotePluginIsolation",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:isRemotePluginPermissionTag",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/permissions.ts:parseRemotePluginPermissionTag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.test.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.test.ts:withTempDir",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.test.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.test.ts:writePayload",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseJsonFile",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:ensureStoreRoot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:stringField",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:numberField",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:optionalBooleanField",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:nullableStringField",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:optionalNullableStringField",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseOptionalNumberOrNull",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseBooleanRecord",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parsePermissionGrant",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseInstallSource",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:registryPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:normalizeInstallSource",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:normalizeInstallRecord",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseInstallRecord",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseRegistry",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:getRemotePluginStorePaths",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:resolveRemotePluginPathInside",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:toRemotePluginViewUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:readRemotePluginManifestAt",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:assertRemotePluginPayload",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:readRemotePluginRegistry",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:writeRemotePluginRegistry",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:listInstalledRemotePluginDirectories",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:readRemotePluginInstallRecord",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:writeRemotePluginInstallRecord",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:buildRemotePluginRuntimeContext",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:writeRemotePluginWorkerBootstrap",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:loadInstalledRemotePluginRecord",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:loadInstalledRemotePlugin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:syncRemotePluginRegistry",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:loadInstalledRemotePlugins",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:toInstalledRemotePluginSnapshot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:toRemotePluginListEntry",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:loadRemotePluginStoreSnapshot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:loadRemotePluginListEntries",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:installPrebuiltRemotePlugin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:uninstallInstalledRemotePlugin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:isRemotePluginSourceDirectory",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:ensureRemotePluginSourceDirectory",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/plugin-remote-manifest/src/store.ts",
+      "target": "class:eliza/packages/plugin-remote-manifest/src/store.ts:RemotePluginStoreError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parsePermissionGrant",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseBooleanRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parsePermissionGrant",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseBooleanRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseInstallSource",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseInstallSource",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseInstallSource",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseInstallSource",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseInstallSource",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:nullableStringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseInstallSource",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:nullableStringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseInstallSource",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:nullableStringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseInstallSource",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:nullableStringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:normalizeInstallRecord",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:normalizeInstallSource",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseInstallRecord",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:normalizeInstallRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseInstallRecord",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseInstallRecord",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseInstallRecord",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:stringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseInstallRecord",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:nullableStringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseInstallRecord",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:numberField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseInstallRecord",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:numberField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseInstallRecord",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parsePermissionGrant",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseInstallRecord",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:optionalBooleanField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseInstallRecord",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseOptionalNumberOrNull",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseInstallRecord",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:optionalNullableStringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseInstallRecord",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseInstallSource",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseRegistry",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseInstallRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:readRemotePluginManifestAt",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseJsonFile",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:assertRemotePluginPayload",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:readRemotePluginManifestAt",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:assertRemotePluginPayload",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:resolveRemotePluginPathInside",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:assertRemotePluginPayload",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:resolveRemotePluginPathInside",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:readRemotePluginRegistry",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:ensureStoreRoot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:readRemotePluginRegistry",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:registryPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:readRemotePluginRegistry",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseRegistry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:readRemotePluginRegistry",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseJsonFile",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:writeRemotePluginRegistry",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:ensureStoreRoot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:writeRemotePluginRegistry",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:normalizeInstallRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:writeRemotePluginRegistry",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:registryPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:listInstalledRemotePluginDirectories",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:ensureStoreRoot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:readRemotePluginInstallRecord",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:getRemotePluginStorePaths",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:readRemotePluginInstallRecord",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseInstallRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:readRemotePluginInstallRecord",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:parseJsonFile",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:writeRemotePluginInstallRecord",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:normalizeInstallRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:writeRemotePluginInstallRecord",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:getRemotePluginStorePaths",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:writeRemotePluginInstallRecord",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:syncRemotePluginRegistry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:writeRemotePluginWorkerBootstrap",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:buildRemotePluginRuntimeContext",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:loadInstalledRemotePluginRecord",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:getRemotePluginStorePaths",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:loadInstalledRemotePluginRecord",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:readRemotePluginManifestAt",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:loadInstalledRemotePluginRecord",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:resolveRemotePluginPathInside",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:loadInstalledRemotePluginRecord",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:resolveRemotePluginPathInside",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:loadInstalledRemotePluginRecord",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:writeRemotePluginWorkerBootstrap",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:loadInstalledRemotePluginRecord",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:toRemotePluginViewUrl",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:loadInstalledRemotePlugin",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:readRemotePluginInstallRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:loadInstalledRemotePlugin",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:loadInstalledRemotePluginRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:syncRemotePluginRegistry",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:listInstalledRemotePluginDirectories",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:syncRemotePluginRegistry",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:readRemotePluginInstallRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:syncRemotePluginRegistry",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:writeRemotePluginRegistry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:loadInstalledRemotePlugins",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:syncRemotePluginRegistry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:loadInstalledRemotePlugins",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:loadInstalledRemotePluginRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:loadRemotePluginStoreSnapshot",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:loadInstalledRemotePlugins",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:loadRemotePluginListEntries",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:loadInstalledRemotePlugins",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:installPrebuiltRemotePlugin",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:assertRemotePluginPayload",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:installPrebuiltRemotePlugin",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:readRemotePluginInstallRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:installPrebuiltRemotePlugin",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:getRemotePluginStorePaths",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:installPrebuiltRemotePlugin",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:writeRemotePluginInstallRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:installPrebuiltRemotePlugin",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:loadInstalledRemotePluginRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:uninstallInstalledRemotePlugin",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:readRemotePluginInstallRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:uninstallInstalledRemotePlugin",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:getRemotePluginStorePaths",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:uninstallInstalledRemotePlugin",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:syncRemotePluginRegistry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/plugin-remote-manifest/src/store.ts:ensureRemotePluginSourceDirectory",
+      "target": "function:eliza/packages/plugin-remote-manifest/src/store.ts:isRemotePluginSourceDirectory",
+      "type": "calls"
+    }
+  ]
+}

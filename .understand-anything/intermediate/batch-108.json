@@ -1,0 +1,395 @@
+{
+  "batchIndex": 108,
+  "nodes": [
+    {
+      "tags": [
+        "test",
+        "voice"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/src/services/voice-profiles/__tests__/diarization-pipeline.test.ts",
+      "type": "file",
+      "name": "diarization-pipeline.test.ts",
+      "filePath": "eliza/packages/app-core/src/services/voice-profiles/__tests__/diarization-pipeline.test.ts",
+      "summary": "diarization-pipeline.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 16 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "voice",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/src/services/voice-profiles/__tests__/owner-confidence.test.ts",
+      "type": "file",
+      "name": "owner-confidence.test.ts",
+      "filePath": "eliza/packages/app-core/src/services/voice-profiles/__tests__/owner-confidence.test.ts",
+      "summary": "owner-confidence.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 80 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/services/voice-profiles/__tests__/owner-confidence.test.ts:input",
+      "type": "function",
+      "name": "input",
+      "filePath": "eliza/packages/app-core/src/services/voice-profiles/__tests__/owner-confidence.test.ts",
+      "summary": "input is a function defined in eliza/packages/app-core/src/services/voice-profiles/__tests__/owner-confidence.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "voice",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/src/services/voice-profiles/__tests__/owner-voice-role-integration.test.ts",
+      "type": "file",
+      "name": "owner-voice-role-integration.test.ts",
+      "filePath": "eliza/packages/app-core/src/services/voice-profiles/__tests__/owner-voice-role-integration.test.ts",
+      "summary": "owner-voice-role-integration.test.ts is a typescript source file in the Milady codebase. It contains 2 functions, 3 imports.",
+      "languageNotes": "typescript; code; 620 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/services/voice-profiles/__tests__/owner-voice-role-integration.test.ts:makeFreqEmbedding",
+      "type": "function",
+      "name": "makeFreqEmbedding",
+      "filePath": "eliza/packages/app-core/src/services/voice-profiles/__tests__/owner-voice-role-integration.test.ts",
+      "summary": "makeFreqEmbedding is a function defined in eliza/packages/app-core/src/services/voice-profiles/__tests__/owner-voice-role-integration.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/services/voice-profiles/__tests__/owner-voice-role-integration.test.ts:makeProfile",
+      "type": "function",
+      "name": "makeProfile",
+      "filePath": "eliza/packages/app-core/src/services/voice-profiles/__tests__/owner-voice-role-integration.test.ts",
+      "summary": "makeProfile is a function defined in eliza/packages/app-core/src/services/voice-profiles/__tests__/owner-voice-role-integration.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "voice"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/src/services/voice-profiles/__tests__/private-challenge.test.ts",
+      "type": "file",
+      "name": "private-challenge.test.ts",
+      "filePath": "eliza/packages/app-core/src/services/voice-profiles/__tests__/private-challenge.test.ts",
+      "summary": "private-challenge.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 48 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "voice",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/src/services/voice-profiles/__tests__/store.test.ts",
+      "type": "file",
+      "name": "store.test.ts",
+      "filePath": "eliza/packages/app-core/src/services/voice-profiles/__tests__/store.test.ts",
+      "summary": "store.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 82 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/services/voice-profiles/__tests__/store.test.ts:makeProfile",
+      "type": "function",
+      "name": "makeProfile",
+      "filePath": "eliza/packages/app-core/src/services/voice-profiles/__tests__/store.test.ts",
+      "summary": "makeProfile is a function defined in eliza/packages/app-core/src/services/voice-profiles/__tests__/store.test.ts."
+    },
+    {
+      "tags": [
+        "voice"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/src/services/voice-profiles/diarization-pipeline.ts",
+      "type": "file",
+      "name": "diarization-pipeline.ts",
+      "filePath": "eliza/packages/app-core/src/services/voice-profiles/diarization-pipeline.ts",
+      "summary": "diarization-pipeline.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 25 lines"
+    },
+    {
+      "tags": [
+        "voice",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/src/services/voice-profiles/owner-confidence.ts",
+      "type": "file",
+      "name": "owner-confidence.ts",
+      "filePath": "eliza/packages/app-core/src/services/voice-profiles/owner-confidence.ts",
+      "summary": "owner-confidence.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 60 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/services/voice-profiles/owner-confidence.ts:scoreOwnerConfidence",
+      "type": "function",
+      "name": "scoreOwnerConfidence",
+      "filePath": "eliza/packages/app-core/src/services/voice-profiles/owner-confidence.ts",
+      "summary": "scoreOwnerConfidence is a function defined in eliza/packages/app-core/src/services/voice-profiles/owner-confidence.ts."
+    },
+    {
+      "tags": [
+        "voice",
+        "class",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/src/services/voice-profiles/private-challenge.ts",
+      "type": "file",
+      "name": "private-challenge.ts",
+      "filePath": "eliza/packages/app-core/src/services/voice-profiles/private-challenge.ts",
+      "summary": "private-challenge.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 class, 1 imports.",
+      "languageNotes": "typescript; code; 60 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/services/voice-profiles/private-challenge.ts:sha256Hex",
+      "type": "function",
+      "name": "sha256Hex",
+      "filePath": "eliza/packages/app-core/src/services/voice-profiles/private-challenge.ts",
+      "summary": "sha256Hex is a function defined in eliza/packages/app-core/src/services/voice-profiles/private-challenge.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/app-core/src/services/voice-profiles/private-challenge.ts:InMemoryChallengeService",
+      "type": "class",
+      "name": "InMemoryChallengeService",
+      "filePath": "eliza/packages/app-core/src/services/voice-profiles/private-challenge.ts",
+      "summary": "InMemoryChallengeService is a class or type declared in eliza/packages/app-core/src/services/voice-profiles/private-challenge.ts."
+    },
+    {
+      "tags": [
+        "voice",
+        "class",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/src/services/voice-profiles/store.ts",
+      "type": "file",
+      "name": "store.ts",
+      "filePath": "eliza/packages/app-core/src/services/voice-profiles/store.ts",
+      "summary": "store.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 class, 1 imports.",
+      "languageNotes": "typescript; code; 76 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/services/voice-profiles/store.ts:cosineSimilarity",
+      "type": "function",
+      "name": "cosineSimilarity",
+      "filePath": "eliza/packages/app-core/src/services/voice-profiles/store.ts",
+      "summary": "cosineSimilarity is a function defined in eliza/packages/app-core/src/services/voice-profiles/store.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/app-core/src/services/voice-profiles/store.ts:InMemoryVoiceProfileStore",
+      "type": "class",
+      "name": "InMemoryVoiceProfileStore",
+      "filePath": "eliza/packages/app-core/src/services/voice-profiles/store.ts",
+      "summary": "InMemoryVoiceProfileStore is a class or type declared in eliza/packages/app-core/src/services/voice-profiles/store.ts."
+    },
+    {
+      "tags": [
+        "voice"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/src/services/voice-profiles/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "eliza/packages/app-core/src/services/voice-profiles/types.ts",
+      "summary": "types.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 42 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/services/voice-profiles/__tests__/owner-confidence.test.ts",
+      "target": "function:eliza/packages/app-core/src/services/voice-profiles/__tests__/owner-confidence.test.ts:input",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/services/voice-profiles/__tests__/owner-voice-role-integration.test.ts",
+      "target": "function:eliza/packages/app-core/src/services/voice-profiles/__tests__/owner-voice-role-integration.test.ts:makeFreqEmbedding",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/services/voice-profiles/__tests__/owner-voice-role-integration.test.ts",
+      "target": "function:eliza/packages/app-core/src/services/voice-profiles/__tests__/owner-voice-role-integration.test.ts:makeProfile",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/services/voice-profiles/__tests__/store.test.ts",
+      "target": "function:eliza/packages/app-core/src/services/voice-profiles/__tests__/store.test.ts:makeProfile",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/services/voice-profiles/owner-confidence.ts",
+      "target": "function:eliza/packages/app-core/src/services/voice-profiles/owner-confidence.ts:scoreOwnerConfidence",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/services/voice-profiles/private-challenge.ts",
+      "target": "function:eliza/packages/app-core/src/services/voice-profiles/private-challenge.ts:sha256Hex",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/services/voice-profiles/private-challenge.ts",
+      "target": "class:eliza/packages/app-core/src/services/voice-profiles/private-challenge.ts:InMemoryChallengeService",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/services/voice-profiles/store.ts",
+      "target": "function:eliza/packages/app-core/src/services/voice-profiles/store.ts:cosineSimilarity",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/services/voice-profiles/store.ts",
+      "target": "class:eliza/packages/app-core/src/services/voice-profiles/store.ts:InMemoryVoiceProfileStore",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/services/voice-profiles/__tests__/diarization-pipeline.test.ts",
+      "target": "file:eliza/packages/app-core/src/services/voice-profiles/diarization-pipeline.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/services/voice-profiles/__tests__/owner-confidence.test.ts",
+      "target": "file:eliza/packages/app-core/src/services/voice-profiles/owner-confidence.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/services/voice-profiles/__tests__/owner-voice-role-integration.test.ts",
+      "target": "file:eliza/packages/app-core/src/services/voice-profiles/owner-confidence.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/services/voice-profiles/__tests__/owner-voice-role-integration.test.ts",
+      "target": "file:eliza/packages/app-core/src/services/voice-profiles/store.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/services/voice-profiles/__tests__/owner-voice-role-integration.test.ts",
+      "target": "file:eliza/packages/app-core/src/services/voice-profiles/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/services/voice-profiles/__tests__/private-challenge.test.ts",
+      "target": "file:eliza/packages/app-core/src/services/voice-profiles/private-challenge.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/services/voice-profiles/__tests__/store.test.ts",
+      "target": "file:eliza/packages/app-core/src/services/voice-profiles/store.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/services/voice-profiles/__tests__/store.test.ts",
+      "target": "file:eliza/packages/app-core/src/services/voice-profiles/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/services/voice-profiles/diarization-pipeline.ts",
+      "target": "file:eliza/packages/app-core/src/services/voice-profiles/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/services/voice-profiles/owner-confidence.ts",
+      "target": "file:eliza/packages/app-core/src/services/voice-profiles/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/services/voice-profiles/private-challenge.ts",
+      "target": "file:eliza/packages/app-core/src/services/voice-profiles/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/services/voice-profiles/store.ts",
+      "target": "file:eliza/packages/app-core/src/services/voice-profiles/types.ts",
+      "type": "imports"
+    }
+  ]
+}

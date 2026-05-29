@@ -1,0 +1,3401 @@
+{
+  "batchIndex": 94,
+  "nodes": [
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/test/helpers/test-utils.ts",
+      "type": "file",
+      "name": "test-utils.ts",
+      "filePath": "eliza/packages/app-core/test/helpers/test-utils.ts",
+      "summary": "test-utils.ts is a typescript source file in the Milady codebase. It contains 5 functions.",
+      "languageNotes": "typescript; code; 94 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/helpers/test-utils.ts:saveEnv",
+      "type": "function",
+      "name": "saveEnv",
+      "filePath": "eliza/packages/app-core/test/helpers/test-utils.ts",
+      "summary": "saveEnv is a function defined in eliza/packages/app-core/test/helpers/test-utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/helpers/test-utils.ts:envSnapshot",
+      "type": "function",
+      "name": "envSnapshot",
+      "filePath": "eliza/packages/app-core/test/helpers/test-utils.ts",
+      "summary": "envSnapshot is a function defined in eliza/packages/app-core/test/helpers/test-utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/helpers/test-utils.ts:withTimeout",
+      "type": "function",
+      "name": "withTimeout",
+      "filePath": "eliza/packages/app-core/test/helpers/test-utils.ts",
+      "summary": "withTimeout is a function defined in eliza/packages/app-core/test/helpers/test-utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/helpers/test-utils.ts:sleep",
+      "type": "function",
+      "name": "sleep",
+      "filePath": "eliza/packages/app-core/test/helpers/test-utils.ts",
+      "summary": "sleep is a function defined in eliza/packages/app-core/test/helpers/test-utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/helpers/test-utils.ts:createDeferred",
+      "type": "function",
+      "name": "createDeferred",
+      "filePath": "eliza/packages/app-core/test/helpers/test-utils.ts",
+      "summary": "createDeferred is a function defined in eliza/packages/app-core/test/helpers/test-utils.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/live-agent/action-invocation.live.e2e.test.ts",
+      "type": "file",
+      "name": "action-invocation.live.e2e.test.ts",
+      "filePath": "eliza/packages/app-core/test/live-agent/action-invocation.live.e2e.test.ts",
+      "summary": "action-invocation.live.e2e.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 1272 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/action-invocation.live.e2e.test.ts:normalizeActionName",
+      "type": "function",
+      "name": "normalizeActionName",
+      "filePath": "eliza/packages/app-core/test/live-agent/action-invocation.live.e2e.test.ts",
+      "summary": "normalizeActionName is a function defined in eliza/packages/app-core/test/live-agent/action-invocation.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts",
+      "type": "file",
+      "name": "agent-runtime.live.e2e.test.ts",
+      "filePath": "eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts",
+      "summary": "agent-runtime.live.e2e.test.ts is a typescript source file in the Milady codebase. It contains 12 functions, 5 imports.",
+      "languageNotes": "typescript; code; 1614 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:loadPlugin",
+      "type": "function",
+      "name": "loadPlugin",
+      "filePath": "eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts",
+      "summary": "loadPlugin is a function defined in eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:http$",
+      "type": "function",
+      "name": "http$",
+      "filePath": "eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts",
+      "summary": "http$ is a function defined in eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:createConversationId",
+      "type": "function",
+      "name": "createConversationId",
+      "filePath": "eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts",
+      "summary": "createConversationId is a function defined in eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:errorMessage",
+      "type": "function",
+      "name": "errorMessage",
+      "filePath": "eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts",
+      "summary": "errorMessage is a function defined in eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:isModelProviderUnavailableError",
+      "type": "function",
+      "name": "isModelProviderUnavailableError",
+      "filePath": "eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts",
+      "summary": "isModelProviderUnavailableError is a function defined in eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:getGeneratedText",
+      "type": "function",
+      "name": "getGeneratedText",
+      "filePath": "eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts",
+      "summary": "getGeneratedText is a function defined in eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:shouldSkipDueModelProviderUnavailable",
+      "type": "function",
+      "name": "shouldSkipDueModelProviderUnavailable",
+      "filePath": "eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts",
+      "summary": "shouldSkipDueModelProviderUnavailable is a function defined in eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:_readSerializedProperty",
+      "type": "function",
+      "name": "_readSerializedProperty",
+      "filePath": "eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts",
+      "summary": "_readSerializedProperty is a function defined in eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:_readSerializedArray",
+      "type": "function",
+      "name": "_readSerializedArray",
+      "filePath": "eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts",
+      "summary": "_readSerializedArray is a function defined in eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:postChatWithRetries",
+      "type": "function",
+      "name": "postChatWithRetries",
+      "filePath": "eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts",
+      "summary": "postChatWithRetries is a function defined in eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:postChatPromptWithRetries",
+      "type": "function",
+      "name": "postChatPromptWithRetries",
+      "filePath": "eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts",
+      "summary": "postChatPromptWithRetries is a function defined in eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:handleMessageAndCollectText",
+      "type": "function",
+      "name": "handleMessageAndCollectText",
+      "filePath": "eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts",
+      "summary": "handleMessageAndCollectText is a function defined in eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "api",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts",
+      "type": "file",
+      "name": "api-auth-live.e2e.test.ts",
+      "filePath": "eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts",
+      "summary": "api-auth-live.e2e.test.ts is a typescript source file in the Milady codebase. It contains 6 functions, 6 imports.",
+      "languageNotes": "typescript; code; 593 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts:seedMachineSession",
+      "type": "function",
+      "name": "seedMachineSession",
+      "filePath": "eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts",
+      "summary": "seedMachineSession is a function defined in eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts:assertWalletExportRejected",
+      "type": "function",
+      "name": "assertWalletExportRejected",
+      "filePath": "eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts",
+      "summary": "assertWalletExportRejected is a function defined in eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts:postConversationMessageWithRetry",
+      "type": "function",
+      "name": "postConversationMessageWithRetry",
+      "filePath": "eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts",
+      "summary": "postConversationMessageWithRetry is a function defined in eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts:isProviderIssueResponse",
+      "type": "function",
+      "name": "isProviderIssueResponse",
+      "filePath": "eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts",
+      "summary": "isProviderIssueResponse is a function defined in eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts:ensureWalletKeys",
+      "type": "function",
+      "name": "ensureWalletKeys",
+      "filePath": "eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts",
+      "summary": "ensureWalletKeys is a function defined in eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts:startLiveServer",
+      "type": "function",
+      "name": "startLiveServer",
+      "filePath": "eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts",
+      "summary": "startLiveServer is a function defined in eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/live-agent/cloud-auth.live.e2e.test.ts",
+      "type": "file",
+      "name": "cloud-auth.live.e2e.test.ts",
+      "filePath": "eliza/packages/app-core/test/live-agent/cloud-auth.live.e2e.test.ts",
+      "summary": "cloud-auth.live.e2e.test.ts is a typescript source file in the Milady codebase. It contains 4 functions, 5 imports.",
+      "languageNotes": "typescript; code; 263 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/cloud-auth.live.e2e.test.ts:getFreePort",
+      "type": "function",
+      "name": "getFreePort",
+      "filePath": "eliza/packages/app-core/test/live-agent/cloud-auth.live.e2e.test.ts",
+      "summary": "getFreePort is a function defined in eliza/packages/app-core/test/live-agent/cloud-auth.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/cloud-auth.live.e2e.test.ts:isProviderIssueResponse",
+      "type": "function",
+      "name": "isProviderIssueResponse",
+      "filePath": "eliza/packages/app-core/test/live-agent/cloud-auth.live.e2e.test.ts",
+      "summary": "isProviderIssueResponse is a function defined in eliza/packages/app-core/test/live-agent/cloud-auth.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/cloud-auth.live.e2e.test.ts:postLiveMessage",
+      "type": "function",
+      "name": "postLiveMessage",
+      "filePath": "eliza/packages/app-core/test/live-agent/cloud-auth.live.e2e.test.ts",
+      "summary": "postLiveMessage is a function defined in eliza/packages/app-core/test/live-agent/cloud-auth.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/app-core/test/live-agent/cloud-auth.live.e2e.test.ts:startRuntime",
+      "type": "function",
+      "name": "startRuntime",
+      "filePath": "eliza/packages/app-core/test/live-agent/cloud-auth.live.e2e.test.ts",
+      "summary": "startRuntime is a function defined in eliza/packages/app-core/test/live-agent/cloud-auth.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/test/live-agent/cloud-login-persist.real.e2e.test.ts",
+      "type": "file",
+      "name": "cloud-login-persist.real.e2e.test.ts",
+      "filePath": "eliza/packages/app-core/test/live-agent/cloud-login-persist.real.e2e.test.ts",
+      "summary": "cloud-login-persist.real.e2e.test.ts is a typescript source file in the Milady codebase. It contains 4 imports.",
+      "languageNotes": "typescript; code; 90 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/live-agent/cloud-providers.live.e2e.test.ts",
+      "type": "file",
+      "name": "cloud-providers.live.e2e.test.ts",
+      "filePath": "eliza/packages/app-core/test/live-agent/cloud-providers.live.e2e.test.ts",
+      "summary": "cloud-providers.live.e2e.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 3 imports.",
+      "languageNotes": "typescript; code; 63 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/cloud-providers.live.e2e.test.ts:getGeneratedText",
+      "type": "function",
+      "name": "getGeneratedText",
+      "filePath": "eliza/packages/app-core/test/live-agent/cloud-providers.live.e2e.test.ts",
+      "summary": "getGeneratedText is a function defined in eliza/packages/app-core/test/live-agent/cloud-providers.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/test/live-agent/connector-health.live.e2e.test.ts",
+      "type": "file",
+      "name": "connector-health.live.e2e.test.ts",
+      "filePath": "eliza/packages/app-core/test/live-agent/connector-health.live.e2e.test.ts",
+      "summary": "connector-health.live.e2e.test.ts is a typescript source file in the Milady codebase. It contains 2 functions, 4 imports.",
+      "languageNotes": "typescript; code; 199 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/connector-health.live.e2e.test.ts:getFreePort",
+      "type": "function",
+      "name": "getFreePort",
+      "filePath": "eliza/packages/app-core/test/live-agent/connector-health.live.e2e.test.ts",
+      "summary": "getFreePort is a function defined in eliza/packages/app-core/test/live-agent/connector-health.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/connector-health.live.e2e.test.ts:startRuntime",
+      "type": "function",
+      "name": "startRuntime",
+      "filePath": "eliza/packages/app-core/test/live-agent/connector-health.live.e2e.test.ts",
+      "summary": "startRuntime is a function defined in eliza/packages/app-core/test/live-agent/connector-health.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/live-agent/database-conversation.live.e2e.test.ts",
+      "type": "file",
+      "name": "database-conversation.live.e2e.test.ts",
+      "filePath": "eliza/packages/app-core/test/live-agent/database-conversation.live.e2e.test.ts",
+      "summary": "database-conversation.live.e2e.test.ts is a typescript source file in the Milady codebase. It contains 4 functions, 5 imports.",
+      "languageNotes": "typescript; code; 293 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/database-conversation.live.e2e.test.ts:getFreePort",
+      "type": "function",
+      "name": "getFreePort",
+      "filePath": "eliza/packages/app-core/test/live-agent/database-conversation.live.e2e.test.ts",
+      "summary": "getFreePort is a function defined in eliza/packages/app-core/test/live-agent/database-conversation.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/database-conversation.live.e2e.test.ts:isProviderIssueResponse",
+      "type": "function",
+      "name": "isProviderIssueResponse",
+      "filePath": "eliza/packages/app-core/test/live-agent/database-conversation.live.e2e.test.ts",
+      "summary": "isProviderIssueResponse is a function defined in eliza/packages/app-core/test/live-agent/database-conversation.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/database-conversation.live.e2e.test.ts:postLiveMessage",
+      "type": "function",
+      "name": "postLiveMessage",
+      "filePath": "eliza/packages/app-core/test/live-agent/database-conversation.live.e2e.test.ts",
+      "summary": "postLiveMessage is a function defined in eliza/packages/app-core/test/live-agent/database-conversation.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/app-core/test/live-agent/database-conversation.live.e2e.test.ts:startRuntime",
+      "type": "function",
+      "name": "startRuntime",
+      "filePath": "eliza/packages/app-core/test/live-agent/database-conversation.live.e2e.test.ts",
+      "summary": "startRuntime is a function defined in eliza/packages/app-core/test/live-agent/database-conversation.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts",
+      "type": "file",
+      "name": "farcaster-connector.live.e2e.test.ts",
+      "filePath": "eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts",
+      "summary": "farcaster-connector.live.e2e.test.ts is a typescript source file in the Milady codebase. It contains 12 functions, 2 imports.",
+      "languageNotes": "typescript; code; 840 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:sleep",
+      "type": "function",
+      "name": "sleep",
+      "filePath": "eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts",
+      "summary": "sleep is a function defined in eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarHeaders",
+      "type": "function",
+      "name": "neynarHeaders",
+      "filePath": "eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts",
+      "summary": "neynarHeaders is a function defined in eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarPostCast",
+      "type": "function",
+      "name": "neynarPostCast",
+      "filePath": "eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts",
+      "summary": "neynarPostCast is a function defined in eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarDeleteCast",
+      "type": "function",
+      "name": "neynarDeleteCast",
+      "filePath": "eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts",
+      "summary": "neynarDeleteCast is a function defined in eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarGetUser",
+      "type": "function",
+      "name": "neynarGetUser",
+      "filePath": "eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts",
+      "summary": "neynarGetUser is a function defined in eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarGetCast",
+      "type": "function",
+      "name": "neynarGetCast",
+      "filePath": "eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts",
+      "summary": "neynarGetCast is a function defined in eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarGetMentions",
+      "type": "function",
+      "name": "neynarGetMentions",
+      "filePath": "eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts",
+      "summary": "neynarGetMentions is a function defined in eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarPostReaction",
+      "type": "function",
+      "name": "neynarPostReaction",
+      "filePath": "eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts",
+      "summary": "neynarPostReaction is a function defined in eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarDeleteReaction",
+      "type": "function",
+      "name": "neynarDeleteReaction",
+      "filePath": "eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts",
+      "summary": "neynarDeleteReaction is a function defined in eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarGetCastFull",
+      "type": "function",
+      "name": "neynarGetCastFull",
+      "filePath": "eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts",
+      "summary": "neynarGetCastFull is a function defined in eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:loadFarcasterPlugin",
+      "type": "function",
+      "name": "loadFarcasterPlugin",
+      "filePath": "eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts",
+      "summary": "loadFarcasterPlugin is a function defined in eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:tryWorkspaceImport",
+      "type": "function",
+      "name": "tryWorkspaceImport",
+      "filePath": "eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts",
+      "summary": "tryWorkspaceImport is a function defined in eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts",
+      "type": "file",
+      "name": "feishu-connector.live.e2e.test.ts",
+      "filePath": "eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts",
+      "summary": "feishu-connector.live.e2e.test.ts is a typescript source file in the Milady codebase. It contains 7 functions, 2 imports.",
+      "languageNotes": "typescript; code; 258 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts:feishuApiBase",
+      "type": "function",
+      "name": "feishuApiBase",
+      "filePath": "eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts",
+      "summary": "feishuApiBase is a function defined in eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts:feishuGetTenantAccessToken",
+      "type": "function",
+      "name": "feishuGetTenantAccessToken",
+      "filePath": "eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts",
+      "summary": "feishuGetTenantAccessToken is a function defined in eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts:_feishuGet",
+      "type": "function",
+      "name": "_feishuGet",
+      "filePath": "eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts",
+      "summary": "_feishuGet is a function defined in eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts:_feishuPost",
+      "type": "function",
+      "name": "_feishuPost",
+      "filePath": "eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts",
+      "summary": "_feishuPost is a function defined in eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts:loadFeishuPlugin",
+      "type": "function",
+      "name": "loadFeishuPlugin",
+      "filePath": "eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts",
+      "summary": "loadFeishuPlugin is a function defined in eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts:tryWorkspaceImport",
+      "type": "function",
+      "name": "tryWorkspaceImport",
+      "filePath": "eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts",
+      "summary": "tryWorkspaceImport is a function defined in eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts:isWorkspaceAvailable",
+      "type": "function",
+      "name": "isWorkspaceAvailable",
+      "filePath": "eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts",
+      "summary": "isWorkspaceAvailable is a function defined in eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts",
+      "type": "file",
+      "name": "local-plugin-inventory.ts",
+      "filePath": "eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts",
+      "summary": "local-plugin-inventory.ts is a typescript source file in the Milady codebase. It contains 11 functions, 1 imports.",
+      "languageNotes": "typescript; code; 368 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:findWorkspaceRoot",
+      "type": "function",
+      "name": "findWorkspaceRoot",
+      "filePath": "eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts",
+      "summary": "findWorkspaceRoot is a function defined in eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:readPluginManifest",
+      "type": "function",
+      "name": "readPluginManifest",
+      "filePath": "eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts",
+      "summary": "readPluginManifest is a function defined in eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:findPackageRoot",
+      "type": "function",
+      "name": "findPackageRoot",
+      "filePath": "eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts",
+      "summary": "findPackageRoot is a function defined in eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:chooseExistingPath",
+      "type": "function",
+      "name": "chooseExistingPath",
+      "filePath": "eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts",
+      "summary": "chooseExistingPath is a function defined in eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:readPackageJson",
+      "type": "function",
+      "name": "readPackageJson",
+      "filePath": "eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts",
+      "summary": "readPackageJson is a function defined in eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:collectPackageMetadata",
+      "type": "function",
+      "name": "collectPackageMetadata",
+      "filePath": "eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts",
+      "summary": "collectPackageMetadata is a function defined in eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:resolvePackageEntrySync",
+      "type": "function",
+      "name": "resolvePackageEntrySync",
+      "filePath": "eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts",
+      "summary": "resolvePackageEntrySync is a function defined in eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:normalizePluginNpmName",
+      "type": "function",
+      "name": "normalizePluginNpmName",
+      "filePath": "eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts",
+      "summary": "normalizePluginNpmName is a function defined in eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:derivePluginId",
+      "type": "function",
+      "name": "derivePluginId",
+      "filePath": "eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts",
+      "summary": "derivePluginId is a function defined in eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:listLocalWorkspacePlugins",
+      "type": "function",
+      "name": "listLocalWorkspacePlugins",
+      "filePath": "eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts",
+      "summary": "listLocalWorkspacePlugins is a function defined in eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:importLocalWorkspacePlugin",
+      "type": "function",
+      "name": "importLocalWorkspacePlugin",
+      "filePath": "eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts",
+      "summary": "importLocalWorkspacePlugin is a function defined in eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts."
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/live-agent/helpers/runtime-harness.ts",
+      "type": "file",
+      "name": "runtime-harness.ts",
+      "filePath": "eliza/packages/app-core/test/live-agent/helpers/runtime-harness.ts",
+      "summary": "runtime-harness.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 6 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts",
+      "type": "file",
+      "name": "lens-connector.live.e2e.test.ts",
+      "filePath": "eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts",
+      "summary": "lens-connector.live.e2e.test.ts is a typescript source file in the Milady codebase. It contains 14 functions, 2 imports.",
+      "languageNotes": "typescript; code; 964 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:sleep",
+      "type": "function",
+      "name": "sleep",
+      "filePath": "eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts",
+      "summary": "sleep is a function defined in eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensGraphQL",
+      "type": "function",
+      "name": "lensGraphQL",
+      "filePath": "eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts",
+      "summary": "lensGraphQL is a function defined in eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensAuthenticate",
+      "type": "function",
+      "name": "lensAuthenticate",
+      "filePath": "eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts",
+      "summary": "lensAuthenticate is a function defined in eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensHealthCheck",
+      "type": "function",
+      "name": "lensHealthCheck",
+      "filePath": "eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts",
+      "summary": "lensHealthCheck is a function defined in eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensGetAccount",
+      "type": "function",
+      "name": "lensGetAccount",
+      "filePath": "eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts",
+      "summary": "lensGetAccount is a function defined in eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:_lensGetAccountsForWallet",
+      "type": "function",
+      "name": "_lensGetAccountsForWallet",
+      "filePath": "eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts",
+      "summary": "_lensGetAccountsForWallet is a function defined in eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensWaitForPost",
+      "type": "function",
+      "name": "lensWaitForPost",
+      "filePath": "eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts",
+      "summary": "lensWaitForPost is a function defined in eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensCreatePost",
+      "type": "function",
+      "name": "lensCreatePost",
+      "filePath": "eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts",
+      "summary": "lensCreatePost is a function defined in eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensDeletePost",
+      "type": "function",
+      "name": "lensDeletePost",
+      "filePath": "eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts",
+      "summary": "lensDeletePost is a function defined in eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensAddReaction",
+      "type": "function",
+      "name": "lensAddReaction",
+      "filePath": "eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts",
+      "summary": "lensAddReaction is a function defined in eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensUndoReaction",
+      "type": "function",
+      "name": "lensUndoReaction",
+      "filePath": "eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts",
+      "summary": "lensUndoReaction is a function defined in eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensRepost",
+      "type": "function",
+      "name": "lensRepost",
+      "filePath": "eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts",
+      "summary": "lensRepost is a function defined in eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:loadLensPlugin",
+      "type": "function",
+      "name": "loadLensPlugin",
+      "filePath": "eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts",
+      "summary": "loadLensPlugin is a function defined in eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:tryWorkspaceImport",
+      "type": "function",
+      "name": "tryWorkspaceImport",
+      "filePath": "eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts",
+      "summary": "tryWorkspaceImport is a function defined in eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/live-agent/matrix-connector.live.e2e.test.ts",
+      "type": "file",
+      "name": "matrix-connector.live.e2e.test.ts",
+      "filePath": "eliza/packages/app-core/test/live-agent/matrix-connector.live.e2e.test.ts",
+      "summary": "matrix-connector.live.e2e.test.ts is a typescript source file in the Milady codebase. It contains 5 functions, 3 imports.",
+      "languageNotes": "typescript; code; 430 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/matrix-connector.live.e2e.test.ts:parseRooms",
+      "type": "function",
+      "name": "parseRooms",
+      "filePath": "eliza/packages/app-core/test/live-agent/matrix-connector.live.e2e.test.ts",
+      "summary": "parseRooms is a function defined in eliza/packages/app-core/test/live-agent/matrix-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/matrix-connector.live.e2e.test.ts:matrixGet",
+      "type": "function",
+      "name": "matrixGet",
+      "filePath": "eliza/packages/app-core/test/live-agent/matrix-connector.live.e2e.test.ts",
+      "summary": "matrixGet is a function defined in eliza/packages/app-core/test/live-agent/matrix-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/matrix-connector.live.e2e.test.ts:matrixPut",
+      "type": "function",
+      "name": "matrixPut",
+      "filePath": "eliza/packages/app-core/test/live-agent/matrix-connector.live.e2e.test.ts",
+      "summary": "matrixPut is a function defined in eliza/packages/app-core/test/live-agent/matrix-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/matrix-connector.live.e2e.test.ts:checkHomeserverHealth",
+      "type": "function",
+      "name": "checkHomeserverHealth",
+      "filePath": "eliza/packages/app-core/test/live-agent/matrix-connector.live.e2e.test.ts",
+      "summary": "checkHomeserverHealth is a function defined in eliza/packages/app-core/test/live-agent/matrix-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/matrix-connector.live.e2e.test.ts:tryWorkspaceImport",
+      "type": "function",
+      "name": "tryWorkspaceImport",
+      "filePath": "eliza/packages/app-core/test/live-agent/matrix-connector.live.e2e.test.ts",
+      "summary": "tryWorkspaceImport is a function defined in eliza/packages/app-core/test/live-agent/matrix-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/live-agent/nostr-connector.live.e2e.test.ts",
+      "type": "file",
+      "name": "nostr-connector.live.e2e.test.ts",
+      "filePath": "eliza/packages/app-core/test/live-agent/nostr-connector.live.e2e.test.ts",
+      "summary": "nostr-connector.live.e2e.test.ts is a typescript source file in the Milady codebase. It contains 3 functions, 3 imports.",
+      "languageNotes": "typescript; code; 294 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/nostr-connector.live.e2e.test.ts:parseRelays",
+      "type": "function",
+      "name": "parseRelays",
+      "filePath": "eliza/packages/app-core/test/live-agent/nostr-connector.live.e2e.test.ts",
+      "summary": "parseRelays is a function defined in eliza/packages/app-core/test/live-agent/nostr-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/nostr-connector.live.e2e.test.ts:checkRelayHealth",
+      "type": "function",
+      "name": "checkRelayHealth",
+      "filePath": "eliza/packages/app-core/test/live-agent/nostr-connector.live.e2e.test.ts",
+      "summary": "checkRelayHealth is a function defined in eliza/packages/app-core/test/live-agent/nostr-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/nostr-connector.live.e2e.test.ts:tryWorkspaceImport",
+      "type": "function",
+      "name": "tryWorkspaceImport",
+      "filePath": "eliza/packages/app-core/test/live-agent/nostr-connector.live.e2e.test.ts",
+      "summary": "tryWorkspaceImport is a function defined in eliza/packages/app-core/test/live-agent/nostr-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/live-agent/page-scoped-chat.live.e2e.test.ts",
+      "type": "file",
+      "name": "page-scoped-chat.live.e2e.test.ts",
+      "filePath": "eliza/packages/app-core/test/live-agent/page-scoped-chat.live.e2e.test.ts",
+      "summary": "page-scoped-chat.live.e2e.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 324 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/page-scoped-chat.live.e2e.test.ts:buildTestRoutingMetadata",
+      "type": "function",
+      "name": "buildTestRoutingMetadata",
+      "filePath": "eliza/packages/app-core/test/live-agent/page-scoped-chat.live.e2e.test.ts",
+      "summary": "buildTestRoutingMetadata is a function defined in eliza/packages/app-core/test/live-agent/page-scoped-chat.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/live-agent/personality-routing.live.e2e.test.ts",
+      "type": "file",
+      "name": "personality-routing.live.e2e.test.ts",
+      "filePath": "eliza/packages/app-core/test/live-agent/personality-routing.live.e2e.test.ts",
+      "summary": "personality-routing.live.e2e.test.ts is a typescript source file in the Milady codebase. It contains 2 functions, 6 imports.",
+      "languageNotes": "typescript; code; 276 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/personality-routing.live.e2e.test.ts:loadPlugin",
+      "type": "function",
+      "name": "loadPlugin",
+      "filePath": "eliza/packages/app-core/test/live-agent/personality-routing.live.e2e.test.ts",
+      "summary": "loadPlugin is a function defined in eliza/packages/app-core/test/live-agent/personality-routing.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/personality-routing.live.e2e.test.ts:handleMessageAndCollectText",
+      "type": "function",
+      "name": "handleMessageAndCollectText",
+      "filePath": "eliza/packages/app-core/test/live-agent/personality-routing.live.e2e.test.ts",
+      "summary": "handleMessageAndCollectText is a function defined in eliza/packages/app-core/test/live-agent/personality-routing.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts",
+      "type": "file",
+      "name": "plugin-lifecycle.live.e2e.test.ts",
+      "filePath": "eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts",
+      "summary": "plugin-lifecycle.live.e2e.test.ts is a typescript source file in the Milady codebase. It contains 13 functions, 6 imports.",
+      "languageNotes": "typescript; code; 688 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:hasBootConfigForAiProvider",
+      "type": "function",
+      "name": "hasBootConfigForAiProvider",
+      "filePath": "eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts",
+      "summary": "hasBootConfigForAiProvider is a function defined in eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:supportsCurrentPlatform",
+      "type": "function",
+      "name": "supportsCurrentPlatform",
+      "filePath": "eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts",
+      "summary": "supportsCurrentPlatform is a function defined in eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:hasRequiredEnv",
+      "type": "function",
+      "name": "hasRequiredEnv",
+      "filePath": "eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts",
+      "summary": "hasRequiredEnv is a function defined in eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:canBootConnector",
+      "type": "function",
+      "name": "canBootConnector",
+      "filePath": "eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts",
+      "summary": "canBootConnector is a function defined in eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:canBootPlugin",
+      "type": "function",
+      "name": "canBootPlugin",
+      "filePath": "eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts",
+      "summary": "canBootPlugin is a function defined in eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:providerPluginId",
+      "type": "function",
+      "name": "providerPluginId",
+      "filePath": "eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts",
+      "summary": "providerPluginId is a function defined in eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:withLiveProvider",
+      "type": "function",
+      "name": "withLiveProvider",
+      "filePath": "eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts",
+      "summary": "withLiveProvider is a function defined in eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:getFreePort",
+      "type": "function",
+      "name": "getFreePort",
+      "filePath": "eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts",
+      "summary": "getFreePort is a function defined in eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:removeDirWithRetries",
+      "type": "function",
+      "name": "removeDirWithRetries",
+      "filePath": "eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts",
+      "summary": "removeDirWithRetries is a function defined in eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:startRuntimeWithPlugins",
+      "type": "function",
+      "name": "startRuntimeWithPlugins",
+      "filePath": "eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts",
+      "summary": "startRuntimeWithPlugins is a function defined in eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:getLocalPluginRows",
+      "type": "function",
+      "name": "getLocalPluginRows",
+      "filePath": "eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts",
+      "summary": "getLocalPluginRows is a function defined in eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:isConfigGatedPluginRow",
+      "type": "function",
+      "name": "isConfigGatedPluginRow",
+      "filePath": "eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts",
+      "summary": "isConfigGatedPluginRow is a function defined in eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:postChatPromptWithRetries",
+      "type": "function",
+      "name": "postChatPromptWithRetries",
+      "filePath": "eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts",
+      "summary": "postChatPromptWithRetries is a function defined in eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/live-agent/real-runtime-helpers.live.e2e.test.ts",
+      "type": "file",
+      "name": "real-runtime-helpers.live.e2e.test.ts",
+      "filePath": "eliza/packages/app-core/test/live-agent/real-runtime-helpers.live.e2e.test.ts",
+      "summary": "real-runtime-helpers.live.e2e.test.ts is a typescript source file in the Milady codebase. It contains 3 imports.",
+      "languageNotes": "typescript; code; 66 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/test/live-agent/runtime-debug.live.e2e.test.ts",
+      "type": "file",
+      "name": "runtime-debug.live.e2e.test.ts",
+      "filePath": "eliza/packages/app-core/test/live-agent/runtime-debug.live.e2e.test.ts",
+      "summary": "runtime-debug.live.e2e.test.ts is a typescript source file in the Milady codebase. It contains 3 imports.",
+      "languageNotes": "typescript; code; 114 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/live-agent/telegram-connector.live.e2e.test.ts",
+      "type": "file",
+      "name": "telegram-connector.live.e2e.test.ts",
+      "filePath": "eliza/packages/app-core/test/live-agent/telegram-connector.live.e2e.test.ts",
+      "summary": "telegram-connector.live.e2e.test.ts is a typescript source file in the Milady codebase. It contains 3 functions, 2 imports.",
+      "languageNotes": "typescript; code; 772 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/telegram-connector.live.e2e.test.ts:tgApi",
+      "type": "function",
+      "name": "tgApi",
+      "filePath": "eliza/packages/app-core/test/live-agent/telegram-connector.live.e2e.test.ts",
+      "summary": "tgApi is a function defined in eliza/packages/app-core/test/live-agent/telegram-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/telegram-connector.live.e2e.test.ts:sendAndTrack",
+      "type": "function",
+      "name": "sendAndTrack",
+      "filePath": "eliza/packages/app-core/test/live-agent/telegram-connector.live.e2e.test.ts",
+      "summary": "sendAndTrack is a function defined in eliza/packages/app-core/test/live-agent/telegram-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/live-agent/telegram-connector.live.e2e.test.ts:loadTelegramPlugin",
+      "type": "function",
+      "name": "loadTelegramPlugin",
+      "filePath": "eliza/packages/app-core/test/live-agent/telegram-connector.live.e2e.test.ts",
+      "summary": "loadTelegramPlugin is a function defined in eliza/packages/app-core/test/live-agent/telegram-connector.live.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-app-control/src/services/__tests__/app-verification.integration.test.ts",
+      "type": "file",
+      "name": "app-verification.integration.test.ts",
+      "filePath": "eliza/plugins/plugin-app-control/src/services/__tests__/app-verification.integration.test.ts",
+      "summary": "app-verification.integration.test.ts is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 245 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/services/__tests__/app-verification.integration.test.ts:commandAvailable",
+      "type": "function",
+      "name": "commandAvailable",
+      "filePath": "eliza/plugins/plugin-app-control/src/services/__tests__/app-verification.integration.test.ts",
+      "summary": "commandAvailable is a function defined in eliza/plugins/plugin-app-control/src/services/__tests__/app-verification.integration.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/services/__tests__/app-verification.integration.test.ts:writeMinimalTsProject",
+      "type": "function",
+      "name": "writeMinimalTsProject",
+      "filePath": "eliza/plugins/plugin-app-control/src/services/__tests__/app-verification.integration.test.ts",
+      "summary": "writeMinimalTsProject is a function defined in eliza/plugins/plugin-app-control/src/services/__tests__/app-verification.integration.test.ts."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/helpers/test-utils.ts",
+      "target": "function:eliza/packages/app-core/test/helpers/test-utils.ts:saveEnv",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/helpers/test-utils.ts",
+      "target": "function:eliza/packages/app-core/test/helpers/test-utils.ts:envSnapshot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/helpers/test-utils.ts",
+      "target": "function:eliza/packages/app-core/test/helpers/test-utils.ts:withTimeout",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/helpers/test-utils.ts",
+      "target": "function:eliza/packages/app-core/test/helpers/test-utils.ts:sleep",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/helpers/test-utils.ts",
+      "target": "function:eliza/packages/app-core/test/helpers/test-utils.ts:createDeferred",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/action-invocation.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/action-invocation.live.e2e.test.ts:normalizeActionName",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:loadPlugin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:http$",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:createConversationId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:errorMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:isModelProviderUnavailableError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:getGeneratedText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:shouldSkipDueModelProviderUnavailable",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:_readSerializedProperty",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:_readSerializedArray",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:postChatWithRetries",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:postChatPromptWithRetries",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:handleMessageAndCollectText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:createConversationId",
+      "target": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:http$",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:shouldSkipDueModelProviderUnavailable",
+      "target": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:getGeneratedText",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:shouldSkipDueModelProviderUnavailable",
+      "target": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:errorMessage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:shouldSkipDueModelProviderUnavailable",
+      "target": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:isModelProviderUnavailableError",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:postChatWithRetries",
+      "target": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:createConversationId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:postChatWithRetries",
+      "target": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:http$",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:postChatPromptWithRetries",
+      "target": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:createConversationId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:postChatPromptWithRetries",
+      "target": "function:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts:http$",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts:seedMachineSession",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts:assertWalletExportRejected",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts:postConversationMessageWithRetry",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts:isProviderIssueResponse",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts:ensureWalletKeys",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts:startLiveServer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts:postConversationMessageWithRetry",
+      "target": "function:eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts:isProviderIssueResponse",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts:startLiveServer",
+      "target": "function:eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts:ensureWalletKeys",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts:startLiveServer",
+      "target": "function:eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts:seedMachineSession",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/cloud-auth.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/cloud-auth.live.e2e.test.ts:getFreePort",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/cloud-auth.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/cloud-auth.live.e2e.test.ts:isProviderIssueResponse",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/cloud-auth.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/cloud-auth.live.e2e.test.ts:postLiveMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/cloud-auth.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/cloud-auth.live.e2e.test.ts:startRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/cloud-auth.live.e2e.test.ts:postLiveMessage",
+      "target": "function:eliza/packages/app-core/test/live-agent/cloud-auth.live.e2e.test.ts:isProviderIssueResponse",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/cloud-auth.live.e2e.test.ts:startRuntime",
+      "target": "function:eliza/packages/app-core/test/live-agent/cloud-auth.live.e2e.test.ts:getFreePort",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/cloud-providers.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/cloud-providers.live.e2e.test.ts:getGeneratedText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/connector-health.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/connector-health.live.e2e.test.ts:getFreePort",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/connector-health.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/connector-health.live.e2e.test.ts:startRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/connector-health.live.e2e.test.ts:startRuntime",
+      "target": "function:eliza/packages/app-core/test/live-agent/connector-health.live.e2e.test.ts:getFreePort",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/database-conversation.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/database-conversation.live.e2e.test.ts:getFreePort",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/database-conversation.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/database-conversation.live.e2e.test.ts:isProviderIssueResponse",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/database-conversation.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/database-conversation.live.e2e.test.ts:postLiveMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/database-conversation.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/database-conversation.live.e2e.test.ts:startRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/database-conversation.live.e2e.test.ts:postLiveMessage",
+      "target": "function:eliza/packages/app-core/test/live-agent/database-conversation.live.e2e.test.ts:isProviderIssueResponse",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/database-conversation.live.e2e.test.ts:startRuntime",
+      "target": "function:eliza/packages/app-core/test/live-agent/database-conversation.live.e2e.test.ts:getFreePort",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:sleep",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarHeaders",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarPostCast",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarDeleteCast",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarGetUser",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarGetCast",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarGetMentions",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarPostReaction",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarDeleteReaction",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarGetCastFull",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:loadFarcasterPlugin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:tryWorkspaceImport",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarPostCast",
+      "target": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:sleep",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarPostCast",
+      "target": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarHeaders",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarDeleteCast",
+      "target": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:sleep",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarDeleteCast",
+      "target": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarHeaders",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarGetUser",
+      "target": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:sleep",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarGetUser",
+      "target": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarHeaders",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarGetCast",
+      "target": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:sleep",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarGetCast",
+      "target": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarHeaders",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarGetMentions",
+      "target": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:sleep",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarGetMentions",
+      "target": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarHeaders",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarPostReaction",
+      "target": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:sleep",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarPostReaction",
+      "target": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarHeaders",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarDeleteReaction",
+      "target": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:sleep",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarDeleteReaction",
+      "target": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarHeaders",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarGetCastFull",
+      "target": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:sleep",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarGetCastFull",
+      "target": "function:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts:neynarHeaders",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts:feishuApiBase",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts:feishuGetTenantAccessToken",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts:_feishuGet",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts:_feishuPost",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts:loadFeishuPlugin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts:tryWorkspaceImport",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts:isWorkspaceAvailable",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts:feishuGetTenantAccessToken",
+      "target": "function:eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts:feishuApiBase",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts:_feishuGet",
+      "target": "function:eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts:feishuApiBase",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts:_feishuPost",
+      "target": "function:eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts:feishuApiBase",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts:isWorkspaceAvailable",
+      "target": "function:eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts:tryWorkspaceImport",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:findWorkspaceRoot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:readPluginManifest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:findPackageRoot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:chooseExistingPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:readPackageJson",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:collectPackageMetadata",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:resolvePackageEntrySync",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:normalizePluginNpmName",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:derivePluginId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:listLocalWorkspacePlugins",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:importLocalWorkspacePlugin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:collectPackageMetadata",
+      "target": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:readPackageJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:resolvePackageEntrySync",
+      "target": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:chooseExistingPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:resolvePackageEntrySync",
+      "target": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:chooseExistingPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:resolvePackageEntrySync",
+      "target": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:chooseExistingPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:resolvePackageEntrySync",
+      "target": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:chooseExistingPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:resolvePackageEntrySync",
+      "target": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:chooseExistingPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:resolvePackageEntrySync",
+      "target": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:chooseExistingPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:resolvePackageEntrySync",
+      "target": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:chooseExistingPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:resolvePackageEntrySync",
+      "target": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:chooseExistingPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:derivePluginId",
+      "target": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:normalizePluginNpmName",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:listLocalWorkspacePlugins",
+      "target": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:readPluginManifest",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:listLocalWorkspacePlugins",
+      "target": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:findPackageRoot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:listLocalWorkspacePlugins",
+      "target": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:resolvePackageEntrySync",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:listLocalWorkspacePlugins",
+      "target": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:collectPackageMetadata",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:listLocalWorkspacePlugins",
+      "target": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:readPackageJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:listLocalWorkspacePlugins",
+      "target": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:readPackageJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:listLocalWorkspacePlugins",
+      "target": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:normalizePluginNpmName",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:listLocalWorkspacePlugins",
+      "target": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:derivePluginId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:listLocalWorkspacePlugins",
+      "target": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:resolvePackageEntrySync",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:listLocalWorkspacePlugins",
+      "target": "function:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts:collectPackageMetadata",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:sleep",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensGraphQL",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensAuthenticate",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensHealthCheck",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensGetAccount",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:_lensGetAccountsForWallet",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensWaitForPost",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensCreatePost",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensDeletePost",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensAddReaction",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensUndoReaction",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensRepost",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:loadLensPlugin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:tryWorkspaceImport",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensGraphQL",
+      "target": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:sleep",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensAuthenticate",
+      "target": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensGraphQL",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensAuthenticate",
+      "target": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensGraphQL",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensHealthCheck",
+      "target": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensGraphQL",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensGetAccount",
+      "target": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensGraphQL",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:_lensGetAccountsForWallet",
+      "target": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensGraphQL",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensWaitForPost",
+      "target": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:sleep",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensWaitForPost",
+      "target": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensGraphQL",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensWaitForPost",
+      "target": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensGraphQL",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensCreatePost",
+      "target": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensGraphQL",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensDeletePost",
+      "target": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensGraphQL",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensAddReaction",
+      "target": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensGraphQL",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensUndoReaction",
+      "target": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensGraphQL",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensRepost",
+      "target": "function:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts:lensGraphQL",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/matrix-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/matrix-connector.live.e2e.test.ts:parseRooms",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/matrix-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/matrix-connector.live.e2e.test.ts:matrixGet",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/matrix-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/matrix-connector.live.e2e.test.ts:matrixPut",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/matrix-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/matrix-connector.live.e2e.test.ts:checkHomeserverHealth",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/matrix-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/matrix-connector.live.e2e.test.ts:tryWorkspaceImport",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/nostr-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/nostr-connector.live.e2e.test.ts:parseRelays",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/nostr-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/nostr-connector.live.e2e.test.ts:checkRelayHealth",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/nostr-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/nostr-connector.live.e2e.test.ts:tryWorkspaceImport",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/page-scoped-chat.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/page-scoped-chat.live.e2e.test.ts:buildTestRoutingMetadata",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/personality-routing.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/personality-routing.live.e2e.test.ts:loadPlugin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/personality-routing.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/personality-routing.live.e2e.test.ts:handleMessageAndCollectText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:hasBootConfigForAiProvider",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:supportsCurrentPlatform",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:hasRequiredEnv",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:canBootConnector",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:canBootPlugin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:providerPluginId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:withLiveProvider",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:getFreePort",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:removeDirWithRetries",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:startRuntimeWithPlugins",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:getLocalPluginRows",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:isConfigGatedPluginRow",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:postChatPromptWithRetries",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:canBootConnector",
+      "target": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:hasRequiredEnv",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:canBootPlugin",
+      "target": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:supportsCurrentPlatform",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:canBootPlugin",
+      "target": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:hasBootConfigForAiProvider",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:canBootPlugin",
+      "target": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:canBootConnector",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:canBootPlugin",
+      "target": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:hasRequiredEnv",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:startRuntimeWithPlugins",
+      "target": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:getFreePort",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:startRuntimeWithPlugins",
+      "target": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:removeDirWithRetries",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:startRuntimeWithPlugins",
+      "target": "function:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts:removeDirWithRetries",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/telegram-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/telegram-connector.live.e2e.test.ts:tgApi",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/telegram-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/telegram-connector.live.e2e.test.ts:sendAndTrack",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/live-agent/telegram-connector.live.e2e.test.ts",
+      "target": "function:eliza/packages/app-core/test/live-agent/telegram-connector.live.e2e.test.ts:loadTelegramPlugin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/services/__tests__/app-verification.integration.test.ts",
+      "target": "function:eliza/plugins/plugin-app-control/src/services/__tests__/app-verification.integration.test.ts:commandAvailable",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/services/__tests__/app-verification.integration.test.ts",
+      "target": "function:eliza/plugins/plugin-app-control/src/services/__tests__/app-verification.integration.test.ts:writeMinimalTsProject",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/action-invocation.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/real-runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/action-invocation.live.e2e.test.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts",
+      "target": "file:eliza/packages/agent/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/conditional-tests.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/live-provider.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/test-utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/agent-runtime.live.e2e.test.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts",
+      "target": "file:eliza/packages/agent/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/conditional-tests.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/http.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/live-provider.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/real-runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/api-auth-live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/test-utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/cloud-auth.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/conditional-tests.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/cloud-auth.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/http.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/cloud-auth.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/live-child-env.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/cloud-auth.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/live-provider.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/cloud-auth.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/live-agent/helpers/runtime-harness.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/cloud-login-persist.real.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/src/api/server.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/cloud-login-persist.real.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/http.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/cloud-login-persist.real.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/isolated-config.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/cloud-login-persist.real.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/real-runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/cloud-providers.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/conditional-tests.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/cloud-providers.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/live-provider.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/cloud-providers.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/real-runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/connector-health.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/conditional-tests.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/connector-health.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/http.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/connector-health.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/live-child-env.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/connector-health.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/live-agent/helpers/runtime-harness.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/database-conversation.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/conditional-tests.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/database-conversation.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/http.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/database-conversation.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/live-child-env.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/database-conversation.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/live-provider.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/database-conversation.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/live-agent/helpers/runtime-harness.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/conditional-tests.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/farcaster-connector.live.e2e.test.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/conditional-tests.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/feishu-connector.live.e2e.test.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts",
+      "target": "file:eliza/packages/agent/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/conditional-tests.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/lens-connector.live.e2e.test.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/matrix-connector.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/conditional-tests.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/matrix-connector.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/test-utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/matrix-connector.live.e2e.test.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/nostr-connector.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/conditional-tests.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/nostr-connector.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/test-utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/nostr-connector.live.e2e.test.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/page-scoped-chat.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/real-runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/page-scoped-chat.live.e2e.test.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/personality-routing.live.e2e.test.ts",
+      "target": "file:eliza/packages/agent/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/personality-routing.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/conditional-tests.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/personality-routing.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/live-provider.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/personality-routing.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/test-utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/personality-routing.live.e2e.test.ts",
+      "target": "file:eliza/packages/core/src/features/advanced-capabilities/personality/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/personality-routing.live.e2e.test.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/conditional-tests.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/http.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/live-child-env.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/live-provider.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/live-agent/helpers/local-plugin-inventory.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/plugin-lifecycle.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/live-agent/helpers/runtime-harness.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/real-runtime-helpers.live.e2e.test.ts",
+      "target": "file:eliza/packages/agent/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/real-runtime-helpers.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/real-runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/real-runtime-helpers.live.e2e.test.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/runtime-debug.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/conditional-tests.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/runtime-debug.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/live-provider.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/runtime-debug.live.e2e.test.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/telegram-connector.live.e2e.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/conditional-tests.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live-agent/telegram-connector.live.e2e.test.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-app-control/src/services/__tests__/app-verification.integration.test.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/conditional-tests.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-app-control/src/services/__tests__/app-verification.integration.test.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    }
+  ]
+}

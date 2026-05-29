@@ -1,0 +1,97 @@
+{
+  "batchIndex": 181,
+  "nodes": [
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/checklists/architecture.md",
+      "type": "document",
+      "name": "architecture.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/checklists/architecture.md",
+      "summary": "architecture.md documents docs/agent-packs/electrobun-agentic-desktop-2026/checklists with 9 lines of reference material.",
+      "languageNotes": "markdown; docs; 9 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/checklists/distribution.md",
+      "type": "document",
+      "name": "distribution.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/checklists/distribution.md",
+      "summary": "distribution.md documents docs/agent-packs/electrobun-agentic-desktop-2026/checklists with 10 lines of reference material.",
+      "languageNotes": "markdown; docs; 10 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/checklists/porting.md",
+      "type": "document",
+      "name": "porting.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/checklists/porting.md",
+      "summary": "porting.md documents docs/agent-packs/electrobun-agentic-desktop-2026/checklists with 9 lines of reference material.",
+      "languageNotes": "markdown; docs; 9 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/checklists/rpc-tools.md",
+      "type": "document",
+      "name": "rpc-tools.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/checklists/rpc-tools.md",
+      "summary": "rpc-tools.md documents docs/agent-packs/electrobun-agentic-desktop-2026/checklists with 9 lines of reference material.",
+      "languageNotes": "markdown; docs; 9 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/checklists/security-privacy.md",
+      "type": "document",
+      "name": "security-privacy.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/checklists/security-privacy.md",
+      "summary": "security-privacy.md documents docs/agent-packs/electrobun-agentic-desktop-2026/checklists with 10 lines of reference material.",
+      "languageNotes": "markdown; docs; 10 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/checklists/testing.md",
+      "type": "document",
+      "name": "testing.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/checklists/testing.md",
+      "summary": "testing.md documents docs/agent-packs/electrobun-agentic-desktop-2026/checklists with 9 lines of reference material.",
+      "languageNotes": "markdown; docs; 9 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/checklists/updates.md",
+      "type": "document",
+      "name": "updates.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/checklists/updates.md",
+      "summary": "updates.md documents docs/agent-packs/electrobun-agentic-desktop-2026/checklists with 9 lines of reference material.",
+      "languageNotes": "markdown; docs; 9 lines"
+    }
+  ],
+  "edges": []
+}

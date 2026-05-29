@@ -1,0 +1,71 @@
+{
+  "batchIndex": 223,
+  "nodes": [
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/CONTRIBUTING.md",
+      "type": "document",
+      "name": "CONTRIBUTING.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/CONTRIBUTING.md",
+      "summary": "CONTRIBUTING.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std with 193 lines of reference material.",
+      "languageNotes": "markdown; docs; 193 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "complex",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/README.md",
+      "summary": "README.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std with 314 lines of reference material.",
+      "languageNotes": "markdown; docs; 314 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/RELEASE_CHECKLIST.md",
+      "type": "document",
+      "name": "RELEASE_CHECKLIST.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/RELEASE_CHECKLIST.md",
+      "summary": "RELEASE_CHECKLIST.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std with 12 lines of reference material.",
+      "languageNotes": "markdown; docs; 12 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/foundry.toml",
+      "type": "config",
+      "name": "foundry.toml",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/foundry.toml",
+      "summary": "foundry.toml configures toml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "toml; config; 18 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/package.json",
+      "type": "config",
+      "name": "package.json",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/package.json",
+      "summary": "package.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 16 lines"
+    }
+  ],
+  "edges": []
+}

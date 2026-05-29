@@ -1,0 +1,2402 @@
+{
+  "batchIndex": 336,
+  "nodes": [
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/vitest.e2e.config.ts",
+      "type": "file",
+      "name": "vitest.e2e.config.ts",
+      "filePath": "eliza/packages/ui/vitest.e2e.config.ts",
+      "summary": "vitest.e2e.config.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 15 lines"
+    },
+    {
+      "tags": [
+        "class"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/vitest.setup.ts",
+      "type": "file",
+      "name": "vitest.setup.ts",
+      "filePath": "eliza/packages/ui/vitest.setup.ts",
+      "summary": "vitest.setup.ts is a typescript source file in the Milady codebase. It contains 1 class.",
+      "languageNotes": "typescript; code; 51 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/ui/vitest.setup.ts:VitestTextEncoder",
+      "type": "class",
+      "name": "VitestTextEncoder",
+      "filePath": "eliza/packages/ui/vitest.setup.ts",
+      "summary": "VitestTextEncoder is a class or type declared in eliza/packages/ui/vitest.setup.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/vault/src/audit.d.ts",
+      "type": "file",
+      "name": "audit.d.ts",
+      "filePath": "eliza/packages/vault/src/audit.d.ts",
+      "summary": "audit.d.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 14 lines"
+    },
+    {
+      "tags": [
+        "class"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/vault/src/audit.ts",
+      "type": "file",
+      "name": "audit.ts",
+      "filePath": "eliza/packages/vault/src/audit.ts",
+      "summary": "audit.ts is a typescript source file in the Milady codebase. It contains 1 class, 1 imports.",
+      "languageNotes": "typescript; code; 31 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/vault/src/audit.ts:AuditLog",
+      "type": "class",
+      "name": "AuditLog",
+      "filePath": "eliza/packages/vault/src/audit.ts",
+      "summary": "AuditLog is a class or type declared in eliza/packages/vault/src/audit.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/vault/src/credentials.d.ts",
+      "type": "file",
+      "name": "credentials.d.ts",
+      "filePath": "eliza/packages/vault/src/credentials.d.ts",
+      "summary": "credentials.d.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 57 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/vault/src/credentials.ts",
+      "type": "file",
+      "name": "credentials.ts",
+      "filePath": "eliza/packages/vault/src/credentials.ts",
+      "summary": "credentials.ts is a typescript source file in the Milady codebase. It contains 13 functions, 1 imports.",
+      "languageNotes": "typescript; code; 221 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/credentials.ts:encodeAccount",
+      "type": "function",
+      "name": "encodeAccount",
+      "filePath": "eliza/packages/vault/src/credentials.ts",
+      "summary": "encodeAccount is a function defined in eliza/packages/vault/src/credentials.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/credentials.ts:decodeAccount",
+      "type": "function",
+      "name": "decodeAccount",
+      "filePath": "eliza/packages/vault/src/credentials.ts",
+      "summary": "decodeAccount is a function defined in eliza/packages/vault/src/credentials.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/credentials.ts:normalizeDomain",
+      "type": "function",
+      "name": "normalizeDomain",
+      "filePath": "eliza/packages/vault/src/credentials.ts",
+      "summary": "normalizeDomain is a function defined in eliza/packages/vault/src/credentials.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/credentials.ts:loginKey",
+      "type": "function",
+      "name": "loginKey",
+      "filePath": "eliza/packages/vault/src/credentials.ts",
+      "summary": "loginKey is a function defined in eliza/packages/vault/src/credentials.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/credentials.ts:autoallowKey",
+      "type": "function",
+      "name": "autoallowKey",
+      "filePath": "eliza/packages/vault/src/credentials.ts",
+      "summary": "autoallowKey is a function defined in eliza/packages/vault/src/credentials.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/credentials.ts:setSavedLogin",
+      "type": "function",
+      "name": "setSavedLogin",
+      "filePath": "eliza/packages/vault/src/credentials.ts",
+      "summary": "setSavedLogin is a function defined in eliza/packages/vault/src/credentials.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/credentials.ts:getSavedLogin",
+      "type": "function",
+      "name": "getSavedLogin",
+      "filePath": "eliza/packages/vault/src/credentials.ts",
+      "summary": "getSavedLogin is a function defined in eliza/packages/vault/src/credentials.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/credentials.ts:listSavedLogins",
+      "type": "function",
+      "name": "listSavedLogins",
+      "filePath": "eliza/packages/vault/src/credentials.ts",
+      "summary": "listSavedLogins is a function defined in eliza/packages/vault/src/credentials.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/credentials.ts:deleteSavedLogin",
+      "type": "function",
+      "name": "deleteSavedLogin",
+      "filePath": "eliza/packages/vault/src/credentials.ts",
+      "summary": "deleteSavedLogin is a function defined in eliza/packages/vault/src/credentials.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/credentials.ts:getAutofillAllowed",
+      "type": "function",
+      "name": "getAutofillAllowed",
+      "filePath": "eliza/packages/vault/src/credentials.ts",
+      "summary": "getAutofillAllowed is a function defined in eliza/packages/vault/src/credentials.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/credentials.ts:setAutofillAllowed",
+      "type": "function",
+      "name": "setAutofillAllowed",
+      "filePath": "eliza/packages/vault/src/credentials.ts",
+      "summary": "setAutofillAllowed is a function defined in eliza/packages/vault/src/credentials.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/credentials.ts:parseLoginKey",
+      "type": "function",
+      "name": "parseLoginKey",
+      "filePath": "eliza/packages/vault/src/credentials.ts",
+      "summary": "parseLoginKey is a function defined in eliza/packages/vault/src/credentials.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/credentials.ts:parseLogin",
+      "type": "function",
+      "name": "parseLogin",
+      "filePath": "eliza/packages/vault/src/credentials.ts",
+      "summary": "parseLogin is a function defined in eliza/packages/vault/src/credentials.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/vault/src/crypto.d.ts",
+      "type": "file",
+      "name": "crypto.d.ts",
+      "filePath": "eliza/packages/vault/src/crypto.d.ts",
+      "summary": "crypto.d.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 18 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/vault/src/crypto.ts",
+      "type": "file",
+      "name": "crypto.ts",
+      "filePath": "eliza/packages/vault/src/crypto.ts",
+      "summary": "crypto.ts is a typescript source file in the Milady codebase. It contains 3 functions, 1 class.",
+      "languageNotes": "typescript; code; 83 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/crypto.ts:generateMasterKey",
+      "type": "function",
+      "name": "generateMasterKey",
+      "filePath": "eliza/packages/vault/src/crypto.ts",
+      "summary": "generateMasterKey is a function defined in eliza/packages/vault/src/crypto.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/crypto.ts:encrypt",
+      "type": "function",
+      "name": "encrypt",
+      "filePath": "eliza/packages/vault/src/crypto.ts",
+      "summary": "encrypt is a function defined in eliza/packages/vault/src/crypto.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/crypto.ts:decrypt",
+      "type": "function",
+      "name": "decrypt",
+      "filePath": "eliza/packages/vault/src/crypto.ts",
+      "summary": "decrypt is a function defined in eliza/packages/vault/src/crypto.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/vault/src/crypto.ts:CryptoError",
+      "type": "class",
+      "name": "CryptoError",
+      "filePath": "eliza/packages/vault/src/crypto.ts",
+      "summary": "CryptoError is a class or type declared in eliza/packages/vault/src/crypto.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/vault/src/external-credentials.d.ts",
+      "type": "file",
+      "name": "external-credentials.d.ts",
+      "filePath": "eliza/packages/vault/src/external-credentials.d.ts",
+      "summary": "external-credentials.d.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 62 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/vault/src/external-credentials.ts",
+      "type": "file",
+      "name": "external-credentials.ts",
+      "filePath": "eliza/packages/vault/src/external-credentials.ts",
+      "summary": "external-credentials.ts is a typescript source file in the Milady codebase. It contains 17 functions, 1 class, 1 imports.",
+      "languageNotes": "typescript; code; 495 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/external-credentials.ts:listOnePasswordLogins",
+      "type": "function",
+      "name": "listOnePasswordLogins",
+      "filePath": "eliza/packages/vault/src/external-credentials.ts",
+      "summary": "listOnePasswordLogins is a function defined in eliza/packages/vault/src/external-credentials.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/external-credentials.ts:revealOnePasswordLogin",
+      "type": "function",
+      "name": "revealOnePasswordLogin",
+      "filePath": "eliza/packages/vault/src/external-credentials.ts",
+      "summary": "revealOnePasswordLogin is a function defined in eliza/packages/vault/src/external-credentials.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/external-credentials.ts:pickOnePasswordUsername",
+      "type": "function",
+      "name": "pickOnePasswordUsername",
+      "filePath": "eliza/packages/vault/src/external-credentials.ts",
+      "summary": "pickOnePasswordUsername is a function defined in eliza/packages/vault/src/external-credentials.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/external-credentials.ts:pickOnePasswordField",
+      "type": "function",
+      "name": "pickOnePasswordField",
+      "filePath": "eliza/packages/vault/src/external-credentials.ts",
+      "summary": "pickOnePasswordField is a function defined in eliza/packages/vault/src/external-credentials.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/external-credentials.ts:listBitwardenLogins",
+      "type": "function",
+      "name": "listBitwardenLogins",
+      "filePath": "eliza/packages/vault/src/external-credentials.ts",
+      "summary": "listBitwardenLogins is a function defined in eliza/packages/vault/src/external-credentials.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/external-credentials.ts:revealBitwardenLogin",
+      "type": "function",
+      "name": "revealBitwardenLogin",
+      "filePath": "eliza/packages/vault/src/external-credentials.ts",
+      "summary": "revealBitwardenLogin is a function defined in eliza/packages/vault/src/external-credentials.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/external-credentials.ts:pickBitwardenUrl",
+      "type": "function",
+      "name": "pickBitwardenUrl",
+      "filePath": "eliza/packages/vault/src/external-credentials.ts",
+      "summary": "pickBitwardenUrl is a function defined in eliza/packages/vault/src/external-credentials.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/external-credentials.ts:readSessionToken",
+      "type": "function",
+      "name": "readSessionToken",
+      "filePath": "eliza/packages/vault/src/external-credentials.ts",
+      "summary": "readSessionToken is a function defined in eliza/packages/vault/src/external-credentials.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/external-credentials.ts:readOnePasswordSessionArgs",
+      "type": "function",
+      "name": "readOnePasswordSessionArgs",
+      "filePath": "eliza/packages/vault/src/external-credentials.ts",
+      "summary": "readOnePasswordSessionArgs is a function defined in eliza/packages/vault/src/external-credentials.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/external-credentials.ts:readDefaultOpAccount",
+      "type": "function",
+      "name": "readDefaultOpAccount",
+      "filePath": "eliza/packages/vault/src/external-credentials.ts",
+      "summary": "readDefaultOpAccount is a function defined in eliza/packages/vault/src/external-credentials.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/external-credentials.ts:isOnePasswordDesktopActiveWithExec",
+      "type": "function",
+      "name": "isOnePasswordDesktopActiveWithExec",
+      "filePath": "eliza/packages/vault/src/external-credentials.ts",
+      "summary": "isOnePasswordDesktopActiveWithExec is a function defined in eliza/packages/vault/src/external-credentials.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/external-credentials.ts:pickPrimaryUrl",
+      "type": "function",
+      "name": "pickPrimaryUrl",
+      "filePath": "eliza/packages/vault/src/external-credentials.ts",
+      "summary": "pickPrimaryUrl is a function defined in eliza/packages/vault/src/external-credentials.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/external-credentials.ts:extractHostname",
+      "type": "function",
+      "name": "extractHostname",
+      "filePath": "eliza/packages/vault/src/external-credentials.ts",
+      "summary": "extractHostname is a function defined in eliza/packages/vault/src/external-credentials.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/external-credentials.ts:parseDate",
+      "type": "function",
+      "name": "parseDate",
+      "filePath": "eliza/packages/vault/src/external-credentials.ts",
+      "summary": "parseDate is a function defined in eliza/packages/vault/src/external-credentials.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/external-credentials.ts:parseJsonArray",
+      "type": "function",
+      "name": "parseJsonArray",
+      "filePath": "eliza/packages/vault/src/external-credentials.ts",
+      "summary": "parseJsonArray is a function defined in eliza/packages/vault/src/external-credentials.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/external-credentials.ts:parseJsonObject",
+      "type": "function",
+      "name": "parseJsonObject",
+      "filePath": "eliza/packages/vault/src/external-credentials.ts",
+      "summary": "parseJsonObject is a function defined in eliza/packages/vault/src/external-credentials.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/external-credentials.ts:defaultExecFn",
+      "type": "function",
+      "name": "defaultExecFn",
+      "filePath": "eliza/packages/vault/src/external-credentials.ts",
+      "summary": "defaultExecFn is a function defined in eliza/packages/vault/src/external-credentials.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/vault/src/external-credentials.ts:BackendNotSignedInError",
+      "type": "class",
+      "name": "BackendNotSignedInError",
+      "filePath": "eliza/packages/vault/src/external-credentials.ts",
+      "summary": "BackendNotSignedInError is a class or type declared in eliza/packages/vault/src/external-credentials.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/vault/src/index.d.ts",
+      "type": "file",
+      "name": "index.d.ts",
+      "filePath": "eliza/packages/vault/src/index.d.ts",
+      "summary": "index.d.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 38 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/vault/src/install.d.ts",
+      "type": "file",
+      "name": "install.d.ts",
+      "filePath": "eliza/packages/vault/src/install.d.ts",
+      "summary": "install.d.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 70 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/vault/src/install.ts",
+      "type": "file",
+      "name": "install.ts",
+      "filePath": "eliza/packages/vault/src/install.ts",
+      "summary": "install.ts is a typescript source file in the Milady codebase. It contains 6 functions, 1 imports.",
+      "languageNotes": "typescript; code; 218 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/install.ts:detectPackageManagers",
+      "type": "function",
+      "name": "detectPackageManagers",
+      "filePath": "eliza/packages/vault/src/install.ts",
+      "summary": "detectPackageManagers is a function defined in eliza/packages/vault/src/install.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/install.ts:resetInstallerCache",
+      "type": "function",
+      "name": "resetInstallerCache",
+      "filePath": "eliza/packages/vault/src/install.ts",
+      "summary": "resetInstallerCache is a function defined in eliza/packages/vault/src/install.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/install.ts:isCommandRunnable",
+      "type": "function",
+      "name": "isCommandRunnable",
+      "filePath": "eliza/packages/vault/src/install.ts",
+      "summary": "isCommandRunnable is a function defined in eliza/packages/vault/src/install.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/install.ts:resolveRunnableMethods",
+      "type": "function",
+      "name": "resolveRunnableMethods",
+      "filePath": "eliza/packages/vault/src/install.ts",
+      "summary": "resolveRunnableMethods is a function defined in eliza/packages/vault/src/install.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/install.ts:currentPlatform",
+      "type": "function",
+      "name": "currentPlatform",
+      "filePath": "eliza/packages/vault/src/install.ts",
+      "summary": "currentPlatform is a function defined in eliza/packages/vault/src/install.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/install.ts:buildInstallCommand",
+      "type": "function",
+      "name": "buildInstallCommand",
+      "filePath": "eliza/packages/vault/src/install.ts",
+      "summary": "buildInstallCommand is a function defined in eliza/packages/vault/src/install.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/vault/src/internal-utils.d.ts",
+      "type": "file",
+      "name": "internal-utils.d.ts",
+      "filePath": "eliza/packages/vault/src/internal-utils.d.ts",
+      "summary": "internal-utils.d.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 6 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/vault/src/internal-utils.ts",
+      "type": "file",
+      "name": "internal-utils.ts",
+      "filePath": "eliza/packages/vault/src/internal-utils.ts",
+      "summary": "internal-utils.ts is a typescript source file in the Milady codebase. It contains 2 functions, 1 imports.",
+      "languageNotes": "typescript; code; 14 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/internal-utils.ts:assertKey",
+      "type": "function",
+      "name": "assertKey",
+      "filePath": "eliza/packages/vault/src/internal-utils.ts",
+      "summary": "assertKey is a function defined in eliza/packages/vault/src/internal-utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/internal-utils.ts:optsCaller",
+      "type": "function",
+      "name": "optsCaller",
+      "filePath": "eliza/packages/vault/src/internal-utils.ts",
+      "summary": "optsCaller is a function defined in eliza/packages/vault/src/internal-utils.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/vault/src/inventory.d.ts",
+      "type": "file",
+      "name": "inventory.d.ts",
+      "filePath": "eliza/packages/vault/src/inventory.d.ts",
+      "summary": "inventory.d.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 127 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/vault/src/inventory.ts",
+      "type": "file",
+      "name": "inventory.ts",
+      "filePath": "eliza/packages/vault/src/inventory.ts",
+      "summary": "inventory.ts is a typescript source file in the Milady codebase. It contains 11 functions, 1 imports.",
+      "languageNotes": "typescript; code; 437 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/inventory.ts:categorizeKey",
+      "type": "function",
+      "name": "categorizeKey",
+      "filePath": "eliza/packages/vault/src/inventory.ts",
+      "summary": "categorizeKey is a function defined in eliza/packages/vault/src/inventory.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/inventory.ts:inferProviderId",
+      "type": "function",
+      "name": "inferProviderId",
+      "filePath": "eliza/packages/vault/src/inventory.ts",
+      "summary": "inferProviderId is a function defined in eliza/packages/vault/src/inventory.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/inventory.ts:defaultLabel",
+      "type": "function",
+      "name": "defaultLabel",
+      "filePath": "eliza/packages/vault/src/inventory.ts",
+      "summary": "defaultLabel is a function defined in eliza/packages/vault/src/inventory.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/inventory.ts:readEntryMeta",
+      "type": "function",
+      "name": "readEntryMeta",
+      "filePath": "eliza/packages/vault/src/inventory.ts",
+      "summary": "readEntryMeta is a function defined in eliza/packages/vault/src/inventory.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/inventory.ts:setEntryMeta",
+      "type": "function",
+      "name": "setEntryMeta",
+      "filePath": "eliza/packages/vault/src/inventory.ts",
+      "summary": "setEntryMeta is a function defined in eliza/packages/vault/src/inventory.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/inventory.ts:removeEntryMeta",
+      "type": "function",
+      "name": "removeEntryMeta",
+      "filePath": "eliza/packages/vault/src/inventory.ts",
+      "summary": "removeEntryMeta is a function defined in eliza/packages/vault/src/inventory.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/inventory.ts:listVaultInventory",
+      "type": "function",
+      "name": "listVaultInventory",
+      "filePath": "eliza/packages/vault/src/inventory.ts",
+      "summary": "listVaultInventory is a function defined in eliza/packages/vault/src/inventory.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/inventory.ts:profileStorageKey",
+      "type": "function",
+      "name": "profileStorageKey",
+      "filePath": "eliza/packages/vault/src/inventory.ts",
+      "summary": "profileStorageKey is a function defined in eliza/packages/vault/src/inventory.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/inventory.ts:descriptorKind",
+      "type": "function",
+      "name": "descriptorKind",
+      "filePath": "eliza/packages/vault/src/inventory.ts",
+      "summary": "descriptorKind is a function defined in eliza/packages/vault/src/inventory.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/inventory.ts:parseMetaRecord",
+      "type": "function",
+      "name": "parseMetaRecord",
+      "filePath": "eliza/packages/vault/src/inventory.ts",
+      "summary": "parseMetaRecord is a function defined in eliza/packages/vault/src/inventory.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/inventory.ts:isCategory",
+      "type": "function",
+      "name": "isCategory",
+      "filePath": "eliza/packages/vault/src/inventory.ts",
+      "summary": "isCategory is a function defined in eliza/packages/vault/src/inventory.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/vault/src/manager.d.ts",
+      "type": "file",
+      "name": "manager.d.ts",
+      "filePath": "eliza/packages/vault/src/manager.d.ts",
+      "summary": "manager.d.ts is a typescript source file in the Milady codebase. It contains 3 imports.",
+      "languageNotes": "typescript; code; 161 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/vault/src/manager.ts",
+      "type": "file",
+      "name": "manager.ts",
+      "filePath": "eliza/packages/vault/src/manager.ts",
+      "summary": "manager.ts is a typescript source file in the Milady codebase. It contains 12 functions, 1 class, 4 imports.",
+      "languageNotes": "typescript; code; 736 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/manager.ts:createManager",
+      "type": "function",
+      "name": "createManager",
+      "filePath": "eliza/packages/vault/src/manager.ts",
+      "summary": "createManager is a function defined in eliza/packages/vault/src/manager.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/manager.ts:normalizePreferences",
+      "type": "function",
+      "name": "normalizePreferences",
+      "filePath": "eliza/packages/vault/src/manager.ts",
+      "summary": "normalizePreferences is a function defined in eliza/packages/vault/src/manager.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/manager.ts:detectInHouse",
+      "type": "function",
+      "name": "detectInHouse",
+      "filePath": "eliza/packages/vault/src/manager.ts",
+      "summary": "detectInHouse is a function defined in eliza/packages/vault/src/manager.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/manager.ts:readStoredSession",
+      "type": "function",
+      "name": "readStoredSession",
+      "filePath": "eliza/packages/vault/src/manager.ts",
+      "summary": "readStoredSession is a function defined in eliza/packages/vault/src/manager.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/manager.ts:detectOnePassword",
+      "type": "function",
+      "name": "detectOnePassword",
+      "filePath": "eliza/packages/vault/src/manager.ts",
+      "summary": "detectOnePassword is a function defined in eliza/packages/vault/src/manager.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/manager.ts:readDefaultOpAccount",
+      "type": "function",
+      "name": "readDefaultOpAccount",
+      "filePath": "eliza/packages/vault/src/manager.ts",
+      "summary": "readDefaultOpAccount is a function defined in eliza/packages/vault/src/manager.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/manager.ts:isOnePasswordDesktopActive",
+      "type": "function",
+      "name": "isOnePasswordDesktopActive",
+      "filePath": "eliza/packages/vault/src/manager.ts",
+      "summary": "isOnePasswordDesktopActive is a function defined in eliza/packages/vault/src/manager.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/manager.ts:detectProtonPass",
+      "type": "function",
+      "name": "detectProtonPass",
+      "filePath": "eliza/packages/vault/src/manager.ts",
+      "summary": "detectProtonPass is a function defined in eliza/packages/vault/src/manager.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/manager.ts:detectBitwarden",
+      "type": "function",
+      "name": "detectBitwarden",
+      "filePath": "eliza/packages/vault/src/manager.ts",
+      "summary": "detectBitwarden is a function defined in eliza/packages/vault/src/manager.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/manager.ts:mapExternalReveal",
+      "type": "function",
+      "name": "mapExternalReveal",
+      "filePath": "eliza/packages/vault/src/manager.ts",
+      "summary": "mapExternalReveal is a function defined in eliza/packages/vault/src/manager.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/manager.ts:safeListExternal",
+      "type": "function",
+      "name": "safeListExternal",
+      "filePath": "eliza/packages/vault/src/manager.ts",
+      "summary": "safeListExternal is a function defined in eliza/packages/vault/src/manager.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/manager.ts:isCommandAvailable",
+      "type": "function",
+      "name": "isCommandAvailable",
+      "filePath": "eliza/packages/vault/src/manager.ts",
+      "summary": "isCommandAvailable is a function defined in eliza/packages/vault/src/manager.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/vault/src/manager.ts:ManagerImpl",
+      "type": "class",
+      "name": "ManagerImpl",
+      "filePath": "eliza/packages/vault/src/manager.ts",
+      "summary": "ManagerImpl is a class or type declared in eliza/packages/vault/src/manager.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/vault/src/master-key.d.ts",
+      "type": "file",
+      "name": "master-key.d.ts",
+      "filePath": "eliza/packages/vault/src/master-key.d.ts",
+      "summary": "master-key.d.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 86 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/vault/src/master-key.ts",
+      "type": "file",
+      "name": "master-key.ts",
+      "filePath": "eliza/packages/vault/src/master-key.ts",
+      "summary": "master-key.ts is a typescript source file in the Milady codebase. It contains 7 functions, 1 class, 1 imports.",
+      "languageNotes": "typescript; code; 350 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/master-key.ts:inMemoryMasterKey",
+      "type": "function",
+      "name": "inMemoryMasterKey",
+      "filePath": "eliza/packages/vault/src/master-key.ts",
+      "summary": "inMemoryMasterKey is a function defined in eliza/packages/vault/src/master-key.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/master-key.ts:passphraseMasterKey",
+      "type": "function",
+      "name": "passphraseMasterKey",
+      "filePath": "eliza/packages/vault/src/master-key.ts",
+      "summary": "passphraseMasterKey is a function defined in eliza/packages/vault/src/master-key.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/master-key.ts:passphraseMasterKeyFromEnv",
+      "type": "function",
+      "name": "passphraseMasterKeyFromEnv",
+      "filePath": "eliza/packages/vault/src/master-key.ts",
+      "summary": "passphraseMasterKeyFromEnv is a function defined in eliza/packages/vault/src/master-key.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/master-key.ts:isKeychainUnsafe",
+      "type": "function",
+      "name": "isKeychainUnsafe",
+      "filePath": "eliza/packages/vault/src/master-key.ts",
+      "summary": "isKeychainUnsafe is a function defined in eliza/packages/vault/src/master-key.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/master-key.ts:keychainUnsafeMessage",
+      "type": "function",
+      "name": "keychainUnsafeMessage",
+      "filePath": "eliza/packages/vault/src/master-key.ts",
+      "summary": "keychainUnsafeMessage is a function defined in eliza/packages/vault/src/master-key.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/master-key.ts:defaultMasterKey",
+      "type": "function",
+      "name": "defaultMasterKey",
+      "filePath": "eliza/packages/vault/src/master-key.ts",
+      "summary": "defaultMasterKey is a function defined in eliza/packages/vault/src/master-key.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/master-key.ts:osKeychainMasterKey",
+      "type": "function",
+      "name": "osKeychainMasterKey",
+      "filePath": "eliza/packages/vault/src/master-key.ts",
+      "summary": "osKeychainMasterKey is a function defined in eliza/packages/vault/src/master-key.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/vault/src/master-key.ts:MasterKeyUnavailableError",
+      "type": "class",
+      "name": "MasterKeyUnavailableError",
+      "filePath": "eliza/packages/vault/src/master-key.ts",
+      "summary": "MasterKeyUnavailableError is a class or type declared in eliza/packages/vault/src/master-key.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/vault/src/password-managers.d.ts",
+      "type": "file",
+      "name": "password-managers.d.ts",
+      "filePath": "eliza/packages/vault/src/password-managers.d.ts",
+      "summary": "password-managers.d.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 17 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/vault/src/password-managers.ts",
+      "type": "file",
+      "name": "password-managers.ts",
+      "filePath": "eliza/packages/vault/src/password-managers.ts",
+      "summary": "password-managers.ts is a typescript source file in the Milady codebase. It contains 3 functions, 1 class, 1 imports.",
+      "languageNotes": "typescript; code; 73 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/password-managers.ts:resolveReference",
+      "type": "function",
+      "name": "resolveReference",
+      "filePath": "eliza/packages/vault/src/password-managers.ts",
+      "summary": "resolveReference is a function defined in eliza/packages/vault/src/password-managers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/password-managers.ts:resolve1Password",
+      "type": "function",
+      "name": "resolve1Password",
+      "filePath": "eliza/packages/vault/src/password-managers.ts",
+      "summary": "resolve1Password is a function defined in eliza/packages/vault/src/password-managers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/password-managers.ts:resolveProtonPass",
+      "type": "function",
+      "name": "resolveProtonPass",
+      "filePath": "eliza/packages/vault/src/password-managers.ts",
+      "summary": "resolveProtonPass is a function defined in eliza/packages/vault/src/password-managers.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/vault/src/password-managers.ts:PasswordManagerError",
+      "type": "class",
+      "name": "PasswordManagerError",
+      "filePath": "eliza/packages/vault/src/password-managers.ts",
+      "summary": "PasswordManagerError is a class or type declared in eliza/packages/vault/src/password-managers.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/vault/src/pglite-vault.d.ts",
+      "type": "file",
+      "name": "pglite-vault.d.ts",
+      "filePath": "eliza/packages/vault/src/pglite-vault.d.ts",
+      "summary": "pglite-vault.d.ts is a typescript source file in the Milady codebase. It contains 3 imports.",
+      "languageNotes": "typescript; code; 49 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/vault/src/pglite-vault.ts",
+      "type": "file",
+      "name": "pglite-vault.ts",
+      "filePath": "eliza/packages/vault/src/pglite-vault.ts",
+      "summary": "pglite-vault.ts is a typescript source file in the Milady codebase. It contains 4 functions, 1 class, 9 imports.",
+      "languageNotes": "typescript; code; 485 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/pglite-vault.ts:writeMigrationSentinel",
+      "type": "function",
+      "name": "writeMigrationSentinel",
+      "filePath": "eliza/packages/vault/src/pglite-vault.ts",
+      "summary": "writeMigrationSentinel is a function defined in eliza/packages/vault/src/pglite-vault.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/pglite-vault.ts:insertLegacyEntry",
+      "type": "function",
+      "name": "insertLegacyEntry",
+      "filePath": "eliza/packages/vault/src/pglite-vault.ts",
+      "summary": "insertLegacyEntry is a function defined in eliza/packages/vault/src/pglite-vault.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/pglite-vault.ts:defaultPgliteVaultDataDir",
+      "type": "function",
+      "name": "defaultPgliteVaultDataDir",
+      "filePath": "eliza/packages/vault/src/pglite-vault.ts",
+      "summary": "defaultPgliteVaultDataDir is a function defined in eliza/packages/vault/src/pglite-vault.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/vault/src/pglite-vault.ts:toMillis",
+      "type": "function",
+      "name": "toMillis",
+      "filePath": "eliza/packages/vault/src/pglite-vault.ts",
+      "summary": "toMillis is a function defined in eliza/packages/vault/src/pglite-vault.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/vault/src/pglite-vault.ts:PgliteVaultImpl",
+      "type": "class",
+      "name": "PgliteVaultImpl",
+      "filePath": "eliza/packages/vault/src/pglite-vault.ts",
+      "summary": "PgliteVaultImpl is a class or type declared in eliza/packages/vault/src/pglite-vault.ts."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/vitest.setup.ts",
+      "target": "class:eliza/packages/ui/vitest.setup.ts:VitestTextEncoder",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/audit.ts",
+      "target": "class:eliza/packages/vault/src/audit.ts:AuditLog",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/credentials.ts",
+      "target": "function:eliza/packages/vault/src/credentials.ts:encodeAccount",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/credentials.ts",
+      "target": "function:eliza/packages/vault/src/credentials.ts:decodeAccount",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/credentials.ts",
+      "target": "function:eliza/packages/vault/src/credentials.ts:normalizeDomain",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/credentials.ts",
+      "target": "function:eliza/packages/vault/src/credentials.ts:loginKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/credentials.ts",
+      "target": "function:eliza/packages/vault/src/credentials.ts:autoallowKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/credentials.ts",
+      "target": "function:eliza/packages/vault/src/credentials.ts:setSavedLogin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/credentials.ts",
+      "target": "function:eliza/packages/vault/src/credentials.ts:getSavedLogin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/credentials.ts",
+      "target": "function:eliza/packages/vault/src/credentials.ts:listSavedLogins",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/credentials.ts",
+      "target": "function:eliza/packages/vault/src/credentials.ts:deleteSavedLogin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/credentials.ts",
+      "target": "function:eliza/packages/vault/src/credentials.ts:getAutofillAllowed",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/credentials.ts",
+      "target": "function:eliza/packages/vault/src/credentials.ts:setAutofillAllowed",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/credentials.ts",
+      "target": "function:eliza/packages/vault/src/credentials.ts:parseLoginKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/credentials.ts",
+      "target": "function:eliza/packages/vault/src/credentials.ts:parseLogin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/credentials.ts:loginKey",
+      "target": "function:eliza/packages/vault/src/credentials.ts:normalizeDomain",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/credentials.ts:loginKey",
+      "target": "function:eliza/packages/vault/src/credentials.ts:encodeAccount",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/credentials.ts:autoallowKey",
+      "target": "function:eliza/packages/vault/src/credentials.ts:normalizeDomain",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/credentials.ts:setSavedLogin",
+      "target": "function:eliza/packages/vault/src/credentials.ts:normalizeDomain",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/credentials.ts:setSavedLogin",
+      "target": "function:eliza/packages/vault/src/credentials.ts:loginKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/credentials.ts:getSavedLogin",
+      "target": "function:eliza/packages/vault/src/credentials.ts:loginKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/credentials.ts:getSavedLogin",
+      "target": "function:eliza/packages/vault/src/credentials.ts:parseLogin",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/credentials.ts:listSavedLogins",
+      "target": "function:eliza/packages/vault/src/credentials.ts:normalizeDomain",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/credentials.ts:listSavedLogins",
+      "target": "function:eliza/packages/vault/src/credentials.ts:parseLoginKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/credentials.ts:listSavedLogins",
+      "target": "function:eliza/packages/vault/src/credentials.ts:decodeAccount",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/credentials.ts:deleteSavedLogin",
+      "target": "function:eliza/packages/vault/src/credentials.ts:loginKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/credentials.ts:getAutofillAllowed",
+      "target": "function:eliza/packages/vault/src/credentials.ts:autoallowKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/credentials.ts:setAutofillAllowed",
+      "target": "function:eliza/packages/vault/src/credentials.ts:autoallowKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/crypto.ts",
+      "target": "function:eliza/packages/vault/src/crypto.ts:generateMasterKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/crypto.ts",
+      "target": "function:eliza/packages/vault/src/crypto.ts:encrypt",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/crypto.ts",
+      "target": "function:eliza/packages/vault/src/crypto.ts:decrypt",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/crypto.ts",
+      "target": "class:eliza/packages/vault/src/crypto.ts:CryptoError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/external-credentials.ts",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:listOnePasswordLogins",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/external-credentials.ts",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:revealOnePasswordLogin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/external-credentials.ts",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:pickOnePasswordUsername",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/external-credentials.ts",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:pickOnePasswordField",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/external-credentials.ts",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:listBitwardenLogins",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/external-credentials.ts",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:revealBitwardenLogin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/external-credentials.ts",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:pickBitwardenUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/external-credentials.ts",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:readSessionToken",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/external-credentials.ts",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:readOnePasswordSessionArgs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/external-credentials.ts",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:readDefaultOpAccount",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/external-credentials.ts",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:isOnePasswordDesktopActiveWithExec",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/external-credentials.ts",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:pickPrimaryUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/external-credentials.ts",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:extractHostname",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/external-credentials.ts",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:parseDate",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/external-credentials.ts",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:parseJsonArray",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/external-credentials.ts",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:parseJsonObject",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/external-credentials.ts",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:defaultExecFn",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/external-credentials.ts",
+      "target": "class:eliza/packages/vault/src/external-credentials.ts:BackendNotSignedInError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/external-credentials.ts:listOnePasswordLogins",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:readOnePasswordSessionArgs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/external-credentials.ts:listOnePasswordLogins",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:parseJsonArray",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/external-credentials.ts:listOnePasswordLogins",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:pickPrimaryUrl",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/external-credentials.ts:listOnePasswordLogins",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:extractHostname",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/external-credentials.ts:listOnePasswordLogins",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:parseDate",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/external-credentials.ts:revealOnePasswordLogin",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:readOnePasswordSessionArgs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/external-credentials.ts:revealOnePasswordLogin",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:parseJsonObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/external-credentials.ts:revealOnePasswordLogin",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:pickOnePasswordUsername",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/external-credentials.ts:revealOnePasswordLogin",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:pickOnePasswordField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/external-credentials.ts:revealOnePasswordLogin",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:pickOnePasswordField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/external-credentials.ts:revealOnePasswordLogin",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:pickOnePasswordField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/external-credentials.ts:revealOnePasswordLogin",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:pickPrimaryUrl",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/external-credentials.ts:revealOnePasswordLogin",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:extractHostname",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/external-credentials.ts:revealOnePasswordLogin",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:parseDate",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/external-credentials.ts:listBitwardenLogins",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:readSessionToken",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/external-credentials.ts:listBitwardenLogins",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:parseJsonArray",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/external-credentials.ts:listBitwardenLogins",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:pickBitwardenUrl",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/external-credentials.ts:listBitwardenLogins",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:extractHostname",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/external-credentials.ts:listBitwardenLogins",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:parseDate",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/external-credentials.ts:revealBitwardenLogin",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:readSessionToken",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/external-credentials.ts:revealBitwardenLogin",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:parseJsonObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/external-credentials.ts:revealBitwardenLogin",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:pickBitwardenUrl",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/external-credentials.ts:revealBitwardenLogin",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:extractHostname",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/external-credentials.ts:revealBitwardenLogin",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:parseDate",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/external-credentials.ts:readOnePasswordSessionArgs",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:readDefaultOpAccount",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/external-credentials.ts:readOnePasswordSessionArgs",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:isOnePasswordDesktopActiveWithExec",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/external-credentials.ts:readOnePasswordSessionArgs",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:readSessionToken",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/external-credentials.ts:readDefaultOpAccount",
+      "target": "function:eliza/packages/vault/src/external-credentials.ts:parseJsonArray",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/install.ts",
+      "target": "function:eliza/packages/vault/src/install.ts:detectPackageManagers",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/install.ts",
+      "target": "function:eliza/packages/vault/src/install.ts:resetInstallerCache",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/install.ts",
+      "target": "function:eliza/packages/vault/src/install.ts:isCommandRunnable",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/install.ts",
+      "target": "function:eliza/packages/vault/src/install.ts:resolveRunnableMethods",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/install.ts",
+      "target": "function:eliza/packages/vault/src/install.ts:currentPlatform",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/install.ts",
+      "target": "function:eliza/packages/vault/src/install.ts:buildInstallCommand",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/install.ts:detectPackageManagers",
+      "target": "function:eliza/packages/vault/src/install.ts:isCommandRunnable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/install.ts:detectPackageManagers",
+      "target": "function:eliza/packages/vault/src/install.ts:isCommandRunnable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/install.ts:resolveRunnableMethods",
+      "target": "function:eliza/packages/vault/src/install.ts:currentPlatform",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/install.ts:resolveRunnableMethods",
+      "target": "function:eliza/packages/vault/src/install.ts:detectPackageManagers",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/internal-utils.ts",
+      "target": "function:eliza/packages/vault/src/internal-utils.ts:assertKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/internal-utils.ts",
+      "target": "function:eliza/packages/vault/src/internal-utils.ts:optsCaller",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/inventory.ts",
+      "target": "function:eliza/packages/vault/src/inventory.ts:categorizeKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/inventory.ts",
+      "target": "function:eliza/packages/vault/src/inventory.ts:inferProviderId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/inventory.ts",
+      "target": "function:eliza/packages/vault/src/inventory.ts:defaultLabel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/inventory.ts",
+      "target": "function:eliza/packages/vault/src/inventory.ts:readEntryMeta",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/inventory.ts",
+      "target": "function:eliza/packages/vault/src/inventory.ts:setEntryMeta",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/inventory.ts",
+      "target": "function:eliza/packages/vault/src/inventory.ts:removeEntryMeta",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/inventory.ts",
+      "target": "function:eliza/packages/vault/src/inventory.ts:listVaultInventory",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/inventory.ts",
+      "target": "function:eliza/packages/vault/src/inventory.ts:profileStorageKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/inventory.ts",
+      "target": "function:eliza/packages/vault/src/inventory.ts:descriptorKind",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/inventory.ts",
+      "target": "function:eliza/packages/vault/src/inventory.ts:parseMetaRecord",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/inventory.ts",
+      "target": "function:eliza/packages/vault/src/inventory.ts:isCategory",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/inventory.ts:readEntryMeta",
+      "target": "function:eliza/packages/vault/src/inventory.ts:parseMetaRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/inventory.ts:setEntryMeta",
+      "target": "function:eliza/packages/vault/src/inventory.ts:readEntryMeta",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/inventory.ts:listVaultInventory",
+      "target": "function:eliza/packages/vault/src/inventory.ts:readEntryMeta",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/inventory.ts:listVaultInventory",
+      "target": "function:eliza/packages/vault/src/inventory.ts:descriptorKind",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/inventory.ts:listVaultInventory",
+      "target": "function:eliza/packages/vault/src/inventory.ts:inferProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/inventory.ts:listVaultInventory",
+      "target": "function:eliza/packages/vault/src/inventory.ts:categorizeKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/inventory.ts:listVaultInventory",
+      "target": "function:eliza/packages/vault/src/inventory.ts:defaultLabel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/inventory.ts:parseMetaRecord",
+      "target": "function:eliza/packages/vault/src/inventory.ts:isCategory",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/manager.ts",
+      "target": "function:eliza/packages/vault/src/manager.ts:createManager",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/manager.ts",
+      "target": "function:eliza/packages/vault/src/manager.ts:normalizePreferences",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/manager.ts",
+      "target": "function:eliza/packages/vault/src/manager.ts:detectInHouse",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/manager.ts",
+      "target": "function:eliza/packages/vault/src/manager.ts:readStoredSession",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/manager.ts",
+      "target": "function:eliza/packages/vault/src/manager.ts:detectOnePassword",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/manager.ts",
+      "target": "function:eliza/packages/vault/src/manager.ts:readDefaultOpAccount",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/manager.ts",
+      "target": "function:eliza/packages/vault/src/manager.ts:isOnePasswordDesktopActive",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/manager.ts",
+      "target": "function:eliza/packages/vault/src/manager.ts:detectProtonPass",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/manager.ts",
+      "target": "function:eliza/packages/vault/src/manager.ts:detectBitwarden",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/manager.ts",
+      "target": "function:eliza/packages/vault/src/manager.ts:mapExternalReveal",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/manager.ts",
+      "target": "function:eliza/packages/vault/src/manager.ts:safeListExternal",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/manager.ts",
+      "target": "function:eliza/packages/vault/src/manager.ts:isCommandAvailable",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/manager.ts",
+      "target": "class:eliza/packages/vault/src/manager.ts:ManagerImpl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/manager.ts:detectOnePassword",
+      "target": "function:eliza/packages/vault/src/manager.ts:isCommandAvailable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/manager.ts:detectOnePassword",
+      "target": "function:eliza/packages/vault/src/manager.ts:readDefaultOpAccount",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/manager.ts:detectOnePassword",
+      "target": "function:eliza/packages/vault/src/manager.ts:isOnePasswordDesktopActive",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/manager.ts:detectOnePassword",
+      "target": "function:eliza/packages/vault/src/manager.ts:readStoredSession",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/manager.ts:detectProtonPass",
+      "target": "function:eliza/packages/vault/src/manager.ts:isCommandAvailable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/manager.ts:detectBitwarden",
+      "target": "function:eliza/packages/vault/src/manager.ts:isCommandAvailable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/manager.ts:detectBitwarden",
+      "target": "function:eliza/packages/vault/src/manager.ts:readStoredSession",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/master-key.ts",
+      "target": "function:eliza/packages/vault/src/master-key.ts:inMemoryMasterKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/master-key.ts",
+      "target": "function:eliza/packages/vault/src/master-key.ts:passphraseMasterKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/master-key.ts",
+      "target": "function:eliza/packages/vault/src/master-key.ts:passphraseMasterKeyFromEnv",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/master-key.ts",
+      "target": "function:eliza/packages/vault/src/master-key.ts:isKeychainUnsafe",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/master-key.ts",
+      "target": "function:eliza/packages/vault/src/master-key.ts:keychainUnsafeMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/master-key.ts",
+      "target": "function:eliza/packages/vault/src/master-key.ts:defaultMasterKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/master-key.ts",
+      "target": "function:eliza/packages/vault/src/master-key.ts:osKeychainMasterKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/master-key.ts",
+      "target": "class:eliza/packages/vault/src/master-key.ts:MasterKeyUnavailableError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/master-key.ts:passphraseMasterKeyFromEnv",
+      "target": "function:eliza/packages/vault/src/master-key.ts:passphraseMasterKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/master-key.ts:defaultMasterKey",
+      "target": "function:eliza/packages/vault/src/master-key.ts:osKeychainMasterKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/password-managers.ts",
+      "target": "function:eliza/packages/vault/src/password-managers.ts:resolveReference",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/password-managers.ts",
+      "target": "function:eliza/packages/vault/src/password-managers.ts:resolve1Password",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/password-managers.ts",
+      "target": "function:eliza/packages/vault/src/password-managers.ts:resolveProtonPass",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/password-managers.ts",
+      "target": "class:eliza/packages/vault/src/password-managers.ts:PasswordManagerError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/password-managers.ts:resolveReference",
+      "target": "function:eliza/packages/vault/src/password-managers.ts:resolve1Password",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/vault/src/password-managers.ts:resolveReference",
+      "target": "function:eliza/packages/vault/src/password-managers.ts:resolveProtonPass",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/pglite-vault.ts",
+      "target": "function:eliza/packages/vault/src/pglite-vault.ts:writeMigrationSentinel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/pglite-vault.ts",
+      "target": "function:eliza/packages/vault/src/pglite-vault.ts:insertLegacyEntry",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/pglite-vault.ts",
+      "target": "function:eliza/packages/vault/src/pglite-vault.ts:defaultPgliteVaultDataDir",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/pglite-vault.ts",
+      "target": "function:eliza/packages/vault/src/pglite-vault.ts:toMillis",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/vault/src/pglite-vault.ts",
+      "target": "class:eliza/packages/vault/src/pglite-vault.ts:PgliteVaultImpl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/vitest.e2e.config.ts",
+      "target": "file:eliza/packages/ui/vitest.config.ts",
+      "type": "imports"
+    }
+  ]
+}

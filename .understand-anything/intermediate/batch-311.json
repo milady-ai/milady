@@ -1,0 +1,698 @@
+{
+  "batchIndex": 311,
+  "nodes": [
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/TimelockController.spec",
+      "type": "file",
+      "name": "TimelockController.spec",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/fv/specs/TimelockController.spec",
+      "summary": "TimelockController.spec is a spec source file in the Milady codebase.",
+      "languageNotes": "spec; code; 299 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/erc4626-tests/ERC4626.prop.sol",
+      "type": "file",
+      "name": "ERC4626.prop.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/erc4626-tests/ERC4626.prop.sol",
+      "summary": "ERC4626.prop.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 404 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/erc4626-tests/ERC4626.test.sol",
+      "type": "file",
+      "name": "ERC4626.test.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/erc4626-tests/ERC4626.test.sol",
+      "summary": "ERC4626.test.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 356 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/erc4626-tests/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/erc4626-tests/README.md",
+      "summary": "README.md documents eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/erc4626-tests with 116 lines of reference material.",
+      "languageNotes": "markdown; docs; 116 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/.gitattributes",
+      "type": "file",
+      "name": ".gitattributes",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/.gitattributes",
+      "summary": ".gitattributes is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 1 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/.github/CODEOWNERS",
+      "type": "file",
+      "name": "CODEOWNERS",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/.github/CODEOWNERS",
+      "summary": "CODEOWNERS is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 1 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/.github/dependabot.yml",
+      "type": "config",
+      "name": "dependabot.yml",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/.github/dependabot.yml",
+      "summary": "dependabot.yml configures yaml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "yaml; config; 6 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/.github/workflows/ci.yml",
+      "type": "config",
+      "name": "ci.yml",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/.github/workflows/ci.yml",
+      "summary": "ci.yml configures yaml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "yaml; config; 125 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/.github/workflows/sync.yml",
+      "type": "config",
+      "name": "sync.yml",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/.github/workflows/sync.yml",
+      "summary": "sync.yml configures yaml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "yaml; config; 36 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/lib/ds-test/.github/workflows/build.yml",
+      "type": "config",
+      "name": "build.yml",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/lib/ds-test/.github/workflows/build.yml",
+      "summary": "build.yml configures yaml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "yaml; config; 41 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/lib/ds-test/default.nix",
+      "type": "file",
+      "name": "default.nix",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/lib/ds-test/default.nix",
+      "summary": "default.nix is a nix source file in the Milady codebase.",
+      "languageNotes": "nix; code; 4 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/lib/ds-test/demo/demo.sol",
+      "type": "file",
+      "name": "demo.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/lib/ds-test/demo/demo.sol",
+      "summary": "demo.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 222 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "infrastructure"
+      ],
+      "complexity": "simple",
+      "id": "service:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/lib/ds-test/Makefile",
+      "type": "service",
+      "name": "Makefile",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/lib/ds-test/Makefile",
+      "summary": "Makefile defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "makefile; infra; 14 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/lib/ds-test/package.json",
+      "type": "config",
+      "name": "package.json",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/lib/ds-test/package.json",
+      "summary": "package.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 15 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/lib/ds-test/src/test.sol",
+      "type": "file",
+      "name": "test.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/lib/ds-test/src/test.sol",
+      "summary": "test.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 469 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/lib/ds-test/src/test.t.sol",
+      "type": "file",
+      "name": "test.t.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/lib/ds-test/src/test.t.sol",
+      "summary": "test.t.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 313 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/LICENSE-APACHE",
+      "type": "file",
+      "name": "LICENSE-APACHE",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/LICENSE-APACHE",
+      "summary": "LICENSE-APACHE is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 203 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/LICENSE-MIT",
+      "type": "file",
+      "name": "LICENSE-MIT",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/LICENSE-MIT",
+      "summary": "LICENSE-MIT is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 25 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "type": "file",
+      "name": "vm.py",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "summary": "vm.py is a python source file in the Milady codebase. It contains 4 functions, 15 classes.",
+      "languageNotes": "python; code; 636 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "summary": "main is a function defined in eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py."
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:cmp_cheatcode",
+      "type": "function",
+      "name": "cmp_cheatcode",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "summary": "cmp_cheatcode is a function defined in eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py."
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:prefix_with_group_headers",
+      "type": "function",
+      "name": "prefix_with_group_headers",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "summary": "prefix_with_group_headers is a function defined in eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py."
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:group",
+      "type": "function",
+      "name": "group",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "summary": "group is a function defined in eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py."
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:CmpCheatcode",
+      "type": "class",
+      "name": "CmpCheatcode",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "summary": "CmpCheatcode is a class or type declared in eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py."
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:Visibility",
+      "type": "class",
+      "name": "Visibility",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "summary": "Visibility is a class or type declared in eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py."
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:Mutability",
+      "type": "class",
+      "name": "Mutability",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "summary": "Mutability is a class or type declared in eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py."
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:Function",
+      "type": "class",
+      "name": "Function",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "summary": "Function is a class or type declared in eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py."
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:Cheatcode",
+      "type": "class",
+      "name": "Cheatcode",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "summary": "Cheatcode is a class or type declared in eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py."
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:Error",
+      "type": "class",
+      "name": "Error",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "summary": "Error is a class or type declared in eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py."
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:Event",
+      "type": "class",
+      "name": "Event",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "summary": "Event is a class or type declared in eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py."
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:EnumVariant",
+      "type": "class",
+      "name": "EnumVariant",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "summary": "EnumVariant is a class or type declared in eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py."
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:Enum",
+      "type": "class",
+      "name": "Enum",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "summary": "Enum is a class or type declared in eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py."
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:StructField",
+      "type": "class",
+      "name": "StructField",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "summary": "StructField is a class or type declared in eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py."
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:Struct",
+      "type": "class",
+      "name": "Struct",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "summary": "Struct is a class or type declared in eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py."
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:Cheatcodes",
+      "type": "class",
+      "name": "Cheatcodes",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "summary": "Cheatcodes is a class or type declared in eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py."
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:Item",
+      "type": "class",
+      "name": "Item",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "summary": "Item is a class or type declared in eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py."
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:ItemOrder",
+      "type": "class",
+      "name": "ItemOrder",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "summary": "ItemOrder is a class or type declared in eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py."
+    },
+    {
+      "tags": [
+        "class",
+        "python"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:CheatcodesPrinter",
+      "type": "class",
+      "name": "CheatcodesPrinter",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "summary": "CheatcodesPrinter is a class or type declared in eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py."
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/src/Base.sol",
+      "type": "file",
+      "name": "Base.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/src/Base.sol",
+      "summary": "Base.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 48 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/src/Config.sol",
+      "type": "file",
+      "name": "Config.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/src/Config.sol",
+      "summary": "Config.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 60 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/src/console.sol",
+      "type": "file",
+      "name": "console.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/src/console.sol",
+      "summary": "console.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 1551 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/src/console2.sol",
+      "type": "file",
+      "name": "console2.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/src/console2.sol",
+      "summary": "console2.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 4 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/src/interfaces/IERC1155.sol",
+      "type": "file",
+      "name": "IERC1155.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/src/interfaces/IERC1155.sol",
+      "summary": "IERC1155.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 105 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/src/interfaces/IERC165.sol",
+      "type": "file",
+      "name": "IERC165.sol",
+      "filePath": "eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/src/interfaces/IERC165.sol",
+      "summary": "IERC165.sol is a sol source file in the Milady codebase.",
+      "languageNotes": "sol; code; 12 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "target": "function:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "target": "function:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:cmp_cheatcode",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "target": "function:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:prefix_with_group_headers",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "target": "function:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:group",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "target": "class:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:CmpCheatcode",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "target": "class:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:Visibility",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "target": "class:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:Mutability",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "target": "class:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:Function",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "target": "class:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:Cheatcode",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "target": "class:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:Error",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "target": "class:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:Event",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "target": "class:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:EnumVariant",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "target": "class:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:Enum",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "target": "class:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:StructField",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "target": "class:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:Struct",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "target": "class:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:Cheatcodes",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "target": "class:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:Item",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "target": "class:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:ItemOrder",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py",
+      "target": "class:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:CheatcodesPrinter",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:main",
+      "target": "function:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:prefix_with_group_headers",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:main",
+      "target": "function:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:prefix_with_group_headers",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:prefix_with_group_headers",
+      "target": "function:eliza/packages/app-core/test/contracts/lib/openzeppelin-contracts/lib/forge-std/scripts/vm.py:group",
+      "type": "calls"
+    }
+  ]
+}

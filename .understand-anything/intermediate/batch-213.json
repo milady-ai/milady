@@ -1,0 +1,246 @@
+{
+  "batchIndex": 213,
+  "nodes": [
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/src/registry/entries/connectors/bluebubbles.json",
+      "type": "config",
+      "name": "bluebubbles.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/connectors/bluebubbles.json",
+      "summary": "bluebubbles.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 99 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/src/registry/entries/connectors/bluesky.json",
+      "type": "config",
+      "name": "bluesky.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/connectors/bluesky.json",
+      "summary": "bluesky.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 173 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/src/registry/entries/connectors/discord.json",
+      "type": "config",
+      "name": "discord.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/connectors/discord.json",
+      "summary": "discord.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 119 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/src/registry/entries/connectors/farcaster.json",
+      "type": "config",
+      "name": "farcaster.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/connectors/farcaster.json",
+      "summary": "farcaster.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 174 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/src/registry/entries/connectors/feishu.json",
+      "type": "config",
+      "name": "feishu.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/connectors/feishu.json",
+      "summary": "feishu.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 79 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/src/registry/entries/connectors/google-chat.json",
+      "type": "config",
+      "name": "google-chat.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/connectors/google-chat.json",
+      "summary": "google-chat.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 120 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/src/registry/entries/connectors/google.json",
+      "type": "config",
+      "name": "google.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/connectors/google.json",
+      "summary": "google.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 82 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/src/registry/entries/connectors/imessage.json",
+      "type": "config",
+      "name": "imessage.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/connectors/imessage.json",
+      "summary": "imessage.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 96 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/src/registry/entries/connectors/instagram.json",
+      "type": "config",
+      "name": "instagram.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/connectors/instagram.json",
+      "summary": "instagram.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 64 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/src/registry/entries/connectors/line.json",
+      "type": "config",
+      "name": "line.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/connectors/line.json",
+      "summary": "line.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 86 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/src/registry/entries/connectors/matrix.json",
+      "type": "config",
+      "name": "matrix.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/connectors/matrix.json",
+      "summary": "matrix.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 94 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/src/registry/entries/connectors/mattermost.json",
+      "type": "config",
+      "name": "mattermost.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/connectors/mattermost.json",
+      "summary": "mattermost.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 110 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/src/registry/entries/connectors/msteams.json",
+      "type": "config",
+      "name": "msteams.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/connectors/msteams.json",
+      "summary": "msteams.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 104 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/src/registry/entries/connectors/nextcloud-talk.json",
+      "type": "config",
+      "name": "nextcloud-talk.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/connectors/nextcloud-talk.json",
+      "summary": "nextcloud-talk.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 104 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/src/registry/entries/connectors/nostr.json",
+      "type": "config",
+      "name": "nostr.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/connectors/nostr.json",
+      "summary": "nostr.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 70 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/src/registry/entries/connectors/signal.json",
+      "type": "config",
+      "name": "signal.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/connectors/signal.json",
+      "summary": "signal.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 81 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/src/registry/entries/connectors/slack.json",
+      "type": "config",
+      "name": "slack.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/connectors/slack.json",
+      "summary": "slack.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 102 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/src/registry/entries/connectors/telegram.json",
+      "type": "config",
+      "name": "telegram.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/connectors/telegram.json",
+      "summary": "telegram.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 71 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/src/registry/entries/connectors/tlon.json",
+      "type": "config",
+      "name": "tlon.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/connectors/tlon.json",
+      "summary": "tlon.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 94 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/src/registry/entries/connectors/twitch.json",
+      "type": "config",
+      "name": "twitch.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/connectors/twitch.json",
+      "summary": "twitch.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 110 lines"
+    }
+  ],
+  "edges": []
+}

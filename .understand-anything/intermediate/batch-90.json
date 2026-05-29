@@ -1,0 +1,739 @@
+{
+  "batchIndex": 90,
+  "nodes": [
+    {
+      "tags": [
+        "entry-point"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/features/advanced-memory/schemas/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/core/src/features/advanced-memory/schemas/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase. It contains 3 imports.",
+      "languageNotes": "typescript; code; 31 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/advanced-memory/schemas/long-term-memories.ts",
+      "type": "file",
+      "name": "long-term-memories.ts",
+      "filePath": "eliza/packages/core/src/features/advanced-memory/schemas/long-term-memories.ts",
+      "summary": "long-term-memories.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 67 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/features/advanced-memory/schemas/memory-access-logs.ts",
+      "type": "file",
+      "name": "memory-access-logs.ts",
+      "filePath": "eliza/packages/core/src/features/advanced-memory/schemas/memory-access-logs.ts",
+      "summary": "memory-access-logs.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 47 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/advanced-memory/schemas/session-summaries.ts",
+      "type": "file",
+      "name": "session-summaries.ts",
+      "filePath": "eliza/packages/core/src/features/advanced-memory/schemas/session-summaries.ts",
+      "summary": "session-summaries.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 68 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/schemas/agent.ts",
+      "type": "file",
+      "name": "agent.ts",
+      "filePath": "eliza/packages/core/src/schemas/agent.ts",
+      "summary": "agent.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 114 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/schemas/cache.ts",
+      "type": "file",
+      "name": "cache.ts",
+      "filePath": "eliza/packages/core/src/schemas/cache.ts",
+      "summary": "cache.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 57 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/schemas/channel-participant.ts",
+      "type": "file",
+      "name": "channel-participant.ts",
+      "filePath": "eliza/packages/core/src/schemas/channel-participant.ts",
+      "summary": "channel-participant.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 51 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/schemas/channel.ts",
+      "type": "file",
+      "name": "channel.ts",
+      "filePath": "eliza/packages/core/src/schemas/channel.ts",
+      "summary": "channel.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 96 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/schemas/component.ts",
+      "type": "file",
+      "name": "component.ts",
+      "filePath": "eliza/packages/core/src/schemas/component.ts",
+      "summary": "component.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 158 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/schemas/embedding.ts",
+      "type": "file",
+      "name": "embedding.ts",
+      "filePath": "eliza/packages/core/src/schemas/embedding.ts",
+      "summary": "embedding.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 91 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/schemas/entity-identity.ts",
+      "type": "file",
+      "name": "entity-identity.ts",
+      "filePath": "eliza/packages/core/src/schemas/entity-identity.ts",
+      "summary": "entity-identity.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 343 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/schemas/entity.ts",
+      "type": "file",
+      "name": "entity.ts",
+      "filePath": "eliza/packages/core/src/schemas/entity.ts",
+      "summary": "entity.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 71 lines"
+    },
+    {
+      "tags": [
+        "entry-point",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/schemas/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/core/src/schemas/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase. It contains 1 function, 23 imports.",
+      "languageNotes": "typescript; code; 150 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/schemas/index.ts:buildBaseTables",
+      "type": "function",
+      "name": "buildBaseTables",
+      "filePath": "eliza/packages/core/src/schemas/index.ts",
+      "summary": "buildBaseTables is a function defined in eliza/packages/core/src/schemas/index.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/schemas/log.ts",
+      "type": "file",
+      "name": "log.ts",
+      "filePath": "eliza/packages/core/src/schemas/log.ts",
+      "summary": "log.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 95 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/schemas/memory.ts",
+      "type": "file",
+      "name": "memory.ts",
+      "filePath": "eliza/packages/core/src/schemas/memory.ts",
+      "summary": "memory.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 169 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/schemas/message-server-agent.ts",
+      "type": "file",
+      "name": "message-server-agent.ts",
+      "filePath": "eliza/packages/core/src/schemas/message-server-agent.ts",
+      "summary": "message-server-agent.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 60 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/schemas/message-server.ts",
+      "type": "file",
+      "name": "message-server.ts",
+      "filePath": "eliza/packages/core/src/schemas/message-server.ts",
+      "summary": "message-server.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 64 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/schemas/message.ts",
+      "type": "file",
+      "name": "message.ts",
+      "filePath": "eliza/packages/core/src/schemas/message.ts",
+      "summary": "message.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 108 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/schemas/pairing-allowlist.ts",
+      "type": "file",
+      "name": "pairing-allowlist.ts",
+      "filePath": "eliza/packages/core/src/schemas/pairing-allowlist.ts",
+      "summary": "pairing-allowlist.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 78 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/schemas/pairing-request.ts",
+      "type": "file",
+      "name": "pairing-request.ts",
+      "filePath": "eliza/packages/core/src/schemas/pairing-request.ts",
+      "summary": "pairing-request.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 98 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/schemas/participant.ts",
+      "type": "file",
+      "name": "participant.ts",
+      "filePath": "eliza/packages/core/src/schemas/participant.ts",
+      "summary": "participant.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 93 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/schemas/relationship.ts",
+      "type": "file",
+      "name": "relationship.ts",
+      "filePath": "eliza/packages/core/src/schemas/relationship.ts",
+      "summary": "relationship.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 104 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/schemas/room.ts",
+      "type": "file",
+      "name": "room.ts",
+      "filePath": "eliza/packages/core/src/schemas/room.ts",
+      "summary": "room.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 88 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/schemas/server.ts",
+      "type": "file",
+      "name": "server.ts",
+      "filePath": "eliza/packages/core/src/schemas/server.ts",
+      "summary": "server.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 35 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/schemas/task.ts",
+      "type": "file",
+      "name": "task.ts",
+      "filePath": "eliza/packages/core/src/schemas/task.ts",
+      "summary": "task.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 97 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/schemas/world.ts",
+      "type": "file",
+      "name": "world.ts",
+      "filePath": "eliza/packages/core/src/schemas/world.ts",
+      "summary": "world.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 66 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/types/schema-builder.ts",
+      "type": "file",
+      "name": "schema-builder.ts",
+      "filePath": "eliza/packages/core/src/types/schema-builder.ts",
+      "summary": "schema-builder.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 54 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/types/schema-builder.ts:snakeToCamel",
+      "type": "function",
+      "name": "snakeToCamel",
+      "filePath": "eliza/packages/core/src/types/schema-builder.ts",
+      "summary": "snakeToCamel is a function defined in eliza/packages/core/src/types/schema-builder.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/types/schema.ts",
+      "type": "file",
+      "name": "schema.ts",
+      "filePath": "eliza/packages/core/src/types/schema.ts",
+      "summary": "schema.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 109 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/schemas/index.ts",
+      "target": "function:eliza/packages/core/src/schemas/index.ts:buildBaseTables",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/types/schema-builder.ts",
+      "target": "function:eliza/packages/core/src/types/schema-builder.ts:snakeToCamel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/advanced-memory/schemas/index.ts",
+      "target": "file:eliza/packages/core/src/features/advanced-memory/schemas/long-term-memories.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/advanced-memory/schemas/index.ts",
+      "target": "file:eliza/packages/core/src/features/advanced-memory/schemas/memory-access-logs.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/advanced-memory/schemas/index.ts",
+      "target": "file:eliza/packages/core/src/features/advanced-memory/schemas/session-summaries.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/advanced-memory/schemas/long-term-memories.ts",
+      "target": "file:eliza/packages/core/src/types/schema.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/advanced-memory/schemas/memory-access-logs.ts",
+      "target": "file:eliza/packages/core/src/types/schema.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/advanced-memory/schemas/session-summaries.ts",
+      "target": "file:eliza/packages/core/src/types/schema.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/agent.ts",
+      "target": "file:eliza/packages/core/src/types/schema.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/cache.ts",
+      "target": "file:eliza/packages/core/src/types/schema.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/channel-participant.ts",
+      "target": "file:eliza/packages/core/src/types/schema.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/channel.ts",
+      "target": "file:eliza/packages/core/src/types/schema.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/component.ts",
+      "target": "file:eliza/packages/core/src/types/schema.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/embedding.ts",
+      "target": "file:eliza/packages/core/src/types/schema.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/entity-identity.ts",
+      "target": "file:eliza/packages/core/src/types/schema.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/entity.ts",
+      "target": "file:eliza/packages/core/src/types/schema.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/index.ts",
+      "target": "file:eliza/packages/core/src/features/advanced-memory/schemas/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/index.ts",
+      "target": "file:eliza/packages/core/src/schemas/agent.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/index.ts",
+      "target": "file:eliza/packages/core/src/schemas/cache.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/index.ts",
+      "target": "file:eliza/packages/core/src/schemas/channel-participant.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/index.ts",
+      "target": "file:eliza/packages/core/src/schemas/channel.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/index.ts",
+      "target": "file:eliza/packages/core/src/schemas/component.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/index.ts",
+      "target": "file:eliza/packages/core/src/schemas/embedding.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/index.ts",
+      "target": "file:eliza/packages/core/src/schemas/entity-identity.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/index.ts",
+      "target": "file:eliza/packages/core/src/schemas/entity.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/index.ts",
+      "target": "file:eliza/packages/core/src/schemas/log.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/index.ts",
+      "target": "file:eliza/packages/core/src/schemas/memory.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/index.ts",
+      "target": "file:eliza/packages/core/src/schemas/message-server-agent.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/index.ts",
+      "target": "file:eliza/packages/core/src/schemas/message-server.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/index.ts",
+      "target": "file:eliza/packages/core/src/schemas/message.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/index.ts",
+      "target": "file:eliza/packages/core/src/schemas/pairing-allowlist.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/index.ts",
+      "target": "file:eliza/packages/core/src/schemas/pairing-request.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/index.ts",
+      "target": "file:eliza/packages/core/src/schemas/participant.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/index.ts",
+      "target": "file:eliza/packages/core/src/schemas/relationship.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/index.ts",
+      "target": "file:eliza/packages/core/src/schemas/room.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/index.ts",
+      "target": "file:eliza/packages/core/src/schemas/server.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/index.ts",
+      "target": "file:eliza/packages/core/src/schemas/task.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/index.ts",
+      "target": "file:eliza/packages/core/src/schemas/world.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/index.ts",
+      "target": "file:eliza/packages/core/src/types/schema-builder.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/log.ts",
+      "target": "file:eliza/packages/core/src/types/schema.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/memory.ts",
+      "target": "file:eliza/packages/core/src/types/schema.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/message-server-agent.ts",
+      "target": "file:eliza/packages/core/src/types/schema.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/message-server.ts",
+      "target": "file:eliza/packages/core/src/types/schema.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/message.ts",
+      "target": "file:eliza/packages/core/src/types/schema.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/pairing-allowlist.ts",
+      "target": "file:eliza/packages/core/src/types/schema.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/pairing-request.ts",
+      "target": "file:eliza/packages/core/src/types/schema.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/participant.ts",
+      "target": "file:eliza/packages/core/src/types/schema.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/relationship.ts",
+      "target": "file:eliza/packages/core/src/types/schema.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/room.ts",
+      "target": "file:eliza/packages/core/src/types/schema.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/server.ts",
+      "target": "file:eliza/packages/core/src/types/schema.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/task.ts",
+      "target": "file:eliza/packages/core/src/types/schema.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/schemas/world.ts",
+      "target": "file:eliza/packages/core/src/types/schema.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/types/schema-builder.ts",
+      "target": "file:eliza/packages/core/src/types/schema.ts",
+      "type": "imports"
+    }
+  ]
+}

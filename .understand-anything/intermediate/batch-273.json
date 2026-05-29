@@ -1,0 +1,772 @@
+{
+  "batchIndex": 273,
+  "nodes": [
+    {
+      "tags": [
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:docs/agent-packs/electrobun-agentic-desktop-2026/scripts/electrobun/pre-build.ts",
+      "type": "file",
+      "name": "pre-build.ts",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/scripts/electrobun/pre-build.ts",
+      "summary": "pre-build.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 24 lines"
+    },
+    {
+      "tags": [
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:docs/agent-packs/electrobun-agentic-desktop-2026/scripts/generate-rpc-fixture.py",
+      "type": "file",
+      "name": "generate-rpc-fixture.py",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/scripts/generate-rpc-fixture.py",
+      "summary": "generate-rpc-fixture.py is a python source file in the Milady codebase.",
+      "languageNotes": "python; code; 15 lines"
+    },
+    {
+      "tags": [
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:docs/agent-packs/electrobun-agentic-desktop-2026/scripts/prompt-eval-runner.py",
+      "type": "file",
+      "name": "prompt-eval-runner.py",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/scripts/prompt-eval-runner.py",
+      "summary": "prompt-eval-runner.py is a python source file in the Milady codebase.",
+      "languageNotes": "python; code; 22 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun/APPLE_TO_ELECTROBUN_EXAMPLE.md",
+      "type": "document",
+      "name": "APPLE_TO_ELECTROBUN_EXAMPLE.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun/APPLE_TO_ELECTROBUN_EXAMPLE.md",
+      "summary": "APPLE_TO_ELECTROBUN_EXAMPLE.md documents docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun with 18 lines of reference material.",
+      "languageNotes": "markdown; docs; 18 lines"
+    },
+    {
+      "tags": [
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun/bunfig.toml.template",
+      "type": "file",
+      "name": "bunfig.toml.template",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun/bunfig.toml.template",
+      "summary": "bunfig.toml.template is a template source file in the Milady codebase.",
+      "languageNotes": "template; code; 10 lines"
+    },
+    {
+      "tags": [
+        "desktop"
+      ],
+      "complexity": "moderate",
+      "id": "file:docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun/electrobun.config.ts",
+      "type": "file",
+      "name": "electrobun.config.ts",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun/electrobun.config.ts",
+      "summary": "electrobun.config.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 66 lines"
+    },
+    {
+      "tags": [
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun/eval_cases.json.example",
+      "type": "file",
+      "name": "eval_cases.json.example",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun/eval_cases.json.example",
+      "summary": "eval_cases.json.example is a example source file in the Milady codebase.",
+      "languageNotes": "example; code; 14 lines"
+    },
+    {
+      "tags": [
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun/package.json.template",
+      "type": "file",
+      "name": "package.json.template",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun/package.json.template",
+      "summary": "package.json.template is a template source file in the Milady codebase.",
+      "languageNotes": "template; code; 26 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun/README-template.md",
+      "type": "document",
+      "name": "README-template.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun/README-template.md",
+      "summary": "README-template.md documents docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun with 13 lines of reference material.",
+      "languageNotes": "markdown; docs; 13 lines"
+    },
+    {
+      "tags": [
+        "desktop",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun/src/bun/network/http-client.ts",
+      "type": "file",
+      "name": "http-client.ts",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun/src/bun/network/http-client.ts",
+      "summary": "http-client.ts is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 31 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun/src/bun/network/http-client.ts:requestJson",
+      "type": "function",
+      "name": "requestJson",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun/src/bun/network/http-client.ts",
+      "summary": "requestJson is a function defined in docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun/src/bun/network/http-client.ts."
+    },
+    {
+      "tags": [
+        "desktop",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun/src/bun/storage/sqlite-repository.ts",
+      "type": "file",
+      "name": "sqlite-repository.ts",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun/src/bun/storage/sqlite-repository.ts",
+      "summary": "sqlite-repository.ts is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 31 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun/src/bun/storage/sqlite-repository.ts:openAppDatabase",
+      "type": "function",
+      "name": "openAppDatabase",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun/src/bun/storage/sqlite-repository.ts",
+      "summary": "openAppDatabase is a function defined in docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun/src/bun/storage/sqlite-repository.ts."
+    },
+    {
+      "tags": [
+        "frontend",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun/src/mainview/index.html",
+      "type": "file",
+      "name": "index.html",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun/src/mainview/index.html",
+      "summary": "index.html is a html source file in the Milady codebase.",
+      "languageNotes": "html; markup; 34 lines"
+    },
+    {
+      "tags": [
+        "frontend",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun/src/mainview/style.css",
+      "type": "file",
+      "name": "style.css",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun/src/mainview/style.css",
+      "summary": "style.css is a css source file in the Milady codebase.",
+      "languageNotes": "css; markup; 47 lines"
+    },
+    {
+      "tags": [
+        "frontend",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun/src/webviewtag/index.html",
+      "type": "file",
+      "name": "index.html",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun/src/webviewtag/index.html",
+      "summary": "index.html is a html source file in the Milady codebase.",
+      "languageNotes": "html; markup; 18 lines"
+    },
+    {
+      "tags": [
+        "entry-point",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun/src/webviewtag/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun/src/webviewtag/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 17 lines"
+    },
+    {
+      "tags": [
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun/tsconfig.json.template",
+      "type": "file",
+      "name": "tsconfig.json.template",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun/tsconfig.json.template",
+      "summary": "tsconfig.json.template is a template source file in the Milady codebase.",
+      "languageNotes": "template; code; 16 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:docs/apps/android-release-signing.md",
+      "type": "document",
+      "name": "android-release-signing.md",
+      "filePath": "docs/apps/android-release-signing.md",
+      "summary": "android-release-signing.md documents docs/apps with 187 lines of reference material.",
+      "languageNotes": "markdown; docs; 187 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/apps/desktop/release-heavy-inventory.md",
+      "type": "document",
+      "name": "release-heavy-inventory.md",
+      "filePath": "docs/apps/desktop/release-heavy-inventory.md",
+      "summary": "release-heavy-inventory.md documents docs/apps/desktop with 41 lines of reference material.",
+      "languageNotes": "markdown; docs; 41 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/apps/desktop/release-regression-checklist.md",
+      "type": "document",
+      "name": "release-regression-checklist.md",
+      "filePath": "docs/apps/desktop/release-regression-checklist.md",
+      "summary": "release-regression-checklist.md documents docs/apps/desktop with 12 lines of reference material.",
+      "languageNotes": "markdown; docs; 12 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:docs/desktop/build-variants.md",
+      "type": "document",
+      "name": "build-variants.md",
+      "filePath": "docs/desktop/build-variants.md",
+      "summary": "build-variants.md documents docs/desktop with 91 lines of reference material.",
+      "languageNotes": "markdown; docs; 91 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "complex",
+      "id": "config:eliza/packages/agent/evidence/tee/full-stack-local-2026-05-20.json",
+      "type": "config",
+      "name": "full-stack-local-2026-05-20.json",
+      "filePath": "eliza/packages/agent/evidence/tee/full-stack-local-2026-05-20.json",
+      "summary": "full-stack-local-2026-05-20.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 599 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/agent/scripts/build-mobile-bundle.mjs",
+      "type": "file",
+      "name": "build-mobile-bundle.mjs",
+      "filePath": "eliza/packages/agent/scripts/build-mobile-bundle.mjs",
+      "summary": "build-mobile-bundle.mjs is a javascript source file in the Milady codebase. It contains 13 functions.",
+      "languageNotes": "javascript; code; 1842 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:findPgliteDist",
+      "type": "function",
+      "name": "findPgliteDist",
+      "filePath": "eliza/packages/agent/scripts/build-mobile-bundle.mjs",
+      "summary": "findPgliteDist is a function defined in eliza/packages/agent/scripts/build-mobile-bundle.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:readdirSyncSafe",
+      "type": "function",
+      "name": "readdirSyncSafe",
+      "filePath": "eliza/packages/agent/scripts/build-mobile-bundle.mjs",
+      "summary": "readdirSyncSafe is a function defined in eliza/packages/agent/scripts/build-mobile-bundle.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:findEthersCommonJsIndex",
+      "type": "function",
+      "name": "findEthersCommonJsIndex",
+      "filePath": "eliza/packages/agent/scripts/build-mobile-bundle.mjs",
+      "summary": "findEthersCommonJsIndex is a function defined in eliza/packages/agent/scripts/build-mobile-bundle.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:findViemPackageRoot",
+      "type": "function",
+      "name": "findViemPackageRoot",
+      "filePath": "eliza/packages/agent/scripts/build-mobile-bundle.mjs",
+      "summary": "findViemPackageRoot is a function defined in eliza/packages/agent/scripts/build-mobile-bundle.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:readJsonFile",
+      "type": "function",
+      "name": "readJsonFile",
+      "filePath": "eliza/packages/agent/scripts/build-mobile-bundle.mjs",
+      "summary": "readJsonFile is a function defined in eliza/packages/agent/scripts/build-mobile-bundle.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:encodeBunPackageName",
+      "type": "function",
+      "name": "encodeBunPackageName",
+      "filePath": "eliza/packages/agent/scripts/build-mobile-bundle.mjs",
+      "summary": "encodeBunPackageName is a function defined in eliza/packages/agent/scripts/build-mobile-bundle.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:versionSatisfiesRange",
+      "type": "function",
+      "name": "versionSatisfiesRange",
+      "filePath": "eliza/packages/agent/scripts/build-mobile-bundle.mjs",
+      "summary": "versionSatisfiesRange is a function defined in eliza/packages/agent/scripts/build-mobile-bundle.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:findInstalledPackageRoot",
+      "type": "function",
+      "name": "findInstalledPackageRoot",
+      "filePath": "eliza/packages/agent/scripts/build-mobile-bundle.mjs",
+      "summary": "findInstalledPackageRoot is a function defined in eliza/packages/agent/scripts/build-mobile-bundle.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:resolveConditionalExport",
+      "type": "function",
+      "name": "resolveConditionalExport",
+      "filePath": "eliza/packages/agent/scripts/build-mobile-bundle.mjs",
+      "summary": "resolveConditionalExport is a function defined in eliza/packages/agent/scripts/build-mobile-bundle.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:resolveInstalledPackageEntry",
+      "type": "function",
+      "name": "resolveInstalledPackageEntry",
+      "filePath": "eliza/packages/agent/scripts/build-mobile-bundle.mjs",
+      "summary": "resolveInstalledPackageEntry is a function defined in eliza/packages/agent/scripts/build-mobile-bundle.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:initSourceComment",
+      "type": "function",
+      "name": "initSourceComment",
+      "filePath": "eliza/packages/agent/scripts/build-mobile-bundle.mjs",
+      "summary": "initSourceComment is a function defined in eliza/packages/agent/scripts/build-mobile-bundle.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:reportInitElizaShape",
+      "type": "function",
+      "name": "reportInitElizaShape",
+      "filePath": "eliza/packages/agent/scripts/build-mobile-bundle.mjs",
+      "summary": "reportInitElizaShape is a function defined in eliza/packages/agent/scripts/build-mobile-bundle.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:scanUndeclaredRenames",
+      "type": "function",
+      "name": "scanUndeclaredRenames",
+      "filePath": "eliza/packages/agent/scripts/build-mobile-bundle.mjs",
+      "summary": "scanUndeclaredRenames is a function defined in eliza/packages/agent/scripts/build-mobile-bundle.mjs."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/agent/scripts/mobile-stubs/app-core-runtime.cjs",
+      "type": "file",
+      "name": "app-core-runtime.cjs",
+      "filePath": "eliza/packages/agent/scripts/mobile-stubs/app-core-runtime.cjs",
+      "summary": "app-core-runtime.cjs is a javascript source file in the Milady codebase. It contains 3 functions.",
+      "languageNotes": "javascript; code; 78 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/scripts/mobile-stubs/app-core-runtime.cjs:noopAsync",
+      "type": "function",
+      "name": "noopAsync",
+      "filePath": "eliza/packages/agent/scripts/mobile-stubs/app-core-runtime.cjs",
+      "summary": "noopAsync is a function defined in eliza/packages/agent/scripts/mobile-stubs/app-core-runtime.cjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/scripts/mobile-stubs/app-core-runtime.cjs:resolveRuntimeMode",
+      "type": "function",
+      "name": "resolveRuntimeMode",
+      "filePath": "eliza/packages/agent/scripts/mobile-stubs/app-core-runtime.cjs",
+      "summary": "resolveRuntimeMode is a function defined in eliza/packages/agent/scripts/mobile-stubs/app-core-runtime.cjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/scripts/mobile-stubs/app-core-runtime.cjs:getBuildVariant",
+      "type": "function",
+      "name": "getBuildVariant",
+      "filePath": "eliza/packages/agent/scripts/mobile-stubs/app-core-runtime.cjs",
+      "summary": "getBuildVariant is a function defined in eliza/packages/agent/scripts/mobile-stubs/app-core-runtime.cjs."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/agent/scripts/mobile-stubs/argon2.cjs",
+      "type": "file",
+      "name": "argon2.cjs",
+      "filePath": "eliza/packages/agent/scripts/mobile-stubs/argon2.cjs",
+      "summary": "argon2.cjs is a javascript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "javascript; code; 24 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/scripts/mobile-stubs/argon2.cjs:unavailable",
+      "type": "function",
+      "name": "unavailable",
+      "filePath": "eliza/packages/agent/scripts/mobile-stubs/argon2.cjs",
+      "summary": "unavailable is a function defined in eliza/packages/agent/scripts/mobile-stubs/argon2.cjs."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/agent/scripts/mobile-stubs/canvas.cjs",
+      "type": "file",
+      "name": "canvas.cjs",
+      "filePath": "eliza/packages/agent/scripts/mobile-stubs/canvas.cjs",
+      "summary": "canvas.cjs is a javascript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "javascript; code; 25 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/scripts/mobile-stubs/canvas.cjs:unavailable",
+      "type": "function",
+      "name": "unavailable",
+      "filePath": "eliza/packages/agent/scripts/mobile-stubs/canvas.cjs",
+      "summary": "unavailable is a function defined in eliza/packages/agent/scripts/mobile-stubs/canvas.cjs."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun/src/bun/network/http-client.ts",
+      "target": "function:docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun/src/bun/network/http-client.ts:requestJson",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun/src/bun/storage/sqlite-repository.ts",
+      "target": "function:docs/agent-packs/electrobun-agentic-desktop-2026/templates/electrobun/src/bun/storage/sqlite-repository.ts:openAppDatabase",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/scripts/build-mobile-bundle.mjs",
+      "target": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:findPgliteDist",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/scripts/build-mobile-bundle.mjs",
+      "target": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:readdirSyncSafe",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/scripts/build-mobile-bundle.mjs",
+      "target": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:findEthersCommonJsIndex",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/scripts/build-mobile-bundle.mjs",
+      "target": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:findViemPackageRoot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/scripts/build-mobile-bundle.mjs",
+      "target": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:readJsonFile",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/scripts/build-mobile-bundle.mjs",
+      "target": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:encodeBunPackageName",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/scripts/build-mobile-bundle.mjs",
+      "target": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:versionSatisfiesRange",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/scripts/build-mobile-bundle.mjs",
+      "target": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:findInstalledPackageRoot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/scripts/build-mobile-bundle.mjs",
+      "target": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:resolveConditionalExport",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/scripts/build-mobile-bundle.mjs",
+      "target": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:resolveInstalledPackageEntry",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/scripts/build-mobile-bundle.mjs",
+      "target": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:initSourceComment",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/scripts/build-mobile-bundle.mjs",
+      "target": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:reportInitElizaShape",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/scripts/build-mobile-bundle.mjs",
+      "target": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:scanUndeclaredRenames",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:findPgliteDist",
+      "target": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:readdirSyncSafe",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:findEthersCommonJsIndex",
+      "target": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:readdirSyncSafe",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:findViemPackageRoot",
+      "target": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:readdirSyncSafe",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:findInstalledPackageRoot",
+      "target": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:encodeBunPackageName",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:findInstalledPackageRoot",
+      "target": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:readdirSyncSafe",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:findInstalledPackageRoot",
+      "target": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:readJsonFile",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:findInstalledPackageRoot",
+      "target": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:versionSatisfiesRange",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:resolveInstalledPackageEntry",
+      "target": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:findInstalledPackageRoot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:resolveInstalledPackageEntry",
+      "target": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:readJsonFile",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:resolveInstalledPackageEntry",
+      "target": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:resolveConditionalExport",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:reportInitElizaShape",
+      "target": "function:eliza/packages/agent/scripts/build-mobile-bundle.mjs:initSourceComment",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/scripts/mobile-stubs/app-core-runtime.cjs",
+      "target": "function:eliza/packages/agent/scripts/mobile-stubs/app-core-runtime.cjs:noopAsync",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/scripts/mobile-stubs/app-core-runtime.cjs",
+      "target": "function:eliza/packages/agent/scripts/mobile-stubs/app-core-runtime.cjs:resolveRuntimeMode",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/scripts/mobile-stubs/app-core-runtime.cjs",
+      "target": "function:eliza/packages/agent/scripts/mobile-stubs/app-core-runtime.cjs:getBuildVariant",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/scripts/mobile-stubs/argon2.cjs",
+      "target": "function:eliza/packages/agent/scripts/mobile-stubs/argon2.cjs:unavailable",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/scripts/mobile-stubs/canvas.cjs",
+      "target": "function:eliza/packages/agent/scripts/mobile-stubs/canvas.cjs:unavailable",
+      "type": "contains"
+    }
+  ]
+}

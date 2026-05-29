@@ -1,0 +1,383 @@
+{
+  "batchIndex": 136,
+  "nodes": [
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/config/__tests__/app-manifest.test.ts",
+      "type": "file",
+      "name": "app-manifest.test.ts",
+      "filePath": "eliza/packages/shared/src/config/__tests__/app-manifest.test.ts",
+      "summary": "app-manifest.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 176 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/config/__tests__/app-manifest.test.ts:writeAppPackageJson",
+      "type": "function",
+      "name": "writeAppPackageJson",
+      "filePath": "eliza/packages/shared/src/config/__tests__/app-manifest.test.ts",
+      "summary": "writeAppPackageJson is a function defined in eliza/packages/shared/src/config/__tests__/app-manifest.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/shared/src/config/__tests__/plugin-manifest.test.ts",
+      "type": "file",
+      "name": "plugin-manifest.test.ts",
+      "filePath": "eliza/packages/shared/src/config/__tests__/plugin-manifest.test.ts",
+      "summary": "plugin-manifest.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 372 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/config/__tests__/plugin-manifest.test.ts:writeFakePlugin",
+      "type": "function",
+      "name": "writeFakePlugin",
+      "filePath": "eliza/packages/shared/src/config/__tests__/plugin-manifest.test.ts",
+      "summary": "writeFakePlugin is a function defined in eliza/packages/shared/src/config/__tests__/plugin-manifest.test.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/config/app-manifest.ts",
+      "type": "file",
+      "name": "app-manifest.ts",
+      "filePath": "eliza/packages/shared/src/config/app-manifest.ts",
+      "summary": "app-manifest.ts is a typescript source file in the Milady codebase. It contains 4 functions, 1 imports.",
+      "languageNotes": "typescript; code; 171 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/config/app-manifest.ts:assertPackageJsonObject",
+      "type": "function",
+      "name": "assertPackageJsonObject",
+      "filePath": "eliza/packages/shared/src/config/app-manifest.ts",
+      "summary": "assertPackageJsonObject is a function defined in eliza/packages/shared/src/config/app-manifest.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/config/app-manifest.ts:readAppManifest",
+      "type": "function",
+      "name": "readAppManifest",
+      "filePath": "eliza/packages/shared/src/config/app-manifest.ts",
+      "summary": "readAppManifest is a function defined in eliza/packages/shared/src/config/app-manifest.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/config/app-manifest.ts:filterCandidatesByAppManifest",
+      "type": "function",
+      "name": "filterCandidatesByAppManifest",
+      "filePath": "eliza/packages/shared/src/config/app-manifest.ts",
+      "summary": "filterCandidatesByAppManifest is a function defined in eliza/packages/shared/src/config/app-manifest.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/config/app-manifest.ts:applyAppManifestDefaults",
+      "type": "function",
+      "name": "applyAppManifestDefaults",
+      "filePath": "eliza/packages/shared/src/config/app-manifest.ts",
+      "summary": "applyAppManifestDefaults is a function defined in eliza/packages/shared/src/config/app-manifest.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/shared/src/config/plugin-manifest.ts",
+      "type": "file",
+      "name": "plugin-manifest.ts",
+      "filePath": "eliza/packages/shared/src/config/plugin-manifest.ts",
+      "summary": "plugin-manifest.ts is a typescript source file in the Milady codebase. It contains 7 functions, 1 imports.",
+      "languageNotes": "typescript; code; 403 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/config/plugin-manifest.ts:assertPackageJsonObject",
+      "type": "function",
+      "name": "assertPackageJsonObject",
+      "filePath": "eliza/packages/shared/src/config/plugin-manifest.ts",
+      "summary": "assertPackageJsonObject is a function defined in eliza/packages/shared/src/config/plugin-manifest.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/config/plugin-manifest.ts:pluginShortId",
+      "type": "function",
+      "name": "pluginShortId",
+      "filePath": "eliza/packages/shared/src/config/plugin-manifest.ts",
+      "summary": "pluginShortId is a function defined in eliza/packages/shared/src/config/plugin-manifest.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/config/plugin-manifest.ts:readPluginPackageManifest",
+      "type": "function",
+      "name": "readPluginPackageManifest",
+      "filePath": "eliza/packages/shared/src/config/plugin-manifest.ts",
+      "summary": "readPluginPackageManifest is a function defined in eliza/packages/shared/src/config/plugin-manifest.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/config/plugin-manifest.ts:loadCheckModule",
+      "type": "function",
+      "name": "loadCheckModule",
+      "filePath": "eliza/packages/shared/src/config/plugin-manifest.ts",
+      "summary": "loadCheckModule is a function defined in eliza/packages/shared/src/config/plugin-manifest.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/shared/src/config/plugin-manifest.ts:evaluatePluginManifest",
+      "type": "function",
+      "name": "evaluatePluginManifest",
+      "filePath": "eliza/packages/shared/src/config/plugin-manifest.ts",
+      "summary": "evaluatePluginManifest is a function defined in eliza/packages/shared/src/config/plugin-manifest.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/config/plugin-manifest.ts:evaluatePluginManifests",
+      "type": "function",
+      "name": "evaluatePluginManifests",
+      "filePath": "eliza/packages/shared/src/config/plugin-manifest.ts",
+      "summary": "evaluatePluginManifests is a function defined in eliza/packages/shared/src/config/plugin-manifest.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/config/plugin-manifest.ts:applyPluginManifestVerdicts",
+      "type": "function",
+      "name": "applyPluginManifestVerdicts",
+      "filePath": "eliza/packages/shared/src/config/plugin-manifest.ts",
+      "summary": "applyPluginManifestVerdicts is a function defined in eliza/packages/shared/src/config/plugin-manifest.ts."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/config/__tests__/app-manifest.test.ts",
+      "target": "function:eliza/packages/shared/src/config/__tests__/app-manifest.test.ts:writeAppPackageJson",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/config/__tests__/plugin-manifest.test.ts",
+      "target": "function:eliza/packages/shared/src/config/__tests__/plugin-manifest.test.ts:writeFakePlugin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/config/app-manifest.ts",
+      "target": "function:eliza/packages/shared/src/config/app-manifest.ts:assertPackageJsonObject",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/config/app-manifest.ts",
+      "target": "function:eliza/packages/shared/src/config/app-manifest.ts:readAppManifest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/config/app-manifest.ts",
+      "target": "function:eliza/packages/shared/src/config/app-manifest.ts:filterCandidatesByAppManifest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/config/app-manifest.ts",
+      "target": "function:eliza/packages/shared/src/config/app-manifest.ts:applyAppManifestDefaults",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/config/app-manifest.ts:readAppManifest",
+      "target": "function:eliza/packages/shared/src/config/app-manifest.ts:assertPackageJsonObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/config/plugin-manifest.ts",
+      "target": "function:eliza/packages/shared/src/config/plugin-manifest.ts:assertPackageJsonObject",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/config/plugin-manifest.ts",
+      "target": "function:eliza/packages/shared/src/config/plugin-manifest.ts:pluginShortId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/config/plugin-manifest.ts",
+      "target": "function:eliza/packages/shared/src/config/plugin-manifest.ts:readPluginPackageManifest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/config/plugin-manifest.ts",
+      "target": "function:eliza/packages/shared/src/config/plugin-manifest.ts:loadCheckModule",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/config/plugin-manifest.ts",
+      "target": "function:eliza/packages/shared/src/config/plugin-manifest.ts:evaluatePluginManifest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/config/plugin-manifest.ts",
+      "target": "function:eliza/packages/shared/src/config/plugin-manifest.ts:evaluatePluginManifests",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/config/plugin-manifest.ts",
+      "target": "function:eliza/packages/shared/src/config/plugin-manifest.ts:applyPluginManifestVerdicts",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/config/plugin-manifest.ts:readPluginPackageManifest",
+      "target": "function:eliza/packages/shared/src/config/plugin-manifest.ts:assertPackageJsonObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/config/plugin-manifest.ts:evaluatePluginManifest",
+      "target": "function:eliza/packages/shared/src/config/plugin-manifest.ts:readPluginPackageManifest",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/config/plugin-manifest.ts:evaluatePluginManifest",
+      "target": "function:eliza/packages/shared/src/config/plugin-manifest.ts:pluginShortId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/config/plugin-manifest.ts:evaluatePluginManifest",
+      "target": "function:eliza/packages/shared/src/config/plugin-manifest.ts:loadCheckModule",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/config/plugin-manifest.ts:evaluatePluginManifests",
+      "target": "function:eliza/packages/shared/src/config/plugin-manifest.ts:evaluatePluginManifest",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/config/plugin-manifest.ts:evaluatePluginManifests",
+      "target": "function:eliza/packages/shared/src/config/plugin-manifest.ts:pluginShortId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/shared/src/config/__tests__/app-manifest.test.ts",
+      "target": "file:eliza/packages/shared/src/config/app-manifest.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/shared/src/config/__tests__/app-manifest.test.ts",
+      "target": "file:eliza/packages/shared/src/config/plugin-manifest.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/shared/src/config/__tests__/plugin-manifest.test.ts",
+      "target": "file:eliza/packages/shared/src/config/plugin-manifest.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/shared/src/config/plugin-manifest.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    }
+  ]
+}

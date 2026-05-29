@@ -1,0 +1,42 @@
+{
+  "batchIndex": 267,
+  "nodes": [
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:skills/plan-my-day/.scan-results.json",
+      "type": "config",
+      "name": ".scan-results.json",
+      "filePath": "skills/plan-my-day/.scan-results.json",
+      "summary": ".scan-results.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 13 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:skills/plan-my-day/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "skills/plan-my-day/SKILL.md",
+      "summary": "SKILL.md documents skills/plan-my-day with 135 lines of reference material.",
+      "languageNotes": "markdown; docs; 135 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:skills/plan-my-day/_meta.json",
+      "type": "config",
+      "name": "_meta.json",
+      "filePath": "skills/plan-my-day/_meta.json",
+      "summary": "_meta.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 6 lines"
+    }
+  ],
+  "edges": []
+}

@@ -1,0 +1,2520 @@
+{
+  "batchIndex": 282,
+  "nodes": [
+    {
+      "tags": [
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/scripts/ensure-build-folder.ts",
+      "type": "file",
+      "name": "ensure-build-folder.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/ensure-build-folder.ts",
+      "summary": "ensure-build-folder.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 28 lines"
+    },
+    {
+      "tags": [
+        "desktop",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "type": "file",
+      "name": "generate-convergence-audit.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "summary": "generate-convergence-audit.ts is a typescript source file in the Milady codebase. It contains 24 functions.",
+      "languageNotes": "typescript; code; 1209 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:relativePath",
+      "type": "function",
+      "name": "relativePath",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "summary": "relativePath is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:isJsonObject",
+      "type": "function",
+      "name": "isJsonObject",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "summary": "isJsonObject is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:pathExists",
+      "type": "function",
+      "name": "pathExists",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "summary": "pathExists is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:readPackageJson",
+      "type": "function",
+      "name": "readPackageJson",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "summary": "readPackageJson is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:git",
+      "type": "function",
+      "name": "git",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "summary": "git is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:countBy",
+      "type": "function",
+      "name": "countBy",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "summary": "countBy is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:packagePurpose",
+      "type": "function",
+      "name": "packagePurpose",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "summary": "packagePurpose is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:nativeRelatedRemote",
+      "type": "function",
+      "name": "nativeRelatedRemote",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "summary": "nativeRelatedRemote is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:classifyPlugin",
+      "type": "function",
+      "name": "classifyPlugin",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "summary": "classifyPlugin is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:pluginNotes",
+      "type": "function",
+      "name": "pluginNotes",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "summary": "pluginNotes is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:pluginEntry",
+      "type": "function",
+      "name": "pluginEntry",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "summary": "pluginEntry is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:directDirectories",
+      "type": "function",
+      "name": "directDirectories",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "summary": "directDirectories is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:packageEntry",
+      "type": "function",
+      "name": "packageEntry",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "summary": "packageEntry is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:remoteEntries",
+      "type": "function",
+      "name": "remoteEntries",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "summary": "remoteEntries is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:deletionCandidates",
+      "type": "function",
+      "name": "deletionCandidates",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "summary": "deletionCandidates is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildEntries",
+      "type": "function",
+      "name": "buildEntries",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "summary": "buildEntries is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:list",
+      "type": "function",
+      "name": "list",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "summary": "list is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildSummaries",
+      "type": "function",
+      "name": "buildSummaries",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "summary": "buildSummaries is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:markdownList",
+      "type": "function",
+      "name": "markdownList",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "summary": "markdownList is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:summaryTable",
+      "type": "function",
+      "name": "summaryTable",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "summary": "summaryTable is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:entriesTable",
+      "type": "function",
+      "name": "entriesTable",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "summary": "entriesTable is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:deletionTable",
+      "type": "function",
+      "name": "deletionTable",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "summary": "deletionTable is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildMarkdown",
+      "type": "function",
+      "name": "buildMarkdown",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "summary": "buildMarkdown is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "summary": "main is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts."
+    },
+    {
+      "tags": [
+        "desktop",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/scripts/lib/app-dir.mjs",
+      "type": "file",
+      "name": "app-dir.mjs",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/lib/app-dir.mjs",
+      "summary": "app-dir.mjs is a javascript source file in the Milady codebase. It contains 5 functions.",
+      "languageNotes": "javascript; code; 74 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/app-dir.mjs:hasPackageJson",
+      "type": "function",
+      "name": "hasPackageJson",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/lib/app-dir.mjs",
+      "summary": "hasPackageJson is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/lib/app-dir.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/app-dir.mjs:firstExistingPackage",
+      "type": "function",
+      "name": "firstExistingPackage",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/lib/app-dir.mjs",
+      "summary": "firstExistingPackage is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/lib/app-dir.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/app-dir.mjs:resolveMainAppDir",
+      "type": "function",
+      "name": "resolveMainAppDir",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/lib/app-dir.mjs",
+      "summary": "resolveMainAppDir is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/lib/app-dir.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/app-dir.mjs:relativeAppDir",
+      "type": "function",
+      "name": "relativeAppDir",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/lib/app-dir.mjs",
+      "summary": "relativeAppDir is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/lib/app-dir.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/app-dir.mjs:resolveElectrobunDir",
+      "type": "function",
+      "name": "resolveElectrobunDir",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/lib/app-dir.mjs",
+      "summary": "resolveElectrobunDir is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/lib/app-dir.mjs."
+    },
+    {
+      "tags": [
+        "desktop",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs",
+      "type": "file",
+      "name": "repo-root.mjs",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs",
+      "summary": "repo-root.mjs is a javascript source file in the Milady codebase. It contains 6 functions.",
+      "languageNotes": "javascript; code; 77 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs:looksLikeElizaSubrepoRoot",
+      "type": "function",
+      "name": "looksLikeElizaSubrepoRoot",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs",
+      "summary": "looksLikeElizaSubrepoRoot is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs:looksLikeFlatMonorepoRoot",
+      "type": "function",
+      "name": "looksLikeFlatMonorepoRoot",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs",
+      "summary": "looksLikeFlatMonorepoRoot is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs:looksLikeRepoRoot",
+      "type": "function",
+      "name": "looksLikeRepoRoot",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs",
+      "summary": "looksLikeRepoRoot is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs:resolveRepoRoot",
+      "type": "function",
+      "name": "resolveRepoRoot",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs",
+      "summary": "resolveRepoRoot is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs:resolveRepoRootFromCwd",
+      "type": "function",
+      "name": "resolveRepoRootFromCwd",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs",
+      "summary": "resolveRepoRootFromCwd is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs:resolveRepoRootFromImportMeta",
+      "type": "function",
+      "name": "resolveRepoRootFromImportMeta",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs",
+      "summary": "resolveRepoRootFromImportMeta is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs."
+    },
+    {
+      "tags": [
+        "desktop",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/scripts/macos-direct-launcher.c",
+      "type": "file",
+      "name": "macos-direct-launcher.c",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/macos-direct-launcher.c",
+      "summary": "macos-direct-launcher.c is a c source file in the Milady codebase. It contains 2 functions.",
+      "languageNotes": "c; code; 84 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/macos-direct-launcher.c:fail",
+      "type": "function",
+      "name": "fail",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/macos-direct-launcher.c",
+      "summary": "fail is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/macos-direct-launcher.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/macos-direct-launcher.c:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/macos-direct-launcher.c",
+      "summary": "main is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/macos-direct-launcher.c."
+    },
+    {
+      "tags": [
+        "desktop",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "type": "file",
+      "name": "postwrap-sign-runtime-macos.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "summary": "postwrap-sign-runtime-macos.ts is a typescript source file in the Milady codebase. It contains 19 functions.",
+      "languageNotes": "typescript; code; 383 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:isPosixAbsolutePath",
+      "type": "function",
+      "name": "isPosixAbsolutePath",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "summary": "isPosixAbsolutePath is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:resolvePortablePath",
+      "type": "function",
+      "name": "resolvePortablePath",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "summary": "resolvePortablePath is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:joinPortable",
+      "type": "function",
+      "name": "joinPortable",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "summary": "joinPortable is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:classifyMachOKind",
+      "type": "function",
+      "name": "classifyMachOKind",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "summary": "classifyMachOKind is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:materializeRuntimePath",
+      "type": "function",
+      "name": "materializeRuntimePath",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "summary": "materializeRuntimePath is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:normalizeBundleStem",
+      "type": "function",
+      "name": "normalizeBundleStem",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "summary": "normalizeBundleStem is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:resolveBuildBundlePath",
+      "type": "function",
+      "name": "resolveBuildBundlePath",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "summary": "resolveBuildBundlePath is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:resolveRuntimeNodeModulesPath",
+      "type": "function",
+      "name": "resolveRuntimeNodeModulesPath",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "summary": "resolveRuntimeNodeModulesPath is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:shouldConsiderForCodesign",
+      "type": "function",
+      "name": "shouldConsiderForCodesign",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "summary": "shouldConsiderForCodesign is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:buildCodesignArgs",
+      "type": "function",
+      "name": "buildCodesignArgs",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "summary": "buildCodesignArgs is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:isRetryableCodesignFailure",
+      "type": "function",
+      "name": "isRetryableCodesignFailure",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "summary": "isRetryableCodesignFailure is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:formatExecSyncFailure",
+      "type": "function",
+      "name": "formatExecSyncFailure",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "summary": "formatExecSyncFailure is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:sleepMs",
+      "type": "function",
+      "name": "sleepMs",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "summary": "sleepMs is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:resolveDeveloperId",
+      "type": "function",
+      "name": "resolveDeveloperId",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "summary": "resolveDeveloperId is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:collectNativeCandidates",
+      "type": "function",
+      "name": "collectNativeCandidates",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "summary": "collectNativeCandidates is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:signRuntimeFile",
+      "type": "function",
+      "name": "signRuntimeFile",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "summary": "signRuntimeFile is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:shouldRun",
+      "type": "function",
+      "name": "shouldRun",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "summary": "shouldRun is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:ensureMacBuildAppIcon",
+      "type": "function",
+      "name": "ensureMacBuildAppIcon",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "summary": "ensureMacBuildAppIcon is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "summary": "main is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts."
+    },
+    {
+      "tags": [
+        "desktop",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/scripts/verify-rpc-handlers.ts",
+      "type": "file",
+      "name": "verify-rpc-handlers.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/verify-rpc-handlers.ts",
+      "summary": "verify-rpc-handlers.ts is a typescript source file in the Milady codebase. It contains 2 functions.",
+      "languageNotes": "typescript; code; 161 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/verify-rpc-handlers.ts:extractSchemaMethods",
+      "type": "function",
+      "name": "extractSchemaMethods",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/verify-rpc-handlers.ts",
+      "summary": "extractSchemaMethods is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/verify-rpc-handlers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/scripts/verify-rpc-handlers.ts:extractHandlerKeys",
+      "type": "function",
+      "name": "extractHandlerKeys",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/verify-rpc-handlers.ts",
+      "summary": "extractHandlerKeys is a function defined in eliza/packages/app-core/platforms/electrobun/scripts/verify-rpc-handlers.ts."
+    },
+    {
+      "tags": [
+        "desktop",
+        "class",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/src/__stubs__/bun-ffi.ts",
+      "type": "file",
+      "name": "bun-ffi.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/__stubs__/bun-ffi.ts",
+      "summary": "bun-ffi.ts is a typescript source file in the Milady codebase. It contains 2 functions, 1 class.",
+      "languageNotes": "typescript; code; 51 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/src/__stubs__/bun-ffi.ts:ptr",
+      "type": "function",
+      "name": "ptr",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/__stubs__/bun-ffi.ts",
+      "summary": "ptr is a function defined in eliza/packages/app-core/platforms/electrobun/src/__stubs__/bun-ffi.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/src/__stubs__/bun-ffi.ts:dlopen",
+      "type": "function",
+      "name": "dlopen",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/__stubs__/bun-ffi.ts",
+      "summary": "dlopen is a function defined in eliza/packages/app-core/platforms/electrobun/src/__stubs__/bun-ffi.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/app-core/platforms/electrobun/src/__stubs__/bun-ffi.ts:CString",
+      "type": "class",
+      "name": "CString",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/__stubs__/bun-ffi.ts",
+      "summary": "CString is a class or type declared in eliza/packages/app-core/platforms/electrobun/src/__stubs__/bun-ffi.ts."
+    },
+    {
+      "tags": [
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/src/__stubs__/electrobun-bun.ts",
+      "type": "file",
+      "name": "electrobun-bun.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/__stubs__/electrobun-bun.ts",
+      "summary": "electrobun-bun.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 20 lines"
+    },
+    {
+      "tags": [
+        "desktop",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/src/bridge/browser-tabs-renderer-registry.ts",
+      "type": "file",
+      "name": "browser-tabs-renderer-registry.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/bridge/browser-tabs-renderer-registry.ts",
+      "summary": "browser-tabs-renderer-registry.ts is a typescript source file in the Milady codebase. It contains 2 functions.",
+      "languageNotes": "typescript; code; 60 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/browser-tabs-renderer-registry.ts:getBrowserTabsRendererImpl",
+      "type": "function",
+      "name": "getBrowserTabsRendererImpl",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/bridge/browser-tabs-renderer-registry.ts",
+      "summary": "getBrowserTabsRendererImpl is a function defined in eliza/packages/app-core/platforms/electrobun/src/bridge/browser-tabs-renderer-registry.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/browser-tabs-renderer-registry.ts:setBrowserTabsRendererImpl",
+      "type": "function",
+      "name": "setBrowserTabsRendererImpl",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/bridge/browser-tabs-renderer-registry.ts",
+      "summary": "setBrowserTabsRendererImpl is a function defined in eliza/packages/app-core/platforms/electrobun/src/bridge/browser-tabs-renderer-registry.ts."
+    },
+    {
+      "tags": [
+        "desktop",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-boot-config.ts",
+      "type": "file",
+      "name": "electrobun-boot-config.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-boot-config.ts",
+      "summary": "electrobun-boot-config.ts is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 42 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-boot-config.ts:updateElectrobunBootConfig",
+      "type": "function",
+      "name": "updateElectrobunBootConfig",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-boot-config.ts",
+      "summary": "updateElectrobunBootConfig is a function defined in eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-boot-config.ts."
+    },
+    {
+      "tags": [
+        "desktop",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-crypto-ready.ts",
+      "type": "file",
+      "name": "electrobun-crypto-ready.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-crypto-ready.ts",
+      "summary": "electrobun-crypto-ready.ts is a typescript source file in the Milady codebase. It contains 3 functions.",
+      "languageNotes": "typescript; code; 120 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-crypto-ready.ts:hasSocketRpcGlobals",
+      "type": "function",
+      "name": "hasSocketRpcGlobals",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-crypto-ready.ts",
+      "summary": "hasSocketRpcGlobals is a function defined in eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-crypto-ready.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-crypto-ready.ts:waitForInstalledFunction",
+      "type": "function",
+      "name": "waitForInstalledFunction",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-crypto-ready.ts",
+      "summary": "waitForInstalledFunction is a function defined in eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-crypto-ready.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-crypto-ready.ts:installElectrobunCryptoReadyGuards",
+      "type": "function",
+      "name": "installElectrobunCryptoReadyGuards",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-crypto-ready.ts",
+      "summary": "installElectrobunCryptoReadyGuards is a function defined in eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-crypto-ready.ts."
+    },
+    {
+      "tags": [
+        "desktop",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts",
+      "type": "file",
+      "name": "electrobun-direct-rpc.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts",
+      "summary": "electrobun-direct-rpc.ts is a typescript source file in the Milady codebase. It contains 8 functions, 3 imports.",
+      "languageNotes": "typescript; code; 434 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts:readRecord",
+      "type": "function",
+      "name": "readRecord",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts",
+      "summary": "readRecord is a function defined in eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts:readRequiredString",
+      "type": "function",
+      "name": "readRequiredString",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts",
+      "summary": "readRequiredString is a function defined in eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts:readRequiredNumber",
+      "type": "function",
+      "name": "readRequiredNumber",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts",
+      "summary": "readRequiredNumber is a function defined in eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts:updateBootConfig",
+      "type": "function",
+      "name": "updateBootConfig",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts",
+      "summary": "updateBootConfig is a function defined in eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts:dispatchMessage",
+      "type": "function",
+      "name": "dispatchMessage",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts",
+      "summary": "dispatchMessage is a function defined in eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts:handleWildcardMessage",
+      "type": "function",
+      "name": "handleWildcardMessage",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts",
+      "summary": "handleWildcardMessage is a function defined in eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts:summarizeDiagnosticValue",
+      "type": "function",
+      "name": "summarizeDiagnosticValue",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts",
+      "summary": "summarizeDiagnosticValue is a function defined in eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts:installRendererLogMirror",
+      "type": "function",
+      "name": "installRendererLogMirror",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts",
+      "summary": "installRendererLogMirror is a function defined in eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts."
+    },
+    {
+      "tags": [
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-preload.ts",
+      "type": "file",
+      "name": "electrobun-preload.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-preload.ts",
+      "summary": "electrobun-preload.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 1 lines"
+    },
+    {
+      "tags": [
+        "desktop",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-stub.ts",
+      "type": "file",
+      "name": "electrobun-stub.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-stub.ts",
+      "summary": "electrobun-stub.ts is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 21 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-stub.ts:ensureElectrobunGlobal",
+      "type": "function",
+      "name": "ensureElectrobunGlobal",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-stub.ts",
+      "summary": "ensureElectrobunGlobal is a function defined in eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-stub.ts."
+    },
+    {
+      "tags": [
+        "frontend",
+        "desktop"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/src/dynamic-views/demo/agent-run-trace.html",
+      "type": "file",
+      "name": "agent-run-trace.html",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/dynamic-views/demo/agent-run-trace.html",
+      "summary": "agent-run-trace.html is a html source file in the Milady codebase.",
+      "languageNotes": "html; markup; 135 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/platforms/electrobun/src/dynamic-views/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/dynamic-views/README.md",
+      "summary": "README.md documents eliza/packages/app-core/platforms/electrobun/src/dynamic-views with 44 lines of reference material.",
+      "languageNotes": "markdown; docs; 44 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/src/electrobun-boot-config.test.ts",
+      "type": "file",
+      "name": "electrobun-boot-config.test.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/electrobun-boot-config.test.ts",
+      "summary": "electrobun-boot-config.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 50 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/src/electrobun-crypto-ready.test.ts",
+      "type": "file",
+      "name": "electrobun-crypto-ready.test.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/electrobun-crypto-ready.test.ts",
+      "summary": "electrobun-crypto-ready.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 65 lines"
+    },
+    {
+      "tags": [
+        "frontend",
+        "desktop"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/src/launch/views/launch-diagnostics.html",
+      "type": "file",
+      "name": "launch-diagnostics.html",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/launch/views/launch-diagnostics.html",
+      "summary": "launch-diagnostics.html is a html source file in the Milady codebase.",
+      "languageNotes": "html; markup; 205 lines"
+    },
+    {
+      "tags": [
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/src/preload.js",
+      "type": "file",
+      "name": "preload.js",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/preload.js",
+      "summary": "preload.js is a javascript source file in the Milady codebase.",
+      "languageNotes": "javascript; code; 1 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/platforms/electrobun/src/trace/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/trace/README.md",
+      "summary": "README.md documents eliza/packages/app-core/platforms/electrobun/src/trace with 73 lines of reference material.",
+      "languageNotes": "markdown; docs; 73 lines"
+    },
+    {
+      "tags": [
+        "frontend",
+        "desktop"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/src/trace/views/agent-run-trace.html",
+      "type": "file",
+      "name": "agent-run-trace.html",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/trace/views/agent-run-trace.html",
+      "summary": "agent-run-trace.html is a html source file in the Milady codebase.",
+      "languageNotes": "html; markup; 311 lines"
+    },
+    {
+      "tags": [
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/src/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/types.ts",
+      "summary": "types.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 18 lines"
+    },
+    {
+      "tags": [
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/src/types/web-speech.d.ts",
+      "type": "file",
+      "name": "web-speech.d.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/types/web-speech.d.ts",
+      "summary": "web-speech.d.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 52 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:relativePath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:isJsonObject",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:pathExists",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:readPackageJson",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:git",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:countBy",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:packagePurpose",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:nativeRelatedRemote",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:classifyPlugin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:pluginNotes",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:pluginEntry",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:directDirectories",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:packageEntry",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:remoteEntries",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:deletionCandidates",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildEntries",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:list",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildSummaries",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:markdownList",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:summaryTable",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:entriesTable",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:deletionTable",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildMarkdown",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:readPackageJson",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:isJsonObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:pluginEntry",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:readPackageJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:pluginEntry",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:classifyPlugin",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:pluginEntry",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:nativeRelatedRemote",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:pluginEntry",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:packagePurpose",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:pluginEntry",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:pluginNotes",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:packageEntry",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:readPackageJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:packageEntry",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:packagePurpose",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:remoteEntries",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:directDirectories",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:remoteEntries",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:readPackageJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:remoteEntries",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:packagePurpose",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:deletionCandidates",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:pathExists",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:deletionCandidates",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:directDirectories",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:deletionCandidates",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:pathExists",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildEntries",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:packageEntry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildEntries",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:packageEntry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildEntries",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:packageEntry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildEntries",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:packageEntry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildEntries",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:packageEntry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildEntries",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:packageEntry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildEntries",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:packageEntry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildEntries",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:packageEntry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildEntries",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:packageEntry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildEntries",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:packageEntry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildEntries",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:packageEntry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildEntries",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:packageEntry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildEntries",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:directDirectories",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildEntries",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:remoteEntries",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildSummaries",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:countBy",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildSummaries",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:countBy",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildSummaries",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:list",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildSummaries",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:list",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildSummaries",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:list",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildSummaries",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:list",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildSummaries",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:list",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildSummaries",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:list",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildSummaries",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:list",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildMarkdown",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:markdownList",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildMarkdown",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:summaryTable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildMarkdown",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:summaryTable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildMarkdown",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:markdownList",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildMarkdown",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:markdownList",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildMarkdown",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:markdownList",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildMarkdown",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:markdownList",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildMarkdown",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:markdownList",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildMarkdown",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:markdownList",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildMarkdown",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:markdownList",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildMarkdown",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:deletionTable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildMarkdown",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:markdownList",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildMarkdown",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:entriesTable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:main",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildEntries",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:main",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:git",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:main",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:git",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:main",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:git",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:main",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:deletionCandidates",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:main",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildSummaries",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:main",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:buildMarkdown",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:main",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:relativePath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:main",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/generate-convergence-audit.ts:relativePath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/lib/app-dir.mjs",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/app-dir.mjs:hasPackageJson",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/lib/app-dir.mjs",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/app-dir.mjs:firstExistingPackage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/lib/app-dir.mjs",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/app-dir.mjs:resolveMainAppDir",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/lib/app-dir.mjs",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/app-dir.mjs:relativeAppDir",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/lib/app-dir.mjs",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/app-dir.mjs:resolveElectrobunDir",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/app-dir.mjs:resolveMainAppDir",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/app-dir.mjs:hasPackageJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/app-dir.mjs:resolveMainAppDir",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/app-dir.mjs:hasPackageJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/app-dir.mjs:resolveMainAppDir",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/app-dir.mjs:firstExistingPackage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/app-dir.mjs:resolveMainAppDir",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/app-dir.mjs:firstExistingPackage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs:looksLikeElizaSubrepoRoot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs:looksLikeFlatMonorepoRoot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs:looksLikeRepoRoot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs:resolveRepoRoot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs:resolveRepoRootFromCwd",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs:resolveRepoRootFromImportMeta",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs:looksLikeFlatMonorepoRoot",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs:looksLikeElizaSubrepoRoot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs:looksLikeRepoRoot",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs:looksLikeFlatMonorepoRoot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs:looksLikeRepoRoot",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs:looksLikeElizaSubrepoRoot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs:resolveRepoRoot",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs:looksLikeRepoRoot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs:resolveRepoRootFromCwd",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs:resolveRepoRoot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs:resolveRepoRootFromImportMeta",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs:resolveRepoRoot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs:resolveRepoRootFromImportMeta",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/lib/repo-root.mjs:resolveRepoRootFromCwd",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/macos-direct-launcher.c",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/macos-direct-launcher.c:fail",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/macos-direct-launcher.c",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/macos-direct-launcher.c:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/macos-direct-launcher.c:main",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/macos-direct-launcher.c:fail",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/macos-direct-launcher.c:main",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/macos-direct-launcher.c:fail",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/macos-direct-launcher.c:main",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/macos-direct-launcher.c:fail",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:isPosixAbsolutePath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:resolvePortablePath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:joinPortable",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:classifyMachOKind",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:materializeRuntimePath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:normalizeBundleStem",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:resolveBuildBundlePath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:resolveRuntimeNodeModulesPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:shouldConsiderForCodesign",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:buildCodesignArgs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:isRetryableCodesignFailure",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:formatExecSyncFailure",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:sleepMs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:resolveDeveloperId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:collectNativeCandidates",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:signRuntimeFile",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:shouldRun",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:ensureMacBuildAppIcon",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:resolvePortablePath",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:isPosixAbsolutePath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:joinPortable",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:isPosixAbsolutePath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:materializeRuntimePath",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:resolvePortablePath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:materializeRuntimePath",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:joinPortable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:materializeRuntimePath",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:joinPortable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:resolveBuildBundlePath",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:resolvePortablePath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:resolveBuildBundlePath",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:joinPortable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:resolveBuildBundlePath",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:normalizeBundleStem",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:resolveBuildBundlePath",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:normalizeBundleStem",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:resolveRuntimeNodeModulesPath",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:materializeRuntimePath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:resolveRuntimeNodeModulesPath",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:materializeRuntimePath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:resolveRuntimeNodeModulesPath",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:resolveBuildBundlePath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:resolveRuntimeNodeModulesPath",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:materializeRuntimePath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:signRuntimeFile",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:classifyMachOKind",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:signRuntimeFile",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:buildCodesignArgs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:signRuntimeFile",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:formatExecSyncFailure",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:signRuntimeFile",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:isRetryableCodesignFailure",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:signRuntimeFile",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:sleepMs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:ensureMacBuildAppIcon",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:resolveBuildBundlePath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:ensureMacBuildAppIcon",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:joinPortable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:main",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:ensureMacBuildAppIcon",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:main",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:shouldRun",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:main",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:resolveRuntimeNodeModulesPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:main",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:resolveDeveloperId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:main",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:collectNativeCandidates",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:main",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/postwrap-sign-runtime-macos.ts:signRuntimeFile",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/verify-rpc-handlers.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/verify-rpc-handlers.ts:extractSchemaMethods",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/scripts/verify-rpc-handlers.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/scripts/verify-rpc-handlers.ts:extractHandlerKeys",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/src/__stubs__/bun-ffi.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/src/__stubs__/bun-ffi.ts:ptr",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/src/__stubs__/bun-ffi.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/src/__stubs__/bun-ffi.ts:dlopen",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/src/__stubs__/bun-ffi.ts",
+      "target": "class:eliza/packages/app-core/platforms/electrobun/src/__stubs__/bun-ffi.ts:CString",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/src/bridge/browser-tabs-renderer-registry.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/browser-tabs-renderer-registry.ts:getBrowserTabsRendererImpl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/src/bridge/browser-tabs-renderer-registry.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/browser-tabs-renderer-registry.ts:setBrowserTabsRendererImpl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-boot-config.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-boot-config.ts:updateElectrobunBootConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-crypto-ready.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-crypto-ready.ts:hasSocketRpcGlobals",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-crypto-ready.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-crypto-ready.ts:waitForInstalledFunction",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-crypto-ready.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-crypto-ready.ts:installElectrobunCryptoReadyGuards",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-crypto-ready.ts:installElectrobunCryptoReadyGuards",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-crypto-ready.ts:hasSocketRpcGlobals",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts:readRecord",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts:readRequiredString",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts:readRequiredNumber",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts:updateBootConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts:dispatchMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts:handleWildcardMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts:summarizeDiagnosticValue",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts:installRendererLogMirror",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts:dispatchMessage",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts:updateBootConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts:handleWildcardMessage",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts:dispatchMessage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts:installRendererLogMirror",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts:summarizeDiagnosticValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts:installRendererLogMirror",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts:summarizeDiagnosticValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-stub.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-stub.ts:ensureElectrobunGlobal",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-preload.ts",
+      "target": "file:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-direct-rpc.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/src/electrobun-boot-config.test.ts",
+      "target": "file:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-boot-config.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/src/electrobun-crypto-ready.test.ts",
+      "target": "file:eliza/packages/app-core/platforms/electrobun/src/bridge/electrobun-crypto-ready.ts",
+      "type": "imports"
+    }
+  ]
+}

@@ -1,0 +1,393 @@
+{
+  "batchIndex": 192,
+  "nodes": [
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "simple",
+      "id": "service:eliza/packages/app-core/deploy/.dockerignore",
+      "type": "service",
+      "name": ".dockerignore",
+      "filePath": "eliza/packages/app-core/deploy/.dockerignore",
+      "summary": ".dockerignore defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "unknown; infra; 34 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "moderate",
+      "id": "service:eliza/packages/app-core/deploy/Dockerfile.ci",
+      "type": "service",
+      "name": "Dockerfile.ci",
+      "filePath": "eliza/packages/app-core/deploy/Dockerfile.ci",
+      "summary": "Dockerfile.ci defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "dockerfile; infra; 189 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "complex",
+      "id": "service:eliza/packages/app-core/deploy/Dockerfile.cloud",
+      "type": "service",
+      "name": "Dockerfile.cloud",
+      "filePath": "eliza/packages/app-core/deploy/Dockerfile.cloud",
+      "summary": "Dockerfile.cloud defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "dockerfile; infra; 307 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "simple",
+      "id": "service:eliza/packages/app-core/deploy/Dockerfile.cloud-agent",
+      "type": "service",
+      "name": "Dockerfile.cloud-agent",
+      "filePath": "eliza/packages/app-core/deploy/Dockerfile.cloud-agent",
+      "summary": "Dockerfile.cloud-agent defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "dockerfile; infra; 59 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "simple",
+      "id": "service:eliza/packages/app-core/deploy/Dockerfile.cloud.dockerignore",
+      "type": "service",
+      "name": "Dockerfile.cloud.dockerignore",
+      "filePath": "eliza/packages/app-core/deploy/Dockerfile.cloud.dockerignore",
+      "summary": "Dockerfile.cloud.dockerignore defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "dockerfile; infra; 55 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "simple",
+      "id": "service:eliza/packages/app-core/deploy/Dockerfile.sandbox",
+      "type": "service",
+      "name": "Dockerfile.sandbox",
+      "filePath": "eliza/packages/app-core/deploy/Dockerfile.sandbox",
+      "summary": "Dockerfile.sandbox defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "dockerfile; infra; 16 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/packages/app-core/deploy/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "eliza/packages/app-core/deploy/README.md",
+      "summary": "README.md documents eliza/packages/app-core/deploy with 63 lines of reference material.",
+      "languageNotes": "markdown; docs; 63 lines"
+    },
+    {
+      "tags": [
+        "script",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/deploy/deploy-to-nodes.sh",
+      "type": "file",
+      "name": "deploy-to-nodes.sh",
+      "filePath": "eliza/packages/app-core/deploy/deploy-to-nodes.sh",
+      "summary": "deploy-to-nodes.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 279 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/deploy/deploy-to-nodes.sh:log",
+      "type": "function",
+      "name": "log",
+      "filePath": "eliza/packages/app-core/deploy/deploy-to-nodes.sh",
+      "summary": "log is a function defined in eliza/packages/app-core/deploy/deploy-to-nodes.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/deploy/deploy-to-nodes.sh:ok",
+      "type": "function",
+      "name": "ok",
+      "filePath": "eliza/packages/app-core/deploy/deploy-to-nodes.sh",
+      "summary": "ok is a function defined in eliza/packages/app-core/deploy/deploy-to-nodes.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/deploy/deploy-to-nodes.sh:warn",
+      "type": "function",
+      "name": "warn",
+      "filePath": "eliza/packages/app-core/deploy/deploy-to-nodes.sh",
+      "summary": "warn is a function defined in eliza/packages/app-core/deploy/deploy-to-nodes.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/deploy/deploy-to-nodes.sh:err",
+      "type": "function",
+      "name": "err",
+      "filePath": "eliza/packages/app-core/deploy/deploy-to-nodes.sh",
+      "summary": "err is a function defined in eliza/packages/app-core/deploy/deploy-to-nodes.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/deploy/deploy-to-nodes.sh:hdr",
+      "type": "function",
+      "name": "hdr",
+      "filePath": "eliza/packages/app-core/deploy/deploy-to-nodes.sh",
+      "summary": "hdr is a function defined in eliza/packages/app-core/deploy/deploy-to-nodes.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/deploy/deploy-to-nodes.sh:ssh_cmd",
+      "type": "function",
+      "name": "ssh_cmd",
+      "filePath": "eliza/packages/app-core/deploy/deploy-to-nodes.sh",
+      "summary": "ssh_cmd is a function defined in eliza/packages/app-core/deploy/deploy-to-nodes.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/deploy/deploy-to-nodes.sh:list_remote_images_cmd",
+      "type": "function",
+      "name": "list_remote_images_cmd",
+      "filePath": "eliza/packages/app-core/deploy/deploy-to-nodes.sh",
+      "summary": "list_remote_images_cmd is a function defined in eliza/packages/app-core/deploy/deploy-to-nodes.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/deploy/deploy-to-nodes.sh:list_remote_containers_cmd",
+      "type": "function",
+      "name": "list_remote_containers_cmd",
+      "filePath": "eliza/packages/app-core/deploy/deploy-to-nodes.sh",
+      "summary": "list_remote_containers_cmd is a function defined in eliza/packages/app-core/deploy/deploy-to-nodes.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/deploy/deploy-to-nodes.sh:list_remote_container_names_cmd",
+      "type": "function",
+      "name": "list_remote_container_names_cmd",
+      "filePath": "eliza/packages/app-core/deploy/deploy-to-nodes.sh",
+      "summary": "list_remote_container_names_cmd is a function defined in eliza/packages/app-core/deploy/deploy-to-nodes.sh."
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/deploy/deploy.defaults.env",
+      "type": "config",
+      "name": "deploy.defaults.env",
+      "filePath": "eliza/packages/app-core/deploy/deploy.defaults.env",
+      "summary": "deploy.defaults.env configures config settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "config; config; 23 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "simple",
+      "id": "service:eliza/packages/app-core/deploy/docker-compose.supabase-db.yml",
+      "type": "service",
+      "name": "docker-compose.supabase-db.yml",
+      "filePath": "eliza/packages/app-core/deploy/docker-compose.supabase-db.yml",
+      "summary": "docker-compose.supabase-db.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 33 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "simple",
+      "id": "service:eliza/packages/app-core/deploy/docker-compose.yml",
+      "type": "service",
+      "name": "docker-compose.yml",
+      "filePath": "eliza/packages/app-core/deploy/docker-compose.yml",
+      "summary": "docker-compose.yml defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "yaml; infra; 57 lines"
+    },
+    {
+      "tags": [
+        "script",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/deploy/docker-setup.sh",
+      "type": "file",
+      "name": "docker-setup.sh",
+      "filePath": "eliza/packages/app-core/deploy/docker-setup.sh",
+      "summary": "docker-setup.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 214 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/deploy/docker-setup.sh:require_cmd",
+      "type": "function",
+      "name": "require_cmd",
+      "filePath": "eliza/packages/app-core/deploy/docker-setup.sh",
+      "summary": "require_cmd is a function defined in eliza/packages/app-core/deploy/docker-setup.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/deploy/docker-setup.sh:write_extra_compose",
+      "type": "function",
+      "name": "write_extra_compose",
+      "filePath": "eliza/packages/app-core/deploy/docker-setup.sh",
+      "summary": "write_extra_compose is a function defined in eliza/packages/app-core/deploy/docker-setup.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/deploy/docker-setup.sh:upsert_env",
+      "type": "function",
+      "name": "upsert_env",
+      "filePath": "eliza/packages/app-core/deploy/docker-setup.sh",
+      "summary": "upsert_env is a function defined in eliza/packages/app-core/deploy/docker-setup.sh."
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/deploy/tsx-runtime-tsconfig.json",
+      "type": "config",
+      "name": "tsx-runtime-tsconfig.json",
+      "filePath": "eliza/packages/app-core/deploy/tsx-runtime-tsconfig.json",
+      "summary": "tsx-runtime-tsconfig.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 12 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/deploy/deploy-to-nodes.sh",
+      "target": "function:eliza/packages/app-core/deploy/deploy-to-nodes.sh:log",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/deploy/deploy-to-nodes.sh",
+      "target": "function:eliza/packages/app-core/deploy/deploy-to-nodes.sh:ok",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/deploy/deploy-to-nodes.sh",
+      "target": "function:eliza/packages/app-core/deploy/deploy-to-nodes.sh:warn",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/deploy/deploy-to-nodes.sh",
+      "target": "function:eliza/packages/app-core/deploy/deploy-to-nodes.sh:err",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/deploy/deploy-to-nodes.sh",
+      "target": "function:eliza/packages/app-core/deploy/deploy-to-nodes.sh:hdr",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/deploy/deploy-to-nodes.sh",
+      "target": "function:eliza/packages/app-core/deploy/deploy-to-nodes.sh:ssh_cmd",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/deploy/deploy-to-nodes.sh",
+      "target": "function:eliza/packages/app-core/deploy/deploy-to-nodes.sh:list_remote_images_cmd",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/deploy/deploy-to-nodes.sh",
+      "target": "function:eliza/packages/app-core/deploy/deploy-to-nodes.sh:list_remote_containers_cmd",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/deploy/deploy-to-nodes.sh",
+      "target": "function:eliza/packages/app-core/deploy/deploy-to-nodes.sh:list_remote_container_names_cmd",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/deploy/docker-setup.sh",
+      "target": "function:eliza/packages/app-core/deploy/docker-setup.sh:require_cmd",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/deploy/docker-setup.sh",
+      "target": "function:eliza/packages/app-core/deploy/docker-setup.sh:write_extra_compose",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/deploy/docker-setup.sh",
+      "target": "function:eliza/packages/app-core/deploy/docker-setup.sh:upsert_env",
+      "type": "contains"
+    }
+  ]
+}

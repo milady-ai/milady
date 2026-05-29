@@ -1,0 +1,188 @@
+{
+  "batchIndex": 159,
+  "nodes": [
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "complex",
+      "id": "document:.claude/plugins/electrobun-dev/commands/electrobun-align.md",
+      "type": "document",
+      "name": "electrobun-align.md",
+      "filePath": ".claude/plugins/electrobun-dev/commands/electrobun-align.md",
+      "summary": "electrobun-align.md documents .claude/plugins/electrobun-dev/commands with 374 lines of reference material.",
+      "languageNotes": "markdown; docs; 374 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "document:.claude/plugins/electrobun-dev/commands/electrobun-build.md",
+      "type": "document",
+      "name": "electrobun-build.md",
+      "filePath": ".claude/plugins/electrobun-dev/commands/electrobun-build.md",
+      "summary": "electrobun-build.md documents .claude/plugins/electrobun-dev/commands with 49 lines of reference material.",
+      "languageNotes": "markdown; docs; 49 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "document:.claude/plugins/electrobun-dev/commands/electrobun-feature.md",
+      "type": "document",
+      "name": "electrobun-feature.md",
+      "filePath": ".claude/plugins/electrobun-dev/commands/electrobun-feature.md",
+      "summary": "electrobun-feature.md documents .claude/plugins/electrobun-dev/commands with 146 lines of reference material.",
+      "languageNotes": "markdown; docs; 146 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "document:.claude/plugins/electrobun-dev/commands/electrobun-init.md",
+      "type": "document",
+      "name": "electrobun-init.md",
+      "filePath": ".claude/plugins/electrobun-dev/commands/electrobun-init.md",
+      "summary": "electrobun-init.md documents .claude/plugins/electrobun-dev/commands with 67 lines of reference material.",
+      "languageNotes": "markdown; docs; 67 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "document:.claude/plugins/electrobun-dev/commands/electrobun-menu.md",
+      "type": "document",
+      "name": "electrobun-menu.md",
+      "filePath": ".claude/plugins/electrobun-dev/commands/electrobun-menu.md",
+      "summary": "electrobun-menu.md documents .claude/plugins/electrobun-dev/commands with 105 lines of reference material.",
+      "languageNotes": "markdown; docs; 105 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "document:.claude/plugins/electrobun-dev/commands/electrobun-release.md",
+      "type": "document",
+      "name": "electrobun-release.md",
+      "filePath": ".claude/plugins/electrobun-dev/commands/electrobun-release.md",
+      "summary": "electrobun-release.md documents .claude/plugins/electrobun-dev/commands with 76 lines of reference material.",
+      "languageNotes": "markdown; docs; 76 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "document:.claude/plugins/electrobun-dev/commands/electrobun-rpc.md",
+      "type": "document",
+      "name": "electrobun-rpc.md",
+      "filePath": ".claude/plugins/electrobun-dev/commands/electrobun-rpc.md",
+      "summary": "electrobun-rpc.md documents .claude/plugins/electrobun-dev/commands with 91 lines of reference material.",
+      "languageNotes": "markdown; docs; 91 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "document:.claude/plugins/electrobun-dev/commands/electrobun-sdlc.md",
+      "type": "document",
+      "name": "electrobun-sdlc.md",
+      "filePath": ".claude/plugins/electrobun-dev/commands/electrobun-sdlc.md",
+      "summary": "electrobun-sdlc.md documents .claude/plugins/electrobun-dev/commands with 281 lines of reference material.",
+      "languageNotes": "markdown; docs; 281 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "complex",
+      "id": "document:.claude/plugins/electrobun-dev/commands/electrobun-setup.md",
+      "type": "document",
+      "name": "electrobun-setup.md",
+      "filePath": ".claude/plugins/electrobun-dev/commands/electrobun-setup.md",
+      "summary": "electrobun-setup.md documents .claude/plugins/electrobun-dev/commands with 1045 lines of reference material.",
+      "languageNotes": "markdown; docs; 1045 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "document:.claude/plugins/electrobun-dev/commands/electrobun-test.md",
+      "type": "document",
+      "name": "electrobun-test.md",
+      "filePath": ".claude/plugins/electrobun-dev/commands/electrobun-test.md",
+      "summary": "electrobun-test.md documents .claude/plugins/electrobun-dev/commands with 62 lines of reference material.",
+      "languageNotes": "markdown; docs; 62 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "document:.claude/plugins/electrobun-dev/commands/electrobun-wgpu.md",
+      "type": "document",
+      "name": "electrobun-wgpu.md",
+      "filePath": ".claude/plugins/electrobun-dev/commands/electrobun-wgpu.md",
+      "summary": "electrobun-wgpu.md documents .claude/plugins/electrobun-dev/commands with 114 lines of reference material.",
+      "languageNotes": "markdown; docs; 114 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "document:.claude/plugins/electrobun-dev/commands/electrobun-window.md",
+      "type": "document",
+      "name": "electrobun-window.md",
+      "filePath": ".claude/plugins/electrobun-dev/commands/electrobun-window.md",
+      "summary": "electrobun-window.md documents .claude/plugins/electrobun-dev/commands with 107 lines of reference material.",
+      "languageNotes": "markdown; docs; 107 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "document:.claude/plugins/electrobun-dev/commands/electrobun-workflow.md",
+      "type": "document",
+      "name": "electrobun-workflow.md",
+      "filePath": ".claude/plugins/electrobun-dev/commands/electrobun-workflow.md",
+      "summary": "electrobun-workflow.md documents .claude/plugins/electrobun-dev/commands with 44 lines of reference material.",
+      "languageNotes": "markdown; docs; 44 lines"
+    }
+  ],
+  "edges": []
+}

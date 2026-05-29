@@ -1,0 +1,202 @@
+{
+  "batchIndex": 155,
+  "nodes": [
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:.claude/agents/connector-dev.md",
+      "type": "document",
+      "name": "connector-dev.md",
+      "filePath": ".claude/agents/connector-dev.md",
+      "summary": "connector-dev.md documents .claude/agents with 68 lines of reference material.",
+      "languageNotes": "markdown; docs; 68 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:.claude/agents/desktop-debugger.md",
+      "type": "document",
+      "name": "desktop-debugger.md",
+      "filePath": ".claude/agents/desktop-debugger.md",
+      "summary": "desktop-debugger.md documents .claude/agents with 81 lines of reference material.",
+      "languageNotes": "markdown; docs; 81 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:.claude/agents/electrobun-native-dev.md",
+      "type": "document",
+      "name": "electrobun-native-dev.md",
+      "filePath": ".claude/agents/electrobun-native-dev.md",
+      "summary": "electrobun-native-dev.md documents .claude/agents with 75 lines of reference material.",
+      "languageNotes": "markdown; docs; 75 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "document:.claude/agents/eliza-plugin-dev.md",
+      "type": "document",
+      "name": "eliza-plugin-dev.md",
+      "filePath": ".claude/agents/eliza-plugin-dev.md",
+      "summary": "eliza-plugin-dev.md documents .claude/agents with 64 lines of reference material.",
+      "languageNotes": "markdown; docs; 64 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "document:.claude/agents/eliza-plugin-reviewer.md",
+      "type": "document",
+      "name": "eliza-plugin-reviewer.md",
+      "filePath": ".claude/agents/eliza-plugin-reviewer.md",
+      "summary": "eliza-plugin-reviewer.md documents .claude/agents with 46 lines of reference material.",
+      "languageNotes": "markdown; docs; 46 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:.claude/agents/milady-architect.md",
+      "type": "document",
+      "name": "milady-architect.md",
+      "filePath": ".claude/agents/milady-architect.md",
+      "summary": "milady-architect.md documents .claude/agents with 62 lines of reference material.",
+      "languageNotes": "markdown; docs; 62 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:.claude/agents/milady-backend-dev.md",
+      "type": "document",
+      "name": "milady-backend-dev.md",
+      "filePath": ".claude/agents/milady-backend-dev.md",
+      "summary": "milady-backend-dev.md documents .claude/agents with 69 lines of reference material.",
+      "languageNotes": "markdown; docs; 69 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:.claude/agents/milady-code-reviewer.md",
+      "type": "document",
+      "name": "milady-code-reviewer.md",
+      "filePath": ".claude/agents/milady-code-reviewer.md",
+      "summary": "milady-code-reviewer.md documents .claude/agents with 89 lines of reference material.",
+      "languageNotes": "markdown; docs; 89 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:.claude/agents/milady-devops.md",
+      "type": "document",
+      "name": "milady-devops.md",
+      "filePath": ".claude/agents/milady-devops.md",
+      "summary": "milady-devops.md documents .claude/agents with 102 lines of reference material.",
+      "languageNotes": "markdown; docs; 102 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:.claude/agents/milady-feature-coordinator.md",
+      "type": "document",
+      "name": "milady-feature-coordinator.md",
+      "filePath": ".claude/agents/milady-feature-coordinator.md",
+      "summary": "milady-feature-coordinator.md documents .claude/agents with 85 lines of reference material.",
+      "languageNotes": "markdown; docs; 85 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:.claude/agents/milady-test-runner.md",
+      "type": "document",
+      "name": "milady-test-runner.md",
+      "filePath": ".claude/agents/milady-test-runner.md",
+      "summary": "milady-test-runner.md documents .claude/agents with 67 lines of reference material.",
+      "languageNotes": "markdown; docs; 67 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:.claude/agents/milady-ui-dev.md",
+      "type": "document",
+      "name": "milady-ui-dev.md",
+      "filePath": ".claude/agents/milady-ui-dev.md",
+      "summary": "milady-ui-dev.md documents .claude/agents with 101 lines of reference material.",
+      "languageNotes": "markdown; docs; 101 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:.claude/agents/observability-specialist.md",
+      "type": "document",
+      "name": "observability-specialist.md",
+      "filePath": ".claude/agents/observability-specialist.md",
+      "summary": "observability-specialist.md documents .claude/agents with 71 lines of reference material.",
+      "languageNotes": "markdown; docs; 71 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "document:.claude/agents/plugin-researcher.md",
+      "type": "document",
+      "name": "plugin-researcher.md",
+      "filePath": ".claude/agents/plugin-researcher.md",
+      "summary": "plugin-researcher.md documents .claude/agents with 53 lines of reference material.",
+      "languageNotes": "markdown; docs; 53 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:.claude/agents/pre-review.md",
+      "type": "document",
+      "name": "pre-review.md",
+      "filePath": ".claude/agents/pre-review.md",
+      "summary": "pre-review.md documents .claude/agents with 79 lines of reference material.",
+      "languageNotes": "markdown; docs; 79 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:.claude/agents/vrm-avatar-specialist.md",
+      "type": "document",
+      "name": "vrm-avatar-specialist.md",
+      "filePath": ".claude/agents/vrm-avatar-specialist.md",
+      "summary": "vrm-avatar-specialist.md documents .claude/agents with 60 lines of reference material.",
+      "languageNotes": "markdown; docs; 60 lines"
+    }
+  ],
+  "edges": []
+}

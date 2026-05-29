@@ -1,0 +1,695 @@
+{
+  "batchIndex": 121,
+  "nodes": [
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/src/registry/connector-accounts.test.ts",
+      "type": "file",
+      "name": "connector-accounts.test.ts",
+      "filePath": "eliza/packages/app-core/src/registry/connector-accounts.test.ts",
+      "summary": "connector-accounts.test.ts is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 191 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/src/registry/facewear-registry.test.ts",
+      "type": "file",
+      "name": "facewear-registry.test.ts",
+      "filePath": "eliza/packages/app-core/src/registry/facewear-registry.test.ts",
+      "summary": "facewear-registry.test.ts is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 58 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/src/registry/generate-apps.ts",
+      "type": "file",
+      "name": "generate-apps.ts",
+      "filePath": "eliza/packages/app-core/src/registry/generate-apps.ts",
+      "summary": "generate-apps.ts is a typescript source file in the Milady codebase. It contains 3 functions, 1 imports.",
+      "languageNotes": "typescript; code; 400 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/registry/generate-apps.ts:buildInternal",
+      "type": "function",
+      "name": "buildInternal",
+      "filePath": "eliza/packages/app-core/src/registry/generate-apps.ts",
+      "summary": "buildInternal is a function defined in eliza/packages/app-core/src/registry/generate-apps.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/registry/generate-apps.ts:buildCurated",
+      "type": "function",
+      "name": "buildCurated",
+      "filePath": "eliza/packages/app-core/src/registry/generate-apps.ts",
+      "summary": "buildCurated is a function defined in eliza/packages/app-core/src/registry/generate-apps.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/registry/generate-apps.ts:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "eliza/packages/app-core/src/registry/generate-apps.ts",
+      "summary": "main is a function defined in eliza/packages/app-core/src/registry/generate-apps.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/src/registry/generate.ts",
+      "type": "file",
+      "name": "generate.ts",
+      "filePath": "eliza/packages/app-core/src/registry/generate.ts",
+      "summary": "generate.ts is a typescript source file in the Milady codebase. It contains 8 functions, 1 imports.",
+      "languageNotes": "typescript; code; 607 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/registry/generate.ts:detectFieldType",
+      "type": "function",
+      "name": "detectFieldType",
+      "filePath": "eliza/packages/app-core/src/registry/generate.ts",
+      "summary": "detectFieldType is a function defined in eliza/packages/app-core/src/registry/generate.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/registry/generate.ts:isAdvanced",
+      "type": "function",
+      "name": "isAdvanced",
+      "filePath": "eliza/packages/app-core/src/registry/generate.ts",
+      "summary": "isAdvanced is a function defined in eliza/packages/app-core/src/registry/generate.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/registry/generate.ts:autoLabel",
+      "type": "function",
+      "name": "autoLabel",
+      "filePath": "eliza/packages/app-core/src/registry/generate.ts",
+      "summary": "autoLabel is a function defined in eliza/packages/app-core/src/registry/generate.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/registry/generate.ts:convertField",
+      "type": "function",
+      "name": "convertField",
+      "filePath": "eliza/packages/app-core/src/registry/generate.ts",
+      "summary": "convertField is a function defined in eliza/packages/app-core/src/registry/generate.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/registry/generate.ts:categorize",
+      "type": "function",
+      "name": "categorize",
+      "filePath": "eliza/packages/app-core/src/registry/generate.ts",
+      "summary": "categorize is a function defined in eliza/packages/app-core/src/registry/generate.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/registry/generate.ts:determineActions",
+      "type": "function",
+      "name": "determineActions",
+      "filePath": "eliza/packages/app-core/src/registry/generate.ts",
+      "summary": "determineActions is a function defined in eliza/packages/app-core/src/registry/generate.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/registry/generate.ts:convert",
+      "type": "function",
+      "name": "convert",
+      "filePath": "eliza/packages/app-core/src/registry/generate.ts",
+      "summary": "convert is a function defined in eliza/packages/app-core/src/registry/generate.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/registry/generate.ts:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "eliza/packages/app-core/src/registry/generate.ts",
+      "summary": "main is a function defined in eliza/packages/app-core/src/registry/generate.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/src/registry/loader.ts",
+      "type": "file",
+      "name": "loader.ts",
+      "filePath": "eliza/packages/app-core/src/registry/loader.ts",
+      "summary": "loader.ts is a typescript source file in the Milady codebase. It contains 12 functions, 1 class, 1 imports.",
+      "languageNotes": "typescript; code; 220 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/registry/loader.ts:loadRegistryFromRawEntries",
+      "type": "function",
+      "name": "loadRegistryFromRawEntries",
+      "filePath": "eliza/packages/app-core/src/registry/loader.ts",
+      "summary": "loadRegistryFromRawEntries is a function defined in eliza/packages/app-core/src/registry/loader.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/registry/loader.ts:normalizeConnectorAuth",
+      "type": "function",
+      "name": "normalizeConnectorAuth",
+      "filePath": "eliza/packages/app-core/src/registry/loader.ts",
+      "summary": "normalizeConnectorAuth is a function defined in eliza/packages/app-core/src/registry/loader.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/registry/loader.ts:mapLegacyAuthKindToAccountAuthKind",
+      "type": "function",
+      "name": "mapLegacyAuthKindToAccountAuthKind",
+      "filePath": "eliza/packages/app-core/src/registry/loader.ts",
+      "summary": "mapLegacyAuthKindToAccountAuthKind is a function defined in eliza/packages/app-core/src/registry/loader.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/registry/loader.ts:indexEntries",
+      "type": "function",
+      "name": "indexEntries",
+      "filePath": "eliza/packages/app-core/src/registry/loader.ts",
+      "summary": "indexEntries is a function defined in eliza/packages/app-core/src/registry/loader.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/registry/loader.ts:compareEntriesForDisplay",
+      "type": "function",
+      "name": "compareEntriesForDisplay",
+      "filePath": "eliza/packages/app-core/src/registry/loader.ts",
+      "summary": "compareEntriesForDisplay is a function defined in eliza/packages/app-core/src/registry/loader.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/registry/loader.ts:getApps",
+      "type": "function",
+      "name": "getApps",
+      "filePath": "eliza/packages/app-core/src/registry/loader.ts",
+      "summary": "getApps is a function defined in eliza/packages/app-core/src/registry/loader.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/registry/loader.ts:getPlugins",
+      "type": "function",
+      "name": "getPlugins",
+      "filePath": "eliza/packages/app-core/src/registry/loader.ts",
+      "summary": "getPlugins is a function defined in eliza/packages/app-core/src/registry/loader.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/registry/loader.ts:getConnectors",
+      "type": "function",
+      "name": "getConnectors",
+      "filePath": "eliza/packages/app-core/src/registry/loader.ts",
+      "summary": "getConnectors is a function defined in eliza/packages/app-core/src/registry/loader.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/registry/loader.ts:getEntry",
+      "type": "function",
+      "name": "getEntry",
+      "filePath": "eliza/packages/app-core/src/registry/loader.ts",
+      "summary": "getEntry is a function defined in eliza/packages/app-core/src/registry/loader.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/registry/loader.ts:getEntryByNpmName",
+      "type": "function",
+      "name": "getEntryByNpmName",
+      "filePath": "eliza/packages/app-core/src/registry/loader.ts",
+      "summary": "getEntryByNpmName is a function defined in eliza/packages/app-core/src/registry/loader.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/registry/loader.ts:mergeWithRuntime",
+      "type": "function",
+      "name": "mergeWithRuntime",
+      "filePath": "eliza/packages/app-core/src/registry/loader.ts",
+      "summary": "mergeWithRuntime is a function defined in eliza/packages/app-core/src/registry/loader.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/registry/loader.ts:defaultOverlay",
+      "type": "function",
+      "name": "defaultOverlay",
+      "filePath": "eliza/packages/app-core/src/registry/loader.ts",
+      "summary": "defaultOverlay is a function defined in eliza/packages/app-core/src/registry/loader.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/app-core/src/registry/loader.ts:RegistryValidationError",
+      "type": "class",
+      "name": "RegistryValidationError",
+      "filePath": "eliza/packages/app-core/src/registry/loader.ts",
+      "summary": "RegistryValidationError is a class or type declared in eliza/packages/app-core/src/registry/loader.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/src/registry/schema.ts",
+      "type": "file",
+      "name": "schema.ts",
+      "filePath": "eliza/packages/app-core/src/registry/schema.ts",
+      "summary": "schema.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 379 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/src/registry/training-app-registry.test.ts",
+      "type": "file",
+      "name": "training-app-registry.test.ts",
+      "filePath": "eliza/packages/app-core/src/registry/training-app-registry.test.ts",
+      "summary": "training-app-registry.test.ts is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 54 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/registry/generate-apps.ts",
+      "target": "function:eliza/packages/app-core/src/registry/generate-apps.ts:buildInternal",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/registry/generate-apps.ts",
+      "target": "function:eliza/packages/app-core/src/registry/generate-apps.ts:buildCurated",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/registry/generate-apps.ts",
+      "target": "function:eliza/packages/app-core/src/registry/generate-apps.ts:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/registry/generate-apps.ts:main",
+      "target": "function:eliza/packages/app-core/src/registry/generate-apps.ts:buildInternal",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/registry/generate-apps.ts:main",
+      "target": "function:eliza/packages/app-core/src/registry/generate-apps.ts:buildCurated",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/registry/generate.ts",
+      "target": "function:eliza/packages/app-core/src/registry/generate.ts:detectFieldType",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/registry/generate.ts",
+      "target": "function:eliza/packages/app-core/src/registry/generate.ts:isAdvanced",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/registry/generate.ts",
+      "target": "function:eliza/packages/app-core/src/registry/generate.ts:autoLabel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/registry/generate.ts",
+      "target": "function:eliza/packages/app-core/src/registry/generate.ts:convertField",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/registry/generate.ts",
+      "target": "function:eliza/packages/app-core/src/registry/generate.ts:categorize",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/registry/generate.ts",
+      "target": "function:eliza/packages/app-core/src/registry/generate.ts:determineActions",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/registry/generate.ts",
+      "target": "function:eliza/packages/app-core/src/registry/generate.ts:convert",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/registry/generate.ts",
+      "target": "function:eliza/packages/app-core/src/registry/generate.ts:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/registry/generate.ts:convertField",
+      "target": "function:eliza/packages/app-core/src/registry/generate.ts:detectFieldType",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/registry/generate.ts:convertField",
+      "target": "function:eliza/packages/app-core/src/registry/generate.ts:autoLabel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/registry/generate.ts:convertField",
+      "target": "function:eliza/packages/app-core/src/registry/generate.ts:isAdvanced",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/registry/generate.ts:convert",
+      "target": "function:eliza/packages/app-core/src/registry/generate.ts:categorize",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/registry/generate.ts:convert",
+      "target": "function:eliza/packages/app-core/src/registry/generate.ts:convertField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/registry/generate.ts:convert",
+      "target": "function:eliza/packages/app-core/src/registry/generate.ts:determineActions",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/registry/generate.ts:main",
+      "target": "function:eliza/packages/app-core/src/registry/generate.ts:convert",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/registry/loader.ts",
+      "target": "function:eliza/packages/app-core/src/registry/loader.ts:loadRegistryFromRawEntries",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/registry/loader.ts",
+      "target": "function:eliza/packages/app-core/src/registry/loader.ts:normalizeConnectorAuth",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/registry/loader.ts",
+      "target": "function:eliza/packages/app-core/src/registry/loader.ts:mapLegacyAuthKindToAccountAuthKind",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/registry/loader.ts",
+      "target": "function:eliza/packages/app-core/src/registry/loader.ts:indexEntries",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/registry/loader.ts",
+      "target": "function:eliza/packages/app-core/src/registry/loader.ts:compareEntriesForDisplay",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/registry/loader.ts",
+      "target": "function:eliza/packages/app-core/src/registry/loader.ts:getApps",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/registry/loader.ts",
+      "target": "function:eliza/packages/app-core/src/registry/loader.ts:getPlugins",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/registry/loader.ts",
+      "target": "function:eliza/packages/app-core/src/registry/loader.ts:getConnectors",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/registry/loader.ts",
+      "target": "function:eliza/packages/app-core/src/registry/loader.ts:getEntry",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/registry/loader.ts",
+      "target": "function:eliza/packages/app-core/src/registry/loader.ts:getEntryByNpmName",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/registry/loader.ts",
+      "target": "function:eliza/packages/app-core/src/registry/loader.ts:mergeWithRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/registry/loader.ts",
+      "target": "function:eliza/packages/app-core/src/registry/loader.ts:defaultOverlay",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/registry/loader.ts",
+      "target": "class:eliza/packages/app-core/src/registry/loader.ts:RegistryValidationError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/registry/loader.ts:loadRegistryFromRawEntries",
+      "target": "function:eliza/packages/app-core/src/registry/loader.ts:normalizeConnectorAuth",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/registry/loader.ts:loadRegistryFromRawEntries",
+      "target": "function:eliza/packages/app-core/src/registry/loader.ts:indexEntries",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/registry/loader.ts:normalizeConnectorAuth",
+      "target": "function:eliza/packages/app-core/src/registry/loader.ts:mapLegacyAuthKindToAccountAuthKind",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/src/registry/loader.ts:mergeWithRuntime",
+      "target": "function:eliza/packages/app-core/src/registry/loader.ts:defaultOverlay",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/registry/connector-accounts.test.ts",
+      "target": "file:eliza/packages/app-core/src/registry/loader.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/registry/connector-accounts.test.ts",
+      "target": "file:eliza/packages/app-core/src/registry/schema.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/registry/facewear-registry.test.ts",
+      "target": "file:eliza/packages/app-core/src/registry/loader.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/registry/facewear-registry.test.ts",
+      "target": "file:eliza/packages/app-core/src/registry/schema.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/registry/generate-apps.ts",
+      "target": "file:eliza/packages/app-core/src/registry/schema.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/registry/generate.ts",
+      "target": "file:eliza/packages/app-core/src/registry/schema.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/registry/training-app-registry.test.ts",
+      "target": "file:eliza/packages/app-core/src/registry/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/registry/training-app-registry.test.ts",
+      "target": "file:eliza/packages/app-core/src/registry/schema.ts",
+      "type": "imports"
+    }
+  ]
+}

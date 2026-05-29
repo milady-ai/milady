@@ -1,0 +1,1239 @@
+{
+  "batchIndex": 275,
+  "nodes": [
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx",
+      "type": "file",
+      "name": "game-tui-mounted-surfaces.test.tsx",
+      "filePath": "eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx",
+      "summary": "game-tui-mounted-surfaces.test.tsx is a typescript source file in the Milady codebase. It contains 7 functions, 5 imports.",
+      "languageNotes": "typescript; code; 363 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx:findAncestor",
+      "type": "function",
+      "name": "findAncestor",
+      "filePath": "eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx",
+      "summary": "findAncestor is a function defined in eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx:latestRunForApp",
+      "type": "function",
+      "name": "latestRunForApp",
+      "filePath": "eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx",
+      "summary": "latestRunForApp is a function defined in eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx:stubComponent",
+      "type": "function",
+      "name": "stubComponent",
+      "filePath": "eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx",
+      "summary": "stubComponent is a function defined in eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx:renderSurface",
+      "type": "function",
+      "name": "renderSurface",
+      "filePath": "eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx",
+      "summary": "renderSurface is a function defined in eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx:cleanupSurfaces",
+      "type": "function",
+      "name": "cleanupSurfaces",
+      "filePath": "eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx",
+      "summary": "cleanupSurfaces is a function defined in eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx:renderState",
+      "type": "function",
+      "name": "renderState",
+      "filePath": "eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx",
+      "summary": "renderState is a function defined in eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx:getElementByText",
+      "type": "function",
+      "name": "getElementByText",
+      "filePath": "eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx",
+      "summary": "getElementByText is a function defined in eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts",
+      "type": "file",
+      "name": "view-llm-eval.test.ts",
+      "filePath": "eliza/packages/agent/src/__tests__/view-llm-eval.test.ts",
+      "summary": "view-llm-eval.test.ts is a typescript source file in the Milady codebase. It contains 11 functions, 1 imports.",
+      "languageNotes": "typescript; code; 605 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:detectProvider",
+      "type": "function",
+      "name": "detectProvider",
+      "filePath": "eliza/packages/agent/src/__tests__/view-llm-eval.test.ts",
+      "summary": "detectProvider is a function defined in eliza/packages/agent/src/__tests__/view-llm-eval.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:defaultModel",
+      "type": "function",
+      "name": "defaultModel",
+      "filePath": "eliza/packages/agent/src/__tests__/view-llm-eval.test.ts",
+      "summary": "defaultModel is a function defined in eliza/packages/agent/src/__tests__/view-llm-eval.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:stubAgentResponse",
+      "type": "function",
+      "name": "stubAgentResponse",
+      "filePath": "eliza/packages/agent/src/__tests__/view-llm-eval.test.ts",
+      "summary": "stubAgentResponse is a function defined in eliza/packages/agent/src/__tests__/view-llm-eval.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:sleep",
+      "type": "function",
+      "name": "sleep",
+      "filePath": "eliza/packages/agent/src/__tests__/view-llm-eval.test.ts",
+      "summary": "sleep is a function defined in eliza/packages/agent/src/__tests__/view-llm-eval.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:withCerebrasRateLimit",
+      "type": "function",
+      "name": "withCerebrasRateLimit",
+      "filePath": "eliza/packages/agent/src/__tests__/view-llm-eval.test.ts",
+      "summary": "withCerebrasRateLimit is a function defined in eliza/packages/agent/src/__tests__/view-llm-eval.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:retryAfterMs",
+      "type": "function",
+      "name": "retryAfterMs",
+      "filePath": "eliza/packages/agent/src/__tests__/view-llm-eval.test.ts",
+      "summary": "retryAfterMs is a function defined in eliza/packages/agent/src/__tests__/view-llm-eval.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:callCerebrasJudge",
+      "type": "function",
+      "name": "callCerebrasJudge",
+      "filePath": "eliza/packages/agent/src/__tests__/view-llm-eval.test.ts",
+      "summary": "callCerebrasJudge is a function defined in eliza/packages/agent/src/__tests__/view-llm-eval.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:callAnthropicJudge",
+      "type": "function",
+      "name": "callAnthropicJudge",
+      "filePath": "eliza/packages/agent/src/__tests__/view-llm-eval.test.ts",
+      "summary": "callAnthropicJudge is a function defined in eliza/packages/agent/src/__tests__/view-llm-eval.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:callJudge",
+      "type": "function",
+      "name": "callJudge",
+      "filePath": "eliza/packages/agent/src/__tests__/view-llm-eval.test.ts",
+      "summary": "callJudge is a function defined in eliza/packages/agent/src/__tests__/view-llm-eval.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:buildJudgePrompt",
+      "type": "function",
+      "name": "buildJudgePrompt",
+      "filePath": "eliza/packages/agent/src/__tests__/view-llm-eval.test.ts",
+      "summary": "buildJudgePrompt is a function defined in eliza/packages/agent/src/__tests__/view-llm-eval.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:evaluateScenario",
+      "type": "function",
+      "name": "evaluateScenario",
+      "filePath": "eliza/packages/agent/src/__tests__/view-llm-eval.test.ts",
+      "summary": "evaluateScenario is a function defined in eliza/packages/agent/src/__tests__/view-llm-eval.test.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/agent/src/__tests__/view-user-journeys.ts",
+      "type": "file",
+      "name": "view-user-journeys.ts",
+      "filePath": "eliza/packages/agent/src/__tests__/view-user-journeys.ts",
+      "summary": "view-user-journeys.ts is a typescript source file in the Milady codebase. It contains 2 functions.",
+      "languageNotes": "typescript; code; 554 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/__tests__/view-user-journeys.ts:getScenariosByTag",
+      "type": "function",
+      "name": "getScenariosByTag",
+      "filePath": "eliza/packages/agent/src/__tests__/view-user-journeys.ts",
+      "summary": "getScenariosByTag is a function defined in eliza/packages/agent/src/__tests__/view-user-journeys.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/__tests__/view-user-journeys.ts:getScenarioById",
+      "type": "function",
+      "name": "getScenarioById",
+      "filePath": "eliza/packages/agent/src/__tests__/view-user-journeys.ts",
+      "summary": "getScenarioById is a function defined in eliza/packages/agent/src/__tests__/view-user-journeys.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/agent/src/__tests__/views-registry-integration.test.ts",
+      "type": "file",
+      "name": "views-registry-integration.test.ts",
+      "filePath": "eliza/packages/agent/src/__tests__/views-registry-integration.test.ts",
+      "summary": "views-registry-integration.test.ts is a typescript source file in the Milady codebase. It contains 2 functions, 4 imports.",
+      "languageNotes": "typescript; code; 867 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/__tests__/views-registry-integration.test.ts:makeReqWithBody",
+      "type": "function",
+      "name": "makeReqWithBody",
+      "filePath": "eliza/packages/agent/src/__tests__/views-registry-integration.test.ts",
+      "summary": "makeReqWithBody is a function defined in eliza/packages/agent/src/__tests__/views-registry-integration.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/__tests__/views-registry-integration.test.ts:makeCtx",
+      "type": "function",
+      "name": "makeCtx",
+      "filePath": "eliza/packages/agent/src/__tests__/views-registry-integration.test.ts",
+      "summary": "makeCtx is a function defined in eliza/packages/agent/src/__tests__/views-registry-integration.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/agent/src/__tests__/views-system-smoke.test.ts",
+      "type": "file",
+      "name": "views-system-smoke.test.ts",
+      "filePath": "eliza/packages/agent/src/__tests__/views-system-smoke.test.ts",
+      "summary": "views-system-smoke.test.ts is a typescript source file in the Milady codebase. It contains 2 functions, 3 imports.",
+      "languageNotes": "typescript; code; 682 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/__tests__/views-system-smoke.test.ts:makeCtx",
+      "type": "function",
+      "name": "makeCtx",
+      "filePath": "eliza/packages/agent/src/__tests__/views-system-smoke.test.ts",
+      "summary": "makeCtx is a function defined in eliza/packages/agent/src/__tests__/views-system-smoke.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/__tests__/views-system-smoke.test.ts:makeReqWithBody",
+      "type": "function",
+      "name": "makeReqWithBody",
+      "filePath": "eliza/packages/agent/src/__tests__/views-system-smoke.test.ts",
+      "summary": "makeReqWithBody is a function defined in eliza/packages/agent/src/__tests__/views-system-smoke.test.ts."
+    },
+    {
+      "tags": [
+        "entry-point"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/agent/src/actions/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/agent/src/actions/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 16 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "api",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/agent/src/api/__tests__/sse-wire-streaming.test.ts",
+      "type": "file",
+      "name": "sse-wire-streaming.test.ts",
+      "filePath": "eliza/packages/agent/src/api/__tests__/sse-wire-streaming.test.ts",
+      "summary": "sse-wire-streaming.test.ts is a typescript source file in the Milady codebase. It contains 2 functions, 1 imports.",
+      "languageNotes": "typescript; code; 177 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/api/__tests__/sse-wire-streaming.test.ts:createMockResponse",
+      "type": "function",
+      "name": "createMockResponse",
+      "filePath": "eliza/packages/agent/src/api/__tests__/sse-wire-streaming.test.ts",
+      "summary": "createMockResponse is a function defined in eliza/packages/agent/src/api/__tests__/sse-wire-streaming.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/api/__tests__/sse-wire-streaming.test.ts:parseFrames",
+      "type": "function",
+      "name": "parseFrames",
+      "filePath": "eliza/packages/agent/src/api/__tests__/sse-wire-streaming.test.ts",
+      "summary": "parseFrames is a function defined in eliza/packages/agent/src/api/__tests__/sse-wire-streaming.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "api"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/agent/src/api/connector-oauth-callback-auth.test.ts",
+      "type": "file",
+      "name": "connector-oauth-callback-auth.test.ts",
+      "filePath": "eliza/packages/agent/src/api/connector-oauth-callback-auth.test.ts",
+      "summary": "connector-oauth-callback-auth.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 49 lines"
+    },
+    {
+      "tags": [
+        "api",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/agent/src/api/connector-oauth-callback-auth.ts",
+      "type": "file",
+      "name": "connector-oauth-callback-auth.ts",
+      "filePath": "eliza/packages/agent/src/api/connector-oauth-callback-auth.ts",
+      "summary": "connector-oauth-callback-auth.ts is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 9 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/api/connector-oauth-callback-auth.ts:isConnectorOAuthCallbackEndpoint",
+      "type": "function",
+      "name": "isConnectorOAuthCallbackEndpoint",
+      "filePath": "eliza/packages/agent/src/api/connector-oauth-callback-auth.ts",
+      "summary": "isConnectorOAuthCallbackEndpoint is a function defined in eliza/packages/agent/src/api/connector-oauth-callback-auth.ts."
+    },
+    {
+      "tags": [
+        "entry-point",
+        "api",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/agent/src/api/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/agent/src/api/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 77 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/api/index.ts:handleWalletRoutes",
+      "type": "function",
+      "name": "handleWalletRoutes",
+      "filePath": "eliza/packages/agent/src/api/index.ts",
+      "summary": "handleWalletRoutes is a function defined in eliza/packages/agent/src/api/index.ts."
+    },
+    {
+      "tags": [
+        "api"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/agent/src/api/permission-request-prompt.ts",
+      "type": "file",
+      "name": "permission-request-prompt.ts",
+      "filePath": "eliza/packages/agent/src/api/permission-request-prompt.ts",
+      "summary": "permission-request-prompt.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 54 lines"
+    },
+    {
+      "tags": [
+        "api",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/agent/src/api/rate-limiter.ts",
+      "type": "file",
+      "name": "rate-limiter.ts",
+      "filePath": "eliza/packages/agent/src/api/rate-limiter.ts",
+      "summary": "rate-limiter.ts is a typescript source file in the Milady codebase. It contains 3 functions.",
+      "languageNotes": "typescript; code; 83 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/api/rate-limiter.ts:cleanup",
+      "type": "function",
+      "name": "cleanup",
+      "filePath": "eliza/packages/agent/src/api/rate-limiter.ts",
+      "summary": "cleanup is a function defined in eliza/packages/agent/src/api/rate-limiter.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/api/rate-limiter.ts:checkRateLimit",
+      "type": "function",
+      "name": "checkRateLimit",
+      "filePath": "eliza/packages/agent/src/api/rate-limiter.ts",
+      "summary": "checkRateLimit is a function defined in eliza/packages/agent/src/api/rate-limiter.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/api/rate-limiter.ts:resetRateLimits",
+      "type": "function",
+      "name": "resetRateLimits",
+      "filePath": "eliza/packages/agent/src/api/rate-limiter.ts",
+      "summary": "resetRateLimits is a function defined in eliza/packages/agent/src/api/rate-limiter.ts."
+    },
+    {
+      "tags": [
+        "api",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/agent/src/api/training-backend-check.ts",
+      "type": "file",
+      "name": "training-backend-check.ts",
+      "filePath": "eliza/packages/agent/src/api/training-backend-check.ts",
+      "summary": "training-backend-check.ts is a typescript source file in the Milady codebase. It contains 3 functions.",
+      "languageNotes": "typescript; code; 40 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/api/training-backend-check.ts:probe",
+      "type": "function",
+      "name": "probe",
+      "filePath": "eliza/packages/agent/src/api/training-backend-check.ts",
+      "summary": "probe is a function defined in eliza/packages/agent/src/api/training-backend-check.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/api/training-backend-check.ts:detectAvailableBackends",
+      "type": "function",
+      "name": "detectAvailableBackends",
+      "filePath": "eliza/packages/agent/src/api/training-backend-check.ts",
+      "summary": "detectAvailableBackends is a function defined in eliza/packages/agent/src/api/training-backend-check.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/api/training-backend-check.ts:clearBackendCache",
+      "type": "function",
+      "name": "clearBackendCache",
+      "filePath": "eliza/packages/agent/src/api/training-backend-check.ts",
+      "summary": "clearBackendCache is a function defined in eliza/packages/agent/src/api/training-backend-check.ts."
+    },
+    {
+      "tags": [
+        "api",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/agent/src/api/zip-utils.ts",
+      "type": "file",
+      "name": "zip-utils.ts",
+      "filePath": "eliza/packages/agent/src/api/zip-utils.ts",
+      "summary": "zip-utils.ts is a typescript source file in the Milady codebase. It contains 5 functions.",
+      "languageNotes": "typescript; code; 130 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/api/zip-utils.ts:normalizeZipEntryName",
+      "type": "function",
+      "name": "normalizeZipEntryName",
+      "filePath": "eliza/packages/agent/src/api/zip-utils.ts",
+      "summary": "normalizeZipEntryName is a function defined in eliza/packages/agent/src/api/zip-utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/api/zip-utils.ts:toBuffer",
+      "type": "function",
+      "name": "toBuffer",
+      "filePath": "eliza/packages/agent/src/api/zip-utils.ts",
+      "summary": "toBuffer is a function defined in eliza/packages/agent/src/api/zip-utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/api/zip-utils.ts:crc32",
+      "type": "function",
+      "name": "crc32",
+      "filePath": "eliza/packages/agent/src/api/zip-utils.ts",
+      "summary": "crc32 is a function defined in eliza/packages/agent/src/api/zip-utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/api/zip-utils.ts:toDosDateTime",
+      "type": "function",
+      "name": "toDosDateTime",
+      "filePath": "eliza/packages/agent/src/api/zip-utils.ts",
+      "summary": "toDosDateTime is a function defined in eliza/packages/agent/src/api/zip-utils.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/api/zip-utils.ts:createZipArchive",
+      "type": "function",
+      "name": "createZipArchive",
+      "filePath": "eliza/packages/agent/src/api/zip-utils.ts",
+      "summary": "createZipArchive is a function defined in eliza/packages/agent/src/api/zip-utils.ts."
+    },
+    {
+      "tags": [
+        "entry-point"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/agent/src/auth/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/agent/src/auth/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 7 lines"
+    },
+    {
+      "tags": [
+        "entry-point"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/agent/src/awareness/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/agent/src/awareness/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 1 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/agent/src/config/character-schema.ts",
+      "type": "file",
+      "name": "character-schema.ts",
+      "filePath": "eliza/packages/agent/src/config/character-schema.ts",
+      "summary": "character-schema.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 44 lines"
+    },
+    {
+      "tags": [
+        "entry-point"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/agent/src/config/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/agent/src/config/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 14 lines"
+    },
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/agent/src/config/plugin-auto-enable.ts",
+      "type": "file",
+      "name": "plugin-auto-enable.ts",
+      "filePath": "eliza/packages/agent/src/config/plugin-auto-enable.ts",
+      "summary": "plugin-auto-enable.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 17 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/agent/src/config/types.messages.ts",
+      "type": "file",
+      "name": "types.messages.ts",
+      "filePath": "eliza/packages/agent/src/config/types.messages.ts",
+      "summary": "types.messages.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 1 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/agent/src/external-modules.d.ts",
+      "type": "file",
+      "name": "external-modules.d.ts",
+      "filePath": "eliza/packages/agent/src/external-modules.d.ts",
+      "summary": "external-modules.d.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 846 lines"
+    },
+    {
+      "tags": [
+        "entry-point"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/agent/src/runtime/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/agent/src/runtime/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 18 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/agent/src/runtime/restart.ts",
+      "type": "file",
+      "name": "restart.ts",
+      "filePath": "eliza/packages/agent/src/runtime/restart.ts",
+      "summary": "restart.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 13 lines"
+    },
+    {
+      "tags": [
+        "entry-point"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/agent/src/security/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/agent/src/security/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 3 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/agent/src/services/external-bridge-state.ts",
+      "type": "file",
+      "name": "external-bridge-state.ts",
+      "filePath": "eliza/packages/agent/src/services/external-bridge-state.ts",
+      "summary": "external-bridge-state.ts is a typescript source file in the Milady codebase. It contains 2 functions.",
+      "languageNotes": "typescript; code; 17 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/external-bridge-state.ts:setStewardEvmBridgeActive",
+      "type": "function",
+      "name": "setStewardEvmBridgeActive",
+      "filePath": "eliza/packages/agent/src/services/external-bridge-state.ts",
+      "summary": "setStewardEvmBridgeActive is a function defined in eliza/packages/agent/src/services/external-bridge-state.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/agent/src/services/external-bridge-state.ts:isStewardEvmBridgeActive",
+      "type": "function",
+      "name": "isStewardEvmBridgeActive",
+      "filePath": "eliza/packages/agent/src/services/external-bridge-state.ts",
+      "summary": "isStewardEvmBridgeActive is a function defined in eliza/packages/agent/src/services/external-bridge-state.ts."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx",
+      "target": "function:eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx:findAncestor",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx",
+      "target": "function:eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx:latestRunForApp",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx",
+      "target": "function:eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx:stubComponent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx",
+      "target": "function:eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx:renderSurface",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx",
+      "target": "function:eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx:cleanupSurfaces",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx",
+      "target": "function:eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx:renderState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx",
+      "target": "function:eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx:getElementByText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx:renderState",
+      "target": "function:eliza/packages/agent/src/__tests__/game-tui-mounted-surfaces.test.tsx:renderSurface",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts",
+      "target": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:detectProvider",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts",
+      "target": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:defaultModel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts",
+      "target": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:stubAgentResponse",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts",
+      "target": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:sleep",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts",
+      "target": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:withCerebrasRateLimit",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts",
+      "target": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:retryAfterMs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts",
+      "target": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:callCerebrasJudge",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts",
+      "target": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:callAnthropicJudge",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts",
+      "target": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:callJudge",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts",
+      "target": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:buildJudgePrompt",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts",
+      "target": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:evaluateScenario",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:withCerebrasRateLimit",
+      "target": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:sleep",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:callCerebrasJudge",
+      "target": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:withCerebrasRateLimit",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:callCerebrasJudge",
+      "target": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:sleep",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:callCerebrasJudge",
+      "target": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:retryAfterMs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:callJudge",
+      "target": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:callCerebrasJudge",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:callJudge",
+      "target": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:callAnthropicJudge",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:evaluateScenario",
+      "target": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:stubAgentResponse",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:evaluateScenario",
+      "target": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:buildJudgePrompt",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:evaluateScenario",
+      "target": "function:eliza/packages/agent/src/__tests__/view-llm-eval.test.ts:callJudge",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/__tests__/view-user-journeys.ts",
+      "target": "function:eliza/packages/agent/src/__tests__/view-user-journeys.ts:getScenariosByTag",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/__tests__/view-user-journeys.ts",
+      "target": "function:eliza/packages/agent/src/__tests__/view-user-journeys.ts:getScenarioById",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/__tests__/views-registry-integration.test.ts",
+      "target": "function:eliza/packages/agent/src/__tests__/views-registry-integration.test.ts:makeReqWithBody",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/__tests__/views-registry-integration.test.ts",
+      "target": "function:eliza/packages/agent/src/__tests__/views-registry-integration.test.ts:makeCtx",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/__tests__/views-registry-integration.test.ts:makeCtx",
+      "target": "function:eliza/packages/agent/src/__tests__/views-registry-integration.test.ts:makeReqWithBody",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/__tests__/views-system-smoke.test.ts",
+      "target": "function:eliza/packages/agent/src/__tests__/views-system-smoke.test.ts:makeCtx",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/__tests__/views-system-smoke.test.ts",
+      "target": "function:eliza/packages/agent/src/__tests__/views-system-smoke.test.ts:makeReqWithBody",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/__tests__/views-system-smoke.test.ts:makeCtx",
+      "target": "function:eliza/packages/agent/src/__tests__/views-system-smoke.test.ts:makeReqWithBody",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/api/__tests__/sse-wire-streaming.test.ts",
+      "target": "function:eliza/packages/agent/src/api/__tests__/sse-wire-streaming.test.ts:createMockResponse",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/api/__tests__/sse-wire-streaming.test.ts",
+      "target": "function:eliza/packages/agent/src/api/__tests__/sse-wire-streaming.test.ts:parseFrames",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/api/connector-oauth-callback-auth.ts",
+      "target": "function:eliza/packages/agent/src/api/connector-oauth-callback-auth.ts:isConnectorOAuthCallbackEndpoint",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/api/index.ts",
+      "target": "function:eliza/packages/agent/src/api/index.ts:handleWalletRoutes",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/api/rate-limiter.ts",
+      "target": "function:eliza/packages/agent/src/api/rate-limiter.ts:cleanup",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/api/rate-limiter.ts",
+      "target": "function:eliza/packages/agent/src/api/rate-limiter.ts:checkRateLimit",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/api/rate-limiter.ts",
+      "target": "function:eliza/packages/agent/src/api/rate-limiter.ts:resetRateLimits",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/api/rate-limiter.ts:checkRateLimit",
+      "target": "function:eliza/packages/agent/src/api/rate-limiter.ts:cleanup",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/api/training-backend-check.ts",
+      "target": "function:eliza/packages/agent/src/api/training-backend-check.ts:probe",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/api/training-backend-check.ts",
+      "target": "function:eliza/packages/agent/src/api/training-backend-check.ts:detectAvailableBackends",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/api/training-backend-check.ts",
+      "target": "function:eliza/packages/agent/src/api/training-backend-check.ts:clearBackendCache",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/api/training-backend-check.ts:detectAvailableBackends",
+      "target": "function:eliza/packages/agent/src/api/training-backend-check.ts:probe",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/api/training-backend-check.ts:detectAvailableBackends",
+      "target": "function:eliza/packages/agent/src/api/training-backend-check.ts:probe",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/api/zip-utils.ts",
+      "target": "function:eliza/packages/agent/src/api/zip-utils.ts:normalizeZipEntryName",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/api/zip-utils.ts",
+      "target": "function:eliza/packages/agent/src/api/zip-utils.ts:toBuffer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/api/zip-utils.ts",
+      "target": "function:eliza/packages/agent/src/api/zip-utils.ts:crc32",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/api/zip-utils.ts",
+      "target": "function:eliza/packages/agent/src/api/zip-utils.ts:toDosDateTime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/api/zip-utils.ts",
+      "target": "function:eliza/packages/agent/src/api/zip-utils.ts:createZipArchive",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/api/zip-utils.ts:createZipArchive",
+      "target": "function:eliza/packages/agent/src/api/zip-utils.ts:normalizeZipEntryName",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/api/zip-utils.ts:createZipArchive",
+      "target": "function:eliza/packages/agent/src/api/zip-utils.ts:toBuffer",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/api/zip-utils.ts:createZipArchive",
+      "target": "function:eliza/packages/agent/src/api/zip-utils.ts:crc32",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/agent/src/api/zip-utils.ts:createZipArchive",
+      "target": "function:eliza/packages/agent/src/api/zip-utils.ts:toDosDateTime",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/external-bridge-state.ts",
+      "target": "function:eliza/packages/agent/src/services/external-bridge-state.ts:setStewardEvmBridgeActive",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/agent/src/services/external-bridge-state.ts",
+      "target": "function:eliza/packages/agent/src/services/external-bridge-state.ts:isStewardEvmBridgeActive",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/agent/src/api/connector-oauth-callback-auth.test.ts",
+      "target": "file:eliza/packages/agent/src/api/connector-oauth-callback-auth.ts",
+      "type": "imports"
+    }
+  ]
+}

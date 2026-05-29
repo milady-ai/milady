@@ -1,0 +1,3576 @@
+{
+  "batchIndex": 84,
+  "nodes": [
+    {
+      "tags": [
+        "voice",
+        "local-inference",
+        "plugin",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts",
+      "type": "file",
+      "name": "eot-classifier-ggml.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts",
+      "summary": "eot-classifier-ggml.ts is a typescript source file in the Milady codebase. It contains 6 functions, 2 classes, 2 imports.",
+      "languageNotes": "typescript; code; 567 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts:turnDetectorGgufForTier",
+      "type": "function",
+      "name": "turnDetectorGgufForTier",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts",
+      "summary": "turnDetectorGgufForTier is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts:loadNlc",
+      "type": "function",
+      "name": "loadNlc",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts",
+      "summary": "loadNlc is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts:getLlama",
+      "type": "function",
+      "name": "getLlama",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts",
+      "summary": "getLlama is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts:createBundledLiveKitGgmlTurnDetector",
+      "type": "function",
+      "name": "createBundledLiveKitGgmlTurnDetector",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts",
+      "summary": "createBundledLiveKitGgmlTurnDetector is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts:normalizeTurnDetectorText",
+      "type": "function",
+      "name": "normalizeTurnDetectorText",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts",
+      "summary": "normalizeTurnDetectorText is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts:applyQwenUserTemplate",
+      "type": "function",
+      "name": "applyQwenUserTemplate",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts",
+      "summary": "applyQwenUserTemplate is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts:EotGgmlUnavailableError",
+      "type": "class",
+      "name": "EotGgmlUnavailableError",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts",
+      "summary": "EotGgmlUnavailableError is a class or type declared in eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts:LiveKitGgmlTurnDetector",
+      "type": "class",
+      "name": "LiveKitGgmlTurnDetector",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts",
+      "summary": "LiveKitGgmlTurnDetector is a class or type declared in eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts."
+    },
+    {
+      "tags": [
+        "voice",
+        "local-inference",
+        "plugin",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "type": "file",
+      "name": "eot-classifier.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "summary": "eot-classifier.ts is a typescript source file in the Milady codebase. It contains 13 functions, 5 classes, 2 imports.",
+      "languageNotes": "typescript; code; 977 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:clampProbability",
+      "type": "function",
+      "name": "clampProbability",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "summary": "clampProbability is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:turnSignalFromProbability",
+      "type": "function",
+      "name": "turnSignalFromProbability",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "summary": "turnSignalFromProbability is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:turnDetectorRevisionForTier",
+      "type": "function",
+      "name": "turnDetectorRevisionForTier",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "summary": "turnDetectorRevisionForTier is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:createBundledLiveKitTurnDetector",
+      "type": "function",
+      "name": "createBundledLiveKitTurnDetector",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "summary": "createBundledLiveKitTurnDetector is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:normalizeTurnDetectorText",
+      "type": "function",
+      "name": "normalizeTurnDetectorText",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "summary": "normalizeTurnDetectorText is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:formatLiveKitTurnDetectorPrompt",
+      "type": "function",
+      "name": "formatLiveKitTurnDetectorPrompt",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "summary": "formatLiveKitTurnDetectorPrompt is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:tokenIdsToBigInt64",
+      "type": "function",
+      "name": "tokenIdsToBigInt64",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "summary": "tokenIdsToBigInt64 is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:isTensorLike",
+      "type": "function",
+      "name": "isTensorLike",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "summary": "isTensorLike is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:toBigInt64Array",
+      "type": "function",
+      "name": "toBigInt64Array",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "summary": "toBigInt64Array is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:probabilityFromOnnxOutput",
+      "type": "function",
+      "name": "probabilityFromOnnxOutput",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "summary": "probabilityFromOnnxOutput is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:softmaxProbability",
+      "type": "function",
+      "name": "softmaxProbability",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "summary": "softmaxProbability is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:createBundledTurnsenseEotClassifier",
+      "type": "function",
+      "name": "createBundledTurnsenseEotClassifier",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "summary": "createBundledTurnsenseEotClassifier is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:probabilityFromTurnsenseOutput",
+      "type": "function",
+      "name": "probabilityFromTurnsenseOutput",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "summary": "probabilityFromTurnsenseOutput is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:HeuristicEotClassifier",
+      "type": "class",
+      "name": "HeuristicEotClassifier",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "summary": "HeuristicEotClassifier is a class or type declared in eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:LiveKitTurnDetector",
+      "type": "class",
+      "name": "LiveKitTurnDetector",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "summary": "LiveKitTurnDetector is a class or type declared in eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:TurnsenseEotClassifier",
+      "type": "class",
+      "name": "TurnsenseEotClassifier",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "summary": "TurnsenseEotClassifier is a class or type declared in eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:RemoteEotClassifier",
+      "type": "class",
+      "name": "RemoteEotClassifier",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "summary": "RemoteEotClassifier is a class or type declared in eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:Eliza1EotClassifier",
+      "type": "class",
+      "name": "Eliza1EotClassifier",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "summary": "Eliza1EotClassifier is a class or type declared in eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts."
+    },
+    {
+      "tags": [
+        "voice",
+        "local-inference",
+        "plugin",
+        "class"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/errors.ts",
+      "type": "file",
+      "name": "errors.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/errors.ts",
+      "summary": "errors.ts is a typescript source file in the Milady codebase. It contains 1 class.",
+      "languageNotes": "typescript; code; 32 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/src/services/voice/errors.ts:VoiceStartupError",
+      "type": "class",
+      "name": "VoiceStartupError",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/errors.ts",
+      "summary": "VoiceStartupError is a class or type declared in eliza/plugins/plugin-local-inference/src/services/voice/errors.ts."
+    },
+    {
+      "tags": [
+        "voice",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts",
+      "type": "file",
+      "name": "expressive-tags.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts",
+      "summary": "expressive-tags.ts is a typescript source file in the Milady codebase. It contains 10 functions.",
+      "languageNotes": "typescript; code; 405 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts:isExpressiveTag",
+      "type": "function",
+      "name": "isExpressiveTag",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts",
+      "summary": "isExpressiveTag is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts:isExpressiveEmotionEnum",
+      "type": "function",
+      "name": "isExpressiveEmotionEnum",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts",
+      "summary": "isExpressiveEmotionEnum is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts:tagRegex",
+      "type": "function",
+      "name": "tagRegex",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts",
+      "summary": "tagRegex is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts:parseExpressiveTags",
+      "type": "function",
+      "name": "parseExpressiveTags",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts",
+      "summary": "parseExpressiveTags is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts:stripExpressiveTags",
+      "type": "function",
+      "name": "stripExpressiveTags",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts",
+      "summary": "stripExpressiveTags is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts:emotionToEnum",
+      "type": "function",
+      "name": "emotionToEnum",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts",
+      "summary": "emotionToEnum is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts:enumToEmotion",
+      "type": "function",
+      "name": "enumToEmotion",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts",
+      "summary": "enumToEmotion is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts:normalizeAsrEmotionLabel",
+      "type": "function",
+      "name": "normalizeAsrEmotionLabel",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts",
+      "summary": "normalizeAsrEmotionLabel is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts:asrEmotionToTag",
+      "type": "function",
+      "name": "asrEmotionToTag",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts",
+      "summary": "asrEmotionToTag is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts:expressiveTagPromptClause",
+      "type": "function",
+      "name": "expressiveTagPromptClause",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts",
+      "summary": "expressiveTagPromptClause is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "voice",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.test.ts",
+      "type": "file",
+      "name": "ffi-bindings.test.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.test.ts",
+      "summary": "ffi-bindings.test.ts is a typescript source file in the Milady codebase. It contains 3 functions, 3 imports.",
+      "languageNotes": "typescript; code; 663 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.test.ts:bunOnPath",
+      "type": "function",
+      "name": "bunOnPath",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.test.ts",
+      "summary": "bunOnPath is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.test.ts:expectHarnessOk",
+      "type": "function",
+      "name": "expectHarnessOk",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.test.ts",
+      "summary": "expectHarnessOk is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.test.ts:runBunHarness",
+      "type": "function",
+      "name": "runBunHarness",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.test.ts",
+      "summary": "runBunHarness is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.test.ts."
+    },
+    {
+      "tags": [
+        "voice",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts",
+      "type": "file",
+      "name": "ffi-bindings.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts",
+      "summary": "ffi-bindings.ts is a typescript source file in the Milady codebase. It contains 8 functions, 1 imports.",
+      "languageNotes": "typescript; code; 1872 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts:isBunRuntime",
+      "type": "function",
+      "name": "isBunRuntime",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts",
+      "summary": "isBunRuntime is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts:loadElizaInferenceFfi",
+      "type": "function",
+      "name": "loadElizaInferenceFfi",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts",
+      "summary": "loadElizaInferenceFfi is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts:loadBunFfiModule",
+      "type": "function",
+      "name": "loadBunFfiModule",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts",
+      "summary": "loadBunFfiModule is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts:bindWithBunFfi",
+      "type": "function",
+      "name": "bindWithBunFfi",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts",
+      "summary": "bindWithBunFfi is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts:formatFfiError",
+      "type": "function",
+      "name": "formatFfiError",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts",
+      "summary": "formatFfiError is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts:readVerifierEvent",
+      "type": "function",
+      "name": "readVerifierEvent",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts",
+      "summary": "readVerifierEvent is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts:readInt32Array",
+      "type": "function",
+      "name": "readInt32Array",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts",
+      "summary": "readInt32Array is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts:readCString",
+      "type": "function",
+      "name": "readCString",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts",
+      "summary": "readCString is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts."
+    },
+    {
+      "tags": [
+        "entry-point",
+        "voice",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 477 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "voice",
+        "local-inference",
+        "plugin",
+        "class"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts",
+      "type": "file",
+      "name": "interactive-session.e2e.test.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts",
+      "summary": "interactive-session.e2e.test.ts is a typescript source file in the Milady codebase. It contains 9 functions, 2 classes, 11 imports.",
+      "languageNotes": "typescript; code; 647 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts:writePresetBundle",
+      "type": "function",
+      "name": "writePresetBundle",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts",
+      "summary": "writePresetBundle is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts:lifecycleLoadersOk",
+      "type": "function",
+      "name": "lifecycleLoadersOk",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts",
+      "summary": "lifecycleLoadersOk is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts:vadStart",
+      "type": "function",
+      "name": "vadStart",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts",
+      "summary": "vadStart is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts:vadActive",
+      "type": "function",
+      "name": "vadActive",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts",
+      "summary": "vadActive is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts:vadPause",
+      "type": "function",
+      "name": "vadPause",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts",
+      "summary": "vadPause is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts:vadEnd",
+      "type": "function",
+      "name": "vadEnd",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts",
+      "summary": "vadEnd is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts:vadBlip",
+      "type": "function",
+      "name": "vadBlip",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts",
+      "summary": "vadBlip is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts:tok",
+      "type": "function",
+      "name": "tok",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts",
+      "summary": "tok is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts:isUnsupportedRealVoiceRuntime",
+      "type": "function",
+      "name": "isUnsupportedRealVoiceRuntime",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts",
+      "summary": "isUnsupportedRealVoiceRuntime is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts:TestTranscriber",
+      "type": "class",
+      "name": "TestTranscriber",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts",
+      "summary": "TestTranscriber is a class or type declared in eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts:ScriptableVad",
+      "type": "class",
+      "name": "ScriptableVad",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts",
+      "summary": "ScriptableVad is a class or type declared in eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "voice",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-backend.test.ts",
+      "type": "file",
+      "name": "kokoro-backend.test.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-backend.test.ts",
+      "summary": "kokoro-backend.test.ts is a typescript source file in the Milady codebase. It contains 4 functions, 5 imports.",
+      "languageNotes": "typescript; code; 151 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-backend.test.ts:fixedPhonemizer",
+      "type": "function",
+      "name": "fixedPhonemizer",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-backend.test.ts",
+      "summary": "fixedPhonemizer is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-backend.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-backend.test.ts:makePreset",
+      "type": "function",
+      "name": "makePreset",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-backend.test.ts",
+      "summary": "makePreset is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-backend.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-backend.test.ts:makePhrase",
+      "type": "function",
+      "name": "makePhrase",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-backend.test.ts",
+      "summary": "makePhrase is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-backend.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-backend.test.ts:makeBackend",
+      "type": "function",
+      "name": "makeBackend",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-backend.test.ts",
+      "summary": "makeBackend is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-backend.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "voice",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-engine-bridge.test.ts",
+      "type": "file",
+      "name": "kokoro-engine-bridge.test.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-engine-bridge.test.ts",
+      "summary": "kokoro-engine-bridge.test.ts is a typescript source file in the Milady codebase. It contains 2 functions, 5 imports.",
+      "languageNotes": "typescript; code; 147 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-engine-bridge.test.ts:makeKokoroConfig",
+      "type": "function",
+      "name": "makeKokoroConfig",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-engine-bridge.test.ts",
+      "summary": "makeKokoroConfig is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-engine-bridge.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-engine-bridge.test.ts:lifecycleLoadersOk",
+      "type": "function",
+      "name": "lifecycleLoadersOk",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-engine-bridge.test.ts",
+      "summary": "lifecycleLoadersOk is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-engine-bridge.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "voice",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-engine-discovery.test.ts",
+      "type": "file",
+      "name": "kokoro-engine-discovery.test.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-engine-discovery.test.ts",
+      "summary": "kokoro-engine-discovery.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 3 imports.",
+      "languageNotes": "typescript; code; 277 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-engine-discovery.test.ts:makeStaged",
+      "type": "function",
+      "name": "makeStaged",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-engine-discovery.test.ts",
+      "summary": "makeStaged is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-engine-discovery.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "voice",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-runtime.test.ts",
+      "type": "file",
+      "name": "kokoro-runtime.test.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-runtime.test.ts",
+      "summary": "kokoro-runtime.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 129 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-runtime.test.ts:makeVoice",
+      "type": "function",
+      "name": "makeVoice",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-runtime.test.ts",
+      "summary": "makeVoice is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-runtime.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "voice",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/phonemizer.test.ts",
+      "type": "file",
+      "name": "phonemizer.test.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/phonemizer.test.ts",
+      "summary": "phonemizer.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 53 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "voice",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/runtime-selection.test.ts",
+      "type": "file",
+      "name": "runtime-selection.test.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/runtime-selection.test.ts",
+      "summary": "runtime-selection.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 209 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "voice",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/voices.test.ts",
+      "type": "file",
+      "name": "voices.test.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/voices.test.ts",
+      "summary": "voices.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 57 lines"
+    },
+    {
+      "tags": [
+        "voice",
+        "local-inference",
+        "plugin",
+        "class"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-backend.ts",
+      "type": "file",
+      "name": "kokoro-backend.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-backend.ts",
+      "summary": "kokoro-backend.ts is a typescript source file in the Milady codebase. It contains 1 class, 5 imports.",
+      "languageNotes": "typescript; code; 208 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-backend.ts:KokoroTtsBackend",
+      "type": "class",
+      "name": "KokoroTtsBackend",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-backend.ts",
+      "summary": "KokoroTtsBackend is a class or type declared in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-backend.ts."
+    },
+    {
+      "tags": [
+        "voice",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts",
+      "type": "file",
+      "name": "kokoro-engine-discovery.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts",
+      "summary": "kokoro-engine-discovery.ts is a typescript source file in the Milady codebase. It contains 7 functions, 3 imports.",
+      "languageNotes": "typescript; code; 170 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts:isKokoroGgufFile",
+      "type": "function",
+      "name": "isKokoroGgufFile",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts",
+      "summary": "isKokoroGgufFile is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts:kokoroEngineModelDir",
+      "type": "function",
+      "name": "kokoroEngineModelDir",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts",
+      "summary": "kokoroEngineModelDir is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts:resolveKokoroEngineConfig",
+      "type": "function",
+      "name": "resolveKokoroEngineConfig",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts",
+      "summary": "resolveKokoroEngineConfig is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts:resolveModelFile",
+      "type": "function",
+      "name": "resolveModelFile",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts",
+      "summary": "resolveModelFile is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts:resolveDefaultVoiceId",
+      "type": "function",
+      "name": "resolveDefaultVoiceId",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts",
+      "summary": "resolveDefaultVoiceId is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts:findVoicePack",
+      "type": "function",
+      "name": "findVoicePack",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts",
+      "summary": "findVoicePack is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts:listStagedVoiceIds",
+      "type": "function",
+      "name": "listStagedVoiceIds",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts",
+      "summary": "listStagedVoiceIds is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts."
+    },
+    {
+      "tags": [
+        "voice",
+        "local-inference",
+        "plugin",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts",
+      "type": "file",
+      "name": "kokoro-runtime.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts",
+      "summary": "kokoro-runtime.ts is a typescript source file in the Milady codebase. It contains 7 functions, 4 classes, 1 imports.",
+      "languageNotes": "typescript; code; 597 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts:decodePhonemesForGgufBody",
+      "type": "function",
+      "name": "decodePhonemesForGgufBody",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts",
+      "summary": "decodePhonemesForGgufBody is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts:bytesToFloat32Pcm",
+      "type": "function",
+      "name": "bytesToFloat32Pcm",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts",
+      "summary": "bytesToFloat32Pcm is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts:normalizeGraphOptimizationLevel",
+      "type": "function",
+      "name": "normalizeGraphOptimizationLevel",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts",
+      "summary": "normalizeGraphOptimizationLevel is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts:getInputMetadataType",
+      "type": "function",
+      "name": "getInputMetadataType",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts",
+      "summary": "getInputMetadataType is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts:defaultOrtLoader",
+      "type": "function",
+      "name": "defaultOrtLoader",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts",
+      "summary": "defaultOrtLoader is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts:pathToFileUrlString",
+      "type": "function",
+      "name": "pathToFileUrlString",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts",
+      "summary": "pathToFileUrlString is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts:verifySha256",
+      "type": "function",
+      "name": "verifySha256",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts",
+      "summary": "verifySha256 is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts:KokoroGgufRuntime",
+      "type": "class",
+      "name": "KokoroGgufRuntime",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts",
+      "summary": "KokoroGgufRuntime is a class or type declared in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts:KokoroOnnxRuntime",
+      "type": "class",
+      "name": "KokoroOnnxRuntime",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts",
+      "summary": "KokoroOnnxRuntime is a class or type declared in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts:KokoroPythonRuntime",
+      "type": "class",
+      "name": "KokoroPythonRuntime",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts",
+      "summary": "KokoroPythonRuntime is a class or type declared in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts:KokoroMockRuntime",
+      "type": "class",
+      "name": "KokoroMockRuntime",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts",
+      "summary": "KokoroMockRuntime is a class or type declared in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts."
+    },
+    {
+      "tags": [
+        "voice",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phoneme-stream.ts",
+      "type": "file",
+      "name": "phoneme-stream.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phoneme-stream.ts",
+      "summary": "phoneme-stream.ts is a typescript source file in the Milady codebase. It contains 2 functions, 1 imports.",
+      "languageNotes": "typescript; code; 123 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phoneme-stream.ts:appendSeq",
+      "type": "function",
+      "name": "appendSeq",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phoneme-stream.ts",
+      "summary": "appendSeq is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phoneme-stream.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phoneme-stream.ts:phonemizePhrase",
+      "type": "function",
+      "name": "phonemizePhrase",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phoneme-stream.ts",
+      "summary": "phonemizePhrase is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phoneme-stream.ts."
+    },
+    {
+      "tags": [
+        "voice",
+        "local-inference",
+        "plugin",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts",
+      "type": "file",
+      "name": "phonemizer.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts",
+      "summary": "phonemizer.ts is a typescript source file in the Milady codebase. It contains 4 functions, 2 classes, 1 imports.",
+      "languageNotes": "typescript; code; 344 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts:fallbackWordToIpa",
+      "type": "function",
+      "name": "fallbackWordToIpa",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts",
+      "summary": "fallbackWordToIpa is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts:fallbackTextToIpa",
+      "type": "function",
+      "name": "fallbackTextToIpa",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts",
+      "summary": "fallbackTextToIpa is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts:kokoroLangToPhonemizerLanguage",
+      "type": "function",
+      "name": "kokoroLangToPhonemizerLanguage",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts",
+      "summary": "kokoroLangToPhonemizerLanguage is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts:resolvePhonemizer",
+      "type": "function",
+      "name": "resolvePhonemizer",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts",
+      "summary": "resolvePhonemizer is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts:FallbackG2PPhonemizer",
+      "type": "class",
+      "name": "FallbackG2PPhonemizer",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts",
+      "summary": "FallbackG2PPhonemizer is a class or type declared in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts:NpmPhonemizePhonemizer",
+      "type": "class",
+      "name": "NpmPhonemizePhonemizer",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts",
+      "summary": "NpmPhonemizePhonemizer is a class or type declared in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "voice",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/pick-runtime.test.ts",
+      "type": "file",
+      "name": "pick-runtime.test.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/pick-runtime.test.ts",
+      "summary": "pick-runtime.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 76 lines"
+    },
+    {
+      "tags": [
+        "voice",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/pick-runtime.ts",
+      "type": "file",
+      "name": "pick-runtime.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/pick-runtime.ts",
+      "summary": "pick-runtime.ts is a typescript source file in the Milady codebase. It contains 2 functions, 1 imports.",
+      "languageNotes": "typescript; code; 136 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/pick-runtime.ts:readKokoroBackendFromEnv",
+      "type": "function",
+      "name": "readKokoroBackendFromEnv",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/pick-runtime.ts",
+      "summary": "readKokoroBackendFromEnv is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/pick-runtime.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/pick-runtime.ts:pickKokoroRuntimeBackend",
+      "type": "function",
+      "name": "pickKokoroRuntimeBackend",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/pick-runtime.ts",
+      "summary": "pickKokoroRuntimeBackend is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/pick-runtime.ts."
+    },
+    {
+      "tags": [
+        "voice",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/runtime-selection.ts",
+      "type": "file",
+      "name": "runtime-selection.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/runtime-selection.ts",
+      "summary": "runtime-selection.ts is a typescript source file in the Milady codebase. It contains 2 functions.",
+      "languageNotes": "typescript; code; 209 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/runtime-selection.ts:readVoiceBackendModeFromEnv",
+      "type": "function",
+      "name": "readVoiceBackendModeFromEnv",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/runtime-selection.ts",
+      "summary": "readVoiceBackendModeFromEnv is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/runtime-selection.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/runtime-selection.ts:selectVoiceBackend",
+      "type": "function",
+      "name": "selectVoiceBackend",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/runtime-selection.ts",
+      "summary": "selectVoiceBackend is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/runtime-selection.ts."
+    },
+    {
+      "tags": [
+        "voice",
+        "local-inference",
+        "plugin",
+        "class"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/types.ts",
+      "summary": "types.ts is a typescript source file in the Milady codebase. It contains 2 classes.",
+      "languageNotes": "typescript; code; 96 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/types.ts:KokoroModelMissingError",
+      "type": "class",
+      "name": "KokoroModelMissingError",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/types.ts",
+      "summary": "KokoroModelMissingError is a class or type declared in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/types.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/types.ts:KokoroPhonemizerError",
+      "type": "class",
+      "name": "KokoroPhonemizerError",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/types.ts",
+      "summary": "KokoroPhonemizerError is a class or type declared in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/types.ts."
+    },
+    {
+      "tags": [
+        "voice",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voice-presets.ts",
+      "type": "file",
+      "name": "voice-presets.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voice-presets.ts",
+      "summary": "voice-presets.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 129 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voice-presets.ts:findKokoroVoice",
+      "type": "function",
+      "name": "findKokoroVoice",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voice-presets.ts",
+      "summary": "findKokoroVoice is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voice-presets.ts."
+    },
+    {
+      "tags": [
+        "voice",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voices.ts",
+      "type": "file",
+      "name": "voices.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voices.ts",
+      "summary": "voices.ts is a typescript source file in the Milady codebase. It contains 4 functions, 2 imports.",
+      "languageNotes": "typescript; code; 64 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voices.ts:listKokoroVoiceIds",
+      "type": "function",
+      "name": "listKokoroVoiceIds",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voices.ts",
+      "summary": "listKokoroVoiceIds is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voices.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voices.ts:listKokoroVoicesByLang",
+      "type": "function",
+      "name": "listKokoroVoicesByLang",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voices.ts",
+      "summary": "listKokoroVoicesByLang is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voices.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voices.ts:listKokoroVoicesByTag",
+      "type": "function",
+      "name": "listKokoroVoicesByTag",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voices.ts",
+      "summary": "listKokoroVoicesByTag is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voices.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voices.ts:resolveKokoroVoiceOrDefault",
+      "type": "function",
+      "name": "resolveKokoroVoiceOrDefault",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voices.ts",
+      "summary": "resolveKokoroVoiceOrDefault is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voices.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "voice",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.test.ts",
+      "type": "file",
+      "name": "lifecycle.test.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.test.ts",
+      "summary": "lifecycle.test.ts is a typescript source file in the Milady codebase. It contains 3 functions, 2 imports.",
+      "languageNotes": "typescript; code; 315 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.test.ts:fakeMmap",
+      "type": "function",
+      "name": "fakeMmap",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.test.ts",
+      "summary": "fakeMmap is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.test.ts:fakeResource",
+      "type": "function",
+      "name": "fakeResource",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.test.ts",
+      "summary": "fakeResource is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.test.ts:loadersOk",
+      "type": "function",
+      "name": "loadersOk",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.test.ts",
+      "summary": "loadersOk is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.test.ts."
+    },
+    {
+      "tags": [
+        "voice",
+        "local-inference",
+        "plugin",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.ts",
+      "type": "file",
+      "name": "lifecycle.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.ts",
+      "summary": "lifecycle.ts is a typescript source file in the Milady codebase. It contains 1 function, 2 classes, 1 imports.",
+      "languageNotes": "typescript; code; 301 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.ts:toLifecycleError",
+      "type": "function",
+      "name": "toLifecycleError",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.ts",
+      "summary": "toLifecycleError is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.ts:VoiceLifecycleError",
+      "type": "class",
+      "name": "VoiceLifecycleError",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.ts",
+      "summary": "VoiceLifecycleError is a class or type declared in eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.ts:VoiceLifecycle",
+      "type": "class",
+      "name": "VoiceLifecycle",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.ts",
+      "summary": "VoiceLifecycle is a class or type declared in eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "voice",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.test.ts",
+      "type": "file",
+      "name": "mic-source.test.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/mic-source.test.ts",
+      "summary": "mic-source.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 3 imports.",
+      "languageNotes": "typescript; code; 210 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.test.ts:int16le",
+      "type": "function",
+      "name": "int16le",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/mic-source.test.ts",
+      "summary": "int16le is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/mic-source.test.ts."
+    },
+    {
+      "tags": [
+        "voice",
+        "local-inference",
+        "plugin",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts",
+      "type": "file",
+      "name": "mic-source.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts",
+      "summary": "mic-source.ts is a typescript source file in the Milady codebase. It contains 5 functions, 2 classes, 2 imports.",
+      "languageNotes": "typescript; code; 503 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts:whichBin",
+      "type": "function",
+      "name": "whichBin",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts",
+      "summary": "whichBin is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts:resolveDesktopRecorder",
+      "type": "function",
+      "name": "resolveDesktopRecorder",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts",
+      "summary": "resolveDesktopRecorder is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts:frameSamplesFor",
+      "type": "function",
+      "name": "frameSamplesFor",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts",
+      "summary": "frameSamplesFor is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts:now",
+      "type": "function",
+      "name": "now",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts",
+      "summary": "now is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts:pipeMicToRingBuffer",
+      "type": "function",
+      "name": "pipeMicToRingBuffer",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts",
+      "summary": "pipeMicToRingBuffer is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts:DesktopMicSource",
+      "type": "class",
+      "name": "DesktopMicSource",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts",
+      "summary": "DesktopMicSource is a class or type declared in eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts:PushMicSource",
+      "type": "class",
+      "name": "PushMicSource",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts",
+      "summary": "PushMicSource is a class or type declared in eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "voice",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/optimistic-policy.test.ts",
+      "type": "file",
+      "name": "optimistic-policy.test.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/optimistic-policy.test.ts",
+      "summary": "optimistic-policy.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 101 lines"
+    },
+    {
+      "tags": [
+        "voice",
+        "local-inference",
+        "plugin",
+        "class",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/optimistic-policy.ts",
+      "type": "file",
+      "name": "optimistic-policy.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/optimistic-policy.ts",
+      "summary": "optimistic-policy.ts is a typescript source file in the Milady codebase. It contains 2 functions, 1 class.",
+      "languageNotes": "typescript; code; 192 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/optimistic-policy.ts:resolvePowerSourceState",
+      "type": "function",
+      "name": "resolvePowerSourceState",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/optimistic-policy.ts",
+      "summary": "resolvePowerSourceState is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/optimistic-policy.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/voice/optimistic-policy.ts:resolveOptimisticPolicyEnabled",
+      "type": "function",
+      "name": "resolveOptimisticPolicyEnabled",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/optimistic-policy.ts",
+      "summary": "resolveOptimisticPolicyEnabled is a function defined in eliza/plugins/plugin-local-inference/src/services/voice/optimistic-policy.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/src/services/voice/optimistic-policy.ts:OptimisticGenerationPolicy",
+      "type": "class",
+      "name": "OptimisticGenerationPolicy",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/optimistic-policy.ts",
+      "summary": "OptimisticGenerationPolicy is a class or type declared in eliza/plugins/plugin-local-inference/src/services/voice/optimistic-policy.ts."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts:turnDetectorGgufForTier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts:loadNlc",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts:getLlama",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts:createBundledLiveKitGgmlTurnDetector",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts:normalizeTurnDetectorText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts:applyQwenUserTemplate",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts:EotGgmlUnavailableError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts:LiveKitGgmlTurnDetector",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts:getLlama",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts:loadNlc",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:clampProbability",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:turnSignalFromProbability",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:turnDetectorRevisionForTier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:createBundledLiveKitTurnDetector",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:normalizeTurnDetectorText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:formatLiveKitTurnDetectorPrompt",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:tokenIdsToBigInt64",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:isTensorLike",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:toBigInt64Array",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:probabilityFromOnnxOutput",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:softmaxProbability",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:createBundledTurnsenseEotClassifier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:probabilityFromTurnsenseOutput",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:HeuristicEotClassifier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:LiveKitTurnDetector",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:TurnsenseEotClassifier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:RemoteEotClassifier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:Eliza1EotClassifier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:turnSignalFromProbability",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:clampProbability",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:tokenIdsToBigInt64",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:isTensorLike",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:tokenIdsToBigInt64",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:toBigInt64Array",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:tokenIdsToBigInt64",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:toBigInt64Array",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:probabilityFromOnnxOutput",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:softmaxProbability",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:probabilityFromOnnxOutput",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:clampProbability",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:softmaxProbability",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:clampProbability",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:probabilityFromTurnsenseOutput",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts:clampProbability",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/errors.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/src/services/voice/errors.ts:VoiceStartupError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts:isExpressiveTag",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts:isExpressiveEmotionEnum",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts:tagRegex",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts:parseExpressiveTags",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts:stripExpressiveTags",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts:emotionToEnum",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts:enumToEmotion",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts:normalizeAsrEmotionLabel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts:asrEmotionToTag",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts:expressiveTagPromptClause",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts:parseExpressiveTags",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts:tagRegex",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts:parseExpressiveTags",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts:tagRegex",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts:stripExpressiveTags",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts:tagRegex",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts:asrEmotionToTag",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/expressive-tags.ts:normalizeAsrEmotionLabel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.test.ts:bunOnPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.test.ts:expectHarnessOk",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.test.ts:runBunHarness",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.test.ts:runBunHarness",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.test.ts:bunOnPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts:isBunRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts:loadElizaInferenceFfi",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts:loadBunFfiModule",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts:bindWithBunFfi",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts:formatFfiError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts:readVerifierEvent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts:readInt32Array",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts:readCString",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts:loadElizaInferenceFfi",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts:isBunRuntime",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts:loadElizaInferenceFfi",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts:bindWithBunFfi",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts:bindWithBunFfi",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts:loadBunFfiModule",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts:bindWithBunFfi",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts:formatFfiError",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts:bindWithBunFfi",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts:formatFfiError",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts:bindWithBunFfi",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts:readCString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts:readVerifierEvent",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts:readInt32Array",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts:readVerifierEvent",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts:readInt32Array",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts:writePresetBundle",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts:lifecycleLoadersOk",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts:vadStart",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts:vadActive",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts:vadPause",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts:vadEnd",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts:vadBlip",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts:tok",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts:isUnsupportedRealVoiceRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts:TestTranscriber",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts:ScriptableVad",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-backend.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-backend.test.ts:fixedPhonemizer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-backend.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-backend.test.ts:makePreset",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-backend.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-backend.test.ts:makePhrase",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-backend.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-backend.test.ts:makeBackend",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-backend.test.ts:makeBackend",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-backend.test.ts:fixedPhonemizer",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-engine-bridge.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-engine-bridge.test.ts:makeKokoroConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-engine-bridge.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-engine-bridge.test.ts:lifecycleLoadersOk",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-engine-discovery.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-engine-discovery.test.ts:makeStaged",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-runtime.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-runtime.test.ts:makeVoice",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-backend.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-backend.ts:KokoroTtsBackend",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts:isKokoroGgufFile",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts:kokoroEngineModelDir",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts:resolveKokoroEngineConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts:resolveModelFile",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts:resolveDefaultVoiceId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts:findVoicePack",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts:listStagedVoiceIds",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts:resolveKokoroEngineConfig",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts:kokoroEngineModelDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts:resolveKokoroEngineConfig",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts:resolveModelFile",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts:resolveKokoroEngineConfig",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts:resolveDefaultVoiceId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts:resolveDefaultVoiceId",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts:findVoicePack",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts:resolveDefaultVoiceId",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts:findVoicePack",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts:resolveDefaultVoiceId",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts:findVoicePack",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts:resolveDefaultVoiceId",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts:listStagedVoiceIds",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts:decodePhonemesForGgufBody",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts:bytesToFloat32Pcm",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts:normalizeGraphOptimizationLevel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts:getInputMetadataType",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts:defaultOrtLoader",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts:pathToFileUrlString",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts:verifySha256",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts:KokoroGgufRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts:KokoroOnnxRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts:KokoroPythonRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts:KokoroMockRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts:defaultOrtLoader",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts:pathToFileUrlString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts:defaultOrtLoader",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts:pathToFileUrlString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phoneme-stream.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phoneme-stream.ts:appendSeq",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phoneme-stream.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phoneme-stream.ts:phonemizePhrase",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts:fallbackWordToIpa",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts:fallbackTextToIpa",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts:kokoroLangToPhonemizerLanguage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts:resolvePhonemizer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts:FallbackG2PPhonemizer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts:NpmPhonemizePhonemizer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts:fallbackTextToIpa",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts:fallbackWordToIpa",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/pick-runtime.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/pick-runtime.ts:readKokoroBackendFromEnv",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/pick-runtime.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/pick-runtime.ts:pickKokoroRuntimeBackend",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/pick-runtime.ts:pickKokoroRuntimeBackend",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/pick-runtime.ts:readKokoroBackendFromEnv",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/runtime-selection.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/runtime-selection.ts:readVoiceBackendModeFromEnv",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/runtime-selection.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/runtime-selection.ts:selectVoiceBackend",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/types.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/types.ts:KokoroModelMissingError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/types.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/types.ts:KokoroPhonemizerError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voice-presets.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voice-presets.ts:findKokoroVoice",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voices.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voices.ts:listKokoroVoiceIds",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voices.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voices.ts:listKokoroVoicesByLang",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voices.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voices.ts:listKokoroVoicesByTag",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voices.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voices.ts:resolveKokoroVoiceOrDefault",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.test.ts:fakeMmap",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.test.ts:fakeResource",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.test.ts:loadersOk",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.test.ts:loadersOk",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.test.ts:fakeMmap",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.test.ts:loadersOk",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.test.ts:fakeMmap",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.test.ts:loadersOk",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.test.ts:fakeResource",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.test.ts:loadersOk",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.test.ts:fakeResource",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.ts:toLifecycleError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.ts:VoiceLifecycleError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.ts:VoiceLifecycle",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.test.ts:int16le",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts:whichBin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts:resolveDesktopRecorder",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts:frameSamplesFor",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts:now",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts:pipeMicToRingBuffer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts:DesktopMicSource",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts:PushMicSource",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts:resolveDesktopRecorder",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts:whichBin",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts:resolveDesktopRecorder",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts:whichBin",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts:resolveDesktopRecorder",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts:whichBin",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts:resolveDesktopRecorder",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts:whichBin",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts:resolveDesktopRecorder",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts:whichBin",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts:resolveDesktopRecorder",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts:whichBin",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts:resolveDesktopRecorder",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts:whichBin",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts:resolveDesktopRecorder",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts:whichBin",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/optimistic-policy.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/optimistic-policy.ts:resolvePowerSourceState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/optimistic-policy.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/voice/optimistic-policy.ts:resolveOptimisticPolicyEnabled",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/optimistic-policy.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/src/services/voice/optimistic-policy.ts:OptimisticGenerationPolicy",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier-ggml.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/eliza1-eot-scorer.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/__test-helpers__/fake-ffi.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/engine.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/latency-trace.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/__test-helpers__/synthetic-speech.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/shared-resources.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/turn-controller.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/vad.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/interactive-session.e2e.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/voice-preset-format.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-backend.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-backend.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-backend.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-backend.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-backend.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voices.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-backend.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-engine-bridge.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/engine-bridge.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-engine-bridge.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-backend.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-engine-bridge.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-engine-bridge.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-engine-bridge.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/shared-resources.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-engine-discovery.test.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-engine-discovery.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-engine-discovery.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voice-presets.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-runtime.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/kokoro-runtime.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/phonemizer.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/runtime-selection.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/runtime-selection.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/__tests__/voices.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voices.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-backend.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-backend.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-backend.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-backend.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voices.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-backend.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/paths.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-engine-discovery.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voice-presets.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phoneme-stream.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/phonemizer.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/pick-runtime.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/pick-runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/pick-runtime.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/kokoro-runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voice-presets.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voices.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voices.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/kokoro/voice-presets.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/shared-resources.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/lifecycle.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/shared-resources.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/ring-buffer.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/ring-buffer.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/mic-source.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/voice/optimistic-policy.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/optimistic-policy.ts",
+      "type": "imports"
+    }
+  ]
+}

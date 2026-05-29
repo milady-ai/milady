@@ -1,0 +1,3445 @@
+{
+  "batchIndex": 81,
+  "nodes": [
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/mflux.ts",
+      "type": "file",
+      "name": "mflux.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/imagegen/mflux.ts",
+      "summary": "mflux.ts is a typescript source file in the Milady codebase. It contains 4 functions, 3 imports.",
+      "languageNotes": "typescript; code; 313 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/mflux.ts:loadMfluxImageGenBackend",
+      "type": "function",
+      "name": "loadMfluxImageGenBackend",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/imagegen/mflux.ts",
+      "summary": "loadMfluxImageGenBackend is a function defined in eliza/plugins/plugin-local-inference/src/services/imagegen/mflux.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/mflux.ts:resolveBinary",
+      "type": "function",
+      "name": "resolveBinary",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/imagegen/mflux.ts",
+      "summary": "resolveBinary is a function defined in eliza/plugins/plugin-local-inference/src/services/imagegen/mflux.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/mflux.ts:assertBinaryAvailable",
+      "type": "function",
+      "name": "assertBinaryAvailable",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/imagegen/mflux.ts",
+      "summary": "assertBinaryAvailable is a function defined in eliza/plugins/plugin-local-inference/src/services/imagegen/mflux.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/mflux.ts:runMflux",
+      "type": "function",
+      "name": "runMflux",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/imagegen/mflux.ts",
+      "summary": "runMflux is a function defined in eliza/plugins/plugin-local-inference/src/services/imagegen/mflux.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "type": "file",
+      "name": "sd-cpp.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "summary": "sd-cpp.ts is a typescript source file in the Milady codebase. It contains 19 functions, 2 imports.",
+      "languageNotes": "typescript; code; 718 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:loadSdCppImageGenBackend",
+      "type": "function",
+      "name": "loadSdCppImageGenBackend",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "summary": "loadSdCppImageGenBackend is a function defined in eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:resolveBinaryPath",
+      "type": "function",
+      "name": "resolveBinaryPath",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "summary": "resolveBinaryPath is a function defined in eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:assertBinaryAvailable",
+      "type": "function",
+      "name": "assertBinaryAvailable",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "summary": "assertBinaryAvailable is a function defined in eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:runCollect",
+      "type": "function",
+      "name": "runCollect",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "summary": "runCollect is a function defined in eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:collectOutput",
+      "type": "function",
+      "name": "collectOutput",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "summary": "collectOutput is a function defined in eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:probeSdCppCapabilitiesFromBinary",
+      "type": "function",
+      "name": "probeSdCppCapabilitiesFromBinary",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "summary": "probeSdCppCapabilitiesFromBinary is a function defined in eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:readSdCppCapabilityManifest",
+      "type": "function",
+      "name": "readSdCppCapabilityManifest",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "summary": "readSdCppCapabilityManifest is a function defined in eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:extractAccelerators",
+      "type": "function",
+      "name": "extractAccelerators",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "summary": "extractAccelerators is a function defined in eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:isSdCppAccelerator",
+      "type": "function",
+      "name": "isSdCppAccelerator",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "summary": "isSdCppAccelerator is a function defined in eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:hasPositiveCudaEvidence",
+      "type": "function",
+      "name": "hasPositiveCudaEvidence",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "summary": "hasPositiveCudaEvidence is a function defined in eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:hasPositiveVulkanEvidence",
+      "type": "function",
+      "name": "hasPositiveVulkanEvidence",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "summary": "hasPositiveVulkanEvidence is a function defined in eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:hasPositiveMetalEvidence",
+      "type": "function",
+      "name": "hasPositiveMetalEvidence",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "summary": "hasPositiveMetalEvidence is a function defined in eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:parseVersionLine",
+      "type": "function",
+      "name": "parseVersionLine",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "summary": "parseVersionLine is a function defined in eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:runSdCpp",
+      "type": "function",
+      "name": "runSdCpp",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "summary": "runSdCpp is a function defined in eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:buildArgs",
+      "type": "function",
+      "name": "buildArgs",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "summary": "buildArgs is a function defined in eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:pickSeed",
+      "type": "function",
+      "name": "pickSeed",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "summary": "pickSeed is a function defined in eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:resolveSeed",
+      "type": "function",
+      "name": "resolveSeed",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "summary": "resolveSeed is a function defined in eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:assertPngOutput",
+      "type": "function",
+      "name": "assertPngOutput",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "summary": "assertPngOutput is a function defined in eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:defaultSpawn",
+      "type": "function",
+      "name": "defaultSpawn",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "summary": "defaultSpawn is a function defined in eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/tensorrt-stub.ts",
+      "type": "file",
+      "name": "tensorrt-stub.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/imagegen/tensorrt-stub.ts",
+      "summary": "tensorrt-stub.ts is a typescript source file in the Milady codebase. It contains 4 functions, 3 imports.",
+      "languageNotes": "typescript; code; 295 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/tensorrt-stub.ts:loadTensorRtImageGenBackend",
+      "type": "function",
+      "name": "loadTensorRtImageGenBackend",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/imagegen/tensorrt-stub.ts",
+      "summary": "loadTensorRtImageGenBackend is a function defined in eliza/plugins/plugin-local-inference/src/services/imagegen/tensorrt-stub.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/tensorrt-stub.ts:resolveBinary",
+      "type": "function",
+      "name": "resolveBinary",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/imagegen/tensorrt-stub.ts",
+      "summary": "resolveBinary is a function defined in eliza/plugins/plugin-local-inference/src/services/imagegen/tensorrt-stub.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/tensorrt-stub.ts:assertBinaryAvailable",
+      "type": "function",
+      "name": "assertBinaryAvailable",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/imagegen/tensorrt-stub.ts",
+      "summary": "assertBinaryAvailable is a function defined in eliza/plugins/plugin-local-inference/src/services/imagegen/tensorrt-stub.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/tensorrt-stub.ts:runTensorRt",
+      "type": "function",
+      "name": "runTensorRt",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/imagegen/tensorrt-stub.ts",
+      "summary": "runTensorRt is a function defined in eliza/plugins/plugin-local-inference/src/services/imagegen/tensorrt-stub.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/imagegen/types.ts",
+      "summary": "types.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 194 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "class"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/inference-telemetry.ts",
+      "type": "file",
+      "name": "inference-telemetry.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/inference-telemetry.ts",
+      "summary": "inference-telemetry.ts is a typescript source file in the Milady codebase. It contains 2 classes, 1 imports.",
+      "languageNotes": "typescript; code; 143 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/src/services/inference-telemetry.ts:BoundedRing",
+      "type": "class",
+      "name": "BoundedRing",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/inference-telemetry.ts",
+      "summary": "BoundedRing is a class or type declared in eliza/plugins/plugin-local-inference/src/services/inference-telemetry.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/src/services/inference-telemetry.ts:InferenceTelemetry",
+      "type": "class",
+      "name": "InferenceTelemetry",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/inference-telemetry.ts",
+      "summary": "InferenceTelemetry is a class or type declared in eliza/plugins/plugin-local-inference/src/services/inference-telemetry.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/kv-spill.test.ts",
+      "type": "file",
+      "name": "kv-spill.test.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/kv-spill.test.ts",
+      "summary": "kv-spill.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 222 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/kv-spill.test.ts:geometry",
+      "type": "function",
+      "name": "geometry",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/kv-spill.test.ts",
+      "summary": "geometry is a function defined in eliza/plugins/plugin-local-inference/src/services/kv-spill.test.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/kv-spill.ts",
+      "type": "file",
+      "name": "kv-spill.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/kv-spill.ts",
+      "summary": "kv-spill.ts is a typescript source file in the Milady codebase. It contains 5 functions, 1 class, 1 imports.",
+      "languageNotes": "typescript; code; 356 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/kv-spill.ts:estimateQuantizedKvBytesPerToken",
+      "type": "function",
+      "name": "estimateQuantizedKvBytesPerToken",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/kv-spill.ts",
+      "summary": "estimateQuantizedKvBytesPerToken is a function defined in eliza/plugins/plugin-local-inference/src/services/kv-spill.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/kv-spill.ts:residentKvBudgetFromRamBudget",
+      "type": "function",
+      "name": "residentKvBudgetFromRamBudget",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/kv-spill.ts",
+      "summary": "residentKvBudgetFromRamBudget is a function defined in eliza/plugins/plugin-local-inference/src/services/kv-spill.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/kv-spill.ts:pagesForTokens",
+      "type": "function",
+      "name": "pagesForTokens",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/kv-spill.ts",
+      "summary": "pagesForTokens is a function defined in eliza/plugins/plugin-local-inference/src/services/kv-spill.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/kv-spill.ts:planKvSpill",
+      "type": "function",
+      "name": "planKvSpill",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/kv-spill.ts",
+      "summary": "planKvSpill is a function defined in eliza/plugins/plugin-local-inference/src/services/kv-spill.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/kv-spill.ts:restoreClassForHardware",
+      "type": "function",
+      "name": "restoreClassForHardware",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/kv-spill.ts",
+      "summary": "restoreClassForHardware is a function defined in eliza/plugins/plugin-local-inference/src/services/kv-spill.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/src/services/kv-spill.ts:KvSpillUnsupportedError",
+      "type": "class",
+      "name": "KvSpillUnsupportedError",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/kv-spill.ts",
+      "summary": "KvSpillUnsupportedError is a class or type declared in eliza/plugins/plugin-local-inference/src/services/kv-spill.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/latency-trace.test.ts",
+      "type": "file",
+      "name": "latency-trace.test.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/latency-trace.test.ts",
+      "summary": "latency-trace.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 266 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/latency-trace.test.ts:fullTurn",
+      "type": "function",
+      "name": "fullTurn",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/latency-trace.test.ts",
+      "summary": "fullTurn is a function defined in eliza/plugins/plugin-local-inference/src/services/latency-trace.test.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/latency-trace.ts",
+      "type": "file",
+      "name": "latency-trace.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/latency-trace.ts",
+      "summary": "latency-trace.ts is a typescript source file in the Milady codebase. It contains 4 functions, 3 classes, 2 imports.",
+      "languageNotes": "typescript; code; 848 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/latency-trace.ts:nextTurnId",
+      "type": "function",
+      "name": "nextTurnId",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/latency-trace.ts",
+      "summary": "nextTurnId is a function defined in eliza/plugins/plugin-local-inference/src/services/latency-trace.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/latency-trace.ts:markVoiceLatency",
+      "type": "function",
+      "name": "markVoiceLatency",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/latency-trace.ts",
+      "summary": "markVoiceLatency is a function defined in eliza/plugins/plugin-local-inference/src/services/latency-trace.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/latency-trace.ts:endVoiceLatencyTurn",
+      "type": "function",
+      "name": "endVoiceLatencyTurn",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/latency-trace.ts",
+      "summary": "endVoiceLatencyTurn is a function defined in eliza/plugins/plugin-local-inference/src/services/latency-trace.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/latency-trace.ts:buildVoiceLatencyDevPayload",
+      "type": "function",
+      "name": "buildVoiceLatencyDevPayload",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/latency-trace.ts",
+      "summary": "buildVoiceLatencyDevPayload is a function defined in eliza/plugins/plugin-local-inference/src/services/latency-trace.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/src/services/latency-trace.ts:BoundedHistogram",
+      "type": "class",
+      "name": "BoundedHistogram",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/latency-trace.ts",
+      "summary": "BoundedHistogram is a class or type declared in eliza/plugins/plugin-local-inference/src/services/latency-trace.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/plugins/plugin-local-inference/src/services/latency-trace.ts:EndToEndLatencyTracer",
+      "type": "class",
+      "name": "EndToEndLatencyTracer",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/latency-trace.ts",
+      "summary": "EndToEndLatencyTracer is a class or type declared in eliza/plugins/plugin-local-inference/src/services/latency-trace.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/src/services/latency-trace.ts:VoiceRunMetrics",
+      "type": "class",
+      "name": "VoiceRunMetrics",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/latency-trace.ts",
+      "summary": "VoiceRunMetrics is a class or type declared in eliza/plugins/plugin-local-inference/src/services/latency-trace.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.test.ts",
+      "type": "file",
+      "name": "llama-server-metrics.test.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.test.ts",
+      "summary": "llama-server-metrics.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 297 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.ts",
+      "type": "file",
+      "name": "llama-server-metrics.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.ts",
+      "summary": "llama-server-metrics.ts is a typescript source file in the Milady codebase. It contains 4 functions.",
+      "languageNotes": "typescript; code; 304 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.ts:parsePrometheusMetrics",
+      "type": "function",
+      "name": "parsePrometheusMetrics",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.ts",
+      "summary": "parsePrometheusMetrics is a function defined in eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.ts:diffSnapshots",
+      "type": "function",
+      "name": "diffSnapshots",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.ts",
+      "summary": "diffSnapshots is a function defined in eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.ts:clampNonNegative",
+      "type": "function",
+      "name": "clampNonNegative",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.ts",
+      "summary": "clampNonNegative is a function defined in eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.ts:fetchMetricsSnapshot",
+      "type": "function",
+      "name": "fetchMetricsSnapshot",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.ts",
+      "summary": "fetchMetricsSnapshot is a function defined in eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/llm-streaming-binding.ts",
+      "type": "file",
+      "name": "llm-streaming-binding.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/llm-streaming-binding.ts",
+      "summary": "llm-streaming-binding.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 136 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/llm-streaming-binding.ts:wrapElizaInferenceFfi",
+      "type": "function",
+      "name": "wrapElizaInferenceFfi",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/llm-streaming-binding.ts",
+      "summary": "wrapElizaInferenceFfi is a function defined in eliza/plugins/plugin-local-inference/src/services/llm-streaming-binding.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/load-args.ts",
+      "type": "file",
+      "name": "load-args.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/load-args.ts",
+      "summary": "load-args.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 81 lines"
+    },
+    {
+      "tags": [
+        "entry-point",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/manifest/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/manifest/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 66 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/manifest/manifest-dflash-eval.test.ts",
+      "type": "file",
+      "name": "manifest-dflash-eval.test.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/manifest/manifest-dflash-eval.test.ts",
+      "summary": "manifest-dflash-eval.test.ts is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 173 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/manifest/manifest-dflash-eval.test.ts:passingBackends",
+      "type": "function",
+      "name": "passingBackends",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/manifest/manifest-dflash-eval.test.ts",
+      "summary": "passingBackends is a function defined in eliza/plugins/plugin-local-inference/src/services/manifest/manifest-dflash-eval.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/manifest/manifest-dflash-eval.test.ts:baseManifest",
+      "type": "function",
+      "name": "baseManifest",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/manifest/manifest-dflash-eval.test.ts",
+      "summary": "baseManifest is a function defined in eliza/plugins/plugin-local-inference/src/services/manifest/manifest-dflash-eval.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/manifest/manifest.test.ts",
+      "type": "file",
+      "name": "manifest.test.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/manifest/manifest.test.ts",
+      "summary": "manifest.test.ts is a typescript source file in the Milady codebase. It contains 3 functions, 2 imports.",
+      "languageNotes": "typescript; code; 659 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/manifest/manifest.test.ts:passingBackends",
+      "type": "function",
+      "name": "passingBackends",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/manifest/manifest.test.ts",
+      "summary": "passingBackends is a function defined in eliza/plugins/plugin-local-inference/src/services/manifest/manifest.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/manifest/manifest.test.ts:textFileForTier",
+      "type": "function",
+      "name": "textFileForTier",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/manifest/manifest.test.ts",
+      "summary": "textFileForTier is a function defined in eliza/plugins/plugin-local-inference/src/services/manifest/manifest.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/manifest/manifest.test.ts:baseManifest",
+      "type": "function",
+      "name": "baseManifest",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/manifest/manifest.test.ts",
+      "summary": "baseManifest is a function defined in eliza/plugins/plugin-local-inference/src/services/manifest/manifest.test.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/manifest/schema.ts",
+      "type": "file",
+      "name": "schema.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/manifest/schema.ts",
+      "summary": "schema.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 664 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/manifest/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/manifest/types.ts",
+      "summary": "types.ts is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 55 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts",
+      "type": "file",
+      "name": "validator.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts",
+      "summary": "validator.ts is a typescript source file in the Milady codebase. It contains 6 functions, 2 imports.",
+      "languageNotes": "typescript; code; 499 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts:validateManifest",
+      "type": "function",
+      "name": "validateManifest",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts",
+      "summary": "validateManifest is a function defined in eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts:parseManifestOrThrow",
+      "type": "function",
+      "name": "parseManifestOrThrow",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts",
+      "summary": "parseManifestOrThrow is a function defined in eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts:canSetAsDefault",
+      "type": "function",
+      "name": "canSetAsDefault",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts",
+      "summary": "canSetAsDefault is a function defined in eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts:isStrictReleaseManifest",
+      "type": "function",
+      "name": "isStrictReleaseManifest",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts",
+      "summary": "isStrictReleaseManifest is a function defined in eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts:collectContractErrors",
+      "type": "function",
+      "name": "collectContractErrors",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts",
+      "summary": "collectContractErrors is a function defined in eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts:missingRequiredKernels",
+      "type": "function",
+      "name": "missingRequiredKernels",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts",
+      "summary": "missingRequiredKernels is a function defined in eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/memory-arbiter.ts",
+      "type": "file",
+      "name": "memory-arbiter.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/memory-arbiter.ts",
+      "summary": "memory-arbiter.ts is a typescript source file in the Milady codebase. It contains 3 functions, 1 class, 3 imports.",
+      "languageNotes": "typescript; code; 910 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/memory-arbiter.ts:setMemoryArbiter",
+      "type": "function",
+      "name": "setMemoryArbiter",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/memory-arbiter.ts",
+      "summary": "setMemoryArbiter is a function defined in eliza/plugins/plugin-local-inference/src/services/memory-arbiter.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/memory-arbiter.ts:getMemoryArbiter",
+      "type": "function",
+      "name": "getMemoryArbiter",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/memory-arbiter.ts",
+      "summary": "getMemoryArbiter is a function defined in eliza/plugins/plugin-local-inference/src/services/memory-arbiter.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/memory-arbiter.ts:tryGetMemoryArbiter",
+      "type": "function",
+      "name": "tryGetMemoryArbiter",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/memory-arbiter.ts",
+      "summary": "tryGetMemoryArbiter is a function defined in eliza/plugins/plugin-local-inference/src/services/memory-arbiter.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/plugins/plugin-local-inference/src/services/memory-arbiter.ts:MemoryArbiter",
+      "type": "class",
+      "name": "MemoryArbiter",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/memory-arbiter.ts",
+      "summary": "MemoryArbiter is a class or type declared in eliza/plugins/plugin-local-inference/src/services/memory-arbiter.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/memory-monitor.test.ts",
+      "type": "file",
+      "name": "memory-monitor.test.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/memory-monitor.test.ts",
+      "summary": "memory-monitor.test.ts is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 187 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/memory-monitor.test.ts:fakeRole",
+      "type": "function",
+      "name": "fakeRole",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/memory-monitor.test.ts",
+      "summary": "fakeRole is a function defined in eliza/plugins/plugin-local-inference/src/services/memory-monitor.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/memory-monitor.test.ts:monitorWithFreeMb",
+      "type": "function",
+      "name": "monitorWithFreeMb",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/memory-monitor.test.ts",
+      "summary": "monitorWithFreeMb is a function defined in eliza/plugins/plugin-local-inference/src/services/memory-monitor.test.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/memory-monitor.ts",
+      "type": "file",
+      "name": "memory-monitor.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/memory-monitor.ts",
+      "summary": "memory-monitor.ts is a typescript source file in the Milady codebase. It contains 4 functions, 1 class, 1 imports.",
+      "languageNotes": "typescript; code; 278 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/memory-monitor.ts:envInt",
+      "type": "function",
+      "name": "envInt",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/memory-monitor.ts",
+      "summary": "envInt is a function defined in eliza/plugins/plugin-local-inference/src/services/memory-monitor.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/memory-monitor.ts:envFloat",
+      "type": "function",
+      "name": "envFloat",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/memory-monitor.ts",
+      "summary": "envFloat is a function defined in eliza/plugins/plugin-local-inference/src/services/memory-monitor.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/memory-monitor.ts:resolveMemoryMonitorConfig",
+      "type": "function",
+      "name": "resolveMemoryMonitorConfig",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/memory-monitor.ts",
+      "summary": "resolveMemoryMonitorConfig is a function defined in eliza/plugins/plugin-local-inference/src/services/memory-monitor.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/memory-monitor.ts:defaultServerRssMb",
+      "type": "function",
+      "name": "defaultServerRssMb",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/memory-monitor.ts",
+      "summary": "defaultServerRssMb is a function defined in eliza/plugins/plugin-local-inference/src/services/memory-monitor.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/plugins/plugin-local-inference/src/services/memory-monitor.ts:MemoryMonitor",
+      "type": "class",
+      "name": "MemoryMonitor",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/memory-monitor.ts",
+      "summary": "MemoryMonitor is a class or type declared in eliza/plugins/plugin-local-inference/src/services/memory-monitor.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/memory-pressure.ts",
+      "type": "file",
+      "name": "memory-pressure.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/memory-pressure.ts",
+      "summary": "memory-pressure.ts is a typescript source file in the Milady codebase. It contains 5 functions.",
+      "languageNotes": "typescript; code; 413 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/memory-pressure.ts:nodeOsPressureSource",
+      "type": "function",
+      "name": "nodeOsPressureSource",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/memory-pressure.ts",
+      "summary": "nodeOsPressureSource is a function defined in eliza/plugins/plugin-local-inference/src/services/memory-pressure.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/memory-pressure.ts:clampFraction",
+      "type": "function",
+      "name": "clampFraction",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/memory-pressure.ts",
+      "summary": "clampFraction is a function defined in eliza/plugins/plugin-local-inference/src/services/memory-pressure.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/memory-pressure.ts:capacitorPressureSource",
+      "type": "function",
+      "name": "capacitorPressureSource",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/memory-pressure.ts",
+      "summary": "capacitorPressureSource is a function defined in eliza/plugins/plugin-local-inference/src/services/memory-pressure.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/memory-pressure.ts:compositePressureSource",
+      "type": "function",
+      "name": "compositePressureSource",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/memory-pressure.ts",
+      "summary": "compositePressureSource is a function defined in eliza/plugins/plugin-local-inference/src/services/memory-pressure.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/memory-pressure.ts:rank",
+      "type": "function",
+      "name": "rank",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/memory-pressure.ts",
+      "summary": "rank is a function defined in eliza/plugins/plugin-local-inference/src/services/memory-pressure.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/paths.ts",
+      "type": "file",
+      "name": "paths.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/paths.ts",
+      "summary": "paths.ts is a typescript source file in the Milady codebase. It contains 5 functions, 1 imports.",
+      "languageNotes": "typescript; code; 25 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/paths.ts:localInferenceRoot",
+      "type": "function",
+      "name": "localInferenceRoot",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/paths.ts",
+      "summary": "localInferenceRoot is a function defined in eliza/plugins/plugin-local-inference/src/services/paths.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/paths.ts:elizaModelsDir",
+      "type": "function",
+      "name": "elizaModelsDir",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/paths.ts",
+      "summary": "elizaModelsDir is a function defined in eliza/plugins/plugin-local-inference/src/services/paths.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/paths.ts:registryPath",
+      "type": "function",
+      "name": "registryPath",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/paths.ts",
+      "summary": "registryPath is a function defined in eliza/plugins/plugin-local-inference/src/services/paths.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/paths.ts:downloadsStagingDir",
+      "type": "function",
+      "name": "downloadsStagingDir",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/paths.ts",
+      "summary": "downloadsStagingDir is a function defined in eliza/plugins/plugin-local-inference/src/services/paths.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/paths.ts:isWithinElizaRoot",
+      "type": "function",
+      "name": "isWithinElizaRoot",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/paths.ts",
+      "summary": "isWithinElizaRoot is a function defined in eliza/plugins/plugin-local-inference/src/services/paths.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/planner-skeleton.ts",
+      "type": "file",
+      "name": "planner-skeleton.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/planner-skeleton.ts",
+      "summary": "planner-skeleton.ts is a typescript source file in the Milady codebase. It contains 3 functions, 2 imports.",
+      "languageNotes": "typescript; code; 181 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/planner-skeleton.ts:buildPlanActionsSkeleton",
+      "type": "function",
+      "name": "buildPlanActionsSkeleton",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/planner-skeleton.ts",
+      "summary": "buildPlanActionsSkeleton is a function defined in eliza/plugins/plugin-local-inference/src/services/planner-skeleton.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/planner-skeleton.ts:buildPlannerGuidedDecode",
+      "type": "function",
+      "name": "buildPlannerGuidedDecode",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/planner-skeleton.ts",
+      "summary": "buildPlannerGuidedDecode is a function defined in eliza/plugins/plugin-local-inference/src/services/planner-skeleton.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/planner-skeleton.ts:planActionParameterSchema",
+      "type": "function",
+      "name": "planActionParameterSchema",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/planner-skeleton.ts",
+      "summary": "planActionParameterSchema is a function defined in eliza/plugins/plugin-local-inference/src/services/planner-skeleton.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/providers.ts",
+      "type": "file",
+      "name": "providers.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/providers.ts",
+      "summary": "providers.ts is a typescript source file in the Milady codebase. It contains 5 functions, 4 imports.",
+      "languageNotes": "typescript; code; 507 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/providers.ts:getRegisteredSlotsForProvider",
+      "type": "function",
+      "name": "getRegisteredSlotsForProvider",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/providers.ts",
+      "summary": "getRegisteredSlotsForProvider is a function defined in eliza/plugins/plugin-local-inference/src/services/providers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/providers.ts:listLinkedAccounts",
+      "type": "function",
+      "name": "listLinkedAccounts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/providers.ts",
+      "summary": "listLinkedAccounts is a function defined in eliza/plugins/plugin-local-inference/src/services/providers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/providers.ts:apiKeyOrLinkedAccountState",
+      "type": "function",
+      "name": "apiKeyOrLinkedAccountState",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/providers.ts",
+      "summary": "apiKeyOrLinkedAccountState is a function defined in eliza/plugins/plugin-local-inference/src/services/providers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/providers.ts:subscriptionEnableState",
+      "type": "function",
+      "name": "subscriptionEnableState",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/providers.ts",
+      "summary": "subscriptionEnableState is a function defined in eliza/plugins/plugin-local-inference/src/services/providers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/providers.ts:snapshotProviders",
+      "type": "function",
+      "name": "snapshotProviders",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/providers.ts",
+      "summary": "snapshotProviders is a function defined in eliza/plugins/plugin-local-inference/src/services/providers.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/ram-budget.test.ts",
+      "type": "file",
+      "name": "ram-budget.test.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/ram-budget.test.ts",
+      "summary": "ram-budget.test.ts is a typescript source file in the Milady codebase. It contains 3 functions, 4 imports.",
+      "languageNotes": "typescript; code; 268 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.test.ts:syntheticManifest",
+      "type": "function",
+      "name": "syntheticManifest",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/ram-budget.test.ts",
+      "summary": "syntheticManifest is a function defined in eliza/plugins/plugin-local-inference/src/services/ram-budget.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.test.ts:installed",
+      "type": "function",
+      "name": "installed",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/ram-budget.test.ts",
+      "summary": "installed is a function defined in eliza/plugins/plugin-local-inference/src/services/ram-budget.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.test.ts:noopLoader",
+      "type": "function",
+      "name": "noopLoader",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/ram-budget.test.ts",
+      "summary": "noopLoader is a function defined in eliza/plugins/plugin-local-inference/src/services/ram-budget.test.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts",
+      "type": "file",
+      "name": "ram-budget.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/ram-budget.ts",
+      "summary": "ram-budget.ts is a typescript source file in the Milady codebase. It contains 9 functions, 4 imports.",
+      "languageNotes": "typescript; code; 285 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts:ramHeadroomReserveMb",
+      "type": "function",
+      "name": "ramHeadroomReserveMb",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/ram-budget.ts",
+      "summary": "ramHeadroomReserveMb is a function defined in eliza/plugins/plugin-local-inference/src/services/ram-budget.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts:isEliza1TierId",
+      "type": "function",
+      "name": "isEliza1TierId",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/ram-budget.ts",
+      "summary": "isEliza1TierId is a function defined in eliza/plugins/plugin-local-inference/src/services/ram-budget.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts:manifestTierFromId",
+      "type": "function",
+      "name": "manifestTierFromId",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/ram-budget.ts",
+      "summary": "manifestTierFromId is a function defined in eliza/plugins/plugin-local-inference/src/services/ram-budget.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts:defaultManifestLoader",
+      "type": "function",
+      "name": "defaultManifestLoader",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/ram-budget.ts",
+      "summary": "defaultManifestLoader is a function defined in eliza/plugins/plugin-local-inference/src/services/ram-budget.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts:catalogRecommendedMb",
+      "type": "function",
+      "name": "catalogRecommendedMb",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/ram-budget.ts",
+      "summary": "catalogRecommendedMb is a function defined in eliza/plugins/plugin-local-inference/src/services/ram-budget.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts:resolveRamBudget",
+      "type": "function",
+      "name": "resolveRamBudget",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/ram-budget.ts",
+      "summary": "resolveRamBudget is a function defined in eliza/plugins/plugin-local-inference/src/services/ram-budget.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts:assessRamFit",
+      "type": "function",
+      "name": "assessRamFit",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/ram-budget.ts",
+      "summary": "assessRamFit is a function defined in eliza/plugins/plugin-local-inference/src/services/ram-budget.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts:contextVariantStem",
+      "type": "function",
+      "name": "contextVariantStem",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/ram-budget.ts",
+      "summary": "contextVariantStem is a function defined in eliza/plugins/plugin-local-inference/src/services/ram-budget.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts:pickFittingContextVariant",
+      "type": "function",
+      "name": "pickFittingContextVariant",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/ram-budget.ts",
+      "summary": "pickFittingContextVariant is a function defined in eliza/plugins/plugin-local-inference/src/services/ram-budget.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/readiness.test.ts",
+      "type": "file",
+      "name": "readiness.test.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/readiness.test.ts",
+      "summary": "readiness.test.ts is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 87 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/readiness.ts",
+      "type": "file",
+      "name": "readiness.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/readiness.ts",
+      "summary": "readiness.ts is a typescript source file in the Milady codebase. It contains 7 functions, 3 imports.",
+      "languageNotes": "typescript; code; 238 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/readiness.ts:catalogById",
+      "type": "function",
+      "name": "catalogById",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/readiness.ts",
+      "summary": "catalogById is a function defined in eliza/plugins/plugin-local-inference/src/services/readiness.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/readiness.ts:installedById",
+      "type": "function",
+      "name": "installedById",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/readiness.ts",
+      "summary": "installedById is a function defined in eliza/plugins/plugin-local-inference/src/services/readiness.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/readiness.ts:latestJobByModel",
+      "type": "function",
+      "name": "latestJobByModel",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/readiness.ts",
+      "summary": "latestJobByModel is a function defined in eliza/plugins/plugin-local-inference/src/services/readiness.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/readiness.ts:requiredModelIds",
+      "type": "function",
+      "name": "requiredModelIds",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/readiness.ts",
+      "summary": "requiredModelIds is a function defined in eliza/plugins/plugin-local-inference/src/services/readiness.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/readiness.ts:statusFromJobs",
+      "type": "function",
+      "name": "statusFromJobs",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/readiness.ts",
+      "summary": "statusFromJobs is a function defined in eliza/plugins/plugin-local-inference/src/services/readiness.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/readiness.ts:slotReadiness",
+      "type": "function",
+      "name": "slotReadiness",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/readiness.ts",
+      "summary": "slotReadiness is a function defined in eliza/plugins/plugin-local-inference/src/services/readiness.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/readiness.ts:buildTextGenerationReadiness",
+      "type": "function",
+      "name": "buildTextGenerationReadiness",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/readiness.ts",
+      "summary": "buildTextGenerationReadiness is a function defined in eliza/plugins/plugin-local-inference/src/services/readiness.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/recommendation-publish-status.test.ts",
+      "type": "file",
+      "name": "recommendation-publish-status.test.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/recommendation-publish-status.test.ts",
+      "summary": "recommendation-publish-status.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 3 imports.",
+      "languageNotes": "typescript; code; 162 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/recommendation-publish-status.test.ts:clone",
+      "type": "function",
+      "name": "clone",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/recommendation-publish-status.test.ts",
+      "summary": "clone is a function defined in eliza/plugins/plugin-local-inference/src/services/recommendation-publish-status.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/recommendation.test.ts",
+      "type": "file",
+      "name": "recommendation.test.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/recommendation.test.ts",
+      "summary": "recommendation.test.ts is a typescript source file in the Milady codebase. It contains 3 functions, 4 imports.",
+      "languageNotes": "typescript; code; 577 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/recommendation.test.ts:hardware",
+      "type": "function",
+      "name": "hardware",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/recommendation.test.ts",
+      "summary": "hardware is a function defined in eliza/plugins/plugin-local-inference/src/services/recommendation.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/recommendation.test.ts:fixtureManifest",
+      "type": "function",
+      "name": "fixtureManifest",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/recommendation.test.ts",
+      "summary": "fixtureManifest is a function defined in eliza/plugins/plugin-local-inference/src/services/recommendation.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/src/services/recommendation.test.ts:installedFixture",
+      "type": "function",
+      "name": "installedFixture",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/recommendation.test.ts",
+      "summary": "installedFixture is a function defined in eliza/plugins/plugin-local-inference/src/services/recommendation.test.ts."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/mflux.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/mflux.ts:loadMfluxImageGenBackend",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/mflux.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/mflux.ts:resolveBinary",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/mflux.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/mflux.ts:assertBinaryAvailable",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/mflux.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/mflux.ts:runMflux",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/mflux.ts:loadMfluxImageGenBackend",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/mflux.ts:resolveBinary",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/mflux.ts:loadMfluxImageGenBackend",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/mflux.ts:assertBinaryAvailable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:loadSdCppImageGenBackend",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:resolveBinaryPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:assertBinaryAvailable",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:runCollect",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:collectOutput",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:probeSdCppCapabilitiesFromBinary",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:readSdCppCapabilityManifest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:extractAccelerators",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:isSdCppAccelerator",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:hasPositiveCudaEvidence",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:hasPositiveVulkanEvidence",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:hasPositiveMetalEvidence",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:parseVersionLine",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:runSdCpp",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:buildArgs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:pickSeed",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:resolveSeed",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:assertPngOutput",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:defaultSpawn",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:loadSdCppImageGenBackend",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:resolveBinaryPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:loadSdCppImageGenBackend",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:assertBinaryAvailable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:assertBinaryAvailable",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:runCollect",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:assertBinaryAvailable",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:probeSdCppCapabilitiesFromBinary",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:runCollect",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:defaultSpawn",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:runCollect",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:collectOutput",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:runCollect",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:collectOutput",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:probeSdCppCapabilitiesFromBinary",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:runCollect",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:probeSdCppCapabilitiesFromBinary",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:runCollect",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:probeSdCppCapabilitiesFromBinary",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:readSdCppCapabilityManifest",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:probeSdCppCapabilitiesFromBinary",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:hasPositiveCudaEvidence",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:probeSdCppCapabilitiesFromBinary",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:hasPositiveVulkanEvidence",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:probeSdCppCapabilitiesFromBinary",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:hasPositiveMetalEvidence",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:probeSdCppCapabilitiesFromBinary",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:parseVersionLine",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:readSdCppCapabilityManifest",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:extractAccelerators",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:runSdCpp",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:defaultSpawn",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:resolveSeed",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts:pickSeed",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/tensorrt-stub.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/tensorrt-stub.ts:loadTensorRtImageGenBackend",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/tensorrt-stub.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/tensorrt-stub.ts:resolveBinary",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/tensorrt-stub.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/tensorrt-stub.ts:assertBinaryAvailable",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/tensorrt-stub.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/tensorrt-stub.ts:runTensorRt",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/tensorrt-stub.ts:loadTensorRtImageGenBackend",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/tensorrt-stub.ts:resolveBinary",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/tensorrt-stub.ts:loadTensorRtImageGenBackend",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/imagegen/tensorrt-stub.ts:assertBinaryAvailable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/inference-telemetry.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/src/services/inference-telemetry.ts:BoundedRing",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/inference-telemetry.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/src/services/inference-telemetry.ts:InferenceTelemetry",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/kv-spill.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/kv-spill.test.ts:geometry",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/kv-spill.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/kv-spill.ts:estimateQuantizedKvBytesPerToken",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/kv-spill.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/kv-spill.ts:residentKvBudgetFromRamBudget",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/kv-spill.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/kv-spill.ts:pagesForTokens",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/kv-spill.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/kv-spill.ts:planKvSpill",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/kv-spill.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/kv-spill.ts:restoreClassForHardware",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/kv-spill.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/src/services/kv-spill.ts:KvSpillUnsupportedError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/kv-spill.ts:planKvSpill",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/kv-spill.ts:pagesForTokens",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/latency-trace.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/latency-trace.test.ts:fullTurn",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/latency-trace.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/latency-trace.ts:nextTurnId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/latency-trace.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/latency-trace.ts:markVoiceLatency",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/latency-trace.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/latency-trace.ts:endVoiceLatencyTurn",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/latency-trace.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/latency-trace.ts:buildVoiceLatencyDevPayload",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/latency-trace.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/src/services/latency-trace.ts:BoundedHistogram",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/latency-trace.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/src/services/latency-trace.ts:EndToEndLatencyTracer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/latency-trace.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/src/services/latency-trace.ts:VoiceRunMetrics",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.ts:parsePrometheusMetrics",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.ts:diffSnapshots",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.ts:clampNonNegative",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.ts:fetchMetricsSnapshot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.ts:diffSnapshots",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.ts:clampNonNegative",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.ts:diffSnapshots",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.ts:clampNonNegative",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.ts:diffSnapshots",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.ts:clampNonNegative",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.ts:diffSnapshots",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.ts:clampNonNegative",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.ts:diffSnapshots",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.ts:clampNonNegative",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.ts:fetchMetricsSnapshot",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.ts:parsePrometheusMetrics",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/llm-streaming-binding.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/llm-streaming-binding.ts:wrapElizaInferenceFfi",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/manifest/manifest-dflash-eval.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/manifest/manifest-dflash-eval.test.ts:passingBackends",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/manifest/manifest-dflash-eval.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/manifest/manifest-dflash-eval.test.ts:baseManifest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/manifest/manifest-dflash-eval.test.ts:baseManifest",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/manifest/manifest-dflash-eval.test.ts:passingBackends",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/manifest/manifest.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/manifest/manifest.test.ts:passingBackends",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/manifest/manifest.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/manifest/manifest.test.ts:textFileForTier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/manifest/manifest.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/manifest/manifest.test.ts:baseManifest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/manifest/manifest.test.ts:baseManifest",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/manifest/manifest.test.ts:textFileForTier",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/manifest/manifest.test.ts:baseManifest",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/manifest/manifest.test.ts:passingBackends",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts:validateManifest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts:parseManifestOrThrow",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts:canSetAsDefault",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts:isStrictReleaseManifest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts:collectContractErrors",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts:missingRequiredKernels",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts:validateManifest",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts:collectContractErrors",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts:parseManifestOrThrow",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts:validateManifest",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts:canSetAsDefault",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts:collectContractErrors",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/memory-arbiter.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/memory-arbiter.ts:setMemoryArbiter",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/memory-arbiter.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/memory-arbiter.ts:getMemoryArbiter",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/memory-arbiter.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/memory-arbiter.ts:tryGetMemoryArbiter",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/memory-arbiter.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/src/services/memory-arbiter.ts:MemoryArbiter",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/memory-monitor.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/memory-monitor.test.ts:fakeRole",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/memory-monitor.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/memory-monitor.test.ts:monitorWithFreeMb",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/memory-monitor.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/memory-monitor.ts:envInt",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/memory-monitor.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/memory-monitor.ts:envFloat",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/memory-monitor.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/memory-monitor.ts:resolveMemoryMonitorConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/memory-monitor.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/memory-monitor.ts:defaultServerRssMb",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/memory-monitor.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/src/services/memory-monitor.ts:MemoryMonitor",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/memory-monitor.ts:resolveMemoryMonitorConfig",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/memory-monitor.ts:envInt",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/memory-monitor.ts:resolveMemoryMonitorConfig",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/memory-monitor.ts:envInt",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/memory-monitor.ts:resolveMemoryMonitorConfig",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/memory-monitor.ts:envFloat",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/memory-pressure.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/memory-pressure.ts:nodeOsPressureSource",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/memory-pressure.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/memory-pressure.ts:clampFraction",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/memory-pressure.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/memory-pressure.ts:capacitorPressureSource",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/memory-pressure.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/memory-pressure.ts:compositePressureSource",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/memory-pressure.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/memory-pressure.ts:rank",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/memory-pressure.ts:nodeOsPressureSource",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/memory-pressure.ts:clampFraction",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/memory-pressure.ts:nodeOsPressureSource",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/memory-pressure.ts:clampFraction",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/paths.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/paths.ts:localInferenceRoot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/paths.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/paths.ts:elizaModelsDir",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/paths.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/paths.ts:registryPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/paths.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/paths.ts:downloadsStagingDir",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/paths.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/paths.ts:isWithinElizaRoot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/paths.ts:elizaModelsDir",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/paths.ts:localInferenceRoot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/paths.ts:registryPath",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/paths.ts:localInferenceRoot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/paths.ts:downloadsStagingDir",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/paths.ts:localInferenceRoot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/paths.ts:isWithinElizaRoot",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/paths.ts:localInferenceRoot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/planner-skeleton.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/planner-skeleton.ts:buildPlanActionsSkeleton",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/planner-skeleton.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/planner-skeleton.ts:buildPlannerGuidedDecode",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/planner-skeleton.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/planner-skeleton.ts:planActionParameterSchema",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/providers.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/providers.ts:getRegisteredSlotsForProvider",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/providers.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/providers.ts:listLinkedAccounts",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/providers.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/providers.ts:apiKeyOrLinkedAccountState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/providers.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/providers.ts:subscriptionEnableState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/providers.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/providers.ts:snapshotProviders",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/providers.ts:apiKeyOrLinkedAccountState",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/providers.ts:listLinkedAccounts",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/providers.ts:subscriptionEnableState",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/providers.ts:listLinkedAccounts",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/providers.ts:snapshotProviders",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/providers.ts:getRegisteredSlotsForProvider",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/ram-budget.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.test.ts:syntheticManifest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/ram-budget.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.test.ts:installed",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/ram-budget.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.test.ts:noopLoader",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts:ramHeadroomReserveMb",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts:isEliza1TierId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts:manifestTierFromId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts:defaultManifestLoader",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts:catalogRecommendedMb",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts:resolveRamBudget",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts:assessRamFit",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts:contextVariantStem",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts:pickFittingContextVariant",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts:defaultManifestLoader",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts:isEliza1TierId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts:defaultManifestLoader",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts:manifestTierFromId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts:resolveRamBudget",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts:isEliza1TierId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts:resolveRamBudget",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts:catalogRecommendedMb",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts:assessRamFit",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts:resolveRamBudget",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts:assessRamFit",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts:ramHeadroomReserveMb",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts:pickFittingContextVariant",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts:contextVariantStem",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts:pickFittingContextVariant",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts:contextVariantStem",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts:pickFittingContextVariant",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts:assessRamFit",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/readiness.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/readiness.ts:catalogById",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/readiness.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/readiness.ts:installedById",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/readiness.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/readiness.ts:latestJobByModel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/readiness.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/readiness.ts:requiredModelIds",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/readiness.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/readiness.ts:statusFromJobs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/readiness.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/readiness.ts:slotReadiness",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/readiness.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/readiness.ts:buildTextGenerationReadiness",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/readiness.ts:slotReadiness",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/readiness.ts:requiredModelIds",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/readiness.ts:slotReadiness",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/readiness.ts:statusFromJobs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/readiness.ts:buildTextGenerationReadiness",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/readiness.ts:catalogById",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/readiness.ts:buildTextGenerationReadiness",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/readiness.ts:installedById",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/readiness.ts:buildTextGenerationReadiness",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/readiness.ts:latestJobByModel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/readiness.ts:buildTextGenerationReadiness",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/readiness.ts:slotReadiness",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/src/services/readiness.ts:buildTextGenerationReadiness",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/readiness.ts:slotReadiness",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/recommendation-publish-status.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/recommendation-publish-status.test.ts:clone",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/recommendation.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/recommendation.test.ts:hardware",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/recommendation.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/recommendation.test.ts:fixtureManifest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/recommendation.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/src/services/recommendation.test.ts:installedFixture",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/mflux.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/errors.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/mflux.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/mflux.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/errors.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/tensorrt-stub.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/errors.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/tensorrt-stub.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/sd-cpp.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/tensorrt-stub.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/imagegen/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/inference-telemetry.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/kv-spill.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/kv-spill.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/kv-spill.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/kv-spill.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/latency-trace.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/latency-trace.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/latency-trace.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/latency-trace.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/latency-trace.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/llama-server-metrics.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/llm-streaming-binding.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/manifest/manifest-dflash-eval.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/manifest/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/manifest/manifest-dflash-eval.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/manifest/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/manifest/manifest.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/manifest/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/manifest/manifest.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/manifest/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/manifest/schema.ts",
+      "target": "file:eliza/packages/shared/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/manifest/types.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/manifest/schema.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/manifest/types.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/manifest/schema.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/manifest/validator.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/manifest/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/memory-arbiter.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/memory-pressure.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/memory-arbiter.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/vision-embedding-cache.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/memory-arbiter.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/shared-resources.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/memory-monitor.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/memory-monitor.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/memory-monitor.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/shared-resources.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/memory-monitor.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/voice/shared-resources.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/paths.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/planner-skeleton.ts",
+      "target": "file:eliza/packages/core/src/index.node.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/planner-skeleton.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/structured-output.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/providers.ts",
+      "target": "file:eliza/packages/shared/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/providers.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/device-bridge.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/providers.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/handler-registry.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/providers.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/paths.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/ram-budget.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/catalog.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/ram-budget.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/manifest/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/ram-budget.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/ram-budget.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/catalog.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/kv-spill.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/manifest/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/ram-budget.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/readiness.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/readiness.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/readiness.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/readiness.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/catalog.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/readiness.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/recommendation.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/readiness.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/recommendation-publish-status.test.ts",
+      "target": "file:eliza/packages/shared/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/recommendation-publish-status.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/catalog.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/recommendation-publish-status.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/recommendation.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/recommendation.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/catalog.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/recommendation.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/manifest/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/recommendation.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/recommendation.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/src/services/recommendation.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/src/services/types.ts",
+      "type": "imports"
+    }
+  ]
+}

@@ -1,0 +1,548 @@
+{
+  "batchIndex": 150,
+  "nodes": [
+    {
+      "tags": [
+        "desktop"
+      ],
+      "complexity": "moderate",
+      "id": "file:scripts/ensure-legacy-electrobun-compat.mjs",
+      "type": "file",
+      "name": "ensure-legacy-electrobun-compat.mjs",
+      "filePath": "scripts/ensure-legacy-electrobun-compat.mjs",
+      "summary": "ensure-legacy-electrobun-compat.mjs is a javascript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "javascript; code; 69 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:scripts/run-release-check.mjs",
+      "type": "file",
+      "name": "run-release-check.mjs",
+      "filePath": "scripts/run-release-check.mjs",
+      "summary": "run-release-check.mjs is a javascript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "javascript; code; 101 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:scripts/run-release-contract-suite.mjs",
+      "type": "file",
+      "name": "run-release-contract-suite.mjs",
+      "filePath": "scripts/run-release-contract-suite.mjs",
+      "summary": "run-release-contract-suite.mjs is a javascript source file in the Milady codebase. It contains 17 functions.",
+      "languageNotes": "javascript; code; 485 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/run-release-contract-suite.mjs:hasLocalElizaAppCore",
+      "type": "function",
+      "name": "hasLocalElizaAppCore",
+      "filePath": "scripts/run-release-contract-suite.mjs",
+      "summary": "hasLocalElizaAppCore is a function defined in scripts/run-release-contract-suite.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/run-release-contract-suite.mjs:selectReleaseContractTests",
+      "type": "function",
+      "name": "selectReleaseContractTests",
+      "filePath": "scripts/run-release-contract-suite.mjs",
+      "summary": "selectReleaseContractTests is a function defined in scripts/run-release-contract-suite.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/run-release-contract-suite.mjs:run",
+      "type": "function",
+      "name": "run",
+      "filePath": "scripts/run-release-contract-suite.mjs",
+      "summary": "run is a function defined in scripts/run-release-contract-suite.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/run-release-contract-suite.mjs:isElizaWorktreeClean",
+      "type": "function",
+      "name": "isElizaWorktreeClean",
+      "filePath": "scripts/run-release-contract-suite.mjs",
+      "summary": "isElizaWorktreeClean is a function defined in scripts/run-release-contract-suite.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/run-release-contract-suite.mjs:listElizaUntrackedFiles",
+      "type": "function",
+      "name": "listElizaUntrackedFiles",
+      "filePath": "scripts/run-release-contract-suite.mjs",
+      "summary": "listElizaUntrackedFiles is a function defined in scripts/run-release-contract-suite.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/run-release-contract-suite.mjs:restoreGeneratedElizaChanges",
+      "type": "function",
+      "name": "restoreGeneratedElizaChanges",
+      "filePath": "scripts/run-release-contract-suite.mjs",
+      "summary": "restoreGeneratedElizaChanges is a function defined in scripts/run-release-contract-suite.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/run-release-contract-suite.mjs:symlinkOrCopy",
+      "type": "function",
+      "name": "symlinkOrCopy",
+      "filePath": "scripts/run-release-contract-suite.mjs",
+      "summary": "symlinkOrCopy is a function defined in scripts/run-release-contract-suite.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/run-release-contract-suite.mjs:assertReleaseContractTestsExist",
+      "type": "function",
+      "name": "assertReleaseContractTestsExist",
+      "filePath": "scripts/run-release-contract-suite.mjs",
+      "summary": "assertReleaseContractTestsExist is a function defined in scripts/run-release-contract-suite.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/run-release-contract-suite.mjs:writeLegacyWindowsSmokeScript",
+      "type": "function",
+      "name": "writeLegacyWindowsSmokeScript",
+      "filePath": "scripts/run-release-contract-suite.mjs",
+      "summary": "writeLegacyWindowsSmokeScript is a function defined in scripts/run-release-contract-suite.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/run-release-contract-suite.mjs:writeLegacyWindowsInstallerProofScript",
+      "type": "function",
+      "name": "writeLegacyWindowsInstallerProofScript",
+      "filePath": "scripts/run-release-contract-suite.mjs",
+      "summary": "writeLegacyWindowsInstallerProofScript is a function defined in scripts/run-release-contract-suite.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/run-release-contract-suite.mjs:copyLegacyScriptsCompatDir",
+      "type": "function",
+      "name": "copyLegacyScriptsCompatDir",
+      "filePath": "scripts/run-release-contract-suite.mjs",
+      "summary": "copyLegacyScriptsCompatDir is a function defined in scripts/run-release-contract-suite.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/run-release-contract-suite.mjs:writeLegacyElectrobunWrapper",
+      "type": "function",
+      "name": "writeLegacyElectrobunWrapper",
+      "filePath": "scripts/run-release-contract-suite.mjs",
+      "summary": "writeLegacyElectrobunWrapper is a function defined in scripts/run-release-contract-suite.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "complex",
+      "id": "function:scripts/run-release-contract-suite.mjs:ensureLegacyElectrobunCompatDir",
+      "type": "function",
+      "name": "ensureLegacyElectrobunCompatDir",
+      "filePath": "scripts/run-release-contract-suite.mjs",
+      "summary": "ensureLegacyElectrobunCompatDir is a function defined in scripts/run-release-contract-suite.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/run-release-contract-suite.mjs:cleanupLegacyElectrobunCompatDir",
+      "type": "function",
+      "name": "cleanupLegacyElectrobunCompatDir",
+      "filePath": "scripts/run-release-contract-suite.mjs",
+      "summary": "cleanupLegacyElectrobunCompatDir is a function defined in scripts/run-release-contract-suite.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/run-release-contract-suite.mjs:loadTrackedLegacyElectrobunPaths",
+      "type": "function",
+      "name": "loadTrackedLegacyElectrobunPaths",
+      "filePath": "scripts/run-release-contract-suite.mjs",
+      "summary": "loadTrackedLegacyElectrobunPaths is a function defined in scripts/run-release-contract-suite.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/run-release-contract-suite.mjs:pruneGeneratedLegacyElectrobunEntries",
+      "type": "function",
+      "name": "pruneGeneratedLegacyElectrobunEntries",
+      "filePath": "scripts/run-release-contract-suite.mjs",
+      "summary": "pruneGeneratedLegacyElectrobunEntries is a function defined in scripts/run-release-contract-suite.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:scripts/run-release-contract-suite.mjs:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "scripts/run-release-contract-suite.mjs",
+      "summary": "main is a function defined in scripts/run-release-contract-suite.mjs."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/run-release-contract-suite.mjs",
+      "target": "function:scripts/run-release-contract-suite.mjs:hasLocalElizaAppCore",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/run-release-contract-suite.mjs",
+      "target": "function:scripts/run-release-contract-suite.mjs:selectReleaseContractTests",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/run-release-contract-suite.mjs",
+      "target": "function:scripts/run-release-contract-suite.mjs:run",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/run-release-contract-suite.mjs",
+      "target": "function:scripts/run-release-contract-suite.mjs:isElizaWorktreeClean",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/run-release-contract-suite.mjs",
+      "target": "function:scripts/run-release-contract-suite.mjs:listElizaUntrackedFiles",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/run-release-contract-suite.mjs",
+      "target": "function:scripts/run-release-contract-suite.mjs:restoreGeneratedElizaChanges",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/run-release-contract-suite.mjs",
+      "target": "function:scripts/run-release-contract-suite.mjs:symlinkOrCopy",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/run-release-contract-suite.mjs",
+      "target": "function:scripts/run-release-contract-suite.mjs:assertReleaseContractTestsExist",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/run-release-contract-suite.mjs",
+      "target": "function:scripts/run-release-contract-suite.mjs:writeLegacyWindowsSmokeScript",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/run-release-contract-suite.mjs",
+      "target": "function:scripts/run-release-contract-suite.mjs:writeLegacyWindowsInstallerProofScript",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/run-release-contract-suite.mjs",
+      "target": "function:scripts/run-release-contract-suite.mjs:copyLegacyScriptsCompatDir",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/run-release-contract-suite.mjs",
+      "target": "function:scripts/run-release-contract-suite.mjs:writeLegacyElectrobunWrapper",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/run-release-contract-suite.mjs",
+      "target": "function:scripts/run-release-contract-suite.mjs:ensureLegacyElectrobunCompatDir",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/run-release-contract-suite.mjs",
+      "target": "function:scripts/run-release-contract-suite.mjs:cleanupLegacyElectrobunCompatDir",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/run-release-contract-suite.mjs",
+      "target": "function:scripts/run-release-contract-suite.mjs:loadTrackedLegacyElectrobunPaths",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/run-release-contract-suite.mjs",
+      "target": "function:scripts/run-release-contract-suite.mjs:pruneGeneratedLegacyElectrobunEntries",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:scripts/run-release-contract-suite.mjs",
+      "target": "function:scripts/run-release-contract-suite.mjs:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/run-release-contract-suite.mjs:selectReleaseContractTests",
+      "target": "function:scripts/run-release-contract-suite.mjs:hasLocalElizaAppCore",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/run-release-contract-suite.mjs:restoreGeneratedElizaChanges",
+      "target": "function:scripts/run-release-contract-suite.mjs:listElizaUntrackedFiles",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/run-release-contract-suite.mjs:copyLegacyScriptsCompatDir",
+      "target": "function:scripts/run-release-contract-suite.mjs:writeLegacyWindowsSmokeScript",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/run-release-contract-suite.mjs:copyLegacyScriptsCompatDir",
+      "target": "function:scripts/run-release-contract-suite.mjs:writeLegacyWindowsInstallerProofScript",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/run-release-contract-suite.mjs:copyLegacyScriptsCompatDir",
+      "target": "function:scripts/run-release-contract-suite.mjs:symlinkOrCopy",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/run-release-contract-suite.mjs:cleanupLegacyElectrobunCompatDir",
+      "target": "function:scripts/run-release-contract-suite.mjs:loadTrackedLegacyElectrobunPaths",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/run-release-contract-suite.mjs:cleanupLegacyElectrobunCompatDir",
+      "target": "function:scripts/run-release-contract-suite.mjs:pruneGeneratedLegacyElectrobunEntries",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/run-release-contract-suite.mjs:main",
+      "target": "function:scripts/run-release-contract-suite.mjs:hasLocalElizaAppCore",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/run-release-contract-suite.mjs:main",
+      "target": "function:scripts/run-release-contract-suite.mjs:selectReleaseContractTests",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/run-release-contract-suite.mjs:main",
+      "target": "function:scripts/run-release-contract-suite.mjs:isElizaWorktreeClean",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/run-release-contract-suite.mjs:main",
+      "target": "function:scripts/run-release-contract-suite.mjs:listElizaUntrackedFiles",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/run-release-contract-suite.mjs:main",
+      "target": "function:scripts/run-release-contract-suite.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/run-release-contract-suite.mjs:main",
+      "target": "function:scripts/run-release-contract-suite.mjs:ensureLegacyElectrobunCompatDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/run-release-contract-suite.mjs:main",
+      "target": "function:scripts/run-release-contract-suite.mjs:assertReleaseContractTestsExist",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/run-release-contract-suite.mjs:main",
+      "target": "function:scripts/run-release-contract-suite.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/run-release-contract-suite.mjs:main",
+      "target": "function:scripts/run-release-contract-suite.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/run-release-contract-suite.mjs:main",
+      "target": "function:scripts/run-release-contract-suite.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/run-release-contract-suite.mjs:main",
+      "target": "function:scripts/run-release-contract-suite.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/run-release-contract-suite.mjs:main",
+      "target": "function:scripts/run-release-contract-suite.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/run-release-contract-suite.mjs:main",
+      "target": "function:scripts/run-release-contract-suite.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/run-release-contract-suite.mjs:main",
+      "target": "function:scripts/run-release-contract-suite.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/run-release-contract-suite.mjs:main",
+      "target": "function:scripts/run-release-contract-suite.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/run-release-contract-suite.mjs:main",
+      "target": "function:scripts/run-release-contract-suite.mjs:cleanupLegacyElectrobunCompatDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:scripts/run-release-contract-suite.mjs:main",
+      "target": "function:scripts/run-release-contract-suite.mjs:restoreGeneratedElizaChanges",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:scripts/ensure-legacy-electrobun-compat.mjs",
+      "target": "file:scripts/run-release-contract-suite.mjs",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:scripts/run-release-check.mjs",
+      "target": "file:scripts/run-release-contract-suite.mjs",
+      "type": "imports"
+    }
+  ]
+}

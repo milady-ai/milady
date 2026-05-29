@@ -1,0 +1,811 @@
+{
+  "batchIndex": 113,
+  "nodes": [
+    {
+      "tags": [
+        "test",
+        "voice",
+        "api",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/api/client-voice-profiles.test.ts",
+      "type": "file",
+      "name": "client-voice-profiles.test.ts",
+      "filePath": "eliza/packages/ui/src/api/client-voice-profiles.test.ts",
+      "summary": "client-voice-profiles.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 314 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/api/client-voice-profiles.test.ts:makeClient",
+      "type": "function",
+      "name": "makeClient",
+      "filePath": "eliza/packages/ui/src/api/client-voice-profiles.test.ts",
+      "summary": "makeClient is a function defined in eliza/packages/ui/src/api/client-voice-profiles.test.ts."
+    },
+    {
+      "tags": [
+        "voice",
+        "api",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "type": "file",
+      "name": "client-voice-profiles.ts",
+      "filePath": "eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "summary": "client-voice-profiles.ts is a typescript source file in the Milady codebase. It contains 13 functions, 2 classes.",
+      "languageNotes": "typescript; code; 543 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/api/client-voice-profiles.ts:fallbackCaptureSession",
+      "type": "function",
+      "name": "fallbackCaptureSession",
+      "filePath": "eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "summary": "fallbackCaptureSession is a function defined in eliza/packages/ui/src/api/client-voice-profiles.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/api/client-voice-profiles.ts:fallbackOwnerSubmitResult",
+      "type": "function",
+      "name": "fallbackOwnerSubmitResult",
+      "filePath": "eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "summary": "fallbackOwnerSubmitResult is a function defined in eliza/packages/ui/src/api/client-voice-profiles.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/api/client-voice-profiles.ts:normaliseCaptureSession",
+      "type": "function",
+      "name": "normaliseCaptureSession",
+      "filePath": "eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "summary": "normaliseCaptureSession is a function defined in eliza/packages/ui/src/api/client-voice-profiles.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/api/client-voice-profiles.ts:normaliseCapturePrompt",
+      "type": "function",
+      "name": "normaliseCapturePrompt",
+      "filePath": "eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "summary": "normaliseCapturePrompt is a function defined in eliza/packages/ui/src/api/client-voice-profiles.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/api/client-voice-profiles.ts:normaliseScriptPrompt",
+      "type": "function",
+      "name": "normaliseScriptPrompt",
+      "filePath": "eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "summary": "normaliseScriptPrompt is a function defined in eliza/packages/ui/src/api/client-voice-profiles.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/api/client-voice-profiles.ts:isCapturePrompt",
+      "type": "function",
+      "name": "isCapturePrompt",
+      "filePath": "eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "summary": "isCapturePrompt is a function defined in eliza/packages/ui/src/api/client-voice-profiles.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/api/client-voice-profiles.ts:isProfile",
+      "type": "function",
+      "name": "isProfile",
+      "filePath": "eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "summary": "isProfile is a function defined in eliza/packages/ui/src/api/client-voice-profiles.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/api/client-voice-profiles.ts:normaliseProfile",
+      "type": "function",
+      "name": "normaliseProfile",
+      "filePath": "eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "summary": "normaliseProfile is a function defined in eliza/packages/ui/src/api/client-voice-profiles.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/api/client-voice-profiles.ts:isCohort",
+      "type": "function",
+      "name": "isCohort",
+      "filePath": "eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "summary": "isCohort is a function defined in eliza/packages/ui/src/api/client-voice-profiles.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/api/client-voice-profiles.ts:isSource",
+      "type": "function",
+      "name": "isSource",
+      "filePath": "eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "summary": "isSource is a function defined in eliza/packages/ui/src/api/client-voice-profiles.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/api/client-voice-profiles.ts:isMissingEndpointError",
+      "type": "function",
+      "name": "isMissingEndpointError",
+      "filePath": "eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "summary": "isMissingEndpointError is a function defined in eliza/packages/ui/src/api/client-voice-profiles.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/api/client-voice-profiles.ts:isUnsupportedCaptureRouteError",
+      "type": "function",
+      "name": "isUnsupportedCaptureRouteError",
+      "filePath": "eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "summary": "isUnsupportedCaptureRouteError is a function defined in eliza/packages/ui/src/api/client-voice-profiles.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/api/client-voice-profiles.ts:createVoiceProfilesClient",
+      "type": "function",
+      "name": "createVoiceProfilesClient",
+      "filePath": "eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "summary": "createVoiceProfilesClient is a function defined in eliza/packages/ui/src/api/client-voice-profiles.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/ui/src/api/client-voice-profiles.ts:VoiceProfilesUnavailableError",
+      "type": "class",
+      "name": "VoiceProfilesUnavailableError",
+      "filePath": "eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "summary": "VoiceProfilesUnavailableError is a class or type declared in eliza/packages/ui/src/api/client-voice-profiles.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/ui/src/api/client-voice-profiles.ts:VoiceProfilesClient",
+      "type": "class",
+      "name": "VoiceProfilesClient",
+      "filePath": "eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "summary": "VoiceProfilesClient is a class or type declared in eliza/packages/ui/src/api/client-voice-profiles.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "voice",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/settings/VoiceProfileSection.test.tsx",
+      "type": "file",
+      "name": "VoiceProfileSection.test.tsx",
+      "filePath": "eliza/packages/ui/src/components/settings/VoiceProfileSection.test.tsx",
+      "summary": "VoiceProfileSection.test.tsx is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 173 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/settings/VoiceProfileSection.test.tsx:fakeProfile",
+      "type": "function",
+      "name": "fakeProfile",
+      "filePath": "eliza/packages/ui/src/components/settings/VoiceProfileSection.test.tsx",
+      "summary": "fakeProfile is a function defined in eliza/packages/ui/src/components/settings/VoiceProfileSection.test.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/settings/VoiceProfileSection.test.tsx:makeClient",
+      "type": "function",
+      "name": "makeClient",
+      "filePath": "eliza/packages/ui/src/components/settings/VoiceProfileSection.test.tsx",
+      "summary": "makeClient is a function defined in eliza/packages/ui/src/components/settings/VoiceProfileSection.test.tsx."
+    },
+    {
+      "tags": [
+        "voice",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/components/settings/VoiceProfileSection.tsx",
+      "type": "file",
+      "name": "VoiceProfileSection.tsx",
+      "filePath": "eliza/packages/ui/src/components/settings/VoiceProfileSection.tsx",
+      "summary": "VoiceProfileSection.tsx is a typescript source file in the Milady codebase. It contains 3 functions, 3 imports.",
+      "languageNotes": "typescript; code; 410 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/settings/VoiceProfileSection.tsx:compareProfiles",
+      "type": "function",
+      "name": "compareProfiles",
+      "filePath": "eliza/packages/ui/src/components/settings/VoiceProfileSection.tsx",
+      "summary": "compareProfiles is a function defined in eliza/packages/ui/src/components/settings/VoiceProfileSection.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/settings/VoiceProfileSection.tsx:relationshipRank",
+      "type": "function",
+      "name": "relationshipRank",
+      "filePath": "eliza/packages/ui/src/components/settings/VoiceProfileSection.tsx",
+      "summary": "relationshipRank is a function defined in eliza/packages/ui/src/components/settings/VoiceProfileSection.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/components/settings/VoiceProfileSection.tsx:VoiceProfileSection",
+      "type": "function",
+      "name": "VoiceProfileSection",
+      "filePath": "eliza/packages/ui/src/components/settings/VoiceProfileSection.tsx",
+      "summary": "VoiceProfileSection is a function defined in eliza/packages/ui/src/components/settings/VoiceProfileSection.tsx."
+    },
+    {
+      "tags": [
+        "test",
+        "voice",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/settings/VoiceSection.test.tsx",
+      "type": "file",
+      "name": "VoiceSection.test.tsx",
+      "filePath": "eliza/packages/ui/src/components/settings/VoiceSection.test.tsx",
+      "summary": "VoiceSection.test.tsx is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 138 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/settings/VoiceSection.test.tsx:makeClient",
+      "type": "function",
+      "name": "makeClient",
+      "filePath": "eliza/packages/ui/src/components/settings/VoiceSection.test.tsx",
+      "summary": "makeClient is a function defined in eliza/packages/ui/src/components/settings/VoiceSection.test.tsx."
+    },
+    {
+      "tags": [
+        "voice",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/components/settings/VoiceSection.tsx",
+      "type": "file",
+      "name": "VoiceSection.tsx",
+      "filePath": "eliza/packages/ui/src/components/settings/VoiceSection.tsx",
+      "summary": "VoiceSection.tsx is a typescript source file in the Milady codebase. It contains 2 functions, 6 imports.",
+      "languageNotes": "typescript; code; 254 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/settings/VoiceSection.tsx:FieldRow",
+      "type": "function",
+      "name": "FieldRow",
+      "filePath": "eliza/packages/ui/src/components/settings/VoiceSection.tsx",
+      "summary": "FieldRow is a function defined in eliza/packages/ui/src/components/settings/VoiceSection.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/components/settings/VoiceSection.tsx:VoiceSection",
+      "type": "function",
+      "name": "VoiceSection",
+      "filePath": "eliza/packages/ui/src/components/settings/VoiceSection.tsx",
+      "summary": "VoiceSection is a function defined in eliza/packages/ui/src/components/settings/VoiceSection.tsx."
+    },
+    {
+      "tags": [
+        "voice",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/components/settings/VoiceSectionMount.tsx",
+      "type": "file",
+      "name": "VoiceSectionMount.tsx",
+      "filePath": "eliza/packages/ui/src/components/settings/VoiceSectionMount.tsx",
+      "summary": "VoiceSectionMount.tsx is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 55 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/settings/VoiceSectionMount.tsx:buildFallbackProfilesClient",
+      "type": "function",
+      "name": "buildFallbackProfilesClient",
+      "filePath": "eliza/packages/ui/src/components/settings/VoiceSectionMount.tsx",
+      "summary": "buildFallbackProfilesClient is a function defined in eliza/packages/ui/src/components/settings/VoiceSectionMount.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/settings/VoiceSectionMount.tsx:VoiceSectionMount",
+      "type": "function",
+      "name": "VoiceSectionMount",
+      "filePath": "eliza/packages/ui/src/components/settings/VoiceSectionMount.tsx",
+      "summary": "VoiceSectionMount is a function defined in eliza/packages/ui/src/components/settings/VoiceSectionMount.tsx."
+    },
+    {
+      "tags": [
+        "test",
+        "voice"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/components/settings/VoiceTierBanner.test.tsx",
+      "type": "file",
+      "name": "VoiceTierBanner.test.tsx",
+      "filePath": "eliza/packages/ui/src/components/settings/VoiceTierBanner.test.tsx",
+      "summary": "VoiceTierBanner.test.tsx is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 48 lines"
+    },
+    {
+      "tags": [
+        "voice",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/components/settings/VoiceTierBanner.tsx",
+      "type": "file",
+      "name": "VoiceTierBanner.tsx",
+      "filePath": "eliza/packages/ui/src/components/settings/VoiceTierBanner.tsx",
+      "summary": "VoiceTierBanner.tsx is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 161 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/components/settings/VoiceTierBanner.tsx:VoiceTierBanner",
+      "type": "function",
+      "name": "VoiceTierBanner",
+      "filePath": "eliza/packages/ui/src/components/settings/VoiceTierBanner.tsx",
+      "summary": "VoiceTierBanner is a function defined in eliza/packages/ui/src/components/settings/VoiceTierBanner.tsx."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/api/client-voice-profiles.test.ts",
+      "target": "function:eliza/packages/ui/src/api/client-voice-profiles.test.ts:makeClient",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "target": "function:eliza/packages/ui/src/api/client-voice-profiles.ts:fallbackCaptureSession",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "target": "function:eliza/packages/ui/src/api/client-voice-profiles.ts:fallbackOwnerSubmitResult",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "target": "function:eliza/packages/ui/src/api/client-voice-profiles.ts:normaliseCaptureSession",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "target": "function:eliza/packages/ui/src/api/client-voice-profiles.ts:normaliseCapturePrompt",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "target": "function:eliza/packages/ui/src/api/client-voice-profiles.ts:normaliseScriptPrompt",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "target": "function:eliza/packages/ui/src/api/client-voice-profiles.ts:isCapturePrompt",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "target": "function:eliza/packages/ui/src/api/client-voice-profiles.ts:isProfile",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "target": "function:eliza/packages/ui/src/api/client-voice-profiles.ts:normaliseProfile",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "target": "function:eliza/packages/ui/src/api/client-voice-profiles.ts:isCohort",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "target": "function:eliza/packages/ui/src/api/client-voice-profiles.ts:isSource",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "target": "function:eliza/packages/ui/src/api/client-voice-profiles.ts:isMissingEndpointError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "target": "function:eliza/packages/ui/src/api/client-voice-profiles.ts:isUnsupportedCaptureRouteError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "target": "function:eliza/packages/ui/src/api/client-voice-profiles.ts:createVoiceProfilesClient",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "target": "class:eliza/packages/ui/src/api/client-voice-profiles.ts:VoiceProfilesUnavailableError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "target": "class:eliza/packages/ui/src/api/client-voice-profiles.ts:VoiceProfilesClient",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/api/client-voice-profiles.ts:normaliseCaptureSession",
+      "target": "function:eliza/packages/ui/src/api/client-voice-profiles.ts:fallbackCaptureSession",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/api/client-voice-profiles.ts:normaliseCaptureSession",
+      "target": "function:eliza/packages/ui/src/api/client-voice-profiles.ts:fallbackCaptureSession",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/api/client-voice-profiles.ts:normaliseProfile",
+      "target": "function:eliza/packages/ui/src/api/client-voice-profiles.ts:isCohort",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/api/client-voice-profiles.ts:normaliseProfile",
+      "target": "function:eliza/packages/ui/src/api/client-voice-profiles.ts:isSource",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/settings/VoiceProfileSection.test.tsx",
+      "target": "function:eliza/packages/ui/src/components/settings/VoiceProfileSection.test.tsx:fakeProfile",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/settings/VoiceProfileSection.test.tsx",
+      "target": "function:eliza/packages/ui/src/components/settings/VoiceProfileSection.test.tsx:makeClient",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/settings/VoiceProfileSection.tsx",
+      "target": "function:eliza/packages/ui/src/components/settings/VoiceProfileSection.tsx:compareProfiles",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/settings/VoiceProfileSection.tsx",
+      "target": "function:eliza/packages/ui/src/components/settings/VoiceProfileSection.tsx:relationshipRank",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/settings/VoiceProfileSection.tsx",
+      "target": "function:eliza/packages/ui/src/components/settings/VoiceProfileSection.tsx:VoiceProfileSection",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/settings/VoiceProfileSection.tsx:compareProfiles",
+      "target": "function:eliza/packages/ui/src/components/settings/VoiceProfileSection.tsx:relationshipRank",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/components/settings/VoiceProfileSection.tsx:compareProfiles",
+      "target": "function:eliza/packages/ui/src/components/settings/VoiceProfileSection.tsx:relationshipRank",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/settings/VoiceSection.test.tsx",
+      "target": "function:eliza/packages/ui/src/components/settings/VoiceSection.test.tsx:makeClient",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/settings/VoiceSection.tsx",
+      "target": "function:eliza/packages/ui/src/components/settings/VoiceSection.tsx:FieldRow",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/settings/VoiceSection.tsx",
+      "target": "function:eliza/packages/ui/src/components/settings/VoiceSection.tsx:VoiceSection",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/settings/VoiceSectionMount.tsx",
+      "target": "function:eliza/packages/ui/src/components/settings/VoiceSectionMount.tsx:buildFallbackProfilesClient",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/settings/VoiceSectionMount.tsx",
+      "target": "function:eliza/packages/ui/src/components/settings/VoiceSectionMount.tsx:VoiceSectionMount",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/components/settings/VoiceTierBanner.tsx",
+      "target": "function:eliza/packages/ui/src/components/settings/VoiceTierBanner.tsx:VoiceTierBanner",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/api/client-voice-profiles.test.ts",
+      "target": "file:eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/settings/VoiceProfileSection.test.tsx",
+      "target": "file:eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/settings/VoiceProfileSection.test.tsx",
+      "target": "file:eliza/packages/ui/src/components/settings/VoiceProfileSection.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/settings/VoiceProfileSection.tsx",
+      "target": "file:eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/settings/VoiceProfileSection.tsx",
+      "target": "file:eliza/packages/ui/src/components/ui/button.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/settings/VoiceProfileSection.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/settings/VoiceSection.test.tsx",
+      "target": "file:eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/settings/VoiceSection.test.tsx",
+      "target": "file:eliza/packages/ui/src/components/settings/VoiceSection.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/settings/VoiceSection.tsx",
+      "target": "file:eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/settings/VoiceSection.tsx",
+      "target": "file:eliza/packages/ui/src/components/composites/chat/ContinuousChatToggle.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/settings/VoiceSection.tsx",
+      "target": "file:eliza/packages/ui/src/components/settings/VoiceProfileSection.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/settings/VoiceSection.tsx",
+      "target": "file:eliza/packages/ui/src/components/settings/VoiceTierBanner.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/settings/VoiceSection.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/settings/VoiceSection.tsx",
+      "target": "file:eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/settings/VoiceSectionMount.tsx",
+      "target": "file:eliza/packages/ui/src/api/client-voice-profiles.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/settings/VoiceSectionMount.tsx",
+      "target": "file:eliza/packages/ui/src/components/settings/VoiceSection.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/settings/VoiceTierBanner.test.tsx",
+      "target": "file:eliza/packages/ui/src/components/settings/VoiceTierBanner.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/components/settings/VoiceTierBanner.tsx",
+      "target": "file:eliza/packages/ui/src/lib/utils.ts",
+      "type": "imports"
+    }
+  ]
+}

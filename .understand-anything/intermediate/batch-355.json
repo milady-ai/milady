@@ -1,0 +1,18 @@
+{
+  "batchIndex": 355,
+  "nodes": [
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:vitest.config.ts",
+      "type": "file",
+      "name": "vitest.config.ts",
+      "filePath": "vitest.config.ts",
+      "summary": "vitest.config.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 84 lines"
+    }
+  ],
+  "edges": []
+}

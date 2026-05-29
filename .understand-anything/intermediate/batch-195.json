@@ -1,0 +1,90 @@
+{
+  "batchIndex": 195,
+  "nodes": [
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:eliza/packages/app-core/platforms/android/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "eliza/packages/app-core/platforms/android/README.md",
+      "summary": "README.md documents eliza/packages/app-core/platforms/android with 137 lines of reference material.",
+      "languageNotes": "markdown; docs; 137 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/platforms/android/build.gradle",
+      "type": "config",
+      "name": "build.gradle",
+      "filePath": "eliza/packages/app-core/platforms/android/build.gradle",
+      "summary": "build.gradle configures gradle settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "gradle; config; 63 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/platforms/android/capacitor.settings.gradle",
+      "type": "config",
+      "name": "capacitor.settings.gradle",
+      "filePath": "eliza/packages/app-core/platforms/android/capacitor.settings.gradle",
+      "summary": "capacitor.settings.gradle configures gradle settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "gradle; config; 51 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/platforms/android/gradle.properties",
+      "type": "config",
+      "name": "gradle.properties",
+      "filePath": "eliza/packages/app-core/platforms/android/gradle.properties",
+      "summary": "gradle.properties configures properties settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "properties; config; 28 lines"
+    },
+    {
+      "tags": [
+        "script"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/android/gradlew.bat",
+      "type": "file",
+      "name": "gradlew.bat",
+      "filePath": "eliza/packages/app-core/platforms/android/gradlew.bat",
+      "summary": "gradlew.bat automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "batch; script; 94 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/platforms/android/settings.gradle",
+      "type": "config",
+      "name": "settings.gradle",
+      "filePath": "eliza/packages/app-core/platforms/android/settings.gradle",
+      "summary": "settings.gradle configures gradle settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "gradle; config; 13 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/app-core/platforms/android/variables.gradle",
+      "type": "config",
+      "name": "variables.gradle",
+      "filePath": "eliza/packages/app-core/platforms/android/variables.gradle",
+      "summary": "variables.gradle configures gradle settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "gradle; config; 17 lines"
+    }
+  ],
+  "edges": []
+}

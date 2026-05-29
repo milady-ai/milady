@@ -1,0 +1,3824 @@
+{
+  "batchIndex": 11,
+  "nodes": [
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/oauth/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "eliza/packages/core/src/features/oauth/types.ts",
+      "summary": "types.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 137 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/oauth/types.ts:eligibleOAuthDeliveryTargets",
+      "type": "function",
+      "name": "eligibleOAuthDeliveryTargets",
+      "filePath": "eliza/packages/core/src/features/oauth/types.ts",
+      "summary": "eligibleOAuthDeliveryTargets is a function defined in eliza/packages/core/src/features/oauth/types.ts."
+    },
+    {
+      "tags": [
+        "entry-point"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/features/payments/actions/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/core/src/features/payments/actions/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 1 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/payments/actions/payment.test.ts",
+      "type": "file",
+      "name": "payment.test.ts",
+      "filePath": "eliza/packages/core/src/features/payments/actions/payment.test.ts",
+      "summary": "payment.test.ts is a typescript source file in the Milady codebase. It contains 3 functions, 3 imports.",
+      "languageNotes": "typescript; code; 528 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/payments/actions/payment.test.ts:envelope",
+      "type": "function",
+      "name": "envelope",
+      "filePath": "eliza/packages/core/src/features/payments/actions/payment.test.ts",
+      "summary": "envelope is a function defined in eliza/packages/core/src/features/payments/actions/payment.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/payments/actions/payment.test.ts:createRuntime",
+      "type": "function",
+      "name": "createRuntime",
+      "filePath": "eliza/packages/core/src/features/payments/actions/payment.test.ts",
+      "summary": "createRuntime is a function defined in eliza/packages/core/src/features/payments/actions/payment.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/payments/actions/payment.test.ts:message",
+      "type": "function",
+      "name": "message",
+      "filePath": "eliza/packages/core/src/features/payments/actions/payment.test.ts",
+      "summary": "message is a function defined in eliza/packages/core/src/features/payments/actions/payment.test.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/payments/actions/payment.ts",
+      "type": "file",
+      "name": "payment.ts",
+      "filePath": "eliza/packages/core/src/features/payments/actions/payment.ts",
+      "summary": "payment.ts is a typescript source file in the Milady codebase. It contains 14 functions, 4 imports.",
+      "languageNotes": "typescript; code; 838 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/payments/actions/payment.ts:readParams",
+      "type": "function",
+      "name": "readParams",
+      "filePath": "eliza/packages/core/src/features/payments/actions/payment.ts",
+      "summary": "readParams is a function defined in eliza/packages/core/src/features/payments/actions/payment.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/payments/actions/payment.ts:normalizePaymentAction",
+      "type": "function",
+      "name": "normalizePaymentAction",
+      "filePath": "eliza/packages/core/src/features/payments/actions/payment.ts",
+      "summary": "normalizePaymentAction is a function defined in eliza/packages/core/src/features/payments/actions/payment.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/payments/actions/payment.ts:parsePaymentContext",
+      "type": "function",
+      "name": "parsePaymentContext",
+      "filePath": "eliza/packages/core/src/features/payments/actions/payment.ts",
+      "summary": "parsePaymentContext is a function defined in eliza/packages/core/src/features/payments/actions/payment.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/payments/actions/payment.ts:buildCreateInput",
+      "type": "function",
+      "name": "buildCreateInput",
+      "filePath": "eliza/packages/core/src/features/payments/actions/payment.ts",
+      "summary": "buildCreateInput is a function defined in eliza/packages/core/src/features/payments/actions/payment.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/payments/actions/payment.ts:envelopeToDispatchRequest",
+      "type": "function",
+      "name": "envelopeToDispatchRequest",
+      "filePath": "eliza/packages/core/src/features/payments/actions/payment.ts",
+      "summary": "envelopeToDispatchRequest is a function defined in eliza/packages/core/src/features/payments/actions/payment.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/payments/actions/payment.ts:dataFor",
+      "type": "function",
+      "name": "dataFor",
+      "filePath": "eliza/packages/core/src/features/payments/actions/payment.ts",
+      "summary": "dataFor is a function defined in eliza/packages/core/src/features/payments/actions/payment.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/payments/actions/payment.ts:maybeCallback",
+      "type": "function",
+      "name": "maybeCallback",
+      "filePath": "eliza/packages/core/src/features/payments/actions/payment.ts",
+      "summary": "maybeCallback is a function defined in eliza/packages/core/src/features/payments/actions/payment.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleCreateRequest",
+      "type": "function",
+      "name": "handleCreateRequest",
+      "filePath": "eliza/packages/core/src/features/payments/actions/payment.ts",
+      "summary": "handleCreateRequest is a function defined in eliza/packages/core/src/features/payments/actions/payment.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleDeliverLink",
+      "type": "function",
+      "name": "handleDeliverLink",
+      "filePath": "eliza/packages/core/src/features/payments/actions/payment.ts",
+      "summary": "handleDeliverLink is a function defined in eliza/packages/core/src/features/payments/actions/payment.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleVerifyPayload",
+      "type": "function",
+      "name": "handleVerifyPayload",
+      "filePath": "eliza/packages/core/src/features/payments/actions/payment.ts",
+      "summary": "handleVerifyPayload is a function defined in eliza/packages/core/src/features/payments/actions/payment.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleSettle",
+      "type": "function",
+      "name": "handleSettle",
+      "filePath": "eliza/packages/core/src/features/payments/actions/payment.ts",
+      "summary": "handleSettle is a function defined in eliza/packages/core/src/features/payments/actions/payment.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleAwaitCallback",
+      "type": "function",
+      "name": "handleAwaitCallback",
+      "filePath": "eliza/packages/core/src/features/payments/actions/payment.ts",
+      "summary": "handleAwaitCallback is a function defined in eliza/packages/core/src/features/payments/actions/payment.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleCancelRequest",
+      "type": "function",
+      "name": "handleCancelRequest",
+      "filePath": "eliza/packages/core/src/features/payments/actions/payment.ts",
+      "summary": "handleCancelRequest is a function defined in eliza/packages/core/src/features/payments/actions/payment.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/payments/actions/payment.ts:validateParams",
+      "type": "function",
+      "name": "validateParams",
+      "filePath": "eliza/packages/core/src/features/payments/actions/payment.ts",
+      "summary": "validateParams is a function defined in eliza/packages/core/src/features/payments/actions/payment.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/features/payments/plugin.test.ts",
+      "type": "file",
+      "name": "plugin.test.ts",
+      "filePath": "eliza/packages/core/src/features/payments/plugin.test.ts",
+      "summary": "plugin.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 28 lines"
+    },
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/features/payments/plugin.ts",
+      "type": "file",
+      "name": "plugin.ts",
+      "filePath": "eliza/packages/core/src/features/payments/plugin.ts",
+      "summary": "plugin.ts is a typescript source file in the Milady codebase. It contains 3 imports.",
+      "languageNotes": "typescript; code; 32 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/payments/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "eliza/packages/core/src/features/payments/types.ts",
+      "summary": "types.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 159 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/payments/types.ts:eligibleDeliveryTargetsFor",
+      "type": "function",
+      "name": "eligibleDeliveryTargetsFor",
+      "filePath": "eliza/packages/core/src/features/payments/types.ts",
+      "summary": "eligibleDeliveryTargetsFor is a function defined in eliza/packages/core/src/features/payments/types.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/plugin-config/actions/activate-plugin-if-ready.test.ts",
+      "type": "file",
+      "name": "activate-plugin-if-ready.test.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-config/actions/activate-plugin-if-ready.test.ts",
+      "summary": "activate-plugin-if-ready.test.ts is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 93 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-config/actions/activate-plugin-if-ready.test.ts:createRuntime",
+      "type": "function",
+      "name": "createRuntime",
+      "filePath": "eliza/packages/core/src/features/plugin-config/actions/activate-plugin-if-ready.test.ts",
+      "summary": "createRuntime is a function defined in eliza/packages/core/src/features/plugin-config/actions/activate-plugin-if-ready.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-config/actions/activate-plugin-if-ready.test.ts:createMessage",
+      "type": "function",
+      "name": "createMessage",
+      "filePath": "eliza/packages/core/src/features/plugin-config/actions/activate-plugin-if-ready.test.ts",
+      "summary": "createMessage is a function defined in eliza/packages/core/src/features/plugin-config/actions/activate-plugin-if-ready.test.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/plugin-config/actions/activate-plugin-if-ready.ts",
+      "type": "file",
+      "name": "activate-plugin-if-ready.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-config/actions/activate-plugin-if-ready.ts",
+      "summary": "activate-plugin-if-ready.ts is a typescript source file in the Milady codebase. It contains 2 functions, 3 imports.",
+      "languageNotes": "typescript; code; 169 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-config/actions/activate-plugin-if-ready.ts:readParams",
+      "type": "function",
+      "name": "readParams",
+      "filePath": "eliza/packages/core/src/features/plugin-config/actions/activate-plugin-if-ready.ts",
+      "summary": "readParams is a function defined in eliza/packages/core/src/features/plugin-config/actions/activate-plugin-if-ready.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-config/actions/activate-plugin-if-ready.ts:dataFor",
+      "type": "function",
+      "name": "dataFor",
+      "filePath": "eliza/packages/core/src/features/plugin-config/actions/activate-plugin-if-ready.ts",
+      "summary": "dataFor is a function defined in eliza/packages/core/src/features/plugin-config/actions/activate-plugin-if-ready.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/plugin-config/actions/deliver-plugin-config-form.test.ts",
+      "type": "file",
+      "name": "deliver-plugin-config-form.test.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-config/actions/deliver-plugin-config-form.test.ts",
+      "summary": "deliver-plugin-config-form.test.ts is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 119 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-config/actions/deliver-plugin-config-form.test.ts:createRuntime",
+      "type": "function",
+      "name": "createRuntime",
+      "filePath": "eliza/packages/core/src/features/plugin-config/actions/deliver-plugin-config-form.test.ts",
+      "summary": "createRuntime is a function defined in eliza/packages/core/src/features/plugin-config/actions/deliver-plugin-config-form.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-config/actions/deliver-plugin-config-form.test.ts:createMessage",
+      "type": "function",
+      "name": "createMessage",
+      "filePath": "eliza/packages/core/src/features/plugin-config/actions/deliver-plugin-config-form.test.ts",
+      "summary": "createMessage is a function defined in eliza/packages/core/src/features/plugin-config/actions/deliver-plugin-config-form.test.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/plugin-config/actions/deliver-plugin-config-form.ts",
+      "type": "file",
+      "name": "deliver-plugin-config-form.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-config/actions/deliver-plugin-config-form.ts",
+      "summary": "deliver-plugin-config-form.ts is a typescript source file in the Milady codebase. It contains 2 functions, 4 imports.",
+      "languageNotes": "typescript; code; 258 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-config/actions/deliver-plugin-config-form.ts:readParams",
+      "type": "function",
+      "name": "readParams",
+      "filePath": "eliza/packages/core/src/features/plugin-config/actions/deliver-plugin-config-form.ts",
+      "summary": "readParams is a function defined in eliza/packages/core/src/features/plugin-config/actions/deliver-plugin-config-form.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-config/actions/deliver-plugin-config-form.ts:dataFor",
+      "type": "function",
+      "name": "dataFor",
+      "filePath": "eliza/packages/core/src/features/plugin-config/actions/deliver-plugin-config-form.ts",
+      "summary": "dataFor is a function defined in eliza/packages/core/src/features/plugin-config/actions/deliver-plugin-config-form.ts."
+    },
+    {
+      "tags": [
+        "entry-point",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/features/plugin-config/actions/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-config/actions/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 4 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "plugin",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/features/plugin-config/actions/poll-plugin-config-status.test.ts",
+      "type": "file",
+      "name": "poll-plugin-config-status.test.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-config/actions/poll-plugin-config-status.test.ts",
+      "summary": "poll-plugin-config-status.test.ts is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 65 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-config/actions/poll-plugin-config-status.test.ts:createRuntime",
+      "type": "function",
+      "name": "createRuntime",
+      "filePath": "eliza/packages/core/src/features/plugin-config/actions/poll-plugin-config-status.test.ts",
+      "summary": "createRuntime is a function defined in eliza/packages/core/src/features/plugin-config/actions/poll-plugin-config-status.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-config/actions/poll-plugin-config-status.test.ts:createMessage",
+      "type": "function",
+      "name": "createMessage",
+      "filePath": "eliza/packages/core/src/features/plugin-config/actions/poll-plugin-config-status.test.ts",
+      "summary": "createMessage is a function defined in eliza/packages/core/src/features/plugin-config/actions/poll-plugin-config-status.test.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/plugin-config/actions/poll-plugin-config-status.ts",
+      "type": "file",
+      "name": "poll-plugin-config-status.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-config/actions/poll-plugin-config-status.ts",
+      "summary": "poll-plugin-config-status.ts is a typescript source file in the Milady codebase. It contains 2 functions, 3 imports.",
+      "languageNotes": "typescript; code; 129 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-config/actions/poll-plugin-config-status.ts:readParams",
+      "type": "function",
+      "name": "readParams",
+      "filePath": "eliza/packages/core/src/features/plugin-config/actions/poll-plugin-config-status.ts",
+      "summary": "readParams is a function defined in eliza/packages/core/src/features/plugin-config/actions/poll-plugin-config-status.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-config/actions/poll-plugin-config-status.ts:dataFor",
+      "type": "function",
+      "name": "dataFor",
+      "filePath": "eliza/packages/core/src/features/plugin-config/actions/poll-plugin-config-status.ts",
+      "summary": "dataFor is a function defined in eliza/packages/core/src/features/plugin-config/actions/poll-plugin-config-status.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/plugin-config/actions/probe-plugin-config-requirements.test.ts",
+      "type": "file",
+      "name": "probe-plugin-config-requirements.test.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-config/actions/probe-plugin-config-requirements.test.ts",
+      "summary": "probe-plugin-config-requirements.test.ts is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 76 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-config/actions/probe-plugin-config-requirements.test.ts:createRuntime",
+      "type": "function",
+      "name": "createRuntime",
+      "filePath": "eliza/packages/core/src/features/plugin-config/actions/probe-plugin-config-requirements.test.ts",
+      "summary": "createRuntime is a function defined in eliza/packages/core/src/features/plugin-config/actions/probe-plugin-config-requirements.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-config/actions/probe-plugin-config-requirements.test.ts:createMessage",
+      "type": "function",
+      "name": "createMessage",
+      "filePath": "eliza/packages/core/src/features/plugin-config/actions/probe-plugin-config-requirements.test.ts",
+      "summary": "createMessage is a function defined in eliza/packages/core/src/features/plugin-config/actions/probe-plugin-config-requirements.test.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/plugin-config/actions/probe-plugin-config-requirements.ts",
+      "type": "file",
+      "name": "probe-plugin-config-requirements.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-config/actions/probe-plugin-config-requirements.ts",
+      "summary": "probe-plugin-config-requirements.ts is a typescript source file in the Milady codebase. It contains 2 functions, 3 imports.",
+      "languageNotes": "typescript; code; 136 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-config/actions/probe-plugin-config-requirements.ts:readParams",
+      "type": "function",
+      "name": "readParams",
+      "filePath": "eliza/packages/core/src/features/plugin-config/actions/probe-plugin-config-requirements.ts",
+      "summary": "readParams is a function defined in eliza/packages/core/src/features/plugin-config/actions/probe-plugin-config-requirements.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-config/actions/probe-plugin-config-requirements.ts:dataFor",
+      "type": "function",
+      "name": "dataFor",
+      "filePath": "eliza/packages/core/src/features/plugin-config/actions/probe-plugin-config-requirements.ts",
+      "summary": "dataFor is a function defined in eliza/packages/core/src/features/plugin-config/actions/probe-plugin-config-requirements.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/features/plugin-config/plugin.test.ts",
+      "type": "file",
+      "name": "plugin.test.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-config/plugin.test.ts",
+      "summary": "plugin.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 21 lines"
+    },
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/features/plugin-config/plugin.ts",
+      "type": "file",
+      "name": "plugin.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-config/plugin.ts",
+      "summary": "plugin.ts is a typescript source file in the Milady codebase. It contains 3 imports.",
+      "languageNotes": "typescript; code; 39 lines"
+    },
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/plugin-config/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-config/types.ts",
+      "summary": "types.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 140 lines"
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/core-status.ts",
+      "type": "file",
+      "name": "core-status.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/core-status.ts",
+      "summary": "core-status.ts is a typescript source file in the Milady codebase. It contains 1 function, 3 imports.",
+      "languageNotes": "typescript; code; 75 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/core-status.ts:runCoreStatus",
+      "type": "function",
+      "name": "runCoreStatus",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/core-status.ts",
+      "summary": "runCoreStatus is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/core-status.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "type": "file",
+      "name": "create.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "summary": "create.ts is a typescript source file in the Milady codebase. It contains 23 functions, 6 imports.",
+      "languageNotes": "typescript; code; 743 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:tokenize",
+      "type": "function",
+      "name": "tokenize",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "summary": "tokenize is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:deriveNames",
+      "type": "function",
+      "name": "deriveNames",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "summary": "deriveNames is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:readStringOption",
+      "type": "function",
+      "name": "readStringOption",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "summary": "readStringOption is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:isDirectory",
+      "type": "function",
+      "name": "isDirectory",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "summary": "isDirectory is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:resolveExistingDirectory",
+      "type": "function",
+      "name": "resolveExistingDirectory",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "summary": "resolveExistingDirectory is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:findFreePluginDir",
+      "type": "function",
+      "name": "findFreePluginDir",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "summary": "findFreePluginDir is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:copyTemplate",
+      "type": "function",
+      "name": "copyTemplate",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "summary": "copyTemplate is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:readStringField",
+      "type": "function",
+      "name": "readStringField",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "summary": "readStringField is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:readTaskAgents",
+      "type": "function",
+      "name": "readTaskAgents",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "summary": "readTaskAgents is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:dispatchCodingAgent",
+      "type": "function",
+      "name": "dispatchCodingAgent",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "summary": "dispatchCodingAgent is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:buildCreatePrompt",
+      "type": "function",
+      "name": "buildCreatePrompt",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "summary": "buildCreatePrompt is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:buildEditPrompt",
+      "type": "function",
+      "name": "buildEditPrompt",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "summary": "buildEditPrompt is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:rankMatches",
+      "type": "function",
+      "name": "rankMatches",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "summary": "rankMatches is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:renderChoiceBlock",
+      "type": "function",
+      "name": "renderChoiceBlock",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "summary": "renderChoiceBlock is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:listKnownPlugins",
+      "type": "function",
+      "name": "listKnownPlugins",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "summary": "listKnownPlugins is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:findExistingIntentTask",
+      "type": "function",
+      "name": "findExistingIntentTask",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "summary": "findExistingIntentTask is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:persistIntentTask",
+      "type": "function",
+      "name": "persistIntentTask",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "summary": "persistIntentTask is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:deleteIntentTask",
+      "type": "function",
+      "name": "deleteIntentTask",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "summary": "deleteIntentTask is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:createNewPlugin",
+      "type": "function",
+      "name": "createNewPlugin",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "summary": "createNewPlugin is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:editExistingPlugin",
+      "type": "function",
+      "name": "editExistingPlugin",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "summary": "editExistingPlugin is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:isPluginCreateChoiceReply",
+      "type": "function",
+      "name": "isPluginCreateChoiceReply",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "summary": "isPluginCreateChoiceReply is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:runCreate",
+      "type": "function",
+      "name": "runCreate",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "summary": "runCreate is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:hasPendingPluginCreateIntent",
+      "type": "function",
+      "name": "hasPendingPluginCreateIntent",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "summary": "hasPendingPluginCreateIntent is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/eject.ts",
+      "type": "file",
+      "name": "eject.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/eject.ts",
+      "summary": "eject.ts is a typescript source file in the Milady codebase. It contains 1 function, 3 imports.",
+      "languageNotes": "typescript; code; 74 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/eject.ts:runEject",
+      "type": "function",
+      "name": "runEject",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/eject.ts",
+      "summary": "runEject is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/eject.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/install.ts",
+      "type": "file",
+      "name": "install.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/install.ts",
+      "summary": "install.ts is a typescript source file in the Milady codebase. It contains 1 function, 4 imports.",
+      "languageNotes": "typescript; code; 88 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/install.ts:runInstall",
+      "type": "function",
+      "name": "runInstall",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/install.ts",
+      "summary": "runInstall is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/install.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/list-ejected.ts",
+      "type": "file",
+      "name": "list-ejected.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/list-ejected.ts",
+      "summary": "list-ejected.ts is a typescript source file in the Milady codebase. It contains 1 function, 3 imports.",
+      "languageNotes": "typescript; code; 52 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/list-ejected.ts:runListEjected",
+      "type": "function",
+      "name": "runListEjected",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/list-ejected.ts",
+      "summary": "runListEjected is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/list-ejected.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/list.ts",
+      "type": "file",
+      "name": "list.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/list.ts",
+      "summary": "list.ts is a typescript source file in the Milady codebase. It contains 1 function, 3 imports.",
+      "languageNotes": "typescript; code; 73 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/list.ts:runList",
+      "type": "function",
+      "name": "runList",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/list.ts",
+      "summary": "runList is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/list.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/reinject.ts",
+      "type": "file",
+      "name": "reinject.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/reinject.ts",
+      "summary": "reinject.ts is a typescript source file in the Milady codebase. It contains 1 function, 3 imports.",
+      "languageNotes": "typescript; code; 68 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/reinject.ts:runReinject",
+      "type": "function",
+      "name": "runReinject",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/reinject.ts",
+      "summary": "runReinject is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/reinject.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts",
+      "type": "file",
+      "name": "runtime-state.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts",
+      "summary": "runtime-state.ts is a typescript source file in the Milady codebase. It contains 11 functions, 4 imports.",
+      "languageNotes": "typescript; code; 318 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:getPluginManager",
+      "type": "function",
+      "name": "getPluginManager",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts",
+      "summary": "getPluginManager is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:normalizeName",
+      "type": "function",
+      "name": "normalizeName",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts",
+      "summary": "normalizeName is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:matchesPluginName",
+      "type": "function",
+      "name": "matchesPluginName",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts",
+      "summary": "matchesPluginName is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:findPluginState",
+      "type": "function",
+      "name": "findPluginState",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts",
+      "summary": "findPluginState is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:findPluginInfo",
+      "type": "function",
+      "name": "findPluginInfo",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts",
+      "summary": "findPluginInfo is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:summarizePluginState",
+      "type": "function",
+      "name": "summarizePluginState",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts",
+      "summary": "summarizePluginState is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:runPluginStatus",
+      "type": "function",
+      "name": "runPluginStatus",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts",
+      "summary": "runPluginStatus is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:runPluginDetails",
+      "type": "function",
+      "name": "runPluginDetails",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts",
+      "summary": "runPluginDetails is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:setPluginEnabled",
+      "type": "function",
+      "name": "setPluginEnabled",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts",
+      "summary": "setPluginEnabled is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:runEnablePlugin",
+      "type": "function",
+      "name": "runEnablePlugin",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts",
+      "summary": "runEnablePlugin is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:runDisablePlugin",
+      "type": "function",
+      "name": "runDisablePlugin",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts",
+      "summary": "runDisablePlugin is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/search.ts",
+      "type": "file",
+      "name": "search.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/search.ts",
+      "summary": "search.ts is a typescript source file in the Milady codebase. It contains 1 function, 4 imports.",
+      "languageNotes": "typescript; code; 76 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/search.ts:runSearch",
+      "type": "function",
+      "name": "runSearch",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/search.ts",
+      "summary": "runSearch is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/search.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/sync.ts",
+      "type": "file",
+      "name": "sync.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/sync.ts",
+      "summary": "sync.ts is a typescript source file in the Milady codebase. It contains 1 function, 3 imports.",
+      "languageNotes": "typescript; code; 73 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/sync.ts:runSync",
+      "type": "function",
+      "name": "runSync",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/sync.ts",
+      "summary": "runSync is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/sync.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "type": "file",
+      "name": "plugin.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "summary": "plugin.ts is a typescript source file in the Milady codebase. It contains 12 functions, 17 imports.",
+      "languageNotes": "typescript; code; 657 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:defaultRepoRoot",
+      "type": "function",
+      "name": "defaultRepoRoot",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "summary": "defaultRepoRoot is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:readNestedParameters",
+      "type": "function",
+      "name": "readNestedParameters",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "summary": "readNestedParameters is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:readOptionValue",
+      "type": "function",
+      "name": "readOptionValue",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "summary": "readOptionValue is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:readStringOption",
+      "type": "function",
+      "name": "readStringOption",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "summary": "readStringOption is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:normalizeSubaction",
+      "type": "function",
+      "name": "normalizeSubaction",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "summary": "normalizeSubaction is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:readSourceOption",
+      "type": "function",
+      "name": "readSourceOption",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "summary": "readSourceOption is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:inferMode",
+      "type": "function",
+      "name": "inferMode",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "summary": "inferMode is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:extractNameFromText",
+      "type": "function",
+      "name": "extractNameFromText",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "summary": "extractNameFromText is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:normalizePluginNameInput",
+      "type": "function",
+      "name": "normalizePluginNameInput",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "summary": "normalizePluginNameInput is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:extractQueryFromText",
+      "type": "function",
+      "name": "extractQueryFromText",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "summary": "extractQueryFromText is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:hasAccessContext",
+      "type": "function",
+      "name": "hasAccessContext",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "summary": "hasAccessContext is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:createPluginAction",
+      "type": "function",
+      "name": "createPluginAction",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "summary": "createPluginAction is a function defined in eliza/packages/core/src/features/plugin-manager/actions/plugin.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/plugin-manager/coreExtensions.ts",
+      "type": "file",
+      "name": "coreExtensions.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/coreExtensions.ts",
+      "summary": "coreExtensions.ts is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 74 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/coreExtensions.ts:extendRuntimeWithComponentUnregistration",
+      "type": "function",
+      "name": "extendRuntimeWithComponentUnregistration",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/coreExtensions.ts",
+      "summary": "extendRuntimeWithComponentUnregistration is a function defined in eliza/packages/core/src/features/plugin-manager/coreExtensions.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/coreExtensions.ts:applyRuntimeExtensions",
+      "type": "function",
+      "name": "applyRuntimeExtensions",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/coreExtensions.ts",
+      "summary": "applyRuntimeExtensions is a function defined in eliza/packages/core/src/features/plugin-manager/coreExtensions.ts."
+    },
+    {
+      "tags": [
+        "entry-point",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/plugin-manager/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase. It contains 10 imports.",
+      "languageNotes": "typescript; code; 133 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/features/plugin-manager/plugin-manager-umbrella.test.ts",
+      "type": "file",
+      "name": "plugin-manager-umbrella.test.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/plugin-manager-umbrella.test.ts",
+      "summary": "plugin-manager-umbrella.test.ts is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 62 lines"
+    },
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/plugin-manager/providers/pluginConfigurationStatus.ts",
+      "type": "file",
+      "name": "pluginConfigurationStatus.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/providers/pluginConfigurationStatus.ts",
+      "summary": "pluginConfigurationStatus.ts is a typescript source file in the Milady codebase. It contains 8 imports.",
+      "languageNotes": "typescript; code; 181 lines"
+    },
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/plugin-manager/providers/pluginStateProvider.ts",
+      "type": "file",
+      "name": "pluginStateProvider.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/providers/pluginStateProvider.ts",
+      "summary": "pluginStateProvider.ts is a typescript source file in the Milady codebase. It contains 7 imports.",
+      "languageNotes": "typescript; code; 218 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/oauth/types.ts",
+      "target": "function:eliza/packages/core/src/features/oauth/types.ts:eligibleOAuthDeliveryTargets",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/payments/actions/payment.test.ts",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.test.ts:envelope",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/payments/actions/payment.test.ts",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.test.ts:createRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/payments/actions/payment.test.ts",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.test.ts:message",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/payments/actions/payment.ts",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:readParams",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/payments/actions/payment.ts",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:normalizePaymentAction",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/payments/actions/payment.ts",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:parsePaymentContext",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/payments/actions/payment.ts",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:buildCreateInput",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/payments/actions/payment.ts",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:envelopeToDispatchRequest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/payments/actions/payment.ts",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:dataFor",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/payments/actions/payment.ts",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:maybeCallback",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/payments/actions/payment.ts",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleCreateRequest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/payments/actions/payment.ts",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleDeliverLink",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/payments/actions/payment.ts",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleVerifyPayload",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/payments/actions/payment.ts",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleSettle",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/payments/actions/payment.ts",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleAwaitCallback",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/payments/actions/payment.ts",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleCancelRequest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/payments/actions/payment.ts",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:validateParams",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/payments/actions/payment.ts:buildCreateInput",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:parsePaymentContext",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleCreateRequest",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:dataFor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleCreateRequest",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:buildCreateInput",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleCreateRequest",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:dataFor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleCreateRequest",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:maybeCallback",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleCreateRequest",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:dataFor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleDeliverLink",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:dataFor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleDeliverLink",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:dataFor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleDeliverLink",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:dataFor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleDeliverLink",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:dataFor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleDeliverLink",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:dataFor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleDeliverLink",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:envelopeToDispatchRequest",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleDeliverLink",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:maybeCallback",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleDeliverLink",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:dataFor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleVerifyPayload",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:dataFor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleVerifyPayload",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:dataFor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleVerifyPayload",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:maybeCallback",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleVerifyPayload",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:dataFor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleSettle",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:dataFor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleSettle",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:dataFor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleSettle",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:maybeCallback",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleSettle",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:dataFor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleAwaitCallback",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:dataFor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleAwaitCallback",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:dataFor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleAwaitCallback",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:maybeCallback",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleAwaitCallback",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:dataFor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleCancelRequest",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:dataFor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleCancelRequest",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:dataFor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleCancelRequest",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:maybeCallback",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/payments/actions/payment.ts:handleCancelRequest",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:dataFor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/payments/actions/payment.ts:validateParams",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:normalizePaymentAction",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/payments/actions/payment.ts:validateParams",
+      "target": "function:eliza/packages/core/src/features/payments/actions/payment.ts:buildCreateInput",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/payments/types.ts",
+      "target": "function:eliza/packages/core/src/features/payments/types.ts:eligibleDeliveryTargetsFor",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/activate-plugin-if-ready.test.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-config/actions/activate-plugin-if-ready.test.ts:createRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/activate-plugin-if-ready.test.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-config/actions/activate-plugin-if-ready.test.ts:createMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/activate-plugin-if-ready.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-config/actions/activate-plugin-if-ready.ts:readParams",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/activate-plugin-if-ready.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-config/actions/activate-plugin-if-ready.ts:dataFor",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/deliver-plugin-config-form.test.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-config/actions/deliver-plugin-config-form.test.ts:createRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/deliver-plugin-config-form.test.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-config/actions/deliver-plugin-config-form.test.ts:createMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/deliver-plugin-config-form.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-config/actions/deliver-plugin-config-form.ts:readParams",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/deliver-plugin-config-form.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-config/actions/deliver-plugin-config-form.ts:dataFor",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/poll-plugin-config-status.test.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-config/actions/poll-plugin-config-status.test.ts:createRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/poll-plugin-config-status.test.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-config/actions/poll-plugin-config-status.test.ts:createMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/poll-plugin-config-status.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-config/actions/poll-plugin-config-status.ts:readParams",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/poll-plugin-config-status.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-config/actions/poll-plugin-config-status.ts:dataFor",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/probe-plugin-config-requirements.test.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-config/actions/probe-plugin-config-requirements.test.ts:createRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/probe-plugin-config-requirements.test.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-config/actions/probe-plugin-config-requirements.test.ts:createMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/probe-plugin-config-requirements.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-config/actions/probe-plugin-config-requirements.ts:readParams",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/probe-plugin-config-requirements.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-config/actions/probe-plugin-config-requirements.ts:dataFor",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/core-status.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/core-status.ts:runCoreStatus",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:tokenize",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:deriveNames",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:readStringOption",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:isDirectory",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:resolveExistingDirectory",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:findFreePluginDir",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:copyTemplate",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:readStringField",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:readTaskAgents",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:dispatchCodingAgent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:buildCreatePrompt",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:buildEditPrompt",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:rankMatches",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:renderChoiceBlock",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:listKnownPlugins",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:findExistingIntentTask",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:persistIntentTask",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:deleteIntentTask",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:createNewPlugin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:editExistingPlugin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:isPluginCreateChoiceReply",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:runCreate",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:hasPendingPluginCreateIntent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:deriveNames",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:tokenize",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:resolveExistingDirectory",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:isDirectory",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:findFreePluginDir",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:resolveExistingDirectory",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:findFreePluginDir",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:isDirectory",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:readTaskAgents",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:readStringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:readTaskAgents",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:readStringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:readTaskAgents",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:readStringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:readTaskAgents",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:readStringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:readTaskAgents",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:readStringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:readTaskAgents",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:readStringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:readTaskAgents",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:readStringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:readTaskAgents",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:readStringField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:dispatchCodingAgent",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:readTaskAgents",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:rankMatches",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:tokenize",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:rankMatches",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:tokenize",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:createNewPlugin",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:deriveNames",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:createNewPlugin",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:resolveExistingDirectory",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:createNewPlugin",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:findFreePluginDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:createNewPlugin",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:copyTemplate",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:createNewPlugin",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:dispatchCodingAgent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:createNewPlugin",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:buildCreatePrompt",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:editExistingPlugin",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:dispatchCodingAgent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:editExistingPlugin",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:buildEditPrompt",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:runCreate",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:readStringOption",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:runCreate",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:readStringOption",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:runCreate",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:readStringOption",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:runCreate",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:findExistingIntentTask",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:runCreate",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:isPluginCreateChoiceReply",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:runCreate",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:deleteIntentTask",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:runCreate",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:createNewPlugin",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:runCreate",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:listKnownPlugins",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:runCreate",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:editExistingPlugin",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:runCreate",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:listKnownPlugins",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:runCreate",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:editExistingPlugin",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:runCreate",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:listKnownPlugins",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:runCreate",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:rankMatches",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:runCreate",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:createNewPlugin",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:runCreate",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:persistIntentTask",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:runCreate",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:renderChoiceBlock",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:hasPendingPluginCreateIntent",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts:findExistingIntentTask",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/eject.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/eject.ts:runEject",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/install.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/install.ts:runInstall",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/list-ejected.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/list-ejected.ts:runListEjected",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/list.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/list.ts:runList",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/reinject.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/reinject.ts:runReinject",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:getPluginManager",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:normalizeName",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:matchesPluginName",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:findPluginState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:findPluginInfo",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:summarizePluginState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:runPluginStatus",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:runPluginDetails",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:setPluginEnabled",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:runEnablePlugin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:runDisablePlugin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:matchesPluginName",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:normalizeName",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:matchesPluginName",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:normalizeName",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:matchesPluginName",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:normalizeName",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:findPluginState",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:matchesPluginName",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:findPluginInfo",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:matchesPluginName",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:runPluginStatus",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:getPluginManager",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:runPluginStatus",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:findPluginState",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:runPluginStatus",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:findPluginInfo",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:runPluginStatus",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:findPluginInfo",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:runPluginStatus",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:summarizePluginState",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:runPluginDetails",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:getPluginManager",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:runPluginDetails",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:findPluginState",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:runPluginDetails",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:summarizePluginState",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:setPluginEnabled",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:getPluginManager",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:setPluginEnabled",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:findPluginState",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:runEnablePlugin",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:setPluginEnabled",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:runDisablePlugin",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts:setPluginEnabled",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/search.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/search.ts:runSearch",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/sync.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/sync.ts:runSync",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:defaultRepoRoot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:readNestedParameters",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:readOptionValue",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:readStringOption",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:normalizeSubaction",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:readSourceOption",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:inferMode",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:extractNameFromText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:normalizePluginNameInput",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:extractQueryFromText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:hasAccessContext",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:createPluginAction",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:readOptionValue",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:readNestedParameters",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:readStringOption",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:readOptionValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:readSourceOption",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:readStringOption",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:inferMode",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:readStringOption",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:inferMode",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:readStringOption",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:inferMode",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:readStringOption",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:inferMode",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:normalizeSubaction",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:inferMode",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:extractNameFromText",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:createPluginAction",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:defaultRepoRoot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:createPluginAction",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:readStringOption",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:createPluginAction",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:readStringOption",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:createPluginAction",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:readStringOption",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:createPluginAction",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:inferMode",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:createPluginAction",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:normalizePluginNameInput",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:createPluginAction",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:readStringOption",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:createPluginAction",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:readStringOption",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:createPluginAction",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:extractNameFromText",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:createPluginAction",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:readSourceOption",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:createPluginAction",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:readStringOption",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:createPluginAction",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:extractQueryFromText",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:createPluginAction",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:readStringOption",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:createPluginAction",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:readStringOption",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:createPluginAction",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts:readStringOption",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/coreExtensions.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/coreExtensions.ts:extendRuntimeWithComponentUnregistration",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/coreExtensions.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/coreExtensions.ts:applyRuntimeExtensions",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/coreExtensions.ts:applyRuntimeExtensions",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/coreExtensions.ts:extendRuntimeWithComponentUnregistration",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/oauth/types.ts",
+      "target": "file:eliza/packages/core/src/sensitive-requests/dispatch-registry.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/payments/actions/payment.test.ts",
+      "target": "file:eliza/packages/core/src/features/payments/actions/payment.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/payments/actions/payment.test.ts",
+      "target": "file:eliza/packages/core/src/features/payments/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/payments/actions/payment.test.ts",
+      "target": "file:eliza/packages/core/src/sensitive-requests/dispatch-registry.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/payments/actions/payment.ts",
+      "target": "file:eliza/packages/core/src/features/payments/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/payments/actions/payment.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/payments/actions/payment.ts",
+      "target": "file:eliza/packages/core/src/sensitive-requests/dispatch-registry.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/payments/actions/payment.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/payments/plugin.test.ts",
+      "target": "file:eliza/packages/core/src/features/payments/plugin.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/payments/plugin.ts",
+      "target": "file:eliza/packages/core/src/features/payments/actions/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/payments/plugin.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/payments/plugin.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/payments/types.ts",
+      "target": "file:eliza/packages/core/src/sensitive-requests/dispatch-registry.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/activate-plugin-if-ready.test.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-config/actions/activate-plugin-if-ready.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/activate-plugin-if-ready.test.ts",
+      "target": "file:eliza/packages/core/src/types/primitives.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/activate-plugin-if-ready.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-config/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/activate-plugin-if-ready.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/activate-plugin-if-ready.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/deliver-plugin-config-form.test.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-config/actions/deliver-plugin-config-form.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/deliver-plugin-config-form.test.ts",
+      "target": "file:eliza/packages/core/src/types/primitives.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/deliver-plugin-config-form.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-config/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/deliver-plugin-config-form.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/deliver-plugin-config-form.ts",
+      "target": "file:eliza/packages/core/src/sensitive-requests/dispatch-registry.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/deliver-plugin-config-form.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/poll-plugin-config-status.test.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-config/actions/poll-plugin-config-status.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/poll-plugin-config-status.test.ts",
+      "target": "file:eliza/packages/core/src/types/primitives.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/poll-plugin-config-status.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-config/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/poll-plugin-config-status.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/poll-plugin-config-status.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/probe-plugin-config-requirements.test.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-config/actions/probe-plugin-config-requirements.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/probe-plugin-config-requirements.test.ts",
+      "target": "file:eliza/packages/core/src/types/primitives.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/probe-plugin-config-requirements.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-config/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/probe-plugin-config-requirements.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-config/actions/probe-plugin-config-requirements.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-config/plugin.test.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-config/plugin.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-config/plugin.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-config/actions/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-config/plugin.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-config/plugin.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-config/types.ts",
+      "target": "file:eliza/packages/core/src/sensitive-requests/dispatch-registry.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/core-status.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/services/coreManagerService.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/core-status.ts",
+      "target": "file:eliza/packages/core/src/types/components.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/core-status.ts",
+      "target": "file:eliza/packages/core/src/types/runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "target": "file:eliza/packages/core/src/types/components.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "target": "file:eliza/packages/core/src/types/memory.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "target": "file:eliza/packages/core/src/types/runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/eject.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/eject.ts",
+      "target": "file:eliza/packages/core/src/types/components.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/eject.ts",
+      "target": "file:eliza/packages/core/src/types/runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/install.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/install.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/install.ts",
+      "target": "file:eliza/packages/core/src/types/components.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/install.ts",
+      "target": "file:eliza/packages/core/src/types/runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/list-ejected.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/list-ejected.ts",
+      "target": "file:eliza/packages/core/src/types/components.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/list-ejected.ts",
+      "target": "file:eliza/packages/core/src/types/runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/list.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/list.ts",
+      "target": "file:eliza/packages/core/src/types/components.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/list.ts",
+      "target": "file:eliza/packages/core/src/types/runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/reinject.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/reinject.ts",
+      "target": "file:eliza/packages/core/src/types/components.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/reinject.ts",
+      "target": "file:eliza/packages/core/src/types/runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts",
+      "target": "file:eliza/packages/core/src/types/components.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts",
+      "target": "file:eliza/packages/core/src/types/runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/search.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/search.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/search.ts",
+      "target": "file:eliza/packages/core/src/types/components.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/search.ts",
+      "target": "file:eliza/packages/core/src/types/runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/sync.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/sync.ts",
+      "target": "file:eliza/packages/core/src/types/components.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/sync.ts",
+      "target": "file:eliza/packages/core/src/types/runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/core-status.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/create.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/eject.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/install.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/list-ejected.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/list.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/reinject.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/runtime-state.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/search.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin-handlers/sync.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/security.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "target": "file:eliza/packages/core/src/types/components.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "target": "file:eliza/packages/core/src/types/memory.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "target": "file:eliza/packages/core/src/types/runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "target": "file:eliza/packages/core/src/types/state.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "target": "file:eliza/packages/core/src/utils/action-validation.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/coreExtensions.ts",
+      "target": "file:eliza/packages/core/src/types/runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/coreExtensions.ts",
+      "target": "file:eliza/packages/core/src/types/service.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/index.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/actions/plugin.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/index.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/providers/pluginConfigurationStatus.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/index.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/providers/pluginStateProvider.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/index.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/providers/registryPluginsProvider.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/index.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/services/coreManagerService.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/index.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/index.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/index.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/index.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/index.ts",
+      "target": "file:eliza/packages/core/src/types/plugin.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/plugin-manager-umbrella.test.ts",
+      "target": "file:eliza/packages/core/src/actions/promote-subactions.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/plugin-manager-umbrella.test.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/pluginConfigurationStatus.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/pluginConfigurationStatus.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/services/pluginConfigurationService.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/pluginConfigurationStatus.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/pluginConfigurationStatus.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/pluginConfigurationStatus.ts",
+      "target": "file:eliza/packages/core/src/types/components.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/pluginConfigurationStatus.ts",
+      "target": "file:eliza/packages/core/src/types/memory.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/pluginConfigurationStatus.ts",
+      "target": "file:eliza/packages/core/src/types/runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/pluginConfigurationStatus.ts",
+      "target": "file:eliza/packages/core/src/types/state.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/pluginStateProvider.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/pluginStateProvider.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/pluginStateProvider.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/pluginStateProvider.ts",
+      "target": "file:eliza/packages/core/src/types/components.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/pluginStateProvider.ts",
+      "target": "file:eliza/packages/core/src/types/memory.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/pluginStateProvider.ts",
+      "target": "file:eliza/packages/core/src/types/runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/pluginStateProvider.ts",
+      "target": "file:eliza/packages/core/src/types/state.ts",
+      "type": "imports"
+    }
+  ]
+}

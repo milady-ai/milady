@@ -1,0 +1,4199 @@
+{
+  "batchIndex": 14,
+  "nodes": [
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/features/trajectories/trajectory-json-export.test.ts",
+      "type": "file",
+      "name": "trajectory-json-export.test.ts",
+      "filePath": "eliza/packages/core/src/features/trajectories/trajectory-json-export.test.ts",
+      "summary": "trajectory-json-export.test.ts is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 54 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/trajectories/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "eliza/packages/core/src/features/trajectories/types.ts",
+      "summary": "types.ts is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 359 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/trust/actions/evaluateTrust.ts",
+      "type": "file",
+      "name": "evaluateTrust.ts",
+      "filePath": "eliza/packages/core/src/features/trust/actions/evaluateTrust.ts",
+      "summary": "evaluateTrust.ts is a typescript source file in the Milady codebase. It contains 2 functions, 5 imports.",
+      "languageNotes": "typescript; code; 171 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/actions/evaluateTrust.ts:readNestedParameters",
+      "type": "function",
+      "name": "readNestedParameters",
+      "filePath": "eliza/packages/core/src/features/trust/actions/evaluateTrust.ts",
+      "summary": "readNestedParameters is a function defined in eliza/packages/core/src/features/trust/actions/evaluateTrust.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/core/src/features/trust/actions/evaluateTrust.ts:evaluateTrustHandler",
+      "type": "function",
+      "name": "evaluateTrustHandler",
+      "filePath": "eliza/packages/core/src/features/trust/actions/evaluateTrust.ts",
+      "summary": "evaluateTrustHandler is a function defined in eliza/packages/core/src/features/trust/actions/evaluateTrust.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/features/trust/actions/hasTrustEngine.ts",
+      "type": "file",
+      "name": "hasTrustEngine.ts",
+      "filePath": "eliza/packages/core/src/features/trust/actions/hasTrustEngine.ts",
+      "summary": "hasTrustEngine.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 5 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/actions/hasTrustEngine.ts:hasTrustEngine",
+      "type": "function",
+      "name": "hasTrustEngine",
+      "filePath": "eliza/packages/core/src/features/trust/actions/hasTrustEngine.ts",
+      "summary": "hasTrustEngine is a function defined in eliza/packages/core/src/features/trust/actions/hasTrustEngine.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/trust/actions/recordTrustInteraction.ts",
+      "type": "file",
+      "name": "recordTrustInteraction.ts",
+      "filePath": "eliza/packages/core/src/features/trust/actions/recordTrustInteraction.ts",
+      "summary": "recordTrustInteraction.ts is a typescript source file in the Milady codebase. It contains 2 functions, 5 imports.",
+      "languageNotes": "typescript; code; 149 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/actions/recordTrustInteraction.ts:readNestedParameters",
+      "type": "function",
+      "name": "readNestedParameters",
+      "filePath": "eliza/packages/core/src/features/trust/actions/recordTrustInteraction.ts",
+      "summary": "readNestedParameters is a function defined in eliza/packages/core/src/features/trust/actions/recordTrustInteraction.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/core/src/features/trust/actions/recordTrustInteraction.ts:recordTrustInteractionHandler",
+      "type": "function",
+      "name": "recordTrustInteractionHandler",
+      "filePath": "eliza/packages/core/src/features/trust/actions/recordTrustInteraction.ts",
+      "summary": "recordTrustInteractionHandler is a function defined in eliza/packages/core/src/features/trust/actions/recordTrustInteraction.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/trust/actions/requestElevation.ts",
+      "type": "file",
+      "name": "requestElevation.ts",
+      "filePath": "eliza/packages/core/src/features/trust/actions/requestElevation.ts",
+      "summary": "requestElevation.ts is a typescript source file in the Milady codebase. It contains 2 functions, 5 imports.",
+      "languageNotes": "typescript; code; 162 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/actions/requestElevation.ts:readNestedParameters",
+      "type": "function",
+      "name": "readNestedParameters",
+      "filePath": "eliza/packages/core/src/features/trust/actions/requestElevation.ts",
+      "summary": "readNestedParameters is a function defined in eliza/packages/core/src/features/trust/actions/requestElevation.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/core/src/features/trust/actions/requestElevation.ts:requestElevationHandler",
+      "type": "function",
+      "name": "requestElevationHandler",
+      "filePath": "eliza/packages/core/src/features/trust/actions/requestElevation.ts",
+      "summary": "requestElevationHandler is a function defined in eliza/packages/core/src/features/trust/actions/requestElevation.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/trust/actions/roles.ts",
+      "type": "file",
+      "name": "roles.ts",
+      "filePath": "eliza/packages/core/src/features/trust/actions/roles.ts",
+      "summary": "roles.ts is a typescript source file in the Milady codebase. It contains 5 functions, 3 imports.",
+      "languageNotes": "typescript; code; 322 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/actions/roles.ts:canModifyRole",
+      "type": "function",
+      "name": "canModifyRole",
+      "filePath": "eliza/packages/core/src/features/trust/actions/roles.ts",
+      "summary": "canModifyRole is a function defined in eliza/packages/core/src/features/trust/actions/roles.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/actions/roles.ts:normalizeRole",
+      "type": "function",
+      "name": "normalizeRole",
+      "filePath": "eliza/packages/core/src/features/trust/actions/roles.ts",
+      "summary": "normalizeRole is a function defined in eliza/packages/core/src/features/trust/actions/roles.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/actions/roles.ts:extractRoleAssignments",
+      "type": "function",
+      "name": "extractRoleAssignments",
+      "filePath": "eliza/packages/core/src/features/trust/actions/roles.ts",
+      "summary": "extractRoleAssignments is a function defined in eliza/packages/core/src/features/trust/actions/roles.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/actions/roles.ts:readNestedParameters",
+      "type": "function",
+      "name": "readNestedParameters",
+      "filePath": "eliza/packages/core/src/features/trust/actions/roles.ts",
+      "summary": "readNestedParameters is a function defined in eliza/packages/core/src/features/trust/actions/roles.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/core/src/features/trust/actions/roles.ts:updateRoleHandler",
+      "type": "function",
+      "name": "updateRoleHandler",
+      "filePath": "eliza/packages/core/src/features/trust/actions/roles.ts",
+      "summary": "updateRoleHandler is a function defined in eliza/packages/core/src/features/trust/actions/roles.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/trust/actions/trust.ts",
+      "type": "file",
+      "name": "trust.ts",
+      "filePath": "eliza/packages/core/src/features/trust/actions/trust.ts",
+      "summary": "trust.ts is a typescript source file in the Milady codebase. It contains 4 functions, 10 imports.",
+      "languageNotes": "typescript; code; 372 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/actions/trust.ts:readNestedParameters",
+      "type": "function",
+      "name": "readNestedParameters",
+      "filePath": "eliza/packages/core/src/features/trust/actions/trust.ts",
+      "summary": "readNestedParameters is a function defined in eliza/packages/core/src/features/trust/actions/trust.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/actions/trust.ts:readStringOption",
+      "type": "function",
+      "name": "readStringOption",
+      "filePath": "eliza/packages/core/src/features/trust/actions/trust.ts",
+      "summary": "readStringOption is a function defined in eliza/packages/core/src/features/trust/actions/trust.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/actions/trust.ts:normalizeSubaction",
+      "type": "function",
+      "name": "normalizeSubaction",
+      "filePath": "eliza/packages/core/src/features/trust/actions/trust.ts",
+      "summary": "normalizeSubaction is a function defined in eliza/packages/core/src/features/trust/actions/trust.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/actions/trust.ts:inferSubaction",
+      "type": "function",
+      "name": "inferSubaction",
+      "filePath": "eliza/packages/core/src/features/trust/actions/trust.ts",
+      "summary": "inferSubaction is a function defined in eliza/packages/core/src/features/trust/actions/trust.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/trust/evaluators/securityEvaluator.ts",
+      "type": "file",
+      "name": "securityEvaluator.ts",
+      "filePath": "eliza/packages/core/src/features/trust/evaluators/securityEvaluator.ts",
+      "summary": "securityEvaluator.ts is a typescript source file in the Milady codebase. It contains 3 functions, 3 imports.",
+      "languageNotes": "typescript; code; 139 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/evaluators/securityEvaluator.ts:stripInvisible",
+      "type": "function",
+      "name": "stripInvisible",
+      "filePath": "eliza/packages/core/src/features/trust/evaluators/securityEvaluator.ts",
+      "summary": "stripInvisible is a function defined in eliza/packages/core/src/features/trust/evaluators/securityEvaluator.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/evaluators/securityEvaluator.ts:hasStructuralInjection",
+      "type": "function",
+      "name": "hasStructuralInjection",
+      "filePath": "eliza/packages/core/src/features/trust/evaluators/securityEvaluator.ts",
+      "summary": "hasStructuralInjection is a function defined in eliza/packages/core/src/features/trust/evaluators/securityEvaluator.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/evaluators/securityEvaluator.ts:detectHeuristicSignals",
+      "type": "function",
+      "name": "detectHeuristicSignals",
+      "filePath": "eliza/packages/core/src/features/trust/evaluators/securityEvaluator.ts",
+      "summary": "detectHeuristicSignals is a function defined in eliza/packages/core/src/features/trust/evaluators/securityEvaluator.ts."
+    },
+    {
+      "tags": [
+        "entry-point",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/trust/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/core/src/features/trust/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase. It contains 2 functions, 16 imports.",
+      "languageNotes": "typescript; code; 184 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/index.ts:ensureAdminRoleOnInit",
+      "type": "function",
+      "name": "ensureAdminRoleOnInit",
+      "filePath": "eliza/packages/core/src/features/trust/index.ts",
+      "summary": "ensureAdminRoleOnInit is a function defined in eliza/packages/core/src/features/trust/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/index.ts:createTrustPlugin",
+      "type": "function",
+      "name": "createTrustPlugin",
+      "filePath": "eliza/packages/core/src/features/trust/index.ts",
+      "summary": "createTrustPlugin is a function defined in eliza/packages/core/src/features/trust/index.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/trust/providers/adminTrust.ts",
+      "type": "file",
+      "name": "adminTrust.ts",
+      "filePath": "eliza/packages/core/src/features/trust/providers/adminTrust.ts",
+      "summary": "adminTrust.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 77 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/providers/adminTrust.ts:normalizeRole",
+      "type": "function",
+      "name": "normalizeRole",
+      "filePath": "eliza/packages/core/src/features/trust/providers/adminTrust.ts",
+      "summary": "normalizeRole is a function defined in eliza/packages/core/src/features/trust/providers/adminTrust.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/trust/providers/roles.ts",
+      "type": "file",
+      "name": "roles.ts",
+      "filePath": "eliza/packages/core/src/features/trust/providers/roles.ts",
+      "summary": "roles.ts is a typescript source file in the Milady codebase. It contains 3 imports.",
+      "languageNotes": "typescript; code; 230 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/trust/providers/securityStatus.ts",
+      "type": "file",
+      "name": "securityStatus.ts",
+      "filePath": "eliza/packages/core/src/features/trust/providers/securityStatus.ts",
+      "summary": "securityStatus.ts is a typescript source file in the Milady codebase. It contains 1 function, 4 imports.",
+      "languageNotes": "typescript; code; 197 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/providers/securityStatus.ts:isAdminRequester",
+      "type": "function",
+      "name": "isAdminRequester",
+      "filePath": "eliza/packages/core/src/features/trust/providers/securityStatus.ts",
+      "summary": "isAdminRequester is a function defined in eliza/packages/core/src/features/trust/providers/securityStatus.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/trust/providers/settings.ts",
+      "type": "file",
+      "name": "settings.ts",
+      "filePath": "eliza/packages/core/src/features/trust/providers/settings.ts",
+      "summary": "settings.ts is a typescript source file in the Milady codebase. It contains 4 functions, 4 imports.",
+      "languageNotes": "typescript; code; 302 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/providers/settings.ts:isSettingEntry",
+      "type": "function",
+      "name": "isSettingEntry",
+      "filePath": "eliza/packages/core/src/features/trust/providers/settings.ts",
+      "summary": "isSettingEntry is a function defined in eliza/packages/core/src/features/trust/providers/settings.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/providers/settings.ts:worldSettingEntries",
+      "type": "function",
+      "name": "worldSettingEntries",
+      "filePath": "eliza/packages/core/src/features/trust/providers/settings.ts",
+      "summary": "worldSettingEntries is a function defined in eliza/packages/core/src/features/trust/providers/settings.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/providers/settings.ts:formatSettingValue",
+      "type": "function",
+      "name": "formatSettingValue",
+      "filePath": "eliza/packages/core/src/features/trust/providers/settings.ts",
+      "summary": "formatSettingValue is a function defined in eliza/packages/core/src/features/trust/providers/settings.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/core/src/features/trust/providers/settings.ts:generateStatusMessage",
+      "type": "function",
+      "name": "generateStatusMessage",
+      "filePath": "eliza/packages/core/src/features/trust/providers/settings.ts",
+      "summary": "generateStatusMessage is a function defined in eliza/packages/core/src/features/trust/providers/settings.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/trust/providers/trustProfile.ts",
+      "type": "file",
+      "name": "trustProfile.ts",
+      "filePath": "eliza/packages/core/src/features/trust/providers/trustProfile.ts",
+      "summary": "trustProfile.ts is a typescript source file in the Milady codebase. It contains 4 imports.",
+      "languageNotes": "typescript; code; 119 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/trust/schema.ts",
+      "type": "file",
+      "name": "schema.ts",
+      "filePath": "eliza/packages/core/src/features/trust/schema.ts",
+      "summary": "schema.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 128 lines"
+    },
+    {
+      "tags": [
+        "class"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/trust/services/ContextualPermissionSystem.ts",
+      "type": "file",
+      "name": "ContextualPermissionSystem.ts",
+      "filePath": "eliza/packages/core/src/features/trust/services/ContextualPermissionSystem.ts",
+      "summary": "ContextualPermissionSystem.ts is a typescript source file in the Milady codebase. It contains 1 class, 7 imports.",
+      "languageNotes": "typescript; code; 429 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/core/src/features/trust/services/ContextualPermissionSystem.ts:ContextualPermissionSystem",
+      "type": "class",
+      "name": "ContextualPermissionSystem",
+      "filePath": "eliza/packages/core/src/features/trust/services/ContextualPermissionSystem.ts",
+      "summary": "ContextualPermissionSystem is a class or type declared in eliza/packages/core/src/features/trust/services/ContextualPermissionSystem.ts."
+    },
+    {
+      "tags": [
+        "class"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/trust/services/CredentialProtector.ts",
+      "type": "file",
+      "name": "CredentialProtector.ts",
+      "filePath": "eliza/packages/core/src/features/trust/services/CredentialProtector.ts",
+      "summary": "CredentialProtector.ts is a typescript source file in the Milady codebase. It contains 1 class, 4 imports.",
+      "languageNotes": "typescript; code; 595 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/core/src/features/trust/services/CredentialProtector.ts:CredentialProtector",
+      "type": "class",
+      "name": "CredentialProtector",
+      "filePath": "eliza/packages/core/src/features/trust/services/CredentialProtector.ts",
+      "summary": "CredentialProtector is a class or type declared in eliza/packages/core/src/features/trust/services/CredentialProtector.ts."
+    },
+    {
+      "tags": [
+        "class"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/trust/services/SecurityModule.ts",
+      "type": "file",
+      "name": "SecurityModule.ts",
+      "filePath": "eliza/packages/core/src/features/trust/services/SecurityModule.ts",
+      "summary": "SecurityModule.ts is a typescript source file in the Milady codebase. It contains 1 class, 7 imports.",
+      "languageNotes": "typescript; code; 1393 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/core/src/features/trust/services/SecurityModule.ts:SecurityModule",
+      "type": "class",
+      "name": "SecurityModule",
+      "filePath": "eliza/packages/core/src/features/trust/services/SecurityModule.ts",
+      "summary": "SecurityModule is a class or type declared in eliza/packages/core/src/features/trust/services/SecurityModule.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/trust/services/SecurityStore.ts",
+      "type": "file",
+      "name": "SecurityStore.ts",
+      "filePath": "eliza/packages/core/src/features/trust/services/SecurityStore.ts",
+      "summary": "SecurityStore.ts is a typescript source file in the Milady codebase. It contains 9 functions, 3 imports.",
+      "languageNotes": "typescript; code; 224 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/services/SecurityStore.ts:insertSecurityIncident",
+      "type": "function",
+      "name": "insertSecurityIncident",
+      "filePath": "eliza/packages/core/src/features/trust/services/SecurityStore.ts",
+      "summary": "insertSecurityIncident is a function defined in eliza/packages/core/src/features/trust/services/SecurityStore.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/services/SecurityStore.ts:getRecentIncidents",
+      "type": "function",
+      "name": "getRecentIncidents",
+      "filePath": "eliza/packages/core/src/features/trust/services/SecurityStore.ts",
+      "summary": "getRecentIncidents is a function defined in eliza/packages/core/src/features/trust/services/SecurityStore.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/services/SecurityStore.ts:insertTrustEvidence",
+      "type": "function",
+      "name": "insertTrustEvidence",
+      "filePath": "eliza/packages/core/src/features/trust/services/SecurityStore.ts",
+      "summary": "insertTrustEvidence is a function defined in eliza/packages/core/src/features/trust/services/SecurityStore.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/services/SecurityStore.ts:getTrustEvidence",
+      "type": "function",
+      "name": "getTrustEvidence",
+      "filePath": "eliza/packages/core/src/features/trust/services/SecurityStore.ts",
+      "summary": "getTrustEvidence is a function defined in eliza/packages/core/src/features/trust/services/SecurityStore.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/services/SecurityStore.ts:upsertBehavioralProfile",
+      "type": "function",
+      "name": "upsertBehavioralProfile",
+      "filePath": "eliza/packages/core/src/features/trust/services/SecurityStore.ts",
+      "summary": "upsertBehavioralProfile is a function defined in eliza/packages/core/src/features/trust/services/SecurityStore.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/services/SecurityStore.ts:getBehavioralProfile",
+      "type": "function",
+      "name": "getBehavioralProfile",
+      "filePath": "eliza/packages/core/src/features/trust/services/SecurityStore.ts",
+      "summary": "getBehavioralProfile is a function defined in eliza/packages/core/src/features/trust/services/SecurityStore.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/services/SecurityStore.ts:insertIdentityLink",
+      "type": "function",
+      "name": "insertIdentityLink",
+      "filePath": "eliza/packages/core/src/features/trust/services/SecurityStore.ts",
+      "summary": "insertIdentityLink is a function defined in eliza/packages/core/src/features/trust/services/SecurityStore.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/services/SecurityStore.ts:getIdentityLinks",
+      "type": "function",
+      "name": "getIdentityLinks",
+      "filePath": "eliza/packages/core/src/features/trust/services/SecurityStore.ts",
+      "summary": "getIdentityLinks is a function defined in eliza/packages/core/src/features/trust/services/SecurityStore.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/services/SecurityStore.ts:insertWhistleblowerReport",
+      "type": "function",
+      "name": "insertWhistleblowerReport",
+      "filePath": "eliza/packages/core/src/features/trust/services/SecurityStore.ts",
+      "summary": "insertWhistleblowerReport is a function defined in eliza/packages/core/src/features/trust/services/SecurityStore.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/trust/services/TrustEngine.ts",
+      "type": "file",
+      "name": "TrustEngine.ts",
+      "filePath": "eliza/packages/core/src/features/trust/services/TrustEngine.ts",
+      "summary": "TrustEngine.ts is a typescript source file in the Milady codebase. It contains 9 functions, 1 class, 7 imports.",
+      "languageNotes": "typescript; code; 988 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:isTrustEvidenceType",
+      "type": "function",
+      "name": "isTrustEvidenceType",
+      "filePath": "eliza/packages/core/src/features/trust/services/TrustEngine.ts",
+      "summary": "isTrustEvidenceType is a function defined in eliza/packages/core/src/features/trust/services/TrustEngine.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:isUuidValue",
+      "type": "function",
+      "name": "isUuidValue",
+      "filePath": "eliza/packages/core/src/features/trust/services/TrustEngine.ts",
+      "summary": "isUuidValue is a function defined in eliza/packages/core/src/features/trust/services/TrustEngine.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:isTrustDimensions",
+      "type": "function",
+      "name": "isTrustDimensions",
+      "filePath": "eliza/packages/core/src/features/trust/services/TrustEngine.ts",
+      "summary": "isTrustDimensions is a function defined in eliza/packages/core/src/features/trust/services/TrustEngine.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:isTrustContext",
+      "type": "function",
+      "name": "isTrustContext",
+      "filePath": "eliza/packages/core/src/features/trust/services/TrustEngine.ts",
+      "summary": "isTrustContext is a function defined in eliza/packages/core/src/features/trust/services/TrustEngine.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:isTrustEvidence",
+      "type": "function",
+      "name": "isTrustEvidence",
+      "filePath": "eliza/packages/core/src/features/trust/services/TrustEngine.ts",
+      "summary": "isTrustEvidence is a function defined in eliza/packages/core/src/features/trust/services/TrustEngine.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:isTrustProfile",
+      "type": "function",
+      "name": "isTrustProfile",
+      "filePath": "eliza/packages/core/src/features/trust/services/TrustEngine.ts",
+      "summary": "isTrustProfile is a function defined in eliza/packages/core/src/features/trust/services/TrustEngine.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:toMetadataValue",
+      "type": "function",
+      "name": "toMetadataValue",
+      "filePath": "eliza/packages/core/src/features/trust/services/TrustEngine.ts",
+      "summary": "toMetadataValue is a function defined in eliza/packages/core/src/features/trust/services/TrustEngine.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:trustEvidenceToMetadata",
+      "type": "function",
+      "name": "trustEvidenceToMetadata",
+      "filePath": "eliza/packages/core/src/features/trust/services/TrustEngine.ts",
+      "summary": "trustEvidenceToMetadata is a function defined in eliza/packages/core/src/features/trust/services/TrustEngine.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:trustProfileToMetadata",
+      "type": "function",
+      "name": "trustProfileToMetadata",
+      "filePath": "eliza/packages/core/src/features/trust/services/TrustEngine.ts",
+      "summary": "trustProfileToMetadata is a function defined in eliza/packages/core/src/features/trust/services/TrustEngine.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/core/src/features/trust/services/TrustEngine.ts:TrustEngine",
+      "type": "class",
+      "name": "TrustEngine",
+      "filePath": "eliza/packages/core/src/features/trust/services/TrustEngine.ts",
+      "summary": "TrustEngine is a class or type declared in eliza/packages/core/src/features/trust/services/TrustEngine.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/features/trust/services/adminContext.ts",
+      "type": "file",
+      "name": "adminContext.ts",
+      "filePath": "eliza/packages/core/src/features/trust/services/adminContext.ts",
+      "summary": "adminContext.ts is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 52 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/services/adminContext.ts:resolveAdminContext",
+      "type": "function",
+      "name": "resolveAdminContext",
+      "filePath": "eliza/packages/core/src/features/trust/services/adminContext.ts",
+      "summary": "resolveAdminContext is a function defined in eliza/packages/core/src/features/trust/services/adminContext.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/features/trust/services/db.ts",
+      "type": "file",
+      "name": "db.ts",
+      "filePath": "eliza/packages/core/src/features/trust/services/db.ts",
+      "summary": "db.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 18 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trust/services/db.ts:getDb",
+      "type": "function",
+      "name": "getDb",
+      "filePath": "eliza/packages/core/src/features/trust/services/db.ts",
+      "summary": "getDb is a function defined in eliza/packages/core/src/features/trust/services/db.ts."
+    },
+    {
+      "tags": [
+        "class"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/trust/services/wrappers.ts",
+      "type": "file",
+      "name": "wrappers.ts",
+      "filePath": "eliza/packages/core/src/features/trust/services/wrappers.ts",
+      "summary": "wrappers.ts is a typescript source file in the Milady codebase. It contains 4 classes, 8 imports.",
+      "languageNotes": "typescript; code; 271 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/core/src/features/trust/services/wrappers.ts:TrustEngineServiceWrapper",
+      "type": "class",
+      "name": "TrustEngineServiceWrapper",
+      "filePath": "eliza/packages/core/src/features/trust/services/wrappers.ts",
+      "summary": "TrustEngineServiceWrapper is a class or type declared in eliza/packages/core/src/features/trust/services/wrappers.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/core/src/features/trust/services/wrappers.ts:SecurityModuleServiceWrapper",
+      "type": "class",
+      "name": "SecurityModuleServiceWrapper",
+      "filePath": "eliza/packages/core/src/features/trust/services/wrappers.ts",
+      "summary": "SecurityModuleServiceWrapper is a class or type declared in eliza/packages/core/src/features/trust/services/wrappers.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/core/src/features/trust/services/wrappers.ts:CredentialProtectorServiceWrapper",
+      "type": "class",
+      "name": "CredentialProtectorServiceWrapper",
+      "filePath": "eliza/packages/core/src/features/trust/services/wrappers.ts",
+      "summary": "CredentialProtectorServiceWrapper is a class or type declared in eliza/packages/core/src/features/trust/services/wrappers.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/core/src/features/trust/services/wrappers.ts:ContextualPermissionSystemServiceWrapper",
+      "type": "class",
+      "name": "ContextualPermissionSystemServiceWrapper",
+      "filePath": "eliza/packages/core/src/features/trust/services/wrappers.ts",
+      "summary": "ContextualPermissionSystemServiceWrapper is a class or type declared in eliza/packages/core/src/features/trust/services/wrappers.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/trust/types/permissions.ts",
+      "type": "file",
+      "name": "permissions.ts",
+      "filePath": "eliza/packages/core/src/features/trust/types/permissions.ts",
+      "summary": "permissions.ts is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 299 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/trust/types/security.ts",
+      "type": "file",
+      "name": "security.ts",
+      "filePath": "eliza/packages/core/src/features/trust/types/security.ts",
+      "summary": "security.ts is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 134 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/trust/types/trust.ts",
+      "type": "file",
+      "name": "trust.ts",
+      "filePath": "eliza/packages/core/src/features/trust/types/trust.ts",
+      "summary": "trust.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 215 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/working-memory/attachmentContext.ts",
+      "type": "file",
+      "name": "attachmentContext.ts",
+      "filePath": "eliza/packages/core/src/features/working-memory/attachmentContext.ts",
+      "summary": "attachmentContext.ts is a typescript source file in the Milady codebase. It contains 10 functions, 1 imports.",
+      "languageNotes": "typescript; code; 271 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:attachmentLocator",
+      "type": "function",
+      "name": "attachmentLocator",
+      "filePath": "eliza/packages/core/src/features/working-memory/attachmentContext.ts",
+      "summary": "attachmentLocator is a function defined in eliza/packages/core/src/features/working-memory/attachmentContext.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:isUnreadableFallbackDescription",
+      "type": "function",
+      "name": "isUnreadableFallbackDescription",
+      "filePath": "eliza/packages/core/src/features/working-memory/attachmentContext.ts",
+      "summary": "isUnreadableFallbackDescription is a function defined in eliza/packages/core/src/features/working-memory/attachmentContext.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:attachmentStoredContent",
+      "type": "function",
+      "name": "attachmentStoredContent",
+      "filePath": "eliza/packages/core/src/features/working-memory/attachmentContext.ts",
+      "summary": "attachmentStoredContent is a function defined in eliza/packages/core/src/features/working-memory/attachmentContext.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:describeImageAttachment",
+      "type": "function",
+      "name": "describeImageAttachment",
+      "filePath": "eliza/packages/core/src/features/working-memory/attachmentContext.ts",
+      "summary": "describeImageAttachment is a function defined in eliza/packages/core/src/features/working-memory/attachmentContext.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:readableAttachmentContent",
+      "type": "function",
+      "name": "readableAttachmentContent",
+      "filePath": "eliza/packages/core/src/features/working-memory/attachmentContext.ts",
+      "summary": "readableAttachmentContent is a function defined in eliza/packages/core/src/features/working-memory/attachmentContext.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:listConversationAttachments",
+      "type": "function",
+      "name": "listConversationAttachments",
+      "filePath": "eliza/packages/core/src/features/working-memory/attachmentContext.ts",
+      "summary": "listConversationAttachments is a function defined in eliza/packages/core/src/features/working-memory/attachmentContext.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:resolveAttachmentSelection",
+      "type": "function",
+      "name": "resolveAttachmentSelection",
+      "filePath": "eliza/packages/core/src/features/working-memory/attachmentContext.ts",
+      "summary": "resolveAttachmentSelection is a function defined in eliza/packages/core/src/features/working-memory/attachmentContext.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:readAttachmentRecord",
+      "type": "function",
+      "name": "readAttachmentRecord",
+      "filePath": "eliza/packages/core/src/features/working-memory/attachmentContext.ts",
+      "summary": "readAttachmentRecord is a function defined in eliza/packages/core/src/features/working-memory/attachmentContext.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:readAttachmentRecords",
+      "type": "function",
+      "name": "readAttachmentRecords",
+      "filePath": "eliza/packages/core/src/features/working-memory/attachmentContext.ts",
+      "summary": "readAttachmentRecords is a function defined in eliza/packages/core/src/features/working-memory/attachmentContext.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:summarizeAttachment",
+      "type": "function",
+      "name": "summarizeAttachment",
+      "filePath": "eliza/packages/core/src/features/working-memory/attachmentContext.ts",
+      "summary": "summarizeAttachment is a function defined in eliza/packages/core/src/features/working-memory/attachmentContext.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "type": "file",
+      "name": "readAttachmentAction.ts",
+      "filePath": "eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "summary": "readAttachmentAction.ts is a typescript source file in the Milady codebase. It contains 15 functions, 5 imports.",
+      "languageNotes": "typescript; code; 570 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:shouldShowAttachmentRecord",
+      "type": "function",
+      "name": "shouldShowAttachmentRecord",
+      "filePath": "eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "summary": "shouldShowAttachmentRecord is a function defined in eliza/packages/core/src/features/working-memory/readAttachmentAction.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:attachmentContentForAnswering",
+      "type": "function",
+      "name": "attachmentContentForAnswering",
+      "filePath": "eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "summary": "attachmentContentForAnswering is a function defined in eliza/packages/core/src/features/working-memory/readAttachmentAction.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:attachmentAnswerTokenBudget",
+      "type": "function",
+      "name": "attachmentAnswerTokenBudget",
+      "filePath": "eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "summary": "attachmentAnswerTokenBudget is a function defined in eliza/packages/core/src/features/working-memory/readAttachmentAction.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:missingReadableContentMessage",
+      "type": "function",
+      "name": "missingReadableContentMessage",
+      "filePath": "eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "summary": "missingReadableContentMessage is a function defined in eliza/packages/core/src/features/working-memory/readAttachmentAction.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:titleForRecord",
+      "type": "function",
+      "name": "titleForRecord",
+      "filePath": "eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "summary": "titleForRecord is a function defined in eliza/packages/core/src/features/working-memory/readAttachmentAction.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:contentForRecords",
+      "type": "function",
+      "name": "contentForRecords",
+      "filePath": "eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "summary": "contentForRecords is a function defined in eliza/packages/core/src/features/working-memory/readAttachmentAction.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:hasReadableContent",
+      "type": "function",
+      "name": "hasReadableContent",
+      "filePath": "eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "summary": "hasReadableContent is a function defined in eliza/packages/core/src/features/working-memory/readAttachmentAction.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:attachmentSourceType",
+      "type": "function",
+      "name": "attachmentSourceType",
+      "filePath": "eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "summary": "attachmentSourceType is a function defined in eliza/packages/core/src/features/working-memory/readAttachmentAction.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:responseRecordText",
+      "type": "function",
+      "name": "responseRecordText",
+      "filePath": "eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "summary": "responseRecordText is a function defined in eliza/packages/core/src/features/working-memory/readAttachmentAction.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:answerAttachmentRequest",
+      "type": "function",
+      "name": "answerAttachmentRequest",
+      "filePath": "eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "summary": "answerAttachmentRequest is a function defined in eliza/packages/core/src/features/working-memory/readAttachmentAction.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:getActionParams",
+      "type": "function",
+      "name": "getActionParams",
+      "filePath": "eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "summary": "getActionParams is a function defined in eliza/packages/core/src/features/working-memory/readAttachmentAction.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:readAttachmentId",
+      "type": "function",
+      "name": "readAttachmentId",
+      "filePath": "eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "summary": "readAttachmentId is a function defined in eliza/packages/core/src/features/working-memory/readAttachmentAction.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:readAttachmentActionKind",
+      "type": "function",
+      "name": "readAttachmentActionKind",
+      "filePath": "eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "summary": "readAttachmentActionKind is a function defined in eliza/packages/core/src/features/working-memory/readAttachmentAction.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:readStringParam",
+      "type": "function",
+      "name": "readStringParam",
+      "filePath": "eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "summary": "readStringParam is a function defined in eliza/packages/core/src/features/working-memory/readAttachmentAction.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:saveAttachmentAsDocument",
+      "type": "function",
+      "name": "saveAttachmentAsDocument",
+      "filePath": "eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "summary": "saveAttachmentAsDocument is a function defined in eliza/packages/core/src/features/working-memory/readAttachmentAction.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts",
+      "type": "file",
+      "name": "taskClipboardPersistence.ts",
+      "filePath": "eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts",
+      "summary": "taskClipboardPersistence.ts is a typescript source file in the Milady codebase. It contains 5 functions, 2 imports.",
+      "languageNotes": "typescript; code; 110 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts:isTruthyFlag",
+      "type": "function",
+      "name": "isTruthyFlag",
+      "filePath": "eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts",
+      "summary": "isTruthyFlag is a function defined in eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts:normalizeTitle",
+      "type": "function",
+      "name": "normalizeTitle",
+      "filePath": "eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts",
+      "summary": "normalizeTitle is a function defined in eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts:shouldAddToClipboard",
+      "type": "function",
+      "name": "shouldAddToClipboard",
+      "filePath": "eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts",
+      "summary": "shouldAddToClipboard is a function defined in eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts:resolveClipboardTitle",
+      "type": "function",
+      "name": "resolveClipboardTitle",
+      "filePath": "eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts",
+      "summary": "resolveClipboardTitle is a function defined in eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts:maybeStoreTaskClipboardItem",
+      "type": "function",
+      "name": "maybeStoreTaskClipboardItem",
+      "filePath": "eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts",
+      "summary": "maybeStoreTaskClipboardItem is a function defined in eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/working-memory/taskClipboardService.ts",
+      "type": "file",
+      "name": "taskClipboardService.ts",
+      "filePath": "eliza/packages/core/src/features/working-memory/taskClipboardService.ts",
+      "summary": "taskClipboardService.ts is a typescript source file in the Milady codebase. It contains 8 functions, 1 class, 2 imports.",
+      "languageNotes": "typescript; code; 328 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/taskClipboardService.ts:defaultBasePath",
+      "type": "function",
+      "name": "defaultBasePath",
+      "filePath": "eliza/packages/core/src/features/working-memory/taskClipboardService.ts",
+      "summary": "defaultBasePath is a function defined in eliza/packages/core/src/features/working-memory/taskClipboardService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/taskClipboardService.ts:readStringSetting",
+      "type": "function",
+      "name": "readStringSetting",
+      "filePath": "eliza/packages/core/src/features/working-memory/taskClipboardService.ts",
+      "summary": "readStringSetting is a function defined in eliza/packages/core/src/features/working-memory/taskClipboardService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/taskClipboardService.ts:resolveConfig",
+      "type": "function",
+      "name": "resolveConfig",
+      "filePath": "eliza/packages/core/src/features/working-memory/taskClipboardService.ts",
+      "summary": "resolveConfig is a function defined in eliza/packages/core/src/features/working-memory/taskClipboardService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/taskClipboardService.ts:createDefaultStore",
+      "type": "function",
+      "name": "createDefaultStore",
+      "filePath": "eliza/packages/core/src/features/working-memory/taskClipboardService.ts",
+      "summary": "createDefaultStore is a function defined in eliza/packages/core/src/features/working-memory/taskClipboardService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/taskClipboardService.ts:sanitizeTitle",
+      "type": "function",
+      "name": "sanitizeTitle",
+      "filePath": "eliza/packages/core/src/features/working-memory/taskClipboardService.ts",
+      "summary": "sanitizeTitle is a function defined in eliza/packages/core/src/features/working-memory/taskClipboardService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/taskClipboardService.ts:defaultTitleForInput",
+      "type": "function",
+      "name": "defaultTitleForInput",
+      "filePath": "eliza/packages/core/src/features/working-memory/taskClipboardService.ts",
+      "summary": "defaultTitleForInput is a function defined in eliza/packages/core/src/features/working-memory/taskClipboardService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/taskClipboardService.ts:normalizeContent",
+      "type": "function",
+      "name": "normalizeContent",
+      "filePath": "eliza/packages/core/src/features/working-memory/taskClipboardService.ts",
+      "summary": "normalizeContent is a function defined in eliza/packages/core/src/features/working-memory/taskClipboardService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/working-memory/taskClipboardService.ts:createTaskClipboardService",
+      "type": "function",
+      "name": "createTaskClipboardService",
+      "filePath": "eliza/packages/core/src/features/working-memory/taskClipboardService.ts",
+      "summary": "createTaskClipboardService is a function defined in eliza/packages/core/src/features/working-memory/taskClipboardService.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/core/src/features/working-memory/taskClipboardService.ts:TaskClipboardService",
+      "type": "class",
+      "name": "TaskClipboardService",
+      "filePath": "eliza/packages/core/src/features/working-memory/taskClipboardService.ts",
+      "summary": "TaskClipboardService is a class or type declared in eliza/packages/core/src/features/working-memory/taskClipboardService.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/generated/action-docs.ts",
+      "type": "file",
+      "name": "action-docs.ts",
+      "filePath": "eliza/packages/core/src/generated/action-docs.ts",
+      "summary": "action-docs.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 10026 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/generated/spec-helpers.ts",
+      "type": "file",
+      "name": "spec-helpers.ts",
+      "filePath": "eliza/packages/core/src/generated/spec-helpers.ts",
+      "summary": "spec-helpers.ts is a typescript source file in the Milady codebase. It contains 4 functions, 1 imports.",
+      "languageNotes": "typescript; code; 79 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/generated/spec-helpers.ts:getActionSpec",
+      "type": "function",
+      "name": "getActionSpec",
+      "filePath": "eliza/packages/core/src/generated/spec-helpers.ts",
+      "summary": "getActionSpec is a function defined in eliza/packages/core/src/generated/spec-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/generated/spec-helpers.ts:requireActionSpec",
+      "type": "function",
+      "name": "requireActionSpec",
+      "filePath": "eliza/packages/core/src/generated/spec-helpers.ts",
+      "summary": "requireActionSpec is a function defined in eliza/packages/core/src/generated/spec-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/generated/spec-helpers.ts:getProviderSpec",
+      "type": "function",
+      "name": "getProviderSpec",
+      "filePath": "eliza/packages/core/src/generated/spec-helpers.ts",
+      "summary": "getProviderSpec is a function defined in eliza/packages/core/src/generated/spec-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/generated/spec-helpers.ts:requireProviderSpec",
+      "type": "function",
+      "name": "requireProviderSpec",
+      "filePath": "eliza/packages/core/src/generated/spec-helpers.ts",
+      "summary": "requireProviderSpec is a function defined in eliza/packages/core/src/generated/spec-helpers.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/i18n/action-search-keywords.ts",
+      "type": "file",
+      "name": "action-search-keywords.ts",
+      "filePath": "eliza/packages/core/src/i18n/action-search-keywords.ts",
+      "summary": "action-search-keywords.ts is a typescript source file in the Milady codebase. It contains 12 functions, 1 imports.",
+      "languageNotes": "typescript; code; 252 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:actionNameToKeywordStem",
+      "type": "function",
+      "name": "actionNameToKeywordStem",
+      "filePath": "eliza/packages/core/src/i18n/action-search-keywords.ts",
+      "summary": "actionNameToKeywordStem is a function defined in eliza/packages/core/src/i18n/action-search-keywords.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:getActionSearchKeywordSources",
+      "type": "function",
+      "name": "getActionSearchKeywordSources",
+      "filePath": "eliza/packages/core/src/i18n/action-search-keywords.ts",
+      "summary": "getActionSearchKeywordSources is a function defined in eliza/packages/core/src/i18n/action-search-keywords.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:getActionSearchKeywordTerms",
+      "type": "function",
+      "name": "getActionSearchKeywordTerms",
+      "filePath": "eliza/packages/core/src/i18n/action-search-keywords.ts",
+      "summary": "getActionSearchKeywordTerms is a function defined in eliza/packages/core/src/i18n/action-search-keywords.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:countActionSearchKeywordMatches",
+      "type": "function",
+      "name": "countActionSearchKeywordMatches",
+      "filePath": "eliza/packages/core/src/i18n/action-search-keywords.ts",
+      "summary": "countActionSearchKeywordMatches is a function defined in eliza/packages/core/src/i18n/action-search-keywords.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:collectKeywordSourcesUnderStem",
+      "type": "function",
+      "name": "collectKeywordSourcesUnderStem",
+      "filePath": "eliza/packages/core/src/i18n/action-search-keywords.ts",
+      "summary": "collectKeywordSourcesUnderStem is a function defined in eliza/packages/core/src/i18n/action-search-keywords.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:collectKeywordDocs",
+      "type": "function",
+      "name": "collectKeywordDocs",
+      "filePath": "eliza/packages/core/src/i18n/action-search-keywords.ts",
+      "summary": "collectKeywordDocs is a function defined in eliza/packages/core/src/i18n/action-search-keywords.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:lookupKeywordNode",
+      "type": "function",
+      "name": "lookupKeywordNode",
+      "filePath": "eliza/packages/core/src/i18n/action-search-keywords.ts",
+      "summary": "lookupKeywordNode is a function defined in eliza/packages/core/src/i18n/action-search-keywords.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:isKeywordDoc",
+      "type": "function",
+      "name": "isKeywordDoc",
+      "filePath": "eliza/packages/core/src/i18n/action-search-keywords.ts",
+      "summary": "isKeywordDoc is a function defined in eliza/packages/core/src/i18n/action-search-keywords.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:normalizeStringArray",
+      "type": "function",
+      "name": "normalizeStringArray",
+      "filePath": "eliza/packages/core/src/i18n/action-search-keywords.ts",
+      "summary": "normalizeStringArray is a function defined in eliza/packages/core/src/i18n/action-search-keywords.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:capitalizeAscii",
+      "type": "function",
+      "name": "capitalizeAscii",
+      "filePath": "eliza/packages/core/src/i18n/action-search-keywords.ts",
+      "summary": "capitalizeAscii is a function defined in eliza/packages/core/src/i18n/action-search-keywords.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:dedupeTerms",
+      "type": "function",
+      "name": "dedupeTerms",
+      "filePath": "eliza/packages/core/src/i18n/action-search-keywords.ts",
+      "summary": "dedupeTerms is a function defined in eliza/packages/core/src/i18n/action-search-keywords.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:dedupeKeywordSources",
+      "type": "function",
+      "name": "dedupeKeywordSources",
+      "filePath": "eliza/packages/core/src/i18n/action-search-keywords.ts",
+      "summary": "dedupeKeywordSources is a function defined in eliza/packages/core/src/i18n/action-search-keywords.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/i18n/validation-keywords.ts",
+      "type": "file",
+      "name": "validation-keywords.ts",
+      "filePath": "eliza/packages/core/src/i18n/validation-keywords.ts",
+      "summary": "validation-keywords.ts is a typescript source file in the Milady codebase. It contains 11 functions, 1 imports.",
+      "languageNotes": "typescript; code; 173 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/i18n/validation-keywords.ts:isValidationKeywordDoc",
+      "type": "function",
+      "name": "isValidationKeywordDoc",
+      "filePath": "eliza/packages/core/src/i18n/validation-keywords.ts",
+      "summary": "isValidationKeywordDoc is a function defined in eliza/packages/core/src/i18n/validation-keywords.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/i18n/validation-keywords.ts:lookupValidationKeywordDoc",
+      "type": "function",
+      "name": "lookupValidationKeywordDoc",
+      "filePath": "eliza/packages/core/src/i18n/validation-keywords.ts",
+      "summary": "lookupValidationKeywordDoc is a function defined in eliza/packages/core/src/i18n/validation-keywords.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/i18n/validation-keywords.ts:escapePattern",
+      "type": "function",
+      "name": "escapePattern",
+      "filePath": "eliza/packages/core/src/i18n/validation-keywords.ts",
+      "summary": "escapePattern is a function defined in eliza/packages/core/src/i18n/validation-keywords.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/i18n/validation-keywords.ts:normalizeKeywordMatchText",
+      "type": "function",
+      "name": "normalizeKeywordMatchText",
+      "filePath": "eliza/packages/core/src/i18n/validation-keywords.ts",
+      "summary": "normalizeKeywordMatchText is a function defined in eliza/packages/core/src/i18n/validation-keywords.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/i18n/validation-keywords.ts:usesAsciiWordBoundaries",
+      "type": "function",
+      "name": "usesAsciiWordBoundaries",
+      "filePath": "eliza/packages/core/src/i18n/validation-keywords.ts",
+      "summary": "usesAsciiWordBoundaries is a function defined in eliza/packages/core/src/i18n/validation-keywords.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/i18n/validation-keywords.ts:splitKeywordDoc",
+      "type": "function",
+      "name": "splitKeywordDoc",
+      "filePath": "eliza/packages/core/src/i18n/validation-keywords.ts",
+      "summary": "splitKeywordDoc is a function defined in eliza/packages/core/src/i18n/validation-keywords.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/i18n/validation-keywords.ts:textIncludesKeywordTerm",
+      "type": "function",
+      "name": "textIncludesKeywordTerm",
+      "filePath": "eliza/packages/core/src/i18n/validation-keywords.ts",
+      "summary": "textIncludesKeywordTerm is a function defined in eliza/packages/core/src/i18n/validation-keywords.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/i18n/validation-keywords.ts:collectKeywordTermMatches",
+      "type": "function",
+      "name": "collectKeywordTermMatches",
+      "filePath": "eliza/packages/core/src/i18n/validation-keywords.ts",
+      "summary": "collectKeywordTermMatches is a function defined in eliza/packages/core/src/i18n/validation-keywords.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/i18n/validation-keywords.ts:findKeywordTermMatch",
+      "type": "function",
+      "name": "findKeywordTermMatch",
+      "filePath": "eliza/packages/core/src/i18n/validation-keywords.ts",
+      "summary": "findKeywordTermMatch is a function defined in eliza/packages/core/src/i18n/validation-keywords.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/i18n/validation-keywords.ts:getValidationKeywordTerms",
+      "type": "function",
+      "name": "getValidationKeywordTerms",
+      "filePath": "eliza/packages/core/src/i18n/validation-keywords.ts",
+      "summary": "getValidationKeywordTerms is a function defined in eliza/packages/core/src/i18n/validation-keywords.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/i18n/validation-keywords.ts:getValidationKeywordLocaleTerms",
+      "type": "function",
+      "name": "getValidationKeywordLocaleTerms",
+      "filePath": "eliza/packages/core/src/i18n/validation-keywords.ts",
+      "summary": "getValidationKeywordLocaleTerms is a function defined in eliza/packages/core/src/i18n/validation-keywords.ts."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/actions/evaluateTrust.ts",
+      "target": "function:eliza/packages/core/src/features/trust/actions/evaluateTrust.ts:readNestedParameters",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/actions/evaluateTrust.ts",
+      "target": "function:eliza/packages/core/src/features/trust/actions/evaluateTrust.ts:evaluateTrustHandler",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trust/actions/evaluateTrust.ts:evaluateTrustHandler",
+      "target": "function:eliza/packages/core/src/features/trust/actions/evaluateTrust.ts:readNestedParameters",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/actions/hasTrustEngine.ts",
+      "target": "function:eliza/packages/core/src/features/trust/actions/hasTrustEngine.ts:hasTrustEngine",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/actions/recordTrustInteraction.ts",
+      "target": "function:eliza/packages/core/src/features/trust/actions/recordTrustInteraction.ts:readNestedParameters",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/actions/recordTrustInteraction.ts",
+      "target": "function:eliza/packages/core/src/features/trust/actions/recordTrustInteraction.ts:recordTrustInteractionHandler",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trust/actions/recordTrustInteraction.ts:recordTrustInteractionHandler",
+      "target": "function:eliza/packages/core/src/features/trust/actions/recordTrustInteraction.ts:readNestedParameters",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/actions/requestElevation.ts",
+      "target": "function:eliza/packages/core/src/features/trust/actions/requestElevation.ts:readNestedParameters",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/actions/requestElevation.ts",
+      "target": "function:eliza/packages/core/src/features/trust/actions/requestElevation.ts:requestElevationHandler",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trust/actions/requestElevation.ts:requestElevationHandler",
+      "target": "function:eliza/packages/core/src/features/trust/actions/requestElevation.ts:readNestedParameters",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/actions/roles.ts",
+      "target": "function:eliza/packages/core/src/features/trust/actions/roles.ts:canModifyRole",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/actions/roles.ts",
+      "target": "function:eliza/packages/core/src/features/trust/actions/roles.ts:normalizeRole",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/actions/roles.ts",
+      "target": "function:eliza/packages/core/src/features/trust/actions/roles.ts:extractRoleAssignments",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/actions/roles.ts",
+      "target": "function:eliza/packages/core/src/features/trust/actions/roles.ts:readNestedParameters",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/actions/roles.ts",
+      "target": "function:eliza/packages/core/src/features/trust/actions/roles.ts:updateRoleHandler",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trust/actions/roles.ts:updateRoleHandler",
+      "target": "function:eliza/packages/core/src/features/trust/actions/roles.ts:readNestedParameters",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trust/actions/roles.ts:updateRoleHandler",
+      "target": "function:eliza/packages/core/src/features/trust/actions/roles.ts:extractRoleAssignments",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trust/actions/roles.ts:updateRoleHandler",
+      "target": "function:eliza/packages/core/src/features/trust/actions/roles.ts:extractRoleAssignments",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trust/actions/roles.ts:updateRoleHandler",
+      "target": "function:eliza/packages/core/src/features/trust/actions/roles.ts:canModifyRole",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/actions/trust.ts",
+      "target": "function:eliza/packages/core/src/features/trust/actions/trust.ts:readNestedParameters",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/actions/trust.ts",
+      "target": "function:eliza/packages/core/src/features/trust/actions/trust.ts:readStringOption",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/actions/trust.ts",
+      "target": "function:eliza/packages/core/src/features/trust/actions/trust.ts:normalizeSubaction",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/actions/trust.ts",
+      "target": "function:eliza/packages/core/src/features/trust/actions/trust.ts:inferSubaction",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trust/actions/trust.ts:readStringOption",
+      "target": "function:eliza/packages/core/src/features/trust/actions/trust.ts:readNestedParameters",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trust/actions/trust.ts:inferSubaction",
+      "target": "function:eliza/packages/core/src/features/trust/actions/trust.ts:readStringOption",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trust/actions/trust.ts:inferSubaction",
+      "target": "function:eliza/packages/core/src/features/trust/actions/trust.ts:readStringOption",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trust/actions/trust.ts:inferSubaction",
+      "target": "function:eliza/packages/core/src/features/trust/actions/trust.ts:readStringOption",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trust/actions/trust.ts:inferSubaction",
+      "target": "function:eliza/packages/core/src/features/trust/actions/trust.ts:readStringOption",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trust/actions/trust.ts:inferSubaction",
+      "target": "function:eliza/packages/core/src/features/trust/actions/trust.ts:normalizeSubaction",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/evaluators/securityEvaluator.ts",
+      "target": "function:eliza/packages/core/src/features/trust/evaluators/securityEvaluator.ts:stripInvisible",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/evaluators/securityEvaluator.ts",
+      "target": "function:eliza/packages/core/src/features/trust/evaluators/securityEvaluator.ts:hasStructuralInjection",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/evaluators/securityEvaluator.ts",
+      "target": "function:eliza/packages/core/src/features/trust/evaluators/securityEvaluator.ts:detectHeuristicSignals",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trust/evaluators/securityEvaluator.ts:detectHeuristicSignals",
+      "target": "function:eliza/packages/core/src/features/trust/evaluators/securityEvaluator.ts:stripInvisible",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trust/evaluators/securityEvaluator.ts:detectHeuristicSignals",
+      "target": "function:eliza/packages/core/src/features/trust/evaluators/securityEvaluator.ts:hasStructuralInjection",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/index.ts",
+      "target": "function:eliza/packages/core/src/features/trust/index.ts:ensureAdminRoleOnInit",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/index.ts",
+      "target": "function:eliza/packages/core/src/features/trust/index.ts:createTrustPlugin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/providers/adminTrust.ts",
+      "target": "function:eliza/packages/core/src/features/trust/providers/adminTrust.ts:normalizeRole",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/providers/securityStatus.ts",
+      "target": "function:eliza/packages/core/src/features/trust/providers/securityStatus.ts:isAdminRequester",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/providers/settings.ts",
+      "target": "function:eliza/packages/core/src/features/trust/providers/settings.ts:isSettingEntry",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/providers/settings.ts",
+      "target": "function:eliza/packages/core/src/features/trust/providers/settings.ts:worldSettingEntries",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/providers/settings.ts",
+      "target": "function:eliza/packages/core/src/features/trust/providers/settings.ts:formatSettingValue",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/providers/settings.ts",
+      "target": "function:eliza/packages/core/src/features/trust/providers/settings.ts:generateStatusMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trust/providers/settings.ts:worldSettingEntries",
+      "target": "function:eliza/packages/core/src/features/trust/providers/settings.ts:isSettingEntry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trust/providers/settings.ts:generateStatusMessage",
+      "target": "function:eliza/packages/core/src/features/trust/providers/settings.ts:worldSettingEntries",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trust/providers/settings.ts:generateStatusMessage",
+      "target": "function:eliza/packages/core/src/features/trust/providers/settings.ts:formatSettingValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/services/ContextualPermissionSystem.ts",
+      "target": "class:eliza/packages/core/src/features/trust/services/ContextualPermissionSystem.ts:ContextualPermissionSystem",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/services/CredentialProtector.ts",
+      "target": "class:eliza/packages/core/src/features/trust/services/CredentialProtector.ts:CredentialProtector",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/services/SecurityModule.ts",
+      "target": "class:eliza/packages/core/src/features/trust/services/SecurityModule.ts:SecurityModule",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/services/SecurityStore.ts",
+      "target": "function:eliza/packages/core/src/features/trust/services/SecurityStore.ts:insertSecurityIncident",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/services/SecurityStore.ts",
+      "target": "function:eliza/packages/core/src/features/trust/services/SecurityStore.ts:getRecentIncidents",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/services/SecurityStore.ts",
+      "target": "function:eliza/packages/core/src/features/trust/services/SecurityStore.ts:insertTrustEvidence",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/services/SecurityStore.ts",
+      "target": "function:eliza/packages/core/src/features/trust/services/SecurityStore.ts:getTrustEvidence",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/services/SecurityStore.ts",
+      "target": "function:eliza/packages/core/src/features/trust/services/SecurityStore.ts:upsertBehavioralProfile",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/services/SecurityStore.ts",
+      "target": "function:eliza/packages/core/src/features/trust/services/SecurityStore.ts:getBehavioralProfile",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/services/SecurityStore.ts",
+      "target": "function:eliza/packages/core/src/features/trust/services/SecurityStore.ts:insertIdentityLink",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/services/SecurityStore.ts",
+      "target": "function:eliza/packages/core/src/features/trust/services/SecurityStore.ts:getIdentityLinks",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/services/SecurityStore.ts",
+      "target": "function:eliza/packages/core/src/features/trust/services/SecurityStore.ts:insertWhistleblowerReport",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/services/TrustEngine.ts",
+      "target": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:isTrustEvidenceType",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/services/TrustEngine.ts",
+      "target": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:isUuidValue",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/services/TrustEngine.ts",
+      "target": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:isTrustDimensions",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/services/TrustEngine.ts",
+      "target": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:isTrustContext",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/services/TrustEngine.ts",
+      "target": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:isTrustEvidence",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/services/TrustEngine.ts",
+      "target": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:isTrustProfile",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/services/TrustEngine.ts",
+      "target": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:toMetadataValue",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/services/TrustEngine.ts",
+      "target": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:trustEvidenceToMetadata",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/services/TrustEngine.ts",
+      "target": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:trustProfileToMetadata",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/services/TrustEngine.ts",
+      "target": "class:eliza/packages/core/src/features/trust/services/TrustEngine.ts:TrustEngine",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:isTrustContext",
+      "target": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:isUuidValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:isTrustEvidence",
+      "target": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:isTrustEvidenceType",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:isTrustEvidence",
+      "target": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:isUuidValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:isTrustEvidence",
+      "target": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:isTrustContext",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:isTrustEvidence",
+      "target": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:isUuidValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:isTrustEvidence",
+      "target": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:isUuidValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:isTrustProfile",
+      "target": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:isUuidValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:isTrustProfile",
+      "target": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:isTrustDimensions",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:isTrustProfile",
+      "target": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:isUuidValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:trustEvidenceToMetadata",
+      "target": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:toMetadataValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:trustEvidenceToMetadata",
+      "target": "function:eliza/packages/core/src/features/trust/services/TrustEngine.ts:toMetadataValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/services/adminContext.ts",
+      "target": "function:eliza/packages/core/src/features/trust/services/adminContext.ts:resolveAdminContext",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/services/db.ts",
+      "target": "function:eliza/packages/core/src/features/trust/services/db.ts:getDb",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/services/wrappers.ts",
+      "target": "class:eliza/packages/core/src/features/trust/services/wrappers.ts:TrustEngineServiceWrapper",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/services/wrappers.ts",
+      "target": "class:eliza/packages/core/src/features/trust/services/wrappers.ts:SecurityModuleServiceWrapper",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/services/wrappers.ts",
+      "target": "class:eliza/packages/core/src/features/trust/services/wrappers.ts:CredentialProtectorServiceWrapper",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trust/services/wrappers.ts",
+      "target": "class:eliza/packages/core/src/features/trust/services/wrappers.ts:ContextualPermissionSystemServiceWrapper",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/attachmentContext.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:attachmentLocator",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/attachmentContext.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:isUnreadableFallbackDescription",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/attachmentContext.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:attachmentStoredContent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/attachmentContext.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:describeImageAttachment",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/attachmentContext.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:readableAttachmentContent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/attachmentContext.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:listConversationAttachments",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/attachmentContext.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:resolveAttachmentSelection",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/attachmentContext.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:readAttachmentRecord",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/attachmentContext.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:readAttachmentRecords",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/attachmentContext.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:summarizeAttachment",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:attachmentStoredContent",
+      "target": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:isUnreadableFallbackDescription",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:readableAttachmentContent",
+      "target": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:attachmentStoredContent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:readableAttachmentContent",
+      "target": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:describeImageAttachment",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:resolveAttachmentSelection",
+      "target": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:attachmentLocator",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:readAttachmentRecord",
+      "target": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:listConversationAttachments",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:readAttachmentRecord",
+      "target": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:resolveAttachmentSelection",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:readAttachmentRecord",
+      "target": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:readableAttachmentContent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:readAttachmentRecords",
+      "target": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:readAttachmentRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:readAttachmentRecords",
+      "target": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:readableAttachmentContent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:readAttachmentRecords",
+      "target": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:readAttachmentRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:summarizeAttachment",
+      "target": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:attachmentStoredContent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:summarizeAttachment",
+      "target": "function:eliza/packages/core/src/features/working-memory/attachmentContext.ts:attachmentLocator",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:shouldShowAttachmentRecord",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:attachmentContentForAnswering",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:attachmentAnswerTokenBudget",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:missingReadableContentMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:titleForRecord",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:contentForRecords",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:hasReadableContent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:attachmentSourceType",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:responseRecordText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:answerAttachmentRequest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:getActionParams",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:readAttachmentId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:readAttachmentActionKind",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:readStringParam",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:saveAttachmentAsDocument",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:contentForRecords",
+      "target": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:titleForRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:answerAttachmentRequest",
+      "target": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:attachmentContentForAnswering",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:answerAttachmentRequest",
+      "target": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:attachmentAnswerTokenBudget",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:saveAttachmentAsDocument",
+      "target": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:missingReadableContentMessage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:saveAttachmentAsDocument",
+      "target": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:readStringParam",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:saveAttachmentAsDocument",
+      "target": "function:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts:titleForRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts:isTruthyFlag",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts:normalizeTitle",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts:shouldAddToClipboard",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts:resolveClipboardTitle",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts:maybeStoreTaskClipboardItem",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts:shouldAddToClipboard",
+      "target": "function:eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts:isTruthyFlag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts:shouldAddToClipboard",
+      "target": "function:eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts:isTruthyFlag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts:shouldAddToClipboard",
+      "target": "function:eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts:isTruthyFlag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts:resolveClipboardTitle",
+      "target": "function:eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts:normalizeTitle",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts:resolveClipboardTitle",
+      "target": "function:eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts:normalizeTitle",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts:resolveClipboardTitle",
+      "target": "function:eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts:normalizeTitle",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts:maybeStoreTaskClipboardItem",
+      "target": "function:eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts:shouldAddToClipboard",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts:maybeStoreTaskClipboardItem",
+      "target": "function:eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts:resolveClipboardTitle",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/taskClipboardService.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/taskClipboardService.ts:defaultBasePath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/taskClipboardService.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/taskClipboardService.ts:readStringSetting",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/taskClipboardService.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/taskClipboardService.ts:resolveConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/taskClipboardService.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/taskClipboardService.ts:createDefaultStore",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/taskClipboardService.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/taskClipboardService.ts:sanitizeTitle",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/taskClipboardService.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/taskClipboardService.ts:defaultTitleForInput",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/taskClipboardService.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/taskClipboardService.ts:normalizeContent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/taskClipboardService.ts",
+      "target": "function:eliza/packages/core/src/features/working-memory/taskClipboardService.ts:createTaskClipboardService",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/working-memory/taskClipboardService.ts",
+      "target": "class:eliza/packages/core/src/features/working-memory/taskClipboardService.ts:TaskClipboardService",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/working-memory/taskClipboardService.ts:resolveConfig",
+      "target": "function:eliza/packages/core/src/features/working-memory/taskClipboardService.ts:readStringSetting",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/working-memory/taskClipboardService.ts:resolveConfig",
+      "target": "function:eliza/packages/core/src/features/working-memory/taskClipboardService.ts:defaultBasePath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/working-memory/taskClipboardService.ts:defaultTitleForInput",
+      "target": "function:eliza/packages/core/src/features/working-memory/taskClipboardService.ts:sanitizeTitle",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/working-memory/taskClipboardService.ts:defaultTitleForInput",
+      "target": "function:eliza/packages/core/src/features/working-memory/taskClipboardService.ts:sanitizeTitle",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/working-memory/taskClipboardService.ts:defaultTitleForInput",
+      "target": "function:eliza/packages/core/src/features/working-memory/taskClipboardService.ts:sanitizeTitle",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/working-memory/taskClipboardService.ts:defaultTitleForInput",
+      "target": "function:eliza/packages/core/src/features/working-memory/taskClipboardService.ts:sanitizeTitle",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/generated/spec-helpers.ts",
+      "target": "function:eliza/packages/core/src/generated/spec-helpers.ts:getActionSpec",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/generated/spec-helpers.ts",
+      "target": "function:eliza/packages/core/src/generated/spec-helpers.ts:requireActionSpec",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/generated/spec-helpers.ts",
+      "target": "function:eliza/packages/core/src/generated/spec-helpers.ts:getProviderSpec",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/generated/spec-helpers.ts",
+      "target": "function:eliza/packages/core/src/generated/spec-helpers.ts:requireProviderSpec",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/generated/spec-helpers.ts:requireActionSpec",
+      "target": "function:eliza/packages/core/src/generated/spec-helpers.ts:getActionSpec",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/generated/spec-helpers.ts:requireProviderSpec",
+      "target": "function:eliza/packages/core/src/generated/spec-helpers.ts:getProviderSpec",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/i18n/action-search-keywords.ts",
+      "target": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:actionNameToKeywordStem",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/i18n/action-search-keywords.ts",
+      "target": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:getActionSearchKeywordSources",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/i18n/action-search-keywords.ts",
+      "target": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:getActionSearchKeywordTerms",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/i18n/action-search-keywords.ts",
+      "target": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:countActionSearchKeywordMatches",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/i18n/action-search-keywords.ts",
+      "target": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:collectKeywordSourcesUnderStem",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/i18n/action-search-keywords.ts",
+      "target": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:collectKeywordDocs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/i18n/action-search-keywords.ts",
+      "target": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:lookupKeywordNode",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/i18n/action-search-keywords.ts",
+      "target": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:isKeywordDoc",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/i18n/action-search-keywords.ts",
+      "target": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:normalizeStringArray",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/i18n/action-search-keywords.ts",
+      "target": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:capitalizeAscii",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/i18n/action-search-keywords.ts",
+      "target": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:dedupeTerms",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/i18n/action-search-keywords.ts",
+      "target": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:dedupeKeywordSources",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:getActionSearchKeywordSources",
+      "target": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:actionNameToKeywordStem",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:getActionSearchKeywordSources",
+      "target": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:normalizeStringArray",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:getActionSearchKeywordSources",
+      "target": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:collectKeywordSourcesUnderStem",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:getActionSearchKeywordSources",
+      "target": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:dedupeKeywordSources",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:getActionSearchKeywordTerms",
+      "target": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:dedupeTerms",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:getActionSearchKeywordTerms",
+      "target": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:getActionSearchKeywordSources",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:collectKeywordSourcesUnderStem",
+      "target": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:lookupKeywordNode",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:collectKeywordSourcesUnderStem",
+      "target": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:collectKeywordDocs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:collectKeywordDocs",
+      "target": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:isKeywordDoc",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:dedupeKeywordSources",
+      "target": "function:eliza/packages/core/src/i18n/action-search-keywords.ts:dedupeTerms",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/i18n/validation-keywords.ts",
+      "target": "function:eliza/packages/core/src/i18n/validation-keywords.ts:isValidationKeywordDoc",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/i18n/validation-keywords.ts",
+      "target": "function:eliza/packages/core/src/i18n/validation-keywords.ts:lookupValidationKeywordDoc",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/i18n/validation-keywords.ts",
+      "target": "function:eliza/packages/core/src/i18n/validation-keywords.ts:escapePattern",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/i18n/validation-keywords.ts",
+      "target": "function:eliza/packages/core/src/i18n/validation-keywords.ts:normalizeKeywordMatchText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/i18n/validation-keywords.ts",
+      "target": "function:eliza/packages/core/src/i18n/validation-keywords.ts:usesAsciiWordBoundaries",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/i18n/validation-keywords.ts",
+      "target": "function:eliza/packages/core/src/i18n/validation-keywords.ts:splitKeywordDoc",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/i18n/validation-keywords.ts",
+      "target": "function:eliza/packages/core/src/i18n/validation-keywords.ts:textIncludesKeywordTerm",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/i18n/validation-keywords.ts",
+      "target": "function:eliza/packages/core/src/i18n/validation-keywords.ts:collectKeywordTermMatches",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/i18n/validation-keywords.ts",
+      "target": "function:eliza/packages/core/src/i18n/validation-keywords.ts:findKeywordTermMatch",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/i18n/validation-keywords.ts",
+      "target": "function:eliza/packages/core/src/i18n/validation-keywords.ts:getValidationKeywordTerms",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/i18n/validation-keywords.ts",
+      "target": "function:eliza/packages/core/src/i18n/validation-keywords.ts:getValidationKeywordLocaleTerms",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/i18n/validation-keywords.ts:lookupValidationKeywordDoc",
+      "target": "function:eliza/packages/core/src/i18n/validation-keywords.ts:isValidationKeywordDoc",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/i18n/validation-keywords.ts:splitKeywordDoc",
+      "target": "function:eliza/packages/core/src/i18n/validation-keywords.ts:normalizeKeywordMatchText",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/i18n/validation-keywords.ts:textIncludesKeywordTerm",
+      "target": "function:eliza/packages/core/src/i18n/validation-keywords.ts:normalizeKeywordMatchText",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/i18n/validation-keywords.ts:textIncludesKeywordTerm",
+      "target": "function:eliza/packages/core/src/i18n/validation-keywords.ts:normalizeKeywordMatchText",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/i18n/validation-keywords.ts:textIncludesKeywordTerm",
+      "target": "function:eliza/packages/core/src/i18n/validation-keywords.ts:usesAsciiWordBoundaries",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/i18n/validation-keywords.ts:textIncludesKeywordTerm",
+      "target": "function:eliza/packages/core/src/i18n/validation-keywords.ts:escapePattern",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/i18n/validation-keywords.ts:collectKeywordTermMatches",
+      "target": "function:eliza/packages/core/src/i18n/validation-keywords.ts:textIncludesKeywordTerm",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/i18n/validation-keywords.ts:findKeywordTermMatch",
+      "target": "function:eliza/packages/core/src/i18n/validation-keywords.ts:textIncludesKeywordTerm",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/i18n/validation-keywords.ts:getValidationKeywordTerms",
+      "target": "function:eliza/packages/core/src/i18n/validation-keywords.ts:lookupValidationKeywordDoc",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/i18n/validation-keywords.ts:getValidationKeywordTerms",
+      "target": "function:eliza/packages/core/src/i18n/validation-keywords.ts:splitKeywordDoc",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/i18n/validation-keywords.ts:getValidationKeywordTerms",
+      "target": "function:eliza/packages/core/src/i18n/validation-keywords.ts:splitKeywordDoc",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/i18n/validation-keywords.ts:getValidationKeywordLocaleTerms",
+      "target": "function:eliza/packages/core/src/i18n/validation-keywords.ts:lookupValidationKeywordDoc",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/i18n/validation-keywords.ts:getValidationKeywordLocaleTerms",
+      "target": "function:eliza/packages/core/src/i18n/validation-keywords.ts:splitKeywordDoc",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trajectories/trajectory-json-export.test.ts",
+      "target": "file:eliza/packages/core/src/trajectory-utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trajectories/trajectory-json-export.test.ts",
+      "target": "file:eliza/packages/core/src/types/context-object.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trajectories/types.ts",
+      "target": "file:eliza/packages/core/src/types/context-object.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trajectories/types.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/actions/evaluateTrust.ts",
+      "target": "file:eliza/packages/core/src/features/trust/services/wrappers.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/actions/evaluateTrust.ts",
+      "target": "file:eliza/packages/core/src/features/trust/types/trust.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/actions/evaluateTrust.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/actions/evaluateTrust.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/actions/evaluateTrust.ts",
+      "target": "file:eliza/packages/core/src/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/actions/hasTrustEngine.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/actions/recordTrustInteraction.ts",
+      "target": "file:eliza/packages/core/src/features/trust/services/wrappers.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/actions/recordTrustInteraction.ts",
+      "target": "file:eliza/packages/core/src/features/trust/types/trust.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/actions/recordTrustInteraction.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/actions/recordTrustInteraction.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/actions/recordTrustInteraction.ts",
+      "target": "file:eliza/packages/core/src/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/actions/requestElevation.ts",
+      "target": "file:eliza/packages/core/src/features/trust/services/wrappers.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/actions/requestElevation.ts",
+      "target": "file:eliza/packages/core/src/features/trust/types/permissions.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/actions/requestElevation.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/actions/requestElevation.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/actions/requestElevation.ts",
+      "target": "file:eliza/packages/core/src/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/actions/roles.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/actions/roles.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/actions/roles.ts",
+      "target": "file:eliza/packages/core/src/utils/type-guards.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/actions/trust.ts",
+      "target": "file:eliza/packages/core/src/features/trust/actions/evaluateTrust.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/actions/trust.ts",
+      "target": "file:eliza/packages/core/src/features/trust/actions/hasTrustEngine.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/actions/trust.ts",
+      "target": "file:eliza/packages/core/src/features/trust/actions/recordTrustInteraction.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/actions/trust.ts",
+      "target": "file:eliza/packages/core/src/features/trust/actions/requestElevation.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/actions/trust.ts",
+      "target": "file:eliza/packages/core/src/features/trust/actions/roles.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/actions/trust.ts",
+      "target": "file:eliza/packages/core/src/types/components.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/actions/trust.ts",
+      "target": "file:eliza/packages/core/src/types/memory.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/actions/trust.ts",
+      "target": "file:eliza/packages/core/src/types/runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/actions/trust.ts",
+      "target": "file:eliza/packages/core/src/types/state.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/actions/trust.ts",
+      "target": "file:eliza/packages/core/src/utils/action-validation.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/evaluators/securityEvaluator.ts",
+      "target": "file:eliza/packages/core/src/features/trust/services/adminContext.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/evaluators/securityEvaluator.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/evaluators/securityEvaluator.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/index.ts",
+      "target": "file:eliza/packages/core/src/actions/promote-subactions.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/index.ts",
+      "target": "file:eliza/packages/core/src/features/trust/actions/trust.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/index.ts",
+      "target": "file:eliza/packages/core/src/features/trust/evaluators/securityEvaluator.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/index.ts",
+      "target": "file:eliza/packages/core/src/features/trust/providers/adminTrust.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/index.ts",
+      "target": "file:eliza/packages/core/src/features/trust/providers/roles.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/index.ts",
+      "target": "file:eliza/packages/core/src/features/trust/providers/securityStatus.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/index.ts",
+      "target": "file:eliza/packages/core/src/features/trust/providers/settings.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/index.ts",
+      "target": "file:eliza/packages/core/src/features/trust/providers/trustProfile.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/index.ts",
+      "target": "file:eliza/packages/core/src/features/trust/schema.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/index.ts",
+      "target": "file:eliza/packages/core/src/features/trust/services/ContextualPermissionSystem.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/index.ts",
+      "target": "file:eliza/packages/core/src/features/trust/services/CredentialProtector.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/index.ts",
+      "target": "file:eliza/packages/core/src/features/trust/services/SecurityModule.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/index.ts",
+      "target": "file:eliza/packages/core/src/features/trust/services/TrustEngine.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/index.ts",
+      "target": "file:eliza/packages/core/src/features/trust/services/wrappers.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/index.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/index.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/providers/adminTrust.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/providers/roles.ts",
+      "target": "file:eliza/packages/core/src/entities.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/providers/roles.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/providers/roles.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/providers/securityStatus.ts",
+      "target": "file:eliza/packages/core/src/features/trust/services/adminContext.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/providers/securityStatus.ts",
+      "target": "file:eliza/packages/core/src/features/trust/services/wrappers.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/providers/securityStatus.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/providers/securityStatus.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/providers/settings.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/providers/settings.ts",
+      "target": "file:eliza/packages/core/src/roles.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/providers/settings.ts",
+      "target": "file:eliza/packages/core/src/settings.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/providers/settings.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/providers/trustProfile.ts",
+      "target": "file:eliza/packages/core/src/features/trust/services/wrappers.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/providers/trustProfile.ts",
+      "target": "file:eliza/packages/core/src/features/trust/types/trust.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/providers/trustProfile.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/providers/trustProfile.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/ContextualPermissionSystem.ts",
+      "target": "file:eliza/packages/core/src/features/trust/services/SecurityModule.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/ContextualPermissionSystem.ts",
+      "target": "file:eliza/packages/core/src/features/trust/services/TrustEngine.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/ContextualPermissionSystem.ts",
+      "target": "file:eliza/packages/core/src/features/trust/types/permissions.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/ContextualPermissionSystem.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/ContextualPermissionSystem.ts",
+      "target": "file:eliza/packages/core/src/roles.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/ContextualPermissionSystem.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/ContextualPermissionSystem.ts",
+      "target": "file:eliza/packages/core/src/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/CredentialProtector.ts",
+      "target": "file:eliza/packages/core/src/features/trust/services/SecurityModule.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/CredentialProtector.ts",
+      "target": "file:eliza/packages/core/src/features/trust/types/security.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/CredentialProtector.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/CredentialProtector.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/SecurityModule.ts",
+      "target": "file:eliza/packages/core/src/features/trust/services/db.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/SecurityModule.ts",
+      "target": "file:eliza/packages/core/src/features/trust/services/SecurityStore.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/SecurityModule.ts",
+      "target": "file:eliza/packages/core/src/features/trust/services/TrustEngine.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/SecurityModule.ts",
+      "target": "file:eliza/packages/core/src/features/trust/types/security.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/SecurityModule.ts",
+      "target": "file:eliza/packages/core/src/features/trust/types/trust.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/SecurityModule.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/SecurityModule.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/SecurityStore.ts",
+      "target": "file:eliza/packages/core/src/features/trust/schema.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/SecurityStore.ts",
+      "target": "file:eliza/packages/core/src/features/trust/services/db.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/SecurityStore.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/TrustEngine.ts",
+      "target": "file:eliza/packages/core/src/features/trust/services/db.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/TrustEngine.ts",
+      "target": "file:eliza/packages/core/src/features/trust/services/SecurityStore.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/TrustEngine.ts",
+      "target": "file:eliza/packages/core/src/features/trust/types/trust.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/TrustEngine.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/TrustEngine.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/TrustEngine.ts",
+      "target": "file:eliza/packages/core/src/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/TrustEngine.ts",
+      "target": "file:eliza/packages/core/src/utils/type-guards.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/adminContext.ts",
+      "target": "file:eliza/packages/core/src/entities.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/adminContext.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/db.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/wrappers.ts",
+      "target": "file:eliza/packages/core/src/features/trust/services/ContextualPermissionSystem.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/wrappers.ts",
+      "target": "file:eliza/packages/core/src/features/trust/services/CredentialProtector.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/wrappers.ts",
+      "target": "file:eliza/packages/core/src/features/trust/services/SecurityModule.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/wrappers.ts",
+      "target": "file:eliza/packages/core/src/features/trust/services/TrustEngine.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/wrappers.ts",
+      "target": "file:eliza/packages/core/src/features/trust/types/permissions.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/wrappers.ts",
+      "target": "file:eliza/packages/core/src/features/trust/types/security.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/wrappers.ts",
+      "target": "file:eliza/packages/core/src/features/trust/types/trust.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/services/wrappers.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/types/permissions.ts",
+      "target": "file:eliza/packages/core/src/features/trust/types/trust.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/types/permissions.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/types/security.ts",
+      "target": "file:eliza/packages/core/src/features/trust/types/permissions.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/types/security.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trust/types/trust.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/working-memory/attachmentContext.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "target": "file:eliza/packages/core/src/features/documents/service.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "target": "file:eliza/packages/core/src/features/documents/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "target": "file:eliza/packages/core/src/features/working-memory/attachmentContext.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "target": "file:eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/working-memory/readAttachmentAction.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts",
+      "target": "file:eliza/packages/core/src/features/working-memory/taskClipboardService.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/working-memory/taskClipboardPersistence.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/working-memory/taskClipboardService.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/working-memory/taskClipboardService.ts",
+      "target": "file:eliza/packages/core/src/utils/state-dir.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/generated/spec-helpers.ts",
+      "target": "file:eliza/packages/core/src/generated/action-docs.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/i18n/action-search-keywords.ts",
+      "target": "file:eliza/packages/core/src/i18n/validation-keywords.ts",
+      "type": "imports"
+    }
+  ]
+}

@@ -1,0 +1,1254 @@
+{
+  "batchIndex": 107,
+  "nodes": [
+    {
+      "tags": [
+        "voice",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-local-inference/native/voice-bench/scripts/generate-fixtures.ts",
+      "type": "file",
+      "name": "generate-fixtures.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/scripts/generate-fixtures.ts",
+      "summary": "generate-fixtures.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 26 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "voice",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/__tests__/audio-source.test.ts",
+      "type": "file",
+      "name": "audio-source.test.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/__tests__/audio-source.test.ts",
+      "summary": "audio-source.test.ts is a typescript source file in the Milady codebase. It contains 3 imports.",
+      "languageNotes": "typescript; code; 130 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "voice",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/__tests__/metrics.test.ts",
+      "type": "file",
+      "name": "metrics.test.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/__tests__/metrics.test.ts",
+      "summary": "metrics.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 127 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/__tests__/metrics.test.ts:waitMs",
+      "type": "function",
+      "name": "waitMs",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/__tests__/metrics.test.ts",
+      "summary": "waitMs is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/__tests__/metrics.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "voice",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/__tests__/scenarios.test.ts",
+      "type": "file",
+      "name": "scenarios.test.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/__tests__/scenarios.test.ts",
+      "summary": "scenarios.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 6 imports.",
+      "languageNotes": "typescript; code; 213 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/__tests__/scenarios.test.ts:collectUnitRun",
+      "type": "function",
+      "name": "collectUnitRun",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/__tests__/scenarios.test.ts",
+      "summary": "collectUnitRun is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/__tests__/scenarios.test.ts."
+    },
+    {
+      "tags": [
+        "voice",
+        "local-inference",
+        "plugin",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts",
+      "type": "file",
+      "name": "audio-source.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts",
+      "summary": "audio-source.ts is a typescript source file in the Milady codebase. It contains 5 functions, 1 class, 1 imports.",
+      "languageNotes": "typescript; code; 307 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts:loadWav",
+      "type": "function",
+      "name": "loadWav",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts",
+      "summary": "loadWav is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts:decodeWav",
+      "type": "function",
+      "name": "decodeWav",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts",
+      "summary": "decodeWav is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts:readAscii",
+      "type": "function",
+      "name": "readAscii",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts",
+      "summary": "readAscii is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts:encodeWav",
+      "type": "function",
+      "name": "encodeWav",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts",
+      "summary": "encodeWav is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts:writeAscii",
+      "type": "function",
+      "name": "writeAscii",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts",
+      "summary": "writeAscii is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts:SyntheticAudioSource",
+      "type": "class",
+      "name": "SyntheticAudioSource",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts",
+      "summary": "SyntheticAudioSource is a class or type declared in eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts."
+    },
+    {
+      "tags": [
+        "voice",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts",
+      "type": "file",
+      "name": "fixtures.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts",
+      "summary": "fixtures.ts is a typescript source file in the Milady codebase. It contains 9 functions, 1 imports.",
+      "languageNotes": "typescript; code; 136 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:mulberry32",
+      "type": "function",
+      "name": "mulberry32",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts",
+      "summary": "mulberry32 is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:speechProxy",
+      "type": "function",
+      "name": "speechProxy",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts",
+      "summary": "speechProxy is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:generateSilence",
+      "type": "function",
+      "name": "generateSilence",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts",
+      "summary": "generateSilence is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:generateShortUtterance",
+      "type": "function",
+      "name": "generateShortUtterance",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts",
+      "summary": "generateShortUtterance is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:generateLongUtterance",
+      "type": "function",
+      "name": "generateLongUtterance",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts",
+      "summary": "generateLongUtterance is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:generateFalseEosUtterance",
+      "type": "function",
+      "name": "generateFalseEosUtterance",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts",
+      "summary": "generateFalseEosUtterance is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:generateBargeInOverlay",
+      "type": "function",
+      "name": "generateBargeInOverlay",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts",
+      "summary": "generateBargeInOverlay is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:writeFixtureWav",
+      "type": "function",
+      "name": "writeFixtureWav",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts",
+      "summary": "writeFixtureWav is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:generateAllFixtures",
+      "type": "function",
+      "name": "generateAllFixtures",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts",
+      "summary": "generateAllFixtures is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts."
+    },
+    {
+      "tags": [
+        "voice",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts",
+      "type": "file",
+      "name": "gates.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts",
+      "summary": "gates.ts is a typescript source file in the Milady codebase. It contains 7 functions, 2 imports.",
+      "languageNotes": "typescript; code; 216 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts:aggregate",
+      "type": "function",
+      "name": "aggregate",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts",
+      "summary": "aggregate is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts:absoluteCheck",
+      "type": "function",
+      "name": "absoluteCheck",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts",
+      "summary": "absoluteCheck is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts:regressionCheck",
+      "type": "function",
+      "name": "regressionCheck",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts",
+      "summary": "regressionCheck is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts:evaluateGates",
+      "type": "function",
+      "name": "evaluateGates",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts",
+      "summary": "evaluateGates is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts:renderMarkdown",
+      "type": "function",
+      "name": "renderMarkdown",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts",
+      "summary": "renderMarkdown is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts:badge",
+      "type": "function",
+      "name": "badge",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts",
+      "summary": "badge is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts:round1",
+      "type": "function",
+      "name": "round1",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts",
+      "summary": "round1 is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts."
+    },
+    {
+      "tags": [
+        "voice",
+        "local-inference",
+        "plugin",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/metrics.ts",
+      "type": "file",
+      "name": "metrics.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/metrics.ts",
+      "summary": "metrics.ts is a typescript source file in the Milady codebase. It contains 2 functions, 1 class, 1 imports.",
+      "languageNotes": "typescript; code; 247 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/metrics.ts:round1",
+      "type": "function",
+      "name": "round1",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/metrics.ts",
+      "summary": "round1 is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/metrics.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/metrics.ts:percentile",
+      "type": "function",
+      "name": "percentile",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/metrics.ts",
+      "summary": "percentile is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/metrics.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/plugins/plugin-local-inference/native/voice-bench/src/metrics.ts:MetricsCollector",
+      "type": "class",
+      "name": "MetricsCollector",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/metrics.ts",
+      "summary": "MetricsCollector is a class or type declared in eliza/plugins/plugin-local-inference/native/voice-bench/src/metrics.ts."
+    },
+    {
+      "tags": [
+        "voice",
+        "local-inference",
+        "plugin",
+        "class",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/mock-driver.ts",
+      "type": "file",
+      "name": "mock-driver.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/mock-driver.ts",
+      "summary": "mock-driver.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 class, 2 imports.",
+      "languageNotes": "typescript; code; 231 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/mock-driver.ts:sleep",
+      "type": "function",
+      "name": "sleep",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/mock-driver.ts",
+      "summary": "sleep is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/mock-driver.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/plugins/plugin-local-inference/native/voice-bench/src/mock-driver.ts:MockPipelineDriver",
+      "type": "class",
+      "name": "MockPipelineDriver",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/mock-driver.ts",
+      "summary": "MockPipelineDriver is a class or type declared in eliza/plugins/plugin-local-inference/native/voice-bench/src/mock-driver.ts."
+    },
+    {
+      "tags": [
+        "voice",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/runner.ts",
+      "type": "file",
+      "name": "runner.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/runner.ts",
+      "summary": "runner.ts is a typescript source file in the Milady codebase. It contains 4 functions, 4 imports.",
+      "languageNotes": "typescript; code; 146 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/runner.ts:runBench",
+      "type": "function",
+      "name": "runBench",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/runner.ts",
+      "summary": "runBench is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/runner.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/runner.ts:isMockBackendLabel",
+      "type": "function",
+      "name": "isMockBackendLabel",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/runner.ts",
+      "summary": "isMockBackendLabel is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/runner.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/runner.ts:readGitSha",
+      "type": "function",
+      "name": "readGitSha",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/runner.ts",
+      "summary": "readGitSha is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/runner.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/runner.ts:parseCliArgs",
+      "type": "function",
+      "name": "parseCliArgs",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/runner.ts",
+      "summary": "parseCliArgs is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/runner.ts."
+    },
+    {
+      "tags": [
+        "voice",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/scenarios.ts",
+      "type": "file",
+      "name": "scenarios.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/scenarios.ts",
+      "summary": "scenarios.ts is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 115 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/scenarios.ts:buildScenarios",
+      "type": "function",
+      "name": "buildScenarios",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/scenarios.ts",
+      "summary": "buildScenarios is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/scenarios.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/scenarios.ts:isScenarioId",
+      "type": "function",
+      "name": "isScenarioId",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/scenarios.ts",
+      "summary": "isScenarioId is a function defined in eliza/plugins/plugin-local-inference/native/voice-bench/src/scenarios.ts."
+    },
+    {
+      "tags": [
+        "voice",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/native/voice-bench/src/types.ts",
+      "summary": "types.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 293 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/__tests__/metrics.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/__tests__/metrics.test.ts:waitMs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/__tests__/scenarios.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/__tests__/scenarios.test.ts:collectUnitRun",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts:loadWav",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts:decodeWav",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts:readAscii",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts:encodeWav",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts:writeAscii",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts:SyntheticAudioSource",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts:loadWav",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts:decodeWav",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts:decodeWav",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts:readAscii",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts:decodeWav",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts:readAscii",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts:decodeWav",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts:readAscii",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts:encodeWav",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts:writeAscii",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts:encodeWav",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts:writeAscii",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts:encodeWav",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts:writeAscii",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts:encodeWav",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts:writeAscii",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:mulberry32",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:speechProxy",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:generateSilence",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:generateShortUtterance",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:generateLongUtterance",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:generateFalseEosUtterance",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:generateBargeInOverlay",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:writeFixtureWav",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:generateAllFixtures",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:speechProxy",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:mulberry32",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:generateShortUtterance",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:speechProxy",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:generateLongUtterance",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:speechProxy",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:generateFalseEosUtterance",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:speechProxy",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:generateFalseEosUtterance",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:generateSilence",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:generateFalseEosUtterance",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:speechProxy",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:generateBargeInOverlay",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:speechProxy",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:generateAllFixtures",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:generateSilence",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:generateAllFixtures",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:generateShortUtterance",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:generateAllFixtures",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:generateLongUtterance",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:generateAllFixtures",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:generateFalseEosUtterance",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:generateAllFixtures",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts:generateBargeInOverlay",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts:aggregate",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts:absoluteCheck",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts:regressionCheck",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts:evaluateGates",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts:renderMarkdown",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts:badge",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts:round1",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts:absoluteCheck",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts:round1",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts:regressionCheck",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts:round1",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts:evaluateGates",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts:regressionCheck",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts:evaluateGates",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts:regressionCheck",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts:evaluateGates",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts:absoluteCheck",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts:evaluateGates",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts:absoluteCheck",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts:evaluateGates",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts:absoluteCheck",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts:evaluateGates",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts:renderMarkdown",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts:renderMarkdown",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts:badge",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/metrics.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/metrics.ts:round1",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/metrics.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/metrics.ts:percentile",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/metrics.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/native/voice-bench/src/metrics.ts:MetricsCollector",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/mock-driver.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/mock-driver.ts:sleep",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/mock-driver.ts",
+      "target": "class:eliza/plugins/plugin-local-inference/native/voice-bench/src/mock-driver.ts:MockPipelineDriver",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/runner.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/runner.ts:runBench",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/runner.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/runner.ts:isMockBackendLabel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/runner.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/runner.ts:readGitSha",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/runner.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/runner.ts:parseCliArgs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/runner.ts:runBench",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/runner.ts:isMockBackendLabel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/runner.ts:runBench",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/runner.ts:isMockBackendLabel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/runner.ts:runBench",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/runner.ts:readGitSha",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/scenarios.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/scenarios.ts:buildScenarios",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/scenarios.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/native/voice-bench/src/scenarios.ts:isScenarioId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/scripts/generate-fixtures.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/__tests__/audio-source.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/__tests__/audio-source.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/__tests__/audio-source.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/__tests__/metrics.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/metrics.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/__tests__/metrics.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/__tests__/scenarios.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/__tests__/scenarios.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/metrics.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/__tests__/scenarios.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/mock-driver.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/__tests__/scenarios.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/runner.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/__tests__/scenarios.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/scenarios.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/__tests__/scenarios.test.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/metrics.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/metrics.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/mock-driver.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/audio-source.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/mock-driver.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/runner.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/gates.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/runner.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/metrics.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/runner.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/scenarios.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/runner.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/scenarios.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/fixtures.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/scenarios.ts",
+      "target": "file:eliza/plugins/plugin-local-inference/native/voice-bench/src/types.ts",
+      "type": "imports"
+    }
+  ]
+}

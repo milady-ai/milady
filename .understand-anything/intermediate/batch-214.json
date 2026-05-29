@@ -1,0 +1,54 @@
+{
+  "batchIndex": 214,
+  "nodes": [
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/src/registry/entries/connectors/whatsapp.json",
+      "type": "config",
+      "name": "whatsapp.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/connectors/whatsapp.json",
+      "summary": "whatsapp.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 113 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "complex",
+      "id": "config:eliza/packages/app-core/src/registry/entries/connectors/x.json",
+      "type": "config",
+      "name": "x.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/connectors/x.json",
+      "summary": "x.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 231 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/src/registry/entries/connectors/zalo.json",
+      "type": "config",
+      "name": "zalo.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/connectors/zalo.json",
+      "summary": "zalo.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 112 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/app-core/src/registry/entries/connectors/zalouser.json",
+      "type": "config",
+      "name": "zalouser.json",
+      "filePath": "eliza/packages/app-core/src/registry/entries/connectors/zalouser.json",
+      "summary": "zalouser.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 122 lines"
+    }
+  ],
+  "edges": []
+}

@@ -1,0 +1,2166 @@
+{
+  "batchIndex": 25,
+  "nodes": [
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/data-list/list-action-menu.tsx",
+      "type": "file",
+      "name": "list-action-menu.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/data-list/list-action-menu.tsx",
+      "summary": "list-action-menu.tsx is a typescript source file in the Milady codebase. It contains 1 function, 3 imports.",
+      "languageNotes": "typescript; code; 119 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/data-list/list-action-menu.tsx:ListActionMenu",
+      "type": "function",
+      "name": "ListActionMenu",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/data-list/list-action-menu.tsx",
+      "summary": "ListActionMenu is a function defined in eliza/packages/ui/src/cloud-ui/components/data-list/list-action-menu.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/data-list/responsive-entity-list.tsx",
+      "type": "file",
+      "name": "responsive-entity-list.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/data-list/responsive-entity-list.tsx",
+      "summary": "responsive-entity-list.tsx is a typescript source file in the Milady codebase. It contains 1 function, 3 imports.",
+      "languageNotes": "typescript; code; 76 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/data-list/responsive-entity-list.tsx:ResponsiveEntityList",
+      "type": "function",
+      "name": "ResponsiveEntityList",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/data-list/responsive-entity-list.tsx",
+      "summary": "ResponsiveEntityList is a function defined in eliza/packages/ui/src/cloud-ui/components/data-list/responsive-entity-list.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/data-list/stat-summary.tsx",
+      "type": "file",
+      "name": "stat-summary.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/data-list/stat-summary.tsx",
+      "summary": "stat-summary.tsx is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 56 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/data-list/stat-summary.tsx:StatSummary",
+      "type": "function",
+      "name": "StatSummary",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/data-list/stat-summary.tsx",
+      "summary": "StatSummary is a function defined in eliza/packages/ui/src/cloud-ui/components/data-list/stat-summary.tsx."
+    },
+    {
+      "tags": [
+        "api",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/docs/api-parameter-select.tsx",
+      "type": "file",
+      "name": "api-parameter-select.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/docs/api-parameter-select.tsx",
+      "summary": "api-parameter-select.tsx is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 51 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/docs/api-parameter-select.tsx:ApiParameterSelect",
+      "type": "function",
+      "name": "ApiParameterSelect",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/docs/api-parameter-select.tsx",
+      "summary": "ApiParameterSelect is a function defined in eliza/packages/ui/src/cloud-ui/components/docs/api-parameter-select.tsx."
+    },
+    {
+      "tags": [
+        "api",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx",
+      "type": "file",
+      "name": "api-route-explorer-client.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx",
+      "summary": "api-route-explorer-client.tsx is a typescript source file in the Milady codebase. It contains 6 functions, 2 imports.",
+      "languageNotes": "typescript; code; 625 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx:methodBadgeClass",
+      "type": "function",
+      "name": "methodBadgeClass",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx",
+      "summary": "methodBadgeClass is a function defined in eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx:isProbablyPublic",
+      "type": "function",
+      "name": "isProbablyPublic",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx",
+      "summary": "isProbablyPublic is a function defined in eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx:groupKeyForPath",
+      "type": "function",
+      "name": "groupKeyForPath",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx",
+      "summary": "groupKeyForPath is a function defined in eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx:CopyButton",
+      "type": "function",
+      "name": "CopyButton",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx",
+      "summary": "CopyButton is a function defined in eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx:generateCurlExample",
+      "type": "function",
+      "name": "generateCurlExample",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx",
+      "summary": "generateCurlExample is a function defined in eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx:ApiRouteExplorerClient",
+      "type": "function",
+      "name": "ApiRouteExplorerClient",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx",
+      "summary": "ApiRouteExplorerClient is a function defined in eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx."
+    },
+    {
+      "tags": [
+        "api",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer.tsx",
+      "type": "file",
+      "name": "api-route-explorer.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer.tsx",
+      "summary": "api-route-explorer.tsx is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 13 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer.tsx:ApiRouteExplorer",
+      "type": "function",
+      "name": "ApiRouteExplorer",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer.tsx",
+      "summary": "ApiRouteExplorer is a function defined in eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/docs/endpoint-card.tsx",
+      "type": "file",
+      "name": "endpoint-card.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/docs/endpoint-card.tsx",
+      "summary": "endpoint-card.tsx is a typescript source file in the Milady codebase. It contains 3 functions, 1 imports.",
+      "languageNotes": "typescript; code; 164 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/docs/endpoint-card.tsx:getPricingTextStyle",
+      "type": "function",
+      "name": "getPricingTextStyle",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/docs/endpoint-card.tsx",
+      "summary": "getPricingTextStyle is a function defined in eliza/packages/ui/src/cloud-ui/components/docs/endpoint-card.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/docs/endpoint-card.tsx:fallbackPricingLabel",
+      "type": "function",
+      "name": "fallbackPricingLabel",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/docs/endpoint-card.tsx",
+      "summary": "fallbackPricingLabel is a function defined in eliza/packages/ui/src/cloud-ui/components/docs/endpoint-card.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/docs/endpoint-card.tsx:EndpointCard",
+      "type": "function",
+      "name": "EndpointCard",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/docs/endpoint-card.tsx",
+      "summary": "EndpointCard is a function defined in eliza/packages/ui/src/cloud-ui/components/docs/endpoint-card.tsx."
+    },
+    {
+      "tags": [
+        "api",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/docs/openapi-viewer.tsx",
+      "type": "file",
+      "name": "openapi-viewer.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/docs/openapi-viewer.tsx",
+      "summary": "openapi-viewer.tsx is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 28 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/docs/openapi-viewer.tsx:OpenApiViewer",
+      "type": "function",
+      "name": "OpenApiViewer",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/docs/openapi-viewer.tsx",
+      "summary": "OpenApiViewer is a function defined in eliza/packages/ui/src/cloud-ui/components/docs/openapi-viewer.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/drawer.tsx",
+      "type": "file",
+      "name": "drawer.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/drawer.tsx",
+      "summary": "drawer.tsx is a typescript source file in the Milady codebase. It contains 10 functions, 1 imports.",
+      "languageNotes": "typescript; code; 139 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/drawer.tsx:Drawer",
+      "type": "function",
+      "name": "Drawer",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/drawer.tsx",
+      "summary": "Drawer is a function defined in eliza/packages/ui/src/cloud-ui/components/drawer.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/drawer.tsx:DrawerTrigger",
+      "type": "function",
+      "name": "DrawerTrigger",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/drawer.tsx",
+      "summary": "DrawerTrigger is a function defined in eliza/packages/ui/src/cloud-ui/components/drawer.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/drawer.tsx:DrawerPortal",
+      "type": "function",
+      "name": "DrawerPortal",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/drawer.tsx",
+      "summary": "DrawerPortal is a function defined in eliza/packages/ui/src/cloud-ui/components/drawer.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/drawer.tsx:DrawerClose",
+      "type": "function",
+      "name": "DrawerClose",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/drawer.tsx",
+      "summary": "DrawerClose is a function defined in eliza/packages/ui/src/cloud-ui/components/drawer.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/drawer.tsx:DrawerOverlay",
+      "type": "function",
+      "name": "DrawerOverlay",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/drawer.tsx",
+      "summary": "DrawerOverlay is a function defined in eliza/packages/ui/src/cloud-ui/components/drawer.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/drawer.tsx:DrawerContent",
+      "type": "function",
+      "name": "DrawerContent",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/drawer.tsx",
+      "summary": "DrawerContent is a function defined in eliza/packages/ui/src/cloud-ui/components/drawer.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/drawer.tsx:DrawerHeader",
+      "type": "function",
+      "name": "DrawerHeader",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/drawer.tsx",
+      "summary": "DrawerHeader is a function defined in eliza/packages/ui/src/cloud-ui/components/drawer.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/drawer.tsx:DrawerFooter",
+      "type": "function",
+      "name": "DrawerFooter",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/drawer.tsx",
+      "summary": "DrawerFooter is a function defined in eliza/packages/ui/src/cloud-ui/components/drawer.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/drawer.tsx:DrawerTitle",
+      "type": "function",
+      "name": "DrawerTitle",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/drawer.tsx",
+      "summary": "DrawerTitle is a function defined in eliza/packages/ui/src/cloud-ui/components/drawer.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/drawer.tsx:DrawerDescription",
+      "type": "function",
+      "name": "DrawerDescription",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/drawer.tsx",
+      "summary": "DrawerDescription is a function defined in eliza/packages/ui/src/cloud-ui/components/drawer.tsx."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/dropdown-menu.tsx",
+      "type": "file",
+      "name": "dropdown-menu.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/dropdown-menu.tsx",
+      "summary": "dropdown-menu.tsx is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 1 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/empty-state.tsx",
+      "type": "file",
+      "name": "empty-state.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/empty-state.tsx",
+      "summary": "empty-state.tsx is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 1 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/glowing-effect.tsx",
+      "type": "file",
+      "name": "glowing-effect.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/glowing-effect.tsx",
+      "summary": "glowing-effect.tsx is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 190 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/glowing-stars.tsx",
+      "type": "file",
+      "name": "glowing-stars.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/glowing-stars.tsx",
+      "summary": "glowing-stars.tsx is a typescript source file in the Milady codebase. It contains 6 functions, 1 imports.",
+      "languageNotes": "typescript; code; 163 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/glowing-stars.tsx:GlowingStarsBackgroundCard",
+      "type": "function",
+      "name": "GlowingStarsBackgroundCard",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/glowing-stars.tsx",
+      "summary": "GlowingStarsBackgroundCard is a function defined in eliza/packages/ui/src/cloud-ui/components/glowing-stars.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/glowing-stars.tsx:GlowingStarsDescription",
+      "type": "function",
+      "name": "GlowingStarsDescription",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/glowing-stars.tsx",
+      "summary": "GlowingStarsDescription is a function defined in eliza/packages/ui/src/cloud-ui/components/glowing-stars.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/glowing-stars.tsx:GlowingStarsTitle",
+      "type": "function",
+      "name": "GlowingStarsTitle",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/glowing-stars.tsx",
+      "summary": "GlowingStarsTitle is a function defined in eliza/packages/ui/src/cloud-ui/components/glowing-stars.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/glowing-stars.tsx:Illustration",
+      "type": "function",
+      "name": "Illustration",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/glowing-stars.tsx",
+      "summary": "Illustration is a function defined in eliza/packages/ui/src/cloud-ui/components/glowing-stars.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/glowing-stars.tsx:Star",
+      "type": "function",
+      "name": "Star",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/glowing-stars.tsx",
+      "summary": "Star is a function defined in eliza/packages/ui/src/cloud-ui/components/glowing-stars.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/glowing-stars.tsx:Glow",
+      "type": "function",
+      "name": "Glow",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/glowing-stars.tsx",
+      "summary": "Glow is a function defined in eliza/packages/ui/src/cloud-ui/components/glowing-stars.tsx."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/hover-card.tsx",
+      "type": "file",
+      "name": "hover-card.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/hover-card.tsx",
+      "summary": "hover-card.tsx is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 1 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/icons.tsx",
+      "type": "file",
+      "name": "icons.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/icons.tsx",
+      "summary": "icons.tsx is a typescript source file in the Milady codebase. It contains 5 functions.",
+      "languageNotes": "typescript; code; 45 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/icons.tsx:DiscordIcon",
+      "type": "function",
+      "name": "DiscordIcon",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/icons.tsx",
+      "summary": "DiscordIcon is a function defined in eliza/packages/ui/src/cloud-ui/components/icons.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/icons.tsx:TelegramIcon",
+      "type": "function",
+      "name": "TelegramIcon",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/icons.tsx",
+      "summary": "TelegramIcon is a function defined in eliza/packages/ui/src/cloud-ui/components/icons.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/icons.tsx:WhatsAppIcon",
+      "type": "function",
+      "name": "WhatsAppIcon",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/icons.tsx",
+      "summary": "WhatsAppIcon is a function defined in eliza/packages/ui/src/cloud-ui/components/icons.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/icons.tsx:AppleMessagesIcon",
+      "type": "function",
+      "name": "AppleMessagesIcon",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/icons.tsx",
+      "summary": "AppleMessagesIcon is a function defined in eliza/packages/ui/src/cloud-ui/components/icons.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/icons.tsx:IMessageIcon",
+      "type": "function",
+      "name": "IMessageIcon",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/icons.tsx",
+      "summary": "IMessageIcon is a function defined in eliza/packages/ui/src/cloud-ui/components/icons.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/image-gen/empty-state.tsx",
+      "type": "file",
+      "name": "empty-state.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/image-gen/empty-state.tsx",
+      "summary": "empty-state.tsx is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 20 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/image-gen/empty-state.tsx:ImageEmptyState",
+      "type": "function",
+      "name": "ImageEmptyState",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/image-gen/empty-state.tsx",
+      "summary": "ImageEmptyState is a function defined in eliza/packages/ui/src/cloud-ui/components/image-gen/empty-state.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/image-gen/loading-state.tsx",
+      "type": "file",
+      "name": "loading-state.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/image-gen/loading-state.tsx",
+      "summary": "loading-state.tsx is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 30 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/image-gen/loading-state.tsx:LoadingState",
+      "type": "function",
+      "name": "LoadingState",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/image-gen/loading-state.tsx",
+      "summary": "LoadingState is a function defined in eliza/packages/ui/src/cloud-ui/components/image-gen/loading-state.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/image-gen/prompt-input.tsx",
+      "type": "file",
+      "name": "prompt-input.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/image-gen/prompt-input.tsx",
+      "summary": "prompt-input.tsx is a typescript source file in the Milady codebase. It contains 1 function, 3 imports.",
+      "languageNotes": "typescript; code; 229 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/image-gen/prompt-input.tsx:ImagePromptInput",
+      "type": "function",
+      "name": "ImagePromptInput",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/image-gen/prompt-input.tsx",
+      "summary": "ImagePromptInput is a function defined in eliza/packages/ui/src/cloud-ui/components/image-gen/prompt-input.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/infinite-moving-cards.tsx",
+      "type": "file",
+      "name": "infinite-moving-cards.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/infinite-moving-cards.tsx",
+      "summary": "infinite-moving-cards.tsx is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 117 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/infinite-moving-cards.tsx:InfiniteMovingCards",
+      "type": "function",
+      "name": "InfiniteMovingCards",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/infinite-moving-cards.tsx",
+      "summary": "InfiniteMovingCards is a function defined in eliza/packages/ui/src/cloud-ui/components/infinite-moving-cards.tsx."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/input-group.tsx",
+      "type": "file",
+      "name": "input-group.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/input-group.tsx",
+      "summary": "input-group.tsx is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 1 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/input.tsx",
+      "type": "file",
+      "name": "input.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/input.tsx",
+      "summary": "input.tsx is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 1 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/label.tsx",
+      "type": "file",
+      "name": "label.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/label.tsx",
+      "summary": "label.tsx is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 1 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-header.tsx",
+      "type": "file",
+      "name": "dashboard-header.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/layout/dashboard-header.tsx",
+      "summary": "dashboard-header.tsx is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 76 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-header.tsx:DashboardHeaderComponent",
+      "type": "function",
+      "name": "DashboardHeaderComponent",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/layout/dashboard-header.tsx",
+      "summary": "DashboardHeaderComponent is a function defined in eliza/packages/ui/src/cloud-ui/components/layout/dashboard-header.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-page.tsx",
+      "type": "file",
+      "name": "dashboard-page.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/layout/dashboard-page.tsx",
+      "summary": "dashboard-page.tsx is a typescript source file in the Milady codebase. It contains 4 functions, 1 imports.",
+      "languageNotes": "typescript; code; 103 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-page.tsx:DashboardPageContainer",
+      "type": "function",
+      "name": "DashboardPageContainer",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/layout/dashboard-page.tsx",
+      "summary": "DashboardPageContainer is a function defined in eliza/packages/ui/src/cloud-ui/components/layout/dashboard-page.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-page.tsx:DashboardPageStack",
+      "type": "function",
+      "name": "DashboardPageStack",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/layout/dashboard-page.tsx",
+      "summary": "DashboardPageStack is a function defined in eliza/packages/ui/src/cloud-ui/components/layout/dashboard-page.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-page.tsx:DashboardToolbar",
+      "type": "function",
+      "name": "DashboardToolbar",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/layout/dashboard-page.tsx",
+      "summary": "DashboardToolbar is a function defined in eliza/packages/ui/src/cloud-ui/components/layout/dashboard-page.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-page.tsx:DashboardStatGrid",
+      "type": "function",
+      "name": "DashboardStatGrid",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/layout/dashboard-page.tsx",
+      "summary": "DashboardStatGrid is a function defined in eliza/packages/ui/src/cloud-ui/components/layout/dashboard-page.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-route-page.tsx",
+      "type": "file",
+      "name": "dashboard-route-page.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/layout/dashboard-route-page.tsx",
+      "summary": "dashboard-route-page.tsx is a typescript source file in the Milady codebase. It contains 2 functions, 3 imports.",
+      "languageNotes": "typescript; code; 109 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-route-page.tsx:normalizeLayoutProps",
+      "type": "function",
+      "name": "normalizeLayoutProps",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/layout/dashboard-route-page.tsx",
+      "summary": "normalizeLayoutProps is a function defined in eliza/packages/ui/src/cloud-ui/components/layout/dashboard-route-page.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-route-page.tsx:DashboardRoutePage",
+      "type": "function",
+      "name": "DashboardRoutePage",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/layout/dashboard-route-page.tsx",
+      "summary": "DashboardRoutePage is a function defined in eliza/packages/ui/src/cloud-ui/components/layout/dashboard-route-page.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-item.tsx",
+      "type": "file",
+      "name": "dashboard-sidebar-item.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-item.tsx",
+      "summary": "dashboard-sidebar-item.tsx is a typescript source file in the Milady codebase. It contains 3 functions, 3 imports.",
+      "languageNotes": "typescript; code; 194 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-item.tsx:defaultIsItemActive",
+      "type": "function",
+      "name": "defaultIsItemActive",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-item.tsx",
+      "summary": "defaultIsItemActive is a function defined in eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-item.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-item.tsx:defaultRenderLink",
+      "type": "function",
+      "name": "defaultRenderLink",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-item.tsx",
+      "summary": "defaultRenderLink is a function defined in eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-item.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-item.tsx:DashboardSidebarNavigationItem",
+      "type": "function",
+      "name": "DashboardSidebarNavigationItem",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-item.tsx",
+      "summary": "DashboardSidebarNavigationItem is a function defined in eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-item.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-section.tsx",
+      "type": "file",
+      "name": "dashboard-sidebar-section.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-section.tsx",
+      "summary": "dashboard-sidebar-section.tsx is a typescript source file in the Milady codebase. It contains 1 function, 4 imports.",
+      "languageNotes": "typescript; code; 146 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-section.tsx:DashboardSidebarNavigationSection",
+      "type": "function",
+      "name": "DashboardSidebarNavigationSection",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-section.tsx",
+      "summary": "DashboardSidebarNavigationSection is a function defined in eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-section.tsx."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-types.ts",
+      "type": "file",
+      "name": "dashboard-sidebar-types.ts",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-types.ts",
+      "summary": "dashboard-sidebar-types.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 32 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar.tsx",
+      "type": "file",
+      "name": "dashboard-sidebar.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar.tsx",
+      "summary": "dashboard-sidebar.tsx is a typescript source file in the Milady codebase. It contains 1 function, 3 imports.",
+      "languageNotes": "typescript; code; 117 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar.tsx:DashboardSidebarComponent",
+      "type": "function",
+      "name": "DashboardSidebarComponent",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar.tsx",
+      "summary": "DashboardSidebarComponent is a function defined in eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/layout/page-header-context.tsx",
+      "type": "file",
+      "name": "page-header-context.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/layout/page-header-context.tsx",
+      "summary": "page-header-context.tsx is a typescript source file in the Milady codebase. It contains 3 functions.",
+      "languageNotes": "typescript; code; 114 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/layout/page-header-context.tsx:PageHeaderProvider",
+      "type": "function",
+      "name": "PageHeaderProvider",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/layout/page-header-context.tsx",
+      "summary": "PageHeaderProvider is a function defined in eliza/packages/ui/src/cloud-ui/components/layout/page-header-context.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/layout/page-header-context.tsx:usePageHeader",
+      "type": "function",
+      "name": "usePageHeader",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/layout/page-header-context.tsx",
+      "summary": "usePageHeader is a function defined in eliza/packages/ui/src/cloud-ui/components/layout/page-header-context.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/layout/page-header-context.tsx:useSetPageHeader",
+      "type": "function",
+      "name": "useSetPageHeader",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/layout/page-header-context.tsx",
+      "summary": "useSetPageHeader is a function defined in eliza/packages/ui/src/cloud-ui/components/layout/page-header-context.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/list-skeleton.tsx",
+      "type": "file",
+      "name": "list-skeleton.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/list-skeleton.tsx",
+      "summary": "list-skeleton.tsx is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 54 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/list-skeleton.tsx:ListSkeleton",
+      "type": "function",
+      "name": "ListSkeleton",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/list-skeleton.tsx",
+      "summary": "ListSkeleton is a function defined in eliza/packages/ui/src/cloud-ui/components/list-skeleton.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx",
+      "type": "file",
+      "name": "log-viewer.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx",
+      "summary": "log-viewer.tsx is a typescript source file in the Milady codebase. It contains 6 functions, 7 imports.",
+      "languageNotes": "typescript; code; 549 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx:formatTimestamp",
+      "type": "function",
+      "name": "formatTimestamp",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx",
+      "summary": "formatTimestamp is a function defined in eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx:getDefaultLineClassName",
+      "type": "function",
+      "name": "getDefaultLineClassName",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx",
+      "summary": "getDefaultLineClassName is a function defined in eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx:getDefaultEntryLevelVariant",
+      "type": "function",
+      "name": "getDefaultEntryLevelVariant",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx",
+      "summary": "getDefaultEntryLevelVariant is a function defined in eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx:getDefaultEntryClassName",
+      "type": "function",
+      "name": "getDefaultEntryClassName",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx",
+      "summary": "getDefaultEntryClassName is a function defined in eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx:renderMetadata",
+      "type": "function",
+      "name": "renderMetadata",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx",
+      "summary": "renderMetadata is a function defined in eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx:LogViewer",
+      "type": "function",
+      "name": "LogViewer",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx",
+      "summary": "LogViewer is a function defined in eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/monetization/animated-counter.tsx",
+      "type": "file",
+      "name": "animated-counter.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/monetization/animated-counter.tsx",
+      "summary": "animated-counter.tsx is a typescript source file in the Milady codebase. It contains 2 functions, 1 imports.",
+      "languageNotes": "typescript; code; 122 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/monetization/animated-counter.tsx:AnimatedCounter",
+      "type": "function",
+      "name": "AnimatedCounter",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/monetization/animated-counter.tsx",
+      "summary": "AnimatedCounter is a function defined in eliza/packages/ui/src/cloud-ui/components/monetization/animated-counter.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/monetization/animated-counter.tsx:AnimatedCounterWithLabel",
+      "type": "function",
+      "name": "AnimatedCounterWithLabel",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/monetization/animated-counter.tsx",
+      "summary": "AnimatedCounterWithLabel is a function defined in eliza/packages/ui/src/cloud-ui/components/monetization/animated-counter.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/monetization/earnings-simulator.tsx",
+      "type": "file",
+      "name": "earnings-simulator.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/monetization/earnings-simulator.tsx",
+      "summary": "earnings-simulator.tsx is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 169 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/monetization/earnings-simulator.tsx:EarningsSimulator",
+      "type": "function",
+      "name": "EarningsSimulator",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/monetization/earnings-simulator.tsx",
+      "summary": "EarningsSimulator is a function defined in eliza/packages/ui/src/cloud-ui/components/monetization/earnings-simulator.tsx."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/cloud-ui/components/monetization/milestone-progress.tsx",
+      "type": "file",
+      "name": "milestone-progress.tsx",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/monetization/milestone-progress.tsx",
+      "summary": "milestone-progress.tsx is a typescript source file in the Milady codebase. It contains 2 functions, 1 imports.",
+      "languageNotes": "typescript; code; 107 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/monetization/milestone-progress.tsx:MilestoneProgress",
+      "type": "function",
+      "name": "MilestoneProgress",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/monetization/milestone-progress.tsx",
+      "summary": "MilestoneProgress is a function defined in eliza/packages/ui/src/cloud-ui/components/monetization/milestone-progress.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/cloud-ui/components/monetization/milestone-progress.tsx:MilestoneCard",
+      "type": "function",
+      "name": "MilestoneCard",
+      "filePath": "eliza/packages/ui/src/cloud-ui/components/monetization/milestone-progress.tsx",
+      "summary": "MilestoneCard is a function defined in eliza/packages/ui/src/cloud-ui/components/monetization/milestone-progress.tsx."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/data-list/list-action-menu.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/data-list/list-action-menu.tsx:ListActionMenu",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/data-list/responsive-entity-list.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/data-list/responsive-entity-list.tsx:ResponsiveEntityList",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/data-list/stat-summary.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/data-list/stat-summary.tsx:StatSummary",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/docs/api-parameter-select.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/docs/api-parameter-select.tsx:ApiParameterSelect",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx:methodBadgeClass",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx:isProbablyPublic",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx:groupKeyForPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx:CopyButton",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx:generateCurlExample",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx:ApiRouteExplorerClient",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx:ApiRouteExplorerClient",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx:groupKeyForPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx:ApiRouteExplorerClient",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx:generateCurlExample",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx:ApiRouteExplorerClient",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx:methodBadgeClass",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx:ApiRouteExplorerClient",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx:methodBadgeClass",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx:ApiRouteExplorerClient",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx:groupKeyForPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer.tsx:ApiRouteExplorer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/docs/endpoint-card.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/docs/endpoint-card.tsx:getPricingTextStyle",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/docs/endpoint-card.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/docs/endpoint-card.tsx:fallbackPricingLabel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/docs/endpoint-card.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/docs/endpoint-card.tsx:EndpointCard",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/cloud-ui/components/docs/endpoint-card.tsx:EndpointCard",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/docs/endpoint-card.tsx:getPricingTextStyle",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/cloud-ui/components/docs/endpoint-card.tsx:EndpointCard",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/docs/endpoint-card.tsx:fallbackPricingLabel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/docs/openapi-viewer.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/docs/openapi-viewer.tsx:OpenApiViewer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/drawer.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/drawer.tsx:Drawer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/drawer.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/drawer.tsx:DrawerTrigger",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/drawer.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/drawer.tsx:DrawerPortal",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/drawer.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/drawer.tsx:DrawerClose",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/drawer.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/drawer.tsx:DrawerOverlay",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/drawer.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/drawer.tsx:DrawerContent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/drawer.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/drawer.tsx:DrawerHeader",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/drawer.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/drawer.tsx:DrawerFooter",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/drawer.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/drawer.tsx:DrawerTitle",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/drawer.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/drawer.tsx:DrawerDescription",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/glowing-stars.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/glowing-stars.tsx:GlowingStarsBackgroundCard",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/glowing-stars.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/glowing-stars.tsx:GlowingStarsDescription",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/glowing-stars.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/glowing-stars.tsx:GlowingStarsTitle",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/glowing-stars.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/glowing-stars.tsx:Illustration",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/glowing-stars.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/glowing-stars.tsx:Star",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/glowing-stars.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/glowing-stars.tsx:Glow",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/icons.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/icons.tsx:DiscordIcon",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/icons.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/icons.tsx:TelegramIcon",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/icons.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/icons.tsx:WhatsAppIcon",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/icons.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/icons.tsx:AppleMessagesIcon",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/icons.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/icons.tsx:IMessageIcon",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/image-gen/empty-state.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/image-gen/empty-state.tsx:ImageEmptyState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/image-gen/loading-state.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/image-gen/loading-state.tsx:LoadingState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/image-gen/prompt-input.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/image-gen/prompt-input.tsx:ImagePromptInput",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/infinite-moving-cards.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/infinite-moving-cards.tsx:InfiniteMovingCards",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-header.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-header.tsx:DashboardHeaderComponent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-page.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-page.tsx:DashboardPageContainer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-page.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-page.tsx:DashboardPageStack",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-page.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-page.tsx:DashboardToolbar",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-page.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-page.tsx:DashboardStatGrid",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-route-page.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-route-page.tsx:normalizeLayoutProps",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-route-page.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-route-page.tsx:DashboardRoutePage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-route-page.tsx:DashboardRoutePage",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-route-page.tsx:normalizeLayoutProps",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-route-page.tsx:DashboardRoutePage",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-route-page.tsx:normalizeLayoutProps",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-item.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-item.tsx:defaultIsItemActive",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-item.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-item.tsx:defaultRenderLink",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-item.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-item.tsx:DashboardSidebarNavigationItem",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-section.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-section.tsx:DashboardSidebarNavigationSection",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar.tsx:DashboardSidebarComponent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/layout/page-header-context.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/layout/page-header-context.tsx:PageHeaderProvider",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/layout/page-header-context.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/layout/page-header-context.tsx:usePageHeader",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/layout/page-header-context.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/layout/page-header-context.tsx:useSetPageHeader",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/cloud-ui/components/layout/page-header-context.tsx:useSetPageHeader",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/layout/page-header-context.tsx:usePageHeader",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/list-skeleton.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/list-skeleton.tsx:ListSkeleton",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx:formatTimestamp",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx:getDefaultLineClassName",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx:getDefaultEntryLevelVariant",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx:getDefaultEntryClassName",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx:renderMetadata",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx:LogViewer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx:LogViewer",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx:formatTimestamp",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx:LogViewer",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx:renderMetadata",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx:LogViewer",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx:renderMetadata",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/monetization/animated-counter.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/monetization/animated-counter.tsx:AnimatedCounter",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/monetization/animated-counter.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/monetization/animated-counter.tsx:AnimatedCounterWithLabel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/monetization/earnings-simulator.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/monetization/earnings-simulator.tsx:EarningsSimulator",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/monetization/milestone-progress.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/monetization/milestone-progress.tsx:MilestoneProgress",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/monetization/milestone-progress.tsx",
+      "target": "function:eliza/packages/ui/src/cloud-ui/components/monetization/milestone-progress.tsx:MilestoneCard",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/data-list/list-action-menu.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/components/brand/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/data-list/list-action-menu.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/components/dropdown-menu.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/data-list/list-action-menu.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/data-list/responsive-entity-list.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/components/data-list/dashboard-data-list.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/data-list/responsive-entity-list.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/components/table.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/data-list/responsive-entity-list.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/data-list/stat-summary.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/components/brand/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/data-list/stat-summary.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/docs/api-parameter-select.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/components/select.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/docs/api-parameter-select.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/types/cloud-api.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer-client.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/docs/api-route-explorer.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/types/cloud-api.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/docs/endpoint-card.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/docs/openapi-viewer.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/components/code/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/docs/openapi-viewer.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/drawer.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/glowing-effect.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/glowing-stars.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/image-gen/empty-state.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/components/empty-state.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/image-gen/loading-state.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/components/skeleton.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/image-gen/prompt-input.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/components/button.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/image-gen/prompt-input.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/components/label.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/image-gen/prompt-input.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/components/select.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/infinite-moving-cards.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-header.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/components/brand/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-page.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-route-page.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-page.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-route-page.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/components/layout/page-header-context.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-route-page.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-item.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-item.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/components/tooltip.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-item.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-section.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/components/collapsible.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-section.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-item.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-section.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-section.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-section.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar-types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/layout/dashboard-sidebar.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/list-skeleton.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/components/badge.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/components/brand/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/components/input.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/components/scroll-area.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/components/select.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/components/skeleton.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/log-viewer.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/monetization/animated-counter.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/monetization/earnings-simulator.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/components/slider.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/monetization/earnings-simulator.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/cloud-ui/components/monetization/milestone-progress.tsx",
+      "target": "file:eliza/packages/ui/src/cloud-ui/lib/utils.ts",
+      "type": "imports"
+    }
+  ]
+}

@@ -1,0 +1,321 @@
+{
+  "batchIndex": 135,
+  "nodes": [
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/helpers/browser-mocks.ts",
+      "type": "file",
+      "name": "browser-mocks.ts",
+      "filePath": "eliza/packages/app-core/test/helpers/browser-mocks.ts",
+      "summary": "browser-mocks.ts is a typescript source file in the Milady codebase. It contains 6 functions.",
+      "languageNotes": "typescript; code; 275 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/helpers/browser-mocks.ts:createMemoryStorage",
+      "type": "function",
+      "name": "createMemoryStorage",
+      "filePath": "eliza/packages/app-core/test/helpers/browser-mocks.ts",
+      "summary": "createMemoryStorage is a function defined in eliza/packages/app-core/test/helpers/browser-mocks.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/helpers/browser-mocks.ts:hasStorageApi",
+      "type": "function",
+      "name": "hasStorageApi",
+      "filePath": "eliza/packages/app-core/test/helpers/browser-mocks.ts",
+      "summary": "hasStorageApi is a function defined in eliza/packages/app-core/test/helpers/browser-mocks.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/helpers/browser-mocks.ts:createCanvas2DContext",
+      "type": "function",
+      "name": "createCanvas2DContext",
+      "filePath": "eliza/packages/app-core/test/helpers/browser-mocks.ts",
+      "summary": "createCanvas2DContext is a function defined in eliza/packages/app-core/test/helpers/browser-mocks.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/helpers/browser-mocks.ts:installCanvasShims",
+      "type": "function",
+      "name": "installCanvasShims",
+      "filePath": "eliza/packages/app-core/test/helpers/browser-mocks.ts",
+      "summary": "installCanvasShims is a function defined in eliza/packages/app-core/test/helpers/browser-mocks.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/helpers/browser-mocks.ts:installMediaElementShims",
+      "type": "function",
+      "name": "installMediaElementShims",
+      "filePath": "eliza/packages/app-core/test/helpers/browser-mocks.ts",
+      "summary": "installMediaElementShims is a function defined in eliza/packages/app-core/test/helpers/browser-mocks.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/helpers/browser-mocks.ts:suppressReactTestConsoleErrors",
+      "type": "function",
+      "name": "suppressReactTestConsoleErrors",
+      "filePath": "eliza/packages/app-core/test/helpers/browser-mocks.ts",
+      "summary": "suppressReactTestConsoleErrors is a function defined in eliza/packages/app-core/test/helpers/browser-mocks.ts."
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/test/live.setup.ts",
+      "type": "file",
+      "name": "live.setup.ts",
+      "filePath": "eliza/packages/app-core/test/live.setup.ts",
+      "summary": "live.setup.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 59 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/test/setup.ts",
+      "type": "file",
+      "name": "setup.ts",
+      "filePath": "eliza/packages/app-core/test/setup.ts",
+      "summary": "setup.ts is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 405 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/setup.ts:ensureStorage",
+      "type": "function",
+      "name": "ensureStorage",
+      "filePath": "eliza/packages/app-core/test/setup.ts",
+      "summary": "ensureStorage is a function defined in eliza/packages/app-core/test/setup.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/setup.ts:defaultCreateNodeMock",
+      "type": "function",
+      "name": "defaultCreateNodeMock",
+      "filePath": "eliza/packages/app-core/test/setup.ts",
+      "summary": "defaultCreateNodeMock is a function defined in eliza/packages/app-core/test/setup.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/test/test-env.ts",
+      "type": "file",
+      "name": "test-env.ts",
+      "filePath": "eliza/packages/app-core/test/test-env.ts",
+      "summary": "test-env.ts is a typescript source file in the Milady codebase. It contains 4 functions.",
+      "languageNotes": "typescript; code; 156 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/test-env.ts:restoreEnv",
+      "type": "function",
+      "name": "restoreEnv",
+      "filePath": "eliza/packages/app-core/test/test-env.ts",
+      "summary": "restoreEnv is a function defined in eliza/packages/app-core/test/test-env.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/test-env.ts:loadProfileEnv",
+      "type": "function",
+      "name": "loadProfileEnv",
+      "filePath": "eliza/packages/app-core/test/test-env.ts",
+      "summary": "loadProfileEnv is a function defined in eliza/packages/app-core/test/test-env.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/app-core/test/test-env.ts:installTestEnv",
+      "type": "function",
+      "name": "installTestEnv",
+      "filePath": "eliza/packages/app-core/test/test-env.ts",
+      "summary": "installTestEnv is a function defined in eliza/packages/app-core/test/test-env.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/test/test-env.ts:withIsolatedTestHome",
+      "type": "function",
+      "name": "withIsolatedTestHome",
+      "filePath": "eliza/packages/app-core/test/test-env.ts",
+      "summary": "withIsolatedTestHome is a function defined in eliza/packages/app-core/test/test-env.ts."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/helpers/browser-mocks.ts",
+      "target": "function:eliza/packages/app-core/test/helpers/browser-mocks.ts:createMemoryStorage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/helpers/browser-mocks.ts",
+      "target": "function:eliza/packages/app-core/test/helpers/browser-mocks.ts:hasStorageApi",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/helpers/browser-mocks.ts",
+      "target": "function:eliza/packages/app-core/test/helpers/browser-mocks.ts:createCanvas2DContext",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/helpers/browser-mocks.ts",
+      "target": "function:eliza/packages/app-core/test/helpers/browser-mocks.ts:installCanvasShims",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/helpers/browser-mocks.ts",
+      "target": "function:eliza/packages/app-core/test/helpers/browser-mocks.ts:installMediaElementShims",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/helpers/browser-mocks.ts",
+      "target": "function:eliza/packages/app-core/test/helpers/browser-mocks.ts:suppressReactTestConsoleErrors",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/setup.ts",
+      "target": "function:eliza/packages/app-core/test/setup.ts:ensureStorage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/setup.ts",
+      "target": "function:eliza/packages/app-core/test/setup.ts:defaultCreateNodeMock",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/test-env.ts",
+      "target": "function:eliza/packages/app-core/test/test-env.ts:restoreEnv",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/test-env.ts",
+      "target": "function:eliza/packages/app-core/test/test-env.ts:loadProfileEnv",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/test-env.ts",
+      "target": "function:eliza/packages/app-core/test/test-env.ts:installTestEnv",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/test/test-env.ts",
+      "target": "function:eliza/packages/app-core/test/test-env.ts:withIsolatedTestHome",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/test-env.ts:installTestEnv",
+      "target": "function:eliza/packages/app-core/test/test-env.ts:loadProfileEnv",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/test/test-env.ts:withIsolatedTestHome",
+      "target": "function:eliza/packages/app-core/test/test-env.ts:installTestEnv",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/live.setup.ts",
+      "target": "file:eliza/packages/app-core/test/test-env.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/setup.ts",
+      "target": "file:eliza/packages/app-core/test/helpers/browser-mocks.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/test/setup.ts",
+      "target": "file:eliza/packages/app-core/test/test-env.ts",
+      "type": "imports"
+    }
+  ]
+}

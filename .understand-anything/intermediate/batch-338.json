@@ -1,0 +1,1841 @@
+{
+  "batchIndex": 338,
+  "nodes": [
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-agent-skills/src/agent-runtime-shim.ts",
+      "type": "file",
+      "name": "agent-runtime-shim.ts",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/agent-runtime-shim.ts",
+      "summary": "agent-runtime-shim.ts is a typescript source file in the Milady codebase. It contains 4 functions.",
+      "languageNotes": "typescript; code; 75 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/agent-runtime-shim.ts:createIntegrationTelemetrySpan",
+      "type": "function",
+      "name": "createIntegrationTelemetrySpan",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/agent-runtime-shim.ts",
+      "summary": "createIntegrationTelemetrySpan is a function defined in eliza/plugins/plugin-agent-skills/src/agent-runtime-shim.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/agent-runtime-shim.ts:resolveUserPath",
+      "type": "function",
+      "name": "resolveUserPath",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/agent-runtime-shim.ts",
+      "summary": "resolveUserPath is a function defined in eliza/plugins/plugin-agent-skills/src/agent-runtime-shim.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/agent-runtime-shim.ts:hasProjectWorkspaceMarker",
+      "type": "function",
+      "name": "hasProjectWorkspaceMarker",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/agent-runtime-shim.ts",
+      "summary": "hasProjectWorkspaceMarker is a function defined in eliza/plugins/plugin-agent-skills/src/agent-runtime-shim.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/agent-runtime-shim.ts:resolveDefaultAgentWorkspaceDir",
+      "type": "function",
+      "name": "resolveDefaultAgentWorkspaceDir",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/agent-runtime-shim.ts",
+      "summary": "resolveDefaultAgentWorkspaceDir is a function defined in eliza/plugins/plugin-agent-skills/src/agent-runtime-shim.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "api",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts",
+      "type": "file",
+      "name": "curated-skills-routes.ts",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts",
+      "summary": "curated-skills-routes.ts is a typescript source file in the Milady codebase. It contains 9 functions.",
+      "languageNotes": "typescript; code; 366 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:curatedActiveDir",
+      "type": "function",
+      "name": "curatedActiveDir",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts",
+      "summary": "curatedActiveDir is a function defined in eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:curatedProposedDir",
+      "type": "function",
+      "name": "curatedProposedDir",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts",
+      "summary": "curatedProposedDir is a function defined in eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:curatedDisabledDir",
+      "type": "function",
+      "name": "curatedDisabledDir",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts",
+      "summary": "curatedDisabledDir is a function defined in eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:isValidName",
+      "type": "function",
+      "name": "isValidName",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts",
+      "summary": "isValidName is a function defined in eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:listSkillEntries",
+      "type": "function",
+      "name": "listSkillEntries",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts",
+      "summary": "listSkillEntries is a function defined in eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:parseSkillFile",
+      "type": "function",
+      "name": "parseSkillFile",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts",
+      "summary": "parseSkillFile is a function defined in eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:stripQuotes",
+      "type": "function",
+      "name": "stripQuotes",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts",
+      "summary": "stripQuotes is a function defined in eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:moveSkillDirectory",
+      "type": "function",
+      "name": "moveSkillDirectory",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts",
+      "summary": "moveSkillDirectory is a function defined in eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:handleCuratedSkillsRoutes",
+      "type": "function",
+      "name": "handleCuratedSkillsRoutes",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts",
+      "summary": "handleCuratedSkillsRoutes is a function defined in eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts."
+    },
+    {
+      "tags": [
+        "documentation",
+        "plugin",
+        "api"
+      ],
+      "complexity": "simple",
+      "id": "document:eliza/plugins/plugin-agent-skills/src/api/skill-scaffold.md",
+      "type": "document",
+      "name": "skill-scaffold.md",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/api/skill-scaffold.md",
+      "summary": "skill-scaffold.md documents eliza/plugins/plugin-agent-skills/src/api with 18 lines of reference material.",
+      "languageNotes": "markdown; docs; 18 lines"
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts",
+      "type": "file",
+      "name": "skill-catalog-client.ts",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts",
+      "summary": "skill-catalog-client.ts is a typescript source file in the Milady codebase. It contains 7 functions.",
+      "languageNotes": "typescript; code; 194 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts:findCatalogPaths",
+      "type": "function",
+      "name": "findCatalogPaths",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts",
+      "summary": "findCatalogPaths is a function defined in eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts:readCatalogFile",
+      "type": "function",
+      "name": "readCatalogFile",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts",
+      "summary": "readCatalogFile is a function defined in eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts:getCatalogSkills",
+      "type": "function",
+      "name": "getCatalogSkills",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts",
+      "summary": "getCatalogSkills is a function defined in eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts:refreshCatalog",
+      "type": "function",
+      "name": "refreshCatalog",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts",
+      "summary": "refreshCatalog is a function defined in eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts:getCatalogSkill",
+      "type": "function",
+      "name": "getCatalogSkill",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts",
+      "summary": "getCatalogSkill is a function defined in eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts:searchCatalogSkills",
+      "type": "function",
+      "name": "searchCatalogSkills",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts",
+      "summary": "searchCatalogSkills is a function defined in eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts:getTrendingSkills",
+      "type": "function",
+      "name": "getTrendingSkills",
+      "filePath": "eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts",
+      "summary": "getTrendingSkills is a function defined in eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts."
+    },
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-agent-skills/tsup.config.ts",
+      "type": "file",
+      "name": "tsup.config.ts",
+      "filePath": "eliza/plugins/plugin-agent-skills/tsup.config.ts",
+      "summary": "tsup.config.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 23 lines"
+    },
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-agent-skills/vitest.config.ts",
+      "type": "file",
+      "name": "vitest.config.ts",
+      "filePath": "eliza/plugins/plugin-agent-skills/vitest.config.ts",
+      "summary": "vitest.config.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 9 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-app-control/src/actions/views-management.test.ts",
+      "type": "file",
+      "name": "views-management.test.ts",
+      "filePath": "eliza/plugins/plugin-app-control/src/actions/views-management.test.ts",
+      "summary": "views-management.test.ts is a typescript source file in the Milady codebase. It contains 4 functions, 5 imports.",
+      "languageNotes": "typescript; code; 603 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/actions/views-management.test.ts:message",
+      "type": "function",
+      "name": "message",
+      "filePath": "eliza/plugins/plugin-app-control/src/actions/views-management.test.ts",
+      "summary": "message is a function defined in eliza/plugins/plugin-app-control/src/actions/views-management.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/actions/views-management.test.ts:view",
+      "type": "function",
+      "name": "view",
+      "filePath": "eliza/plugins/plugin-app-control/src/actions/views-management.test.ts",
+      "summary": "view is a function defined in eliza/plugins/plugin-app-control/src/actions/views-management.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/actions/views-management.test.ts:createRuntime",
+      "type": "function",
+      "name": "createRuntime",
+      "filePath": "eliza/plugins/plugin-app-control/src/actions/views-management.test.ts",
+      "summary": "createRuntime is a function defined in eliza/plugins/plugin-app-control/src/actions/views-management.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/actions/views-management.test.ts:createRepoFixture",
+      "type": "function",
+      "name": "createRepoFixture",
+      "filePath": "eliza/plugins/plugin-app-control/src/actions/views-management.test.ts",
+      "summary": "createRepoFixture is a function defined in eliza/plugins/plugin-app-control/src/actions/views-management.test.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-app-control/src/protected-apps.ts",
+      "type": "file",
+      "name": "protected-apps.ts",
+      "filePath": "eliza/plugins/plugin-app-control/src/protected-apps.ts",
+      "summary": "protected-apps.ts is a typescript source file in the Milady codebase. It contains 6 functions.",
+      "languageNotes": "typescript; code; 121 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/protected-apps.ts:splitEnvList",
+      "type": "function",
+      "name": "splitEnvList",
+      "filePath": "eliza/plugins/plugin-app-control/src/protected-apps.ts",
+      "summary": "splitEnvList is a function defined in eliza/plugins/plugin-app-control/src/protected-apps.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/protected-apps.ts:packageBasename",
+      "type": "function",
+      "name": "packageBasename",
+      "filePath": "eliza/plugins/plugin-app-control/src/protected-apps.ts",
+      "summary": "packageBasename is a function defined in eliza/plugins/plugin-app-control/src/protected-apps.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/protected-apps.ts:expansionsFor",
+      "type": "function",
+      "name": "expansionsFor",
+      "filePath": "eliza/plugins/plugin-app-control/src/protected-apps.ts",
+      "summary": "expansionsFor is a function defined in eliza/plugins/plugin-app-control/src/protected-apps.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/protected-apps.ts:listFirstPartyApps",
+      "type": "function",
+      "name": "listFirstPartyApps",
+      "filePath": "eliza/plugins/plugin-app-control/src/protected-apps.ts",
+      "summary": "listFirstPartyApps is a function defined in eliza/plugins/plugin-app-control/src/protected-apps.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/protected-apps.ts:resolveProtectedApps",
+      "type": "function",
+      "name": "resolveProtectedApps",
+      "filePath": "eliza/plugins/plugin-app-control/src/protected-apps.ts",
+      "summary": "resolveProtectedApps is a function defined in eliza/plugins/plugin-app-control/src/protected-apps.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/protected-apps.ts:isProtected",
+      "type": "function",
+      "name": "isProtected",
+      "filePath": "eliza/plugins/plugin-app-control/src/protected-apps.ts",
+      "summary": "isProtected is a function defined in eliza/plugins/plugin-app-control/src/protected-apps.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-app-control/src/resolve.ts",
+      "type": "file",
+      "name": "resolve.ts",
+      "filePath": "eliza/plugins/plugin-app-control/src/resolve.ts",
+      "summary": "resolve.ts is a typescript source file in the Milady codebase. It contains 8 functions, 1 imports.",
+      "languageNotes": "typescript; code; 89 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/resolve.ts:norm",
+      "type": "function",
+      "name": "norm",
+      "filePath": "eliza/plugins/plugin-app-control/src/resolve.ts",
+      "summary": "norm is a function defined in eliza/plugins/plugin-app-control/src/resolve.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/resolve.ts:appKeys",
+      "type": "function",
+      "name": "appKeys",
+      "filePath": "eliza/plugins/plugin-app-control/src/resolve.ts",
+      "summary": "appKeys is a function defined in eliza/plugins/plugin-app-control/src/resolve.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/resolve.ts:runKeys",
+      "type": "function",
+      "name": "runKeys",
+      "filePath": "eliza/plugins/plugin-app-control/src/resolve.ts",
+      "summary": "runKeys is a function defined in eliza/plugins/plugin-app-control/src/resolve.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/resolve.ts:matches",
+      "type": "function",
+      "name": "matches",
+      "filePath": "eliza/plugins/plugin-app-control/src/resolve.ts",
+      "summary": "matches is a function defined in eliza/plugins/plugin-app-control/src/resolve.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/resolve.ts:resolveInstalledApp",
+      "type": "function",
+      "name": "resolveInstalledApp",
+      "filePath": "eliza/plugins/plugin-app-control/src/resolve.ts",
+      "summary": "resolveInstalledApp is a function defined in eliza/plugins/plugin-app-control/src/resolve.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/resolve.ts:resolveRunByName",
+      "type": "function",
+      "name": "resolveRunByName",
+      "filePath": "eliza/plugins/plugin-app-control/src/resolve.ts",
+      "summary": "resolveRunByName is a function defined in eliza/plugins/plugin-app-control/src/resolve.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/resolve.ts:formatAppCandidates",
+      "type": "function",
+      "name": "formatAppCandidates",
+      "filePath": "eliza/plugins/plugin-app-control/src/resolve.ts",
+      "summary": "formatAppCandidates is a function defined in eliza/plugins/plugin-app-control/src/resolve.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/resolve.ts:formatRunCandidates",
+      "type": "function",
+      "name": "formatRunCandidates",
+      "filePath": "eliza/plugins/plugin-app-control/src/resolve.ts",
+      "summary": "formatRunCandidates is a function defined in eliza/plugins/plugin-app-control/src/resolve.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "plugin"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-app-control/src/services/__tests__/app-worker-host.test.ts",
+      "type": "file",
+      "name": "app-worker-host.test.ts",
+      "filePath": "eliza/plugins/plugin-app-control/src/services/__tests__/app-worker-host.test.ts",
+      "summary": "app-worker-host.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 422 lines"
+    },
+    {
+      "tags": [
+        "entry-point",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-app-control/src/services/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/plugins/plugin-app-control/src/services/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 15 lines"
+    },
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-app-control/src/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "eliza/plugins/plugin-app-control/src/types.ts",
+      "summary": "types.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 55 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-app-control/src/views/ViewManagerView.test.ts",
+      "type": "file",
+      "name": "ViewManagerView.test.ts",
+      "filePath": "eliza/plugins/plugin-app-control/src/views/ViewManagerView.test.ts",
+      "summary": "ViewManagerView.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 67 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/views/ViewManagerView.test.ts:jsonResponse",
+      "type": "function",
+      "name": "jsonResponse",
+      "filePath": "eliza/plugins/plugin-app-control/src/views/ViewManagerView.test.ts",
+      "summary": "jsonResponse is a function defined in eliza/plugins/plugin-app-control/src/views/ViewManagerView.test.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx",
+      "type": "file",
+      "name": "ViewManagerView.tsx",
+      "filePath": "eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx",
+      "summary": "ViewManagerView.tsx is a typescript source file in the Milady codebase. It contains 9 functions.",
+      "languageNotes": "typescript; code; 487 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx:fetchViewEntries",
+      "type": "function",
+      "name": "fetchViewEntries",
+      "filePath": "eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx",
+      "summary": "fetchViewEntries is a function defined in eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx:requestViewNavigation",
+      "type": "function",
+      "name": "requestViewNavigation",
+      "filePath": "eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx",
+      "summary": "requestViewNavigation is a function defined in eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx:ViewCard",
+      "type": "function",
+      "name": "ViewCard",
+      "filePath": "eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx",
+      "summary": "ViewCard is a function defined in eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx:EmptyState",
+      "type": "function",
+      "name": "EmptyState",
+      "filePath": "eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx",
+      "summary": "EmptyState is a function defined in eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx:ViewManagerView",
+      "type": "function",
+      "name": "ViewManagerView",
+      "filePath": "eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx",
+      "summary": "ViewManagerView is a function defined in eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx:TuiStatusBadge",
+      "type": "function",
+      "name": "TuiStatusBadge",
+      "filePath": "eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx",
+      "summary": "TuiStatusBadge is a function defined in eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx:TuiViewRow",
+      "type": "function",
+      "name": "TuiViewRow",
+      "filePath": "eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx",
+      "summary": "TuiViewRow is a function defined in eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx:ViewManagerTuiView",
+      "type": "function",
+      "name": "ViewManagerTuiView",
+      "filePath": "eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx",
+      "summary": "ViewManagerTuiView is a function defined in eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx:interact",
+      "type": "function",
+      "name": "interact",
+      "filePath": "eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx",
+      "summary": "interact is a function defined in eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx."
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts",
+      "type": "file",
+      "name": "app-worker-entry.ts",
+      "filePath": "eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts",
+      "summary": "app-worker-entry.ts is a typescript source file in the Milady codebase. It contains 10 functions.",
+      "languageNotes": "typescript; code; 404 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts:declaredHosts",
+      "type": "function",
+      "name": "declaredHosts",
+      "filePath": "eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts",
+      "summary": "declaredHosts is a function defined in eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts:hostMatches",
+      "type": "function",
+      "name": "hostMatches",
+      "filePath": "eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts",
+      "summary": "hostMatches is a function defined in eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts:hasDeclaredFsOperation",
+      "type": "function",
+      "name": "hasDeclaredFsOperation",
+      "filePath": "eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts",
+      "summary": "hasDeclaredFsOperation is a function defined in eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts:gatedFetch",
+      "type": "function",
+      "name": "gatedFetch",
+      "filePath": "eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts",
+      "summary": "gatedFetch is a function defined in eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts:checkFsAccess",
+      "type": "function",
+      "name": "checkFsAccess",
+      "filePath": "eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts",
+      "summary": "checkFsAccess is a function defined in eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts:loadPlugin",
+      "type": "function",
+      "name": "loadPlugin",
+      "filePath": "eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts",
+      "summary": "loadPlugin is a function defined in eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts:makeRuntimeStub",
+      "type": "function",
+      "name": "makeRuntimeStub",
+      "filePath": "eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts",
+      "summary": "makeRuntimeStub is a function defined in eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts:dispatchInvokeAction",
+      "type": "function",
+      "name": "dispatchInvokeAction",
+      "filePath": "eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts",
+      "summary": "dispatchInvokeAction is a function defined in eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts:dispatch",
+      "type": "function",
+      "name": "dispatch",
+      "filePath": "eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts",
+      "summary": "dispatch is a function defined in eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts:bootSequence",
+      "type": "function",
+      "name": "bootSequence",
+      "filePath": "eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts",
+      "summary": "bootSequence is a function defined in eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-app-control/test/fixtures/sandbox-plugin/plugin.ts",
+      "type": "file",
+      "name": "plugin.ts",
+      "filePath": "eliza/plugins/plugin-app-control/test/fixtures/sandbox-plugin/plugin.ts",
+      "summary": "plugin.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 102 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-app-control/test/scenarios/app-create-cancel.scenario.ts",
+      "type": "file",
+      "name": "app-create-cancel.scenario.ts",
+      "filePath": "eliza/plugins/plugin-app-control/test/scenarios/app-create-cancel.scenario.ts",
+      "summary": "app-create-cancel.scenario.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 61 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-app-control/test/scenarios/app-create-no-existing.scenario.ts",
+      "type": "file",
+      "name": "app-create-no-existing.scenario.ts",
+      "filePath": "eliza/plugins/plugin-app-control/test/scenarios/app-create-no-existing.scenario.ts",
+      "summary": "app-create-no-existing.scenario.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 56 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-app-control/test/scenarios/app-create-with-existing-picker.scenario.ts",
+      "type": "file",
+      "name": "app-create-with-existing-picker.scenario.ts",
+      "filePath": "eliza/plugins/plugin-app-control/test/scenarios/app-create-with-existing-picker.scenario.ts",
+      "summary": "app-create-with-existing-picker.scenario.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 62 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-app-control/test/scenarios/app-launch-basic.scenario.ts",
+      "type": "file",
+      "name": "app-launch-basic.scenario.ts",
+      "filePath": "eliza/plugins/plugin-app-control/test/scenarios/app-launch-basic.scenario.ts",
+      "summary": "app-launch-basic.scenario.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 42 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-app-control/test/scenarios/app-list.scenario.ts",
+      "type": "file",
+      "name": "app-list.scenario.ts",
+      "filePath": "eliza/plugins/plugin-app-control/test/scenarios/app-list.scenario.ts",
+      "summary": "app-list.scenario.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 42 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-app-control/test/scenarios/app-load-from-directory.scenario.ts",
+      "type": "file",
+      "name": "app-load-from-directory.scenario.ts",
+      "filePath": "eliza/plugins/plugin-app-control/test/scenarios/app-load-from-directory.scenario.ts",
+      "summary": "app-load-from-directory.scenario.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 42 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-app-control/test/scenarios/app-relaunch.scenario.ts",
+      "type": "file",
+      "name": "app-relaunch.scenario.ts",
+      "filePath": "eliza/plugins/plugin-app-control/test/scenarios/app-relaunch.scenario.ts",
+      "summary": "app-relaunch.scenario.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 42 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-app-control/test/scenarios/views-list.scenario.ts",
+      "type": "file",
+      "name": "views-list.scenario.ts",
+      "filePath": "eliza/plugins/plugin-app-control/test/scenarios/views-list.scenario.ts",
+      "summary": "views-list.scenario.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 42 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-app-control/test/scenarios/views-search.scenario.ts",
+      "type": "file",
+      "name": "views-search.scenario.ts",
+      "filePath": "eliza/plugins/plugin-app-control/test/scenarios/views-search.scenario.ts",
+      "summary": "views-search.scenario.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 42 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/agent-runtime-shim.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/agent-runtime-shim.ts:createIntegrationTelemetrySpan",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/agent-runtime-shim.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/agent-runtime-shim.ts:resolveUserPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/agent-runtime-shim.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/agent-runtime-shim.ts:hasProjectWorkspaceMarker",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/agent-runtime-shim.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/agent-runtime-shim.ts:resolveDefaultAgentWorkspaceDir",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/agent-runtime-shim.ts:resolveDefaultAgentWorkspaceDir",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/agent-runtime-shim.ts:resolveUserPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/agent-runtime-shim.ts:resolveDefaultAgentWorkspaceDir",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/agent-runtime-shim.ts:resolveUserPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/agent-runtime-shim.ts:resolveDefaultAgentWorkspaceDir",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/agent-runtime-shim.ts:hasProjectWorkspaceMarker",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/agent-runtime-shim.ts:resolveDefaultAgentWorkspaceDir",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/agent-runtime-shim.ts:resolveUserPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:curatedActiveDir",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:curatedProposedDir",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:curatedDisabledDir",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:isValidName",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:listSkillEntries",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:parseSkillFile",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:stripQuotes",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:moveSkillDirectory",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:handleCuratedSkillsRoutes",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:listSkillEntries",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:parseSkillFile",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:parseSkillFile",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:stripQuotes",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:parseSkillFile",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:stripQuotes",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:parseSkillFile",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:stripQuotes",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:parseSkillFile",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:stripQuotes",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:parseSkillFile",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:stripQuotes",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:handleCuratedSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:listSkillEntries",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:handleCuratedSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:curatedActiveDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:handleCuratedSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:listSkillEntries",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:handleCuratedSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:curatedProposedDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:handleCuratedSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:listSkillEntries",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:handleCuratedSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:curatedDisabledDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:handleCuratedSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:isValidName",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:handleCuratedSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:curatedProposedDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:handleCuratedSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:curatedActiveDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:handleCuratedSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:moveSkillDirectory",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:handleCuratedSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:isValidName",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:handleCuratedSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:curatedActiveDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:handleCuratedSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:curatedDisabledDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:handleCuratedSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:moveSkillDirectory",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:handleCuratedSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:isValidName",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:handleCuratedSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:curatedActiveDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:handleCuratedSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:curatedProposedDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:handleCuratedSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:curatedDisabledDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:handleCuratedSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:isValidName",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:handleCuratedSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:curatedActiveDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:handleCuratedSkillsRoutes",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/api/curated-skills-routes.ts:curatedProposedDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts:findCatalogPaths",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts:readCatalogFile",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts:getCatalogSkills",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts:refreshCatalog",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts:getCatalogSkill",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts:searchCatalogSkills",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts:getTrendingSkills",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts:readCatalogFile",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts:findCatalogPaths",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts:getCatalogSkills",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts:readCatalogFile",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts:refreshCatalog",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts:getCatalogSkills",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts:getCatalogSkill",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts:getCatalogSkills",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts:searchCatalogSkills",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts:getCatalogSkills",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts:getTrendingSkills",
+      "target": "function:eliza/plugins/plugin-agent-skills/src/services/skill-catalog-client.ts:getCatalogSkills",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/actions/views-management.test.ts",
+      "target": "function:eliza/plugins/plugin-app-control/src/actions/views-management.test.ts:message",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/actions/views-management.test.ts",
+      "target": "function:eliza/plugins/plugin-app-control/src/actions/views-management.test.ts:view",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/actions/views-management.test.ts",
+      "target": "function:eliza/plugins/plugin-app-control/src/actions/views-management.test.ts:createRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/actions/views-management.test.ts",
+      "target": "function:eliza/plugins/plugin-app-control/src/actions/views-management.test.ts:createRepoFixture",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/protected-apps.ts",
+      "target": "function:eliza/plugins/plugin-app-control/src/protected-apps.ts:splitEnvList",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/protected-apps.ts",
+      "target": "function:eliza/plugins/plugin-app-control/src/protected-apps.ts:packageBasename",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/protected-apps.ts",
+      "target": "function:eliza/plugins/plugin-app-control/src/protected-apps.ts:expansionsFor",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/protected-apps.ts",
+      "target": "function:eliza/plugins/plugin-app-control/src/protected-apps.ts:listFirstPartyApps",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/protected-apps.ts",
+      "target": "function:eliza/plugins/plugin-app-control/src/protected-apps.ts:resolveProtectedApps",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/protected-apps.ts",
+      "target": "function:eliza/plugins/plugin-app-control/src/protected-apps.ts:isProtected",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-app-control/src/protected-apps.ts:expansionsFor",
+      "target": "function:eliza/plugins/plugin-app-control/src/protected-apps.ts:packageBasename",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-app-control/src/protected-apps.ts:resolveProtectedApps",
+      "target": "function:eliza/plugins/plugin-app-control/src/protected-apps.ts:splitEnvList",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-app-control/src/protected-apps.ts:resolveProtectedApps",
+      "target": "function:eliza/plugins/plugin-app-control/src/protected-apps.ts:listFirstPartyApps",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-app-control/src/protected-apps.ts:resolveProtectedApps",
+      "target": "function:eliza/plugins/plugin-app-control/src/protected-apps.ts:expansionsFor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-app-control/src/protected-apps.ts:isProtected",
+      "target": "function:eliza/plugins/plugin-app-control/src/protected-apps.ts:expansionsFor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/resolve.ts",
+      "target": "function:eliza/plugins/plugin-app-control/src/resolve.ts:norm",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/resolve.ts",
+      "target": "function:eliza/plugins/plugin-app-control/src/resolve.ts:appKeys",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/resolve.ts",
+      "target": "function:eliza/plugins/plugin-app-control/src/resolve.ts:runKeys",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/resolve.ts",
+      "target": "function:eliza/plugins/plugin-app-control/src/resolve.ts:matches",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/resolve.ts",
+      "target": "function:eliza/plugins/plugin-app-control/src/resolve.ts:resolveInstalledApp",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/resolve.ts",
+      "target": "function:eliza/plugins/plugin-app-control/src/resolve.ts:resolveRunByName",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/resolve.ts",
+      "target": "function:eliza/plugins/plugin-app-control/src/resolve.ts:formatAppCandidates",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/resolve.ts",
+      "target": "function:eliza/plugins/plugin-app-control/src/resolve.ts:formatRunCandidates",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-app-control/src/resolve.ts:matches",
+      "target": "function:eliza/plugins/plugin-app-control/src/resolve.ts:norm",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-app-control/src/resolve.ts:resolveInstalledApp",
+      "target": "function:eliza/plugins/plugin-app-control/src/resolve.ts:matches",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-app-control/src/resolve.ts:resolveRunByName",
+      "target": "function:eliza/plugins/plugin-app-control/src/resolve.ts:matches",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/views/ViewManagerView.test.ts",
+      "target": "function:eliza/plugins/plugin-app-control/src/views/ViewManagerView.test.ts:jsonResponse",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx",
+      "target": "function:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx:fetchViewEntries",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx",
+      "target": "function:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx:requestViewNavigation",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx",
+      "target": "function:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx:ViewCard",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx",
+      "target": "function:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx:EmptyState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx",
+      "target": "function:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx:ViewManagerView",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx",
+      "target": "function:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx:TuiStatusBadge",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx",
+      "target": "function:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx:TuiViewRow",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx",
+      "target": "function:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx:ViewManagerTuiView",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx",
+      "target": "function:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx:interact",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx:ViewManagerView",
+      "target": "function:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx:fetchViewEntries",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx:ViewManagerTuiView",
+      "target": "function:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx:fetchViewEntries",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx:ViewManagerTuiView",
+      "target": "function:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx:requestViewNavigation",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx:interact",
+      "target": "function:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx:fetchViewEntries",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx:interact",
+      "target": "function:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx:fetchViewEntries",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx:interact",
+      "target": "function:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx:requestViewNavigation",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts",
+      "target": "function:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts:declaredHosts",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts",
+      "target": "function:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts:hostMatches",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts",
+      "target": "function:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts:hasDeclaredFsOperation",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts",
+      "target": "function:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts:gatedFetch",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts",
+      "target": "function:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts:checkFsAccess",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts",
+      "target": "function:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts:loadPlugin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts",
+      "target": "function:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts:makeRuntimeStub",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts",
+      "target": "function:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts:dispatchInvokeAction",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts",
+      "target": "function:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts:dispatch",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts",
+      "target": "function:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts:bootSequence",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts:gatedFetch",
+      "target": "function:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts:declaredHosts",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts:gatedFetch",
+      "target": "function:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts:hostMatches",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts:checkFsAccess",
+      "target": "function:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts:hasDeclaredFsOperation",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts:dispatchInvokeAction",
+      "target": "function:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts:makeRuntimeStub",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts:dispatch",
+      "target": "function:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts:dispatchInvokeAction",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts:bootSequence",
+      "target": "function:eliza/plugins/plugin-app-control/src/workers/app-worker-entry.ts:loadPlugin",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-app-control/src/views/ViewManagerView.test.ts",
+      "target": "file:eliza/plugins/plugin-app-control/src/views/ViewManagerView.tsx",
+      "type": "imports"
+    }
+  ]
+}

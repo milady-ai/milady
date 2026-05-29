@@ -1,0 +1,228 @@
+{
+  "batchIndex": 184,
+  "nodes": [
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/rules/00-prime-directive.md",
+      "type": "document",
+      "name": "00-prime-directive.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/rules/00-prime-directive.md",
+      "summary": "00-prime-directive.md documents docs/agent-packs/electrobun-agentic-desktop-2026/rules with 22 lines of reference material.",
+      "languageNotes": "markdown; docs; 22 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/rules/01-project-discovery.md",
+      "type": "document",
+      "name": "01-project-discovery.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/rules/01-project-discovery.md",
+      "summary": "01-project-discovery.md documents docs/agent-packs/electrobun-agentic-desktop-2026/rules with 14 lines of reference material.",
+      "languageNotes": "markdown; docs; 14 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/rules/02-agentic-desktop-architecture.md",
+      "type": "document",
+      "name": "02-agentic-desktop-architecture.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/rules/02-agentic-desktop-architecture.md",
+      "summary": "02-agentic-desktop-architecture.md documents docs/agent-packs/electrobun-agentic-desktop-2026/rules with 27 lines of reference material.",
+      "languageNotes": "markdown; docs; 27 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/rules/03-model-routing-and-ai.md",
+      "type": "document",
+      "name": "03-model-routing-and-ai.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/rules/03-model-routing-and-ai.md",
+      "summary": "03-model-routing-and-ai.md documents docs/agent-packs/electrobun-agentic-desktop-2026/rules with 28 lines of reference material.",
+      "languageNotes": "markdown; docs; 28 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/rules/04-electrobun-rpc-tools.md",
+      "type": "document",
+      "name": "04-electrobun-rpc-tools.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/rules/04-electrobun-rpc-tools.md",
+      "summary": "04-electrobun-rpc-tools.md documents docs/agent-packs/electrobun-agentic-desktop-2026/rules with 21 lines of reference material.",
+      "languageNotes": "markdown; docs; 21 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/rules/05-electrobun-ui-architecture.md",
+      "type": "document",
+      "name": "05-electrobun-ui-architecture.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/rules/05-electrobun-ui-architecture.md",
+      "summary": "05-electrobun-ui-architecture.md documents docs/agent-packs/electrobun-agentic-desktop-2026/rules with 25 lines of reference material.",
+      "languageNotes": "markdown; docs; 25 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/rules/06-bun-typescript-concurrency.md",
+      "type": "document",
+      "name": "06-bun-typescript-concurrency.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/rules/06-bun-typescript-concurrency.md",
+      "summary": "06-bun-typescript-concurrency.md documents docs/agent-packs/electrobun-agentic-desktop-2026/rules with 20 lines of reference material.",
+      "languageNotes": "markdown; docs; 20 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/rules/07-data-memory-persistence.md",
+      "type": "document",
+      "name": "07-data-memory-persistence.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/rules/07-data-memory-persistence.md",
+      "summary": "07-data-memory-persistence.md documents docs/agent-packs/electrobun-agentic-desktop-2026/rules with 20 lines of reference material.",
+      "languageNotes": "markdown; docs; 20 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/rules/08-security-privacy-sandboxing.md",
+      "type": "document",
+      "name": "08-security-privacy-sandboxing.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/rules/08-security-privacy-sandboxing.md",
+      "summary": "08-security-privacy-sandboxing.md documents docs/agent-packs/electrobun-agentic-desktop-2026/rules with 22 lines of reference material.",
+      "languageNotes": "markdown; docs; 22 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/rules/09-system-surfaces-updates-deeplinks.md",
+      "type": "document",
+      "name": "09-system-surfaces-updates-deeplinks.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/rules/09-system-surfaces-updates-deeplinks.md",
+      "summary": "09-system-surfaces-updates-deeplinks.md documents docs/agent-packs/electrobun-agentic-desktop-2026/rules with 24 lines of reference material.",
+      "languageNotes": "markdown; docs; 24 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/rules/10-testing-ci-performance.md",
+      "type": "document",
+      "name": "10-testing-ci-performance.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/rules/10-testing-ci-performance.md",
+      "summary": "10-testing-ci-performance.md documents docs/agent-packs/electrobun-agentic-desktop-2026/rules with 31 lines of reference material.",
+      "languageNotes": "markdown; docs; 31 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/rules/11-accessibility-localization-design.md",
+      "type": "document",
+      "name": "11-accessibility-localization-design.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/rules/11-accessibility-localization-design.md",
+      "summary": "11-accessibility-localization-design.md documents docs/agent-packs/electrobun-agentic-desktop-2026/rules with 23 lines of reference material.",
+      "languageNotes": "markdown; docs; 23 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/rules/12-distribution-code-signing.md",
+      "type": "document",
+      "name": "12-distribution-code-signing.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/rules/12-distribution-code-signing.md",
+      "summary": "12-distribution-code-signing.md documents docs/agent-packs/electrobun-agentic-desktop-2026/rules with 17 lines of reference material.",
+      "languageNotes": "markdown; docs; 17 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop",
+        "api"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/rules/13-electrobun-api-topic-map.md",
+      "type": "document",
+      "name": "13-electrobun-api-topic-map.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/rules/13-electrobun-api-topic-map.md",
+      "summary": "13-electrobun-api-topic-map.md documents docs/agent-packs/electrobun-agentic-desktop-2026/rules with 15 lines of reference material.",
+      "languageNotes": "markdown; docs; 15 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/rules/14-hooks-commands-automations.md",
+      "type": "document",
+      "name": "14-hooks-commands-automations.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/rules/14-hooks-commands-automations.md",
+      "summary": "14-hooks-commands-automations.md documents docs/agent-packs/electrobun-agentic-desktop-2026/rules with 22 lines of reference material.",
+      "languageNotes": "markdown; docs; 22 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/rules/15-apple-swift-porting-map.md",
+      "type": "document",
+      "name": "15-apple-swift-porting-map.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/rules/15-apple-swift-porting-map.md",
+      "summary": "15-apple-swift-porting-map.md documents docs/agent-packs/electrobun-agentic-desktop-2026/rules with 19 lines of reference material.",
+      "languageNotes": "markdown; docs; 19 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/rules/16-agentic-app-ux-policies.md",
+      "type": "document",
+      "name": "16-agentic-app-ux-policies.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/rules/16-agentic-app-ux-policies.md",
+      "summary": "16-agentic-app-ux-policies.md documents docs/agent-packs/electrobun-agentic-desktop-2026/rules with 21 lines of reference material.",
+      "languageNotes": "markdown; docs; 21 lines"
+    }
+  ],
+  "edges": []
+}

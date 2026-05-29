@@ -1,0 +1,3831 @@
+{
+  "batchIndex": 12,
+  "nodes": [
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/plugin-manager/providers/registryPluginsProvider.ts",
+      "type": "file",
+      "name": "registryPluginsProvider.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/providers/registryPluginsProvider.ts",
+      "summary": "registryPluginsProvider.ts is a typescript source file in the Milady codebase. It contains 8 imports.",
+      "languageNotes": "typescript; code; 153 lines"
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts",
+      "type": "file",
+      "name": "relevance.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/providers/relevance.ts",
+      "summary": "relevance.ts is a typescript source file in the Milady codebase. It contains 12 functions, 3 imports.",
+      "languageNotes": "typescript; code; 269 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:getRecentMessagesData",
+      "type": "function",
+      "name": "getRecentMessagesData",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/providers/relevance.ts",
+      "summary": "getRecentMessagesData is a function defined in eliza/packages/core/src/features/plugin-manager/providers/relevance.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:escapeRegex",
+      "type": "function",
+      "name": "escapeRegex",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/providers/relevance.ts",
+      "summary": "escapeRegex is a function defined in eliza/packages/core/src/features/plugin-manager/providers/relevance.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:normalizeKeyword",
+      "type": "function",
+      "name": "normalizeKeyword",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/providers/relevance.ts",
+      "summary": "normalizeKeyword is a function defined in eliza/packages/core/src/features/plugin-manager/providers/relevance.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:buildProviderKeywords",
+      "type": "function",
+      "name": "buildProviderKeywords",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/providers/relevance.ts",
+      "summary": "buildProviderKeywords is a function defined in eliza/packages/core/src/features/plugin-manager/providers/relevance.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:keywordsFromPluginNames",
+      "type": "function",
+      "name": "keywordsFromPluginNames",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/providers/relevance.ts",
+      "summary": "keywordsFromPluginNames is a function defined in eliza/packages/core/src/features/plugin-manager/providers/relevance.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:buildKeywordRegex",
+      "type": "function",
+      "name": "buildKeywordRegex",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/providers/relevance.ts",
+      "summary": "buildKeywordRegex is a function defined in eliza/packages/core/src/features/plugin-manager/providers/relevance.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:getMemoryText",
+      "type": "function",
+      "name": "getMemoryText",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/providers/relevance.ts",
+      "summary": "getMemoryText is a function defined in eliza/packages/core/src/features/plugin-manager/providers/relevance.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:getRecentMessageTexts",
+      "type": "function",
+      "name": "getRecentMessageTexts",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/providers/relevance.ts",
+      "summary": "getRecentMessageTexts is a function defined in eliza/packages/core/src/features/plugin-manager/providers/relevance.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:getRecentMessages",
+      "type": "function",
+      "name": "getRecentMessages",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/providers/relevance.ts",
+      "summary": "getRecentMessages is a function defined in eliza/packages/core/src/features/plugin-manager/providers/relevance.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:validateKeywords",
+      "type": "function",
+      "name": "validateKeywords",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/providers/relevance.ts",
+      "summary": "validateKeywords is a function defined in eliza/packages/core/src/features/plugin-manager/providers/relevance.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:validateRegex",
+      "type": "function",
+      "name": "validateRegex",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/providers/relevance.ts",
+      "summary": "validateRegex is a function defined in eliza/packages/core/src/features/plugin-manager/providers/relevance.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:isProviderRelevant",
+      "type": "function",
+      "name": "isProviderRelevant",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/providers/relevance.ts",
+      "summary": "isProviderRelevant is a function defined in eliza/packages/core/src/features/plugin-manager/providers/relevance.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/plugin-manager/security.ts",
+      "type": "file",
+      "name": "security.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/security.ts",
+      "summary": "security.ts is a typescript source file in the Milady codebase. It contains 5 functions, 3 imports.",
+      "languageNotes": "typescript; code; 120 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/security.ts:getAccessContext",
+      "type": "function",
+      "name": "getAccessContext",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/security.ts",
+      "summary": "getAccessContext is a function defined in eliza/packages/core/src/features/plugin-manager/security.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/security.ts:isAgentSelf",
+      "type": "function",
+      "name": "isAgentSelf",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/security.ts",
+      "summary": "isAgentSelf is a function defined in eliza/packages/core/src/features/plugin-manager/security.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/security.ts:isCanonicalOwner",
+      "type": "function",
+      "name": "isCanonicalOwner",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/security.ts",
+      "summary": "isCanonicalOwner is a function defined in eliza/packages/core/src/features/plugin-manager/security.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/security.ts:hasOwnerAccess",
+      "type": "function",
+      "name": "hasOwnerAccess",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/security.ts",
+      "summary": "hasOwnerAccess is a function defined in eliza/packages/core/src/features/plugin-manager/security.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/security.ts:hasAdminAccess",
+      "type": "function",
+      "name": "hasAdminAccess",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/security.ts",
+      "summary": "hasAdminAccess is a function defined in eliza/packages/core/src/features/plugin-manager/security.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "class"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/plugin-manager/services/coreManagerService.ts",
+      "type": "file",
+      "name": "coreManagerService.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/services/coreManagerService.ts",
+      "summary": "coreManagerService.ts is a typescript source file in the Milady codebase. It contains 1 class, 5 imports.",
+      "languageNotes": "typescript; code; 658 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/core/src/features/plugin-manager/services/coreManagerService.ts:CoreManagerService",
+      "type": "class",
+      "name": "CoreManagerService",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/services/coreManagerService.ts",
+      "summary": "CoreManagerService is a class or type declared in eliza/packages/core/src/features/plugin-manager/services/coreManagerService.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "class"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/plugin-manager/services/pluginConfigurationService.ts",
+      "type": "file",
+      "name": "pluginConfigurationService.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/services/pluginConfigurationService.ts",
+      "summary": "pluginConfigurationService.ts is a typescript source file in the Milady codebase. It contains 1 class, 5 imports.",
+      "languageNotes": "typescript; code; 73 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/core/src/features/plugin-manager/services/pluginConfigurationService.ts:PluginConfigurationService",
+      "type": "class",
+      "name": "PluginConfigurationService",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/services/pluginConfigurationService.ts",
+      "summary": "PluginConfigurationService is a class or type declared in eliza/packages/core/src/features/plugin-manager/services/pluginConfigurationService.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts",
+      "type": "file",
+      "name": "pluginManagerService.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts",
+      "summary": "pluginManagerService.ts is a typescript source file in the Milady codebase. It contains 3 functions, 1 class, 10 imports.",
+      "languageNotes": "typescript; code; 1367 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts:assertSafeForShell",
+      "type": "function",
+      "name": "assertSafeForShell",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts",
+      "summary": "assertSafeForShell is a function defined in eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts:resetRegistryCache",
+      "type": "function",
+      "name": "resetRegistryCache",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts",
+      "summary": "resetRegistryCache is a function defined in eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts:detectPackageManager",
+      "type": "function",
+      "name": "detectPackageManager",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts",
+      "summary": "detectPackageManager is a function defined in eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts:PluginManagerService",
+      "type": "class",
+      "name": "PluginManagerService",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts",
+      "summary": "PluginManagerService is a class or type declared in eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "type": "file",
+      "name": "pluginRegistryService.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "summary": "pluginRegistryService.ts is a typescript source file in the Milady codebase. It contains 20 functions, 2 imports.",
+      "languageNotes": "typescript; code; 699 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:resetRegistryCache",
+      "type": "function",
+      "name": "resetRegistryCache",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "summary": "resetRegistryCache is a function defined in eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:entryToPlugin",
+      "type": "function",
+      "name": "entryToPlugin",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "summary": "entryToPlugin is a function defined in eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:stubPlugin",
+      "type": "function",
+      "name": "stubPlugin",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "summary": "stubPlugin is a function defined in eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:localPluginToRegistry",
+      "type": "function",
+      "name": "localPluginToRegistry",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "summary": "localPluginToRegistry is a function defined in eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:scanLocalPlugins",
+      "type": "function",
+      "name": "scanLocalPlugins",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "summary": "scanLocalPlugins is a function defined in eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:fetchGeneratedRegistry",
+      "type": "function",
+      "name": "fetchGeneratedRegistry",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "summary": "fetchGeneratedRegistry is a function defined in eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:fetchIndexRegistry",
+      "type": "function",
+      "name": "fetchIndexRegistry",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "summary": "fetchIndexRegistry is a function defined in eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:loadRegistry",
+      "type": "function",
+      "name": "loadRegistry",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "summary": "loadRegistry is a function defined in eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:resolvePlugin",
+      "type": "function",
+      "name": "resolvePlugin",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "summary": "resolvePlugin is a function defined in eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:getRegistryEntry",
+      "type": "function",
+      "name": "getRegistryEntry",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "summary": "getRegistryEntry is a function defined in eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:toMetadata",
+      "type": "function",
+      "name": "toMetadata",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "summary": "toMetadata is a function defined in eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:computeSearchScore",
+      "type": "function",
+      "name": "computeSearchScore",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "summary": "computeSearchScore is a function defined in eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:searchPluginsByContent",
+      "type": "function",
+      "name": "searchPluginsByContent",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "summary": "searchPluginsByContent is a function defined in eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:getPluginDetails",
+      "type": "function",
+      "name": "getPluginDetails",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "summary": "getPluginDetails is a function defined in eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:getAllPlugins",
+      "type": "function",
+      "name": "getAllPlugins",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "summary": "getAllPlugins is a function defined in eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:listNonAppPlugins",
+      "type": "function",
+      "name": "listNonAppPlugins",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "summary": "listNonAppPlugins is a function defined in eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:searchNonAppPlugins",
+      "type": "function",
+      "name": "searchNonAppPlugins",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "summary": "searchNonAppPlugins is a function defined in eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:refreshRegistry",
+      "type": "function",
+      "name": "refreshRegistry",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "summary": "refreshRegistry is a function defined in eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:clonePlugin",
+      "type": "function",
+      "name": "clonePlugin",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "summary": "clonePlugin is a function defined in eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:errMsg",
+      "type": "function",
+      "name": "errMsg",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "summary": "errMsg is a function defined in eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts."
+    },
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/plugin-manager/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/types.ts",
+      "summary": "types.ts is a typescript source file in the Milady codebase. It contains 3 imports.",
+      "languageNotes": "typescript; code; 182 lines"
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/features/plugin-manager/utils/paths.ts",
+      "type": "file",
+      "name": "paths.ts",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/utils/paths.ts",
+      "summary": "paths.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 17 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/plugin-manager/utils/paths.ts:resolveConfigPath",
+      "type": "function",
+      "name": "resolveConfigPath",
+      "filePath": "eliza/packages/core/src/features/plugin-manager/utils/paths.ts",
+      "summary": "resolveConfigPath is a function defined in eliza/packages/core/src/features/plugin-manager/utils/paths.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/features/secrets/actions/check-secret.test.ts",
+      "type": "file",
+      "name": "check-secret.test.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/check-secret.test.ts",
+      "summary": "check-secret.test.ts is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 63 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/actions/check-secret.test.ts:createRuntime",
+      "type": "function",
+      "name": "createRuntime",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/check-secret.test.ts",
+      "summary": "createRuntime is a function defined in eliza/packages/core/src/features/secrets/actions/check-secret.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/actions/check-secret.test.ts:createMessage",
+      "type": "function",
+      "name": "createMessage",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/check-secret.test.ts",
+      "summary": "createMessage is a function defined in eliza/packages/core/src/features/secrets/actions/check-secret.test.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/secrets/actions/check-secret.ts",
+      "type": "file",
+      "name": "check-secret.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/check-secret.ts",
+      "summary": "check-secret.ts is a typescript source file in the Milady codebase. It contains 3 functions, 4 imports.",
+      "languageNotes": "typescript; code; 114 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/actions/check-secret.ts:normalizeKey",
+      "type": "function",
+      "name": "normalizeKey",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/check-secret.ts",
+      "summary": "normalizeKey is a function defined in eliza/packages/core/src/features/secrets/actions/check-secret.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/actions/check-secret.ts:readParams",
+      "type": "function",
+      "name": "readParams",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/check-secret.ts",
+      "summary": "readParams is a function defined in eliza/packages/core/src/features/secrets/actions/check-secret.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/actions/check-secret.ts:checkSecretHandler",
+      "type": "function",
+      "name": "checkSecretHandler",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/check-secret.ts",
+      "summary": "checkSecretHandler is a function defined in eliza/packages/core/src/features/secrets/actions/check-secret.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/features/secrets/actions/delete-secret.test.ts",
+      "type": "file",
+      "name": "delete-secret.test.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/delete-secret.test.ts",
+      "summary": "delete-secret.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 59 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/actions/delete-secret.test.ts:createRuntime",
+      "type": "function",
+      "name": "createRuntime",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/delete-secret.test.ts",
+      "summary": "createRuntime is a function defined in eliza/packages/core/src/features/secrets/actions/delete-secret.test.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/secrets/actions/delete-secret.ts",
+      "type": "file",
+      "name": "delete-secret.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/delete-secret.ts",
+      "summary": "delete-secret.ts is a typescript source file in the Milady codebase. It contains 2 functions, 4 imports.",
+      "languageNotes": "typescript; code; 115 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/actions/delete-secret.ts:readParams",
+      "type": "function",
+      "name": "readParams",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/delete-secret.ts",
+      "summary": "readParams is a function defined in eliza/packages/core/src/features/secrets/actions/delete-secret.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/actions/delete-secret.ts:deleteSecretHandler",
+      "type": "function",
+      "name": "deleteSecretHandler",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/delete-secret.ts",
+      "summary": "deleteSecretHandler is a function defined in eliza/packages/core/src/features/secrets/actions/delete-secret.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/secrets/actions/get-secret.test.ts",
+      "type": "file",
+      "name": "get-secret.test.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/get-secret.test.ts",
+      "summary": "get-secret.test.ts is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 79 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/actions/get-secret.test.ts:createRuntime",
+      "type": "function",
+      "name": "createRuntime",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/get-secret.test.ts",
+      "summary": "createRuntime is a function defined in eliza/packages/core/src/features/secrets/actions/get-secret.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/actions/get-secret.test.ts:createMessage",
+      "type": "function",
+      "name": "createMessage",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/get-secret.test.ts",
+      "summary": "createMessage is a function defined in eliza/packages/core/src/features/secrets/actions/get-secret.test.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/secrets/actions/get-secret.ts",
+      "type": "file",
+      "name": "get-secret.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/get-secret.ts",
+      "summary": "get-secret.ts is a typescript source file in the Milady codebase. It contains 2 functions, 5 imports.",
+      "languageNotes": "typescript; code; 110 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/actions/get-secret.ts:readParams",
+      "type": "function",
+      "name": "readParams",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/get-secret.ts",
+      "summary": "readParams is a function defined in eliza/packages/core/src/features/secrets/actions/get-secret.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/actions/get-secret.ts:getSecretHandler",
+      "type": "function",
+      "name": "getSecretHandler",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/get-secret.ts",
+      "summary": "getSecretHandler is a function defined in eliza/packages/core/src/features/secrets/actions/get-secret.ts."
+    },
+    {
+      "tags": [
+        "entry-point"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/features/secrets/actions/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 24 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/secrets/actions/list-secrets.test.ts",
+      "type": "file",
+      "name": "list-secrets.test.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/list-secrets.test.ts",
+      "summary": "list-secrets.test.ts is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 80 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/actions/list-secrets.test.ts:createRuntime",
+      "type": "function",
+      "name": "createRuntime",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/list-secrets.test.ts",
+      "summary": "createRuntime is a function defined in eliza/packages/core/src/features/secrets/actions/list-secrets.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/actions/list-secrets.test.ts:createMessage",
+      "type": "function",
+      "name": "createMessage",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/list-secrets.test.ts",
+      "summary": "createMessage is a function defined in eliza/packages/core/src/features/secrets/actions/list-secrets.test.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/secrets/actions/list-secrets.ts",
+      "type": "file",
+      "name": "list-secrets.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/list-secrets.ts",
+      "summary": "list-secrets.ts is a typescript source file in the Milady codebase. It contains 2 functions, 4 imports.",
+      "languageNotes": "typescript; code; 121 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/actions/list-secrets.ts:readParams",
+      "type": "function",
+      "name": "readParams",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/list-secrets.ts",
+      "summary": "readParams is a function defined in eliza/packages/core/src/features/secrets/actions/list-secrets.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/actions/list-secrets.ts:listSecretsHandler",
+      "type": "function",
+      "name": "listSecretsHandler",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/list-secrets.ts",
+      "summary": "listSecretsHandler is a function defined in eliza/packages/core/src/features/secrets/actions/list-secrets.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/secrets/actions/manage-secret.ts",
+      "type": "file",
+      "name": "manage-secret.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/manage-secret.ts",
+      "summary": "manage-secret.ts is a typescript source file in the Milady codebase. It contains 1 function, 11 imports.",
+      "languageNotes": "typescript; code; 379 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/actions/manage-secret.ts:resolveSecretsAction",
+      "type": "function",
+      "name": "resolveSecretsAction",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/manage-secret.ts",
+      "summary": "resolveSecretsAction is a function defined in eliza/packages/core/src/features/secrets/actions/manage-secret.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/features/secrets/actions/mask.ts",
+      "type": "file",
+      "name": "mask.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/mask.ts",
+      "summary": "mask.ts is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 15 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/actions/mask.ts:maskSecretValue",
+      "type": "function",
+      "name": "maskSecretValue",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/mask.ts",
+      "summary": "maskSecretValue is a function defined in eliza/packages/core/src/features/secrets/actions/mask.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.test.ts",
+      "type": "file",
+      "name": "mirror-secret-to-vault.test.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.test.ts",
+      "summary": "mirror-secret-to-vault.test.ts is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 83 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.test.ts:createRuntime",
+      "type": "function",
+      "name": "createRuntime",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.test.ts",
+      "summary": "createRuntime is a function defined in eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.test.ts:createMessage",
+      "type": "function",
+      "name": "createMessage",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.test.ts",
+      "summary": "createMessage is a function defined in eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.test.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.ts",
+      "type": "file",
+      "name": "mirror-secret-to-vault.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.ts",
+      "summary": "mirror-secret-to-vault.ts is a typescript source file in the Milady codebase. It contains 3 functions, 4 imports.",
+      "languageNotes": "typescript; code; 168 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.ts:readParams",
+      "type": "function",
+      "name": "readParams",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.ts",
+      "summary": "readParams is a function defined in eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.ts:isVaultLike",
+      "type": "function",
+      "name": "isVaultLike",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.ts",
+      "summary": "isVaultLike is a function defined in eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.ts:mirrorSecretToVaultHandler",
+      "type": "function",
+      "name": "mirrorSecretToVaultHandler",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.ts",
+      "summary": "mirrorSecretToVaultHandler is a function defined in eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/secrets/actions/request-secret.test.ts",
+      "type": "file",
+      "name": "request-secret.test.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/request-secret.test.ts",
+      "summary": "request-secret.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 3 imports.",
+      "languageNotes": "typescript; code; 69 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/actions/request-secret.test.ts:createRuntime",
+      "type": "function",
+      "name": "createRuntime",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/request-secret.test.ts",
+      "summary": "createRuntime is a function defined in eliza/packages/core/src/features/secrets/actions/request-secret.test.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/secrets/actions/request-secret.ts",
+      "type": "file",
+      "name": "request-secret.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/request-secret.ts",
+      "summary": "request-secret.ts is a typescript source file in the Milady codebase. It contains 5 functions, 6 imports.",
+      "languageNotes": "typescript; code; 241 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/core/src/features/secrets/actions/request-secret.ts:requestSecretHandler",
+      "type": "function",
+      "name": "requestSecretHandler",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/request-secret.ts",
+      "summary": "requestSecretHandler is a function defined in eliza/packages/core/src/features/secrets/actions/request-secret.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/actions/request-secret.ts:runtimeSetting",
+      "type": "function",
+      "name": "runtimeSetting",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/request-secret.ts",
+      "summary": "runtimeSetting is a function defined in eliza/packages/core/src/features/secrets/actions/request-secret.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/actions/request-secret.ts:buildSecretRequestEnvironment",
+      "type": "function",
+      "name": "buildSecretRequestEnvironment",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/request-secret.ts",
+      "summary": "buildSecretRequestEnvironment is a function defined in eliza/packages/core/src/features/secrets/actions/request-secret.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/actions/request-secret.ts:toJsonObject",
+      "type": "function",
+      "name": "toJsonObject",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/request-secret.ts",
+      "summary": "toJsonObject is a function defined in eliza/packages/core/src/features/secrets/actions/request-secret.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/actions/request-secret.ts:buildSecretRequestText",
+      "type": "function",
+      "name": "buildSecretRequestText",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/request-secret.ts",
+      "summary": "buildSecretRequestText is a function defined in eliza/packages/core/src/features/secrets/actions/request-secret.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/secrets/actions/set-secret.ts",
+      "type": "file",
+      "name": "set-secret.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/set-secret.ts",
+      "summary": "set-secret.ts is a typescript source file in the Milady codebase. It contains 1 function, 6 imports.",
+      "languageNotes": "typescript; code; 282 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/core/src/features/secrets/actions/set-secret.ts:setSecretHandler",
+      "type": "function",
+      "name": "setSecretHandler",
+      "filePath": "eliza/packages/core/src/features/secrets/actions/set-secret.ts",
+      "summary": "setSecretHandler is a function defined in eliza/packages/core/src/features/secrets/actions/set-secret.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "type": "file",
+      "name": "encryption.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "summary": "encryption.ts is a typescript source file in the Milady codebase. It contains 16 functions, 1 class, 1 imports.",
+      "languageNotes": "typescript; code; 507 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:generateSalt",
+      "type": "function",
+      "name": "generateSalt",
+      "filePath": "eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "summary": "generateSalt is a function defined in eliza/packages/core/src/features/secrets/crypto/encryption.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:generateKey",
+      "type": "function",
+      "name": "generateKey",
+      "filePath": "eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "summary": "generateKey is a function defined in eliza/packages/core/src/features/secrets/crypto/encryption.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:deriveKeyPbkdf2",
+      "type": "function",
+      "name": "deriveKeyPbkdf2",
+      "filePath": "eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "summary": "deriveKeyPbkdf2 is a function defined in eliza/packages/core/src/features/secrets/crypto/encryption.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:deriveKeyScrypt",
+      "type": "function",
+      "name": "deriveKeyScrypt",
+      "filePath": "eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "summary": "deriveKeyScrypt is a function defined in eliza/packages/core/src/features/secrets/crypto/encryption.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:deriveKeyFromAgentId",
+      "type": "function",
+      "name": "deriveKeyFromAgentId",
+      "filePath": "eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "summary": "deriveKeyFromAgentId is a function defined in eliza/packages/core/src/features/secrets/crypto/encryption.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:createKeyDerivationParams",
+      "type": "function",
+      "name": "createKeyDerivationParams",
+      "filePath": "eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "summary": "createKeyDerivationParams is a function defined in eliza/packages/core/src/features/secrets/crypto/encryption.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:encryptGcm",
+      "type": "function",
+      "name": "encryptGcm",
+      "filePath": "eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "summary": "encryptGcm is a function defined in eliza/packages/core/src/features/secrets/crypto/encryption.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:encryptCbc",
+      "type": "function",
+      "name": "encryptCbc",
+      "filePath": "eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "summary": "encryptCbc is a function defined in eliza/packages/core/src/features/secrets/crypto/encryption.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:encrypt",
+      "type": "function",
+      "name": "encrypt",
+      "filePath": "eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "summary": "encrypt is a function defined in eliza/packages/core/src/features/secrets/crypto/encryption.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:decryptGcm",
+      "type": "function",
+      "name": "decryptGcm",
+      "filePath": "eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "summary": "decryptGcm is a function defined in eliza/packages/core/src/features/secrets/crypto/encryption.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:decryptCbc",
+      "type": "function",
+      "name": "decryptCbc",
+      "filePath": "eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "summary": "decryptCbc is a function defined in eliza/packages/core/src/features/secrets/crypto/encryption.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:decrypt",
+      "type": "function",
+      "name": "decrypt",
+      "filePath": "eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "summary": "decrypt is a function defined in eliza/packages/core/src/features/secrets/crypto/encryption.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:isEncryptedSecret",
+      "type": "function",
+      "name": "isEncryptedSecret",
+      "filePath": "eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "summary": "isEncryptedSecret is a function defined in eliza/packages/core/src/features/secrets/crypto/encryption.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:generateSecureToken",
+      "type": "function",
+      "name": "generateSecureToken",
+      "filePath": "eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "summary": "generateSecureToken is a function defined in eliza/packages/core/src/features/secrets/crypto/encryption.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:hashValue",
+      "type": "function",
+      "name": "hashValue",
+      "filePath": "eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "summary": "hashValue is a function defined in eliza/packages/core/src/features/secrets/crypto/encryption.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:secureCompare",
+      "type": "function",
+      "name": "secureCompare",
+      "filePath": "eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "summary": "secureCompare is a function defined in eliza/packages/core/src/features/secrets/crypto/encryption.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/core/src/features/secrets/crypto/encryption.ts:KeyManager",
+      "type": "class",
+      "name": "KeyManager",
+      "filePath": "eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "summary": "KeyManager is a class or type declared in eliza/packages/core/src/features/secrets/crypto/encryption.ts."
+    },
+    {
+      "tags": [
+        "entry-point"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/features/secrets/crypto/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/crypto/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 35 lines"
+    },
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/secrets/plugin.ts",
+      "type": "file",
+      "name": "plugin.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/plugin.ts",
+      "summary": "plugin.ts is a typescript source file in the Milady codebase. It contains 7 imports.",
+      "languageNotes": "typescript; code; 142 lines"
+    },
+    {
+      "tags": [
+        "entry-point"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/features/secrets/providers/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/providers/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 8 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/secrets/providers/secrets-status.ts",
+      "type": "file",
+      "name": "secrets-status.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/providers/secrets-status.ts",
+      "summary": "secrets-status.ts is a typescript source file in the Milady codebase. It contains 4 imports.",
+      "languageNotes": "typescript; code; 274 lines"
+    },
+    {
+      "tags": [
+        "entry-point"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/features/secrets/services/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/services/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase. It contains 2 imports.",
+      "languageNotes": "typescript; code; 37 lines"
+    },
+    {
+      "tags": [
+        "plugin",
+        "class"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/secrets/services/plugin-activator.ts",
+      "type": "file",
+      "name": "plugin-activator.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/services/plugin-activator.ts",
+      "summary": "plugin-activator.ts is a typescript source file in the Milady codebase. It contains 1 class, 4 imports.",
+      "languageNotes": "typescript; code; 859 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/core/src/features/secrets/services/plugin-activator.ts:PluginActivatorService",
+      "type": "class",
+      "name": "PluginActivatorService",
+      "filePath": "eliza/packages/core/src/features/secrets/services/plugin-activator.ts",
+      "summary": "PluginActivatorService is a class or type declared in eliza/packages/core/src/features/secrets/services/plugin-activator.ts."
+    },
+    {
+      "tags": [
+        "class"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/secrets/services/secrets.ts",
+      "type": "file",
+      "name": "secrets.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/services/secrets.ts",
+      "summary": "secrets.ts is a typescript source file in the Milady codebase. It contains 1 class, 6 imports.",
+      "languageNotes": "typescript; code; 708 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/core/src/features/secrets/services/secrets.ts:SecretsService",
+      "type": "class",
+      "name": "SecretsService",
+      "filePath": "eliza/packages/core/src/features/secrets/services/secrets.ts",
+      "summary": "SecretsService is a class or type declared in eliza/packages/core/src/features/secrets/services/secrets.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/secrets/setup/action.ts",
+      "type": "file",
+      "name": "action.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/setup/action.ts",
+      "summary": "action.ts is a typescript source file in the Milady codebase. It contains 6 functions, 7 imports.",
+      "languageNotes": "typescript; code; 536 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/setup/action.ts:normalizeSettingValue",
+      "type": "function",
+      "name": "normalizeSettingValue",
+      "filePath": "eliza/packages/core/src/features/secrets/setup/action.ts",
+      "summary": "normalizeSettingValue is a function defined in eliza/packages/core/src/features/secrets/setup/action.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/setup/action.ts:extractValidSettingUpdates",
+      "type": "function",
+      "name": "extractValidSettingUpdates",
+      "filePath": "eliza/packages/core/src/features/secrets/setup/action.ts",
+      "summary": "extractValidSettingUpdates is a function defined in eliza/packages/core/src/features/secrets/setup/action.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/setup/action.ts:extractSettingValues",
+      "type": "function",
+      "name": "extractSettingValues",
+      "filePath": "eliza/packages/core/src/features/secrets/setup/action.ts",
+      "summary": "extractSettingValues is a function defined in eliza/packages/core/src/features/secrets/setup/action.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/core/src/features/secrets/setup/action.ts:processSettingUpdates",
+      "type": "function",
+      "name": "processSettingUpdates",
+      "filePath": "eliza/packages/core/src/features/secrets/setup/action.ts",
+      "summary": "processSettingUpdates is a function defined in eliza/packages/core/src/features/secrets/setup/action.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/setup/action.ts:getNextRequiredSetting",
+      "type": "function",
+      "name": "getNextRequiredSetting",
+      "filePath": "eliza/packages/core/src/features/secrets/setup/action.ts",
+      "summary": "getNextRequiredSetting is a function defined in eliza/packages/core/src/features/secrets/setup/action.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/setup/action.ts:countUnconfiguredRequired",
+      "type": "function",
+      "name": "countUnconfiguredRequired",
+      "filePath": "eliza/packages/core/src/features/secrets/setup/action.ts",
+      "summary": "countUnconfiguredRequired is a function defined in eliza/packages/core/src/features/secrets/setup/action.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/secrets/setup/config.ts",
+      "type": "file",
+      "name": "config.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/setup/config.ts",
+      "summary": "config.ts is a typescript source file in the Milady codebase. It contains 6 functions, 1 imports.",
+      "languageNotes": "typescript; code; 338 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/setup/config.ts:createSetupConfig",
+      "type": "function",
+      "name": "createSetupConfig",
+      "filePath": "eliza/packages/core/src/features/secrets/setup/config.ts",
+      "summary": "createSetupConfig is a function defined in eliza/packages/core/src/features/secrets/setup/config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/setup/config.ts:getUnconfiguredRequired",
+      "type": "function",
+      "name": "getUnconfiguredRequired",
+      "filePath": "eliza/packages/core/src/features/secrets/setup/config.ts",
+      "summary": "getUnconfiguredRequired is a function defined in eliza/packages/core/src/features/secrets/setup/config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/setup/config.ts:getUnconfiguredOptional",
+      "type": "function",
+      "name": "getUnconfiguredOptional",
+      "filePath": "eliza/packages/core/src/features/secrets/setup/config.ts",
+      "summary": "getUnconfiguredOptional is a function defined in eliza/packages/core/src/features/secrets/setup/config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/setup/config.ts:isSetupComplete",
+      "type": "function",
+      "name": "isSetupComplete",
+      "filePath": "eliza/packages/core/src/features/secrets/setup/config.ts",
+      "summary": "isSetupComplete is a function defined in eliza/packages/core/src/features/secrets/setup/config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/setup/config.ts:getNextSetting",
+      "type": "function",
+      "name": "getNextSetting",
+      "filePath": "eliza/packages/core/src/features/secrets/setup/config.ts",
+      "summary": "getNextSetting is a function defined in eliza/packages/core/src/features/secrets/setup/config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/setup/config.ts:generateSettingPrompt",
+      "type": "function",
+      "name": "generateSettingPrompt",
+      "filePath": "eliza/packages/core/src/features/secrets/setup/config.ts",
+      "summary": "generateSettingPrompt is a function defined in eliza/packages/core/src/features/secrets/setup/config.ts."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:getRecentMessagesData",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:escapeRegex",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:normalizeKeyword",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:buildProviderKeywords",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:keywordsFromPluginNames",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:buildKeywordRegex",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:getMemoryText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:getRecentMessageTexts",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:getRecentMessages",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:validateKeywords",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:validateRegex",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:isProviderRelevant",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:buildProviderKeywords",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:normalizeKeyword",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:keywordsFromPluginNames",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:normalizeKeyword",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:getRecentMessageTexts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:getRecentMessages",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:getRecentMessageTexts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:getMemoryText",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:getRecentMessages",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:getRecentMessagesData",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:validateKeywords",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:getMemoryText",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:validateKeywords",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:getRecentMessageTexts",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:validateKeywords",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:normalizeKeyword",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:validateRegex",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:getMemoryText",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:validateRegex",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:getRecentMessageTexts",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:isProviderRelevant",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:getRecentMessages",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:isProviderRelevant",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:buildKeywordRegex",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:isProviderRelevant",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:validateKeywords",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:isProviderRelevant",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts:validateRegex",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/security.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/security.ts:getAccessContext",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/security.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/security.ts:isAgentSelf",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/security.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/security.ts:isCanonicalOwner",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/security.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/security.ts:hasOwnerAccess",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/security.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/security.ts:hasAdminAccess",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/security.ts:hasOwnerAccess",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/security.ts:getAccessContext",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/security.ts:hasOwnerAccess",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/security.ts:isAgentSelf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/security.ts:hasOwnerAccess",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/security.ts:isCanonicalOwner",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/security.ts:hasAdminAccess",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/security.ts:getAccessContext",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/security.ts:hasAdminAccess",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/security.ts:isAgentSelf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/security.ts:hasAdminAccess",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/security.ts:isCanonicalOwner",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/coreManagerService.ts",
+      "target": "class:eliza/packages/core/src/features/plugin-manager/services/coreManagerService.ts:CoreManagerService",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginConfigurationService.ts",
+      "target": "class:eliza/packages/core/src/features/plugin-manager/services/pluginConfigurationService.ts:PluginConfigurationService",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts:assertSafeForShell",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts:resetRegistryCache",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts:detectPackageManager",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts",
+      "target": "class:eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts:PluginManagerService",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:resetRegistryCache",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:entryToPlugin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:stubPlugin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:localPluginToRegistry",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:scanLocalPlugins",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:fetchGeneratedRegistry",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:fetchIndexRegistry",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:loadRegistry",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:resolvePlugin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:getRegistryEntry",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:toMetadata",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:computeSearchScore",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:searchPluginsByContent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:getPluginDetails",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:getAllPlugins",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:listNonAppPlugins",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:searchNonAppPlugins",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:refreshRegistry",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:clonePlugin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:errMsg",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:scanLocalPlugins",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:localPluginToRegistry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:scanLocalPlugins",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:errMsg",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:scanLocalPlugins",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:errMsg",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:fetchGeneratedRegistry",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:entryToPlugin",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:fetchGeneratedRegistry",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:entryToPlugin",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:fetchIndexRegistry",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:stubPlugin",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:loadRegistry",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:fetchGeneratedRegistry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:loadRegistry",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:errMsg",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:loadRegistry",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:fetchIndexRegistry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:loadRegistry",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:errMsg",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:loadRegistry",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:scanLocalPlugins",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:getRegistryEntry",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:resolvePlugin",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:getRegistryEntry",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:loadRegistry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:searchPluginsByContent",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:loadRegistry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:searchPluginsByContent",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:computeSearchScore",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:getPluginDetails",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:resolvePlugin",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:getPluginDetails",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:loadRegistry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:getPluginDetails",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:toMetadata",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:getAllPlugins",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:loadRegistry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:listNonAppPlugins",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:loadRegistry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:searchNonAppPlugins",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:loadRegistry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:searchNonAppPlugins",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:computeSearchScore",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:refreshRegistry",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:resetRegistryCache",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:refreshRegistry",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:loadRegistry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:clonePlugin",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:resolvePlugin",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:clonePlugin",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts:loadRegistry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/utils/paths.ts",
+      "target": "function:eliza/packages/core/src/features/plugin-manager/utils/paths.ts:resolveConfigPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/check-secret.test.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/check-secret.test.ts:createRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/check-secret.test.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/check-secret.test.ts:createMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/check-secret.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/check-secret.ts:normalizeKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/check-secret.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/check-secret.ts:readParams",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/check-secret.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/check-secret.ts:checkSecretHandler",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/secrets/actions/check-secret.ts:checkSecretHandler",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/check-secret.ts:readParams",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/delete-secret.test.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/delete-secret.test.ts:createRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/delete-secret.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/delete-secret.ts:readParams",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/delete-secret.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/delete-secret.ts:deleteSecretHandler",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/secrets/actions/delete-secret.ts:deleteSecretHandler",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/delete-secret.ts:readParams",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/get-secret.test.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/get-secret.test.ts:createRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/get-secret.test.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/get-secret.test.ts:createMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/get-secret.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/get-secret.ts:readParams",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/get-secret.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/get-secret.ts:getSecretHandler",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/secrets/actions/get-secret.ts:getSecretHandler",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/get-secret.ts:readParams",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/list-secrets.test.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/list-secrets.test.ts:createRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/list-secrets.test.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/list-secrets.test.ts:createMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/list-secrets.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/list-secrets.ts:readParams",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/list-secrets.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/list-secrets.ts:listSecretsHandler",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/secrets/actions/list-secrets.ts:listSecretsHandler",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/list-secrets.ts:readParams",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/manage-secret.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/manage-secret.ts:resolveSecretsAction",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/mask.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/mask.ts:maskSecretValue",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.test.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.test.ts:createRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.test.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.test.ts:createMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.ts:readParams",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.ts:isVaultLike",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.ts:mirrorSecretToVaultHandler",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.ts:mirrorSecretToVaultHandler",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.ts:readParams",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.ts:mirrorSecretToVaultHandler",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.ts:isVaultLike",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/request-secret.test.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/request-secret.test.ts:createRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/request-secret.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/request-secret.ts:requestSecretHandler",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/request-secret.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/request-secret.ts:runtimeSetting",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/request-secret.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/request-secret.ts:buildSecretRequestEnvironment",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/request-secret.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/request-secret.ts:toJsonObject",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/request-secret.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/request-secret.ts:buildSecretRequestText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/secrets/actions/request-secret.ts:requestSecretHandler",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/request-secret.ts:buildSecretRequestEnvironment",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/secrets/actions/request-secret.ts:requestSecretHandler",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/request-secret.ts:buildSecretRequestText",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/secrets/actions/request-secret.ts:requestSecretHandler",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/request-secret.ts:toJsonObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/secrets/actions/request-secret.ts:buildSecretRequestEnvironment",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/request-secret.ts:runtimeSetting",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/secrets/actions/request-secret.ts:buildSecretRequestEnvironment",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/request-secret.ts:runtimeSetting",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/secrets/actions/request-secret.ts:buildSecretRequestEnvironment",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/request-secret.ts:runtimeSetting",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/secrets/actions/request-secret.ts:buildSecretRequestEnvironment",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/request-secret.ts:runtimeSetting",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/secrets/actions/request-secret.ts:buildSecretRequestEnvironment",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/request-secret.ts:runtimeSetting",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/set-secret.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/actions/set-secret.ts:setSecretHandler",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:generateSalt",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:generateKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:deriveKeyPbkdf2",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:deriveKeyScrypt",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:deriveKeyFromAgentId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:createKeyDerivationParams",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:encryptGcm",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:encryptCbc",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:encrypt",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:decryptGcm",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:decryptCbc",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:decrypt",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:isEncryptedSecret",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:generateSecureToken",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:hashValue",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:secureCompare",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "target": "class:eliza/packages/core/src/features/secrets/crypto/encryption.ts:KeyManager",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:createKeyDerivationParams",
+      "target": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:generateSalt",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:encrypt",
+      "target": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:encryptGcm",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:decrypt",
+      "target": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:decryptGcm",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:decrypt",
+      "target": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:decryptCbc",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:encrypt",
+      "target": "function:eliza/packages/core/src/features/secrets/crypto/encryption.ts:encryptGcm",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/services/plugin-activator.ts",
+      "target": "class:eliza/packages/core/src/features/secrets/services/plugin-activator.ts:PluginActivatorService",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/services/secrets.ts",
+      "target": "class:eliza/packages/core/src/features/secrets/services/secrets.ts:SecretsService",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/setup/action.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/setup/action.ts:normalizeSettingValue",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/setup/action.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/setup/action.ts:extractValidSettingUpdates",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/setup/action.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/setup/action.ts:extractSettingValues",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/setup/action.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/setup/action.ts:processSettingUpdates",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/setup/action.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/setup/action.ts:getNextRequiredSetting",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/setup/action.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/setup/action.ts:countUnconfiguredRequired",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/secrets/setup/action.ts:extractSettingValues",
+      "target": "function:eliza/packages/core/src/features/secrets/setup/action.ts:extractValidSettingUpdates",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/setup/config.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/setup/config.ts:createSetupConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/setup/config.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/setup/config.ts:getUnconfiguredRequired",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/setup/config.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/setup/config.ts:getUnconfiguredOptional",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/setup/config.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/setup/config.ts:isSetupComplete",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/setup/config.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/setup/config.ts:getNextSetting",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/setup/config.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/setup/config.ts:generateSettingPrompt",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/secrets/setup/config.ts:isSetupComplete",
+      "target": "function:eliza/packages/core/src/features/secrets/setup/config.ts:getUnconfiguredRequired",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/secrets/setup/config.ts:getNextSetting",
+      "target": "function:eliza/packages/core/src/features/secrets/setup/config.ts:getUnconfiguredRequired",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/secrets/setup/config.ts:getNextSetting",
+      "target": "function:eliza/packages/core/src/features/secrets/setup/config.ts:getUnconfiguredOptional",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/registryPluginsProvider.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/registryPluginsProvider.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/registryPluginsProvider.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/registryPluginsProvider.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/registryPluginsProvider.ts",
+      "target": "file:eliza/packages/core/src/types/components.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/registryPluginsProvider.ts",
+      "target": "file:eliza/packages/core/src/types/memory.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/registryPluginsProvider.ts",
+      "target": "file:eliza/packages/core/src/types/runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/registryPluginsProvider.ts",
+      "target": "file:eliza/packages/core/src/types/state.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts",
+      "target": "file:eliza/packages/core/src/types/memory.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts",
+      "target": "file:eliza/packages/core/src/types/state.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/providers/relevance.ts",
+      "target": "file:eliza/packages/core/src/validation/keywords.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/security.ts",
+      "target": "file:eliza/packages/core/src/roles.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/security.ts",
+      "target": "file:eliza/packages/core/src/types/memory.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/security.ts",
+      "target": "file:eliza/packages/core/src/types/runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/coreManagerService.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/coreManagerService.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/utils/paths.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/coreManagerService.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/coreManagerService.ts",
+      "target": "file:eliza/packages/core/src/types/runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/coreManagerService.ts",
+      "target": "file:eliza/packages/core/src/types/service.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginConfigurationService.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginConfigurationService.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginConfigurationService.ts",
+      "target": "file:eliza/packages/core/src/types/plugin.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginConfigurationService.ts",
+      "target": "file:eliza/packages/core/src/types/runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginConfigurationService.ts",
+      "target": "file:eliza/packages/core/src/types/service.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts",
+      "target": "file:eliza/packages/core/src/entities.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/coreExtensions.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/utils/paths.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts",
+      "target": "file:eliza/packages/core/src/types/events.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts",
+      "target": "file:eliza/packages/core/src/types/plugin.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts",
+      "target": "file:eliza/packages/core/src/types/runtime.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginManagerService.ts",
+      "target": "file:eliza/packages/core/src/types/service.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "target": "file:eliza/packages/core/src/features/plugin-manager/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/services/pluginRegistryService.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/types.ts",
+      "target": "file:eliza/packages/core/src/types/events.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/types.ts",
+      "target": "file:eliza/packages/core/src/types/plugin.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/types.ts",
+      "target": "file:eliza/packages/core/src/types/service.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/plugin-manager/utils/paths.ts",
+      "target": "file:eliza/packages/core/src/utils/state-dir.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/check-secret.test.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/actions/check-secret.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/check-secret.test.ts",
+      "target": "file:eliza/packages/core/src/types/primitives.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/check-secret.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/services/secrets.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/check-secret.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/check-secret.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/check-secret.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/delete-secret.test.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/actions/delete-secret.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/delete-secret.test.ts",
+      "target": "file:eliza/packages/core/src/types/primitives.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/delete-secret.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/services/secrets.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/delete-secret.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/delete-secret.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/delete-secret.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/get-secret.test.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/actions/get-secret.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/get-secret.test.ts",
+      "target": "file:eliza/packages/core/src/types/primitives.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/get-secret.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/actions/mask.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/get-secret.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/services/secrets.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/get-secret.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/get-secret.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/get-secret.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/index.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/actions/manage-secret.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/list-secrets.test.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/actions/list-secrets.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/list-secrets.test.ts",
+      "target": "file:eliza/packages/core/src/types/primitives.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/list-secrets.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/services/secrets.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/list-secrets.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/list-secrets.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/list-secrets.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/manage-secret.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/actions/check-secret.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/manage-secret.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/actions/delete-secret.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/manage-secret.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/actions/get-secret.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/manage-secret.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/actions/list-secrets.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/manage-secret.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/manage-secret.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/actions/request-secret.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/manage-secret.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/actions/set-secret.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/manage-secret.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/services/secrets.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/manage-secret.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/manage-secret.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/manage-secret.ts",
+      "target": "file:eliza/packages/core/src/utils/action-validation.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.test.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.test.ts",
+      "target": "file:eliza/packages/core/src/types/primitives.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/services/secrets.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/mirror-secret-to-vault.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/request-secret.test.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/actions/manage-secret.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/request-secret.test.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/actions/request-secret.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/request-secret.test.ts",
+      "target": "file:eliza/packages/core/src/types/primitives.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/request-secret.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/services/secrets.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/request-secret.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/request-secret.ts",
+      "target": "file:eliza/packages/core/src/prompts.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/request-secret.ts",
+      "target": "file:eliza/packages/core/src/sensitive-request-policy.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/request-secret.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/request-secret.ts",
+      "target": "file:eliza/packages/core/src/types/primitives.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/set-secret.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/services/secrets.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/set-secret.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/set-secret.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/validation.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/set-secret.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/set-secret.ts",
+      "target": "file:eliza/packages/core/src/prompts.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/actions/set-secret.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/crypto/encryption.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/plugin.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/actions/manage-secret.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/plugin.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/providers/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/plugin.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/services/plugin-activator.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/plugin.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/services/secrets.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/plugin.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/setup/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/plugin.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/plugin.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/providers/secrets-status.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/services/plugin-activator.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/providers/secrets-status.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/services/secrets.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/providers/secrets-status.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/providers/secrets-status.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/services/index.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/services/plugin-activator.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/services/index.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/services/secrets.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/services/plugin-activator.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/services/secrets.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/services/plugin-activator.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/services/plugin-activator.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/services/plugin-activator.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/services/secrets.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/crypto/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/services/secrets.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/storage/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/services/secrets.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/services/secrets.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/validation.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/services/secrets.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/services/secrets.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/setup/action.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/services/secrets.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/setup/action.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/setup/config.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/setup/action.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/setup/action.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/validation.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/setup/action.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/setup/action.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/setup/action.ts",
+      "target": "file:eliza/packages/core/src/utils/type-guards.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/setup/config.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/types.ts",
+      "type": "imports"
+    }
+  ]
+}

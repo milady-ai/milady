@@ -1,0 +1,3454 @@
+{
+  "batchIndex": 31,
+  "nodes": [
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/state/useStreamingText.ts",
+      "type": "file",
+      "name": "useStreamingText.ts",
+      "filePath": "eliza/packages/ui/src/state/useStreamingText.ts",
+      "summary": "useStreamingText.ts is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 150 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/state/useStreamingText.ts:computeNextMessage",
+      "type": "function",
+      "name": "computeNextMessage",
+      "filePath": "eliza/packages/ui/src/state/useStreamingText.ts",
+      "summary": "computeNextMessage is a function defined in eliza/packages/ui/src/state/useStreamingText.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/state/useStreamingText.ts:applyStreamingTextModification",
+      "type": "function",
+      "name": "applyStreamingTextModification",
+      "filePath": "eliza/packages/ui/src/state/useStreamingText.ts",
+      "summary": "applyStreamingTextModification is a function defined in eliza/packages/ui/src/state/useStreamingText.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/state/useTriggersState.ts",
+      "type": "file",
+      "name": "useTriggersState.ts",
+      "filePath": "eliza/packages/ui/src/state/useTriggersState.ts",
+      "summary": "useTriggersState.ts is a typescript source file in the Milady codebase. It contains 2 functions, 1 imports.",
+      "languageNotes": "typescript; code; 230 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/state/useTriggersState.ts:sortTriggersByNextRun",
+      "type": "function",
+      "name": "sortTriggersByNextRun",
+      "filePath": "eliza/packages/ui/src/state/useTriggersState.ts",
+      "summary": "sortTriggersByNextRun is a function defined in eliza/packages/ui/src/state/useTriggersState.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/state/useTriggersState.ts:useTriggersState",
+      "type": "function",
+      "name": "useTriggersState",
+      "filePath": "eliza/packages/ui/src/state/useTriggersState.ts",
+      "summary": "useTriggersState is a function defined in eliza/packages/ui/src/state/useTriggersState.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/state/useVincentState.ts",
+      "type": "file",
+      "name": "useVincentState.ts",
+      "filePath": "eliza/packages/ui/src/state/useVincentState.ts",
+      "summary": "useVincentState.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 21 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/state/useVincentState.ts:useVincentState",
+      "type": "function",
+      "name": "useVincentState",
+      "filePath": "eliza/packages/ui/src/state/useVincentState.ts",
+      "summary": "useVincentState is a function defined in eliza/packages/ui/src/state/useVincentState.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/state/useWalletState.ts",
+      "type": "file",
+      "name": "useWalletState.ts",
+      "filePath": "eliza/packages/ui/src/state/useWalletState.ts",
+      "summary": "useWalletState.ts is a typescript source file in the Milady codebase. It contains 1 function, 6 imports.",
+      "languageNotes": "typescript; code; 678 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/state/useWalletState.ts:useWalletState",
+      "type": "function",
+      "name": "useWalletState",
+      "filePath": "eliza/packages/ui/src/state/useWalletState.ts",
+      "summary": "useWalletState is a function defined in eliza/packages/ui/src/state/useWalletState.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/state/vrm.ts",
+      "type": "file",
+      "name": "vrm.ts",
+      "filePath": "eliza/packages/ui/src/state/vrm.ts",
+      "summary": "vrm.ts is a typescript source file in the Milady codebase. It contains 8 functions, 3 imports.",
+      "languageNotes": "typescript; code; 80 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/state/vrm.ts:getAssets",
+      "type": "function",
+      "name": "getAssets",
+      "filePath": "eliza/packages/ui/src/state/vrm.ts",
+      "summary": "getAssets is a function defined in eliza/packages/ui/src/state/vrm.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/state/vrm.ts:getVrmCount",
+      "type": "function",
+      "name": "getVrmCount",
+      "filePath": "eliza/packages/ui/src/state/vrm.ts",
+      "summary": "getVrmCount is a function defined in eliza/packages/ui/src/state/vrm.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/state/vrm.ts:normalizeAvatarIndex",
+      "type": "function",
+      "name": "normalizeAvatarIndex",
+      "filePath": "eliza/packages/ui/src/state/vrm.ts",
+      "summary": "normalizeAvatarIndex is a function defined in eliza/packages/ui/src/state/vrm.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/state/vrm.ts:getVrmUrl",
+      "type": "function",
+      "name": "getVrmUrl",
+      "filePath": "eliza/packages/ui/src/state/vrm.ts",
+      "summary": "getVrmUrl is a function defined in eliza/packages/ui/src/state/vrm.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/state/vrm.ts:getVrmPreviewUrl",
+      "type": "function",
+      "name": "getVrmPreviewUrl",
+      "filePath": "eliza/packages/ui/src/state/vrm.ts",
+      "summary": "getVrmPreviewUrl is a function defined in eliza/packages/ui/src/state/vrm.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/state/vrm.ts:getVrmBackgroundUrl",
+      "type": "function",
+      "name": "getVrmBackgroundUrl",
+      "filePath": "eliza/packages/ui/src/state/vrm.ts",
+      "summary": "getVrmBackgroundUrl is a function defined in eliza/packages/ui/src/state/vrm.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/state/vrm.ts:getCompanionBackgroundUrl",
+      "type": "function",
+      "name": "getCompanionBackgroundUrl",
+      "filePath": "eliza/packages/ui/src/state/vrm.ts",
+      "summary": "getCompanionBackgroundUrl is a function defined in eliza/packages/ui/src/state/vrm.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/state/vrm.ts:getVrmTitle",
+      "type": "function",
+      "name": "getVrmTitle",
+      "filePath": "eliza/packages/ui/src/state/vrm.ts",
+      "summary": "getVrmTitle is a function defined in eliza/packages/ui/src/state/vrm.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/storage/workspace-folder.test.ts",
+      "type": "file",
+      "name": "workspace-folder.test.ts",
+      "filePath": "eliza/packages/ui/src/storage/workspace-folder.test.ts",
+      "summary": "workspace-folder.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 88 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/storage/workspace-folder.test.ts:makeStorage",
+      "type": "function",
+      "name": "makeStorage",
+      "filePath": "eliza/packages/ui/src/storage/workspace-folder.test.ts",
+      "summary": "makeStorage is a function defined in eliza/packages/ui/src/storage/workspace-folder.test.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/storage/workspace-folder.ts",
+      "type": "file",
+      "name": "workspace-folder.ts",
+      "filePath": "eliza/packages/ui/src/storage/workspace-folder.ts",
+      "summary": "workspace-folder.ts is a typescript source file in the Milady codebase. It contains 5 functions.",
+      "languageNotes": "typescript; code; 88 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/storage/workspace-folder.ts:getStorage",
+      "type": "function",
+      "name": "getStorage",
+      "filePath": "eliza/packages/ui/src/storage/workspace-folder.ts",
+      "summary": "getStorage is a function defined in eliza/packages/ui/src/storage/workspace-folder.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/storage/workspace-folder.ts:isStoredWorkspaceFolder",
+      "type": "function",
+      "name": "isStoredWorkspaceFolder",
+      "filePath": "eliza/packages/ui/src/storage/workspace-folder.ts",
+      "summary": "isStoredWorkspaceFolder is a function defined in eliza/packages/ui/src/storage/workspace-folder.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/storage/workspace-folder.ts:readStoredWorkspaceFolder",
+      "type": "function",
+      "name": "readStoredWorkspaceFolder",
+      "filePath": "eliza/packages/ui/src/storage/workspace-folder.ts",
+      "summary": "readStoredWorkspaceFolder is a function defined in eliza/packages/ui/src/storage/workspace-folder.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/storage/workspace-folder.ts:persistStoredWorkspaceFolder",
+      "type": "function",
+      "name": "persistStoredWorkspaceFolder",
+      "filePath": "eliza/packages/ui/src/storage/workspace-folder.ts",
+      "summary": "persistStoredWorkspaceFolder is a function defined in eliza/packages/ui/src/storage/workspace-folder.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/storage/workspace-folder.ts:clearStoredWorkspaceFolder",
+      "type": "function",
+      "name": "clearStoredWorkspaceFolder",
+      "filePath": "eliza/packages/ui/src/storage/workspace-folder.ts",
+      "summary": "clearStoredWorkspaceFolder is a function defined in eliza/packages/ui/src/storage/workspace-folder.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/terminal/palette.ts",
+      "type": "file",
+      "name": "palette.ts",
+      "filePath": "eliza/packages/ui/src/terminal/palette.ts",
+      "summary": "palette.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 12 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/terminal/theme.ts",
+      "type": "file",
+      "name": "theme.ts",
+      "filePath": "eliza/packages/ui/src/terminal/theme.ts",
+      "summary": "theme.ts is a typescript source file in the Milady codebase. It contains 3 functions, 1 imports.",
+      "languageNotes": "typescript; code; 38 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/terminal/theme.ts:hex",
+      "type": "function",
+      "name": "hex",
+      "filePath": "eliza/packages/ui/src/terminal/theme.ts",
+      "summary": "hex is a function defined in eliza/packages/ui/src/terminal/theme.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/terminal/theme.ts:isRich",
+      "type": "function",
+      "name": "isRich",
+      "filePath": "eliza/packages/ui/src/terminal/theme.ts",
+      "summary": "isRich is a function defined in eliza/packages/ui/src/terminal/theme.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/terminal/theme.ts:colorize",
+      "type": "function",
+      "name": "colorize",
+      "filePath": "eliza/packages/ui/src/terminal/theme.ts",
+      "summary": "colorize is a function defined in eliza/packages/ui/src/terminal/theme.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/utils/asset-url.ts",
+      "type": "file",
+      "name": "asset-url.ts",
+      "filePath": "eliza/packages/ui/src/utils/asset-url.ts",
+      "summary": "asset-url.ts is a typescript source file in the Milady codebase. It contains 10 functions, 2 imports.",
+      "languageNotes": "typescript; code; 168 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/asset-url.ts:stripLeadingPathMarkers",
+      "type": "function",
+      "name": "stripLeadingPathMarkers",
+      "filePath": "eliza/packages/ui/src/utils/asset-url.ts",
+      "summary": "stripLeadingPathMarkers is a function defined in eliza/packages/ui/src/utils/asset-url.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/asset-url.ts:isAlreadyAbsolute",
+      "type": "function",
+      "name": "isAlreadyAbsolute",
+      "filePath": "eliza/packages/ui/src/utils/asset-url.ts",
+      "summary": "isAlreadyAbsolute is a function defined in eliza/packages/ui/src/utils/asset-url.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/asset-url.ts:normalizeBaseHref",
+      "type": "function",
+      "name": "normalizeBaseHref",
+      "filePath": "eliza/packages/ui/src/utils/asset-url.ts",
+      "summary": "normalizeBaseHref is a function defined in eliza/packages/ui/src/utils/asset-url.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/asset-url.ts:inferBaseForUrl",
+      "type": "function",
+      "name": "inferBaseForUrl",
+      "filePath": "eliza/packages/ui/src/utils/asset-url.ts",
+      "summary": "inferBaseForUrl is a function defined in eliza/packages/ui/src/utils/asset-url.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/asset-url.ts:shouldIgnoreViteBase",
+      "type": "function",
+      "name": "shouldIgnoreViteBase",
+      "filePath": "eliza/packages/ui/src/utils/asset-url.ts",
+      "summary": "shouldIgnoreViteBase is a function defined in eliza/packages/ui/src/utils/asset-url.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/asset-url.ts:computeBaseHref",
+      "type": "function",
+      "name": "computeBaseHref",
+      "filePath": "eliza/packages/ui/src/utils/asset-url.ts",
+      "summary": "computeBaseHref is a function defined in eliza/packages/ui/src/utils/asset-url.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/asset-url.ts:runtimeBaseHref",
+      "type": "function",
+      "name": "runtimeBaseHref",
+      "filePath": "eliza/packages/ui/src/utils/asset-url.ts",
+      "summary": "runtimeBaseHref is a function defined in eliza/packages/ui/src/utils/asset-url.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/asset-url.ts:resolveAppAssetUrl",
+      "type": "function",
+      "name": "resolveAppAssetUrl",
+      "filePath": "eliza/packages/ui/src/utils/asset-url.ts",
+      "summary": "resolveAppAssetUrl is a function defined in eliza/packages/ui/src/utils/asset-url.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/asset-url.ts:readSessionStorageApiBase",
+      "type": "function",
+      "name": "readSessionStorageApiBase",
+      "filePath": "eliza/packages/ui/src/utils/asset-url.ts",
+      "summary": "readSessionStorageApiBase is a function defined in eliza/packages/ui/src/utils/asset-url.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/asset-url.ts:resolveApiUrl",
+      "type": "function",
+      "name": "resolveApiUrl",
+      "filePath": "eliza/packages/ui/src/utils/asset-url.ts",
+      "summary": "resolveApiUrl is a function defined in eliza/packages/ui/src/utils/asset-url.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/utils/eliza-globals.ts",
+      "type": "file",
+      "name": "eliza-globals.ts",
+      "filePath": "eliza/packages/ui/src/utils/eliza-globals.ts",
+      "summary": "eliza-globals.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 9 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/utils/globals.ts",
+      "type": "file",
+      "name": "globals.ts",
+      "filePath": "eliza/packages/ui/src/utils/globals.ts",
+      "summary": "globals.ts is a typescript source file in the Milady codebase. It contains 7 functions, 2 imports.",
+      "languageNotes": "typescript; code; 57 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/globals.ts:isLogLevelEnabled",
+      "type": "function",
+      "name": "isLogLevelEnabled",
+      "filePath": "eliza/packages/ui/src/utils/globals.ts",
+      "summary": "isLogLevelEnabled is a function defined in eliza/packages/ui/src/utils/globals.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/globals.ts:setVerbose",
+      "type": "function",
+      "name": "setVerbose",
+      "filePath": "eliza/packages/ui/src/utils/globals.ts",
+      "summary": "setVerbose is a function defined in eliza/packages/ui/src/utils/globals.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/globals.ts:isVerbose",
+      "type": "function",
+      "name": "isVerbose",
+      "filePath": "eliza/packages/ui/src/utils/globals.ts",
+      "summary": "isVerbose is a function defined in eliza/packages/ui/src/utils/globals.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/globals.ts:shouldLogVerbose",
+      "type": "function",
+      "name": "shouldLogVerbose",
+      "filePath": "eliza/packages/ui/src/utils/globals.ts",
+      "summary": "shouldLogVerbose is a function defined in eliza/packages/ui/src/utils/globals.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/globals.ts:logVerbose",
+      "type": "function",
+      "name": "logVerbose",
+      "filePath": "eliza/packages/ui/src/utils/globals.ts",
+      "summary": "logVerbose is a function defined in eliza/packages/ui/src/utils/globals.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/globals.ts:setYes",
+      "type": "function",
+      "name": "setYes",
+      "filePath": "eliza/packages/ui/src/utils/globals.ts",
+      "summary": "setYes is a function defined in eliza/packages/ui/src/utils/globals.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/globals.ts:isYes",
+      "type": "function",
+      "name": "isYes",
+      "filePath": "eliza/packages/ui/src/utils/globals.ts",
+      "summary": "isYes is a function defined in eliza/packages/ui/src/utils/globals.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/utils/name-tokens.ts",
+      "type": "file",
+      "name": "name-tokens.ts",
+      "filePath": "eliza/packages/ui/src/utils/name-tokens.ts",
+      "summary": "name-tokens.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 4 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/utils/owner-name.ts",
+      "type": "file",
+      "name": "owner-name.ts",
+      "filePath": "eliza/packages/ui/src/utils/owner-name.ts",
+      "summary": "owner-name.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 1 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/utils/streaming-text.ts",
+      "type": "file",
+      "name": "streaming-text.ts",
+      "filePath": "eliza/packages/ui/src/utils/streaming-text.ts",
+      "summary": "streaming-text.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 6 lines"
+    },
+    {
+      "tags": [
+        "voice",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/utils/tts-debug.ts",
+      "type": "file",
+      "name": "tts-debug.ts",
+      "filePath": "eliza/packages/ui/src/utils/tts-debug.ts",
+      "summary": "tts-debug.ts is a typescript source file in the Milady codebase. It contains 4 functions.",
+      "languageNotes": "typescript; code; 77 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/tts-debug.ts:ttsDebugEnabled",
+      "type": "function",
+      "name": "ttsDebugEnabled",
+      "filePath": "eliza/packages/ui/src/utils/tts-debug.ts",
+      "summary": "ttsDebugEnabled is a function defined in eliza/packages/ui/src/utils/tts-debug.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/tts-debug.ts:isTtsDebugEnabled",
+      "type": "function",
+      "name": "isTtsDebugEnabled",
+      "filePath": "eliza/packages/ui/src/utils/tts-debug.ts",
+      "summary": "isTtsDebugEnabled is a function defined in eliza/packages/ui/src/utils/tts-debug.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/tts-debug.ts:ttsDebugTextPreview",
+      "type": "function",
+      "name": "ttsDebugTextPreview",
+      "filePath": "eliza/packages/ui/src/utils/tts-debug.ts",
+      "summary": "ttsDebugTextPreview is a function defined in eliza/packages/ui/src/utils/tts-debug.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/utils/tts-debug.ts:ttsDebug",
+      "type": "function",
+      "name": "ttsDebug",
+      "filePath": "eliza/packages/ui/src/utils/tts-debug.ts",
+      "summary": "ttsDebug is a function defined in eliza/packages/ui/src/utils/tts-debug.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/view-recents.ts",
+      "type": "file",
+      "name": "view-recents.ts",
+      "filePath": "eliza/packages/ui/src/view-recents.ts",
+      "summary": "view-recents.ts is a typescript source file in the Milady codebase. It contains 3 functions.",
+      "languageNotes": "typescript; code; 39 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/view-recents.ts:readRecentViewIds",
+      "type": "function",
+      "name": "readRecentViewIds",
+      "filePath": "eliza/packages/ui/src/view-recents.ts",
+      "summary": "readRecentViewIds is a function defined in eliza/packages/ui/src/view-recents.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/view-recents.ts:writeRecentViewIds",
+      "type": "function",
+      "name": "writeRecentViewIds",
+      "filePath": "eliza/packages/ui/src/view-recents.ts",
+      "summary": "writeRecentViewIds is a function defined in eliza/packages/ui/src/view-recents.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/view-recents.ts:recordRecentViewId",
+      "type": "function",
+      "name": "recordRecentViewId",
+      "filePath": "eliza/packages/ui/src/view-recents.ts",
+      "summary": "recordRecentViewId is a function defined in eliza/packages/ui/src/view-recents.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/views/view-event-bus.ts",
+      "type": "file",
+      "name": "view-event-bus.ts",
+      "filePath": "eliza/packages/ui/src/views/view-event-bus.ts",
+      "summary": "view-event-bus.ts is a typescript source file in the Milady codebase. It contains 4 functions.",
+      "languageNotes": "typescript; code; 122 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/views/view-event-bus.ts:getChannel",
+      "type": "function",
+      "name": "getChannel",
+      "filePath": "eliza/packages/ui/src/views/view-event-bus.ts",
+      "summary": "getChannel is a function defined in eliza/packages/ui/src/views/view-event-bus.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/views/view-event-bus.ts:emitViewEvent",
+      "type": "function",
+      "name": "emitViewEvent",
+      "filePath": "eliza/packages/ui/src/views/view-event-bus.ts",
+      "summary": "emitViewEvent is a function defined in eliza/packages/ui/src/views/view-event-bus.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/views/view-event-bus.ts:onViewEvent",
+      "type": "function",
+      "name": "onViewEvent",
+      "filePath": "eliza/packages/ui/src/views/view-event-bus.ts",
+      "summary": "onViewEvent is a function defined in eliza/packages/ui/src/views/view-event-bus.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/views/view-event-bus.ts:onAnyViewEvent",
+      "type": "function",
+      "name": "onAnyViewEvent",
+      "filePath": "eliza/packages/ui/src/views/view-event-bus.ts",
+      "summary": "onAnyViewEvent is a function defined in eliza/packages/ui/src/views/view-event-bus.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "voice"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/voice/__tests__/emotion.test.ts",
+      "type": "file",
+      "name": "emotion.test.ts",
+      "filePath": "eliza/packages/ui/src/voice/__tests__/emotion.test.ts",
+      "summary": "emotion.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 60 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "voice",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/voice/__tests__/sentence-streaming.test.ts",
+      "type": "file",
+      "name": "sentence-streaming.test.ts",
+      "filePath": "eliza/packages/ui/src/voice/__tests__/sentence-streaming.test.ts",
+      "summary": "sentence-streaming.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 232 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/__tests__/sentence-streaming.test.ts:runStreamingFlusher",
+      "type": "function",
+      "name": "runStreamingFlusher",
+      "filePath": "eliza/packages/ui/src/voice/__tests__/sentence-streaming.test.ts",
+      "summary": "runStreamingFlusher is a function defined in eliza/packages/ui/src/voice/__tests__/sentence-streaming.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "voice"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/voice/character-voice-config.test.ts",
+      "type": "file",
+      "name": "character-voice-config.test.ts",
+      "filePath": "eliza/packages/ui/src/voice/character-voice-config.test.ts",
+      "summary": "character-voice-config.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 31 lines"
+    },
+    {
+      "tags": [
+        "voice",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/voice/character-voice-config.ts",
+      "type": "file",
+      "name": "character-voice-config.ts",
+      "filePath": "eliza/packages/ui/src/voice/character-voice-config.ts",
+      "summary": "character-voice-config.ts is a typescript source file in the Milady codebase. It contains 7 functions, 5 imports.",
+      "languageNotes": "typescript; code; 139 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/character-voice-config.ts:readString",
+      "type": "function",
+      "name": "readString",
+      "filePath": "eliza/packages/ui/src/voice/character-voice-config.ts",
+      "summary": "readString is a function defined in eliza/packages/ui/src/voice/character-voice-config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/character-voice-config.ts:readNumber",
+      "type": "function",
+      "name": "readNumber",
+      "filePath": "eliza/packages/ui/src/voice/character-voice-config.ts",
+      "summary": "readNumber is a function defined in eliza/packages/ui/src/voice/character-voice-config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/character-voice-config.ts:resolveStoredVoiceConfig",
+      "type": "function",
+      "name": "resolveStoredVoiceConfig",
+      "filePath": "eliza/packages/ui/src/voice/character-voice-config.ts",
+      "summary": "resolveStoredVoiceConfig is a function defined in eliza/packages/ui/src/voice/character-voice-config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/character-voice-config.ts:resolveSelectedCharacterVoiceId",
+      "type": "function",
+      "name": "resolveSelectedCharacterVoiceId",
+      "filePath": "eliza/packages/ui/src/voice/character-voice-config.ts",
+      "summary": "resolveSelectedCharacterVoiceId is a function defined in eliza/packages/ui/src/voice/character-voice-config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/character-voice-config.ts:resolveLegacyVoiceId",
+      "type": "function",
+      "name": "resolveLegacyVoiceId",
+      "filePath": "eliza/packages/ui/src/voice/character-voice-config.ts",
+      "summary": "resolveLegacyVoiceId is a function defined in eliza/packages/ui/src/voice/character-voice-config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/character-voice-config.ts:resolveCharacterVoiceConfigFromAppConfig",
+      "type": "function",
+      "name": "resolveCharacterVoiceConfigFromAppConfig",
+      "filePath": "eliza/packages/ui/src/voice/character-voice-config.ts",
+      "summary": "resolveCharacterVoiceConfigFromAppConfig is a function defined in eliza/packages/ui/src/voice/character-voice-config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/character-voice-config.ts:applyVoiceProviderDefaults",
+      "type": "function",
+      "name": "applyVoiceProviderDefaults",
+      "filePath": "eliza/packages/ui/src/voice/character-voice-config.ts",
+      "summary": "applyVoiceProviderDefaults is a function defined in eliza/packages/ui/src/voice/character-voice-config.ts."
+    },
+    {
+      "tags": [
+        "voice",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/voice/emotion.ts",
+      "type": "file",
+      "name": "emotion.ts",
+      "filePath": "eliza/packages/ui/src/voice/emotion.ts",
+      "summary": "emotion.ts is a typescript source file in the Milady codebase. It contains 4 functions.",
+      "languageNotes": "typescript; code; 139 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/emotion.ts:isEmotion",
+      "type": "function",
+      "name": "isEmotion",
+      "filePath": "eliza/packages/ui/src/voice/emotion.ts",
+      "summary": "isEmotion is a function defined in eliza/packages/ui/src/voice/emotion.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/emotion.ts:coerceEmotion",
+      "type": "function",
+      "name": "coerceEmotion",
+      "filePath": "eliza/packages/ui/src/voice/emotion.ts",
+      "summary": "coerceEmotion is a function defined in eliza/packages/ui/src/voice/emotion.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/emotion.ts:emotionFromText",
+      "type": "function",
+      "name": "emotionFromText",
+      "filePath": "eliza/packages/ui/src/voice/emotion.ts",
+      "summary": "emotionFromText is a function defined in eliza/packages/ui/src/voice/emotion.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/emotion.ts:emotionToOmnivoiceKeyword",
+      "type": "function",
+      "name": "emotionToOmnivoiceKeyword",
+      "filePath": "eliza/packages/ui/src/voice/emotion.ts",
+      "summary": "emotionToOmnivoiceKeyword is a function defined in eliza/packages/ui/src/voice/emotion.ts."
+    },
+    {
+      "tags": [
+        "entry-point",
+        "voice"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/voice/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/ui/src/voice/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 16 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "voice"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/voice/local-asr-capture.test.ts",
+      "type": "file",
+      "name": "local-asr-capture.test.ts",
+      "filePath": "eliza/packages/ui/src/voice/local-asr-capture.test.ts",
+      "summary": "local-asr-capture.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 68 lines"
+    },
+    {
+      "tags": [
+        "voice",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/voice/local-asr-capture.ts",
+      "type": "file",
+      "name": "local-asr-capture.ts",
+      "filePath": "eliza/packages/ui/src/voice/local-asr-capture.ts",
+      "summary": "local-asr-capture.ts is a typescript source file in the Milady codebase. It contains 11 functions.",
+      "languageNotes": "typescript; code; 306 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:getAudioContextCtor",
+      "type": "function",
+      "name": "getAudioContextCtor",
+      "filePath": "eliza/packages/ui/src/voice/local-asr-capture.ts",
+      "summary": "getAudioContextCtor is a function defined in eliza/packages/ui/src/voice/local-asr-capture.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:isLocalAsrCaptureSupported",
+      "type": "function",
+      "name": "isLocalAsrCaptureSupported",
+      "filePath": "eliza/packages/ui/src/voice/local-asr-capture.ts",
+      "summary": "isLocalAsrCaptureSupported is a function defined in eliza/packages/ui/src/voice/local-asr-capture.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:concatPcm",
+      "type": "function",
+      "name": "concatPcm",
+      "filePath": "eliza/packages/ui/src/voice/local-asr-capture.ts",
+      "summary": "concatPcm is a function defined in eliza/packages/ui/src/voice/local-asr-capture.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:writeAscii",
+      "type": "function",
+      "name": "writeAscii",
+      "filePath": "eliza/packages/ui/src/voice/local-asr-capture.ts",
+      "summary": "writeAscii is a function defined in eliza/packages/ui/src/voice/local-asr-capture.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:clampPcm16",
+      "type": "function",
+      "name": "clampPcm16",
+      "filePath": "eliza/packages/ui/src/voice/local-asr-capture.ts",
+      "summary": "clampPcm16 is a function defined in eliza/packages/ui/src/voice/local-asr-capture.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:nowMs",
+      "type": "function",
+      "name": "nowMs",
+      "filePath": "eliza/packages/ui/src/voice/local-asr-capture.ts",
+      "summary": "nowMs is a function defined in eliza/packages/ui/src/voice/local-asr-capture.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:measurePcmAudio",
+      "type": "function",
+      "name": "measurePcmAudio",
+      "filePath": "eliza/packages/ui/src/voice/local-asr-capture.ts",
+      "summary": "measurePcmAudio is a function defined in eliza/packages/ui/src/voice/local-asr-capture.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:isSilentPcmAudio",
+      "type": "function",
+      "name": "isSilentPcmAudio",
+      "filePath": "eliza/packages/ui/src/voice/local-asr-capture.ts",
+      "summary": "isSilentPcmAudio is a function defined in eliza/packages/ui/src/voice/local-asr-capture.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:createLocalAsrAutoStopDetector",
+      "type": "function",
+      "name": "createLocalAsrAutoStopDetector",
+      "filePath": "eliza/packages/ui/src/voice/local-asr-capture.ts",
+      "summary": "createLocalAsrAutoStopDetector is a function defined in eliza/packages/ui/src/voice/local-asr-capture.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:encodeMonoPcm16Wav",
+      "type": "function",
+      "name": "encodeMonoPcm16Wav",
+      "filePath": "eliza/packages/ui/src/voice/local-asr-capture.ts",
+      "summary": "encodeMonoPcm16Wav is a function defined in eliza/packages/ui/src/voice/local-asr-capture.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:startLocalAsrRecorder",
+      "type": "function",
+      "name": "startLocalAsrRecorder",
+      "filePath": "eliza/packages/ui/src/voice/local-asr-capture.ts",
+      "summary": "startLocalAsrRecorder is a function defined in eliza/packages/ui/src/voice/local-asr-capture.ts."
+    },
+    {
+      "tags": [
+        "voice",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/voice/local-asr-transcribe.ts",
+      "type": "file",
+      "name": "local-asr-transcribe.ts",
+      "filePath": "eliza/packages/ui/src/voice/local-asr-transcribe.ts",
+      "summary": "local-asr-transcribe.ts is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 55 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/local-asr-transcribe.ts:transcribeLocalInferenceWav",
+      "type": "function",
+      "name": "transcribeLocalInferenceWav",
+      "filePath": "eliza/packages/ui/src/voice/local-asr-transcribe.ts",
+      "summary": "transcribeLocalInferenceWav is a function defined in eliza/packages/ui/src/voice/local-asr-transcribe.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "voice"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/voice/voice-capture-factory.test.ts",
+      "type": "file",
+      "name": "voice-capture-factory.test.ts",
+      "filePath": "eliza/packages/ui/src/voice/voice-capture-factory.test.ts",
+      "summary": "voice-capture-factory.test.ts is a typescript source file in the Milady codebase. It contains 3 imports.",
+      "languageNotes": "typescript; code; 74 lines"
+    },
+    {
+      "tags": [
+        "voice",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/voice/voice-capture-factory.ts",
+      "type": "file",
+      "name": "voice-capture-factory.ts",
+      "filePath": "eliza/packages/ui/src/voice/voice-capture-factory.ts",
+      "summary": "voice-capture-factory.ts is a typescript source file in the Milady codebase. It contains 2 functions, 4 imports.",
+      "languageNotes": "typescript; code; 306 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/voice-capture-factory.ts:resolveBackend",
+      "type": "function",
+      "name": "resolveBackend",
+      "filePath": "eliza/packages/ui/src/voice/voice-capture-factory.ts",
+      "summary": "resolveBackend is a function defined in eliza/packages/ui/src/voice/voice-capture-factory.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/voice/voice-capture-factory.ts:createVoiceCapture",
+      "type": "function",
+      "name": "createVoiceCapture",
+      "filePath": "eliza/packages/ui/src/voice/voice-capture-factory.ts",
+      "summary": "createVoiceCapture is a function defined in eliza/packages/ui/src/voice/voice-capture-factory.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "voice"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/voice/voice-chat-playback.test.ts",
+      "type": "file",
+      "name": "voice-chat-playback.test.ts",
+      "filePath": "eliza/packages/ui/src/voice/voice-chat-playback.test.ts",
+      "summary": "voice-chat-playback.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 16 lines"
+    },
+    {
+      "tags": [
+        "voice",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "type": "file",
+      "name": "voice-chat-playback.ts",
+      "filePath": "eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "summary": "voice-chat-playback.ts is a typescript source file in the Milady codebase. It contains 16 functions, 2 imports.",
+      "languageNotes": "typescript; code; 268 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:collapseWhitespace",
+      "type": "function",
+      "name": "collapseWhitespace",
+      "filePath": "eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "summary": "collapseWhitespace is a function defined in eliza/packages/ui/src/voice/voice-chat-playback.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:normalizeCacheText",
+      "type": "function",
+      "name": "normalizeCacheText",
+      "filePath": "eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "summary": "normalizeCacheText is a function defined in eliza/packages/ui/src/voice/voice-chat-playback.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:countSpeechTokens",
+      "type": "function",
+      "name": "countSpeechTokens",
+      "filePath": "eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "summary": "countSpeechTokens is a function defined in eliza/packages/ui/src/voice/voice-chat-playback.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:shouldCacheGeneratedSpeech",
+      "type": "function",
+      "name": "shouldCacheGeneratedSpeech",
+      "filePath": "eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "summary": "shouldCacheGeneratedSpeech is a function defined in eliza/packages/ui/src/voice/voice-chat-playback.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:capSpeechLength",
+      "type": "function",
+      "name": "capSpeechLength",
+      "filePath": "eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "summary": "capSpeechLength is a function defined in eliza/packages/ui/src/voice/voice-chat-playback.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:parseJsonObject",
+      "type": "function",
+      "name": "parseJsonObject",
+      "filePath": "eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "summary": "parseJsonObject is a function defined in eliza/packages/ui/src/voice/voice-chat-playback.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:extractStructuredVoiceText",
+      "type": "function",
+      "name": "extractStructuredVoiceText",
+      "filePath": "eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "summary": "extractStructuredVoiceText is a function defined in eliza/packages/ui/src/voice/voice-chat-playback.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:extractVoiceText",
+      "type": "function",
+      "name": "extractVoiceText",
+      "filePath": "eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "summary": "extractVoiceText is a function defined in eliza/packages/ui/src/voice/voice-chat-playback.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:toSpeakableText",
+      "type": "function",
+      "name": "toSpeakableText",
+      "filePath": "eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "summary": "toSpeakableText is a function defined in eliza/packages/ui/src/voice/voice-chat-playback.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:shelterUrls",
+      "type": "function",
+      "name": "shelterUrls",
+      "filePath": "eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "summary": "shelterUrls is a function defined in eliza/packages/ui/src/voice/voice-chat-playback.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:isRealSentenceEnd",
+      "type": "function",
+      "name": "isRealSentenceEnd",
+      "filePath": "eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "summary": "isRealSentenceEnd is a function defined in eliza/packages/ui/src/voice/voice-chat-playback.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:splitFirstSentence",
+      "type": "function",
+      "name": "splitFirstSentence",
+      "filePath": "eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "summary": "splitFirstSentence is a function defined in eliza/packages/ui/src/voice/voice-chat-playback.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:remainderAfter",
+      "type": "function",
+      "name": "remainderAfter",
+      "filePath": "eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "summary": "remainderAfter is a function defined in eliza/packages/ui/src/voice/voice-chat-playback.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:queueableSpeechPrefix",
+      "type": "function",
+      "name": "queueableSpeechPrefix",
+      "filePath": "eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "summary": "queueableSpeechPrefix is a function defined in eliza/packages/ui/src/voice/voice-chat-playback.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:normalizeMouthOpen",
+      "type": "function",
+      "name": "normalizeMouthOpen",
+      "filePath": "eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "summary": "normalizeMouthOpen is a function defined in eliza/packages/ui/src/voice/voice-chat-playback.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:nextIdleMouthOpen",
+      "type": "function",
+      "name": "nextIdleMouthOpen",
+      "filePath": "eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "summary": "nextIdleMouthOpen is a function defined in eliza/packages/ui/src/voice/voice-chat-playback.ts."
+    },
+    {
+      "tags": [
+        "voice",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/voice/voice-chat-recording.ts",
+      "type": "file",
+      "name": "voice-chat-recording.ts",
+      "filePath": "eliza/packages/ui/src/voice/voice-chat-recording.ts",
+      "summary": "voice-chat-recording.ts is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 59 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/voice-chat-recording.ts:normalizeTranscriptWord",
+      "type": "function",
+      "name": "normalizeTranscriptWord",
+      "filePath": "eliza/packages/ui/src/voice/voice-chat-recording.ts",
+      "summary": "normalizeTranscriptWord is a function defined in eliza/packages/ui/src/voice/voice-chat-recording.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/voice-chat-recording.ts:mergeTranscriptWindows",
+      "type": "function",
+      "name": "mergeTranscriptWindows",
+      "filePath": "eliza/packages/ui/src/voice/voice-chat-recording.ts",
+      "summary": "mergeTranscriptWindows is a function defined in eliza/packages/ui/src/voice/voice-chat-recording.ts."
+    },
+    {
+      "tags": [
+        "voice",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "type": "file",
+      "name": "voice-chat-types.ts",
+      "filePath": "eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "summary": "voice-chat-types.ts is a typescript source file in the Milady codebase. It contains 14 functions, 4 imports.",
+      "languageNotes": "typescript; code; 555 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:isSpeechRecognitionCtor",
+      "type": "function",
+      "name": "isSpeechRecognitionCtor",
+      "filePath": "eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "summary": "isSpeechRecognitionCtor is a function defined in eliza/packages/ui/src/voice/voice-chat-types.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:getSpeechRecognitionCtor",
+      "type": "function",
+      "name": "getSpeechRecognitionCtor",
+      "filePath": "eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "summary": "getSpeechRecognitionCtor is a function defined in eliza/packages/ui/src/voice/voice-chat-types.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:resolveVoiceMode",
+      "type": "function",
+      "name": "resolveVoiceMode",
+      "filePath": "eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "summary": "resolveVoiceMode is a function defined in eliza/packages/ui/src/voice/voice-chat-types.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:resolveVoiceProxyEndpoint",
+      "type": "function",
+      "name": "resolveVoiceProxyEndpoint",
+      "filePath": "eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "summary": "resolveVoiceProxyEndpoint is a function defined in eliza/packages/ui/src/voice/voice-chat-types.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:describeTtsCloudFetchTargetForDebug",
+      "type": "function",
+      "name": "describeTtsCloudFetchTargetForDebug",
+      "filePath": "eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "summary": "describeTtsCloudFetchTargetForDebug is a function defined in eliza/packages/ui/src/voice/voice-chat-types.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:isRedactedSecret",
+      "type": "function",
+      "name": "isRedactedSecret",
+      "filePath": "eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "summary": "isRedactedSecret is a function defined in eliza/packages/ui/src/voice/voice-chat-types.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:cloneVoiceConfig",
+      "type": "function",
+      "name": "cloneVoiceConfig",
+      "filePath": "eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "summary": "cloneVoiceConfig is a function defined in eliza/packages/ui/src/voice/voice-chat-types.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:resolveEffectiveVoiceConfig",
+      "type": "function",
+      "name": "resolveEffectiveVoiceConfig",
+      "filePath": "eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "summary": "resolveEffectiveVoiceConfig is a function defined in eliza/packages/ui/src/voice/voice-chat-types.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:isAbortError",
+      "type": "function",
+      "name": "isAbortError",
+      "filePath": "eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "summary": "isAbortError is a function defined in eliza/packages/ui/src/voice/voice-chat-types.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:webSpeechVoiceDebugFields",
+      "type": "function",
+      "name": "webSpeechVoiceDebugFields",
+      "filePath": "eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "summary": "webSpeechVoiceDebugFields is a function defined in eliza/packages/ui/src/voice/voice-chat-types.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:normalizeSpeechLocale",
+      "type": "function",
+      "name": "normalizeSpeechLocale",
+      "filePath": "eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "summary": "normalizeSpeechLocale is a function defined in eliza/packages/ui/src/voice/voice-chat-types.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:localePrefix",
+      "type": "function",
+      "name": "localePrefix",
+      "filePath": "eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "summary": "localePrefix is a function defined in eliza/packages/ui/src/voice/voice-chat-types.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:matchesVoiceLocale",
+      "type": "function",
+      "name": "matchesVoiceLocale",
+      "filePath": "eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "summary": "matchesVoiceLocale is a function defined in eliza/packages/ui/src/voice/voice-chat-types.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:toArrayBuffer",
+      "type": "function",
+      "name": "toArrayBuffer",
+      "filePath": "eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "summary": "toArrayBuffer is a function defined in eliza/packages/ui/src/voice/voice-chat-types.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "voice"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/ui/src/voice/voice-provider-defaults.test.ts",
+      "type": "file",
+      "name": "voice-provider-defaults.test.ts",
+      "filePath": "eliza/packages/ui/src/voice/voice-provider-defaults.test.ts",
+      "summary": "voice-provider-defaults.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 76 lines"
+    },
+    {
+      "tags": [
+        "voice",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/ui/src/voice/voice-provider-defaults.ts",
+      "type": "file",
+      "name": "voice-provider-defaults.ts",
+      "filePath": "eliza/packages/ui/src/voice/voice-provider-defaults.ts",
+      "summary": "voice-provider-defaults.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 64 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/ui/src/voice/voice-provider-defaults.ts:pickDefaultVoiceProvider",
+      "type": "function",
+      "name": "pickDefaultVoiceProvider",
+      "filePath": "eliza/packages/ui/src/voice/voice-provider-defaults.ts",
+      "summary": "pickDefaultVoiceProvider is a function defined in eliza/packages/ui/src/voice/voice-provider-defaults.ts."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/state/useStreamingText.ts",
+      "target": "function:eliza/packages/ui/src/state/useStreamingText.ts:computeNextMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/state/useStreamingText.ts",
+      "target": "function:eliza/packages/ui/src/state/useStreamingText.ts:applyStreamingTextModification",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/state/useStreamingText.ts:applyStreamingTextModification",
+      "target": "function:eliza/packages/ui/src/state/useStreamingText.ts:computeNextMessage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/state/useTriggersState.ts",
+      "target": "function:eliza/packages/ui/src/state/useTriggersState.ts:sortTriggersByNextRun",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/state/useTriggersState.ts",
+      "target": "function:eliza/packages/ui/src/state/useTriggersState.ts:useTriggersState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/state/useTriggersState.ts:useTriggersState",
+      "target": "function:eliza/packages/ui/src/state/useTriggersState.ts:sortTriggersByNextRun",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/state/useTriggersState.ts:useTriggersState",
+      "target": "function:eliza/packages/ui/src/state/useTriggersState.ts:sortTriggersByNextRun",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/state/useTriggersState.ts:useTriggersState",
+      "target": "function:eliza/packages/ui/src/state/useTriggersState.ts:sortTriggersByNextRun",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/state/useTriggersState.ts:useTriggersState",
+      "target": "function:eliza/packages/ui/src/state/useTriggersState.ts:sortTriggersByNextRun",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/state/useTriggersState.ts:useTriggersState",
+      "target": "function:eliza/packages/ui/src/state/useTriggersState.ts:sortTriggersByNextRun",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/state/useVincentState.ts",
+      "target": "function:eliza/packages/ui/src/state/useVincentState.ts:useVincentState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/state/useWalletState.ts",
+      "target": "function:eliza/packages/ui/src/state/useWalletState.ts:useWalletState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/state/vrm.ts",
+      "target": "function:eliza/packages/ui/src/state/vrm.ts:getAssets",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/state/vrm.ts",
+      "target": "function:eliza/packages/ui/src/state/vrm.ts:getVrmCount",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/state/vrm.ts",
+      "target": "function:eliza/packages/ui/src/state/vrm.ts:normalizeAvatarIndex",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/state/vrm.ts",
+      "target": "function:eliza/packages/ui/src/state/vrm.ts:getVrmUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/state/vrm.ts",
+      "target": "function:eliza/packages/ui/src/state/vrm.ts:getVrmPreviewUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/state/vrm.ts",
+      "target": "function:eliza/packages/ui/src/state/vrm.ts:getVrmBackgroundUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/state/vrm.ts",
+      "target": "function:eliza/packages/ui/src/state/vrm.ts:getCompanionBackgroundUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/state/vrm.ts",
+      "target": "function:eliza/packages/ui/src/state/vrm.ts:getVrmTitle",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/state/vrm.ts:getVrmCount",
+      "target": "function:eliza/packages/ui/src/state/vrm.ts:getAssets",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/state/vrm.ts:normalizeAvatarIndex",
+      "target": "function:eliza/packages/ui/src/state/vrm.ts:getAssets",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/state/vrm.ts:getVrmUrl",
+      "target": "function:eliza/packages/ui/src/state/vrm.ts:getAssets",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/state/vrm.ts:getVrmUrl",
+      "target": "function:eliza/packages/ui/src/state/vrm.ts:normalizeAvatarIndex",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/state/vrm.ts:getVrmPreviewUrl",
+      "target": "function:eliza/packages/ui/src/state/vrm.ts:getAssets",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/state/vrm.ts:getVrmPreviewUrl",
+      "target": "function:eliza/packages/ui/src/state/vrm.ts:normalizeAvatarIndex",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/state/vrm.ts:getVrmBackgroundUrl",
+      "target": "function:eliza/packages/ui/src/state/vrm.ts:getAssets",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/state/vrm.ts:getVrmBackgroundUrl",
+      "target": "function:eliza/packages/ui/src/state/vrm.ts:normalizeAvatarIndex",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/state/vrm.ts:getCompanionBackgroundUrl",
+      "target": "function:eliza/packages/ui/src/state/vrm.ts:getVrmBackgroundUrl",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/state/vrm.ts:getVrmTitle",
+      "target": "function:eliza/packages/ui/src/state/vrm.ts:getAssets",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/state/vrm.ts:getVrmTitle",
+      "target": "function:eliza/packages/ui/src/state/vrm.ts:normalizeAvatarIndex",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/storage/workspace-folder.test.ts",
+      "target": "function:eliza/packages/ui/src/storage/workspace-folder.test.ts:makeStorage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/storage/workspace-folder.ts",
+      "target": "function:eliza/packages/ui/src/storage/workspace-folder.ts:getStorage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/storage/workspace-folder.ts",
+      "target": "function:eliza/packages/ui/src/storage/workspace-folder.ts:isStoredWorkspaceFolder",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/storage/workspace-folder.ts",
+      "target": "function:eliza/packages/ui/src/storage/workspace-folder.ts:readStoredWorkspaceFolder",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/storage/workspace-folder.ts",
+      "target": "function:eliza/packages/ui/src/storage/workspace-folder.ts:persistStoredWorkspaceFolder",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/storage/workspace-folder.ts",
+      "target": "function:eliza/packages/ui/src/storage/workspace-folder.ts:clearStoredWorkspaceFolder",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/storage/workspace-folder.ts:readStoredWorkspaceFolder",
+      "target": "function:eliza/packages/ui/src/storage/workspace-folder.ts:getStorage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/storage/workspace-folder.ts:readStoredWorkspaceFolder",
+      "target": "function:eliza/packages/ui/src/storage/workspace-folder.ts:isStoredWorkspaceFolder",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/storage/workspace-folder.ts:persistStoredWorkspaceFolder",
+      "target": "function:eliza/packages/ui/src/storage/workspace-folder.ts:getStorage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/storage/workspace-folder.ts:clearStoredWorkspaceFolder",
+      "target": "function:eliza/packages/ui/src/storage/workspace-folder.ts:getStorage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/terminal/theme.ts",
+      "target": "function:eliza/packages/ui/src/terminal/theme.ts:hex",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/terminal/theme.ts",
+      "target": "function:eliza/packages/ui/src/terminal/theme.ts:isRich",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/terminal/theme.ts",
+      "target": "function:eliza/packages/ui/src/terminal/theme.ts:colorize",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/asset-url.ts",
+      "target": "function:eliza/packages/ui/src/utils/asset-url.ts:stripLeadingPathMarkers",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/asset-url.ts",
+      "target": "function:eliza/packages/ui/src/utils/asset-url.ts:isAlreadyAbsolute",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/asset-url.ts",
+      "target": "function:eliza/packages/ui/src/utils/asset-url.ts:normalizeBaseHref",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/asset-url.ts",
+      "target": "function:eliza/packages/ui/src/utils/asset-url.ts:inferBaseForUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/asset-url.ts",
+      "target": "function:eliza/packages/ui/src/utils/asset-url.ts:shouldIgnoreViteBase",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/asset-url.ts",
+      "target": "function:eliza/packages/ui/src/utils/asset-url.ts:computeBaseHref",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/asset-url.ts",
+      "target": "function:eliza/packages/ui/src/utils/asset-url.ts:runtimeBaseHref",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/asset-url.ts",
+      "target": "function:eliza/packages/ui/src/utils/asset-url.ts:resolveAppAssetUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/asset-url.ts",
+      "target": "function:eliza/packages/ui/src/utils/asset-url.ts:readSessionStorageApiBase",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/asset-url.ts",
+      "target": "function:eliza/packages/ui/src/utils/asset-url.ts:resolveApiUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/asset-url.ts:computeBaseHref",
+      "target": "function:eliza/packages/ui/src/utils/asset-url.ts:shouldIgnoreViteBase",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/asset-url.ts:computeBaseHref",
+      "target": "function:eliza/packages/ui/src/utils/asset-url.ts:inferBaseForUrl",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/asset-url.ts:runtimeBaseHref",
+      "target": "function:eliza/packages/ui/src/utils/asset-url.ts:computeBaseHref",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/asset-url.ts:resolveAppAssetUrl",
+      "target": "function:eliza/packages/ui/src/utils/asset-url.ts:isAlreadyAbsolute",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/asset-url.ts:resolveAppAssetUrl",
+      "target": "function:eliza/packages/ui/src/utils/asset-url.ts:stripLeadingPathMarkers",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/asset-url.ts:resolveAppAssetUrl",
+      "target": "function:eliza/packages/ui/src/utils/asset-url.ts:normalizeBaseHref",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/asset-url.ts:resolveAppAssetUrl",
+      "target": "function:eliza/packages/ui/src/utils/asset-url.ts:computeBaseHref",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/asset-url.ts:resolveAppAssetUrl",
+      "target": "function:eliza/packages/ui/src/utils/asset-url.ts:runtimeBaseHref",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/asset-url.ts:resolveApiUrl",
+      "target": "function:eliza/packages/ui/src/utils/asset-url.ts:readSessionStorageApiBase",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/globals.ts",
+      "target": "function:eliza/packages/ui/src/utils/globals.ts:isLogLevelEnabled",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/globals.ts",
+      "target": "function:eliza/packages/ui/src/utils/globals.ts:setVerbose",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/globals.ts",
+      "target": "function:eliza/packages/ui/src/utils/globals.ts:isVerbose",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/globals.ts",
+      "target": "function:eliza/packages/ui/src/utils/globals.ts:shouldLogVerbose",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/globals.ts",
+      "target": "function:eliza/packages/ui/src/utils/globals.ts:logVerbose",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/globals.ts",
+      "target": "function:eliza/packages/ui/src/utils/globals.ts:setYes",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/globals.ts",
+      "target": "function:eliza/packages/ui/src/utils/globals.ts:isYes",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/globals.ts:shouldLogVerbose",
+      "target": "function:eliza/packages/ui/src/utils/globals.ts:isLogLevelEnabled",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/globals.ts:logVerbose",
+      "target": "function:eliza/packages/ui/src/utils/globals.ts:shouldLogVerbose",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/tts-debug.ts",
+      "target": "function:eliza/packages/ui/src/utils/tts-debug.ts:ttsDebugEnabled",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/tts-debug.ts",
+      "target": "function:eliza/packages/ui/src/utils/tts-debug.ts:isTtsDebugEnabled",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/tts-debug.ts",
+      "target": "function:eliza/packages/ui/src/utils/tts-debug.ts:ttsDebugTextPreview",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/utils/tts-debug.ts",
+      "target": "function:eliza/packages/ui/src/utils/tts-debug.ts:ttsDebug",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/tts-debug.ts:isTtsDebugEnabled",
+      "target": "function:eliza/packages/ui/src/utils/tts-debug.ts:ttsDebugEnabled",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/utils/tts-debug.ts:ttsDebug",
+      "target": "function:eliza/packages/ui/src/utils/tts-debug.ts:ttsDebugEnabled",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/view-recents.ts",
+      "target": "function:eliza/packages/ui/src/view-recents.ts:readRecentViewIds",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/view-recents.ts",
+      "target": "function:eliza/packages/ui/src/view-recents.ts:writeRecentViewIds",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/view-recents.ts",
+      "target": "function:eliza/packages/ui/src/view-recents.ts:recordRecentViewId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/view-recents.ts:recordRecentViewId",
+      "target": "function:eliza/packages/ui/src/view-recents.ts:readRecentViewIds",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/view-recents.ts:recordRecentViewId",
+      "target": "function:eliza/packages/ui/src/view-recents.ts:readRecentViewIds",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/view-recents.ts:recordRecentViewId",
+      "target": "function:eliza/packages/ui/src/view-recents.ts:writeRecentViewIds",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/views/view-event-bus.ts",
+      "target": "function:eliza/packages/ui/src/views/view-event-bus.ts:getChannel",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/views/view-event-bus.ts",
+      "target": "function:eliza/packages/ui/src/views/view-event-bus.ts:emitViewEvent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/views/view-event-bus.ts",
+      "target": "function:eliza/packages/ui/src/views/view-event-bus.ts:onViewEvent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/views/view-event-bus.ts",
+      "target": "function:eliza/packages/ui/src/views/view-event-bus.ts:onAnyViewEvent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/views/view-event-bus.ts:emitViewEvent",
+      "target": "function:eliza/packages/ui/src/views/view-event-bus.ts:getChannel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/views/view-event-bus.ts:onViewEvent",
+      "target": "function:eliza/packages/ui/src/views/view-event-bus.ts:onAnyViewEvent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/views/view-event-bus.ts:onAnyViewEvent",
+      "target": "function:eliza/packages/ui/src/views/view-event-bus.ts:getChannel",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/__tests__/sentence-streaming.test.ts",
+      "target": "function:eliza/packages/ui/src/voice/__tests__/sentence-streaming.test.ts:runStreamingFlusher",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/character-voice-config.ts",
+      "target": "function:eliza/packages/ui/src/voice/character-voice-config.ts:readString",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/character-voice-config.ts",
+      "target": "function:eliza/packages/ui/src/voice/character-voice-config.ts:readNumber",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/character-voice-config.ts",
+      "target": "function:eliza/packages/ui/src/voice/character-voice-config.ts:resolveStoredVoiceConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/character-voice-config.ts",
+      "target": "function:eliza/packages/ui/src/voice/character-voice-config.ts:resolveSelectedCharacterVoiceId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/character-voice-config.ts",
+      "target": "function:eliza/packages/ui/src/voice/character-voice-config.ts:resolveLegacyVoiceId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/character-voice-config.ts",
+      "target": "function:eliza/packages/ui/src/voice/character-voice-config.ts:resolveCharacterVoiceConfigFromAppConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/character-voice-config.ts",
+      "target": "function:eliza/packages/ui/src/voice/character-voice-config.ts:applyVoiceProviderDefaults",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/character-voice-config.ts:resolveSelectedCharacterVoiceId",
+      "target": "function:eliza/packages/ui/src/voice/character-voice-config.ts:readString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/character-voice-config.ts:resolveSelectedCharacterVoiceId",
+      "target": "function:eliza/packages/ui/src/voice/character-voice-config.ts:readNumber",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/character-voice-config.ts:resolveCharacterVoiceConfigFromAppConfig",
+      "target": "function:eliza/packages/ui/src/voice/character-voice-config.ts:resolveStoredVoiceConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/character-voice-config.ts:resolveCharacterVoiceConfigFromAppConfig",
+      "target": "function:eliza/packages/ui/src/voice/character-voice-config.ts:resolveSelectedCharacterVoiceId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/character-voice-config.ts:resolveCharacterVoiceConfigFromAppConfig",
+      "target": "function:eliza/packages/ui/src/voice/character-voice-config.ts:resolveLegacyVoiceId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/emotion.ts",
+      "target": "function:eliza/packages/ui/src/voice/emotion.ts:isEmotion",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/emotion.ts",
+      "target": "function:eliza/packages/ui/src/voice/emotion.ts:coerceEmotion",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/emotion.ts",
+      "target": "function:eliza/packages/ui/src/voice/emotion.ts:emotionFromText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/emotion.ts",
+      "target": "function:eliza/packages/ui/src/voice/emotion.ts:emotionToOmnivoiceKeyword",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/emotion.ts:coerceEmotion",
+      "target": "function:eliza/packages/ui/src/voice/emotion.ts:isEmotion",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/local-asr-capture.ts",
+      "target": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:getAudioContextCtor",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/local-asr-capture.ts",
+      "target": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:isLocalAsrCaptureSupported",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/local-asr-capture.ts",
+      "target": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:concatPcm",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/local-asr-capture.ts",
+      "target": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:writeAscii",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/local-asr-capture.ts",
+      "target": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:clampPcm16",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/local-asr-capture.ts",
+      "target": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:nowMs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/local-asr-capture.ts",
+      "target": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:measurePcmAudio",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/local-asr-capture.ts",
+      "target": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:isSilentPcmAudio",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/local-asr-capture.ts",
+      "target": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:createLocalAsrAutoStopDetector",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/local-asr-capture.ts",
+      "target": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:encodeMonoPcm16Wav",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/local-asr-capture.ts",
+      "target": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:startLocalAsrRecorder",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:isLocalAsrCaptureSupported",
+      "target": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:getAudioContextCtor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:isSilentPcmAudio",
+      "target": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:measurePcmAudio",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:createLocalAsrAutoStopDetector",
+      "target": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:nowMs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:createLocalAsrAutoStopDetector",
+      "target": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:nowMs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:createLocalAsrAutoStopDetector",
+      "target": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:measurePcmAudio",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:encodeMonoPcm16Wav",
+      "target": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:writeAscii",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:encodeMonoPcm16Wav",
+      "target": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:writeAscii",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:encodeMonoPcm16Wav",
+      "target": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:writeAscii",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:encodeMonoPcm16Wav",
+      "target": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:writeAscii",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:encodeMonoPcm16Wav",
+      "target": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:clampPcm16",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:startLocalAsrRecorder",
+      "target": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:getAudioContextCtor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:startLocalAsrRecorder",
+      "target": "function:eliza/packages/ui/src/voice/local-asr-capture.ts:createLocalAsrAutoStopDetector",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/local-asr-transcribe.ts",
+      "target": "function:eliza/packages/ui/src/voice/local-asr-transcribe.ts:transcribeLocalInferenceWav",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/voice-capture-factory.ts",
+      "target": "function:eliza/packages/ui/src/voice/voice-capture-factory.ts:resolveBackend",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/voice-capture-factory.ts",
+      "target": "function:eliza/packages/ui/src/voice/voice-capture-factory.ts:createVoiceCapture",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/voice-capture-factory.ts:createVoiceCapture",
+      "target": "function:eliza/packages/ui/src/voice/voice-capture-factory.ts:resolveBackend",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:collapseWhitespace",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:normalizeCacheText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:countSpeechTokens",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:shouldCacheGeneratedSpeech",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:capSpeechLength",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:parseJsonObject",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:extractStructuredVoiceText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:extractVoiceText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:toSpeakableText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:shelterUrls",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:isRealSentenceEnd",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:splitFirstSentence",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:remainderAfter",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:queueableSpeechPrefix",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:normalizeMouthOpen",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:nextIdleMouthOpen",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:normalizeCacheText",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:collapseWhitespace",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:countSpeechTokens",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:collapseWhitespace",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:shouldCacheGeneratedSpeech",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:countSpeechTokens",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:extractStructuredVoiceText",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:parseJsonObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:extractVoiceText",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:extractStructuredVoiceText",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:toSpeakableText",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:extractVoiceText",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:toSpeakableText",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:capSpeechLength",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:splitFirstSentence",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:collapseWhitespace",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:splitFirstSentence",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:shelterUrls",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:splitFirstSentence",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:isRealSentenceEnd",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:remainderAfter",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:collapseWhitespace",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:remainderAfter",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:collapseWhitespace",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:queueableSpeechPrefix",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:collapseWhitespace",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:queueableSpeechPrefix",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:shelterUrls",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:queueableSpeechPrefix",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:isRealSentenceEnd",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:nextIdleMouthOpen",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-playback.ts:normalizeMouthOpen",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-recording.ts",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-recording.ts:normalizeTranscriptWord",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-recording.ts",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-recording.ts:mergeTranscriptWindows",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/voice-chat-recording.ts:mergeTranscriptWindows",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-recording.ts:normalizeTranscriptWord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/voice-chat-recording.ts:mergeTranscriptWindows",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-recording.ts:normalizeTranscriptWord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:isSpeechRecognitionCtor",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:getSpeechRecognitionCtor",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:resolveVoiceMode",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:resolveVoiceProxyEndpoint",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:describeTtsCloudFetchTargetForDebug",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:isRedactedSecret",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:cloneVoiceConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:resolveEffectiveVoiceConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:isAbortError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:webSpeechVoiceDebugFields",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:normalizeSpeechLocale",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:localePrefix",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:matchesVoiceLocale",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:toArrayBuffer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:getSpeechRecognitionCtor",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:isSpeechRecognitionCtor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:getSpeechRecognitionCtor",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:isSpeechRecognitionCtor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:resolveEffectiveVoiceConfig",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:cloneVoiceConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:resolveEffectiveVoiceConfig",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:resolveVoiceMode",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:resolveEffectiveVoiceConfig",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:isRedactedSecret",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:matchesVoiceLocale",
+      "target": "function:eliza/packages/ui/src/voice/voice-chat-types.ts:localePrefix",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/ui/src/voice/voice-provider-defaults.ts",
+      "target": "function:eliza/packages/ui/src/voice/voice-provider-defaults.ts:pickDefaultVoiceProvider",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/state/useStreamingText.ts",
+      "target": "file:eliza/packages/ui/src/api/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/state/useStreamingText.ts",
+      "target": "file:eliza/packages/ui/src/state/parsers.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/state/useTriggersState.ts",
+      "target": "file:eliza/packages/ui/src/api/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/state/useVincentState.ts",
+      "target": "file:eliza/packages/ui/src/config/boot-config.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/state/useWalletState.ts",
+      "target": "file:eliza/packages/shared/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/state/useWalletState.ts",
+      "target": "file:eliza/packages/ui/src/api/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/state/useWalletState.ts",
+      "target": "file:eliza/packages/ui/src/components/ui/confirm-dialog.tsx",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/state/useWalletState.ts",
+      "target": "file:eliza/packages/ui/src/state/persistence.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/state/useWalletState.ts",
+      "target": "file:eliza/packages/ui/src/state/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/state/useWalletState.ts",
+      "target": "file:eliza/packages/ui/src/utils/desktop-dialogs.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/state/vrm.ts",
+      "target": "file:eliza/packages/ui/src/config/boot-config.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/state/vrm.ts",
+      "target": "file:eliza/packages/ui/src/state/ui-preferences.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/state/vrm.ts",
+      "target": "file:eliza/packages/ui/src/utils/asset-url.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/storage/workspace-folder.test.ts",
+      "target": "file:eliza/packages/ui/src/storage/workspace-folder.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/terminal/theme.ts",
+      "target": "file:eliza/packages/ui/src/terminal/palette.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/utils/asset-url.ts",
+      "target": "file:eliza/packages/ui/src/config/boot-config.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/utils/asset-url.ts",
+      "target": "file:eliza/packages/ui/src/utils/eliza-globals.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/utils/globals.ts",
+      "target": "file:eliza/packages/core/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/utils/globals.ts",
+      "target": "file:eliza/packages/ui/src/terminal/theme.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/voice/__tests__/emotion.test.ts",
+      "target": "file:eliza/packages/ui/src/voice/emotion.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/voice/__tests__/sentence-streaming.test.ts",
+      "target": "file:eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/voice/character-voice-config.test.ts",
+      "target": "file:eliza/packages/ui/src/voice/character-voice-config.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/voice/character-voice-config.ts",
+      "target": "file:eliza/packages/shared/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/voice/character-voice-config.ts",
+      "target": "file:eliza/packages/ui/src/api/client.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/voice/character-voice-config.ts",
+      "target": "file:eliza/packages/ui/src/state/config-readers.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/voice/character-voice-config.ts",
+      "target": "file:eliza/packages/ui/src/voice/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/voice/character-voice-config.ts",
+      "target": "file:eliza/packages/ui/src/voice/voice-provider-defaults.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/voice/local-asr-capture.test.ts",
+      "target": "file:eliza/packages/ui/src/voice/local-asr-capture.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/voice/local-asr-transcribe.ts",
+      "target": "file:eliza/packages/ui/src/api/csrf-client.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/voice/local-asr-transcribe.ts",
+      "target": "file:eliza/packages/ui/src/utils/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/voice/voice-capture-factory.test.ts",
+      "target": "file:eliza/packages/ui/src/voice/local-asr-capture.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/voice/voice-capture-factory.test.ts",
+      "target": "file:eliza/packages/ui/src/voice/local-asr-transcribe.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/voice/voice-capture-factory.test.ts",
+      "target": "file:eliza/packages/ui/src/voice/voice-capture-factory.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/voice/voice-capture-factory.ts",
+      "target": "file:eliza/packages/ui/src/api/client-types-config.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/voice/voice-capture-factory.ts",
+      "target": "file:eliza/packages/ui/src/voice/local-asr-capture.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/voice/voice-capture-factory.ts",
+      "target": "file:eliza/packages/ui/src/voice/local-asr-transcribe.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/voice/voice-capture-factory.ts",
+      "target": "file:eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-playback.test.ts",
+      "target": "file:eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "target": "file:eliza/packages/shared/src/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "target": "file:eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-recording.ts",
+      "target": "file:eliza/packages/ui/src/utils/streaming-text.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-recording.ts",
+      "target": "file:eliza/packages/ui/src/voice/voice-chat-playback.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "target": "file:eliza/packages/ui/src/api/client.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "target": "file:eliza/packages/ui/src/utils/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "target": "file:eliza/packages/ui/src/utils/tts-debug.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/voice/voice-chat-types.ts",
+      "target": "file:eliza/packages/ui/src/voice/emotion.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/voice/voice-provider-defaults.test.ts",
+      "target": "file:eliza/packages/ui/src/voice/voice-provider-defaults.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/ui/src/voice/voice-provider-defaults.ts",
+      "target": "file:eliza/packages/ui/src/api/client-types-config.ts",
+      "type": "imports"
+    }
+  ]
+}

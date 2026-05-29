@@ -1,0 +1,342 @@
+{
+  "batchIndex": 112,
+  "nodes": [
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/src/services/ambient-audio/__tests__/consent-store.test.ts",
+      "type": "file",
+      "name": "consent-store.test.ts",
+      "filePath": "eliza/packages/app-core/src/services/ambient-audio/__tests__/consent-store.test.ts",
+      "summary": "consent-store.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 58 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/src/services/ambient-audio/__tests__/replay-buffer.test.ts",
+      "type": "file",
+      "name": "replay-buffer.test.ts",
+      "filePath": "eliza/packages/app-core/src/services/ambient-audio/__tests__/replay-buffer.test.ts",
+      "summary": "replay-buffer.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 113 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/services/ambient-audio/__tests__/replay-buffer.test.ts:frame",
+      "type": "function",
+      "name": "frame",
+      "filePath": "eliza/packages/app-core/src/services/ambient-audio/__tests__/replay-buffer.test.ts",
+      "summary": "frame is a function defined in eliza/packages/app-core/src/services/ambient-audio/__tests__/replay-buffer.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/src/services/ambient-audio/__tests__/response-gate.test.ts",
+      "type": "file",
+      "name": "response-gate.test.ts",
+      "filePath": "eliza/packages/app-core/src/services/ambient-audio/__tests__/response-gate.test.ts",
+      "summary": "response-gate.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 82 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/services/ambient-audio/__tests__/response-gate.test.ts:signals",
+      "type": "function",
+      "name": "signals",
+      "filePath": "eliza/packages/app-core/src/services/ambient-audio/__tests__/response-gate.test.ts",
+      "summary": "signals is a function defined in eliza/packages/app-core/src/services/ambient-audio/__tests__/response-gate.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/src/services/ambient-audio/__tests__/service.test.ts",
+      "type": "file",
+      "name": "service.test.ts",
+      "filePath": "eliza/packages/app-core/src/services/ambient-audio/__tests__/service.test.ts",
+      "summary": "service.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 2 imports.",
+      "languageNotes": "typescript; code; 73 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/services/ambient-audio/__tests__/service.test.ts:seg",
+      "type": "function",
+      "name": "seg",
+      "filePath": "eliza/packages/app-core/src/services/ambient-audio/__tests__/service.test.ts",
+      "summary": "seg is a function defined in eliza/packages/app-core/src/services/ambient-audio/__tests__/service.test.ts."
+    },
+    {
+      "tags": [
+        "class"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/src/services/ambient-audio/consent-store.ts",
+      "type": "file",
+      "name": "consent-store.ts",
+      "filePath": "eliza/packages/app-core/src/services/ambient-audio/consent-store.ts",
+      "summary": "consent-store.ts is a typescript source file in the Milady codebase. It contains 1 class, 1 imports.",
+      "languageNotes": "typescript; code; 74 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/app-core/src/services/ambient-audio/consent-store.ts:ConsentStore",
+      "type": "class",
+      "name": "ConsentStore",
+      "filePath": "eliza/packages/app-core/src/services/ambient-audio/consent-store.ts",
+      "summary": "ConsentStore is a class or type declared in eliza/packages/app-core/src/services/ambient-audio/consent-store.ts."
+    },
+    {
+      "tags": [
+        "class"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/src/services/ambient-audio/replay-buffer.ts",
+      "type": "file",
+      "name": "replay-buffer.ts",
+      "filePath": "eliza/packages/app-core/src/services/ambient-audio/replay-buffer.ts",
+      "summary": "replay-buffer.ts is a typescript source file in the Milady codebase. It contains 1 class, 1 imports.",
+      "languageNotes": "typescript; code; 70 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/app-core/src/services/ambient-audio/replay-buffer.ts:ReplayBuffer",
+      "type": "class",
+      "name": "ReplayBuffer",
+      "filePath": "eliza/packages/app-core/src/services/ambient-audio/replay-buffer.ts",
+      "summary": "ReplayBuffer is a class or type declared in eliza/packages/app-core/src/services/ambient-audio/replay-buffer.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/src/services/ambient-audio/response-gate.ts",
+      "type": "file",
+      "name": "response-gate.ts",
+      "filePath": "eliza/packages/app-core/src/services/ambient-audio/response-gate.ts",
+      "summary": "response-gate.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 27 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/src/services/ambient-audio/response-gate.ts:decideResponse",
+      "type": "function",
+      "name": "decideResponse",
+      "filePath": "eliza/packages/app-core/src/services/ambient-audio/response-gate.ts",
+      "summary": "decideResponse is a function defined in eliza/packages/app-core/src/services/ambient-audio/response-gate.ts."
+    },
+    {
+      "tags": [
+        "class"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/src/services/ambient-audio/service.ts",
+      "type": "file",
+      "name": "service.ts",
+      "filePath": "eliza/packages/app-core/src/services/ambient-audio/service.ts",
+      "summary": "service.ts is a typescript source file in the Milady codebase. It contains 1 class, 3 imports.",
+      "languageNotes": "typescript; code; 82 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/app-core/src/services/ambient-audio/service.ts:MockAmbientAudioService",
+      "type": "class",
+      "name": "MockAmbientAudioService",
+      "filePath": "eliza/packages/app-core/src/services/ambient-audio/service.ts",
+      "summary": "MockAmbientAudioService is a class or type declared in eliza/packages/app-core/src/services/ambient-audio/service.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/src/services/ambient-audio/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "eliza/packages/app-core/src/services/ambient-audio/types.ts",
+      "summary": "types.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 40 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/services/ambient-audio/__tests__/replay-buffer.test.ts",
+      "target": "function:eliza/packages/app-core/src/services/ambient-audio/__tests__/replay-buffer.test.ts:frame",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/services/ambient-audio/__tests__/response-gate.test.ts",
+      "target": "function:eliza/packages/app-core/src/services/ambient-audio/__tests__/response-gate.test.ts:signals",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/services/ambient-audio/__tests__/service.test.ts",
+      "target": "function:eliza/packages/app-core/src/services/ambient-audio/__tests__/service.test.ts:seg",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/services/ambient-audio/consent-store.ts",
+      "target": "class:eliza/packages/app-core/src/services/ambient-audio/consent-store.ts:ConsentStore",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/services/ambient-audio/replay-buffer.ts",
+      "target": "class:eliza/packages/app-core/src/services/ambient-audio/replay-buffer.ts:ReplayBuffer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/services/ambient-audio/response-gate.ts",
+      "target": "function:eliza/packages/app-core/src/services/ambient-audio/response-gate.ts:decideResponse",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/src/services/ambient-audio/service.ts",
+      "target": "class:eliza/packages/app-core/src/services/ambient-audio/service.ts:MockAmbientAudioService",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/services/ambient-audio/__tests__/consent-store.test.ts",
+      "target": "file:eliza/packages/app-core/src/services/ambient-audio/consent-store.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/services/ambient-audio/__tests__/replay-buffer.test.ts",
+      "target": "file:eliza/packages/app-core/src/services/ambient-audio/replay-buffer.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/services/ambient-audio/__tests__/replay-buffer.test.ts",
+      "target": "file:eliza/packages/app-core/src/services/ambient-audio/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/services/ambient-audio/__tests__/response-gate.test.ts",
+      "target": "file:eliza/packages/app-core/src/services/ambient-audio/response-gate.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/services/ambient-audio/__tests__/response-gate.test.ts",
+      "target": "file:eliza/packages/app-core/src/services/ambient-audio/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/services/ambient-audio/__tests__/service.test.ts",
+      "target": "file:eliza/packages/app-core/src/services/ambient-audio/service.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/services/ambient-audio/__tests__/service.test.ts",
+      "target": "file:eliza/packages/app-core/src/services/ambient-audio/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/services/ambient-audio/consent-store.ts",
+      "target": "file:eliza/packages/app-core/src/services/ambient-audio/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/services/ambient-audio/replay-buffer.ts",
+      "target": "file:eliza/packages/app-core/src/services/ambient-audio/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/services/ambient-audio/response-gate.ts",
+      "target": "file:eliza/packages/app-core/src/services/ambient-audio/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/services/ambient-audio/service.ts",
+      "target": "file:eliza/packages/app-core/src/services/ambient-audio/consent-store.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/services/ambient-audio/service.ts",
+      "target": "file:eliza/packages/app-core/src/services/ambient-audio/response-gate.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/src/services/ambient-audio/service.ts",
+      "target": "file:eliza/packages/app-core/src/services/ambient-audio/types.ts",
+      "type": "imports"
+    }
+  ]
+}

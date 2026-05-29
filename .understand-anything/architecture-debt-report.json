@@ -1,0 +1,4169 @@
+{
+  "generatedAt": "2026-05-28T00:03:29.179Z",
+  "graph": {
+    "project": {
+      "name": "miladyai",
+      "languages": [
+        "adoc",
+        "awk",
+        "batch",
+        "c",
+        "ci",
+        "cmake",
+        "comp",
+        "conf",
+        "config",
+        "cpp",
+        "css",
+        "cu",
+        "darwin-arm64-metal-fused",
+        "desktop",
+        "dockerfile",
+        "entitlements",
+        "example",
+        "glb",
+        "gradle",
+        "hbs",
+        "html",
+        "icns",
+        "inc",
+        "iss",
+        "jar",
+        "java",
+        "javascript",
+        "json",
+        "jsonc",
+        "makefile",
+        "markdown",
+        "mdc",
+        "metal",
+        "mm",
+        "mts",
+        "nix",
+        "o",
+        "patch",
+        "pbxproj",
+        "powershell",
+        "pro",
+        "properties",
+        "python",
+        "recipe",
+        "ruby",
+        "service",
+        "sha256",
+        "shell",
+        "so",
+        "sol",
+        "spec",
+        "storyboard",
+        "swift",
+        "template",
+        "terraform",
+        "timer",
+        "toml",
+        "txt",
+        "typed",
+        "typescript",
+        "unknown",
+        "upstream",
+        "vrm",
+        "wav",
+        "webm",
+        "webmanifest",
+        "webp",
+        "xcprivacy",
+        "xcworkspacedata",
+        "xml",
+        "yaml"
+      ],
+      "frameworks": [
+        "React",
+        "Vite",
+        "Vitest",
+        "Tailwind CSS",
+        "Express",
+        "Three.js",
+        "Electrobun",
+        "Capacitor",
+        "Docker",
+        "Docker Compose",
+        "GitHub Actions"
+      ],
+      "description": "Milady is a personal AI assistant that is local-first by default and can also connect to Eliza Cloud or a remote self-hosted backend when you want hosted runtime access. Built on [elizaOS](https://github.com/elizaOS). Note: this project has over 100 source files; this graph scopes the embedded eliza checkout to Milady-relevant runtime, UI, agent, core, security, vault, local inference, and app/plugin management surfaces.",
+      "analyzedAt": "2026-05-26T04:56:52.803Z",
+      "gitCommitHash": "b979c4612da152422404aec7f50f9b8e73e87b9a"
+    },
+    "nodes": 30304,
+    "edges": 52420,
+    "layers": 11
+  },
+  "highDegreeHubs": [
+    {
+      "id": "file:eliza/packages/core/src/index.node.ts",
+      "filePath": "eliza/packages/core/src/index.node.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "complexity": "complex",
+      "degree": {
+        "in": 556,
+        "out": 0,
+        "total": 556,
+        "edgeTypes": {
+          "imports": 556
+        }
+      },
+      "summary": "index.node.ts is a typescript source file in the Milady codebase."
+    },
+    {
+      "id": "file:eliza/packages/shared/src/index.ts",
+      "filePath": "eliza/packages/shared/src/index.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "complexity": "complex",
+      "degree": {
+        "in": 311,
+        "out": 0,
+        "total": 311,
+        "edgeTypes": {
+          "imports": 311
+        }
+      },
+      "summary": "index.ts is a typescript source file in the Milady codebase."
+    },
+    {
+      "id": "file:eliza/packages/core/src/services/message.ts",
+      "filePath": "eliza/packages/core/src/services/message.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "complexity": "complex",
+      "degree": {
+        "in": 11,
+        "out": 278,
+        "total": 289,
+        "edgeTypes": {
+          "imports": 76,
+          "contains": 213
+        }
+      },
+      "summary": "message.ts is a typescript source file in the Milady codebase. It contains 212 functions, 1 class, 65 imports."
+    },
+    {
+      "id": "file:eliza/packages/core/src/types/index.ts",
+      "filePath": "eliza/packages/core/src/types/index.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "complexity": "simple",
+      "degree": {
+        "in": 276,
+        "out": 0,
+        "total": 276,
+        "edgeTypes": {
+          "imports": 276
+        }
+      },
+      "summary": "index.ts is a typescript source file in the Milady codebase."
+    },
+    {
+      "id": "file:eliza/packages/app-core/scripts/run-mobile-build.mjs",
+      "filePath": "eliza/packages/app-core/scripts/run-mobile-build.mjs",
+      "layer": "Runtime App Core",
+      "complexity": "complex",
+      "degree": {
+        "in": 2,
+        "out": 190,
+        "total": 192,
+        "edgeTypes": {
+          "contains": 185,
+          "imports": 7
+        }
+      },
+      "summary": "run-mobile-build.mjs is a javascript source file in the Milady codebase. It contains 185 functions, 5 imports."
+    },
+    {
+      "id": "file:eliza/packages/core/src/logger.ts",
+      "filePath": "eliza/packages/core/src/logger.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "complexity": "complex",
+      "degree": {
+        "in": 150,
+        "out": 26,
+        "total": 176,
+        "edgeTypes": {
+          "imports": 151,
+          "contains": 25
+        }
+      },
+      "summary": "logger.ts is a typescript source file in the Milady codebase. It contains 25 functions, 1 imports."
+    },
+    {
+      "id": "file:eliza/packages/ui/src/components/ui/button.tsx",
+      "filePath": "eliza/packages/ui/src/components/ui/button.tsx",
+      "layer": "Shared UI And First Run",
+      "complexity": "moderate",
+      "degree": {
+        "in": 169,
+        "out": 1,
+        "total": 170,
+        "edgeTypes": {
+          "imports": 170
+        }
+      },
+      "summary": "button.tsx is a typescript source file in the Milady codebase. It contains 1 imports."
+    },
+    {
+      "id": "file:eliza/packages/agent/src/api/server.ts",
+      "filePath": "eliza/packages/agent/src/api/server.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "complexity": "complex",
+      "degree": {
+        "in": 0,
+        "out": 135,
+        "total": 135,
+        "edgeTypes": {
+          "contains": 49,
+          "imports": 86
+        }
+      },
+      "summary": "server.ts is a typescript source file in the Milady codebase. It contains 49 functions, 86 imports."
+    },
+    {
+      "id": "file:eliza/packages/ui/src/api/index.ts",
+      "filePath": "eliza/packages/ui/src/api/index.ts",
+      "layer": "Shared UI And First Run",
+      "complexity": "simple",
+      "degree": {
+        "in": 134,
+        "out": 0,
+        "total": 134,
+        "edgeTypes": {
+          "imports": 134
+        }
+      },
+      "summary": "index.ts is a typescript source file in the Milady codebase."
+    },
+    {
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/dflash-server.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/dflash-server.ts",
+      "layer": "Plugins Local Inference And App Management",
+      "complexity": "complex",
+      "degree": {
+        "in": 11,
+        "out": 121,
+        "total": 132,
+        "edgeTypes": {
+          "imports": 29,
+          "contains": 102,
+          "tested_by": 1
+        }
+      },
+      "summary": "dflash-server.ts is a typescript source file in the Milady codebase. It contains 101 functions, 1 class, 18 imports."
+    },
+    {
+      "id": "file:eliza/packages/app-core/scripts/build-llama-cpp-dflash.mjs",
+      "filePath": "eliza/packages/app-core/scripts/build-llama-cpp-dflash.mjs",
+      "layer": "Runtime App Core",
+      "complexity": "complex",
+      "degree": {
+        "in": 2,
+        "out": 122,
+        "total": 124,
+        "edgeTypes": {
+          "contains": 112,
+          "imports": 12
+        }
+      },
+      "summary": "build-llama-cpp-dflash.mjs is a javascript source file in the Milady codebase. It contains 112 functions, 10 imports."
+    },
+    {
+      "id": "file:eliza/packages/ui/src/api/ios-local-agent-kernel.ts",
+      "filePath": "eliza/packages/ui/src/api/ios-local-agent-kernel.ts",
+      "layer": "Shared UI And First Run",
+      "complexity": "complex",
+      "degree": {
+        "in": 4,
+        "out": 119,
+        "total": 123,
+        "edgeTypes": {
+          "imports": 11,
+          "contains": 111,
+          "tested_by": 1
+        }
+      },
+      "summary": "ios-local-agent-kernel.ts is a typescript source file in the Milady codebase. It contains 111 functions, 7 imports."
+    },
+    {
+      "id": "file:eliza/packages/ui/src/lib/utils.ts",
+      "filePath": "eliza/packages/ui/src/lib/utils.ts",
+      "layer": "Shared UI And First Run",
+      "complexity": "simple",
+      "degree": {
+        "in": 116,
+        "out": 1,
+        "total": 117,
+        "edgeTypes": {
+          "imports": 116,
+          "contains": 1
+        }
+      },
+      "summary": "utils.ts is a typescript source file in the Milady codebase. It contains 1 function."
+    },
+    {
+      "id": "file:eliza/packages/agent/src/runtime/eliza.ts",
+      "filePath": "eliza/packages/agent/src/runtime/eliza.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "complexity": "complex",
+      "degree": {
+        "in": 2,
+        "out": 112,
+        "total": 114,
+        "edgeTypes": {
+          "contains": 80,
+          "imports": 34
+        }
+      },
+      "summary": "eliza.ts is a typescript source file in the Milady codebase. It contains 80 functions, 32 imports."
+    },
+    {
+      "id": "file:eliza/packages/core/src/types/runtime.ts",
+      "filePath": "eliza/packages/core/src/types/runtime.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "complexity": "complex",
+      "degree": {
+        "in": 84,
+        "out": 26,
+        "total": 110,
+        "edgeTypes": {
+          "imports": 110
+        }
+      },
+      "summary": "runtime.ts is a typescript source file in the Milady codebase. It contains 26 imports."
+    },
+    {
+      "id": "file:eliza/packages/ui/src/App.tsx",
+      "filePath": "eliza/packages/ui/src/App.tsx",
+      "layer": "Shared UI And First Run",
+      "complexity": "complex",
+      "degree": {
+        "in": 1,
+        "out": 108,
+        "total": 109,
+        "edgeTypes": {
+          "contains": 43,
+          "imports": 66
+        }
+      },
+      "summary": "App.tsx is a typescript source file in the Milady codebase. It contains 43 functions, 65 imports."
+    },
+    {
+      "id": "file:eliza/packages/ui/src/state/index.ts",
+      "filePath": "eliza/packages/ui/src/state/index.ts",
+      "layer": "Shared UI And First Run",
+      "complexity": "simple",
+      "degree": {
+        "in": 108,
+        "out": 0,
+        "total": 108,
+        "edgeTypes": {
+          "imports": 108
+        }
+      },
+      "summary": "index.ts is a typescript source file in the Milady codebase."
+    },
+    {
+      "id": "file:eliza/packages/ui/src/state/persistence.ts",
+      "filePath": "eliza/packages/ui/src/state/persistence.ts",
+      "layer": "Shared UI And First Run",
+      "complexity": "complex",
+      "degree": {
+        "in": 25,
+        "out": 80,
+        "total": 105,
+        "edgeTypes": {
+          "imports": 34,
+          "contains": 71
+        }
+      },
+      "summary": "persistence.ts is a typescript source file in the Milady codebase. It contains 71 functions, 9 imports."
+    },
+    {
+      "id": "file:eliza/packages/core/src/features/advanced-capabilities/actions/message.ts",
+      "filePath": "eliza/packages/core/src/features/advanced-capabilities/actions/message.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "complexity": "complex",
+      "degree": {
+        "in": 6,
+        "out": 96,
+        "total": 102,
+        "edgeTypes": {
+          "imports": 27,
+          "contains": 75
+        }
+      },
+      "summary": "message.ts is a typescript source file in the Milady codebase. It contains 75 functions, 21 imports."
+    },
+    {
+      "id": "file:eliza/packages/core/src/runtime/planner-loop.ts",
+      "filePath": "eliza/packages/core/src/runtime/planner-loop.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "complexity": "complex",
+      "degree": {
+        "in": 13,
+        "out": 88,
+        "total": 101,
+        "edgeTypes": {
+          "imports": 34,
+          "contains": 66,
+          "tested_by": 1
+        }
+      },
+      "summary": "planner-loop.ts is a typescript source file in the Milady codebase. It contains 66 functions, 21 imports."
+    },
+    {
+      "id": "file:eliza/packages/app-core/platforms/electrobun/src/index.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/index.ts",
+      "layer": "Runtime App Core",
+      "complexity": "complex",
+      "degree": {
+        "in": 0,
+        "out": 100,
+        "total": 100,
+        "edgeTypes": {
+          "contains": 55,
+          "imports": 45
+        }
+      },
+      "summary": "index.ts is a typescript source file in the Milady codebase. It contains 55 functions, 45 imports."
+    },
+    {
+      "id": "file:eliza/packages/agent/src/api/chat-routes.ts",
+      "filePath": "eliza/packages/agent/src/api/chat-routes.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "complexity": "complex",
+      "degree": {
+        "in": 5,
+        "out": 92,
+        "total": 97,
+        "edgeTypes": {
+          "imports": 21,
+          "contains": 76
+        }
+      },
+      "summary": "chat-routes.ts is a typescript source file in the Milady codebase. It contains 76 functions, 16 imports."
+    },
+    {
+      "id": "file:eliza/packages/core/src/runtime.ts",
+      "filePath": "eliza/packages/core/src/runtime.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "complexity": "complex",
+      "degree": {
+        "in": 17,
+        "out": 73,
+        "total": 90,
+        "edgeTypes": {
+          "imports": 66,
+          "contains": 24
+        }
+      },
+      "summary": "runtime.ts is a typescript source file in the Milady codebase. It contains 22 functions, 2 classes, 49 imports."
+    },
+    {
+      "id": "file:eliza/packages/core/src/types/primitives.ts",
+      "filePath": "eliza/packages/core/src/types/primitives.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "complexity": "moderate",
+      "degree": {
+        "in": 89,
+        "out": 1,
+        "total": 90,
+        "edgeTypes": {
+          "imports": 89,
+          "contains": 1
+        }
+      },
+      "summary": "primitives.ts is a typescript source file in the Milady codebase. It contains 1 function."
+    },
+    {
+      "id": "file:eliza/packages/agent/src/services/remote-plugin-adapter.ts",
+      "filePath": "eliza/packages/agent/src/services/remote-plugin-adapter.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "complexity": "complex",
+      "degree": {
+        "in": 7,
+        "out": 79,
+        "total": 86,
+        "edgeTypes": {
+          "imports": 11,
+          "contains": 74,
+          "tested_by": 1
+        }
+      },
+      "summary": "remote-plugin-adapter.ts is a typescript source file in the Milady codebase. It contains 74 functions, 4 imports."
+    },
+    {
+      "id": "file:eliza/packages/core/src/capabilities/index.ts",
+      "filePath": "eliza/packages/core/src/capabilities/index.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "complexity": "complex",
+      "degree": {
+        "in": 1,
+        "out": 85,
+        "total": 86,
+        "edgeTypes": {
+          "contains": 83,
+          "imports": 2,
+          "tested_by": 1
+        }
+      },
+      "summary": "index.ts is a typescript source file in the Milady codebase. It contains 80 functions, 3 classes, 1 imports."
+    },
+    {
+      "id": "file:eliza/packages/core/src/utils.ts",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "complexity": "complex",
+      "degree": {
+        "in": 36,
+        "out": 46,
+        "total": 82,
+        "edgeTypes": {
+          "imports": 48,
+          "contains": 34
+        }
+      },
+      "summary": "utils.ts is a typescript source file in the Milady codebase. It contains 34 functions, 12 imports."
+    },
+    {
+      "id": "file:eliza/packages/agent/src/runtime/trajectory-internals.ts",
+      "filePath": "eliza/packages/agent/src/runtime/trajectory-internals.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "complexity": "complex",
+      "degree": {
+        "in": 10,
+        "out": 71,
+        "total": 81,
+        "edgeTypes": {
+          "imports": 13,
+          "contains": 68
+        }
+      },
+      "summary": "trajectory-internals.ts is a typescript source file in the Milady codebase. It contains 68 functions, 3 imports."
+    },
+    {
+      "id": "file:eliza/packages/ui/src/cloud-ui/lib/utils.ts",
+      "filePath": "eliza/packages/ui/src/cloud-ui/lib/utils.ts",
+      "layer": "Shared UI And First Run",
+      "complexity": "simple",
+      "degree": {
+        "in": 80,
+        "out": 0,
+        "total": 80,
+        "edgeTypes": {
+          "imports": 80
+        }
+      },
+      "summary": "utils.ts is a typescript source file in the Milady codebase."
+    },
+    {
+      "id": "file:eliza/packages/app-core/platforms/electrobun/src/native/agent.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/native/agent.ts",
+      "layer": "Runtime App Core",
+      "complexity": "complex",
+      "degree": {
+        "in": 10,
+        "out": 67,
+        "total": 77,
+        "edgeTypes": {
+          "imports": 20,
+          "contains": 57
+        }
+      },
+      "summary": "agent.ts is a typescript source file in the Milady codebase. It contains 56 functions, 1 class, 10 imports."
+    },
+    {
+      "id": "file:eliza/packages/app-core/test/app/qa-checklist.real.e2e.test.ts",
+      "filePath": "eliza/packages/app-core/test/app/qa-checklist.real.e2e.test.ts",
+      "layer": "Runtime App Core",
+      "complexity": "complex",
+      "degree": {
+        "in": 0,
+        "out": 77,
+        "total": 77,
+        "edgeTypes": {
+          "contains": 74,
+          "imports": 3
+        }
+      },
+      "summary": "qa-checklist.real.e2e.test.ts is a typescript source file in the Milady codebase. It contains 74 functions, 3 imports."
+    },
+    {
+      "id": "file:eliza/packages/agent/src/api/inbox-routes.ts",
+      "filePath": "eliza/packages/agent/src/api/inbox-routes.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "complexity": "complex",
+      "degree": {
+        "in": 1,
+        "out": 70,
+        "total": 71,
+        "edgeTypes": {
+          "contains": 68,
+          "imports": 3
+        }
+      },
+      "summary": "inbox-routes.ts is a typescript source file in the Milady codebase. It contains 68 functions, 2 imports."
+    },
+    {
+      "id": "file:eliza/packages/agent/src/config/config.ts",
+      "filePath": "eliza/packages/agent/src/config/config.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "complexity": "complex",
+      "degree": {
+        "in": 50,
+        "out": 20,
+        "total": 70,
+        "edgeTypes": {
+          "imports": 59,
+          "contains": 11
+        }
+      },
+      "summary": "config.ts is a typescript source file in the Milady codebase. It contains 11 functions, 9 imports."
+    },
+    {
+      "id": "file:eliza/packages/app-core/scripts/copy-runtime-node-modules.ts",
+      "filePath": "eliza/packages/app-core/scripts/copy-runtime-node-modules.ts",
+      "layer": "Runtime App Core",
+      "complexity": "complex",
+      "degree": {
+        "in": 1,
+        "out": 69,
+        "total": 70,
+        "edgeTypes": {
+          "contains": 68,
+          "imports": 2
+        }
+      },
+      "summary": "copy-runtime-node-modules.ts is a typescript source file in the Milady codebase. It contains 68 functions, 1 imports."
+    },
+    {
+      "id": "file:eliza/packages/core/src/types/model.ts",
+      "filePath": "eliza/packages/core/src/types/model.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "complexity": "complex",
+      "degree": {
+        "in": 64,
+        "out": 6,
+        "total": 70,
+        "edgeTypes": {
+          "imports": 68,
+          "contains": 2
+        }
+      },
+      "summary": "model.ts is a typescript source file in the Milady codebase. It contains 2 functions, 4 imports."
+    },
+    {
+      "id": "file:eliza/packages/core/src/services/relationships-graph-builder.ts",
+      "filePath": "eliza/packages/core/src/services/relationships-graph-builder.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "complexity": "complex",
+      "degree": {
+        "in": 1,
+        "out": 68,
+        "total": 69,
+        "edgeTypes": {
+          "contains": 66,
+          "imports": 3
+        }
+      },
+      "summary": "relationships-graph-builder.ts is a typescript source file in the Milady codebase. It contains 66 functions, 2 imports."
+    },
+    {
+      "id": "file:eliza/packages/ui/src/api/client-agent.ts",
+      "filePath": "eliza/packages/ui/src/api/client-agent.ts",
+      "layer": "Shared UI And First Run",
+      "complexity": "complex",
+      "degree": {
+        "in": 21,
+        "out": 48,
+        "total": 69,
+        "edgeTypes": {
+          "imports": 28,
+          "contains": 41
+        }
+      },
+      "summary": "client-agent.ts is a typescript source file in the Milady codebase. It contains 41 functions, 7 imports."
+    },
+    {
+      "id": "file:eliza/plugins/plugin-app-manager/src/services/app-manager.ts",
+      "filePath": "eliza/plugins/plugin-app-manager/src/services/app-manager.ts",
+      "layer": "Plugins Local Inference And App Management",
+      "complexity": "complex",
+      "degree": {
+        "in": 0,
+        "out": 69,
+        "total": 69,
+        "edgeTypes": {
+          "contains": 59,
+          "imports": 10
+        }
+      },
+      "summary": "app-manager.ts is a typescript source file in the Milady codebase. It contains 58 functions, 1 class, 10 imports."
+    },
+    {
+      "id": "file:scripts/setup-upstreams.mjs",
+      "filePath": "scripts/setup-upstreams.mjs",
+      "layer": "Build Scripts CI And Deployment",
+      "complexity": "complex",
+      "degree": {
+        "in": 1,
+        "out": 68,
+        "total": 69,
+        "edgeTypes": {
+          "contains": 65,
+          "imports": 3,
+          "tested_by": 1
+        }
+      },
+      "summary": "setup-upstreams.mjs is a javascript source file in the Milady codebase. It contains 65 functions, 2 imports."
+    },
+    {
+      "id": "file:apps/app/vite.config.ts",
+      "filePath": "apps/app/vite.config.ts",
+      "layer": "Product Entry And Desktop Shell",
+      "complexity": "complex",
+      "degree": {
+        "in": 0,
+        "out": 68,
+        "total": 68,
+        "edgeTypes": {
+          "contains": 65,
+          "imports": 3
+        }
+      },
+      "summary": "vite.config.ts is a typescript source file in the Milady codebase. It contains 65 functions, 3 imports."
+    }
+  ],
+  "crossLayerPairs": [
+    {
+      "pair": "Plugins Local Inference And App Management -> Agent Core And Shared Contracts",
+      "count": 282,
+      "examples": [
+        {
+          "type": "imports",
+          "source": "eliza/plugins/plugin-app-control/src/actions/app-create.ts",
+          "target": "eliza/packages/core/src/index.node.ts"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/plugins/plugin-app-control/src/actions/app-launch.ts",
+          "target": "eliza/packages/core/src/index.node.ts"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/plugins/plugin-app-control/src/actions/app-list.ts",
+          "target": "eliza/packages/core/src/index.node.ts"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/plugins/plugin-app-control/src/actions/app-load-from-directory.ts",
+          "target": "eliza/packages/core/src/index.node.ts"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/plugins/plugin-app-control/src/actions/app-load-from-directory.ts",
+          "target": "eliza/packages/shared/src/index.ts"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/plugins/plugin-app-control/src/actions/app-relaunch.ts",
+          "target": "eliza/packages/core/src/index.node.ts"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/plugins/plugin-app-control/src/actions/app.ts",
+          "target": "eliza/packages/core/src/index.node.ts"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/plugins/plugin-app-control/src/actions/views-client.ts",
+          "target": "eliza/packages/core/src/index.node.ts"
+        }
+      ]
+    },
+    {
+      "pair": "Runtime App Core -> Agent Core And Shared Contracts",
+      "count": 264,
+      "examples": [
+        {
+          "type": "imports",
+          "source": "eliza/packages/app-core/scripts/dev-platform.mjs",
+          "target": "eliza/packages/shared/src/index.ts"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/packages/app-core/scripts/dev-ui.mjs",
+          "target": "eliza/packages/shared/src/index.ts"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/packages/app-core/scripts/lib/orchestrator-desktop-dev-banner.mjs",
+          "target": "eliza/packages/shared/src/dev-settings-figlet-heading.ts"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/packages/app-core/scripts/lib/orchestrator-desktop-dev-banner.mjs",
+          "target": "eliza/packages/shared/src/index.ts"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/packages/app-core/scripts/local-stt-bench.ts",
+          "target": "eliza/packages/core/src/database/inMemoryAdapter.ts"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/packages/app-core/scripts/local-stt-bench.ts",
+          "target": "eliza/packages/core/src/runtime.ts"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/packages/app-core/scripts/local-stt-bench.ts",
+          "target": "eliza/packages/core/src/types/index.ts"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/packages/app-core/scripts/streaming-pipeline-bench.ts",
+          "target": "eliza/packages/core/src/database/inMemoryAdapter.ts"
+        }
+      ]
+    },
+    {
+      "pair": "Shared UI And First Run -> Agent Core And Shared Contracts",
+      "count": 103,
+      "examples": [
+        {
+          "type": "imports",
+          "source": "eliza/packages/ui/src/api/agent-client-type-shim.ts",
+          "target": "eliza/packages/core/src/index.ts"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/packages/ui/src/api/agent-client-type-shim.ts",
+          "target": "eliza/packages/shared/src/index.ts"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/packages/ui/src/api/client-base.ts",
+          "target": "eliza/packages/shared/src/index.ts"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/packages/ui/src/api/client-chat.ts",
+          "target": "eliza/packages/shared/src/index.ts"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/packages/ui/src/api/client-skills.ts",
+          "target": "eliza/packages/shared/src/index.ts"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/packages/ui/src/api/client-types-core.ts",
+          "target": "eliza/packages/core/src/index.ts"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/packages/ui/src/api/client-types-core.ts",
+          "target": "eliza/packages/shared/src/index.ts"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/packages/ui/src/api/client-types-steward.ts",
+          "target": "eliza/packages/shared/src/index.ts"
+        }
+      ]
+    },
+    {
+      "pair": "Runtime App Core -> Shared UI And First Run",
+      "count": 63,
+      "examples": [
+        {
+          "type": "imports",
+          "source": "eliza/packages/app-core/src/api/ios-local-agent-transport.ts",
+          "target": "eliza/packages/ui/src/api/ios-local-agent-kernel.ts"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/packages/app-core/src/api/ios-local-agent-transport.ts",
+          "target": "eliza/packages/ui/src/api/ittp-agent-transport.ts"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/packages/app-core/src/api/ios-local-agent-transport.ts",
+          "target": "eliza/packages/ui/src/api/transport.ts"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/packages/app-core/src/api/ios-local-agent-transport.ts",
+          "target": "eliza/packages/ui/src/build-variant.ts"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/packages/app-core/src/api/ios-local-agent-transport.ts",
+          "target": "eliza/packages/ui/src/first-run/mobile-runtime-mode.ts"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/packages/app-core/src/services/app-updates/update-policy.ts",
+          "target": "eliza/packages/ui/src/build-variant.ts"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/packages/app-core/src/services/app-updates/update-policy.ts",
+          "target": "eliza/packages/ui/src/platform/index.ts"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/packages/app-core/src/api/automation-node-contributors.ts",
+          "target": "eliza/packages/ui/src/index.ts"
+        }
+      ]
+    },
+    {
+      "pair": "Plugins Local Inference And App Management -> Runtime App Core",
+      "count": 7,
+      "examples": [
+        {
+          "type": "imports",
+          "source": "eliza/plugins/plugin-local-inference/src/services/voice/voice-duet.test.ts",
+          "target": "eliza/packages/app-core/scripts/lib/duet-bridge.mjs"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/plugins/plugin-app-control/src/services/__tests__/app-verification.integration.test.ts",
+          "target": "eliza/packages/app-core/test/helpers/conditional-tests.ts"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/plugins/plugin-registry/src/api/app-plugins-routes.ts",
+          "target": "eliza/packages/app-core/src/api/auth.ts"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/plugins/plugin-registry/src/api/app-plugins-routes.ts",
+          "target": "eliza/packages/app-core/src/api/compat-route-shared.ts"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/plugins/plugin-registry/src/api/app-plugins-routes.ts",
+          "target": "eliza/packages/app-core/src/api/response.ts"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/plugins/plugin-registry/src/api/app-plugins-routes.ts",
+          "target": "eliza/packages/app-core/src/registry/index.ts"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/plugins/plugin-registry/src/api/app-plugins-routes.ts",
+          "target": "eliza/packages/app-core/src/services/vault-mirror.ts"
+        }
+      ]
+    },
+    {
+      "pair": "Agent Core And Shared Contracts -> Plugins Local Inference And App Management",
+      "count": 3,
+      "examples": [
+        {
+          "type": "imports",
+          "source": "eliza/packages/agent/src/api/server.ts",
+          "target": "eliza/plugins/plugin-app-manager/src/index.ts"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/packages/agent/src/runtime/eliza.ts",
+          "target": "eliza/plugins/plugin-local-inference/src/runtime/embedding-presets.ts"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/packages/agent/src/services/app-session-gate.ts",
+          "target": "eliza/plugins/plugin-app-manager/src/index.ts"
+        }
+      ]
+    },
+    {
+      "pair": "Product Entry And Desktop Shell -> Runtime App Core",
+      "count": 3,
+      "examples": [
+        {
+          "type": "imports",
+          "source": "apps/app/test/electrobun-packaged/live-api.ts",
+          "target": "eliza/packages/app-core/src/api/server.ts"
+        },
+        {
+          "type": "imports",
+          "source": "apps/app/test/electrobun-packaged/live-api.ts",
+          "target": "eliza/packages/app-core/test/helpers/isolated-config.ts"
+        },
+        {
+          "type": "imports",
+          "source": "apps/app/test/electrobun-packaged/live-api.ts",
+          "target": "eliza/packages/app-core/test/helpers/real-runtime.ts"
+        }
+      ]
+    },
+    {
+      "pair": "Agent Core And Shared Contracts -> Runtime App Core",
+      "count": 2,
+      "examples": [
+        {
+          "type": "imports",
+          "source": "eliza/packages/core/src/__tests__/read-attachment-action.live.test.ts",
+          "target": "eliza/packages/app-core/test/helpers/live-agent-test.ts"
+        },
+        {
+          "type": "imports",
+          "source": "eliza/packages/agent/src/providers/media-provider.real.test.ts",
+          "target": "eliza/packages/app-core/test/helpers/conditional-tests.ts"
+        }
+      ]
+    },
+    {
+      "pair": "Product Entry And Desktop Shell -> Build Scripts CI And Deployment",
+      "count": 2,
+      "examples": [
+        {
+          "type": "imports",
+          "source": "apps/app/scripts/build.mjs",
+          "target": "scripts/run-app-web-build.mjs"
+        },
+        {
+          "type": "imports",
+          "source": "apps/app/vite.config.ts",
+          "target": "scripts/lib/sync-eliza-env-aliases.mjs"
+        }
+      ]
+    },
+    {
+      "pair": "Runtime App Core -> Plugins Local Inference And App Management",
+      "count": 1,
+      "examples": [
+        {
+          "type": "imports",
+          "source": "eliza/packages/app-core/src/api/server.ts",
+          "target": "eliza/plugins/plugin-registry/src/index.ts"
+        }
+      ]
+    }
+  ],
+  "complexFiles": [
+    {
+      "id": "file:eliza/packages/core/src/index.node.ts",
+      "filePath": "eliza/packages/core/src/index.node.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "degree": {
+        "in": 556,
+        "out": 0,
+        "total": 556,
+        "edgeTypes": {
+          "imports": 556
+        }
+      },
+      "summary": "index.node.ts is a typescript source file in the Milady codebase."
+    },
+    {
+      "id": "file:eliza/packages/shared/src/index.ts",
+      "filePath": "eliza/packages/shared/src/index.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "degree": {
+        "in": 311,
+        "out": 0,
+        "total": 311,
+        "edgeTypes": {
+          "imports": 311
+        }
+      },
+      "summary": "index.ts is a typescript source file in the Milady codebase."
+    },
+    {
+      "id": "file:eliza/packages/core/src/services/message.ts",
+      "filePath": "eliza/packages/core/src/services/message.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "degree": {
+        "in": 11,
+        "out": 278,
+        "total": 289,
+        "edgeTypes": {
+          "imports": 76,
+          "contains": 213
+        }
+      },
+      "summary": "message.ts is a typescript source file in the Milady codebase. It contains 212 functions, 1 class, 65 imports."
+    },
+    {
+      "id": "file:eliza/packages/app-core/scripts/run-mobile-build.mjs",
+      "filePath": "eliza/packages/app-core/scripts/run-mobile-build.mjs",
+      "layer": "Runtime App Core",
+      "degree": {
+        "in": 2,
+        "out": 190,
+        "total": 192,
+        "edgeTypes": {
+          "contains": 185,
+          "imports": 7
+        }
+      },
+      "summary": "run-mobile-build.mjs is a javascript source file in the Milady codebase. It contains 185 functions, 5 imports."
+    },
+    {
+      "id": "file:eliza/packages/core/src/logger.ts",
+      "filePath": "eliza/packages/core/src/logger.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "degree": {
+        "in": 150,
+        "out": 26,
+        "total": 176,
+        "edgeTypes": {
+          "imports": 151,
+          "contains": 25
+        }
+      },
+      "summary": "logger.ts is a typescript source file in the Milady codebase. It contains 25 functions, 1 imports."
+    },
+    {
+      "id": "file:eliza/packages/agent/src/api/server.ts",
+      "filePath": "eliza/packages/agent/src/api/server.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "degree": {
+        "in": 0,
+        "out": 135,
+        "total": 135,
+        "edgeTypes": {
+          "contains": 49,
+          "imports": 86
+        }
+      },
+      "summary": "server.ts is a typescript source file in the Milady codebase. It contains 49 functions, 86 imports."
+    },
+    {
+      "id": "file:eliza/plugins/plugin-local-inference/src/services/dflash-server.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/services/dflash-server.ts",
+      "layer": "Plugins Local Inference And App Management",
+      "degree": {
+        "in": 11,
+        "out": 121,
+        "total": 132,
+        "edgeTypes": {
+          "imports": 29,
+          "contains": 102,
+          "tested_by": 1
+        }
+      },
+      "summary": "dflash-server.ts is a typescript source file in the Milady codebase. It contains 101 functions, 1 class, 18 imports."
+    },
+    {
+      "id": "file:eliza/packages/app-core/scripts/build-llama-cpp-dflash.mjs",
+      "filePath": "eliza/packages/app-core/scripts/build-llama-cpp-dflash.mjs",
+      "layer": "Runtime App Core",
+      "degree": {
+        "in": 2,
+        "out": 122,
+        "total": 124,
+        "edgeTypes": {
+          "contains": 112,
+          "imports": 12
+        }
+      },
+      "summary": "build-llama-cpp-dflash.mjs is a javascript source file in the Milady codebase. It contains 112 functions, 10 imports."
+    },
+    {
+      "id": "file:eliza/packages/ui/src/api/ios-local-agent-kernel.ts",
+      "filePath": "eliza/packages/ui/src/api/ios-local-agent-kernel.ts",
+      "layer": "Shared UI And First Run",
+      "degree": {
+        "in": 4,
+        "out": 119,
+        "total": 123,
+        "edgeTypes": {
+          "imports": 11,
+          "contains": 111,
+          "tested_by": 1
+        }
+      },
+      "summary": "ios-local-agent-kernel.ts is a typescript source file in the Milady codebase. It contains 111 functions, 7 imports."
+    },
+    {
+      "id": "file:eliza/packages/agent/src/runtime/eliza.ts",
+      "filePath": "eliza/packages/agent/src/runtime/eliza.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "degree": {
+        "in": 2,
+        "out": 112,
+        "total": 114,
+        "edgeTypes": {
+          "contains": 80,
+          "imports": 34
+        }
+      },
+      "summary": "eliza.ts is a typescript source file in the Milady codebase. It contains 80 functions, 32 imports."
+    },
+    {
+      "id": "file:eliza/packages/core/src/types/runtime.ts",
+      "filePath": "eliza/packages/core/src/types/runtime.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "degree": {
+        "in": 84,
+        "out": 26,
+        "total": 110,
+        "edgeTypes": {
+          "imports": 110
+        }
+      },
+      "summary": "runtime.ts is a typescript source file in the Milady codebase. It contains 26 imports."
+    },
+    {
+      "id": "file:eliza/packages/ui/src/App.tsx",
+      "filePath": "eliza/packages/ui/src/App.tsx",
+      "layer": "Shared UI And First Run",
+      "degree": {
+        "in": 1,
+        "out": 108,
+        "total": 109,
+        "edgeTypes": {
+          "contains": 43,
+          "imports": 66
+        }
+      },
+      "summary": "App.tsx is a typescript source file in the Milady codebase. It contains 43 functions, 65 imports."
+    },
+    {
+      "id": "file:eliza/packages/ui/src/state/persistence.ts",
+      "filePath": "eliza/packages/ui/src/state/persistence.ts",
+      "layer": "Shared UI And First Run",
+      "degree": {
+        "in": 25,
+        "out": 80,
+        "total": 105,
+        "edgeTypes": {
+          "imports": 34,
+          "contains": 71
+        }
+      },
+      "summary": "persistence.ts is a typescript source file in the Milady codebase. It contains 71 functions, 9 imports."
+    },
+    {
+      "id": "file:eliza/packages/core/src/features/advanced-capabilities/actions/message.ts",
+      "filePath": "eliza/packages/core/src/features/advanced-capabilities/actions/message.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "degree": {
+        "in": 6,
+        "out": 96,
+        "total": 102,
+        "edgeTypes": {
+          "imports": 27,
+          "contains": 75
+        }
+      },
+      "summary": "message.ts is a typescript source file in the Milady codebase. It contains 75 functions, 21 imports."
+    },
+    {
+      "id": "file:eliza/packages/core/src/runtime/planner-loop.ts",
+      "filePath": "eliza/packages/core/src/runtime/planner-loop.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "degree": {
+        "in": 13,
+        "out": 88,
+        "total": 101,
+        "edgeTypes": {
+          "imports": 34,
+          "contains": 66,
+          "tested_by": 1
+        }
+      },
+      "summary": "planner-loop.ts is a typescript source file in the Milady codebase. It contains 66 functions, 21 imports."
+    },
+    {
+      "id": "file:eliza/packages/app-core/platforms/electrobun/src/index.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/index.ts",
+      "layer": "Runtime App Core",
+      "degree": {
+        "in": 0,
+        "out": 100,
+        "total": 100,
+        "edgeTypes": {
+          "contains": 55,
+          "imports": 45
+        }
+      },
+      "summary": "index.ts is a typescript source file in the Milady codebase. It contains 55 functions, 45 imports."
+    },
+    {
+      "id": "file:eliza/packages/agent/src/api/chat-routes.ts",
+      "filePath": "eliza/packages/agent/src/api/chat-routes.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "degree": {
+        "in": 5,
+        "out": 92,
+        "total": 97,
+        "edgeTypes": {
+          "imports": 21,
+          "contains": 76
+        }
+      },
+      "summary": "chat-routes.ts is a typescript source file in the Milady codebase. It contains 76 functions, 16 imports."
+    },
+    {
+      "id": "file:eliza/packages/core/src/runtime.ts",
+      "filePath": "eliza/packages/core/src/runtime.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "degree": {
+        "in": 17,
+        "out": 73,
+        "total": 90,
+        "edgeTypes": {
+          "imports": 66,
+          "contains": 24
+        }
+      },
+      "summary": "runtime.ts is a typescript source file in the Milady codebase. It contains 22 functions, 2 classes, 49 imports."
+    },
+    {
+      "id": "file:eliza/packages/agent/src/services/remote-plugin-adapter.ts",
+      "filePath": "eliza/packages/agent/src/services/remote-plugin-adapter.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "degree": {
+        "in": 7,
+        "out": 79,
+        "total": 86,
+        "edgeTypes": {
+          "imports": 11,
+          "contains": 74,
+          "tested_by": 1
+        }
+      },
+      "summary": "remote-plugin-adapter.ts is a typescript source file in the Milady codebase. It contains 74 functions, 4 imports."
+    },
+    {
+      "id": "file:eliza/packages/core/src/capabilities/index.ts",
+      "filePath": "eliza/packages/core/src/capabilities/index.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "degree": {
+        "in": 1,
+        "out": 85,
+        "total": 86,
+        "edgeTypes": {
+          "contains": 83,
+          "imports": 2,
+          "tested_by": 1
+        }
+      },
+      "summary": "index.ts is a typescript source file in the Milady codebase. It contains 80 functions, 3 classes, 1 imports."
+    },
+    {
+      "id": "file:eliza/packages/core/src/utils.ts",
+      "filePath": "eliza/packages/core/src/utils.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "degree": {
+        "in": 36,
+        "out": 46,
+        "total": 82,
+        "edgeTypes": {
+          "imports": 48,
+          "contains": 34
+        }
+      },
+      "summary": "utils.ts is a typescript source file in the Milady codebase. It contains 34 functions, 12 imports."
+    },
+    {
+      "id": "file:eliza/packages/agent/src/runtime/trajectory-internals.ts",
+      "filePath": "eliza/packages/agent/src/runtime/trajectory-internals.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "degree": {
+        "in": 10,
+        "out": 71,
+        "total": 81,
+        "edgeTypes": {
+          "imports": 13,
+          "contains": 68
+        }
+      },
+      "summary": "trajectory-internals.ts is a typescript source file in the Milady codebase. It contains 68 functions, 3 imports."
+    },
+    {
+      "id": "file:eliza/packages/app-core/platforms/electrobun/src/native/agent.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/native/agent.ts",
+      "layer": "Runtime App Core",
+      "degree": {
+        "in": 10,
+        "out": 67,
+        "total": 77,
+        "edgeTypes": {
+          "imports": 20,
+          "contains": 57
+        }
+      },
+      "summary": "agent.ts is a typescript source file in the Milady codebase. It contains 56 functions, 1 class, 10 imports."
+    },
+    {
+      "id": "file:eliza/packages/app-core/test/app/qa-checklist.real.e2e.test.ts",
+      "filePath": "eliza/packages/app-core/test/app/qa-checklist.real.e2e.test.ts",
+      "layer": "Runtime App Core",
+      "degree": {
+        "in": 0,
+        "out": 77,
+        "total": 77,
+        "edgeTypes": {
+          "contains": 74,
+          "imports": 3
+        }
+      },
+      "summary": "qa-checklist.real.e2e.test.ts is a typescript source file in the Milady codebase. It contains 74 functions, 3 imports."
+    },
+    {
+      "id": "file:eliza/packages/agent/src/api/inbox-routes.ts",
+      "filePath": "eliza/packages/agent/src/api/inbox-routes.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "degree": {
+        "in": 1,
+        "out": 70,
+        "total": 71,
+        "edgeTypes": {
+          "contains": 68,
+          "imports": 3
+        }
+      },
+      "summary": "inbox-routes.ts is a typescript source file in the Milady codebase. It contains 68 functions, 2 imports."
+    },
+    {
+      "id": "file:eliza/packages/agent/src/config/config.ts",
+      "filePath": "eliza/packages/agent/src/config/config.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "degree": {
+        "in": 50,
+        "out": 20,
+        "total": 70,
+        "edgeTypes": {
+          "imports": 59,
+          "contains": 11
+        }
+      },
+      "summary": "config.ts is a typescript source file in the Milady codebase. It contains 11 functions, 9 imports."
+    },
+    {
+      "id": "file:eliza/packages/app-core/scripts/copy-runtime-node-modules.ts",
+      "filePath": "eliza/packages/app-core/scripts/copy-runtime-node-modules.ts",
+      "layer": "Runtime App Core",
+      "degree": {
+        "in": 1,
+        "out": 69,
+        "total": 70,
+        "edgeTypes": {
+          "contains": 68,
+          "imports": 2
+        }
+      },
+      "summary": "copy-runtime-node-modules.ts is a typescript source file in the Milady codebase. It contains 68 functions, 1 imports."
+    },
+    {
+      "id": "file:eliza/packages/core/src/types/model.ts",
+      "filePath": "eliza/packages/core/src/types/model.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "degree": {
+        "in": 64,
+        "out": 6,
+        "total": 70,
+        "edgeTypes": {
+          "imports": 68,
+          "contains": 2
+        }
+      },
+      "summary": "model.ts is a typescript source file in the Milady codebase. It contains 2 functions, 4 imports."
+    },
+    {
+      "id": "file:eliza/packages/core/src/services/relationships-graph-builder.ts",
+      "filePath": "eliza/packages/core/src/services/relationships-graph-builder.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "degree": {
+        "in": 1,
+        "out": 68,
+        "total": 69,
+        "edgeTypes": {
+          "contains": 66,
+          "imports": 3
+        }
+      },
+      "summary": "relationships-graph-builder.ts is a typescript source file in the Milady codebase. It contains 66 functions, 2 imports."
+    },
+    {
+      "id": "file:eliza/packages/ui/src/api/client-agent.ts",
+      "filePath": "eliza/packages/ui/src/api/client-agent.ts",
+      "layer": "Shared UI And First Run",
+      "degree": {
+        "in": 21,
+        "out": 48,
+        "total": 69,
+        "edgeTypes": {
+          "imports": 28,
+          "contains": 41
+        }
+      },
+      "summary": "client-agent.ts is a typescript source file in the Milady codebase. It contains 41 functions, 7 imports."
+    },
+    {
+      "id": "file:eliza/plugins/plugin-app-manager/src/services/app-manager.ts",
+      "filePath": "eliza/plugins/plugin-app-manager/src/services/app-manager.ts",
+      "layer": "Plugins Local Inference And App Management",
+      "degree": {
+        "in": 0,
+        "out": 69,
+        "total": 69,
+        "edgeTypes": {
+          "contains": 59,
+          "imports": 10
+        }
+      },
+      "summary": "app-manager.ts is a typescript source file in the Milady codebase. It contains 58 functions, 1 class, 10 imports."
+    },
+    {
+      "id": "file:scripts/setup-upstreams.mjs",
+      "filePath": "scripts/setup-upstreams.mjs",
+      "layer": "Build Scripts CI And Deployment",
+      "degree": {
+        "in": 1,
+        "out": 68,
+        "total": 69,
+        "edgeTypes": {
+          "contains": 65,
+          "imports": 3,
+          "tested_by": 1
+        }
+      },
+      "summary": "setup-upstreams.mjs is a javascript source file in the Milady codebase. It contains 65 functions, 2 imports."
+    },
+    {
+      "id": "file:apps/app/vite.config.ts",
+      "filePath": "apps/app/vite.config.ts",
+      "layer": "Product Entry And Desktop Shell",
+      "degree": {
+        "in": 0,
+        "out": 68,
+        "total": 68,
+        "edgeTypes": {
+          "contains": 65,
+          "imports": 3
+        }
+      },
+      "summary": "vite.config.ts is a typescript source file in the Milady codebase. It contains 65 functions, 3 imports."
+    },
+    {
+      "id": "file:eliza/plugins/plugin-app-manager/src/services/app-manager.js",
+      "filePath": "eliza/plugins/plugin-app-manager/src/services/app-manager.js",
+      "layer": "Plugins Local Inference And App Management",
+      "degree": {
+        "in": 0,
+        "out": 68,
+        "total": 68,
+        "edgeTypes": {
+          "contains": 59,
+          "imports": 9
+        }
+      },
+      "summary": "app-manager.js is a javascript source file in the Milady codebase. It contains 58 functions, 1 class, 9 imports."
+    },
+    {
+      "id": "file:eliza/plugins/plugin-local-inference/native/verify/kokoro_e2e_loop_bench.mjs",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/kokoro_e2e_loop_bench.mjs",
+      "layer": "Plugins Local Inference And App Management",
+      "degree": {
+        "in": 0,
+        "out": 65,
+        "total": 65,
+        "edgeTypes": {
+          "contains": 65
+        }
+      },
+      "summary": "kokoro_e2e_loop_bench.mjs is a javascript source file in the Milady codebase. It contains 65 functions."
+    },
+    {
+      "id": "file:eliza/packages/agent/src/services/e2b-capability-router.ts",
+      "filePath": "eliza/packages/agent/src/services/e2b-capability-router.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "degree": {
+        "in": 3,
+        "out": 59,
+        "total": 62,
+        "edgeTypes": {
+          "imports": 4,
+          "contains": 57,
+          "tested_by": 1
+        }
+      },
+      "summary": "e2b-capability-router.ts is a typescript source file in the Milady codebase. It contains 50 functions, 7 classes, 1 imports."
+    },
+    {
+      "id": "file:eliza/packages/app-core/platforms/electrobun/src/rpc-handlers.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/src/rpc-handlers.ts",
+      "layer": "Runtime App Core",
+      "degree": {
+        "in": 1,
+        "out": 60,
+        "total": 61,
+        "edgeTypes": {
+          "imports": 53,
+          "contains": 7,
+          "tested_by": 1
+        }
+      },
+      "summary": "rpc-handlers.ts is a typescript source file in the Milady codebase. It contains 7 functions, 52 imports."
+    },
+    {
+      "id": "file:eliza/packages/core/src/features/basic-capabilities/index.ts",
+      "filePath": "eliza/packages/core/src/features/basic-capabilities/index.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "degree": {
+        "in": 1,
+        "out": 60,
+        "total": 61,
+        "edgeTypes": {
+          "contains": 12,
+          "imports": 49
+        }
+      },
+      "summary": "index.ts is a typescript source file in the Milady codebase. It contains 12 functions, 48 imports."
+    },
+    {
+      "id": "file:eliza/packages/core/src/types/components.ts",
+      "filePath": "eliza/packages/core/src/types/components.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "degree": {
+        "in": 54,
+        "out": 7,
+        "total": 61,
+        "edgeTypes": {
+          "imports": 60,
+          "contains": 1
+        }
+      },
+      "summary": "components.ts is a typescript source file in the Milady codebase. It contains 1 function, 6 imports."
+    },
+    {
+      "id": "file:eliza/packages/ui/src/api/client.ts",
+      "filePath": "eliza/packages/ui/src/api/client.ts",
+      "layer": "Shared UI And First Run",
+      "degree": {
+        "in": 43,
+        "out": 18,
+        "total": 61,
+        "edgeTypes": {
+          "imports": 61
+        }
+      },
+      "summary": "client.ts is a typescript source file in the Milady codebase. It contains 18 imports."
+    },
+    {
+      "id": "file:eliza/packages/ui/src/components/config-ui/ui-renderer.tsx",
+      "filePath": "eliza/packages/ui/src/components/config-ui/ui-renderer.tsx",
+      "layer": "Shared UI And First Run",
+      "degree": {
+        "in": 1,
+        "out": 59,
+        "total": 60,
+        "edgeTypes": {
+          "imports": 9,
+          "contains": 51
+        }
+      },
+      "summary": "ui-renderer.tsx is a typescript source file in the Milady codebase. It contains 51 functions, 8 imports."
+    },
+    {
+      "id": "file:eliza/packages/core/src/types/memory.ts",
+      "filePath": "eliza/packages/core/src/types/memory.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "degree": {
+        "in": 58,
+        "out": 1,
+        "total": 59,
+        "edgeTypes": {
+          "imports": 59
+        }
+      },
+      "summary": "memory.ts is a typescript source file in the Milady codebase. It contains 1 imports."
+    },
+    {
+      "id": "file:eliza/plugins/plugin-local-inference/src/local-inference-routes.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/local-inference-routes.ts",
+      "layer": "Plugins Local Inference And App Management",
+      "degree": {
+        "in": 0,
+        "out": 59,
+        "total": 59,
+        "edgeTypes": {
+          "contains": 55,
+          "imports": 3,
+          "tested_by": 1
+        }
+      },
+      "summary": "local-inference-routes.ts is a typescript source file in the Milady codebase. It contains 55 functions, 3 imports."
+    },
+    {
+      "id": "file:apps/app/src/main.tsx",
+      "filePath": "apps/app/src/main.tsx",
+      "layer": "Product Entry And Desktop Shell",
+      "degree": {
+        "in": 0,
+        "out": 58,
+        "total": 58,
+        "edgeTypes": {
+          "contains": 50,
+          "imports": 8
+        }
+      },
+      "summary": "main.tsx is a typescript source file in the Milady codebase. It contains 50 functions, 8 imports."
+    },
+    {
+      "id": "file:eliza/packages/core/src/roles.ts",
+      "filePath": "eliza/packages/core/src/roles.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "degree": {
+        "in": 13,
+        "out": 45,
+        "total": 58,
+        "edgeTypes": {
+          "imports": 18,
+          "contains": 40
+        }
+      },
+      "summary": "roles.ts is a typescript source file in the Milady codebase. It contains 40 functions, 5 imports."
+    },
+    {
+      "id": "file:eliza/packages/core/src/runtime/evaluator.ts",
+      "filePath": "eliza/packages/core/src/runtime/evaluator.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "degree": {
+        "in": 3,
+        "out": 54,
+        "total": 57,
+        "edgeTypes": {
+          "imports": 15,
+          "contains": 41,
+          "tested_by": 1
+        }
+      },
+      "summary": "evaluator.ts is a typescript source file in the Milady codebase. It contains 41 functions, 12 imports."
+    },
+    {
+      "id": "file:eliza/packages/app-core/platforms/electrobun/remotes/runtime/src/bun/worker.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/runtime/src/bun/worker.ts",
+      "layer": "Runtime App Core",
+      "degree": {
+        "in": 0,
+        "out": 56,
+        "total": 56,
+        "edgeTypes": {
+          "contains": 50,
+          "imports": 6
+        }
+      },
+      "summary": "worker.ts is a typescript source file in the Milady codebase. It contains 50 functions, 6 imports."
+    },
+    {
+      "id": "file:eliza/packages/ui/src/components/config-ui/config-field.tsx",
+      "filePath": "eliza/packages/ui/src/components/config-ui/config-field.tsx",
+      "layer": "Shared UI And First Run",
+      "degree": {
+        "in": 1,
+        "out": 54,
+        "total": 55,
+        "edgeTypes": {
+          "contains": 45,
+          "imports": 10
+        }
+      },
+      "summary": "config-field.tsx is a typescript source file in the Milady codebase. It contains 45 functions, 9 imports."
+    },
+    {
+      "id": "file:scripts/disable-local-eliza-workspace.mjs",
+      "filePath": "scripts/disable-local-eliza-workspace.mjs",
+      "layer": "Build Scripts CI And Deployment",
+      "degree": {
+        "in": 2,
+        "out": 53,
+        "total": 55,
+        "edgeTypes": {
+          "contains": 50,
+          "imports": 4,
+          "tested_by": 1
+        }
+      },
+      "summary": "disable-local-eliza-workspace.mjs is a javascript source file in the Milady codebase. It contains 50 functions, 2 imports."
+    },
+    {
+      "id": "file:eliza/packages/app-core/src/api/compat-route-shared.ts",
+      "filePath": "eliza/packages/app-core/src/api/compat-route-shared.ts",
+      "layer": "Runtime App Core",
+      "degree": {
+        "in": 30,
+        "out": 24,
+        "total": 54,
+        "edgeTypes": {
+          "imports": 33,
+          "contains": 21
+        }
+      },
+      "summary": "compat-route-shared.ts is a typescript source file in the Milady codebase. It contains 21 functions, 3 imports."
+    },
+    {
+      "id": "file:eliza/packages/app-core/src/runtime/mobile-safe-runtime.ts",
+      "filePath": "eliza/packages/app-core/src/runtime/mobile-safe-runtime.ts",
+      "layer": "Runtime App Core",
+      "degree": {
+        "in": 2,
+        "out": 52,
+        "total": 54,
+        "edgeTypes": {
+          "contains": 50,
+          "imports": 3,
+          "tested_by": 1
+        }
+      },
+      "summary": "mobile-safe-runtime.ts is a typescript source file in the Milady codebase. It contains 49 functions, 1 class, 1 imports."
+    },
+    {
+      "id": "file:eliza/packages/core/src/runtime/response-grammar.ts",
+      "filePath": "eliza/packages/core/src/runtime/response-grammar.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "degree": {
+        "in": 4,
+        "out": 50,
+        "total": 54,
+        "edgeTypes": {
+          "imports": 4,
+          "contains": 49,
+          "tested_by": 1
+        }
+      },
+      "summary": "response-grammar.ts is a typescript source file in the Milady codebase. It contains 48 functions, 1 class, 4 imports."
+    },
+    {
+      "id": "file:eliza/packages/ui/src/api/ios-local-agent-transport.ts",
+      "filePath": "eliza/packages/ui/src/api/ios-local-agent-transport.ts",
+      "layer": "Shared UI And First Run",
+      "degree": {
+        "in": 3,
+        "out": 51,
+        "total": 54,
+        "edgeTypes": {
+          "imports": 8,
+          "contains": 46
+        }
+      },
+      "summary": "ios-local-agent-transport.ts is a typescript source file in the Milady codebase. It contains 46 functions, 5 imports."
+    },
+    {
+      "id": "file:eliza/plugins/plugin-local-inference/src/runtime/ensure-local-inference-handler.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/src/runtime/ensure-local-inference-handler.ts",
+      "layer": "Plugins Local Inference And App Management",
+      "degree": {
+        "in": 3,
+        "out": 51,
+        "total": 54,
+        "edgeTypes": {
+          "imports": 19,
+          "contains": 34,
+          "tested_by": 1
+        }
+      },
+      "summary": "ensure-local-inference-handler.ts is a typescript source file in the Milady codebase. It contains 34 functions, 16 imports."
+    },
+    {
+      "id": "file:eliza/packages/agent/src/runtime/plugin-resolver.ts",
+      "filePath": "eliza/packages/agent/src/runtime/plugin-resolver.ts",
+      "layer": "Agent Core And Shared Contracts",
+      "degree": {
+        "in": 2,
+        "out": 51,
+        "total": 53,
+        "edgeTypes": {
+          "imports": 12,
+          "contains": 41
+        }
+      },
+      "summary": "plugin-resolver.ts is a typescript source file in the Milady codebase. It contains 41 functions, 10 imports."
+    },
+    {
+      "id": "file:eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaAgentService.java",
+      "filePath": "eliza/packages/app-core/platforms/android/app/src/main/java/ai/milady/milady/ElizaAgentService.java",
+      "layer": "Runtime App Core",
+      "degree": {
+        "in": 0,
+        "out": 53,
+        "total": 53,
+        "edgeTypes": {
+          "contains": 53
+        }
+      },
+      "summary": "ElizaAgentService.java is a java source file in the Milady codebase. It contains 53 functions, 1 class."
+    },
+    {
+      "id": "file:eliza/packages/app-core/src/api/ios-local-agent-transport.ts",
+      "filePath": "eliza/packages/app-core/src/api/ios-local-agent-transport.ts",
+      "layer": "Runtime App Core",
+      "degree": {
+        "in": 1,
+        "out": 52,
+        "total": 53,
+        "edgeTypes": {
+          "contains": 46,
+          "imports": 6,
+          "tested_by": 1
+        }
+      },
+      "summary": "ios-local-agent-transport.ts is a typescript source file in the Milady codebase. It contains 46 functions, 5 imports."
+    },
+    {
+      "id": "file:eliza/packages/app-core/src/api/server.ts",
+      "filePath": "eliza/packages/app-core/src/api/server.ts",
+      "layer": "Runtime App Core",
+      "degree": {
+        "in": 5,
+        "out": 48,
+        "total": 53,
+        "edgeTypes": {
+          "contains": 18,
+          "imports": 35
+        }
+      },
+      "summary": "server.ts is a typescript source file in the Milady codebase. It contains 18 functions, 30 imports."
+    },
+    {
+      "id": "file:eliza/packages/app-core/src/benchmark/server.ts",
+      "filePath": "eliza/packages/app-core/src/benchmark/server.ts",
+      "layer": "Runtime App Core",
+      "degree": {
+        "in": 0,
+        "out": 53,
+        "total": 53,
+        "edgeTypes": {
+          "contains": 49,
+          "imports": 4
+        }
+      },
+      "summary": "server.ts is a typescript source file in the Milady codebase. It contains 49 functions, 4 imports."
+    },
+    {
+      "id": "file:eliza/packages/ui/src/bridge/electrobun-rpc.ts",
+      "filePath": "eliza/packages/ui/src/bridge/electrobun-rpc.ts",
+      "layer": "Shared UI And First Run",
+      "degree": {
+        "in": 23,
+        "out": 29,
+        "total": 52,
+        "edgeTypes": {
+          "imports": 23,
+          "contains": 29
+        }
+      },
+      "summary": "electrobun-rpc.ts is a typescript source file in the Milady codebase. It contains 29 functions, 1 imports."
+    }
+  ],
+  "miscellaneousFiles": [
+    {
+      "id": "file:skills/.defaults/skill-creator/scripts/init_skill.py",
+      "filePath": "skills/.defaults/skill-creator/scripts/init_skill.py",
+      "degree": {
+        "in": 0,
+        "out": 6,
+        "total": 6,
+        "edgeTypes": {
+          "contains": 6
+        }
+      },
+      "summary": "init_skill.py is a python source file in the Milady codebase. It contains 6 functions."
+    },
+    {
+      "id": "file:skills/.defaults/skill-creator/scripts/package_skill.py",
+      "filePath": "skills/.defaults/skill-creator/scripts/package_skill.py",
+      "degree": {
+        "in": 0,
+        "out": 3,
+        "total": 3,
+        "edgeTypes": {
+          "contains": 2,
+          "imports": 1
+        }
+      },
+      "summary": "package_skill.py is a python source file in the Milady codebase. It contains 2 functions, 1 imports."
+    },
+    {
+      "id": "file:skills/.defaults/nano-banana-pro/scripts/generate_image.py",
+      "filePath": "skills/.defaults/nano-banana-pro/scripts/generate_image.py",
+      "degree": {
+        "in": 0,
+        "out": 2,
+        "total": 2,
+        "edgeTypes": {
+          "contains": 2
+        }
+      },
+      "summary": "generate_image.py is a python source file in the Milady codebase. It contains 2 functions."
+    },
+    {
+      "id": "file:skills/.defaults/skill-creator/scripts/quick_validate.py",
+      "filePath": "skills/.defaults/skill-creator/scripts/quick_validate.py",
+      "degree": {
+        "in": 1,
+        "out": 1,
+        "total": 2,
+        "edgeTypes": {
+          "contains": 1,
+          "imports": 1
+        }
+      },
+      "summary": "quick_validate.py is a python source file in the Milady codebase. It contains 1 function."
+    },
+    {
+      "id": "file:skills/.defaults/tmux/scripts/find-sessions.sh",
+      "filePath": "skills/.defaults/tmux/scripts/find-sessions.sh",
+      "degree": {
+        "in": 0,
+        "out": 2,
+        "total": 2,
+        "edgeTypes": {
+          "contains": 2
+        }
+      },
+      "summary": "find-sessions.sh automates a Milady workspace, build, verification, or runtime task."
+    },
+    {
+      "id": "file:skills/.defaults/tmux/scripts/wait-for-text.sh",
+      "filePath": "skills/.defaults/tmux/scripts/wait-for-text.sh",
+      "degree": {
+        "in": 0,
+        "out": 1,
+        "total": 1,
+        "edgeTypes": {
+          "contains": 1
+        }
+      },
+      "summary": "wait-for-text.sh automates a Milady workspace, build, verification, or runtime task."
+    },
+    {
+      "id": "file:.agent/hooks/post-bash-summary.sh",
+      "filePath": ".agent/hooks/post-bash-summary.sh",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "post-bash-summary.sh automates a Milady workspace, build, verification, or runtime task."
+    },
+    {
+      "id": "file:.agent/hooks/post-edit-validate.sh",
+      "filePath": ".agent/hooks/post-edit-validate.sh",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "post-edit-validate.sh automates a Milady workspace, build, verification, or runtime task."
+    },
+    {
+      "id": "file:.agent/hooks/pre-bash-guard.sh",
+      "filePath": ".agent/hooks/pre-bash-guard.sh",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "pre-bash-guard.sh automates a Milady workspace, build, verification, or runtime task."
+    },
+    {
+      "id": "file:.agent/hooks/pre-edit-guard.sh",
+      "filePath": ".agent/hooks/pre-edit-guard.sh",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "pre-edit-guard.sh automates a Milady workspace, build, verification, or runtime task."
+    },
+    {
+      "id": "file:.agent/hooks/stop-checklist.sh",
+      "filePath": ".agent/hooks/stop-checklist.sh",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "stop-checklist.sh automates a Milady workspace, build, verification, or runtime task."
+    },
+    {
+      "id": "file:.biomeignore",
+      "filePath": ".biomeignore",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": ".biomeignore is a unknown source file in the Milady codebase."
+    },
+    {
+      "id": "config:.codefactor.yml",
+      "filePath": ".codefactor.yml",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": ".codefactor.yml configures yaml settings for the Milady workspace or one of its embedded packages."
+    },
+    {
+      "id": "file:.codeflowignore",
+      "filePath": ".codeflowignore",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": ".codeflowignore is a unknown source file in the Milady codebase."
+    },
+    {
+      "id": "document:.codex/AGENTS.md",
+      "filePath": ".codex/AGENTS.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "AGENTS.md documents .codex with 17 lines of reference material."
+    },
+    {
+      "id": "file:.cursor/rules/electrobun-agentic-desktop-2026.mdc",
+      "filePath": ".cursor/rules/electrobun-agentic-desktop-2026.mdc",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "electrobun-agentic-desktop-2026.mdc is a mdc source file in the Milady codebase."
+    },
+    {
+      "id": "config:.env.example",
+      "filePath": ".env.example",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": ".env.example configures config settings for the Milady workspace or one of its embedded packages."
+    },
+    {
+      "id": "file:.gitattributes",
+      "filePath": ".gitattributes",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": ".gitattributes is a unknown source file in the Milady codebase."
+    },
+    {
+      "id": "config:.gitleaks.toml",
+      "filePath": ".gitleaks.toml",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": ".gitleaks.toml configures toml settings for the Milady workspace or one of its embedded packages."
+    },
+    {
+      "id": "config:.mcp.json",
+      "filePath": ".mcp.json",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": ".mcp.json configures json settings for the Milady workspace or one of its embedded packages."
+    },
+    {
+      "id": "file:.npmignore",
+      "filePath": ".npmignore",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": ".npmignore is a unknown source file in the Milady codebase."
+    },
+    {
+      "id": "file:.nvmrc",
+      "filePath": ".nvmrc",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": ".nvmrc is a unknown source file in the Milady codebase."
+    },
+    {
+      "id": "file:.understand-anything/.understandignore",
+      "filePath": ".understand-anything/.understandignore",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": ".understandignore is a unknown source file in the Milady codebase."
+    },
+    {
+      "id": "file:.windsurfrules",
+      "filePath": ".windsurfrules",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": ".windsurfrules is a unknown source file in the Milady codebase."
+    },
+    {
+      "id": "document:AUDIT.md",
+      "filePath": "AUDIT.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "AUDIT.md documents the project with 133 lines of reference material."
+    },
+    {
+      "id": "config:automations/agent-automation.yaml",
+      "filePath": "automations/agent-automation.yaml",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "agent-automation.yaml configures yaml settings for the Milady workspace or one of its embedded packages."
+    },
+    {
+      "id": "config:biome.json",
+      "filePath": "biome.json",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "biome.json configures json settings for the Milady workspace or one of its embedded packages."
+    },
+    {
+      "id": "document:commands/electrobun-agent-tool.md",
+      "filePath": "commands/electrobun-agent-tool.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "electrobun-agent-tool.md documents commands with 14 lines of reference material."
+    },
+    {
+      "id": "document:commands/electrobun-build-fix.md",
+      "filePath": "commands/electrobun-build-fix.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "electrobun-build-fix.md documents commands with 11 lines of reference material."
+    },
+    {
+      "id": "document:commands/electrobun-menu-tray.md",
+      "filePath": "commands/electrobun-menu-tray.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "electrobun-menu-tray.md documents commands with 13 lines of reference material."
+    },
+    {
+      "id": "document:commands/electrobun-plan.md",
+      "filePath": "commands/electrobun-plan.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "electrobun-plan.md documents commands with 17 lines of reference material."
+    },
+    {
+      "id": "document:commands/electrobun-port-apple.md",
+      "filePath": "commands/electrobun-port-apple.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "electrobun-port-apple.md documents commands with 15 lines of reference material."
+    },
+    {
+      "id": "document:commands/electrobun-release.md",
+      "filePath": "commands/electrobun-release.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "electrobun-release.md documents commands with 15 lines of reference material."
+    },
+    {
+      "id": "document:commands/electrobun-rpc.md",
+      "filePath": "commands/electrobun-rpc.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "electrobun-rpc.md documents commands with 13 lines of reference material."
+    },
+    {
+      "id": "document:commands/electrobun-security-review.md",
+      "filePath": "commands/electrobun-security-review.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "electrobun-security-review.md documents commands with 15 lines of reference material."
+    },
+    {
+      "id": "document:commands/electrobun-test.md",
+      "filePath": "commands/electrobun-test.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "electrobun-test.md documents commands with 12 lines of reference material."
+    },
+    {
+      "id": "document:commands/electrobun-update.md",
+      "filePath": "commands/electrobun-update.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "electrobun-update.md documents commands with 14 lines of reference material."
+    },
+    {
+      "id": "document:commands/electrobun-view.md",
+      "filePath": "commands/electrobun-view.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "electrobun-view.md documents commands with 14 lines of reference material."
+    },
+    {
+      "id": "document:commands/README.md",
+      "filePath": "commands/README.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "README.md documents commands with 12 lines of reference material."
+    },
+    {
+      "id": "document:hooks/README.md",
+      "filePath": "hooks/README.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "README.md documents hooks with 18 lines of reference material."
+    },
+    {
+      "id": "file:install.ps1",
+      "filePath": "install.ps1",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "install.ps1 automates a Milady workspace, build, verification, or runtime task."
+    },
+    {
+      "id": "config:knip.jsonc",
+      "filePath": "knip.jsonc",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "knip.jsonc configures jsonc settings for the Milady workspace or one of its embedded packages."
+    },
+    {
+      "id": "config:plugins.json",
+      "filePath": "plugins.json",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "plugins.json configures json settings for the Milady workspace or one of its embedded packages."
+    },
+    {
+      "id": "document:reports/qa/2026-05-10/desktop/console-log-tail.txt",
+      "filePath": "reports/qa/2026-05-10/desktop/console-log-tail.txt",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "console-log-tail.txt documents reports/qa/2026-05-10/desktop with 1 lines of reference material."
+    },
+    {
+      "id": "config:reports/qa/2026-05-10/desktop/stack-status.json",
+      "filePath": "reports/qa/2026-05-10/desktop/stack-status.json",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "stack-status.json configures json settings for the Milady workspace or one of its embedded packages."
+    },
+    {
+      "id": "document:reports/qa/2026-05-10/SUMMARY.md",
+      "filePath": "reports/qa/2026-05-10/SUMMARY.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "SUMMARY.md documents reports/qa/2026-05-10 with 89 lines of reference material."
+    },
+    {
+      "id": "document:rules/00-prime-directive.md",
+      "filePath": "rules/00-prime-directive.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "00-prime-directive.md documents rules with 22 lines of reference material."
+    },
+    {
+      "id": "document:rules/01-project-discovery.md",
+      "filePath": "rules/01-project-discovery.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "01-project-discovery.md documents rules with 14 lines of reference material."
+    },
+    {
+      "id": "document:rules/02-agentic-desktop-architecture.md",
+      "filePath": "rules/02-agentic-desktop-architecture.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "02-agentic-desktop-architecture.md documents rules with 27 lines of reference material."
+    },
+    {
+      "id": "document:rules/03-model-routing-and-ai.md",
+      "filePath": "rules/03-model-routing-and-ai.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "03-model-routing-and-ai.md documents rules with 28 lines of reference material."
+    },
+    {
+      "id": "document:rules/04-electrobun-rpc-tools.md",
+      "filePath": "rules/04-electrobun-rpc-tools.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "04-electrobun-rpc-tools.md documents rules with 21 lines of reference material."
+    },
+    {
+      "id": "document:rules/05-electrobun-ui-architecture.md",
+      "filePath": "rules/05-electrobun-ui-architecture.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "05-electrobun-ui-architecture.md documents rules with 25 lines of reference material."
+    },
+    {
+      "id": "document:rules/06-bun-typescript-concurrency.md",
+      "filePath": "rules/06-bun-typescript-concurrency.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "06-bun-typescript-concurrency.md documents rules with 20 lines of reference material."
+    },
+    {
+      "id": "document:rules/07-data-memory-persistence.md",
+      "filePath": "rules/07-data-memory-persistence.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "07-data-memory-persistence.md documents rules with 20 lines of reference material."
+    },
+    {
+      "id": "document:rules/08-security-privacy-sandboxing.md",
+      "filePath": "rules/08-security-privacy-sandboxing.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "08-security-privacy-sandboxing.md documents rules with 22 lines of reference material."
+    },
+    {
+      "id": "document:rules/09-system-surfaces-updates-deeplinks.md",
+      "filePath": "rules/09-system-surfaces-updates-deeplinks.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "09-system-surfaces-updates-deeplinks.md documents rules with 24 lines of reference material."
+    },
+    {
+      "id": "document:rules/10-testing-ci-performance.md",
+      "filePath": "rules/10-testing-ci-performance.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "10-testing-ci-performance.md documents rules with 31 lines of reference material."
+    },
+    {
+      "id": "document:rules/11-accessibility-localization-design.md",
+      "filePath": "rules/11-accessibility-localization-design.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "11-accessibility-localization-design.md documents rules with 23 lines of reference material."
+    },
+    {
+      "id": "document:rules/12-distribution-code-signing.md",
+      "filePath": "rules/12-distribution-code-signing.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "12-distribution-code-signing.md documents rules with 17 lines of reference material."
+    },
+    {
+      "id": "document:rules/13-electrobun-api-topic-map.md",
+      "filePath": "rules/13-electrobun-api-topic-map.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "13-electrobun-api-topic-map.md documents rules with 15 lines of reference material."
+    },
+    {
+      "id": "document:rules/14-hooks-commands-automations.md",
+      "filePath": "rules/14-hooks-commands-automations.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "14-hooks-commands-automations.md documents rules with 22 lines of reference material."
+    },
+    {
+      "id": "document:rules/15-apple-swift-porting-map.md",
+      "filePath": "rules/15-apple-swift-porting-map.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "15-apple-swift-porting-map.md documents rules with 19 lines of reference material."
+    },
+    {
+      "id": "document:rules/16-agentic-app-ux-policies.md",
+      "filePath": "rules/16-agentic-app-ux-policies.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "16-agentic-app-ux-policies.md documents rules with 21 lines of reference material."
+    },
+    {
+      "id": "document:SETUP_IOS.md",
+      "filePath": "SETUP_IOS.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "SETUP_IOS.md documents the project with 149 lines of reference material."
+    },
+    {
+      "id": "document:skills/.defaults/1password/references/cli-examples.md",
+      "filePath": "skills/.defaults/1password/references/cli-examples.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "cli-examples.md documents skills/.defaults/1password/references with 29 lines of reference material."
+    },
+    {
+      "id": "document:skills/.defaults/1password/references/get-started.md",
+      "filePath": "skills/.defaults/1password/references/get-started.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "get-started.md documents skills/.defaults/1password/references with 17 lines of reference material."
+    },
+    {
+      "id": "document:skills/.defaults/1password/SKILL.md",
+      "filePath": "skills/.defaults/1password/SKILL.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "SKILL.md documents skills/.defaults/1password with 70 lines of reference material."
+    },
+    {
+      "id": "document:skills/.defaults/apple-notes/SKILL.md",
+      "filePath": "skills/.defaults/apple-notes/SKILL.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "SKILL.md documents skills/.defaults/apple-notes with 77 lines of reference material."
+    },
+    {
+      "id": "document:skills/.defaults/apple-reminders/SKILL.md",
+      "filePath": "skills/.defaults/apple-reminders/SKILL.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "SKILL.md documents skills/.defaults/apple-reminders with 96 lines of reference material."
+    },
+    {
+      "id": "document:skills/.defaults/blucli/SKILL.md",
+      "filePath": "skills/.defaults/blucli/SKILL.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "SKILL.md documents skills/.defaults/blucli with 47 lines of reference material."
+    },
+    {
+      "id": "document:skills/.defaults/bluebubbles/SKILL.md",
+      "filePath": "skills/.defaults/bluebubbles/SKILL.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "SKILL.md documents skills/.defaults/bluebubbles with 131 lines of reference material."
+    },
+    {
+      "id": "document:skills/.defaults/build-monetized-app/references/failure-modes.md",
+      "filePath": "skills/.defaults/build-monetized-app/references/failure-modes.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "failure-modes.md documents skills/.defaults/build-monetized-app/references with 71 lines of reference material."
+    },
+    {
+      "id": "document:skills/.defaults/build-monetized-app/references/sdk-flow.md",
+      "filePath": "skills/.defaults/build-monetized-app/references/sdk-flow.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "sdk-flow.md documents skills/.defaults/build-monetized-app/references with 188 lines of reference material."
+    },
+    {
+      "id": "document:skills/.defaults/build-monetized-app/references/survival-economics.md",
+      "filePath": "skills/.defaults/build-monetized-app/references/survival-economics.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "survival-economics.md documents skills/.defaults/build-monetized-app/references with 64 lines of reference material."
+    },
+    {
+      "id": "document:skills/.defaults/build-monetized-app/SKILL.md",
+      "filePath": "skills/.defaults/build-monetized-app/SKILL.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "SKILL.md documents skills/.defaults/build-monetized-app with 108 lines of reference material."
+    },
+    {
+      "id": "document:skills/.defaults/camsnap/SKILL.md",
+      "filePath": "skills/.defaults/camsnap/SKILL.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "SKILL.md documents skills/.defaults/camsnap with 45 lines of reference material."
+    },
+    {
+      "id": "document:skills/.defaults/canvas/SKILL.md",
+      "filePath": "skills/.defaults/canvas/SKILL.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "SKILL.md documents skills/.defaults/canvas with 203 lines of reference material."
+    },
+    {
+      "id": "document:skills/.defaults/coding-agent/SKILL.md",
+      "filePath": "skills/.defaults/coding-agent/SKILL.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "SKILL.md documents skills/.defaults/coding-agent with 284 lines of reference material."
+    },
+    {
+      "id": "document:skills/.defaults/discord/SKILL.md",
+      "filePath": "skills/.defaults/discord/SKILL.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "SKILL.md documents skills/.defaults/discord with 578 lines of reference material."
+    },
+    {
+      "id": "document:skills/.defaults/eliza-app-development/references/repo-map.md",
+      "filePath": "skills/.defaults/eliza-app-development/references/repo-map.md",
+      "degree": {
+        "in": 0,
+        "out": 0,
+        "total": 0,
+        "edgeTypes": {}
+      },
+      "summary": "repo-map.md documents skills/.defaults/eliza-app-development/references with 70 lines of reference material."
+    }
+  ],
+  "firstRunRuntimeVoice": {
+    "nodeCount": 1957,
+    "layers": {
+      "Plugins Local Inference And App Management": 646,
+      "Runtime App Core": 493,
+      "Agent Core And Shared Contracts": 295,
+      "Shared UI And First Run": 209,
+      "Templates Agent Packs And Examples": 158,
+      "Governance Security And Reference Docs": 69,
+      "Build Scripts CI And Deployment": 38,
+      "Miscellaneous Source": 24,
+      "Product Entry And Desktop Shell": 17,
+      "Homepage And Docs Site": 5,
+      "Mobile Native And Platform Packaging": 3
+    },
+    "topNodes": [
+      {
+        "id": "file:eliza/plugins/plugin-local-inference/src/services/dflash-server.ts",
+        "filePath": "eliza/plugins/plugin-local-inference/src/services/dflash-server.ts",
+        "layer": "Plugins Local Inference And App Management",
+        "complexity": "complex",
+        "degree": {
+          "in": 11,
+          "out": 121,
+          "total": 132,
+          "edgeTypes": {
+            "imports": 29,
+            "contains": 102,
+            "tested_by": 1
+          }
+        },
+        "summary": "dflash-server.ts is a typescript source file in the Milady codebase. It contains 101 functions, 1 class, 18 imports."
+      },
+      {
+        "id": "file:eliza/packages/agent/src/runtime/eliza.ts",
+        "filePath": "eliza/packages/agent/src/runtime/eliza.ts",
+        "layer": "Agent Core And Shared Contracts",
+        "complexity": "complex",
+        "degree": {
+          "in": 2,
+          "out": 112,
+          "total": 114,
+          "edgeTypes": {
+            "contains": 80,
+            "imports": 34
+          }
+        },
+        "summary": "eliza.ts is a typescript source file in the Milady codebase. It contains 80 functions, 32 imports."
+      },
+      {
+        "id": "file:eliza/packages/core/src/types/runtime.ts",
+        "filePath": "eliza/packages/core/src/types/runtime.ts",
+        "layer": "Agent Core And Shared Contracts",
+        "complexity": "complex",
+        "degree": {
+          "in": 84,
+          "out": 26,
+          "total": 110,
+          "edgeTypes": {
+            "imports": 110
+          }
+        },
+        "summary": "runtime.ts is a typescript source file in the Milady codebase. It contains 26 imports."
+      },
+      {
+        "id": "file:eliza/packages/core/src/runtime/planner-loop.ts",
+        "filePath": "eliza/packages/core/src/runtime/planner-loop.ts",
+        "layer": "Agent Core And Shared Contracts",
+        "complexity": "complex",
+        "degree": {
+          "in": 13,
+          "out": 88,
+          "total": 101,
+          "edgeTypes": {
+            "imports": 34,
+            "contains": 66,
+            "tested_by": 1
+          }
+        },
+        "summary": "planner-loop.ts is a typescript source file in the Milady codebase. It contains 66 functions, 21 imports."
+      },
+      {
+        "id": "file:eliza/packages/app-core/platforms/electrobun/src/index.ts",
+        "filePath": "eliza/packages/app-core/platforms/electrobun/src/index.ts",
+        "layer": "Runtime App Core",
+        "complexity": "complex",
+        "degree": {
+          "in": 0,
+          "out": 100,
+          "total": 100,
+          "edgeTypes": {
+            "contains": 55,
+            "imports": 45
+          }
+        },
+        "summary": "index.ts is a typescript source file in the Milady codebase. It contains 55 functions, 45 imports."
+      },
+      {
+        "id": "file:eliza/packages/core/src/runtime.ts",
+        "filePath": "eliza/packages/core/src/runtime.ts",
+        "layer": "Agent Core And Shared Contracts",
+        "complexity": "complex",
+        "degree": {
+          "in": 17,
+          "out": 73,
+          "total": 90,
+          "edgeTypes": {
+            "imports": 66,
+            "contains": 24
+          }
+        },
+        "summary": "runtime.ts is a typescript source file in the Milady codebase. It contains 22 functions, 2 classes, 49 imports."
+      },
+      {
+        "id": "file:eliza/packages/agent/src/runtime/trajectory-internals.ts",
+        "filePath": "eliza/packages/agent/src/runtime/trajectory-internals.ts",
+        "layer": "Agent Core And Shared Contracts",
+        "complexity": "complex",
+        "degree": {
+          "in": 10,
+          "out": 71,
+          "total": 81,
+          "edgeTypes": {
+            "imports": 13,
+            "contains": 68
+          }
+        },
+        "summary": "trajectory-internals.ts is a typescript source file in the Milady codebase. It contains 68 functions, 3 imports."
+      },
+      {
+        "id": "file:eliza/packages/app-core/platforms/electrobun/src/native/agent.ts",
+        "filePath": "eliza/packages/app-core/platforms/electrobun/src/native/agent.ts",
+        "layer": "Runtime App Core",
+        "complexity": "complex",
+        "degree": {
+          "in": 10,
+          "out": 67,
+          "total": 77,
+          "edgeTypes": {
+            "imports": 20,
+            "contains": 57
+          }
+        },
+        "summary": "agent.ts is a typescript source file in the Milady codebase. It contains 56 functions, 1 class, 10 imports."
+      },
+      {
+        "id": "file:eliza/packages/app-core/scripts/copy-runtime-node-modules.ts",
+        "filePath": "eliza/packages/app-core/scripts/copy-runtime-node-modules.ts",
+        "layer": "Runtime App Core",
+        "complexity": "complex",
+        "degree": {
+          "in": 1,
+          "out": 69,
+          "total": 70,
+          "edgeTypes": {
+            "contains": 68,
+            "imports": 2
+          }
+        },
+        "summary": "copy-runtime-node-modules.ts is a typescript source file in the Milady codebase. It contains 68 functions, 1 imports."
+      },
+      {
+        "id": "file:eliza/packages/ui/src/api/client-agent.ts",
+        "filePath": "eliza/packages/ui/src/api/client-agent.ts",
+        "layer": "Shared UI And First Run",
+        "complexity": "complex",
+        "degree": {
+          "in": 21,
+          "out": 48,
+          "total": 69,
+          "edgeTypes": {
+            "imports": 28,
+            "contains": 41
+          }
+        },
+        "summary": "client-agent.ts is a typescript source file in the Milady codebase. It contains 41 functions, 7 imports."
+      },
+      {
+        "id": "file:eliza/plugins/plugin-local-inference/native/verify/kokoro_e2e_loop_bench.mjs",
+        "filePath": "eliza/plugins/plugin-local-inference/native/verify/kokoro_e2e_loop_bench.mjs",
+        "layer": "Plugins Local Inference And App Management",
+        "complexity": "complex",
+        "degree": {
+          "in": 0,
+          "out": 65,
+          "total": 65,
+          "edgeTypes": {
+            "contains": 65
+          }
+        },
+        "summary": "kokoro_e2e_loop_bench.mjs is a javascript source file in the Milady codebase. It contains 65 functions."
+      },
+      {
+        "id": "file:eliza/packages/app-core/platforms/electrobun/src/rpc-handlers.ts",
+        "filePath": "eliza/packages/app-core/platforms/electrobun/src/rpc-handlers.ts",
+        "layer": "Runtime App Core",
+        "complexity": "complex",
+        "degree": {
+          "in": 1,
+          "out": 60,
+          "total": 61,
+          "edgeTypes": {
+            "imports": 53,
+            "contains": 7,
+            "tested_by": 1
+          }
+        },
+        "summary": "rpc-handlers.ts is a typescript source file in the Milady codebase. It contains 7 functions, 52 imports."
+      },
+      {
+        "id": "file:eliza/plugins/plugin-local-inference/src/local-inference-routes.ts",
+        "filePath": "eliza/plugins/plugin-local-inference/src/local-inference-routes.ts",
+        "layer": "Plugins Local Inference And App Management",
+        "complexity": "complex",
+        "degree": {
+          "in": 0,
+          "out": 59,
+          "total": 59,
+          "edgeTypes": {
+            "contains": 55,
+            "imports": 3,
+            "tested_by": 1
+          }
+        },
+        "summary": "local-inference-routes.ts is a typescript source file in the Milady codebase. It contains 55 functions, 3 imports."
+      },
+      {
+        "id": "file:apps/app/src/main.tsx",
+        "filePath": "apps/app/src/main.tsx",
+        "layer": "Product Entry And Desktop Shell",
+        "complexity": "complex",
+        "degree": {
+          "in": 0,
+          "out": 58,
+          "total": 58,
+          "edgeTypes": {
+            "contains": 50,
+            "imports": 8
+          }
+        },
+        "summary": "main.tsx is a typescript source file in the Milady codebase. It contains 50 functions, 8 imports."
+      },
+      {
+        "id": "file:eliza/packages/core/src/runtime/evaluator.ts",
+        "filePath": "eliza/packages/core/src/runtime/evaluator.ts",
+        "layer": "Agent Core And Shared Contracts",
+        "complexity": "complex",
+        "degree": {
+          "in": 3,
+          "out": 54,
+          "total": 57,
+          "edgeTypes": {
+            "imports": 15,
+            "contains": 41,
+            "tested_by": 1
+          }
+        },
+        "summary": "evaluator.ts is a typescript source file in the Milady codebase. It contains 41 functions, 12 imports."
+      },
+      {
+        "id": "file:eliza/packages/app-core/platforms/electrobun/remotes/runtime/src/bun/worker.ts",
+        "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/runtime/src/bun/worker.ts",
+        "layer": "Runtime App Core",
+        "complexity": "complex",
+        "degree": {
+          "in": 0,
+          "out": 56,
+          "total": 56,
+          "edgeTypes": {
+            "contains": 50,
+            "imports": 6
+          }
+        },
+        "summary": "worker.ts is a typescript source file in the Milady codebase. It contains 50 functions, 6 imports."
+      },
+      {
+        "id": "file:eliza/packages/app-core/src/runtime/mobile-safe-runtime.ts",
+        "filePath": "eliza/packages/app-core/src/runtime/mobile-safe-runtime.ts",
+        "layer": "Runtime App Core",
+        "complexity": "complex",
+        "degree": {
+          "in": 2,
+          "out": 52,
+          "total": 54,
+          "edgeTypes": {
+            "contains": 50,
+            "imports": 3,
+            "tested_by": 1
+          }
+        },
+        "summary": "mobile-safe-runtime.ts is a typescript source file in the Milady codebase. It contains 49 functions, 1 class, 1 imports."
+      },
+      {
+        "id": "file:eliza/packages/core/src/runtime/response-grammar.ts",
+        "filePath": "eliza/packages/core/src/runtime/response-grammar.ts",
+        "layer": "Agent Core And Shared Contracts",
+        "complexity": "complex",
+        "degree": {
+          "in": 4,
+          "out": 50,
+          "total": 54,
+          "edgeTypes": {
+            "imports": 4,
+            "contains": 49,
+            "tested_by": 1
+          }
+        },
+        "summary": "response-grammar.ts is a typescript source file in the Milady codebase. It contains 48 functions, 1 class, 4 imports."
+      },
+      {
+        "id": "file:eliza/plugins/plugin-local-inference/src/runtime/ensure-local-inference-handler.ts",
+        "filePath": "eliza/plugins/plugin-local-inference/src/runtime/ensure-local-inference-handler.ts",
+        "layer": "Plugins Local Inference And App Management",
+        "complexity": "complex",
+        "degree": {
+          "in": 3,
+          "out": 51,
+          "total": 54,
+          "edgeTypes": {
+            "imports": 19,
+            "contains": 34,
+            "tested_by": 1
+          }
+        },
+        "summary": "ensure-local-inference-handler.ts is a typescript source file in the Milady codebase. It contains 34 functions, 16 imports."
+      },
+      {
+        "id": "file:eliza/packages/agent/src/runtime/plugin-resolver.ts",
+        "filePath": "eliza/packages/agent/src/runtime/plugin-resolver.ts",
+        "layer": "Agent Core And Shared Contracts",
+        "complexity": "complex",
+        "degree": {
+          "in": 2,
+          "out": 51,
+          "total": 53,
+          "edgeTypes": {
+            "imports": 12,
+            "contains": 41
+          }
+        },
+        "summary": "plugin-resolver.ts is a typescript source file in the Milady codebase. It contains 41 functions, 10 imports."
+      },
+      {
+        "id": "file:eliza/packages/ui/src/bridge/electrobun-rpc.ts",
+        "filePath": "eliza/packages/ui/src/bridge/electrobun-rpc.ts",
+        "layer": "Shared UI And First Run",
+        "complexity": "complex",
+        "degree": {
+          "in": 23,
+          "out": 29,
+          "total": 52,
+          "edgeTypes": {
+            "imports": 23,
+            "contains": 29
+          }
+        },
+        "summary": "electrobun-rpc.ts is a typescript source file in the Milady codebase. It contains 29 functions, 1 imports."
+      },
+      {
+        "id": "file:eliza/plugins/plugin-local-inference/src/services/engine.ts",
+        "filePath": "eliza/plugins/plugin-local-inference/src/services/engine.ts",
+        "layer": "Plugins Local Inference And App Management",
+        "complexity": "complex",
+        "degree": {
+          "in": 19,
+          "out": 33,
+          "total": 52,
+          "edgeTypes": {
+            "imports": 41,
+            "contains": 11
+          }
+        },
+        "summary": "engine.ts is a typescript source file in the Milady codebase. It contains 9 functions, 2 classes, 22 imports."
+      },
+      {
+        "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/engine-bridge.ts",
+        "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/engine-bridge.ts",
+        "layer": "Plugins Local Inference And App Management",
+        "complexity": "complex",
+        "degree": {
+          "in": 8,
+          "out": 44,
+          "total": 52,
+          "edgeTypes": {
+            "imports": 26,
+            "contains": 25,
+            "tested_by": 1
+          }
+        },
+        "summary": "engine-bridge.ts is a typescript source file in the Milady codebase. It contains 22 functions, 3 classes, 18 imports."
+      },
+      {
+        "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/types.ts",
+        "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/types.ts",
+        "layer": "Plugins Local Inference And App Management",
+        "complexity": "complex",
+        "degree": {
+          "in": 52,
+          "out": 0,
+          "total": 52,
+          "edgeTypes": {
+            "imports": 52
+          }
+        },
+        "summary": "types.ts is a typescript source file in the Milady codebase."
+      },
+      {
+        "id": "file:eliza/packages/app-core/src/runtime/eliza.ts",
+        "filePath": "eliza/packages/app-core/src/runtime/eliza.ts",
+        "layer": "Runtime App Core",
+        "complexity": "complex",
+        "degree": {
+          "in": 2,
+          "out": 46,
+          "total": 48,
+          "edgeTypes": {
+            "contains": 41,
+            "imports": 7
+          }
+        },
+        "summary": "eliza.ts is a typescript source file in the Milady codebase. It contains 41 functions, 5 imports."
+      },
+      {
+        "id": "file:eliza/packages/agent/src/runtime/prompt-optimization.ts",
+        "filePath": "eliza/packages/agent/src/runtime/prompt-optimization.ts",
+        "layer": "Agent Core And Shared Contracts",
+        "complexity": "complex",
+        "degree": {
+          "in": 2,
+          "out": 45,
+          "total": 47,
+          "edgeTypes": {
+            "imports": 11,
+            "contains": 36
+          }
+        },
+        "summary": "prompt-optimization.ts is a typescript source file in the Milady codebase. It contains 36 functions, 9 imports."
+      },
+      {
+        "id": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+        "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+        "layer": "Agent Core And Shared Contracts",
+        "complexity": "complex",
+        "degree": {
+          "in": 0,
+          "out": 47,
+          "total": 47,
+          "edgeTypes": {
+            "contains": 47
+          }
+        },
+        "summary": "first-run-options.ts is a typescript source file in the Milady codebase. It contains 47 functions, 3 imports."
+      },
+      {
+        "id": "file:eliza/packages/shared/src/contracts/first-run-options.ts",
+        "filePath": "eliza/packages/shared/src/contracts/first-run-options.ts",
+        "layer": "Agent Core And Shared Contracts",
+        "complexity": "complex",
+        "degree": {
+          "in": 0,
+          "out": 47,
+          "total": 47,
+          "edgeTypes": {
+            "contains": 47
+          }
+        },
+        "summary": "first-run-options.ts is a typescript source file in the Milady codebase. It contains 47 functions, 3 imports."
+      },
+      {
+        "id": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+        "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+        "layer": "Plugins Local Inference And App Management",
+        "complexity": "complex",
+        "degree": {
+          "in": 0,
+          "out": 46,
+          "total": 46,
+          "edgeTypes": {
+            "contains": 45,
+            "imports": 1
+          }
+        },
+        "summary": "dflash_drafter_runtime_smoke.mjs is a javascript source file in the Milady codebase. It contains 45 functions, 1 imports."
+      },
+      {
+        "id": "file:eliza/plugins/plugin-local-inference/native/verify/voice_profile_emotion_status.mjs",
+        "filePath": "eliza/plugins/plugin-local-inference/native/verify/voice_profile_emotion_status.mjs",
+        "layer": "Plugins Local Inference And App Management",
+        "complexity": "complex",
+        "degree": {
+          "in": 1,
+          "out": 45,
+          "total": 46,
+          "edgeTypes": {
+            "contains": 44,
+            "imports": 1,
+            "tested_by": 1
+          }
+        },
+        "summary": "voice_profile_emotion_status.mjs is a javascript source file in the Milady codebase. It contains 44 functions."
+      },
+      {
+        "id": "file:eliza/packages/agent/src/runtime/conversation-compactor.ts",
+        "filePath": "eliza/packages/agent/src/runtime/conversation-compactor.ts",
+        "layer": "Agent Core And Shared Contracts",
+        "complexity": "complex",
+        "degree": {
+          "in": 3,
+          "out": 42,
+          "total": 45,
+          "edgeTypes": {
+            "imports": 4,
+            "contains": 40,
+            "tested_by": 1
+          }
+        },
+        "summary": "conversation-compactor.ts is a typescript source file in the Milady codebase. It contains 40 functions, 1 imports."
+      },
+      {
+        "id": "file:eliza/packages/core/src/runtime/trajectory-recorder.ts",
+        "filePath": "eliza/packages/core/src/runtime/trajectory-recorder.ts",
+        "layer": "Agent Core And Shared Contracts",
+        "complexity": "complex",
+        "degree": {
+          "in": 8,
+          "out": 37,
+          "total": 45,
+          "edgeTypes": {
+            "imports": 12,
+            "contains": 32,
+            "tested_by": 1
+          }
+        },
+        "summary": "trajectory-recorder.ts is a typescript source file in the Milady codebase. It contains 31 functions, 1 class, 4 imports."
+      },
+      {
+        "id": "file:eliza/plugins/plugin-local-inference/src/provider.ts",
+        "filePath": "eliza/plugins/plugin-local-inference/src/provider.ts",
+        "layer": "Plugins Local Inference And App Management",
+        "complexity": "complex",
+        "degree": {
+          "in": 6,
+          "out": 38,
+          "total": 44,
+          "edgeTypes": {
+            "imports": 7,
+            "contains": 37
+          }
+        },
+        "summary": "provider.ts is a typescript source file in the Milady codebase. It contains 36 functions, 1 class, 1 imports."
+      },
+      {
+        "id": "file:eliza/packages/app-core/platforms/electrobun/src/voice/voice-live-validation.ts",
+        "filePath": "eliza/packages/app-core/platforms/electrobun/src/voice/voice-live-validation.ts",
+        "layer": "Runtime App Core",
+        "complexity": "complex",
+        "degree": {
+          "in": 1,
+          "out": 42,
+          "total": 43,
+          "edgeTypes": {
+            "contains": 30,
+            "imports": 12,
+            "tested_by": 1
+          }
+        },
+        "summary": "voice-live-validation.ts is a typescript source file in the Milady codebase. It contains 28 functions, 2 classes, 11 imports."
+      },
+      {
+        "id": "file:eliza/plugins/plugin-local-inference/native/verify/e2e_loop_bench.mjs",
+        "filePath": "eliza/plugins/plugin-local-inference/native/verify/e2e_loop_bench.mjs",
+        "layer": "Plugins Local Inference And App Management",
+        "complexity": "complex",
+        "degree": {
+          "in": 0,
+          "out": 43,
+          "total": 43,
+          "edgeTypes": {
+            "contains": 43
+          }
+        },
+        "summary": "e2e_loop_bench.mjs is a javascript source file in the Milady codebase. It contains 43 functions."
+      },
+      {
+        "id": "file:eliza/packages/agent/src/runtime/conversation-compactor-runtime.ts",
+        "filePath": "eliza/packages/agent/src/runtime/conversation-compactor-runtime.ts",
+        "layer": "Agent Core And Shared Contracts",
+        "complexity": "complex",
+        "degree": {
+          "in": 3,
+          "out": 39,
+          "total": 42,
+          "edgeTypes": {
+            "imports": 6,
+            "contains": 35,
+            "tested_by": 1
+          }
+        },
+        "summary": "conversation-compactor-runtime.ts is a typescript source file in the Milady codebase. It contains 35 functions, 3 imports."
+      },
+      {
+        "id": "file:eliza/plugins/plugin-local-inference/src/services/active-model.ts",
+        "filePath": "eliza/plugins/plugin-local-inference/src/services/active-model.ts",
+        "layer": "Plugins Local Inference And App Management",
+        "complexity": "complex",
+        "degree": {
+          "in": 8,
+          "out": 34,
+          "total": 42,
+          "edgeTypes": {
+            "imports": 18,
+            "contains": 23,
+            "tested_by": 1
+          }
+        },
+        "summary": "active-model.ts is a typescript source file in the Milady codebase. It contains 19 functions, 4 classes, 10 imports."
+      },
+      {
+        "id": "file:eliza/plugins/plugin-local-inference/src/services/types.ts",
+        "filePath": "eliza/plugins/plugin-local-inference/src/services/types.ts",
+        "layer": "Plugins Local Inference And App Management",
+        "complexity": "simple",
+        "degree": {
+          "in": 42,
+          "out": 0,
+          "total": 42,
+          "edgeTypes": {
+            "imports": 42
+          }
+        },
+        "summary": "types.ts is a typescript source file in the Milady codebase."
+      },
+      {
+        "id": "file:eliza/packages/app-core/platforms/electrobun/src/rpc-schema.ts",
+        "filePath": "eliza/packages/app-core/platforms/electrobun/src/rpc-schema.ts",
+        "layer": "Runtime App Core",
+        "complexity": "complex",
+        "degree": {
+          "in": 32,
+          "out": 8,
+          "total": 40,
+          "edgeTypes": {
+            "imports": 40
+          }
+        },
+        "summary": "rpc-schema.ts is a typescript source file in the Milady codebase. It contains 8 imports."
+      },
+      {
+        "id": "file:eliza/packages/app-core/src/runtime/desktop/AppWindowRenderer.tsx",
+        "filePath": "eliza/packages/app-core/src/runtime/desktop/AppWindowRenderer.tsx",
+        "layer": "Runtime App Core",
+        "complexity": "complex",
+        "degree": {
+          "in": 0,
+          "out": 40,
+          "total": 40,
+          "edgeTypes": {
+            "contains": 16,
+            "imports": 24
+          }
+        },
+        "summary": "AppWindowRenderer.tsx is a typescript source file in the Milady codebase. It contains 16 functions, 24 imports."
+      },
+      {
+        "id": "file:eliza/packages/agent/src/runtime/eliza-plugin.ts",
+        "filePath": "eliza/packages/agent/src/runtime/eliza-plugin.ts",
+        "layer": "Agent Core And Shared Contracts",
+        "complexity": "moderate",
+        "degree": {
+          "in": 2,
+          "out": 37,
+          "total": 39,
+          "edgeTypes": {
+            "contains": 2,
+            "imports": 37
+          }
+        },
+        "summary": "eliza-plugin.ts is a typescript source file in the Milady codebase. It contains 2 functions, 35 imports."
+      },
+      {
+        "id": "file:eliza/packages/app-core/platforms/electrobun/src/config-and-auth-rpc.ts",
+        "filePath": "eliza/packages/app-core/platforms/electrobun/src/config-and-auth-rpc.ts",
+        "layer": "Runtime App Core",
+        "complexity": "complex",
+        "degree": {
+          "in": 22,
+          "out": 17,
+          "total": 39,
+          "edgeTypes": {
+            "contains": 15,
+            "imports": 23,
+            "tested_by": 1
+          }
+        },
+        "summary": "config-and-auth-rpc.ts is a typescript source file in the Milady codebase. It contains 14 functions, 1 class, 1 imports."
+      },
+      {
+        "id": "file:eliza/packages/ui/src/first-run/mobile-runtime-mode.ts",
+        "filePath": "eliza/packages/ui/src/first-run/mobile-runtime-mode.ts",
+        "layer": "Shared UI And First Run",
+        "complexity": "moderate",
+        "degree": {
+          "in": 26,
+          "out": 12,
+          "total": 38,
+          "edgeTypes": {
+            "imports": 28,
+            "contains": 9,
+            "tested_by": 1
+          }
+        },
+        "summary": "mobile-runtime-mode.ts is a typescript source file in the Milady codebase. It contains 9 functions, 2 imports."
+      },
+      {
+        "id": "file:eliza/packages/core/src/runtime/execute-planned-tool-call.ts",
+        "filePath": "eliza/packages/core/src/runtime/execute-planned-tool-call.ts",
+        "layer": "Agent Core And Shared Contracts",
+        "complexity": "complex",
+        "degree": {
+          "in": 6,
+          "out": 31,
+          "total": 37,
+          "edgeTypes": {
+            "imports": 21,
+            "contains": 15,
+            "tested_by": 1
+          }
+        },
+        "summary": "execute-planned-tool-call.ts is a typescript source file in the Milady codebase. It contains 15 functions, 15 imports."
+      },
+      {
+        "id": "file:eliza/packages/core/src/runtime/facts-and-relationships.ts",
+        "filePath": "eliza/packages/core/src/runtime/facts-and-relationships.ts",
+        "layer": "Agent Core And Shared Contracts",
+        "complexity": "complex",
+        "degree": {
+          "in": 2,
+          "out": 35,
+          "total": 37,
+          "edgeTypes": {
+            "imports": 13,
+            "contains": 23,
+            "tested_by": 1
+          }
+        },
+        "summary": "facts-and-relationships.ts is a typescript source file in the Milady codebase. It contains 23 functions, 11 imports."
+      },
+      {
+        "id": "file:eliza/plugins/plugin-local-inference/native/verify/eliza1_gates_collect.mjs",
+        "filePath": "eliza/plugins/plugin-local-inference/native/verify/eliza1_gates_collect.mjs",
+        "layer": "Plugins Local Inference And App Management",
+        "complexity": "complex",
+        "degree": {
+          "in": 0,
+          "out": 37,
+          "total": 37,
+          "edgeTypes": {
+            "contains": 37
+          }
+        },
+        "summary": "eliza1_gates_collect.mjs is a javascript source file in the Milady codebase. It contains 37 functions."
+      },
+      {
+        "id": "file:eliza/plugins/plugin-local-inference/scripts/local-inference-ablation.mjs",
+        "filePath": "eliza/plugins/plugin-local-inference/scripts/local-inference-ablation.mjs",
+        "layer": "Plugins Local Inference And App Management",
+        "complexity": "complex",
+        "degree": {
+          "in": 0,
+          "out": 37,
+          "total": 37,
+          "edgeTypes": {
+            "contains": 37
+          }
+        },
+        "summary": "local-inference-ablation.mjs is a javascript source file in the Milady codebase. It contains 37 functions."
+      },
+      {
+        "id": "file:eliza/plugins/plugin-local-inference/src/services/recommendation.ts",
+        "filePath": "eliza/plugins/plugin-local-inference/src/services/recommendation.ts",
+        "layer": "Plugins Local Inference And App Management",
+        "complexity": "complex",
+        "degree": {
+          "in": 7,
+          "out": 30,
+          "total": 37,
+          "edgeTypes": {
+            "imports": 11,
+            "contains": 25,
+            "tested_by": 1
+          }
+        },
+        "summary": "recommendation.ts is a typescript source file in the Milady codebase. It contains 25 functions, 4 imports."
+      },
+      {
+        "id": "file:eliza/packages/agent/src/runtime/plugin-lifecycle.ts",
+        "filePath": "eliza/packages/agent/src/runtime/plugin-lifecycle.ts",
+        "layer": "Agent Core And Shared Contracts",
+        "complexity": "complex",
+        "degree": {
+          "in": 3,
+          "out": 31,
+          "total": 34,
+          "edgeTypes": {
+            "imports": 7,
+            "contains": 27
+          }
+        },
+        "summary": "plugin-lifecycle.ts is a typescript source file in the Milady codebase. It contains 27 functions, 4 imports."
+      },
+      {
+        "id": "file:eliza/packages/app-core/platforms/electrobun/remotes/runtime/src/bun/stream-manager.ts",
+        "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/runtime/src/bun/stream-manager.ts",
+        "layer": "Runtime App Core",
+        "complexity": "complex",
+        "degree": {
+          "in": 2,
+          "out": 32,
+          "total": 34,
+          "edgeTypes": {
+            "contains": 28,
+            "imports": 6
+          }
+        },
+        "summary": "stream-manager.ts is a typescript source file in the Milady codebase. It contains 27 functions, 1 class, 4 imports."
+      },
+      {
+        "id": "file:eliza/packages/app-core/platforms/electrobun/src/native/remote-plugin-host.ts",
+        "filePath": "eliza/packages/app-core/platforms/electrobun/src/native/remote-plugin-host.ts",
+        "layer": "Runtime App Core",
+        "complexity": "complex",
+        "degree": {
+          "in": 6,
+          "out": 27,
+          "total": 33,
+          "edgeTypes": {
+            "imports": 13,
+            "contains": 19,
+            "tested_by": 1
+          }
+        },
+        "summary": "remote-plugin-host.ts is a typescript source file in the Milady codebase. It contains 13 functions, 6 classes, 7 imports."
+      },
+      {
+        "id": "file:eliza/packages/ui/src/state/startup-phase-restore.ts",
+        "filePath": "eliza/packages/ui/src/state/startup-phase-restore.ts",
+        "layer": "Shared UI And First Run",
+        "complexity": "complex",
+        "degree": {
+          "in": 5,
+          "out": 28,
+          "total": 33,
+          "edgeTypes": {
+            "imports": 17,
+            "contains": 16
+          }
+        },
+        "summary": "startup-phase-restore.ts is a typescript source file in the Milady codebase. It contains 16 functions, 12 imports."
+      },
+      {
+        "id": "file:eliza/packages/core/src/runtime-env.ts",
+        "filePath": "eliza/packages/core/src/runtime-env.ts",
+        "layer": "Agent Core And Shared Contracts",
+        "complexity": "complex",
+        "degree": {
+          "in": 0,
+          "out": 32,
+          "total": 32,
+          "edgeTypes": {
+            "contains": 32
+          }
+        },
+        "summary": "runtime-env.ts is a typescript source file in the Milady codebase. It contains 32 functions, 1 imports."
+      },
+      {
+        "id": "file:eliza/packages/shared/src/runtime-env.ts",
+        "filePath": "eliza/packages/shared/src/runtime-env.ts",
+        "layer": "Agent Core And Shared Contracts",
+        "complexity": "complex",
+        "degree": {
+          "in": 0,
+          "out": 32,
+          "total": 32,
+          "edgeTypes": {
+            "contains": 32
+          }
+        },
+        "summary": "runtime-env.ts is a typescript source file in the Milady codebase. It contains 32 functions, 1 imports."
+      },
+      {
+        "id": "file:eliza/packages/ui/src/first-run/first-run.ts",
+        "filePath": "eliza/packages/ui/src/first-run/first-run.ts",
+        "layer": "Shared UI And First Run",
+        "complexity": "complex",
+        "degree": {
+          "in": 3,
+          "out": 29,
+          "total": 32,
+          "edgeTypes": {
+            "contains": 24,
+            "imports": 7,
+            "tested_by": 1
+          }
+        },
+        "summary": "first-run.ts is a typescript source file in the Milady codebase. It contains 24 functions, 4 imports."
+      },
+      {
+        "id": "file:eliza/plugins/plugin-local-inference/native/verify/eliza1_memory_inventory.mjs",
+        "filePath": "eliza/plugins/plugin-local-inference/native/verify/eliza1_memory_inventory.mjs",
+        "layer": "Plugins Local Inference And App Management",
+        "complexity": "complex",
+        "degree": {
+          "in": 0,
+          "out": 32,
+          "total": 32,
+          "edgeTypes": {
+            "contains": 32
+          }
+        },
+        "summary": "eliza1_memory_inventory.mjs is a javascript source file in the Milady codebase. It contains 32 functions."
+      },
+      {
+        "id": "file:eliza/plugins/plugin-local-inference/src/services/service.ts",
+        "filePath": "eliza/plugins/plugin-local-inference/src/services/service.ts",
+        "layer": "Plugins Local Inference And App Management",
+        "complexity": "complex",
+        "degree": {
+          "in": 7,
+          "out": 25,
+          "total": 32,
+          "edgeTypes": {
+            "imports": 29,
+            "contains": 2,
+            "tested_by": 1
+          }
+        },
+        "summary": "service.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 class, 22 imports."
+      },
+      {
+        "id": "file:eliza/packages/agent/src/runtime/custom-actions.ts",
+        "filePath": "eliza/packages/agent/src/runtime/custom-actions.ts",
+        "layer": "Agent Core And Shared Contracts",
+        "complexity": "complex",
+        "degree": {
+          "in": 2,
+          "out": 29,
+          "total": 31,
+          "edgeTypes": {
+            "imports": 8,
+            "contains": 23
+          }
+        },
+        "summary": "custom-actions.ts is a typescript source file in the Milady codebase. It contains 22 functions, 1 class, 6 imports."
+      },
+      {
+        "id": "file:eliza/packages/ui/src/services/local-inference/recommendation.ts",
+        "filePath": "eliza/packages/ui/src/services/local-inference/recommendation.ts",
+        "layer": "Shared UI And First Run",
+        "complexity": "complex",
+        "degree": {
+          "in": 9,
+          "out": 22,
+          "total": 31,
+          "edgeTypes": {
+            "imports": 12,
+            "contains": 18,
+            "tested_by": 1
+          }
+        },
+        "summary": "recommendation.ts is a typescript source file in the Milady codebase. It contains 18 functions, 3 imports."
+      },
+      {
+        "id": "file:eliza/packages/ui/src/voice/voice-chat-types.ts",
+        "filePath": "eliza/packages/ui/src/voice/voice-chat-types.ts",
+        "layer": "Shared UI And First Run",
+        "complexity": "complex",
+        "degree": {
+          "in": 13,
+          "out": 18,
+          "total": 31,
+          "edgeTypes": {
+            "imports": 17,
+            "contains": 14
+          }
+        },
+        "summary": "voice-chat-types.ts is a typescript source file in the Milady codebase. It contains 14 functions, 4 imports."
+      },
+      {
+        "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/voice-preset-format.ts",
+        "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/voice-preset-format.ts",
+        "layer": "Plugins Local Inference And App Management",
+        "complexity": "complex",
+        "degree": {
+          "in": 17,
+          "out": 14,
+          "total": 31,
+          "edgeTypes": {
+            "imports": 17,
+            "contains": 14
+          }
+        },
+        "summary": "voice-preset-format.ts is a typescript source file in the Milady codebase. It contains 13 functions, 1 class."
+      },
+      {
+        "id": "file:eliza/packages/app-core/scripts/ios-xcframework/runtime-symbol-shim.c",
+        "filePath": "eliza/packages/app-core/scripts/ios-xcframework/runtime-symbol-shim.c",
+        "layer": "Runtime App Core",
+        "complexity": "complex",
+        "degree": {
+          "in": 0,
+          "out": 30,
+          "total": 30,
+          "edgeTypes": {
+            "contains": 29,
+            "imports": 1
+          }
+        },
+        "summary": "runtime-symbol-shim.c is a c source file in the Milady codebase. It contains 22 functions, 7 classes, 1 imports."
+      },
+      {
+        "id": "file:eliza/plugins/plugin-local-inference/native/verify/eliza1_vision_smoke.mjs",
+        "filePath": "eliza/plugins/plugin-local-inference/native/verify/eliza1_vision_smoke.mjs",
+        "layer": "Plugins Local Inference And App Management",
+        "complexity": "complex",
+        "degree": {
+          "in": 1,
+          "out": 29,
+          "total": 30,
+          "edgeTypes": {
+            "contains": 28,
+            "imports": 1,
+            "tested_by": 1
+          }
+        },
+        "summary": "eliza1_vision_smoke.mjs is a javascript source file in the Milady codebase. It contains 28 functions."
+      },
+      {
+        "id": "file:eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+        "filePath": "eliza/plugins/plugin-local-inference/native/verify/vulkan_verify.cpp",
+        "layer": "Plugins Local Inference And App Management",
+        "complexity": "complex",
+        "degree": {
+          "in": 0,
+          "out": 30,
+          "total": 30,
+          "edgeTypes": {
+            "contains": 30
+          }
+        },
+        "summary": "vulkan_verify.cpp is a cpp source file in the Milady codebase. It contains 20 functions, 10 classes."
+      },
+      {
+        "id": "file:eliza/packages/app-core/platforms/electrobun/src/brand-config.ts",
+        "filePath": "eliza/packages/app-core/platforms/electrobun/src/brand-config.ts",
+        "layer": "Runtime App Core",
+        "complexity": "moderate",
+        "degree": {
+          "in": 22,
+          "out": 7,
+          "total": 29,
+          "edgeTypes": {
+            "contains": 7,
+            "imports": 22
+          }
+        },
+        "summary": "brand-config.ts is a typescript source file in the Milady codebase. It contains 7 functions."
+      },
+      {
+        "id": "file:eliza/packages/app-core/scripts/voice-e2e-hardware.ts",
+        "filePath": "eliza/packages/app-core/scripts/voice-e2e-hardware.ts",
+        "layer": "Runtime App Core",
+        "complexity": "complex",
+        "degree": {
+          "in": 0,
+          "out": 29,
+          "total": 29,
+          "edgeTypes": {
+            "contains": 29
+          }
+        },
+        "summary": "voice-e2e-hardware.ts is a typescript source file in the Milady codebase. It contains 29 functions."
+      },
+      {
+        "id": "file:eliza/packages/core/src/runtime/action-catalog.ts",
+        "filePath": "eliza/packages/core/src/runtime/action-catalog.ts",
+        "layer": "Agent Core And Shared Contracts",
+        "complexity": "complex",
+        "degree": {
+          "in": 8,
+          "out": 21,
+          "total": 29,
+          "edgeTypes": {
+            "imports": 10,
+            "contains": 19
+          }
+        },
+        "summary": "action-catalog.ts is a typescript source file in the Milady codebase. It contains 19 functions, 2 imports."
+      },
+      {
+        "id": "file:eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+        "filePath": "eliza/plugins/plugin-local-inference/native/reference/turbo_kernels.c",
+        "layer": "Plugins Local Inference And App Management",
+        "complexity": "complex",
+        "degree": {
+          "in": 0,
+          "out": 29,
+          "total": 29,
+          "edgeTypes": {
+            "contains": 28,
+            "imports": 1
+          }
+        },
+        "summary": "turbo_kernels.c is a c source file in the Milady codebase. It contains 28 functions, 1 imports."
+      },
+      {
+        "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+        "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/eot-classifier.ts",
+        "layer": "Plugins Local Inference And App Management",
+        "complexity": "complex",
+        "degree": {
+          "in": 8,
+          "out": 21,
+          "total": 29,
+          "edgeTypes": {
+            "imports": 10,
+            "contains": 18,
+            "tested_by": 1
+          }
+        },
+        "summary": "eot-classifier.ts is a typescript source file in the Milady codebase. It contains 13 functions, 5 classes, 2 imports."
+      },
+      {
+        "id": "file:eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts",
+        "filePath": "eliza/plugins/plugin-local-inference/src/services/voice/ffi-bindings.ts",
+        "layer": "Plugins Local Inference And App Management",
+        "complexity": "complex",
+        "degree": {
+          "in": 19,
+          "out": 10,
+          "total": 29,
+          "edgeTypes": {
+            "imports": 20,
+            "contains": 8,
+            "tested_by": 1
+          }
+        },
+        "summary": "ffi-bindings.ts is a typescript source file in the Milady codebase. It contains 8 functions, 1 imports."
+      },
+      {
+        "id": "file:eliza/packages/core/src/runtime/context-renderer.ts",
+        "filePath": "eliza/packages/core/src/runtime/context-renderer.ts",
+        "layer": "Agent Core And Shared Contracts",
+        "complexity": "complex",
+        "degree": {
+          "in": 5,
+          "out": 23,
+          "total": 28,
+          "edgeTypes": {
+            "imports": 7,
+            "contains": 20,
+            "tested_by": 1
+          }
+        },
+        "summary": "context-renderer.ts is a typescript source file in the Milady codebase. It contains 20 functions, 2 imports."
+      },
+      {
+        "id": "file:eliza/packages/ui/src/components/local-inference/LocalInferencePanel.tsx",
+        "filePath": "eliza/packages/ui/src/components/local-inference/LocalInferencePanel.tsx",
+        "layer": "Shared UI And First Run",
+        "complexity": "complex",
+        "degree": {
+          "in": 1,
+          "out": 27,
+          "total": 28,
+          "edgeTypes": {
+            "imports": 23,
+            "contains": 5
+          }
+        },
+        "summary": "LocalInferencePanel.tsx is a typescript source file in the Milady codebase. It contains 5 functions, 22 imports."
+      },
+      {
+        "id": "file:eliza/plugins/plugin-local-inference/native/verify/two_agent_voice_demo.mjs",
+        "filePath": "eliza/plugins/plugin-local-inference/native/verify/two_agent_voice_demo.mjs",
+        "layer": "Plugins Local Inference And App Management",
+        "complexity": "complex",
+        "degree": {
+          "in": 0,
+          "out": 28,
+          "total": 28,
+          "edgeTypes": {
+            "contains": 28
+          }
+        },
+        "summary": "two_agent_voice_demo.mjs is a javascript source file in the Milady codebase. It contains 27 functions, 1 class."
+      },
+      {
+        "id": "file:eliza/packages/ui/src/state/useFirstRunCallbacks.ts",
+        "filePath": "eliza/packages/ui/src/state/useFirstRunCallbacks.ts",
+        "layer": "Shared UI And First Run",
+        "complexity": "complex",
+        "degree": {
+          "in": 1,
+          "out": 26,
+          "total": 27,
+          "edgeTypes": {
+            "imports": 17,
+            "contains": 10
+          }
+        },
+        "summary": "useFirstRunCallbacks.ts is a typescript source file in the Milady codebase. It contains 10 functions, 16 imports."
+      },
+      {
+        "id": "file:eliza/plugins/plugin-local-inference/src/routes/compat-helpers.ts",
+        "filePath": "eliza/plugins/plugin-local-inference/src/routes/compat-helpers.ts",
+        "layer": "Plugins Local Inference And App Management",
+        "complexity": "complex",
+        "degree": {
+          "in": 7,
+          "out": 20,
+          "total": 27,
+          "edgeTypes": {
+            "imports": 9,
+            "contains": 18
+          }
+        },
+        "summary": "compat-helpers.ts is a typescript source file in the Milady codebase. It contains 18 functions, 2 imports."
+      },
+      {
+        "id": "file:eliza/plugins/plugin-local-inference/src/services/registry.ts",
+        "filePath": "eliza/plugins/plugin-local-inference/src/services/registry.ts",
+        "layer": "Plugins Local Inference And App Management",
+        "complexity": "complex",
+        "degree": {
+          "in": 10,
+          "out": 17,
+          "total": 27,
+          "edgeTypes": {
+            "imports": 14,
+            "contains": 12,
+            "tested_by": 1
+          }
+        },
+        "summary": "registry.ts is a typescript source file in the Milady codebase. It contains 12 functions, 4 imports."
+      },
+      {
+        "id": "file:eliza/packages/agent/src/triggers/runtime.ts",
+        "filePath": "eliza/packages/agent/src/triggers/runtime.ts",
+        "layer": "Agent Core And Shared Contracts",
+        "complexity": "complex",
+        "degree": {
+          "in": 5,
+          "out": 21,
+          "total": 26,
+          "edgeTypes": {
+            "imports": 8,
+            "contains": 18
+          }
+        },
+        "summary": "runtime.ts is a typescript source file in the Milady codebase. It contains 18 functions, 3 imports."
+      },
+      {
+        "id": "file:eliza/packages/app-core/platforms/electrobun/remotes/surface/src/web/state.ts",
+        "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/surface/src/web/state.ts",
+        "layer": "Runtime App Core",
+        "complexity": "complex",
+        "degree": {
+          "in": 3,
+          "out": 23,
+          "total": 26,
+          "edgeTypes": {
+            "contains": 22,
+            "imports": 4
+          }
+        },
+        "summary": "state.ts is a typescript source file in the Milady codebase. It contains 22 functions, 1 imports."
+      },
+      {
+        "id": "file:eliza/packages/app-core/platforms/electrobun/scripts/smoke-test.sh",
+        "filePath": "eliza/packages/app-core/platforms/electrobun/scripts/smoke-test.sh",
+        "layer": "Runtime App Core",
+        "complexity": "complex",
+        "degree": {
+          "in": 0,
+          "out": 26,
+          "total": 26,
+          "edgeTypes": {
+            "contains": 26
+          }
+        },
+        "summary": "smoke-test.sh automates a Milady workspace, build, verification, or runtime task."
+      },
+      {
+        "id": "file:eliza/packages/app-core/platforms/electrobun/src/dynamic-views/host.ts",
+        "filePath": "eliza/packages/app-core/platforms/electrobun/src/dynamic-views/host.ts",
+        "layer": "Runtime App Core",
+        "complexity": "complex",
+        "degree": {
+          "in": 4,
+          "out": 22,
+          "total": 26,
+          "edgeTypes": {
+            "contains": 16,
+            "imports": 9,
+            "tested_by": 1
+          }
+        },
+        "summary": "host.ts is a typescript source file in the Milady codebase. It contains 16 functions, 5 imports."
+      }
+    ]
+  }
+}

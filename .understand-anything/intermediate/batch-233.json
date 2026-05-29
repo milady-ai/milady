@@ -1,0 +1,58 @@
+{
+  "batchIndex": 233,
+  "nodes": [
+    {
+      "tags": [
+        "configuration",
+        "local-inference"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/shared/src/local-inference-gpu/profiles/h200.yaml",
+      "type": "config",
+      "name": "h200.yaml",
+      "filePath": "eliza/packages/shared/src/local-inference-gpu/profiles/h200.yaml",
+      "summary": "h200.yaml configures yaml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "yaml; config; 115 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "local-inference"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/shared/src/local-inference-gpu/profiles/rtx-3090.yaml",
+      "type": "config",
+      "name": "rtx-3090.yaml",
+      "filePath": "eliza/packages/shared/src/local-inference-gpu/profiles/rtx-3090.yaml",
+      "summary": "rtx-3090.yaml configures yaml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "yaml; config; 92 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "local-inference"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/shared/src/local-inference-gpu/profiles/rtx-4090.yaml",
+      "type": "config",
+      "name": "rtx-4090.yaml",
+      "filePath": "eliza/packages/shared/src/local-inference-gpu/profiles/rtx-4090.yaml",
+      "summary": "rtx-4090.yaml configures yaml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "yaml; config; 105 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "local-inference"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/shared/src/local-inference-gpu/profiles/rtx-5090.yaml",
+      "type": "config",
+      "name": "rtx-5090.yaml",
+      "filePath": "eliza/packages/shared/src/local-inference-gpu/profiles/rtx-5090.yaml",
+      "summary": "rtx-5090.yaml configures yaml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "yaml; config; 122 lines"
+    }
+  ],
+  "edges": []
+}

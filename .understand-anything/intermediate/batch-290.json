@@ -1,0 +1,3488 @@
+{
+  "batchIndex": 290,
+  "nodes": [
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/bun-riscv64/webkit-patches/0002-cherry-pick-baseline-jit-riscv64.recipe",
+      "type": "file",
+      "name": "0002-cherry-pick-baseline-jit-riscv64.recipe",
+      "filePath": "eliza/packages/app-core/scripts/bun-riscv64/webkit-patches/0002-cherry-pick-baseline-jit-riscv64.recipe",
+      "summary": "0002-cherry-pick-baseline-jit-riscv64.recipe is a recipe source file in the Milady codebase.",
+      "languageNotes": "recipe; code; 40 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/bun-riscv64/webkit-patches/0003-disable-dfg-ftl-on-riscv64.patch",
+      "type": "file",
+      "name": "0003-disable-dfg-ftl-on-riscv64.patch",
+      "filePath": "eliza/packages/app-core/scripts/bun-riscv64/webkit-patches/0003-disable-dfg-ftl-on-riscv64.patch",
+      "summary": "0003-disable-dfg-ftl-on-riscv64.patch is a patch source file in the Milady codebase.",
+      "languageNotes": "patch; code; 60 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/bun-riscv64/webkit-patches/0004-riscv64-do-not-force-wasm-in-c-loop.patch",
+      "type": "file",
+      "name": "0004-riscv64-do-not-force-wasm-in-c-loop.patch",
+      "filePath": "eliza/packages/app-core/scripts/bun-riscv64/webkit-patches/0004-riscv64-do-not-force-wasm-in-c-loop.patch",
+      "summary": "0004-riscv64-do-not-force-wasm-in-c-loop.patch is a patch source file in the Milady codebase.",
+      "languageNotes": "patch; code; 31 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/bun-riscv64/webkit-patches/0005-domjit-effect-allow-no-dfg-c-loop.patch",
+      "type": "file",
+      "name": "0005-domjit-effect-allow-no-dfg-c-loop.patch",
+      "filePath": "eliza/packages/app-core/scripts/bun-riscv64/webkit-patches/0005-domjit-effect-allow-no-dfg-c-loop.patch",
+      "summary": "0005-domjit-effect-allow-no-dfg-c-loop.patch is a patch source file in the Milady codebase.",
+      "languageNotes": "patch; code; 40 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/bun-riscv64/webkit-patches/0006-disable-usewasm-when-webassembly-compiled-out.patch",
+      "type": "file",
+      "name": "0006-disable-usewasm-when-webassembly-compiled-out.patch",
+      "filePath": "eliza/packages/app-core/scripts/bun-riscv64/webkit-patches/0006-disable-usewasm-when-webassembly-compiled-out.patch",
+      "summary": "0006-disable-usewasm-when-webassembly-compiled-out.patch is a patch source file in the Milady codebase.",
+      "languageNotes": "patch; code; 33 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:eliza/packages/app-core/scripts/bun-riscv64/webkit-patches/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "eliza/packages/app-core/scripts/bun-riscv64/webkit-patches/README.md",
+      "summary": "README.md documents eliza/packages/app-core/scripts/bun-riscv64/webkit-patches with 146 lines of reference material.",
+      "languageNotes": "markdown; docs; 146 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs",
+      "type": "file",
+      "name": "check-homepage-public-readiness.mjs",
+      "filePath": "eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs",
+      "summary": "check-homepage-public-readiness.mjs is a javascript source file in the Milady codebase. It contains 13 functions.",
+      "languageNotes": "javascript; code; 353 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:usage",
+      "type": "function",
+      "name": "usage",
+      "filePath": "eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs",
+      "summary": "usage is a function defined in eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:parseArgs",
+      "type": "function",
+      "name": "parseArgs",
+      "filePath": "eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs",
+      "summary": "parseArgs is a function defined in eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:run",
+      "type": "function",
+      "name": "run",
+      "filePath": "eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs",
+      "summary": "run is a function defined in eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:sleepSync",
+      "type": "function",
+      "name": "sleepSync",
+      "filePath": "eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs",
+      "summary": "sleepSync is a function defined in eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:check",
+      "type": "function",
+      "name": "check",
+      "filePath": "eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs",
+      "summary": "check is a function defined in eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:ghJson",
+      "type": "function",
+      "name": "ghJson",
+      "filePath": "eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs",
+      "summary": "ghJson is a function defined in eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:decodeGhContent",
+      "type": "function",
+      "name": "decodeGhContent",
+      "filePath": "eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs",
+      "summary": "decodeGhContent is a function defined in eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:dig",
+      "type": "function",
+      "name": "dig",
+      "filePath": "eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs",
+      "summary": "dig is a function defined in eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:fetchJson",
+      "type": "function",
+      "name": "fetchJson",
+      "filePath": "eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs",
+      "summary": "fetchJson is a function defined in eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:setEquals",
+      "type": "function",
+      "name": "setEquals",
+      "filePath": "eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs",
+      "summary": "setEquals is a function defined in eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:findJsAssets",
+      "type": "function",
+      "name": "findJsAssets",
+      "filePath": "eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs",
+      "summary": "findJsAssets is a function defined in eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:writeEvidence",
+      "type": "function",
+      "name": "writeEvidence",
+      "filePath": "eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs",
+      "summary": "writeEvidence is a function defined in eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs",
+      "summary": "main is a function defined in eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/scripts/check-homepage-release-data.mjs",
+      "type": "file",
+      "name": "check-homepage-release-data.mjs",
+      "filePath": "eliza/packages/app-core/scripts/check-homepage-release-data.mjs",
+      "summary": "check-homepage-release-data.mjs is a javascript source file in the Milady codebase. It contains 2 functions.",
+      "languageNotes": "javascript; code; 110 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-homepage-release-data.mjs:parseGeneratedModule",
+      "type": "function",
+      "name": "parseGeneratedModule",
+      "filePath": "eliza/packages/app-core/scripts/check-homepage-release-data.mjs",
+      "summary": "parseGeneratedModule is a function defined in eliza/packages/app-core/scripts/check-homepage-release-data.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-homepage-release-data.mjs:fail",
+      "type": "function",
+      "name": "fail",
+      "filePath": "eliza/packages/app-core/scripts/check-homepage-release-data.mjs",
+      "summary": "fail is a function defined in eliza/packages/app-core/scripts/check-homepage-release-data.mjs."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/scripts/check-i18n.mjs",
+      "type": "file",
+      "name": "check-i18n.mjs",
+      "filePath": "eliza/packages/app-core/scripts/check-i18n.mjs",
+      "summary": "check-i18n.mjs is a javascript source file in the Milady codebase. It contains 9 functions.",
+      "languageNotes": "javascript; code; 329 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-i18n.mjs:walk",
+      "type": "function",
+      "name": "walk",
+      "filePath": "eliza/packages/app-core/scripts/check-i18n.mjs",
+      "summary": "walk is a function defined in eliza/packages/app-core/scripts/check-i18n.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-i18n.mjs:lineOf",
+      "type": "function",
+      "name": "lineOf",
+      "filePath": "eliza/packages/app-core/scripts/check-i18n.mjs",
+      "summary": "lineOf is a function defined in eliza/packages/app-core/scripts/check-i18n.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-i18n.mjs:relpath",
+      "type": "function",
+      "name": "relpath",
+      "filePath": "eliza/packages/app-core/scripts/check-i18n.mjs",
+      "summary": "relpath is a function defined in eliza/packages/app-core/scripts/check-i18n.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-i18n.mjs:scanSources",
+      "type": "function",
+      "name": "scanSources",
+      "filePath": "eliza/packages/app-core/scripts/check-i18n.mjs",
+      "summary": "scanSources is a function defined in eliza/packages/app-core/scripts/check-i18n.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-i18n.mjs:loadLocales",
+      "type": "function",
+      "name": "loadLocales",
+      "filePath": "eliza/packages/app-core/scripts/check-i18n.mjs",
+      "summary": "loadLocales is a function defined in eliza/packages/app-core/scripts/check-i18n.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-i18n.mjs:loadAllowlist",
+      "type": "function",
+      "name": "loadAllowlist",
+      "filePath": "eliza/packages/app-core/scripts/check-i18n.mjs",
+      "summary": "loadAllowlist is a function defined in eliza/packages/app-core/scripts/check-i18n.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-i18n.mjs:isCoveredByPrefixes",
+      "type": "function",
+      "name": "isCoveredByPrefixes",
+      "filePath": "eliza/packages/app-core/scripts/check-i18n.mjs",
+      "summary": "isCoveredByPrefixes is a function defined in eliza/packages/app-core/scripts/check-i18n.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-i18n.mjs:fmtSites",
+      "type": "function",
+      "name": "fmtSites",
+      "filePath": "eliza/packages/app-core/scripts/check-i18n.mjs",
+      "summary": "fmtSites is a function defined in eliza/packages/app-core/scripts/check-i18n.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/app-core/scripts/check-i18n.mjs:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "eliza/packages/app-core/scripts/check-i18n.mjs",
+      "summary": "main is a function defined in eliza/packages/app-core/scripts/check-i18n.mjs."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/scripts/check-secret-hygiene.mjs",
+      "type": "file",
+      "name": "check-secret-hygiene.mjs",
+      "filePath": "eliza/packages/app-core/scripts/check-secret-hygiene.mjs",
+      "summary": "check-secret-hygiene.mjs is a javascript source file in the Milady codebase. It contains 11 functions.",
+      "languageNotes": "javascript; code; 344 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-secret-hygiene.mjs:discoverTrackedRepos",
+      "type": "function",
+      "name": "discoverTrackedRepos",
+      "filePath": "eliza/packages/app-core/scripts/check-secret-hygiene.mjs",
+      "summary": "discoverTrackedRepos is a function defined in eliza/packages/app-core/scripts/check-secret-hygiene.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-secret-hygiene.mjs:listTrackedFiles",
+      "type": "function",
+      "name": "listTrackedFiles",
+      "filePath": "eliza/packages/app-core/scripts/check-secret-hygiene.mjs",
+      "summary": "listTrackedFiles is a function defined in eliza/packages/app-core/scripts/check-secret-hygiene.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-secret-hygiene.mjs:isDisallowedTrackedPath",
+      "type": "function",
+      "name": "isDisallowedTrackedPath",
+      "filePath": "eliza/packages/app-core/scripts/check-secret-hygiene.mjs",
+      "summary": "isDisallowedTrackedPath is a function defined in eliza/packages/app-core/scripts/check-secret-hygiene.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-secret-hygiene.mjs:collectLocalSecretEntries",
+      "type": "function",
+      "name": "collectLocalSecretEntries",
+      "filePath": "eliza/packages/app-core/scripts/check-secret-hygiene.mjs",
+      "summary": "collectLocalSecretEntries is a function defined in eliza/packages/app-core/scripts/check-secret-hygiene.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-secret-hygiene.mjs:findLocalEnvFiles",
+      "type": "function",
+      "name": "findLocalEnvFiles",
+      "filePath": "eliza/packages/app-core/scripts/check-secret-hygiene.mjs",
+      "summary": "findLocalEnvFiles is a function defined in eliza/packages/app-core/scripts/check-secret-hygiene.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-secret-hygiene.mjs:parseEnvFile",
+      "type": "function",
+      "name": "parseEnvFile",
+      "filePath": "eliza/packages/app-core/scripts/check-secret-hygiene.mjs",
+      "summary": "parseEnvFile is a function defined in eliza/packages/app-core/scripts/check-secret-hygiene.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-secret-hygiene.mjs:stripWrappingQuotes",
+      "type": "function",
+      "name": "stripWrappingQuotes",
+      "filePath": "eliza/packages/app-core/scripts/check-secret-hygiene.mjs",
+      "summary": "stripWrappingQuotes is a function defined in eliza/packages/app-core/scripts/check-secret-hygiene.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-secret-hygiene.mjs:looksLikeSecret",
+      "type": "function",
+      "name": "looksLikeSecret",
+      "filePath": "eliza/packages/app-core/scripts/check-secret-hygiene.mjs",
+      "summary": "looksLikeSecret is a function defined in eliza/packages/app-core/scripts/check-secret-hygiene.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-secret-hygiene.mjs:dedupeEntries",
+      "type": "function",
+      "name": "dedupeEntries",
+      "filePath": "eliza/packages/app-core/scripts/check-secret-hygiene.mjs",
+      "summary": "dedupeEntries is a function defined in eliza/packages/app-core/scripts/check-secret-hygiene.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-secret-hygiene.mjs:loadTrackedFileBuffers",
+      "type": "function",
+      "name": "loadTrackedFileBuffers",
+      "filePath": "eliza/packages/app-core/scripts/check-secret-hygiene.mjs",
+      "summary": "loadTrackedFileBuffers is a function defined in eliza/packages/app-core/scripts/check-secret-hygiene.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-secret-hygiene.mjs:toWorkspacePath",
+      "type": "function",
+      "name": "toWorkspacePath",
+      "filePath": "eliza/packages/app-core/scripts/check-secret-hygiene.mjs",
+      "summary": "toWorkspacePath is a function defined in eliza/packages/app-core/scripts/check-secret-hygiene.mjs."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs",
+      "type": "file",
+      "name": "check-sms-gateway-completion-audit.mjs",
+      "filePath": "eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs",
+      "summary": "check-sms-gateway-completion-audit.mjs is a javascript source file in the Milady codebase. It contains 9 functions.",
+      "languageNotes": "javascript; code; 428 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs:usage",
+      "type": "function",
+      "name": "usage",
+      "filePath": "eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs",
+      "summary": "usage is a function defined in eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs:parseArgs",
+      "type": "function",
+      "name": "parseArgs",
+      "filePath": "eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs",
+      "summary": "parseArgs is a function defined in eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs:createBunTestCwd",
+      "type": "function",
+      "name": "createBunTestCwd",
+      "filePath": "eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs",
+      "summary": "createBunTestCwd is a function defined in eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs:run",
+      "type": "function",
+      "name": "run",
+      "filePath": "eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs",
+      "summary": "run is a function defined in eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs:oneLine",
+      "type": "function",
+      "name": "oneLine",
+      "filePath": "eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs",
+      "summary": "oneLine is a function defined in eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs:redactOutput",
+      "type": "function",
+      "name": "redactOutput",
+      "filePath": "eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs",
+      "summary": "redactOutput is a function defined in eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs:summarizeEvidenceJson",
+      "type": "function",
+      "name": "summarizeEvidenceJson",
+      "filePath": "eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs",
+      "summary": "summarizeEvidenceJson is a function defined in eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs:readSupplementalEvidence",
+      "type": "function",
+      "name": "readSupplementalEvidence",
+      "filePath": "eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs",
+      "summary": "readSupplementalEvidence is a function defined in eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs:writeEvidence",
+      "type": "function",
+      "name": "writeEvidence",
+      "filePath": "eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs",
+      "summary": "writeEvidence is a function defined in eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs",
+      "type": "file",
+      "name": "check-sms-gateway-readiness.mjs",
+      "filePath": "eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs",
+      "summary": "check-sms-gateway-readiness.mjs is a javascript source file in the Milady codebase. It contains 12 functions.",
+      "languageNotes": "javascript; code; 266 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:run",
+      "type": "function",
+      "name": "run",
+      "filePath": "eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs",
+      "summary": "run is a function defined in eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:curlText",
+      "type": "function",
+      "name": "curlText",
+      "filePath": "eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs",
+      "summary": "curlText is a function defined in eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printSection",
+      "type": "function",
+      "name": "printSection",
+      "filePath": "eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs",
+      "summary": "printSection is a function defined in eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printGateSection",
+      "type": "function",
+      "name": "printGateSection",
+      "filePath": "eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs",
+      "summary": "printGateSection is a function defined in eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:usbInventoryFromIoreg",
+      "type": "function",
+      "name": "usbInventoryFromIoreg",
+      "filePath": "eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs",
+      "summary": "usbInventoryFromIoreg is a function defined in eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printHostUsbState",
+      "type": "function",
+      "name": "printHostUsbState",
+      "filePath": "eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs",
+      "summary": "printHostUsbState is a function defined in eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:fetchDeployedGetStartedChunk",
+      "type": "function",
+      "name": "fetchDeployedGetStartedChunk",
+      "filePath": "eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs",
+      "summary": "fetchDeployedGetStartedChunk is a function defined in eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printOnboardingContinuationState",
+      "type": "function",
+      "name": "printOnboardingContinuationState",
+      "filePath": "eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs",
+      "summary": "printOnboardingContinuationState is a function defined in eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printAndroidState",
+      "type": "function",
+      "name": "printAndroidState",
+      "filePath": "eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs",
+      "summary": "printAndroidState is a function defined in eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printBridgeState",
+      "type": "function",
+      "name": "printBridgeState",
+      "filePath": "eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs",
+      "summary": "printBridgeState is a function defined in eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:createRoutingContractCwd",
+      "type": "function",
+      "name": "createRoutingContractCwd",
+      "filePath": "eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs",
+      "summary": "createRoutingContractCwd is a function defined in eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printRoutingContractState",
+      "type": "function",
+      "name": "printRoutingContractState",
+      "filePath": "eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs",
+      "summary": "printRoutingContractState is a function defined in eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/scripts/container-entrypoint.mjs",
+      "type": "file",
+      "name": "container-entrypoint.mjs",
+      "filePath": "eliza/packages/app-core/scripts/container-entrypoint.mjs",
+      "summary": "container-entrypoint.mjs is a javascript source file in the Milady codebase. It contains 4 functions.",
+      "languageNotes": "javascript; code; 101 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/container-entrypoint.mjs:normalizeContainerMode",
+      "type": "function",
+      "name": "normalizeContainerMode",
+      "filePath": "eliza/packages/app-core/scripts/container-entrypoint.mjs",
+      "summary": "normalizeContainerMode is a function defined in eliza/packages/app-core/scripts/container-entrypoint.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/container-entrypoint.mjs:resolveContainerLaunch",
+      "type": "function",
+      "name": "resolveContainerLaunch",
+      "filePath": "eliza/packages/app-core/scripts/container-entrypoint.mjs",
+      "summary": "resolveContainerLaunch is a function defined in eliza/packages/app-core/scripts/container-entrypoint.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/container-entrypoint.mjs:spawnContainerProcess",
+      "type": "function",
+      "name": "spawnContainerProcess",
+      "filePath": "eliza/packages/app-core/scripts/container-entrypoint.mjs",
+      "summary": "spawnContainerProcess is a function defined in eliza/packages/app-core/scripts/container-entrypoint.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/container-entrypoint.mjs:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "eliza/packages/app-core/scripts/container-entrypoint.mjs",
+      "summary": "main is a function defined in eliza/packages/app-core/scripts/container-entrypoint.mjs."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs",
+      "type": "file",
+      "name": "continue-sms-gateway-work.mjs",
+      "filePath": "eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs",
+      "summary": "continue-sms-gateway-work.mjs is a javascript source file in the Milady codebase. It contains 5 functions.",
+      "languageNotes": "javascript; code; 121 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:usage",
+      "type": "function",
+      "name": "usage",
+      "filePath": "eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs",
+      "summary": "usage is a function defined in eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:parseArgs",
+      "type": "function",
+      "name": "parseArgs",
+      "filePath": "eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs",
+      "summary": "parseArgs is a function defined in eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:runStep",
+      "type": "function",
+      "name": "runStep",
+      "filePath": "eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs",
+      "summary": "runStep is a function defined in eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:script",
+      "type": "function",
+      "name": "script",
+      "filePath": "eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs",
+      "summary": "script is a function defined in eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs",
+      "summary": "main is a function defined in eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/scripts/coordinator-cross-platform-review.mjs",
+      "type": "file",
+      "name": "coordinator-cross-platform-review.mjs",
+      "filePath": "eliza/packages/app-core/scripts/coordinator-cross-platform-review.mjs",
+      "summary": "coordinator-cross-platform-review.mjs is a javascript source file in the Milady codebase. It contains 2 functions.",
+      "languageNotes": "javascript; code; 192 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/coordinator-cross-platform-review.mjs:runCommand",
+      "type": "function",
+      "name": "runCommand",
+      "filePath": "eliza/packages/app-core/scripts/coordinator-cross-platform-review.mjs",
+      "summary": "runCommand is a function defined in eliza/packages/app-core/scripts/coordinator-cross-platform-review.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/coordinator-cross-platform-review.mjs:writeArtifact",
+      "type": "function",
+      "name": "writeArtifact",
+      "filePath": "eliza/packages/app-core/scripts/coordinator-cross-platform-review.mjs",
+      "summary": "writeArtifact is a function defined in eliza/packages/app-core/scripts/coordinator-cross-platform-review.mjs."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/copy-package-assets.mjs",
+      "type": "file",
+      "name": "copy-package-assets.mjs",
+      "filePath": "eliza/packages/app-core/scripts/copy-package-assets.mjs",
+      "summary": "copy-package-assets.mjs is a javascript source file in the Milady codebase.",
+      "languageNotes": "javascript; code; 31 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/coverage-policy.d.mts",
+      "type": "file",
+      "name": "coverage-policy.d.mts",
+      "filePath": "eliza/packages/app-core/scripts/coverage-policy.d.mts",
+      "summary": "coverage-policy.d.mts is a mts source file in the Milady codebase.",
+      "languageNotes": "mts; code; 16 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/coverage-policy.mjs",
+      "type": "file",
+      "name": "coverage-policy.mjs",
+      "filePath": "eliza/packages/app-core/scripts/coverage-policy.mjs",
+      "summary": "coverage-policy.mjs is a javascript source file in the Milady codebase. It contains 2 functions.",
+      "languageNotes": "javascript; code; 38 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/coverage-policy.mjs:formatCompactCoverageThresholds",
+      "type": "function",
+      "name": "formatCompactCoverageThresholds",
+      "filePath": "eliza/packages/app-core/scripts/coverage-policy.mjs",
+      "summary": "formatCompactCoverageThresholds is a function defined in eliza/packages/app-core/scripts/coverage-policy.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/coverage-policy.mjs:formatCoverageThresholdSentence",
+      "type": "function",
+      "name": "formatCoverageThresholdSentence",
+      "filePath": "eliza/packages/app-core/scripts/coverage-policy.mjs",
+      "summary": "formatCoverageThresholdSentence is a function defined in eliza/packages/app-core/scripts/coverage-policy.mjs."
+    },
+    {
+      "tags": [
+        "api",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/deploy-cloud-api-production-gateway.mjs",
+      "type": "file",
+      "name": "deploy-cloud-api-production-gateway.mjs",
+      "filePath": "eliza/packages/app-core/scripts/deploy-cloud-api-production-gateway.mjs",
+      "summary": "deploy-cloud-api-production-gateway.mjs is a javascript source file in the Milady codebase. It contains 2 functions.",
+      "languageNotes": "javascript; code; 52 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/deploy-cloud-api-production-gateway.mjs:run",
+      "type": "function",
+      "name": "run",
+      "filePath": "eliza/packages/app-core/scripts/deploy-cloud-api-production-gateway.mjs",
+      "summary": "run is a function defined in eliza/packages/app-core/scripts/deploy-cloud-api-production-gateway.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/deploy-cloud-api-production-gateway.mjs:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "eliza/packages/app-core/scripts/deploy-cloud-api-production-gateway.mjs",
+      "summary": "main is a function defined in eliza/packages/app-core/scripts/deploy-cloud-api-production-gateway.mjs."
+    },
+    {
+      "tags": [
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "type": "file",
+      "name": "eliza_llama_shim.c",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "eliza_llama_shim.c is a c source file in the Milady codebase. It contains 37 functions, 2 classes, 1 imports.",
+      "languageNotes": "c; code; 670 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_model_params_free",
+      "type": "function",
+      "name": "eliza_llama_model_params_free",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "eliza_llama_model_params_free is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_model_params_set_n_gpu_layers",
+      "type": "function",
+      "name": "eliza_llama_model_params_set_n_gpu_layers",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "eliza_llama_model_params_set_n_gpu_layers is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_model_params_set_use_mmap",
+      "type": "function",
+      "name": "eliza_llama_model_params_set_use_mmap",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "eliza_llama_model_params_set_use_mmap is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_model_params_set_use_mlock",
+      "type": "function",
+      "name": "eliza_llama_model_params_set_use_mlock",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "eliza_llama_model_params_set_use_mlock is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_model_params_set_vocab_only",
+      "type": "function",
+      "name": "eliza_llama_model_params_set_vocab_only",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "eliza_llama_model_params_set_vocab_only is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_model_params_set_main_gpu",
+      "type": "function",
+      "name": "eliza_llama_model_params_set_main_gpu",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "eliza_llama_model_params_set_main_gpu is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_context_params_free",
+      "type": "function",
+      "name": "eliza_llama_context_params_free",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "eliza_llama_context_params_free is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_context_params_set_n_ctx",
+      "type": "function",
+      "name": "eliza_llama_context_params_set_n_ctx",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "eliza_llama_context_params_set_n_ctx is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_context_params_set_n_batch",
+      "type": "function",
+      "name": "eliza_llama_context_params_set_n_batch",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "eliza_llama_context_params_set_n_batch is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_context_params_set_n_ubatch",
+      "type": "function",
+      "name": "eliza_llama_context_params_set_n_ubatch",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "eliza_llama_context_params_set_n_ubatch is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_context_params_set_n_threads",
+      "type": "function",
+      "name": "eliza_llama_context_params_set_n_threads",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "eliza_llama_context_params_set_n_threads is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_context_params_set_n_threads_batch",
+      "type": "function",
+      "name": "eliza_llama_context_params_set_n_threads_batch",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "eliza_llama_context_params_set_n_threads_batch is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_context_params_set_embeddings",
+      "type": "function",
+      "name": "eliza_llama_context_params_set_embeddings",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "eliza_llama_context_params_set_embeddings is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_context_params_set_pooling_type",
+      "type": "function",
+      "name": "eliza_llama_context_params_set_pooling_type",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "eliza_llama_context_params_set_pooling_type is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_context_params_set_type_k",
+      "type": "function",
+      "name": "eliza_llama_context_params_set_type_k",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "eliza_llama_context_params_set_type_k is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_context_params_set_type_v",
+      "type": "function",
+      "name": "eliza_llama_context_params_set_type_v",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "eliza_llama_context_params_set_type_v is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_context_params_set_offload_kqv",
+      "type": "function",
+      "name": "eliza_llama_context_params_set_offload_kqv",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "eliza_llama_context_params_set_offload_kqv is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_sampler_chain_params_free",
+      "type": "function",
+      "name": "eliza_llama_sampler_chain_params_free",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "eliza_llama_sampler_chain_params_free is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_batch_free",
+      "type": "function",
+      "name": "eliza_llama_batch_free",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "eliza_llama_batch_free is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_decode",
+      "type": "function",
+      "name": "eliza_llama_decode",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "eliza_llama_decode is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza__silent_log",
+      "type": "function",
+      "name": "eliza__silent_log",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "eliza__silent_log is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_log_silence",
+      "type": "function",
+      "name": "eliza_llama_log_silence",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "eliza_llama_log_silence is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_context_attach_drafter",
+      "type": "function",
+      "name": "eliza_llama_context_attach_drafter",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "eliza_llama_context_attach_drafter is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_context_set_spec_mode",
+      "type": "function",
+      "name": "eliza_llama_context_set_spec_mode",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "eliza_llama_context_set_spec_mode is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_decode_unified",
+      "type": "function",
+      "name": "eliza_llama_decode_unified",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "eliza_llama_decode_unified is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_dflash_stats",
+      "type": "function",
+      "name": "eliza_llama_dflash_stats",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "eliza_llama_dflash_stats is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:token_tree_free_data",
+      "type": "function",
+      "name": "token_tree_free_data",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "token_tree_free_data is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:trie_child_for_token",
+      "type": "function",
+      "name": "trie_child_for_token",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "trie_child_for_token is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:token_tree_sampler_apply",
+      "type": "function",
+      "name": "token_tree_sampler_apply",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "token_tree_sampler_apply is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:token_tree_sampler_accept",
+      "type": "function",
+      "name": "token_tree_sampler_accept",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "token_tree_sampler_accept is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:token_tree_sampler_reset",
+      "type": "function",
+      "name": "token_tree_sampler_reset",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "token_tree_sampler_reset is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:token_tree_sampler_free",
+      "type": "function",
+      "name": "token_tree_sampler_free",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "token_tree_sampler_free is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:prefill_plan_free_state",
+      "type": "function",
+      "name": "prefill_plan_free_state",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "prefill_plan_free_state is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:prefill_plan_sampler_apply",
+      "type": "function",
+      "name": "prefill_plan_sampler_apply",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "prefill_plan_sampler_apply is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:prefill_plan_sampler_accept",
+      "type": "function",
+      "name": "prefill_plan_sampler_accept",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "prefill_plan_sampler_accept is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:prefill_plan_sampler_reset",
+      "type": "function",
+      "name": "prefill_plan_sampler_reset",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "prefill_plan_sampler_reset is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "function",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:prefill_plan_sampler_free",
+      "type": "function",
+      "name": "prefill_plan_sampler_free",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "prefill_plan_sampler_free is a function defined in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "class",
+        "c"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:llama_sampler_i",
+      "type": "class",
+      "name": "llama_sampler_i",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "summary": "llama_sampler_i is a class or type declared in eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.h",
+      "type": "file",
+      "name": "eliza_llama_shim.h",
+      "filePath": "eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.h",
+      "summary": "eliza_llama_shim.h is a c source file in the Milady codebase.",
+      "languageNotes": "c; code; 239 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/scripts/desktop-stack-status.mjs",
+      "type": "file",
+      "name": "desktop-stack-status.mjs",
+      "filePath": "eliza/packages/app-core/scripts/desktop-stack-status.mjs",
+      "summary": "desktop-stack-status.mjs is a javascript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "javascript; code; 80 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/scripts/dev-win.mjs",
+      "type": "file",
+      "name": "dev-win.mjs",
+      "filePath": "eliza/packages/app-core/scripts/dev-win.mjs",
+      "summary": "dev-win.mjs is a javascript source file in the Milady codebase.",
+      "languageNotes": "javascript; code; 25 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs",
+      "type": "file",
+      "name": "disable-local-eliza-workspace.mjs",
+      "filePath": "eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs",
+      "summary": "disable-local-eliza-workspace.mjs is a javascript source file in the Milady codebase. It contains 9 functions.",
+      "languageNotes": "javascript; code; 455 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:isExactRegistryVersion",
+      "type": "function",
+      "name": "isExactRegistryVersion",
+      "filePath": "eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs",
+      "summary": "isExactRegistryVersion is a function defined in eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:isWorkspaceProtocolSpecifier",
+      "type": "function",
+      "name": "isWorkspaceProtocolSpecifier",
+      "filePath": "eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs",
+      "summary": "isWorkspaceProtocolSpecifier is a function defined in eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:readPackageJson",
+      "type": "function",
+      "name": "readPackageJson",
+      "filePath": "eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs",
+      "summary": "readPackageJson is a function defined in eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:resolvePinnedCoreVersion",
+      "type": "function",
+      "name": "resolvePinnedCoreVersion",
+      "filePath": "eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs",
+      "summary": "resolvePinnedCoreVersion is a function defined in eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:writePackageJson",
+      "type": "function",
+      "name": "writePackageJson",
+      "filePath": "eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs",
+      "summary": "writePackageJson is a function defined in eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:expandGlob",
+      "type": "function",
+      "name": "expandGlob",
+      "filePath": "eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs",
+      "summary": "expandGlob is a function defined in eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:resolvePinnedWorkspaceVersions",
+      "type": "function",
+      "name": "resolvePinnedWorkspaceVersions",
+      "filePath": "eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs",
+      "summary": "resolvePinnedWorkspaceVersions is a function defined in eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:rewriteWorkspaceDependencySpecifiers",
+      "type": "function",
+      "name": "rewriteWorkspaceDependencySpecifiers",
+      "filePath": "eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs",
+      "summary": "rewriteWorkspaceDependencySpecifiers is a function defined in eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:disableLocalElizaWorkspace",
+      "type": "function",
+      "name": "disableLocalElizaWorkspace",
+      "filePath": "eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs",
+      "summary": "disableLocalElizaWorkspace is a function defined in eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/scripts/docker-runtime-review.mjs",
+      "type": "file",
+      "name": "docker-runtime-review.mjs",
+      "filePath": "eliza/packages/app-core/scripts/docker-runtime-review.mjs",
+      "summary": "docker-runtime-review.mjs is a javascript source file in the Milady codebase. It contains 4 functions.",
+      "languageNotes": "javascript; code; 230 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/docker-runtime-review.mjs:findDockerBin",
+      "type": "function",
+      "name": "findDockerBin",
+      "filePath": "eliza/packages/app-core/scripts/docker-runtime-review.mjs",
+      "summary": "findDockerBin is a function defined in eliza/packages/app-core/scripts/docker-runtime-review.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/docker-runtime-review.mjs:runCommand",
+      "type": "function",
+      "name": "runCommand",
+      "filePath": "eliza/packages/app-core/scripts/docker-runtime-review.mjs",
+      "summary": "runCommand is a function defined in eliza/packages/app-core/scripts/docker-runtime-review.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/docker-runtime-review.mjs:writeArtifact",
+      "type": "function",
+      "name": "writeArtifact",
+      "filePath": "eliza/packages/app-core/scripts/docker-runtime-review.mjs",
+      "summary": "writeArtifact is a function defined in eliza/packages/app-core/scripts/docker-runtime-review.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/docker-runtime-review.mjs:summarize",
+      "type": "function",
+      "name": "summarize",
+      "filePath": "eliza/packages/app-core/scripts/docker-runtime-review.mjs",
+      "summary": "summarize is a function defined in eliza/packages/app-core/scripts/docker-runtime-review.mjs."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:usage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:parseArgs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:run",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:sleepSync",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:check",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:ghJson",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:decodeGhContent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:dig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:fetchJson",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:setEquals",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:findJsAssets",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:writeEvidence",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:parseArgs",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:usage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:parseArgs",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:usage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:ghJson",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:ghJson",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:sleepSync",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:decodeGhContent",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:ghJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:dig",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:fetchJson",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:findJsAssets",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:ghJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:parseArgs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:ghJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:check",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:check",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:decodeGhContent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:check",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:check",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:findJsAssets",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:decodeGhContent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:check",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:check",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:dig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:fetchJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:check",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:check",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:check",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:dig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:check",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:setEquals",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:dig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:check",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:writeEvidence",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-public-readiness.mjs:writeEvidence",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-homepage-release-data.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-release-data.mjs:parseGeneratedModule",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-homepage-release-data.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-homepage-release-data.mjs:fail",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-i18n.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-i18n.mjs:walk",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-i18n.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-i18n.mjs:lineOf",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-i18n.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-i18n.mjs:relpath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-i18n.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-i18n.mjs:scanSources",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-i18n.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-i18n.mjs:loadLocales",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-i18n.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-i18n.mjs:loadAllowlist",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-i18n.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-i18n.mjs:isCoveredByPrefixes",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-i18n.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-i18n.mjs:fmtSites",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-i18n.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-i18n.mjs:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-i18n.mjs:scanSources",
+      "target": "function:eliza/packages/app-core/scripts/check-i18n.mjs:walk",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-i18n.mjs:scanSources",
+      "target": "function:eliza/packages/app-core/scripts/check-i18n.mjs:lineOf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-i18n.mjs:scanSources",
+      "target": "function:eliza/packages/app-core/scripts/check-i18n.mjs:lineOf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-i18n.mjs:scanSources",
+      "target": "function:eliza/packages/app-core/scripts/check-i18n.mjs:lineOf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-i18n.mjs:scanSources",
+      "target": "function:eliza/packages/app-core/scripts/check-i18n.mjs:lineOf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-i18n.mjs:fmtSites",
+      "target": "function:eliza/packages/app-core/scripts/check-i18n.mjs:relpath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-i18n.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/check-i18n.mjs:scanSources",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-i18n.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/check-i18n.mjs:loadLocales",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-i18n.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/check-i18n.mjs:loadAllowlist",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-i18n.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/check-i18n.mjs:fmtSites",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-i18n.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/check-i18n.mjs:isCoveredByPrefixes",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-i18n.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/check-i18n.mjs:relpath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-i18n.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/check-i18n.mjs:relpath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-secret-hygiene.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-secret-hygiene.mjs:discoverTrackedRepos",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-secret-hygiene.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-secret-hygiene.mjs:listTrackedFiles",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-secret-hygiene.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-secret-hygiene.mjs:isDisallowedTrackedPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-secret-hygiene.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-secret-hygiene.mjs:collectLocalSecretEntries",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-secret-hygiene.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-secret-hygiene.mjs:findLocalEnvFiles",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-secret-hygiene.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-secret-hygiene.mjs:parseEnvFile",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-secret-hygiene.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-secret-hygiene.mjs:stripWrappingQuotes",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-secret-hygiene.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-secret-hygiene.mjs:looksLikeSecret",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-secret-hygiene.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-secret-hygiene.mjs:dedupeEntries",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-secret-hygiene.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-secret-hygiene.mjs:loadTrackedFileBuffers",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-secret-hygiene.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-secret-hygiene.mjs:toWorkspacePath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-secret-hygiene.mjs:collectLocalSecretEntries",
+      "target": "function:eliza/packages/app-core/scripts/check-secret-hygiene.mjs:findLocalEnvFiles",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-secret-hygiene.mjs:collectLocalSecretEntries",
+      "target": "function:eliza/packages/app-core/scripts/check-secret-hygiene.mjs:parseEnvFile",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-secret-hygiene.mjs:collectLocalSecretEntries",
+      "target": "function:eliza/packages/app-core/scripts/check-secret-hygiene.mjs:looksLikeSecret",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-secret-hygiene.mjs:collectLocalSecretEntries",
+      "target": "function:eliza/packages/app-core/scripts/check-secret-hygiene.mjs:dedupeEntries",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-secret-hygiene.mjs:parseEnvFile",
+      "target": "function:eliza/packages/app-core/scripts/check-secret-hygiene.mjs:stripWrappingQuotes",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-secret-hygiene.mjs:loadTrackedFileBuffers",
+      "target": "function:eliza/packages/app-core/scripts/check-secret-hygiene.mjs:isDisallowedTrackedPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-secret-hygiene.mjs:loadTrackedFileBuffers",
+      "target": "function:eliza/packages/app-core/scripts/check-secret-hygiene.mjs:toWorkspacePath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs:usage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs:parseArgs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs:createBunTestCwd",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs:run",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs:oneLine",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs:redactOutput",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs:summarizeEvidenceJson",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs:readSupplementalEvidence",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs:writeEvidence",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs:parseArgs",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs:usage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs:parseArgs",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs:usage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs:redactOutput",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs:oneLine",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs:readSupplementalEvidence",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-completion-audit.mjs:summarizeEvidenceJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:run",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:curlText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printSection",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printGateSection",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:usbInventoryFromIoreg",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printHostUsbState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:fetchDeployedGetStartedChunk",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printOnboardingContinuationState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printAndroidState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printBridgeState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:createRoutingContractCwd",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printRoutingContractState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:curlText",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printGateSection",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printSection",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:usbInventoryFromIoreg",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printHostUsbState",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:usbInventoryFromIoreg",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printHostUsbState",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printSection",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:fetchDeployedGetStartedChunk",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:curlText",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:fetchDeployedGetStartedChunk",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:curlText",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printOnboardingContinuationState",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printOnboardingContinuationState",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printSection",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printOnboardingContinuationState",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:fetchDeployedGetStartedChunk",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printOnboardingContinuationState",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printSection",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printAndroidState",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printGateSection",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printAndroidState",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printAndroidState",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printSection",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printAndroidState",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printAndroidState",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printHostUsbState",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printBridgeState",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printGateSection",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printBridgeState",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printBridgeState",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printSection",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printBridgeState",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printRoutingContractState",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:createRoutingContractCwd",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printRoutingContractState",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printSection",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:printRoutingContractState",
+      "target": "function:eliza/packages/app-core/scripts/check-sms-gateway-readiness.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/container-entrypoint.mjs",
+      "target": "function:eliza/packages/app-core/scripts/container-entrypoint.mjs:normalizeContainerMode",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/container-entrypoint.mjs",
+      "target": "function:eliza/packages/app-core/scripts/container-entrypoint.mjs:resolveContainerLaunch",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/container-entrypoint.mjs",
+      "target": "function:eliza/packages/app-core/scripts/container-entrypoint.mjs:spawnContainerProcess",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/container-entrypoint.mjs",
+      "target": "function:eliza/packages/app-core/scripts/container-entrypoint.mjs:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/container-entrypoint.mjs:resolveContainerLaunch",
+      "target": "function:eliza/packages/app-core/scripts/container-entrypoint.mjs:normalizeContainerMode",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/container-entrypoint.mjs:spawnContainerProcess",
+      "target": "function:eliza/packages/app-core/scripts/container-entrypoint.mjs:resolveContainerLaunch",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/container-entrypoint.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/container-entrypoint.mjs:spawnContainerProcess",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs",
+      "target": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:usage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs",
+      "target": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:parseArgs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs",
+      "target": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:runStep",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs",
+      "target": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:script",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs",
+      "target": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:parseArgs",
+      "target": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:usage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:parseArgs",
+      "target": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:usage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:parseArgs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:runStep",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:script",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:runStep",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:script",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:runStep",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:script",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:runStep",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:script",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:runStep",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:script",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:runStep",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:script",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:runStep",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/continue-sms-gateway-work.mjs:script",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/coordinator-cross-platform-review.mjs",
+      "target": "function:eliza/packages/app-core/scripts/coordinator-cross-platform-review.mjs:runCommand",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/coordinator-cross-platform-review.mjs",
+      "target": "function:eliza/packages/app-core/scripts/coordinator-cross-platform-review.mjs:writeArtifact",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/coverage-policy.mjs",
+      "target": "function:eliza/packages/app-core/scripts/coverage-policy.mjs:formatCompactCoverageThresholds",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/coverage-policy.mjs",
+      "target": "function:eliza/packages/app-core/scripts/coverage-policy.mjs:formatCoverageThresholdSentence",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/deploy-cloud-api-production-gateway.mjs",
+      "target": "function:eliza/packages/app-core/scripts/deploy-cloud-api-production-gateway.mjs:run",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/deploy-cloud-api-production-gateway.mjs",
+      "target": "function:eliza/packages/app-core/scripts/deploy-cloud-api-production-gateway.mjs:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/deploy-cloud-api-production-gateway.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/deploy-cloud-api-production-gateway.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/deploy-cloud-api-production-gateway.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/deploy-cloud-api-production-gateway.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/deploy-cloud-api-production-gateway.mjs:main",
+      "target": "function:eliza/packages/app-core/scripts/deploy-cloud-api-production-gateway.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_model_params_free",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_model_params_set_n_gpu_layers",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_model_params_set_use_mmap",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_model_params_set_use_mlock",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_model_params_set_vocab_only",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_model_params_set_main_gpu",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_context_params_free",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_context_params_set_n_ctx",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_context_params_set_n_batch",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_context_params_set_n_ubatch",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_context_params_set_n_threads",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_context_params_set_n_threads_batch",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_context_params_set_embeddings",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_context_params_set_pooling_type",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_context_params_set_type_k",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_context_params_set_type_v",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_context_params_set_offload_kqv",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_sampler_chain_params_free",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_batch_free",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_decode",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza__silent_log",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_log_silence",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_context_attach_drafter",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_context_set_spec_mode",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_decode_unified",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_dflash_stats",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:token_tree_free_data",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:trie_child_for_token",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:token_tree_sampler_apply",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:token_tree_sampler_accept",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:token_tree_sampler_reset",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:token_tree_sampler_free",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:prefill_plan_free_state",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:prefill_plan_sampler_apply",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:prefill_plan_sampler_accept",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:prefill_plan_sampler_reset",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:prefill_plan_sampler_free",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "class:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:llama_sampler_i",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "class:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:llama_sampler_i",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_decode_unified",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:eliza_llama_decode",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:token_tree_sampler_accept",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:trie_child_for_token",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:token_tree_sampler_free",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:token_tree_free_data",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:prefill_plan_sampler_free",
+      "target": "function:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c:prefill_plan_free_state",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs",
+      "target": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:isExactRegistryVersion",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs",
+      "target": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:isWorkspaceProtocolSpecifier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs",
+      "target": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:readPackageJson",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs",
+      "target": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:resolvePinnedCoreVersion",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs",
+      "target": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:writePackageJson",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs",
+      "target": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:expandGlob",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs",
+      "target": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:resolvePinnedWorkspaceVersions",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs",
+      "target": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:rewriteWorkspaceDependencySpecifiers",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs",
+      "target": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:disableLocalElizaWorkspace",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:resolvePinnedCoreVersion",
+      "target": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:isExactRegistryVersion",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:resolvePinnedCoreVersion",
+      "target": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:isExactRegistryVersion",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:resolvePinnedWorkspaceVersions",
+      "target": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:resolvePinnedCoreVersion",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:resolvePinnedWorkspaceVersions",
+      "target": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:isExactRegistryVersion",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:resolvePinnedWorkspaceVersions",
+      "target": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:isExactRegistryVersion",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:resolvePinnedWorkspaceVersions",
+      "target": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:expandGlob",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:resolvePinnedWorkspaceVersions",
+      "target": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:isExactRegistryVersion",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:rewriteWorkspaceDependencySpecifiers",
+      "target": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:isWorkspaceProtocolSpecifier",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:disableLocalElizaWorkspace",
+      "target": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:writePackageJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:disableLocalElizaWorkspace",
+      "target": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:resolvePinnedWorkspaceVersions",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:disableLocalElizaWorkspace",
+      "target": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:expandGlob",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:disableLocalElizaWorkspace",
+      "target": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:rewriteWorkspaceDependencySpecifiers",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:disableLocalElizaWorkspace",
+      "target": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:writePackageJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:disableLocalElizaWorkspace",
+      "target": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:rewriteWorkspaceDependencySpecifiers",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:disableLocalElizaWorkspace",
+      "target": "function:eliza/packages/app-core/scripts/disable-local-eliza-workspace.mjs:writePackageJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/docker-runtime-review.mjs",
+      "target": "function:eliza/packages/app-core/scripts/docker-runtime-review.mjs:findDockerBin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/docker-runtime-review.mjs",
+      "target": "function:eliza/packages/app-core/scripts/docker-runtime-review.mjs:runCommand",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/docker-runtime-review.mjs",
+      "target": "function:eliza/packages/app-core/scripts/docker-runtime-review.mjs:writeArtifact",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/docker-runtime-review.mjs",
+      "target": "function:eliza/packages/app-core/scripts/docker-runtime-review.mjs:summarize",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.c",
+      "target": "file:eliza/packages/app-core/scripts/desktop-llama-shim/eliza_llama_shim.h",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/scripts/desktop-stack-status.mjs",
+      "target": "file:eliza/packages/app-core/scripts/lib/desktop-stack-status.mjs",
+      "type": "imports"
+    }
+  ]
+}

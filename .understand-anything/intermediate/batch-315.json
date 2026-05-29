@@ -1,0 +1,4671 @@
+{
+  "batchIndex": 315,
+  "nodes": [
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/vitest.e2e.config.ts",
+      "type": "file",
+      "name": "vitest.e2e.config.ts",
+      "filePath": "eliza/packages/app-core/vitest.e2e.config.ts",
+      "summary": "vitest.e2e.config.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 29 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/vitest.node-sqlite.config.ts",
+      "type": "file",
+      "name": "vitest.node-sqlite.config.ts",
+      "filePath": "eliza/packages/app-core/vitest.node-sqlite.config.ts",
+      "summary": "vitest.node-sqlite.config.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 26 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/.npmignore",
+      "type": "file",
+      "name": ".npmignore",
+      "filePath": "eliza/packages/core/.npmignore",
+      "summary": ".npmignore is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 6 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/build.ts",
+      "type": "file",
+      "name": "build.ts",
+      "filePath": "eliza/packages/core/build.ts",
+      "summary": "build.ts is a typescript source file in the Milady codebase. It contains 16 functions.",
+      "languageNotes": "typescript; code; 1026 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/build.ts:getTimer",
+      "type": "function",
+      "name": "getTimer",
+      "filePath": "eliza/packages/core/build.ts",
+      "summary": "getTimer is a function defined in eliza/packages/core/build.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/core/build.ts:createElizaBuildConfig",
+      "type": "function",
+      "name": "createElizaBuildConfig",
+      "filePath": "eliza/packages/core/build.ts",
+      "summary": "createElizaBuildConfig is a function defined in eliza/packages/core/build.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/core/build.ts:copyAssets",
+      "type": "function",
+      "name": "copyAssets",
+      "filePath": "eliza/packages/core/build.ts",
+      "summary": "copyAssets is a function defined in eliza/packages/core/build.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/build.ts:generateDts",
+      "type": "function",
+      "name": "generateDts",
+      "filePath": "eliza/packages/core/build.ts",
+      "summary": "generateDts is a function defined in eliza/packages/core/build.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/build.ts:cleanBuild",
+      "type": "function",
+      "name": "cleanBuild",
+      "filePath": "eliza/packages/core/build.ts",
+      "summary": "cleanBuild is a function defined in eliza/packages/core/build.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/core/build.ts:watchFiles",
+      "type": "function",
+      "name": "watchFiles",
+      "filePath": "eliza/packages/core/build.ts",
+      "summary": "watchFiles is a function defined in eliza/packages/core/build.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/core/build.ts:runBuild",
+      "type": "function",
+      "name": "runBuild",
+      "filePath": "eliza/packages/core/build.ts",
+      "summary": "runBuild is a function defined in eliza/packages/core/build.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/build.ts:createBuildRunner",
+      "type": "function",
+      "name": "createBuildRunner",
+      "filePath": "eliza/packages/core/build.ts",
+      "summary": "createBuildRunner is a function defined in eliza/packages/core/build.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/build.ts:buildNode",
+      "type": "function",
+      "name": "buildNode",
+      "filePath": "eliza/packages/core/build.ts",
+      "summary": "buildNode is a function defined in eliza/packages/core/build.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/build.ts:buildBrowser",
+      "type": "function",
+      "name": "buildBrowser",
+      "filePath": "eliza/packages/core/build.ts",
+      "summary": "buildBrowser is a function defined in eliza/packages/core/build.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/build.ts:buildEdge",
+      "type": "function",
+      "name": "buildEdge",
+      "filePath": "eliza/packages/core/build.ts",
+      "summary": "buildEdge is a function defined in eliza/packages/core/build.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/build.ts:buildTesting",
+      "type": "function",
+      "name": "buildTesting",
+      "filePath": "eliza/packages/core/build.ts",
+      "summary": "buildTesting is a function defined in eliza/packages/core/build.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/build.ts:buildNodeOnly",
+      "type": "function",
+      "name": "buildNodeOnly",
+      "filePath": "eliza/packages/core/build.ts",
+      "summary": "buildNodeOnly is a function defined in eliza/packages/core/build.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/build.ts:buildAll",
+      "type": "function",
+      "name": "buildAll",
+      "filePath": "eliza/packages/core/build.ts",
+      "summary": "buildAll is a function defined in eliza/packages/core/build.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/core/build.ts:fixDtsExtensions",
+      "type": "function",
+      "name": "fixDtsExtensions",
+      "filePath": "eliza/packages/core/build.ts",
+      "summary": "fixDtsExtensions is a function defined in eliza/packages/core/build.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/build.ts:generateTypeScriptDeclarations",
+      "type": "function",
+      "name": "generateTypeScriptDeclarations",
+      "filePath": "eliza/packages/core/build.ts",
+      "summary": "generateTypeScriptDeclarations is a function defined in eliza/packages/core/build.ts."
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/e2e/runtime-live.e2e.spec.ts",
+      "type": "file",
+      "name": "runtime-live.e2e.spec.ts",
+      "filePath": "eliza/packages/core/e2e/runtime-live.e2e.spec.ts",
+      "summary": "runtime-live.e2e.spec.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 145 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/playwright.config.ts",
+      "type": "file",
+      "name": "playwright.config.ts",
+      "filePath": "eliza/packages/core/playwright.config.ts",
+      "summary": "playwright.config.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 23 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/scripts/run-e2e-smoke.mjs",
+      "type": "file",
+      "name": "run-e2e-smoke.mjs",
+      "filePath": "eliza/packages/core/scripts/run-e2e-smoke.mjs",
+      "summary": "run-e2e-smoke.mjs is a javascript source file in the Milady codebase. It contains 5 functions.",
+      "languageNotes": "javascript; code; 111 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/scripts/run-e2e-smoke.mjs:envFlagEnabled",
+      "type": "function",
+      "name": "envFlagEnabled",
+      "filePath": "eliza/packages/core/scripts/run-e2e-smoke.mjs",
+      "summary": "envFlagEnabled is a function defined in eliza/packages/core/scripts/run-e2e-smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/scripts/run-e2e-smoke.mjs:getConfiguredProviderUrl",
+      "type": "function",
+      "name": "getConfiguredProviderUrl",
+      "filePath": "eliza/packages/core/scripts/run-e2e-smoke.mjs",
+      "summary": "getConfiguredProviderUrl is a function defined in eliza/packages/core/scripts/run-e2e-smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/scripts/run-e2e-smoke.mjs:canReachOllama",
+      "type": "function",
+      "name": "canReachOllama",
+      "filePath": "eliza/packages/core/scripts/run-e2e-smoke.mjs",
+      "summary": "canReachOllama is a function defined in eliza/packages/core/scripts/run-e2e-smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/scripts/run-e2e-smoke.mjs:resolveProviderEnv",
+      "type": "function",
+      "name": "resolveProviderEnv",
+      "filePath": "eliza/packages/core/scripts/run-e2e-smoke.mjs",
+      "summary": "resolveProviderEnv is a function defined in eliza/packages/core/scripts/run-e2e-smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/scripts/run-e2e-smoke.mjs:skip",
+      "type": "function",
+      "name": "skip",
+      "filePath": "eliza/packages/core/scripts/run-e2e-smoke.mjs",
+      "summary": "skip is a function defined in eliza/packages/core/scripts/run-e2e-smoke.mjs."
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/__tests__/description-compressed-lint.test.ts",
+      "type": "file",
+      "name": "description-compressed-lint.test.ts",
+      "filePath": "eliza/packages/core/src/__tests__/description-compressed-lint.test.ts",
+      "summary": "description-compressed-lint.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 165 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/__tests__/message-benchmark-integration.contract.test.ts",
+      "type": "file",
+      "name": "message-benchmark-integration.contract.test.ts",
+      "filePath": "eliza/packages/core/src/__tests__/message-benchmark-integration.contract.test.ts",
+      "summary": "message-benchmark-integration.contract.test.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 48 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/__tests__/mockCharacter.ts",
+      "type": "file",
+      "name": "mockCharacter.ts",
+      "filePath": "eliza/packages/core/src/__tests__/mockCharacter.ts",
+      "summary": "mockCharacter.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 546 lines"
+    },
+    {
+      "tags": [
+        "api",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/api/http-helpers.ts",
+      "type": "file",
+      "name": "http-helpers.ts",
+      "filePath": "eliza/packages/core/src/api/http-helpers.ts",
+      "summary": "http-helpers.ts is a typescript source file in the Milady codebase. It contains 11 functions, 1 imports.",
+      "languageNotes": "typescript; code; 284 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/api/http-helpers.ts:defaultTooLargeMessage",
+      "type": "function",
+      "name": "defaultTooLargeMessage",
+      "filePath": "eliza/packages/core/src/api/http-helpers.ts",
+      "summary": "defaultTooLargeMessage is a function defined in eliza/packages/core/src/api/http-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/core/src/api/http-helpers.ts:readRequestBodyBuffer",
+      "type": "function",
+      "name": "readRequestBodyBuffer",
+      "filePath": "eliza/packages/core/src/api/http-helpers.ts",
+      "summary": "readRequestBodyBuffer is a function defined in eliza/packages/core/src/api/http-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/api/http-helpers.ts:readRequestBody",
+      "type": "function",
+      "name": "readRequestBody",
+      "filePath": "eliza/packages/core/src/api/http-helpers.ts",
+      "summary": "readRequestBody is a function defined in eliza/packages/core/src/api/http-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/api/http-helpers.ts:isJsonObjectBody",
+      "type": "function",
+      "name": "isJsonObjectBody",
+      "filePath": "eliza/packages/core/src/api/http-helpers.ts",
+      "summary": "isJsonObjectBody is a function defined in eliza/packages/core/src/api/http-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/api/http-helpers.ts:writeJsonResponse",
+      "type": "function",
+      "name": "writeJsonResponse",
+      "filePath": "eliza/packages/core/src/api/http-helpers.ts",
+      "summary": "writeJsonResponse is a function defined in eliza/packages/core/src/api/http-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/api/http-helpers.ts:writeJsonError",
+      "type": "function",
+      "name": "writeJsonError",
+      "filePath": "eliza/packages/core/src/api/http-helpers.ts",
+      "summary": "writeJsonError is a function defined in eliza/packages/core/src/api/http-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/api/http-helpers.ts:writeJsonResponseSafe",
+      "type": "function",
+      "name": "writeJsonResponseSafe",
+      "filePath": "eliza/packages/core/src/api/http-helpers.ts",
+      "summary": "writeJsonResponseSafe is a function defined in eliza/packages/core/src/api/http-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/api/http-helpers.ts:sendJson",
+      "type": "function",
+      "name": "sendJson",
+      "filePath": "eliza/packages/core/src/api/http-helpers.ts",
+      "summary": "sendJson is a function defined in eliza/packages/core/src/api/http-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/api/http-helpers.ts:sendJsonError",
+      "type": "function",
+      "name": "sendJsonError",
+      "filePath": "eliza/packages/core/src/api/http-helpers.ts",
+      "summary": "sendJsonError is a function defined in eliza/packages/core/src/api/http-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/api/http-helpers.ts:writeJsonErrorSafe",
+      "type": "function",
+      "name": "writeJsonErrorSafe",
+      "filePath": "eliza/packages/core/src/api/http-helpers.ts",
+      "summary": "writeJsonErrorSafe is a function defined in eliza/packages/core/src/api/http-helpers.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/api/http-helpers.ts:readJsonBody",
+      "type": "function",
+      "name": "readJsonBody",
+      "filePath": "eliza/packages/core/src/api/http-helpers.ts",
+      "summary": "readJsonBody is a function defined in eliza/packages/core/src/api/http-helpers.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/app-registry.ts",
+      "type": "file",
+      "name": "app-registry.ts",
+      "filePath": "eliza/packages/core/src/app-registry.ts",
+      "summary": "app-registry.ts is a typescript source file in the Milady codebase. It contains 3 functions.",
+      "languageNotes": "typescript; code; 46 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/app-registry.ts:getCuratedAppRegistryStore",
+      "type": "function",
+      "name": "getCuratedAppRegistryStore",
+      "filePath": "eliza/packages/core/src/app-registry.ts",
+      "summary": "getCuratedAppRegistryStore is a function defined in eliza/packages/core/src/app-registry.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/app-registry.ts:registerCuratedApp",
+      "type": "function",
+      "name": "registerCuratedApp",
+      "filePath": "eliza/packages/core/src/app-registry.ts",
+      "summary": "registerCuratedApp is a function defined in eliza/packages/core/src/app-registry.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/app-registry.ts:getRegisteredCuratedApps",
+      "type": "function",
+      "name": "getRegisteredCuratedApps",
+      "filePath": "eliza/packages/core/src/app-registry.ts",
+      "summary": "getRegisteredCuratedApps is a function defined in eliza/packages/core/src/app-registry.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/boot-env.ts",
+      "type": "file",
+      "name": "boot-env.ts",
+      "filePath": "eliza/packages/core/src/boot-env.ts",
+      "summary": "boot-env.ts is a typescript source file in the Milady codebase. It contains 8 functions.",
+      "languageNotes": "typescript; code; 106 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/boot-env.ts:getGlobalSlot",
+      "type": "function",
+      "name": "getGlobalSlot",
+      "filePath": "eliza/packages/core/src/boot-env.ts",
+      "summary": "getGlobalSlot is a function defined in eliza/packages/core/src/boot-env.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/boot-env.ts:getBootConfigStore",
+      "type": "function",
+      "name": "getBootConfigStore",
+      "filePath": "eliza/packages/core/src/boot-env.ts",
+      "summary": "getBootConfigStore is a function defined in eliza/packages/core/src/boot-env.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/boot-env.ts:getBootConfig",
+      "type": "function",
+      "name": "getBootConfig",
+      "filePath": "eliza/packages/core/src/boot-env.ts",
+      "summary": "getBootConfig is a function defined in eliza/packages/core/src/boot-env.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/boot-env.ts:getProcessEnv",
+      "type": "function",
+      "name": "getProcessEnv",
+      "filePath": "eliza/packages/core/src/boot-env.ts",
+      "summary": "getProcessEnv is a function defined in eliza/packages/core/src/boot-env.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/boot-env.ts:syncBrandEnvToEliza",
+      "type": "function",
+      "name": "syncBrandEnvToEliza",
+      "filePath": "eliza/packages/core/src/boot-env.ts",
+      "summary": "syncBrandEnvToEliza is a function defined in eliza/packages/core/src/boot-env.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/boot-env.ts:syncElizaEnvToBrand",
+      "type": "function",
+      "name": "syncElizaEnvToBrand",
+      "filePath": "eliza/packages/core/src/boot-env.ts",
+      "summary": "syncElizaEnvToBrand is a function defined in eliza/packages/core/src/boot-env.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/boot-env.ts:syncAppEnvToEliza",
+      "type": "function",
+      "name": "syncAppEnvToEliza",
+      "filePath": "eliza/packages/core/src/boot-env.ts",
+      "summary": "syncAppEnvToEliza is a function defined in eliza/packages/core/src/boot-env.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/boot-env.ts:syncElizaEnvAliases",
+      "type": "function",
+      "name": "syncElizaEnvAliases",
+      "filePath": "eliza/packages/core/src/boot-env.ts",
+      "summary": "syncElizaEnvAliases is a function defined in eliza/packages/core/src/boot-env.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/cloud-routing.ts",
+      "type": "file",
+      "name": "cloud-routing.ts",
+      "filePath": "eliza/packages/core/src/cloud-routing.ts",
+      "summary": "cloud-routing.ts is a typescript source file in the Milady codebase. It contains 8 functions.",
+      "languageNotes": "typescript; code; 183 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/cloud-routing.ts:toRuntimeSettings",
+      "type": "function",
+      "name": "toRuntimeSettings",
+      "filePath": "eliza/packages/core/src/cloud-routing.ts",
+      "summary": "toRuntimeSettings is a function defined in eliza/packages/core/src/cloud-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/cloud-routing.ts:cloudServiceApisBaseUrl",
+      "type": "function",
+      "name": "cloudServiceApisBaseUrl",
+      "filePath": "eliza/packages/core/src/cloud-routing.ts",
+      "summary": "cloudServiceApisBaseUrl is a function defined in eliza/packages/core/src/cloud-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/cloud-routing.ts:stripTrailingSlashes",
+      "type": "function",
+      "name": "stripTrailingSlashes",
+      "filePath": "eliza/packages/core/src/cloud-routing.ts",
+      "summary": "stripTrailingSlashes is a function defined in eliza/packages/core/src/cloud-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/cloud-routing.ts:getSettingAsString",
+      "type": "function",
+      "name": "getSettingAsString",
+      "filePath": "eliza/packages/core/src/cloud-routing.ts",
+      "summary": "getSettingAsString is a function defined in eliza/packages/core/src/cloud-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/cloud-routing.ts:buildCloudProxyRoute",
+      "type": "function",
+      "name": "buildCloudProxyRoute",
+      "filePath": "eliza/packages/core/src/cloud-routing.ts",
+      "summary": "buildCloudProxyRoute is a function defined in eliza/packages/core/src/cloud-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/cloud-routing.ts:isCloudConnected",
+      "type": "function",
+      "name": "isCloudConnected",
+      "filePath": "eliza/packages/core/src/cloud-routing.ts",
+      "summary": "isCloudConnected is a function defined in eliza/packages/core/src/cloud-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/cloud-routing.ts:resolveCloudRoute",
+      "type": "function",
+      "name": "resolveCloudRoute",
+      "filePath": "eliza/packages/core/src/cloud-routing.ts",
+      "summary": "resolveCloudRoute is a function defined in eliza/packages/core/src/cloud-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/cloud-routing.ts:buildLocalKeyHeaders",
+      "type": "function",
+      "name": "buildLocalKeyHeaders",
+      "filePath": "eliza/packages/core/src/cloud-routing.ts",
+      "summary": "buildLocalKeyHeaders is a function defined in eliza/packages/core/src/cloud-routing.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/connectors.ts",
+      "type": "file",
+      "name": "connectors.ts",
+      "filePath": "eliza/packages/core/src/connectors.ts",
+      "summary": "connectors.ts is a typescript source file in the Milady codebase. It contains 6 functions.",
+      "languageNotes": "typescript; code; 95 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/connectors.ts:rebuildRawToCanonical",
+      "type": "function",
+      "name": "rebuildRawToCanonical",
+      "filePath": "eliza/packages/core/src/connectors.ts",
+      "summary": "rebuildRawToCanonical is a function defined in eliza/packages/core/src/connectors.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/connectors.ts:registerConnectorSourceAliases",
+      "type": "function",
+      "name": "registerConnectorSourceAliases",
+      "filePath": "eliza/packages/core/src/connectors.ts",
+      "summary": "registerConnectorSourceAliases is a function defined in eliza/packages/core/src/connectors.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/connectors.ts:getMergedAliases",
+      "type": "function",
+      "name": "getMergedAliases",
+      "filePath": "eliza/packages/core/src/connectors.ts",
+      "summary": "getMergedAliases is a function defined in eliza/packages/core/src/connectors.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/connectors.ts:normalizeConnectorSource",
+      "type": "function",
+      "name": "normalizeConnectorSource",
+      "filePath": "eliza/packages/core/src/connectors.ts",
+      "summary": "normalizeConnectorSource is a function defined in eliza/packages/core/src/connectors.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/connectors.ts:getConnectorSourceAliases",
+      "type": "function",
+      "name": "getConnectorSourceAliases",
+      "filePath": "eliza/packages/core/src/connectors.ts",
+      "summary": "getConnectorSourceAliases is a function defined in eliza/packages/core/src/connectors.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/connectors.ts:expandConnectorSourceFilter",
+      "type": "function",
+      "name": "expandConnectorSourceFilter",
+      "filePath": "eliza/packages/core/src/connectors.ts",
+      "summary": "expandConnectorSourceFilter is a function defined in eliza/packages/core/src/connectors.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/connectors/connector-config.ts",
+      "type": "file",
+      "name": "connector-config.ts",
+      "filePath": "eliza/packages/core/src/connectors/connector-config.ts",
+      "summary": "connector-config.ts is a typescript source file in the Milady codebase. It contains 3 functions.",
+      "languageNotes": "typescript; code; 180 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/core/src/connectors/connector-config.ts:isConnectorConfigured",
+      "type": "function",
+      "name": "isConnectorConfigured",
+      "filePath": "eliza/packages/core/src/connectors/connector-config.ts",
+      "summary": "isConnectorConfigured is a function defined in eliza/packages/core/src/connectors/connector-config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/connectors/connector-config.ts:isStreamingDestinationConfigured",
+      "type": "function",
+      "name": "isStreamingDestinationConfigured",
+      "filePath": "eliza/packages/core/src/connectors/connector-config.ts",
+      "summary": "isStreamingDestinationConfigured is a function defined in eliza/packages/core/src/connectors/connector-config.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/connectors/connector-config.ts:isWechatConfigured",
+      "type": "function",
+      "name": "isWechatConfigured",
+      "filePath": "eliza/packages/core/src/connectors/connector-config.ts",
+      "summary": "isWechatConfigured is a function defined in eliza/packages/core/src/connectors/connector-config.ts."
+    },
+    {
+      "tags": [
+        "entry-point"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/constants/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/core/src/constants/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 7 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/contracts/cloud-topology.ts",
+      "type": "file",
+      "name": "cloud-topology.ts",
+      "filePath": "eliza/packages/core/src/contracts/cloud-topology.ts",
+      "summary": "cloud-topology.ts is a typescript source file in the Milady codebase. It contains 7 functions, 1 imports.",
+      "languageNotes": "typescript; code; 126 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/cloud-topology.ts:asConfigRecord",
+      "type": "function",
+      "name": "asConfigRecord",
+      "filePath": "eliza/packages/core/src/contracts/cloud-topology.ts",
+      "summary": "asConfigRecord is a function defined in eliza/packages/core/src/contracts/cloud-topology.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/cloud-topology.ts:_readConfigString",
+      "type": "function",
+      "name": "_readConfigString",
+      "filePath": "eliza/packages/core/src/contracts/cloud-topology.ts",
+      "summary": "_readConfigString is a function defined in eliza/packages/core/src/contracts/cloud-topology.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/cloud-topology.ts:normalizeSecretString",
+      "type": "function",
+      "name": "normalizeSecretString",
+      "filePath": "eliza/packages/core/src/contracts/cloud-topology.ts",
+      "summary": "normalizeSecretString is a function defined in eliza/packages/core/src/contracts/cloud-topology.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/cloud-topology.ts:isElizaCloudLinkedInConfig",
+      "type": "function",
+      "name": "isElizaCloudLinkedInConfig",
+      "filePath": "eliza/packages/core/src/contracts/cloud-topology.ts",
+      "summary": "isElizaCloudLinkedInConfig is a function defined in eliza/packages/core/src/contracts/cloud-topology.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/cloud-topology.ts:resolveElizaCloudTopology",
+      "type": "function",
+      "name": "resolveElizaCloudTopology",
+      "filePath": "eliza/packages/core/src/contracts/cloud-topology.ts",
+      "summary": "resolveElizaCloudTopology is a function defined in eliza/packages/core/src/contracts/cloud-topology.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/cloud-topology.ts:isElizaCloudServiceSelectedInConfig",
+      "type": "function",
+      "name": "isElizaCloudServiceSelectedInConfig",
+      "filePath": "eliza/packages/core/src/contracts/cloud-topology.ts",
+      "summary": "isElizaCloudServiceSelectedInConfig is a function defined in eliza/packages/core/src/contracts/cloud-topology.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/cloud-topology.ts:shouldLoadElizaCloudPluginInConfig",
+      "type": "function",
+      "name": "shouldLoadElizaCloudPluginInConfig",
+      "filePath": "eliza/packages/core/src/contracts/cloud-topology.ts",
+      "summary": "shouldLoadElizaCloudPluginInConfig is a function defined in eliza/packages/core/src/contracts/cloud-topology.ts."
+    },
+    {
+      "tags": [
+        "first-run",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "type": "file",
+      "name": "first-run-options.ts",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "first-run-options.ts is a typescript source file in the Milady codebase. It contains 47 functions, 3 imports.",
+      "languageNotes": "typescript; code; 1783 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:pickFirstRunCloudModelPreferences",
+      "type": "function",
+      "name": "pickFirstRunCloudModelPreferences",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "pickFirstRunCloudModelPreferences is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunCloudModelPreferences",
+      "type": "function",
+      "name": "readFirstRunCloudModelPreferences",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "readFirstRunCloudModelPreferences is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:isSubscriptionProviderSelectionId",
+      "type": "function",
+      "name": "isSubscriptionProviderSelectionId",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "isSubscriptionProviderSelectionId is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeSubscriptionProviderSelectionId",
+      "type": "function",
+      "name": "normalizeSubscriptionProviderSelectionId",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "normalizeSubscriptionProviderSelectionId is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:getStoredSubscriptionProvider",
+      "type": "function",
+      "name": "getStoredSubscriptionProvider",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "getStoredSubscriptionProvider is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:getSubscriptionProviderFamily",
+      "type": "function",
+      "name": "getSubscriptionProviderFamily",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "getSubscriptionProviderFamily is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:requiresAdditionalRuntimeProvider",
+      "type": "function",
+      "name": "requiresAdditionalRuntimeProvider",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "requiresAdditionalRuntimeProvider is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeFirstRunProviderId",
+      "type": "function",
+      "name": "normalizeFirstRunProviderId",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "normalizeFirstRunProviderId is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:getFirstRunProviderOption",
+      "type": "function",
+      "name": "getFirstRunProviderOption",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "getFirstRunProviderOption is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:getFirstRunProviderFamily",
+      "type": "function",
+      "name": "getFirstRunProviderFamily",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "getFirstRunProviderFamily is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:getStoredFirstRunProviderId",
+      "type": "function",
+      "name": "getStoredFirstRunProviderId",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "getStoredFirstRunProviderId is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:getDirectAccountProviderForFirstRunProvider",
+      "type": "function",
+      "name": "getDirectAccountProviderForFirstRunProvider",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "getDirectAccountProviderForFirstRunProvider is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:sortFirstRunProviders",
+      "type": "function",
+      "name": "sortFirstRunProviders",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "sortFirstRunProviders is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:isCloudManagedConnection",
+      "type": "function",
+      "name": "isCloudManagedConnection",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "isCloudManagedConnection is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:isRemoteProviderConnection",
+      "type": "function",
+      "name": "isRemoteProviderConnection",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "isRemoteProviderConnection is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:isLocalProviderConnection",
+      "type": "function",
+      "name": "isLocalProviderConnection",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "isLocalProviderConnection is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:isFirstRunConnectionComplete",
+      "type": "function",
+      "name": "isFirstRunConnectionComplete",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "isFirstRunConnectionComplete is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "function",
+      "name": "asConfigRecord",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "asConfigRecord is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "function",
+      "name": "readConfigString",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "readConfigString is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeSecretString",
+      "type": "function",
+      "name": "normalizeSecretString",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "normalizeSecretString is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunEnvContainer",
+      "type": "function",
+      "name": "readFirstRunEnvContainer",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "readFirstRunEnvContainer is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunEnvString",
+      "type": "function",
+      "name": "readFirstRunEnvString",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "readFirstRunEnvString is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunEnvSecret",
+      "type": "function",
+      "name": "readFirstRunEnvSecret",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "readFirstRunEnvSecret is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:getFirstRunProviderSignalEnvKeys",
+      "type": "function",
+      "name": "getFirstRunProviderSignalEnvKeys",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "getFirstRunProviderSignalEnvKeys is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunProviderApiKey",
+      "type": "function",
+      "name": "readFirstRunProviderApiKey",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "readFirstRunProviderApiKey is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:readPrimaryModelFromConfig",
+      "type": "function",
+      "name": "readPrimaryModelFromConfig",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "readPrimaryModelFromConfig is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:hasExplicitCanonicalRuntimeConfig",
+      "type": "function",
+      "name": "hasExplicitCanonicalRuntimeConfig",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "hasExplicitCanonicalRuntimeConfig is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:buildElizaCloudTextRoute",
+      "type": "function",
+      "name": "buildElizaCloudTextRoute",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "buildElizaCloudTextRoute is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveLegacyDeploymentTargetInConfig",
+      "type": "function",
+      "name": "resolveLegacyDeploymentTargetInConfig",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "resolveLegacyDeploymentTargetInConfig is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveLegacyServiceRoutingInConfig",
+      "type": "function",
+      "name": "resolveLegacyServiceRoutingInConfig",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "resolveLegacyServiceRoutingInConfig is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:pruneLegacyCloudRoutingFields",
+      "type": "function",
+      "name": "pruneLegacyCloudRoutingFields",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "pruneLegacyCloudRoutingFields is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:migrateLegacyRuntimeConfig",
+      "type": "function",
+      "name": "migrateLegacyRuntimeConfig",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "migrateLegacyRuntimeConfig is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveLinkedAccountsInConfig",
+      "type": "function",
+      "name": "resolveLinkedAccountsInConfig",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "resolveLinkedAccountsInConfig is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveDeploymentTargetInConfig",
+      "type": "function",
+      "name": "resolveDeploymentTargetInConfig",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "resolveDeploymentTargetInConfig is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveServiceRoutingInConfig",
+      "type": "function",
+      "name": "resolveServiceRoutingInConfig",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "resolveServiceRoutingInConfig is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:deriveFirstRunConnectionFromRuntimeConfig",
+      "type": "function",
+      "name": "deriveFirstRunConnectionFromRuntimeConfig",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "deriveFirstRunConnectionFromRuntimeConfig is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveConfiguredLocalProviderFromSignals",
+      "type": "function",
+      "name": "resolveConfiguredLocalProviderFromSignals",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "resolveConfiguredLocalProviderFromSignals is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizePersistedFirstRunConnection",
+      "type": "function",
+      "name": "normalizePersistedFirstRunConnection",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "normalizePersistedFirstRunConnection is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeFirstRunCredentialInputs",
+      "type": "function",
+      "name": "normalizeFirstRunCredentialInputs",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "normalizeFirstRunCredentialInputs is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:deriveFirstRunCredentialPersistencePlan",
+      "type": "function",
+      "name": "deriveFirstRunCredentialPersistencePlan",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "deriveFirstRunCredentialPersistencePlan is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:stripFirstRunConnectionSecrets",
+      "type": "function",
+      "name": "stripFirstRunConnectionSecrets",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "stripFirstRunConnectionSecrets is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:inferCompatibilityFirstRunConnection",
+      "type": "function",
+      "name": "inferCompatibilityFirstRunConnection",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "inferCompatibilityFirstRunConnection is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:inferFirstRunConnectionFromConfig",
+      "type": "function",
+      "name": "inferFirstRunConnectionFromConfig",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "inferFirstRunConnectionFromConfig is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:inferLegacyCloudInferenceSelection",
+      "type": "function",
+      "name": "inferLegacyCloudInferenceSelection",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "inferLegacyCloudInferenceSelection is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:isCloudInferenceSelectedInConfig",
+      "type": "function",
+      "name": "isCloudInferenceSelectedInConfig",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "isCloudInferenceSelectedInConfig is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:registerProviderOption",
+      "type": "function",
+      "name": "registerProviderOption",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "registerProviderOption is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/first-run-options.ts:getProviderOptions",
+      "type": "function",
+      "name": "getProviderOptions",
+      "filePath": "eliza/packages/core/src/contracts/first-run-options.ts",
+      "summary": "getProviderOptions is a function defined in eliza/packages/core/src/contracts/first-run-options.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/contracts/service-routing.ts",
+      "type": "file",
+      "name": "service-routing.ts",
+      "filePath": "eliza/packages/core/src/contracts/service-routing.ts",
+      "summary": "service-routing.ts is a typescript source file in the Milady codebase. It contains 19 functions, 1 imports.",
+      "languageNotes": "typescript; code; 568 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/service-routing.ts:buildElizaCloudServiceRoute",
+      "type": "function",
+      "name": "buildElizaCloudServiceRoute",
+      "filePath": "eliza/packages/core/src/contracts/service-routing.ts",
+      "summary": "buildElizaCloudServiceRoute is a function defined in eliza/packages/core/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/service-routing.ts:buildDefaultElizaCloudServiceRouting",
+      "type": "function",
+      "name": "buildDefaultElizaCloudServiceRouting",
+      "filePath": "eliza/packages/core/src/contracts/service-routing.ts",
+      "summary": "buildDefaultElizaCloudServiceRouting is a function defined in eliza/packages/core/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "function",
+      "name": "readTrimmedString",
+      "filePath": "eliza/packages/core/src/contracts/service-routing.ts",
+      "summary": "readTrimmedString is a function defined in eliza/packages/core/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountStatus",
+      "type": "function",
+      "name": "normalizeLinkedAccountStatus",
+      "filePath": "eliza/packages/core/src/contracts/service-routing.ts",
+      "summary": "normalizeLinkedAccountStatus is a function defined in eliza/packages/core/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountSource",
+      "type": "function",
+      "name": "normalizeLinkedAccountSource",
+      "filePath": "eliza/packages/core/src/contracts/service-routing.ts",
+      "summary": "normalizeLinkedAccountSource is a function defined in eliza/packages/core/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeServiceTransport",
+      "type": "function",
+      "name": "normalizeServiceTransport",
+      "filePath": "eliza/packages/core/src/contracts/service-routing.ts",
+      "summary": "normalizeServiceTransport is a function defined in eliza/packages/core/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeServiceRouteAccountStrategy",
+      "type": "function",
+      "name": "normalizeServiceRouteAccountStrategy",
+      "filePath": "eliza/packages/core/src/contracts/service-routing.ts",
+      "summary": "normalizeServiceRouteAccountStrategy is a function defined in eliza/packages/core/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountFlagConfig",
+      "type": "function",
+      "name": "normalizeLinkedAccountFlagConfig",
+      "filePath": "eliza/packages/core/src/contracts/service-routing.ts",
+      "summary": "normalizeLinkedAccountFlagConfig is a function defined in eliza/packages/core/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountFlagsConfig",
+      "type": "function",
+      "name": "normalizeLinkedAccountFlagsConfig",
+      "filePath": "eliza/packages/core/src/contracts/service-routing.ts",
+      "summary": "normalizeLinkedAccountFlagsConfig is a function defined in eliza/packages/core/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/service-routing.ts:isLinkedAccountProviderId",
+      "type": "function",
+      "name": "isLinkedAccountProviderId",
+      "filePath": "eliza/packages/core/src/contracts/service-routing.ts",
+      "summary": "isLinkedAccountProviderId is a function defined in eliza/packages/core/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountAccountSource",
+      "type": "function",
+      "name": "normalizeLinkedAccountAccountSource",
+      "filePath": "eliza/packages/core/src/contracts/service-routing.ts",
+      "summary": "normalizeLinkedAccountAccountSource is a function defined in eliza/packages/core/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountHealth",
+      "type": "function",
+      "name": "normalizeLinkedAccountHealth",
+      "filePath": "eliza/packages/core/src/contracts/service-routing.ts",
+      "summary": "normalizeLinkedAccountHealth is a function defined in eliza/packages/core/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountHealthDetail",
+      "type": "function",
+      "name": "normalizeLinkedAccountHealthDetail",
+      "filePath": "eliza/packages/core/src/contracts/service-routing.ts",
+      "summary": "normalizeLinkedAccountHealthDetail is a function defined in eliza/packages/core/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountUsage",
+      "type": "function",
+      "name": "normalizeLinkedAccountUsage",
+      "filePath": "eliza/packages/core/src/contracts/service-routing.ts",
+      "summary": "normalizeLinkedAccountUsage is a function defined in eliza/packages/core/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountRecord",
+      "type": "function",
+      "name": "normalizeLinkedAccountRecord",
+      "filePath": "eliza/packages/core/src/contracts/service-routing.ts",
+      "summary": "normalizeLinkedAccountRecord is a function defined in eliza/packages/core/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountsRecords",
+      "type": "function",
+      "name": "normalizeLinkedAccountsRecords",
+      "filePath": "eliza/packages/core/src/contracts/service-routing.ts",
+      "summary": "normalizeLinkedAccountsRecords is a function defined in eliza/packages/core/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "type": "function",
+      "name": "normalizeServiceRouteConfig",
+      "filePath": "eliza/packages/core/src/contracts/service-routing.ts",
+      "summary": "normalizeServiceRouteConfig is a function defined in eliza/packages/core/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeServiceRoutingConfig",
+      "type": "function",
+      "name": "normalizeServiceRoutingConfig",
+      "filePath": "eliza/packages/core/src/contracts/service-routing.ts",
+      "summary": "normalizeServiceRoutingConfig is a function defined in eliza/packages/core/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeDeploymentTargetConfig",
+      "type": "function",
+      "name": "normalizeDeploymentTargetConfig",
+      "filePath": "eliza/packages/core/src/contracts/service-routing.ts",
+      "summary": "normalizeDeploymentTargetConfig is a function defined in eliza/packages/core/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/contracts/wallet.ts",
+      "type": "file",
+      "name": "wallet.ts",
+      "filePath": "eliza/packages/core/src/contracts/wallet.ts",
+      "summary": "wallet.ts is a typescript source file in the Milady codebase. It contains 2 functions.",
+      "languageNotes": "typescript; code; 280 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/wallet.ts:normalizeWalletRpcProviderId",
+      "type": "function",
+      "name": "normalizeWalletRpcProviderId",
+      "filePath": "eliza/packages/core/src/contracts/wallet.ts",
+      "summary": "normalizeWalletRpcProviderId is a function defined in eliza/packages/core/src/contracts/wallet.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/contracts/wallet.ts:normalizeWalletRpcSelections",
+      "type": "function",
+      "name": "normalizeWalletRpcSelections",
+      "filePath": "eliza/packages/core/src/contracts/wallet.ts",
+      "summary": "normalizeWalletRpcSelections is a function defined in eliza/packages/core/src/contracts/wallet.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/env-utils.ts",
+      "type": "file",
+      "name": "env-utils.ts",
+      "filePath": "eliza/packages/core/src/env-utils.ts",
+      "summary": "env-utils.ts is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 11 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/env-utils.ts:isTruthyEnvValue",
+      "type": "function",
+      "name": "isTruthyEnvValue",
+      "filePath": "eliza/packages/core/src/env-utils.ts",
+      "summary": "isTruthyEnvValue is a function defined in eliza/packages/core/src/env-utils.ts."
+    },
+    {
+      "tags": [
+        "entry-point"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/features/advanced-capabilities/form/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/core/src/features/advanced-capabilities/form/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 9 lines"
+    },
+    {
+      "tags": [
+        "entry-point"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/features/advanced-capabilities/todos/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/core/src/features/advanced-capabilities/todos/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 14 lines"
+    },
+    {
+      "tags": [
+        "entry-point"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/features/approvals/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/core/src/features/approvals/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 39 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/build.ts",
+      "target": "function:eliza/packages/core/build.ts:getTimer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/build.ts",
+      "target": "function:eliza/packages/core/build.ts:createElizaBuildConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/build.ts",
+      "target": "function:eliza/packages/core/build.ts:copyAssets",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/build.ts",
+      "target": "function:eliza/packages/core/build.ts:generateDts",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/build.ts",
+      "target": "function:eliza/packages/core/build.ts:cleanBuild",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/build.ts",
+      "target": "function:eliza/packages/core/build.ts:watchFiles",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/build.ts",
+      "target": "function:eliza/packages/core/build.ts:runBuild",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/build.ts",
+      "target": "function:eliza/packages/core/build.ts:createBuildRunner",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/build.ts",
+      "target": "function:eliza/packages/core/build.ts:buildNode",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/build.ts",
+      "target": "function:eliza/packages/core/build.ts:buildBrowser",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/build.ts",
+      "target": "function:eliza/packages/core/build.ts:buildEdge",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/build.ts",
+      "target": "function:eliza/packages/core/build.ts:buildTesting",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/build.ts",
+      "target": "function:eliza/packages/core/build.ts:buildNodeOnly",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/build.ts",
+      "target": "function:eliza/packages/core/build.ts:buildAll",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/build.ts",
+      "target": "function:eliza/packages/core/build.ts:fixDtsExtensions",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/build.ts",
+      "target": "function:eliza/packages/core/build.ts:generateTypeScriptDeclarations",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/build.ts:copyAssets",
+      "target": "function:eliza/packages/core/build.ts:getTimer",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/build.ts:copyAssets",
+      "target": "function:eliza/packages/core/build.ts:getTimer",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/build.ts:generateDts",
+      "target": "function:eliza/packages/core/build.ts:getTimer",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/build.ts:cleanBuild",
+      "target": "function:eliza/packages/core/build.ts:getTimer",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/build.ts:runBuild",
+      "target": "function:eliza/packages/core/build.ts:getTimer",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/build.ts:runBuild",
+      "target": "function:eliza/packages/core/build.ts:cleanBuild",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/build.ts:runBuild",
+      "target": "function:eliza/packages/core/build.ts:getTimer",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/build.ts:runBuild",
+      "target": "function:eliza/packages/core/build.ts:createElizaBuildConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/build.ts:runBuild",
+      "target": "function:eliza/packages/core/build.ts:getTimer",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/build.ts:runBuild",
+      "target": "function:eliza/packages/core/build.ts:generateDts",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/build.ts:runBuild",
+      "target": "function:eliza/packages/core/build.ts:copyAssets",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/build.ts:runBuild",
+      "target": "function:eliza/packages/core/build.ts:getTimer",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/build.ts:buildNode",
+      "target": "function:eliza/packages/core/build.ts:createBuildRunner",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/build.ts:buildBrowser",
+      "target": "function:eliza/packages/core/build.ts:createBuildRunner",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/build.ts:buildEdge",
+      "target": "function:eliza/packages/core/build.ts:createBuildRunner",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/build.ts:buildTesting",
+      "target": "function:eliza/packages/core/build.ts:createBuildRunner",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/build.ts:buildNodeOnly",
+      "target": "function:eliza/packages/core/build.ts:buildNode",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/build.ts:buildNodeOnly",
+      "target": "function:eliza/packages/core/build.ts:buildTesting",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/build.ts:buildNodeOnly",
+      "target": "function:eliza/packages/core/build.ts:generateTypeScriptDeclarations",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/build.ts:buildAll",
+      "target": "function:eliza/packages/core/build.ts:buildNode",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/build.ts:buildAll",
+      "target": "function:eliza/packages/core/build.ts:buildBrowser",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/build.ts:buildAll",
+      "target": "function:eliza/packages/core/build.ts:buildEdge",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/build.ts:buildAll",
+      "target": "function:eliza/packages/core/build.ts:buildTesting",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/build.ts:buildAll",
+      "target": "function:eliza/packages/core/build.ts:generateTypeScriptDeclarations",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/build.ts:generateTypeScriptDeclarations",
+      "target": "function:eliza/packages/core/build.ts:fixDtsExtensions",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/scripts/run-e2e-smoke.mjs",
+      "target": "function:eliza/packages/core/scripts/run-e2e-smoke.mjs:envFlagEnabled",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/scripts/run-e2e-smoke.mjs",
+      "target": "function:eliza/packages/core/scripts/run-e2e-smoke.mjs:getConfiguredProviderUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/scripts/run-e2e-smoke.mjs",
+      "target": "function:eliza/packages/core/scripts/run-e2e-smoke.mjs:canReachOllama",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/scripts/run-e2e-smoke.mjs",
+      "target": "function:eliza/packages/core/scripts/run-e2e-smoke.mjs:resolveProviderEnv",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/scripts/run-e2e-smoke.mjs",
+      "target": "function:eliza/packages/core/scripts/run-e2e-smoke.mjs:skip",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/scripts/run-e2e-smoke.mjs:resolveProviderEnv",
+      "target": "function:eliza/packages/core/scripts/run-e2e-smoke.mjs:getConfiguredProviderUrl",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/scripts/run-e2e-smoke.mjs:resolveProviderEnv",
+      "target": "function:eliza/packages/core/scripts/run-e2e-smoke.mjs:canReachOllama",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/api/http-helpers.ts",
+      "target": "function:eliza/packages/core/src/api/http-helpers.ts:defaultTooLargeMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/api/http-helpers.ts",
+      "target": "function:eliza/packages/core/src/api/http-helpers.ts:readRequestBodyBuffer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/api/http-helpers.ts",
+      "target": "function:eliza/packages/core/src/api/http-helpers.ts:readRequestBody",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/api/http-helpers.ts",
+      "target": "function:eliza/packages/core/src/api/http-helpers.ts:isJsonObjectBody",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/api/http-helpers.ts",
+      "target": "function:eliza/packages/core/src/api/http-helpers.ts:writeJsonResponse",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/api/http-helpers.ts",
+      "target": "function:eliza/packages/core/src/api/http-helpers.ts:writeJsonError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/api/http-helpers.ts",
+      "target": "function:eliza/packages/core/src/api/http-helpers.ts:writeJsonResponseSafe",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/api/http-helpers.ts",
+      "target": "function:eliza/packages/core/src/api/http-helpers.ts:sendJson",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/api/http-helpers.ts",
+      "target": "function:eliza/packages/core/src/api/http-helpers.ts:sendJsonError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/api/http-helpers.ts",
+      "target": "function:eliza/packages/core/src/api/http-helpers.ts:writeJsonErrorSafe",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/api/http-helpers.ts",
+      "target": "function:eliza/packages/core/src/api/http-helpers.ts:readJsonBody",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/api/http-helpers.ts:readRequestBodyBuffer",
+      "target": "function:eliza/packages/core/src/api/http-helpers.ts:defaultTooLargeMessage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/api/http-helpers.ts:readRequestBody",
+      "target": "function:eliza/packages/core/src/api/http-helpers.ts:readRequestBodyBuffer",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/api/http-helpers.ts:writeJsonError",
+      "target": "function:eliza/packages/core/src/api/http-helpers.ts:writeJsonResponse",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/api/http-helpers.ts:writeJsonResponseSafe",
+      "target": "function:eliza/packages/core/src/api/http-helpers.ts:writeJsonResponse",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/api/http-helpers.ts:sendJson",
+      "target": "function:eliza/packages/core/src/api/http-helpers.ts:writeJsonResponseSafe",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/api/http-helpers.ts:sendJsonError",
+      "target": "function:eliza/packages/core/src/api/http-helpers.ts:writeJsonErrorSafe",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/api/http-helpers.ts:writeJsonErrorSafe",
+      "target": "function:eliza/packages/core/src/api/http-helpers.ts:writeJsonError",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/api/http-helpers.ts:readJsonBody",
+      "target": "function:eliza/packages/core/src/api/http-helpers.ts:writeJsonError",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/api/http-helpers.ts:readJsonBody",
+      "target": "function:eliza/packages/core/src/api/http-helpers.ts:readRequestBody",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/api/http-helpers.ts:readJsonBody",
+      "target": "function:eliza/packages/core/src/api/http-helpers.ts:writeJsonError",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/api/http-helpers.ts:readJsonBody",
+      "target": "function:eliza/packages/core/src/api/http-helpers.ts:writeJsonError",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/api/http-helpers.ts:readJsonBody",
+      "target": "function:eliza/packages/core/src/api/http-helpers.ts:writeJsonError",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/api/http-helpers.ts:readJsonBody",
+      "target": "function:eliza/packages/core/src/api/http-helpers.ts:writeJsonError",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/app-registry.ts",
+      "target": "function:eliza/packages/core/src/app-registry.ts:getCuratedAppRegistryStore",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/app-registry.ts",
+      "target": "function:eliza/packages/core/src/app-registry.ts:registerCuratedApp",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/app-registry.ts",
+      "target": "function:eliza/packages/core/src/app-registry.ts:getRegisteredCuratedApps",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/app-registry.ts:registerCuratedApp",
+      "target": "function:eliza/packages/core/src/app-registry.ts:getCuratedAppRegistryStore",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/app-registry.ts:getRegisteredCuratedApps",
+      "target": "function:eliza/packages/core/src/app-registry.ts:getCuratedAppRegistryStore",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/boot-env.ts",
+      "target": "function:eliza/packages/core/src/boot-env.ts:getGlobalSlot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/boot-env.ts",
+      "target": "function:eliza/packages/core/src/boot-env.ts:getBootConfigStore",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/boot-env.ts",
+      "target": "function:eliza/packages/core/src/boot-env.ts:getBootConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/boot-env.ts",
+      "target": "function:eliza/packages/core/src/boot-env.ts:getProcessEnv",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/boot-env.ts",
+      "target": "function:eliza/packages/core/src/boot-env.ts:syncBrandEnvToEliza",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/boot-env.ts",
+      "target": "function:eliza/packages/core/src/boot-env.ts:syncElizaEnvToBrand",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/boot-env.ts",
+      "target": "function:eliza/packages/core/src/boot-env.ts:syncAppEnvToEliza",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/boot-env.ts",
+      "target": "function:eliza/packages/core/src/boot-env.ts:syncElizaEnvAliases",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/boot-env.ts:getBootConfigStore",
+      "target": "function:eliza/packages/core/src/boot-env.ts:getGlobalSlot",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/boot-env.ts:getBootConfig",
+      "target": "function:eliza/packages/core/src/boot-env.ts:getBootConfigStore",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/boot-env.ts:syncBrandEnvToEliza",
+      "target": "function:eliza/packages/core/src/boot-env.ts:getProcessEnv",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/boot-env.ts:syncElizaEnvToBrand",
+      "target": "function:eliza/packages/core/src/boot-env.ts:getProcessEnv",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/boot-env.ts:syncAppEnvToEliza",
+      "target": "function:eliza/packages/core/src/boot-env.ts:getBootConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/boot-env.ts:syncAppEnvToEliza",
+      "target": "function:eliza/packages/core/src/boot-env.ts:syncBrandEnvToEliza",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/boot-env.ts:syncElizaEnvAliases",
+      "target": "function:eliza/packages/core/src/boot-env.ts:getBootConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/boot-env.ts:syncElizaEnvAliases",
+      "target": "function:eliza/packages/core/src/boot-env.ts:syncElizaEnvToBrand",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/cloud-routing.ts",
+      "target": "function:eliza/packages/core/src/cloud-routing.ts:toRuntimeSettings",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/cloud-routing.ts",
+      "target": "function:eliza/packages/core/src/cloud-routing.ts:cloudServiceApisBaseUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/cloud-routing.ts",
+      "target": "function:eliza/packages/core/src/cloud-routing.ts:stripTrailingSlashes",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/cloud-routing.ts",
+      "target": "function:eliza/packages/core/src/cloud-routing.ts:getSettingAsString",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/cloud-routing.ts",
+      "target": "function:eliza/packages/core/src/cloud-routing.ts:buildCloudProxyRoute",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/cloud-routing.ts",
+      "target": "function:eliza/packages/core/src/cloud-routing.ts:isCloudConnected",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/cloud-routing.ts",
+      "target": "function:eliza/packages/core/src/cloud-routing.ts:resolveCloudRoute",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/cloud-routing.ts",
+      "target": "function:eliza/packages/core/src/cloud-routing.ts:buildLocalKeyHeaders",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/cloud-routing.ts:cloudServiceApisBaseUrl",
+      "target": "function:eliza/packages/core/src/cloud-routing.ts:buildCloudProxyRoute",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/cloud-routing.ts:buildCloudProxyRoute",
+      "target": "function:eliza/packages/core/src/cloud-routing.ts:isCloudConnected",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/cloud-routing.ts:buildCloudProxyRoute",
+      "target": "function:eliza/packages/core/src/cloud-routing.ts:getSettingAsString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/cloud-routing.ts:buildCloudProxyRoute",
+      "target": "function:eliza/packages/core/src/cloud-routing.ts:getSettingAsString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/cloud-routing.ts:buildCloudProxyRoute",
+      "target": "function:eliza/packages/core/src/cloud-routing.ts:stripTrailingSlashes",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/cloud-routing.ts:isCloudConnected",
+      "target": "function:eliza/packages/core/src/cloud-routing.ts:getSettingAsString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/cloud-routing.ts:resolveCloudRoute",
+      "target": "function:eliza/packages/core/src/cloud-routing.ts:getSettingAsString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/cloud-routing.ts:resolveCloudRoute",
+      "target": "function:eliza/packages/core/src/cloud-routing.ts:stripTrailingSlashes",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/cloud-routing.ts:resolveCloudRoute",
+      "target": "function:eliza/packages/core/src/cloud-routing.ts:buildLocalKeyHeaders",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/cloud-routing.ts:resolveCloudRoute",
+      "target": "function:eliza/packages/core/src/cloud-routing.ts:buildCloudProxyRoute",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/connectors.ts",
+      "target": "function:eliza/packages/core/src/connectors.ts:rebuildRawToCanonical",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/connectors.ts",
+      "target": "function:eliza/packages/core/src/connectors.ts:registerConnectorSourceAliases",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/connectors.ts",
+      "target": "function:eliza/packages/core/src/connectors.ts:getMergedAliases",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/connectors.ts",
+      "target": "function:eliza/packages/core/src/connectors.ts:normalizeConnectorSource",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/connectors.ts",
+      "target": "function:eliza/packages/core/src/connectors.ts:getConnectorSourceAliases",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/connectors.ts",
+      "target": "function:eliza/packages/core/src/connectors.ts:expandConnectorSourceFilter",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/connectors.ts:registerConnectorSourceAliases",
+      "target": "function:eliza/packages/core/src/connectors.ts:rebuildRawToCanonical",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/connectors.ts:getConnectorSourceAliases",
+      "target": "function:eliza/packages/core/src/connectors.ts:normalizeConnectorSource",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/connectors.ts:getConnectorSourceAliases",
+      "target": "function:eliza/packages/core/src/connectors.ts:getMergedAliases",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/connectors.ts:expandConnectorSourceFilter",
+      "target": "function:eliza/packages/core/src/connectors.ts:getConnectorSourceAliases",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/connectors/connector-config.ts",
+      "target": "function:eliza/packages/core/src/connectors/connector-config.ts:isConnectorConfigured",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/connectors/connector-config.ts",
+      "target": "function:eliza/packages/core/src/connectors/connector-config.ts:isStreamingDestinationConfigured",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/connectors/connector-config.ts",
+      "target": "function:eliza/packages/core/src/connectors/connector-config.ts:isWechatConfigured",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/connectors/connector-config.ts:isConnectorConfigured",
+      "target": "function:eliza/packages/core/src/connectors/connector-config.ts:isWechatConfigured",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/cloud-topology.ts",
+      "target": "function:eliza/packages/core/src/contracts/cloud-topology.ts:asConfigRecord",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/cloud-topology.ts",
+      "target": "function:eliza/packages/core/src/contracts/cloud-topology.ts:_readConfigString",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/cloud-topology.ts",
+      "target": "function:eliza/packages/core/src/contracts/cloud-topology.ts:normalizeSecretString",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/cloud-topology.ts",
+      "target": "function:eliza/packages/core/src/contracts/cloud-topology.ts:isElizaCloudLinkedInConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/cloud-topology.ts",
+      "target": "function:eliza/packages/core/src/contracts/cloud-topology.ts:resolveElizaCloudTopology",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/cloud-topology.ts",
+      "target": "function:eliza/packages/core/src/contracts/cloud-topology.ts:isElizaCloudServiceSelectedInConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/cloud-topology.ts",
+      "target": "function:eliza/packages/core/src/contracts/cloud-topology.ts:shouldLoadElizaCloudPluginInConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/cloud-topology.ts:isElizaCloudLinkedInConfig",
+      "target": "function:eliza/packages/core/src/contracts/cloud-topology.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/cloud-topology.ts:isElizaCloudLinkedInConfig",
+      "target": "function:eliza/packages/core/src/contracts/cloud-topology.ts:normalizeSecretString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/cloud-topology.ts:resolveElizaCloudTopology",
+      "target": "function:eliza/packages/core/src/contracts/cloud-topology.ts:isElizaCloudLinkedInConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/cloud-topology.ts:isElizaCloudServiceSelectedInConfig",
+      "target": "function:eliza/packages/core/src/contracts/cloud-topology.ts:resolveElizaCloudTopology",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/cloud-topology.ts:shouldLoadElizaCloudPluginInConfig",
+      "target": "function:eliza/packages/core/src/contracts/cloud-topology.ts:resolveElizaCloudTopology",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:pickFirstRunCloudModelPreferences",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunCloudModelPreferences",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:isSubscriptionProviderSelectionId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeSubscriptionProviderSelectionId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:getStoredSubscriptionProvider",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:getSubscriptionProviderFamily",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:requiresAdditionalRuntimeProvider",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeFirstRunProviderId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:getFirstRunProviderOption",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:getFirstRunProviderFamily",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:getStoredFirstRunProviderId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:getDirectAccountProviderForFirstRunProvider",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:sortFirstRunProviders",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:isCloudManagedConnection",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:isRemoteProviderConnection",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:isLocalProviderConnection",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:isFirstRunConnectionComplete",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeSecretString",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunEnvContainer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunEnvString",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunEnvSecret",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:getFirstRunProviderSignalEnvKeys",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunProviderApiKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readPrimaryModelFromConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:hasExplicitCanonicalRuntimeConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:buildElizaCloudTextRoute",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveLegacyDeploymentTargetInConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveLegacyServiceRoutingInConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:pruneLegacyCloudRoutingFields",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:migrateLegacyRuntimeConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveLinkedAccountsInConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveDeploymentTargetInConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveServiceRoutingInConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:deriveFirstRunConnectionFromRuntimeConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveConfiguredLocalProviderFromSignals",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizePersistedFirstRunConnection",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeFirstRunCredentialInputs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:deriveFirstRunCredentialPersistencePlan",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:stripFirstRunConnectionSecrets",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:inferCompatibilityFirstRunConnection",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:inferFirstRunConnectionFromConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:inferLegacyCloudInferenceSelection",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:isCloudInferenceSelectedInConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:registerProviderOption",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/first-run-options.ts",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:getProviderOptions",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunCloudModelPreferences",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:pickFirstRunCloudModelPreferences",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunCloudModelPreferences",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunCloudModelPreferences",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunCloudModelPreferences",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunCloudModelPreferences",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunCloudModelPreferences",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunCloudModelPreferences",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunCloudModelPreferences",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunCloudModelPreferences",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunCloudModelPreferences",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunCloudModelPreferences",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunCloudModelPreferences",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeSubscriptionProviderSelectionId",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeFirstRunProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeSubscriptionProviderSelectionId",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:isSubscriptionProviderSelectionId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:requiresAdditionalRuntimeProvider",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeSubscriptionProviderSelectionId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:getFirstRunProviderOption",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeFirstRunProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:getFirstRunProviderFamily",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:getFirstRunProviderOption",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:getStoredFirstRunProviderId",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:getFirstRunProviderOption",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:getDirectAccountProviderForFirstRunProvider",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeFirstRunProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:isFirstRunConnectionComplete",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:isLocalProviderConnection",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:isFirstRunConnectionComplete",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:isRemoteProviderConnection",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:isFirstRunConnectionComplete",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:isCloudManagedConnection",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunEnvContainer",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunEnvContainer",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunEnvString",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunEnvContainer",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunEnvString",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunEnvString",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunEnvSecret",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeSecretString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunEnvSecret",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunEnvString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:getFirstRunProviderSignalEnvKeys",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:getFirstRunProviderOption",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunProviderApiKey",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:getFirstRunProviderOption",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunProviderApiKey",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunEnvSecret",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunProviderApiKey",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunEnvSecret",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:readPrimaryModelFromConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:readPrimaryModelFromConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:readPrimaryModelFromConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:readPrimaryModelFromConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:hasExplicitCanonicalRuntimeConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:buildElizaCloudTextRoute",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:pickFirstRunCloudModelPreferences",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveLegacyDeploymentTargetInConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveLegacyDeploymentTargetInConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveLegacyDeploymentTargetInConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeSecretString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveLegacyDeploymentTargetInConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeSecretString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveLegacyDeploymentTargetInConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeFirstRunProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveLegacyDeploymentTargetInConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveLegacyDeploymentTargetInConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveLegacyDeploymentTargetInConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveLegacyServiceRoutingInConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveLegacyServiceRoutingInConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveLegacyDeploymentTargetInConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveLegacyServiceRoutingInConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveLegacyServiceRoutingInConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveLegacyServiceRoutingInConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveLegacyServiceRoutingInConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readPrimaryModelFromConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveLegacyServiceRoutingInConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:inferLegacyCloudInferenceSelection",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveLegacyServiceRoutingInConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:buildElizaCloudTextRoute",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveLegacyServiceRoutingInConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveLegacyServiceRoutingInConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveLegacyServiceRoutingInConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveConfiguredLocalProviderFromSignals",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveLegacyServiceRoutingInConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readPrimaryModelFromConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:pruneLegacyCloudRoutingFields",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:pruneLegacyCloudRoutingFields",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:pruneLegacyCloudRoutingFields",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:migrateLegacyRuntimeConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:migrateLegacyRuntimeConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveLegacyDeploymentTargetInConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:migrateLegacyRuntimeConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveLinkedAccountsInConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:migrateLegacyRuntimeConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveLegacyServiceRoutingInConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:migrateLegacyRuntimeConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:pruneLegacyCloudRoutingFields",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveLinkedAccountsInConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveLinkedAccountsInConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveLinkedAccountsInConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeSecretString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveDeploymentTargetInConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveServiceRoutingInConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveServiceRoutingInConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveDeploymentTargetInConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveServiceRoutingInConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readPrimaryModelFromConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveServiceRoutingInConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveConfiguredLocalProviderFromSignals",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveServiceRoutingInConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readPrimaryModelFromConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:deriveFirstRunConnectionFromRuntimeConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveServiceRoutingInConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:deriveFirstRunConnectionFromRuntimeConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveDeploymentTargetInConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:deriveFirstRunConnectionFromRuntimeConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeFirstRunProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:deriveFirstRunConnectionFromRuntimeConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunProviderApiKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:deriveFirstRunConnectionFromRuntimeConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:pickFirstRunCloudModelPreferences",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveConfiguredLocalProviderFromSignals",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveConfiguredLocalProviderFromSignals",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveConfiguredLocalProviderFromSignals",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeFirstRunProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveConfiguredLocalProviderFromSignals",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveConfiguredLocalProviderFromSignals",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:requiresAdditionalRuntimeProvider",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveConfiguredLocalProviderFromSignals",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:getFirstRunProviderSignalEnvKeys",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveConfiguredLocalProviderFromSignals",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunEnvString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizePersistedFirstRunConnection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizePersistedFirstRunConnection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeSecretString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizePersistedFirstRunConnection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunCloudModelPreferences",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizePersistedFirstRunConnection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeFirstRunProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizePersistedFirstRunConnection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeSecretString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizePersistedFirstRunConnection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizePersistedFirstRunConnection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizePersistedFirstRunConnection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeFirstRunProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizePersistedFirstRunConnection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeSecretString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizePersistedFirstRunConnection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeSecretString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizePersistedFirstRunConnection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeFirstRunCredentialInputs",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeFirstRunCredentialInputs",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeSecretString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeFirstRunCredentialInputs",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeSecretString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:deriveFirstRunCredentialPersistencePlan",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeFirstRunCredentialInputs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:deriveFirstRunCredentialPersistencePlan",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeFirstRunProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:deriveFirstRunCredentialPersistencePlan",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:pickFirstRunCloudModelPreferences",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:deriveFirstRunCredentialPersistencePlan",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeFirstRunProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:deriveFirstRunCredentialPersistencePlan",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeFirstRunProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:stripFirstRunConnectionSecrets",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:pickFirstRunCloudModelPreferences",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:inferCompatibilityFirstRunConnection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:inferCompatibilityFirstRunConnection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:inferCompatibilityFirstRunConnection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:inferCompatibilityFirstRunConnection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeSecretString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:inferCompatibilityFirstRunConnection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveConfiguredLocalProviderFromSignals",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:inferCompatibilityFirstRunConnection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readPrimaryModelFromConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:inferCompatibilityFirstRunConnection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readFirstRunProviderApiKey",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:inferCompatibilityFirstRunConnection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeFirstRunProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:inferCompatibilityFirstRunConnection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:inferCompatibilityFirstRunConnection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeSecretString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:inferCompatibilityFirstRunConnection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:inferCompatibilityFirstRunConnection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:inferCompatibilityFirstRunConnection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:inferCompatibilityFirstRunConnection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:inferCompatibilityFirstRunConnection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:inferCompatibilityFirstRunConnection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:inferFirstRunConnectionFromConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:deriveFirstRunConnectionFromRuntimeConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:inferLegacyCloudInferenceSelection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:inferLegacyCloudInferenceSelection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:inferLegacyCloudInferenceSelection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:inferLegacyCloudInferenceSelection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeFirstRunProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:inferLegacyCloudInferenceSelection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:inferLegacyCloudInferenceSelection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:asConfigRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:inferLegacyCloudInferenceSelection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:inferLegacyCloudInferenceSelection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:inferLegacyCloudInferenceSelection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:inferLegacyCloudInferenceSelection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:inferLegacyCloudInferenceSelection",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:readConfigString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:isCloudInferenceSelectedInConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:resolveServiceRoutingInConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/first-run-options.ts:isCloudInferenceSelectedInConfig",
+      "target": "function:eliza/packages/core/src/contracts/first-run-options.ts:normalizeFirstRunProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:buildElizaCloudServiceRoute",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:buildDefaultElizaCloudServiceRouting",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountStatus",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountSource",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeServiceTransport",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeServiceRouteAccountStrategy",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountFlagConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountFlagsConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:isLinkedAccountProviderId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountAccountSource",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountHealth",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountHealthDetail",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountUsage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountRecord",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountsRecords",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeServiceRoutingConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeDeploymentTargetConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:buildDefaultElizaCloudServiceRouting",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:buildElizaCloudServiceRoute",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:buildDefaultElizaCloudServiceRouting",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:buildElizaCloudServiceRoute",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountFlagConfig",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountStatus",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountFlagConfig",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountSource",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountFlagConfig",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountFlagConfig",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountFlagsConfig",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountFlagConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountHealthDetail",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountRecord",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountRecord",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:isLinkedAccountProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountRecord",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountRecord",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountAccountSource",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountRecord",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountHealth",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountRecord",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountHealthDetail",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountRecord",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountUsage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountRecord",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountRecord",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountRecord",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountsRecords",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeLinkedAccountRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeServiceTransport",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeServiceRouteAccountStrategy",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeServiceRoutingConfig",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeDeploymentTargetConfig",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeDeploymentTargetConfig",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeDeploymentTargetConfig",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/service-routing.ts:normalizeDeploymentTargetConfig",
+      "target": "function:eliza/packages/core/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/wallet.ts",
+      "target": "function:eliza/packages/core/src/contracts/wallet.ts:normalizeWalletRpcProviderId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/contracts/wallet.ts",
+      "target": "function:eliza/packages/core/src/contracts/wallet.ts:normalizeWalletRpcSelections",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/wallet.ts:normalizeWalletRpcSelections",
+      "target": "function:eliza/packages/core/src/contracts/wallet.ts:normalizeWalletRpcProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/wallet.ts:normalizeWalletRpcSelections",
+      "target": "function:eliza/packages/core/src/contracts/wallet.ts:normalizeWalletRpcProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/contracts/wallet.ts:normalizeWalletRpcSelections",
+      "target": "function:eliza/packages/core/src/contracts/wallet.ts:normalizeWalletRpcProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/env-utils.ts",
+      "target": "function:eliza/packages/core/src/env-utils.ts:isTruthyEnvValue",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/vitest.node-sqlite.config.ts",
+      "target": "file:eliza/packages/app-core/vitest.config.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/__tests__/description-compressed-lint.test.ts",
+      "target": "file:eliza/packages/core/src/utils/description-compressed-lint.ts",
+      "type": "imports"
+    }
+  ]
+}

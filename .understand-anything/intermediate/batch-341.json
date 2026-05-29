@@ -1,0 +1,2486 @@
+{
+  "batchIndex": 341,
+  "nodes": [
+    {
+      "tags": [
+        "plugin",
+        "class"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-elizacloud/src/cloud/null-observer.ts",
+      "type": "file",
+      "name": "null-observer.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud/null-observer.ts",
+      "summary": "null-observer.ts is a typescript source file in the Milady codebase. It contains 1 class, 1 imports.",
+      "languageNotes": "typescript; code; 45 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-elizacloud/src/cloud/null-observer.ts:NullCloudSetupObserver",
+      "type": "class",
+      "name": "NullCloudSetupObserver",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud/null-observer.ts",
+      "summary": "NullCloudSetupObserver is a class or type declared in eliza/plugins/plugin-elizacloud/src/cloud/null-observer.ts."
+    },
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-elizacloud/src/cloud/setup-observer.ts",
+      "type": "file",
+      "name": "setup-observer.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud/setup-observer.ts",
+      "summary": "setup-observer.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 125 lines"
+    },
+    {
+      "tags": [
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts",
+      "type": "file",
+      "name": "validate-url.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts",
+      "summary": "validate-url.ts is a typescript source file in the Milady codebase. It contains 10 functions.",
+      "languageNotes": "typescript; code; 187 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:normalizeHostLike",
+      "type": "function",
+      "name": "normalizeHostLike",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts",
+      "summary": "normalizeHostLike is a function defined in eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:decodeIpv6MappedHex",
+      "type": "function",
+      "name": "decodeIpv6MappedHex",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts",
+      "summary": "decodeIpv6MappedHex is a function defined in eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:canonicalizeIpv6",
+      "type": "function",
+      "name": "canonicalizeIpv6",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts",
+      "summary": "canonicalizeIpv6 is a function defined in eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:normalizeIpForPolicy",
+      "type": "function",
+      "name": "normalizeIpForPolicy",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts",
+      "summary": "normalizeIpForPolicy is a function defined in eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:cidrV4",
+      "type": "function",
+      "name": "cidrV4",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts",
+      "summary": "cidrV4 is a function defined in eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:parseIpv4ToInt",
+      "type": "function",
+      "name": "parseIpv4ToInt",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts",
+      "summary": "parseIpv4ToInt is a function defined in eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:isBlockedIpv4",
+      "type": "function",
+      "name": "isBlockedIpv4",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts",
+      "summary": "isBlockedIpv4 is a function defined in eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:isBlockedIpv6",
+      "type": "function",
+      "name": "isBlockedIpv6",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts",
+      "summary": "isBlockedIpv6 is a function defined in eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:isBlockedIp",
+      "type": "function",
+      "name": "isBlockedIp",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts",
+      "summary": "isBlockedIp is a function defined in eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:validateCloudBaseUrl",
+      "type": "function",
+      "name": "validateCloudBaseUrl",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts",
+      "summary": "validateCloudBaseUrl is a function defined in eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts."
+    },
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-elizacloud/src/index.node.ts",
+      "type": "file",
+      "name": "index.node.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/index.node.ts",
+      "summary": "index.node.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 69 lines"
+    },
+    {
+      "tags": [
+        "voice",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-elizacloud/src/lib/tts-debug.ts",
+      "type": "file",
+      "name": "tts-debug.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/lib/tts-debug.ts",
+      "summary": "tts-debug.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 5 lines"
+    },
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-elizacloud/src/routes/cloud-provisioning.ts",
+      "type": "file",
+      "name": "cloud-provisioning.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/routes/cloud-provisioning.ts",
+      "summary": "cloud-provisioning.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 4 lines"
+    },
+    {
+      "tags": [
+        "entry-point",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-elizacloud/src/services/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/services/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 17 lines"
+    },
+    {
+      "tags": [
+        "plugin",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts",
+      "type": "file",
+      "name": "client.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts",
+      "summary": "client.ts is a typescript source file in the Milady codebase. It contains 8 functions, 1 class, 3 imports.",
+      "languageNotes": "typescript; code; 748 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts:trimTrailingSlash",
+      "type": "function",
+      "name": "trimTrailingSlash",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts",
+      "summary": "trimTrailingSlash is a function defined in eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts:normalizeBaseUrl",
+      "type": "function",
+      "name": "normalizeBaseUrl",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts",
+      "summary": "normalizeBaseUrl is a function defined in eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts:apiOriginFromApiBaseUrl",
+      "type": "function",
+      "name": "apiOriginFromApiBaseUrl",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts",
+      "summary": "apiOriginFromApiBaseUrl is a function defined in eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts:browserBaseUrlForCliLogin",
+      "type": "function",
+      "name": "browserBaseUrlForCliLogin",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts",
+      "summary": "browserBaseUrlForCliLogin is a function defined in eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts:encodePathParam",
+      "type": "function",
+      "name": "encodePathParam",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts",
+      "summary": "encodePathParam is a function defined in eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts:withPathParams",
+      "type": "function",
+      "name": "withPathParams",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts",
+      "summary": "withPathParams is a function defined in eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts:getCryptoRandomUuid",
+      "type": "function",
+      "name": "getCryptoRandomUuid",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts",
+      "summary": "getCryptoRandomUuid is a function defined in eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts:createElizaCloudClient",
+      "type": "function",
+      "name": "createElizaCloudClient",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts",
+      "summary": "createElizaCloudClient is a function defined in eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts:ElizaCloudClient",
+      "type": "class",
+      "name": "ElizaCloudClient",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts",
+      "summary": "ElizaCloudClient is a class or type declared in eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts",
+      "type": "file",
+      "name": "http.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts",
+      "summary": "http.ts is a typescript source file in the Milady codebase. It contains 11 functions, 4 classes, 1 imports.",
+      "languageNotes": "typescript; code; 291 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:trimTrailingSlash",
+      "type": "function",
+      "name": "trimTrailingSlash",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts",
+      "summary": "trimTrailingSlash is a function defined in eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:ensureLeadingSlash",
+      "type": "function",
+      "name": "ensureLeadingSlash",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts",
+      "summary": "ensureLeadingSlash is a function defined in eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:normalizeBaseUrl",
+      "type": "function",
+      "name": "normalizeBaseUrl",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts",
+      "summary": "normalizeBaseUrl is a function defined in eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:isRecord",
+      "type": "function",
+      "name": "isRecord",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts",
+      "summary": "isRecord is a function defined in eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:appendQuery",
+      "type": "function",
+      "name": "appendQuery",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts",
+      "summary": "appendQuery is a function defined in eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:appendQueryValue",
+      "type": "function",
+      "name": "appendQueryValue",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts",
+      "summary": "appendQueryValue is a function defined in eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:resolveUrl",
+      "type": "function",
+      "name": "resolveUrl",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts",
+      "summary": "resolveUrl is a function defined in eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:parseResponseBody",
+      "type": "function",
+      "name": "parseResponseBody",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts",
+      "summary": "parseResponseBody is a function defined in eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:normalizeErrorBody",
+      "type": "function",
+      "name": "normalizeErrorBody",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts",
+      "summary": "normalizeErrorBody is a function defined in eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:isQuota",
+      "type": "function",
+      "name": "isQuota",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts",
+      "summary": "isQuota is a function defined in eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:timeoutSignal",
+      "type": "function",
+      "name": "timeoutSignal",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts",
+      "summary": "timeoutSignal is a function defined in eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:CloudApiError",
+      "type": "class",
+      "name": "CloudApiError",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts",
+      "summary": "CloudApiError is a class or type declared in eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:InsufficientCreditsError",
+      "type": "class",
+      "name": "InsufficientCreditsError",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts",
+      "summary": "InsufficientCreditsError is a class or type declared in eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:ElizaCloudHttpClient",
+      "type": "class",
+      "name": "ElizaCloudHttpClient",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts",
+      "summary": "ElizaCloudHttpClient is a class or type declared in eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:CloudApiClient",
+      "type": "class",
+      "name": "CloudApiClient",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts",
+      "summary": "CloudApiClient is a class or type declared in eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts."
+    },
+    {
+      "tags": [
+        "entry-point",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 23 lines"
+    },
+    {
+      "tags": [
+        "plugin",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts",
+      "type": "file",
+      "name": "public-routes.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts",
+      "summary": "public-routes.ts is a typescript source file in the Milady codebase. It contains 5 functions, 1 class, 1 imports.",
+      "languageNotes": "typescript; code; 5238 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts:encodePathValue",
+      "type": "function",
+      "name": "encodePathValue",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts",
+      "summary": "encodePathValue is a function defined in eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts:isPathParamArray",
+      "type": "function",
+      "name": "isPathParamArray",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts",
+      "summary": "isPathParamArray is a function defined in eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts:encodeCatchAllPathValue",
+      "type": "function",
+      "name": "encodeCatchAllPathValue",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts",
+      "summary": "encodeCatchAllPathValue is a function defined in eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts:buildPublicRoutePath",
+      "type": "function",
+      "name": "buildPublicRoutePath",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts",
+      "summary": "buildPublicRoutePath is a function defined in eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts:toRequestOptions",
+      "type": "function",
+      "name": "toRequestOptions",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts",
+      "summary": "toRequestOptions is a function defined in eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts:ElizaCloudPublicRoutesClient",
+      "type": "class",
+      "name": "ElizaCloudPublicRoutesClient",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts",
+      "summary": "ElizaCloudPublicRoutesClient is a class or type declared in eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts."
+    },
+    {
+      "tags": [
+        "plugin",
+        "api"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/types.cloud-api.ts",
+      "type": "file",
+      "name": "types.cloud-api.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/types.cloud-api.ts",
+      "summary": "types.cloud-api.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 120 lines"
+    },
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/types.ts",
+      "summary": "types.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 762 lines"
+    },
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-elizacloud/vitest.config.ts",
+      "type": "file",
+      "name": "vitest.config.ts",
+      "filePath": "eliza/plugins/plugin-elizacloud/vitest.config.ts",
+      "summary": "vitest.config.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 27 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/__tests__/apple-foundation.test.ts",
+      "type": "file",
+      "name": "apple-foundation.test.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/__tests__/apple-foundation.test.ts",
+      "summary": "apple-foundation.test.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 imports.",
+      "languageNotes": "typescript; code; 218 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/__tests__/apple-foundation.test.ts:makeBridge",
+      "type": "function",
+      "name": "makeBridge",
+      "filePath": "eliza/plugins/plugin-local-inference/__tests__/apple-foundation.test.ts",
+      "summary": "makeBridge is a function defined in eliza/plugins/plugin-local-inference/__tests__/apple-foundation.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts",
+      "type": "file",
+      "name": "dac-parity.test.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts",
+      "summary": "dac-parity.test.ts is a typescript source file in the Milady codebase. It contains 8 functions.",
+      "languageNotes": "typescript; code; 417 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts:readFixture",
+      "type": "function",
+      "name": "readFixture",
+      "filePath": "eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts",
+      "summary": "readFixture is a function defined in eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts:findCurrentCodec",
+      "type": "function",
+      "name": "findCurrentCodec",
+      "filePath": "eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts",
+      "summary": "findCurrentCodec is a function defined in eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts:findCodecGguf",
+      "type": "function",
+      "name": "findCodecGguf",
+      "filePath": "eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts",
+      "summary": "findCodecGguf is a function defined in eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts:readWavToFloat32",
+      "type": "function",
+      "name": "readWavToFloat32",
+      "filePath": "eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts",
+      "summary": "readWavToFloat32 is a function defined in eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts:mse",
+      "type": "function",
+      "name": "mse",
+      "filePath": "eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts",
+      "summary": "mse is a function defined in eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts:maxAbsDiff",
+      "type": "function",
+      "name": "maxAbsDiff",
+      "filePath": "eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts",
+      "summary": "maxAbsDiff is a function defined in eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts:cosineSim",
+      "type": "function",
+      "name": "cosineSim",
+      "filePath": "eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts",
+      "summary": "cosineSim is a function defined in eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts:resolveHarness",
+      "type": "function",
+      "name": "resolveHarness",
+      "filePath": "eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts",
+      "summary": "resolveHarness is a function defined in eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/__tests__/imagegen-publishing.test.ts",
+      "type": "file",
+      "name": "imagegen-publishing.test.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/__tests__/imagegen-publishing.test.ts",
+      "summary": "imagegen-publishing.test.ts is a typescript source file in the Milady codebase. It contains 3 functions.",
+      "languageNotes": "typescript; code; 290 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/__tests__/imagegen-publishing.test.ts:loadExtras",
+      "type": "function",
+      "name": "loadExtras",
+      "filePath": "eliza/plugins/plugin-local-inference/__tests__/imagegen-publishing.test.ts",
+      "summary": "loadExtras is a function defined in eliza/plugins/plugin-local-inference/__tests__/imagegen-publishing.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/__tests__/imagegen-publishing.test.ts:isHttpsUrl",
+      "type": "function",
+      "name": "isHttpsUrl",
+      "filePath": "eliza/plugins/plugin-local-inference/__tests__/imagegen-publishing.test.ts",
+      "summary": "isHttpsUrl is a function defined in eliza/plugins/plugin-local-inference/__tests__/imagegen-publishing.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/__tests__/imagegen-publishing.test.ts:isHexSha256",
+      "type": "function",
+      "name": "isHexSha256",
+      "filePath": "eliza/plugins/plugin-local-inference/__tests__/imagegen-publishing.test.ts",
+      "summary": "isHexSha256 is a function defined in eliza/plugins/plugin-local-inference/__tests__/imagegen-publishing.test.ts."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-local-inference/build.ts",
+      "type": "file",
+      "name": "build.ts",
+      "filePath": "eliza/plugins/plugin-local-inference/build.ts",
+      "summary": "build.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 56 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "complex",
+      "id": "document:eliza/plugins/plugin-local-inference/docs/MEMORY_ARBITER.md",
+      "type": "document",
+      "name": "MEMORY_ARBITER.md",
+      "filePath": "eliza/plugins/plugin-local-inference/docs/MEMORY_ARBITER.md",
+      "summary": "MEMORY_ARBITER.md documents eliza/plugins/plugin-local-inference/docs with 316 lines of reference material.",
+      "languageNotes": "markdown; docs; 316 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "voice",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "document:eliza/plugins/plugin-local-inference/docs/voice-cancellation-contract.md",
+      "type": "document",
+      "name": "voice-cancellation-contract.md",
+      "filePath": "eliza/plugins/plugin-local-inference/docs/voice-cancellation-contract.md",
+      "summary": "voice-cancellation-contract.md documents eliza/plugins/plugin-local-inference/docs with 229 lines of reference material.",
+      "languageNotes": "markdown; docs; 229 lines"
+    },
+    {
+      "tags": [
+        "voice",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs",
+      "type": "file",
+      "name": "build-omnivoice.mjs",
+      "filePath": "eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs",
+      "summary": "build-omnivoice.mjs is a javascript source file in the Milady codebase. It contains 10 functions.",
+      "languageNotes": "javascript; code; 374 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:log",
+      "type": "function",
+      "name": "log",
+      "filePath": "eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs",
+      "summary": "log is a function defined in eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:fail",
+      "type": "function",
+      "name": "fail",
+      "filePath": "eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs",
+      "summary": "fail is a function defined in eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:resolveTarget",
+      "type": "function",
+      "name": "resolveTarget",
+      "filePath": "eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs",
+      "summary": "resolveTarget is a function defined in eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:detectBackend",
+      "type": "function",
+      "name": "detectBackend",
+      "filePath": "eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs",
+      "summary": "detectBackend is a function defined in eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:platformFlags",
+      "type": "function",
+      "name": "platformFlags",
+      "filePath": "eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs",
+      "summary": "platformFlags is a function defined in eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:expectedLibName",
+      "type": "function",
+      "name": "expectedLibName",
+      "filePath": "eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs",
+      "summary": "expectedLibName is a function defined in eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:run",
+      "type": "function",
+      "name": "run",
+      "filePath": "eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs",
+      "summary": "run is a function defined in eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:ensureZigDrivers",
+      "type": "function",
+      "name": "ensureZigDrivers",
+      "filePath": "eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs",
+      "summary": "ensureZigDrivers is a function defined in eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:crossConfigureArgs",
+      "type": "function",
+      "name": "crossConfigureArgs",
+      "filePath": "eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs",
+      "summary": "crossConfigureArgs is a function defined in eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs",
+      "summary": "main is a function defined in eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/native/build-whisper.mjs",
+      "type": "file",
+      "name": "build-whisper.mjs",
+      "filePath": "eliza/plugins/plugin-local-inference/native/build-whisper.mjs",
+      "summary": "build-whisper.mjs is a javascript source file in the Milady codebase. It contains 10 functions.",
+      "languageNotes": "javascript; code; 485 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:log",
+      "type": "function",
+      "name": "log",
+      "filePath": "eliza/plugins/plugin-local-inference/native/build-whisper.mjs",
+      "summary": "log is a function defined in eliza/plugins/plugin-local-inference/native/build-whisper.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:fail",
+      "type": "function",
+      "name": "fail",
+      "filePath": "eliza/plugins/plugin-local-inference/native/build-whisper.mjs",
+      "summary": "fail is a function defined in eliza/plugins/plugin-local-inference/native/build-whisper.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:resolveTarget",
+      "type": "function",
+      "name": "resolveTarget",
+      "filePath": "eliza/plugins/plugin-local-inference/native/build-whisper.mjs",
+      "summary": "resolveTarget is a function defined in eliza/plugins/plugin-local-inference/native/build-whisper.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:detectBackend",
+      "type": "function",
+      "name": "detectBackend",
+      "filePath": "eliza/plugins/plugin-local-inference/native/build-whisper.mjs",
+      "summary": "detectBackend is a function defined in eliza/plugins/plugin-local-inference/native/build-whisper.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:platformFlags",
+      "type": "function",
+      "name": "platformFlags",
+      "filePath": "eliza/plugins/plugin-local-inference/native/build-whisper.mjs",
+      "summary": "platformFlags is a function defined in eliza/plugins/plugin-local-inference/native/build-whisper.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:resolveSourceDir",
+      "type": "function",
+      "name": "resolveSourceDir",
+      "filePath": "eliza/plugins/plugin-local-inference/native/build-whisper.mjs",
+      "summary": "resolveSourceDir is a function defined in eliza/plugins/plugin-local-inference/native/build-whisper.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:run",
+      "type": "function",
+      "name": "run",
+      "filePath": "eliza/plugins/plugin-local-inference/native/build-whisper.mjs",
+      "summary": "run is a function defined in eliza/plugins/plugin-local-inference/native/build-whisper.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:ensureZigDrivers",
+      "type": "function",
+      "name": "ensureZigDrivers",
+      "filePath": "eliza/plugins/plugin-local-inference/native/build-whisper.mjs",
+      "summary": "ensureZigDrivers is a function defined in eliza/plugins/plugin-local-inference/native/build-whisper.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:crossConfigureArgs",
+      "type": "function",
+      "name": "crossConfigureArgs",
+      "filePath": "eliza/plugins/plugin-local-inference/native/build-whisper.mjs",
+      "summary": "crossConfigureArgs is a function defined in eliza/plugins/plugin-local-inference/native/build-whisper.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "eliza/plugins/plugin-local-inference/native/build-whisper.mjs",
+      "summary": "main is a function defined in eliza/plugins/plugin-local-inference/native/build-whisper.mjs."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/native/cuda/fused-attn-qjl-tbq.cu",
+      "type": "file",
+      "name": "fused-attn-qjl-tbq.cu",
+      "filePath": "eliza/plugins/plugin-local-inference/native/cuda/fused-attn-qjl-tbq.cu",
+      "summary": "fused-attn-qjl-tbq.cu is a cu source file in the Milady codebase.",
+      "languageNotes": "cu; code; 318 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp",
+      "type": "file",
+      "name": "dflash_draft.cpp",
+      "filePath": "eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp",
+      "summary": "dflash_draft.cpp is a cpp source file in the Milady codebase. It contains 7 functions, 1 class.",
+      "languageNotes": "cpp; code; 328 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp:dflash_max_cross_ctx",
+      "type": "function",
+      "name": "dflash_max_cross_ctx",
+      "filePath": "eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp",
+      "summary": "dflash_max_cross_ctx is a function defined in eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp:load_arch_hparams",
+      "type": "function",
+      "name": "load_arch_hparams",
+      "filePath": "eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp",
+      "summary": "load_arch_hparams is a function defined in eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp:load_arch_tensors",
+      "type": "function",
+      "name": "load_arch_tensors",
+      "filePath": "eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp",
+      "summary": "load_arch_tensors is a function defined in eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp:build_arch_graph",
+      "type": "function",
+      "name": "build_arch_graph",
+      "filePath": "eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp",
+      "summary": "build_arch_graph is a function defined in eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp:llm_graph_input_dflash",
+      "type": "function",
+      "name": "llm_graph_input_dflash",
+      "filePath": "eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp",
+      "summary": "llm_graph_input_dflash is a function defined in eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp:set_input",
+      "type": "function",
+      "name": "set_input",
+      "filePath": "eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp",
+      "summary": "set_input is a function defined in eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp."
+    },
+    {
+      "tags": [
+        "function",
+        "cpp"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp:llm_build_dflash_draft",
+      "type": "function",
+      "name": "llm_build_dflash_draft",
+      "filePath": "eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp",
+      "summary": "llm_build_dflash_draft is a function defined in eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp."
+    },
+    {
+      "tags": [
+        "class",
+        "cpp"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp:llm_graph_input_dflash",
+      "type": "class",
+      "name": "llm_graph_input_dflash",
+      "filePath": "eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp",
+      "summary": "llm_graph_input_dflash is a class or type declared in eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp."
+    },
+    {
+      "tags": [
+        "documentation",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "complex",
+      "id": "document:eliza/plugins/plugin-local-inference/native/docs/TOKEN_TRIE_SAMPLER.md",
+      "type": "document",
+      "name": "TOKEN_TRIE_SAMPLER.md",
+      "filePath": "eliza/plugins/plugin-local-inference/native/docs/TOKEN_TRIE_SAMPLER.md",
+      "summary": "TOKEN_TRIE_SAMPLER.md documents eliza/plugins/plugin-local-inference/native/docs with 710 lines of reference material.",
+      "languageNotes": "markdown; docs; 710 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud/null-observer.ts",
+      "target": "class:eliza/plugins/plugin-elizacloud/src/cloud/null-observer.ts:NullCloudSetupObserver",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:normalizeHostLike",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:decodeIpv6MappedHex",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:canonicalizeIpv6",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:normalizeIpForPolicy",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:cidrV4",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:parseIpv4ToInt",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:isBlockedIpv4",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:isBlockedIpv6",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:isBlockedIp",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:validateCloudBaseUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:normalizeIpForPolicy",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:normalizeHostLike",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:normalizeIpForPolicy",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:canonicalizeIpv6",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:normalizeIpForPolicy",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:decodeIpv6MappedHex",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:cidrV4",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:parseIpv4ToInt",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:isBlockedIpv4",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:parseIpv4ToInt",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:isBlockedIp",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:normalizeIpForPolicy",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:isBlockedIp",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:isBlockedIpv4",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:isBlockedIp",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:isBlockedIpv6",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:validateCloudBaseUrl",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:normalizeHostLike",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:validateCloudBaseUrl",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:isBlockedIp",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:validateCloudBaseUrl",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/cloud/validate-url.ts:isBlockedIp",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts:trimTrailingSlash",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts:normalizeBaseUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts:apiOriginFromApiBaseUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts:browserBaseUrlForCliLogin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts:encodePathParam",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts:withPathParams",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts:getCryptoRandomUuid",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts:createElizaCloudClient",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts",
+      "target": "class:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts:ElizaCloudClient",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts:normalizeBaseUrl",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts:trimTrailingSlash",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts:withPathParams",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/client.ts:encodePathParam",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:trimTrailingSlash",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:ensureLeadingSlash",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:normalizeBaseUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:isRecord",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:appendQuery",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:appendQueryValue",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:resolveUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:parseResponseBody",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:normalizeErrorBody",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:isQuota",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:timeoutSignal",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts",
+      "target": "class:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:CloudApiError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts",
+      "target": "class:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:InsufficientCreditsError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts",
+      "target": "class:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:ElizaCloudHttpClient",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts",
+      "target": "class:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:CloudApiClient",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:normalizeBaseUrl",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:trimTrailingSlash",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:appendQuery",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:appendQueryValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:resolveUrl",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:trimTrailingSlash",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:resolveUrl",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:ensureLeadingSlash",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:resolveUrl",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:appendQuery",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:normalizeErrorBody",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:normalizeErrorBody",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:normalizeErrorBody",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:normalizeErrorBody",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:isQuota",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:isQuota",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/http.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts:encodePathValue",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts:isPathParamArray",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts:encodeCatchAllPathValue",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts:buildPublicRoutePath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts:toRequestOptions",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts",
+      "target": "class:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts:ElizaCloudPublicRoutesClient",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts:encodeCatchAllPathValue",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts:isPathParamArray",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts:buildPublicRoutePath",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts:encodeCatchAllPathValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts:buildPublicRoutePath",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts:isPathParamArray",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts:buildPublicRoutePath",
+      "target": "function:eliza/plugins/plugin-elizacloud/src/utils/cloud-sdk/public-routes.ts:encodePathValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/__tests__/apple-foundation.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/__tests__/apple-foundation.test.ts:makeBridge",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts:readFixture",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts:findCurrentCodec",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts:findCodecGguf",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts:readWavToFloat32",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts:mse",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts:maxAbsDiff",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts:cosineSim",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts:resolveHarness",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts:resolveHarness",
+      "target": "function:eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts:readFixture",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts:resolveHarness",
+      "target": "function:eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts:findCurrentCodec",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts:resolveHarness",
+      "target": "function:eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts:findCodecGguf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts:resolveHarness",
+      "target": "function:eliza/plugins/plugin-local-inference/__tests__/dac-parity.test.ts:readWavToFloat32",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/__tests__/imagegen-publishing.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/__tests__/imagegen-publishing.test.ts:loadExtras",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/__tests__/imagegen-publishing.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/__tests__/imagegen-publishing.test.ts:isHttpsUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/__tests__/imagegen-publishing.test.ts",
+      "target": "function:eliza/plugins/plugin-local-inference/__tests__/imagegen-publishing.test.ts:isHexSha256",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:log",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:fail",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:resolveTarget",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:detectBackend",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:platformFlags",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:expectedLibName",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:run",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:ensureZigDrivers",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:crossConfigureArgs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:resolveTarget",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:fail",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:fail",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:fail",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:resolveTarget",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:detectBackend",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:ensureZigDrivers",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:crossConfigureArgs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:platformFlags",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:expectedLibName",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:expectedLibName",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:fail",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-omnivoice.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/build-whisper.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:log",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/build-whisper.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:fail",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/build-whisper.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:resolveTarget",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/build-whisper.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:detectBackend",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/build-whisper.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:platformFlags",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/build-whisper.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:resolveSourceDir",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/build-whisper.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:run",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/build-whisper.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:ensureZigDrivers",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/build-whisper.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:crossConfigureArgs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/build-whisper.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:resolveTarget",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:fail",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:resolveSourceDir",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:fail",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:resolveSourceDir",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:resolveSourceDir",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:resolveSourceDir",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:fail",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:resolveTarget",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:resolveSourceDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:detectBackend",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:ensureZigDrivers",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:crossConfigureArgs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:platformFlags",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:fail",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:fail",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/build-whisper.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp:dflash_max_cross_ctx",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp:load_arch_hparams",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp:load_arch_tensors",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp:build_arch_graph",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp:llm_graph_input_dflash",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp:set_input",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp",
+      "target": "function:eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp:llm_build_dflash_draft",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp",
+      "target": "class:eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp:llm_graph_input_dflash",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp:llm_build_dflash_draft",
+      "target": "function:eliza/plugins/plugin-local-inference/native/dflash/dflash_draft.cpp:dflash_max_cross_ctx",
+      "type": "calls"
+    }
+  ]
+}

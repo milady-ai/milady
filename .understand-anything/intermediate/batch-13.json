@@ -1,0 +1,4257 @@
+{
+  "batchIndex": 13,
+  "nodes": [
+    {
+      "tags": [
+        "entry-point"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/features/secrets/setup/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/setup/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 13 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/secrets/setup/provider.ts",
+      "type": "file",
+      "name": "provider.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/setup/provider.ts",
+      "summary": "provider.ts is a typescript source file in the Milady codebase. It contains 2 functions, 3 imports.",
+      "languageNotes": "typescript; code; 304 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/setup/provider.ts:formatSettingValue",
+      "type": "function",
+      "name": "formatSettingValue",
+      "filePath": "eliza/packages/core/src/features/secrets/setup/provider.ts",
+      "summary": "formatSettingValue is a function defined in eliza/packages/core/src/features/secrets/setup/provider.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/core/src/features/secrets/setup/provider.ts:generateStatusMessage",
+      "type": "function",
+      "name": "generateStatusMessage",
+      "filePath": "eliza/packages/core/src/features/secrets/setup/provider.ts",
+      "summary": "generateStatusMessage is a function defined in eliza/packages/core/src/features/secrets/setup/provider.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/secrets/setup/service.ts",
+      "type": "file",
+      "name": "service.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/setup/service.ts",
+      "summary": "service.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 class, 6 imports.",
+      "languageNotes": "typescript; code; 675 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/setup/service.ts:isTelegramDeepLinkService",
+      "type": "function",
+      "name": "isTelegramDeepLinkService",
+      "filePath": "eliza/packages/core/src/features/secrets/setup/service.ts",
+      "summary": "isTelegramDeepLinkService is a function defined in eliza/packages/core/src/features/secrets/setup/service.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/core/src/features/secrets/setup/service.ts:SetupService",
+      "type": "class",
+      "name": "SetupService",
+      "filePath": "eliza/packages/core/src/features/secrets/setup/service.ts",
+      "summary": "SetupService is a class or type declared in eliza/packages/core/src/features/secrets/setup/service.ts."
+    },
+    {
+      "tags": [
+        "class"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/secrets/storage/character-store.ts",
+      "type": "file",
+      "name": "character-store.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/storage/character-store.ts",
+      "summary": "character-store.ts is a typescript source file in the Milady codebase. It contains 1 class, 5 imports.",
+      "languageNotes": "typescript; code; 352 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/core/src/features/secrets/storage/character-store.ts:CharacterSettingsStorage",
+      "type": "class",
+      "name": "CharacterSettingsStorage",
+      "filePath": "eliza/packages/core/src/features/secrets/storage/character-store.ts",
+      "summary": "CharacterSettingsStorage is a class or type declared in eliza/packages/core/src/features/secrets/storage/character-store.ts."
+    },
+    {
+      "tags": [
+        "class"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/secrets/storage/component-store.ts",
+      "type": "file",
+      "name": "component-store.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/storage/component-store.ts",
+      "summary": "component-store.ts is a typescript source file in the Milady codebase. It contains 1 class, 6 imports.",
+      "languageNotes": "typescript; code; 373 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/core/src/features/secrets/storage/component-store.ts:ComponentSecretStorage",
+      "type": "class",
+      "name": "ComponentSecretStorage",
+      "filePath": "eliza/packages/core/src/features/secrets/storage/component-store.ts",
+      "summary": "ComponentSecretStorage is a class or type declared in eliza/packages/core/src/features/secrets/storage/component-store.ts."
+    },
+    {
+      "tags": [
+        "entry-point"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/features/secrets/storage/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/storage/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase. It contains 5 imports.",
+      "languageNotes": "typescript; code; 39 lines"
+    },
+    {
+      "tags": [
+        "class"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/secrets/storage/interface.ts",
+      "type": "file",
+      "name": "interface.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/storage/interface.ts",
+      "summary": "interface.ts is a typescript source file in the Milady codebase. It contains 1 class, 1 imports.",
+      "languageNotes": "typescript; code; 170 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/core/src/features/secrets/storage/interface.ts:CompositeSecretStorage",
+      "type": "class",
+      "name": "CompositeSecretStorage",
+      "filePath": "eliza/packages/core/src/features/secrets/storage/interface.ts",
+      "summary": "CompositeSecretStorage is a class or type declared in eliza/packages/core/src/features/secrets/storage/interface.ts."
+    },
+    {
+      "tags": [
+        "class"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/secrets/storage/memory-store.ts",
+      "type": "file",
+      "name": "memory-store.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/storage/memory-store.ts",
+      "summary": "memory-store.ts is a typescript source file in the Milady codebase. It contains 1 class, 2 imports.",
+      "languageNotes": "typescript; code; 196 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/core/src/features/secrets/storage/memory-store.ts:MemorySecretStorage",
+      "type": "class",
+      "name": "MemorySecretStorage",
+      "filePath": "eliza/packages/core/src/features/secrets/storage/memory-store.ts",
+      "summary": "MemorySecretStorage is a class or type declared in eliza/packages/core/src/features/secrets/storage/memory-store.ts."
+    },
+    {
+      "tags": [
+        "class"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/secrets/storage/world-store.ts",
+      "type": "file",
+      "name": "world-store.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/storage/world-store.ts",
+      "summary": "world-store.ts is a typescript source file in the Milady codebase. It contains 1 class, 5 imports.",
+      "languageNotes": "typescript; code; 406 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/core/src/features/secrets/storage/world-store.ts:WorldMetadataStorage",
+      "type": "class",
+      "name": "WorldMetadataStorage",
+      "filePath": "eliza/packages/core/src/features/secrets/storage/world-store.ts",
+      "summary": "WorldMetadataStorage is a class or type declared in eliza/packages/core/src/features/secrets/storage/world-store.ts."
+    },
+    {
+      "tags": [
+        "class"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/secrets/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/types.ts",
+      "summary": "types.ts is a typescript source file in the Milady codebase. It contains 6 classes.",
+      "languageNotes": "typescript; code; 615 lines"
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/core/src/features/secrets/types.ts:SecretsError",
+      "type": "class",
+      "name": "SecretsError",
+      "filePath": "eliza/packages/core/src/features/secrets/types.ts",
+      "summary": "SecretsError is a class or type declared in eliza/packages/core/src/features/secrets/types.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/core/src/features/secrets/types.ts:PermissionDeniedError",
+      "type": "class",
+      "name": "PermissionDeniedError",
+      "filePath": "eliza/packages/core/src/features/secrets/types.ts",
+      "summary": "PermissionDeniedError is a class or type declared in eliza/packages/core/src/features/secrets/types.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/core/src/features/secrets/types.ts:SecretNotFoundError",
+      "type": "class",
+      "name": "SecretNotFoundError",
+      "filePath": "eliza/packages/core/src/features/secrets/types.ts",
+      "summary": "SecretNotFoundError is a class or type declared in eliza/packages/core/src/features/secrets/types.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/core/src/features/secrets/types.ts:ValidationError",
+      "type": "class",
+      "name": "ValidationError",
+      "filePath": "eliza/packages/core/src/features/secrets/types.ts",
+      "summary": "ValidationError is a class or type declared in eliza/packages/core/src/features/secrets/types.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/core/src/features/secrets/types.ts:EncryptionError",
+      "type": "class",
+      "name": "EncryptionError",
+      "filePath": "eliza/packages/core/src/features/secrets/types.ts",
+      "summary": "EncryptionError is a class or type declared in eliza/packages/core/src/features/secrets/types.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/core/src/features/secrets/types.ts:StorageError",
+      "type": "class",
+      "name": "StorageError",
+      "filePath": "eliza/packages/core/src/features/secrets/types.ts",
+      "summary": "StorageError is a class or type declared in eliza/packages/core/src/features/secrets/types.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/secrets/validation.ts",
+      "type": "file",
+      "name": "validation.ts",
+      "filePath": "eliza/packages/core/src/features/secrets/validation.ts",
+      "summary": "validation.ts is a typescript source file in the Milady codebase. It contains 7 functions, 2 imports.",
+      "languageNotes": "typescript; code; 492 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/validation.ts:registerValidator",
+      "type": "function",
+      "name": "registerValidator",
+      "filePath": "eliza/packages/core/src/features/secrets/validation.ts",
+      "summary": "registerValidator is a function defined in eliza/packages/core/src/features/secrets/validation.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/validation.ts:unregisterValidator",
+      "type": "function",
+      "name": "unregisterValidator",
+      "filePath": "eliza/packages/core/src/features/secrets/validation.ts",
+      "summary": "unregisterValidator is a function defined in eliza/packages/core/src/features/secrets/validation.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/validation.ts:getValidator",
+      "type": "function",
+      "name": "getValidator",
+      "filePath": "eliza/packages/core/src/features/secrets/validation.ts",
+      "summary": "getValidator is a function defined in eliza/packages/core/src/features/secrets/validation.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/validation.ts:validateSecret",
+      "type": "function",
+      "name": "validateSecret",
+      "filePath": "eliza/packages/core/src/features/secrets/validation.ts",
+      "summary": "validateSecret is a function defined in eliza/packages/core/src/features/secrets/validation.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/validation.ts:inferValidationStrategy",
+      "type": "function",
+      "name": "inferValidationStrategy",
+      "filePath": "eliza/packages/core/src/features/secrets/validation.ts",
+      "summary": "inferValidationStrategy is a function defined in eliza/packages/core/src/features/secrets/validation.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/validation.ts:verifyOpenAIKey",
+      "type": "function",
+      "name": "verifyOpenAIKey",
+      "filePath": "eliza/packages/core/src/features/secrets/validation.ts",
+      "summary": "verifyOpenAIKey is a function defined in eliza/packages/core/src/features/secrets/validation.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/secrets/validation.ts:verifyAnthropicKey",
+      "type": "function",
+      "name": "verifyAnthropicKey",
+      "filePath": "eliza/packages/core/src/features/secrets/validation.ts",
+      "summary": "verifyAnthropicKey is a function defined in eliza/packages/core/src/features/secrets/validation.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/await-child-agent-decision.test.ts",
+      "type": "file",
+      "name": "await-child-agent-decision.test.ts",
+      "filePath": "eliza/packages/core/src/features/sub-agent-credentials/actions/await-child-agent-decision.test.ts",
+      "summary": "await-child-agent-decision.test.ts is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 85 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/sub-agent-credentials/actions/await-child-agent-decision.test.ts:createRuntime",
+      "type": "function",
+      "name": "createRuntime",
+      "filePath": "eliza/packages/core/src/features/sub-agent-credentials/actions/await-child-agent-decision.test.ts",
+      "summary": "createRuntime is a function defined in eliza/packages/core/src/features/sub-agent-credentials/actions/await-child-agent-decision.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/sub-agent-credentials/actions/await-child-agent-decision.test.ts:message",
+      "type": "function",
+      "name": "message",
+      "filePath": "eliza/packages/core/src/features/sub-agent-credentials/actions/await-child-agent-decision.test.ts",
+      "summary": "message is a function defined in eliza/packages/core/src/features/sub-agent-credentials/actions/await-child-agent-decision.test.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/await-child-agent-decision.ts",
+      "type": "file",
+      "name": "await-child-agent-decision.ts",
+      "filePath": "eliza/packages/core/src/features/sub-agent-credentials/actions/await-child-agent-decision.ts",
+      "summary": "await-child-agent-decision.ts is a typescript source file in the Milady codebase. It contains 2 functions, 3 imports.",
+      "languageNotes": "typescript; code; 152 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/sub-agent-credentials/actions/await-child-agent-decision.ts:readParams",
+      "type": "function",
+      "name": "readParams",
+      "filePath": "eliza/packages/core/src/features/sub-agent-credentials/actions/await-child-agent-decision.ts",
+      "summary": "readParams is a function defined in eliza/packages/core/src/features/sub-agent-credentials/actions/await-child-agent-decision.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/sub-agent-credentials/actions/await-child-agent-decision.ts:getBus",
+      "type": "function",
+      "name": "getBus",
+      "filePath": "eliza/packages/core/src/features/sub-agent-credentials/actions/await-child-agent-decision.ts",
+      "summary": "getBus is a function defined in eliza/packages/core/src/features/sub-agent-credentials/actions/await-child-agent-decision.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/declare-sub-agent-credential-scope.test.ts",
+      "type": "file",
+      "name": "declare-sub-agent-credential-scope.test.ts",
+      "filePath": "eliza/packages/core/src/features/sub-agent-credentials/actions/declare-sub-agent-credential-scope.test.ts",
+      "summary": "declare-sub-agent-credential-scope.test.ts is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 114 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/sub-agent-credentials/actions/declare-sub-agent-credential-scope.test.ts:createRuntime",
+      "type": "function",
+      "name": "createRuntime",
+      "filePath": "eliza/packages/core/src/features/sub-agent-credentials/actions/declare-sub-agent-credential-scope.test.ts",
+      "summary": "createRuntime is a function defined in eliza/packages/core/src/features/sub-agent-credentials/actions/declare-sub-agent-credential-scope.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/sub-agent-credentials/actions/declare-sub-agent-credential-scope.test.ts:message",
+      "type": "function",
+      "name": "message",
+      "filePath": "eliza/packages/core/src/features/sub-agent-credentials/actions/declare-sub-agent-credential-scope.test.ts",
+      "summary": "message is a function defined in eliza/packages/core/src/features/sub-agent-credentials/actions/declare-sub-agent-credential-scope.test.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/declare-sub-agent-credential-scope.ts",
+      "type": "file",
+      "name": "declare-sub-agent-credential-scope.ts",
+      "filePath": "eliza/packages/core/src/features/sub-agent-credentials/actions/declare-sub-agent-credential-scope.ts",
+      "summary": "declare-sub-agent-credential-scope.ts is a typescript source file in the Milady codebase. It contains 2 functions, 3 imports.",
+      "languageNotes": "typescript; code; 200 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/sub-agent-credentials/actions/declare-sub-agent-credential-scope.ts:readParams",
+      "type": "function",
+      "name": "readParams",
+      "filePath": "eliza/packages/core/src/features/sub-agent-credentials/actions/declare-sub-agent-credential-scope.ts",
+      "summary": "readParams is a function defined in eliza/packages/core/src/features/sub-agent-credentials/actions/declare-sub-agent-credential-scope.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/sub-agent-credentials/actions/declare-sub-agent-credential-scope.ts:getBridge",
+      "type": "function",
+      "name": "getBridge",
+      "filePath": "eliza/packages/core/src/features/sub-agent-credentials/actions/declare-sub-agent-credential-scope.ts",
+      "summary": "getBridge is a function defined in eliza/packages/core/src/features/sub-agent-credentials/actions/declare-sub-agent-credential-scope.ts."
+    },
+    {
+      "tags": [
+        "entry-point"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/core/src/features/sub-agent-credentials/actions/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 4 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/retrieve-child-agent-results.test.ts",
+      "type": "file",
+      "name": "retrieve-child-agent-results.test.ts",
+      "filePath": "eliza/packages/core/src/features/sub-agent-credentials/actions/retrieve-child-agent-results.test.ts",
+      "summary": "retrieve-child-agent-results.test.ts is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 65 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/sub-agent-credentials/actions/retrieve-child-agent-results.test.ts:createRuntime",
+      "type": "function",
+      "name": "createRuntime",
+      "filePath": "eliza/packages/core/src/features/sub-agent-credentials/actions/retrieve-child-agent-results.test.ts",
+      "summary": "createRuntime is a function defined in eliza/packages/core/src/features/sub-agent-credentials/actions/retrieve-child-agent-results.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/sub-agent-credentials/actions/retrieve-child-agent-results.test.ts:message",
+      "type": "function",
+      "name": "message",
+      "filePath": "eliza/packages/core/src/features/sub-agent-credentials/actions/retrieve-child-agent-results.test.ts",
+      "summary": "message is a function defined in eliza/packages/core/src/features/sub-agent-credentials/actions/retrieve-child-agent-results.test.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/retrieve-child-agent-results.ts",
+      "type": "file",
+      "name": "retrieve-child-agent-results.ts",
+      "filePath": "eliza/packages/core/src/features/sub-agent-credentials/actions/retrieve-child-agent-results.ts",
+      "summary": "retrieve-child-agent-results.ts is a typescript source file in the Milady codebase. It contains 2 functions, 3 imports.",
+      "languageNotes": "typescript; code; 133 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/sub-agent-credentials/actions/retrieve-child-agent-results.ts:readParams",
+      "type": "function",
+      "name": "readParams",
+      "filePath": "eliza/packages/core/src/features/sub-agent-credentials/actions/retrieve-child-agent-results.ts",
+      "summary": "readParams is a function defined in eliza/packages/core/src/features/sub-agent-credentials/actions/retrieve-child-agent-results.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/sub-agent-credentials/actions/retrieve-child-agent-results.ts:getClient",
+      "type": "function",
+      "name": "getClient",
+      "filePath": "eliza/packages/core/src/features/sub-agent-credentials/actions/retrieve-child-agent-results.ts",
+      "summary": "getClient is a function defined in eliza/packages/core/src/features/sub-agent-credentials/actions/retrieve-child-agent-results.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/tunnel-credential-to-child-session.test.ts",
+      "type": "file",
+      "name": "tunnel-credential-to-child-session.test.ts",
+      "filePath": "eliza/packages/core/src/features/sub-agent-credentials/actions/tunnel-credential-to-child-session.test.ts",
+      "summary": "tunnel-credential-to-child-session.test.ts is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 88 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/sub-agent-credentials/actions/tunnel-credential-to-child-session.test.ts:createRuntime",
+      "type": "function",
+      "name": "createRuntime",
+      "filePath": "eliza/packages/core/src/features/sub-agent-credentials/actions/tunnel-credential-to-child-session.test.ts",
+      "summary": "createRuntime is a function defined in eliza/packages/core/src/features/sub-agent-credentials/actions/tunnel-credential-to-child-session.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/sub-agent-credentials/actions/tunnel-credential-to-child-session.test.ts:message",
+      "type": "function",
+      "name": "message",
+      "filePath": "eliza/packages/core/src/features/sub-agent-credentials/actions/tunnel-credential-to-child-session.test.ts",
+      "summary": "message is a function defined in eliza/packages/core/src/features/sub-agent-credentials/actions/tunnel-credential-to-child-session.test.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/tunnel-credential-to-child-session.ts",
+      "type": "file",
+      "name": "tunnel-credential-to-child-session.ts",
+      "filePath": "eliza/packages/core/src/features/sub-agent-credentials/actions/tunnel-credential-to-child-session.ts",
+      "summary": "tunnel-credential-to-child-session.ts is a typescript source file in the Milady codebase. It contains 2 functions, 3 imports.",
+      "languageNotes": "typescript; code; 171 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/sub-agent-credentials/actions/tunnel-credential-to-child-session.ts:readParams",
+      "type": "function",
+      "name": "readParams",
+      "filePath": "eliza/packages/core/src/features/sub-agent-credentials/actions/tunnel-credential-to-child-session.ts",
+      "summary": "readParams is a function defined in eliza/packages/core/src/features/sub-agent-credentials/actions/tunnel-credential-to-child-session.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/sub-agent-credentials/actions/tunnel-credential-to-child-session.ts:getBridge",
+      "type": "function",
+      "name": "getBridge",
+      "filePath": "eliza/packages/core/src/features/sub-agent-credentials/actions/tunnel-credential-to-child-session.ts",
+      "summary": "getBridge is a function defined in eliza/packages/core/src/features/sub-agent-credentials/actions/tunnel-credential-to-child-session.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/features/sub-agent-credentials/plugin.test.ts",
+      "type": "file",
+      "name": "plugin.test.ts",
+      "filePath": "eliza/packages/core/src/features/sub-agent-credentials/plugin.test.ts",
+      "summary": "plugin.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 23 lines"
+    },
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/features/sub-agent-credentials/plugin.ts",
+      "type": "file",
+      "name": "plugin.ts",
+      "filePath": "eliza/packages/core/src/features/sub-agent-credentials/plugin.ts",
+      "summary": "plugin.ts is a typescript source file in the Milady codebase. It contains 3 imports.",
+      "languageNotes": "typescript; code; 41 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/sub-agent-credentials/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "eliza/packages/core/src/features/sub-agent-credentials/types.ts",
+      "summary": "types.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 88 lines"
+    },
+    {
+      "tags": [
+        "test",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.test.ts",
+      "type": "file",
+      "name": "TrajectoriesService.test.ts",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.test.ts",
+      "summary": "TrajectoriesService.test.ts is a typescript source file in the Milady codebase. It contains 3 functions, 2 imports.",
+      "languageNotes": "typescript; code; 174 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.test.ts:createRuntimeWithoutSql",
+      "type": "function",
+      "name": "createRuntimeWithoutSql",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.test.ts",
+      "summary": "createRuntimeWithoutSql is a function defined in eliza/packages/core/src/features/trajectories/TrajectoriesService.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.test.ts:makeTrajectoryRow",
+      "type": "function",
+      "name": "makeTrajectoryRow",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.test.ts",
+      "summary": "makeTrajectoryRow is a function defined in eliza/packages/core/src/features/trajectories/TrajectoriesService.test.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.test.ts:extractSqlStringAssignment",
+      "type": "function",
+      "name": "extractSqlStringAssignment",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.test.ts",
+      "summary": "extractSqlStringAssignment is a function defined in eliza/packages/core/src/features/trajectories/TrajectoriesService.test.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "type": "file",
+      "name": "TrajectoriesService.ts",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "summary": "TrajectoriesService.ts is a typescript source file in the Milady codebase. It contains 31 functions, 1 class, 7 imports.",
+      "languageNotes": "typescript; code; 2695 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:asNumber",
+      "type": "function",
+      "name": "asNumber",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "summary": "asNumber is a function defined in eliza/packages/core/src/features/trajectories/TrajectoriesService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:asString",
+      "type": "function",
+      "name": "asString",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "summary": "asString is a function defined in eliza/packages/core/src/features/trajectories/TrajectoriesService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:asIsoString",
+      "type": "function",
+      "name": "asIsoString",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "summary": "asIsoString is a function defined in eliza/packages/core/src/features/trajectories/TrajectoriesService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:pickCell",
+      "type": "function",
+      "name": "pickCell",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "summary": "pickCell is a function defined in eliza/packages/core/src/features/trajectories/TrajectoriesService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:isPlainRecord",
+      "type": "function",
+      "name": "isPlainRecord",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "summary": "isPlainRecord is a function defined in eliza/packages/core/src/features/trajectories/TrajectoriesService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:isJsonValue",
+      "type": "function",
+      "name": "isJsonValue",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "summary": "isJsonValue is a function defined in eliza/packages/core/src/features/trajectories/TrajectoriesService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:isJsonObject",
+      "type": "function",
+      "name": "isJsonObject",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "summary": "isJsonObject is a function defined in eliza/packages/core/src/features/trajectories/TrajectoriesService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:stringValue",
+      "type": "function",
+      "name": "stringValue",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "summary": "stringValue is a function defined in eliza/packages/core/src/features/trajectories/TrajectoriesService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:numberValue",
+      "type": "function",
+      "name": "numberValue",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "summary": "numberValue is a function defined in eliza/packages/core/src/features/trajectories/TrajectoriesService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:booleanValue",
+      "type": "function",
+      "name": "booleanValue",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "summary": "booleanValue is a function defined in eliza/packages/core/src/features/trajectories/TrajectoriesService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:stringArrayValue",
+      "type": "function",
+      "name": "stringArrayValue",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "summary": "stringArrayValue is a function defined in eliza/packages/core/src/features/trajectories/TrajectoriesService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:truncateTrajectoryString",
+      "type": "function",
+      "name": "truncateTrajectoryString",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "summary": "truncateTrajectoryString is a function defined in eliza/packages/core/src/features/trajectories/TrajectoriesService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:sanitizeTrajectoryJsonValue",
+      "type": "function",
+      "name": "sanitizeTrajectoryJsonValue",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "summary": "sanitizeTrajectoryJsonValue is a function defined in eliza/packages/core/src/features/trajectories/TrajectoriesService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:sanitizeTrajectoryJsonArray",
+      "type": "function",
+      "name": "sanitizeTrajectoryJsonArray",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "summary": "sanitizeTrajectoryJsonArray is a function defined in eliza/packages/core/src/features/trajectories/TrajectoriesService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:sanitizeTrajectoryJsonOptional",
+      "type": "function",
+      "name": "sanitizeTrajectoryJsonOptional",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "summary": "sanitizeTrajectoryJsonOptional is a function defined in eliza/packages/core/src/features/trajectories/TrajectoriesService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:sanitizeTrajectoryText",
+      "type": "function",
+      "name": "sanitizeTrajectoryText",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "summary": "sanitizeTrajectoryText is a function defined in eliza/packages/core/src/features/trajectories/TrajectoriesService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:stringifyTrajectoryJsonForSql",
+      "type": "function",
+      "name": "stringifyTrajectoryJsonForSql",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "summary": "stringifyTrajectoryJsonForSql is a function defined in eliza/packages/core/src/features/trajectories/TrajectoriesService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:isEmbeddingLlmCall",
+      "type": "function",
+      "name": "isEmbeddingLlmCall",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "summary": "isEmbeddingLlmCall is a function defined in eliza/packages/core/src/features/trajectories/TrajectoriesService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:parseJsonCell",
+      "type": "function",
+      "name": "parseJsonCell",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "summary": "parseJsonCell is a function defined in eliza/packages/core/src/features/trajectories/TrajectoriesService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:parseJsonObjectCell",
+      "type": "function",
+      "name": "parseJsonObjectCell",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "summary": "parseJsonObjectCell is a function defined in eliza/packages/core/src/features/trajectories/TrajectoriesService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeEnvironmentState",
+      "type": "function",
+      "name": "normalizeEnvironmentState",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "summary": "normalizeEnvironmentState is a function defined in eliza/packages/core/src/features/trajectories/TrajectoriesService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeLlmCall",
+      "type": "function",
+      "name": "normalizeLlmCall",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "summary": "normalizeLlmCall is a function defined in eliza/packages/core/src/features/trajectories/TrajectoriesService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeProviderAccess",
+      "type": "function",
+      "name": "normalizeProviderAccess",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "summary": "normalizeProviderAccess is a function defined in eliza/packages/core/src/features/trajectories/TrajectoriesService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeActionAttempt",
+      "type": "function",
+      "name": "normalizeActionAttempt",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "summary": "normalizeActionAttempt is a function defined in eliza/packages/core/src/features/trajectories/TrajectoriesService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeTrajectoryStep",
+      "type": "function",
+      "name": "normalizeTrajectoryStep",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "summary": "normalizeTrajectoryStep is a function defined in eliza/packages/core/src/features/trajectories/TrajectoriesService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:parseTrajectorySteps",
+      "type": "function",
+      "name": "parseTrajectorySteps",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "summary": "parseTrajectorySteps is a function defined in eliza/packages/core/src/features/trajectories/TrajectoriesService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:parseRewardComponents",
+      "type": "function",
+      "name": "parseRewardComponents",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "summary": "parseRewardComponents is a function defined in eliza/packages/core/src/features/trajectories/TrajectoriesService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:parseTrajectoryMetrics",
+      "type": "function",
+      "name": "parseTrajectoryMetrics",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "summary": "parseTrajectoryMetrics is a function defined in eliza/packages/core/src/features/trajectories/TrajectoriesService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:parseTrajectoryMetadata",
+      "type": "function",
+      "name": "parseTrajectoryMetadata",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "summary": "parseTrajectoryMetadata is a function defined in eliza/packages/core/src/features/trajectories/TrajectoriesService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:sqlLiteral",
+      "type": "function",
+      "name": "sqlLiteral",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "summary": "sqlLiteral is a function defined in eliza/packages/core/src/features/trajectories/TrajectoriesService.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:trajectoryRunIdWhereClause",
+      "type": "function",
+      "name": "trajectoryRunIdWhereClause",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "summary": "trajectoryRunIdWhereClause is a function defined in eliza/packages/core/src/features/trajectories/TrajectoriesService.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:TrajectoriesService",
+      "type": "class",
+      "name": "TrajectoriesService",
+      "filePath": "eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "summary": "TrajectoriesService is a class or type declared in eliza/packages/core/src/features/trajectories/TrajectoriesService.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/trajectories/action-interceptor.ts",
+      "type": "file",
+      "name": "action-interceptor.ts",
+      "filePath": "eliza/packages/core/src/features/trajectories/action-interceptor.ts",
+      "summary": "action-interceptor.ts is a typescript source file in the Milady codebase. It contains 9 functions, 4 imports.",
+      "languageNotes": "typescript; code; 318 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/action-interceptor.ts:setTrajectoryContext",
+      "type": "function",
+      "name": "setTrajectoryContext",
+      "filePath": "eliza/packages/core/src/features/trajectories/action-interceptor.ts",
+      "summary": "setTrajectoryContext is a function defined in eliza/packages/core/src/features/trajectories/action-interceptor.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/action-interceptor.ts:getTrajectoryContext",
+      "type": "function",
+      "name": "getTrajectoryContext",
+      "filePath": "eliza/packages/core/src/features/trajectories/action-interceptor.ts",
+      "summary": "getTrajectoryContext is a function defined in eliza/packages/core/src/features/trajectories/action-interceptor.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/action-interceptor.ts:clearTrajectoryContext",
+      "type": "function",
+      "name": "clearTrajectoryContext",
+      "filePath": "eliza/packages/core/src/features/trajectories/action-interceptor.ts",
+      "summary": "clearTrajectoryContext is a function defined in eliza/packages/core/src/features/trajectories/action-interceptor.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/core/src/features/trajectories/action-interceptor.ts:wrapActionWithLogging",
+      "type": "function",
+      "name": "wrapActionWithLogging",
+      "filePath": "eliza/packages/core/src/features/trajectories/action-interceptor.ts",
+      "summary": "wrapActionWithLogging is a function defined in eliza/packages/core/src/features/trajectories/action-interceptor.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/action-interceptor.ts:wrapPluginActions",
+      "type": "function",
+      "name": "wrapPluginActions",
+      "filePath": "eliza/packages/core/src/features/trajectories/action-interceptor.ts",
+      "summary": "wrapPluginActions is a function defined in eliza/packages/core/src/features/trajectories/action-interceptor.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/action-interceptor.ts:logLLMCallFromAction",
+      "type": "function",
+      "name": "logLLMCallFromAction",
+      "filePath": "eliza/packages/core/src/features/trajectories/action-interceptor.ts",
+      "summary": "logLLMCallFromAction is a function defined in eliza/packages/core/src/features/trajectories/action-interceptor.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/action-interceptor.ts:logProviderFromAction",
+      "type": "function",
+      "name": "logProviderFromAction",
+      "filePath": "eliza/packages/core/src/features/trajectories/action-interceptor.ts",
+      "summary": "logProviderFromAction is a function defined in eliza/packages/core/src/features/trajectories/action-interceptor.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/action-interceptor.ts:wrapProviderWithLogging",
+      "type": "function",
+      "name": "wrapProviderWithLogging",
+      "filePath": "eliza/packages/core/src/features/trajectories/action-interceptor.ts",
+      "summary": "wrapProviderWithLogging is a function defined in eliza/packages/core/src/features/trajectories/action-interceptor.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/action-interceptor.ts:wrapPluginProviders",
+      "type": "function",
+      "name": "wrapPluginProviders",
+      "filePath": "eliza/packages/core/src/features/trajectories/action-interceptor.ts",
+      "summary": "wrapPluginProviders is a function defined in eliza/packages/core/src/features/trajectories/action-interceptor.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/trajectories/art-format.ts",
+      "type": "file",
+      "name": "art-format.ts",
+      "filePath": "eliza/packages/core/src/features/trajectories/art-format.ts",
+      "summary": "art-format.ts is a typescript source file in the Milady codebase. It contains 13 functions, 2 imports.",
+      "languageNotes": "typescript; code; 328 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/art-format.ts:toARTMessages",
+      "type": "function",
+      "name": "toARTMessages",
+      "filePath": "eliza/packages/core/src/features/trajectories/art-format.ts",
+      "summary": "toARTMessages is a function defined in eliza/packages/core/src/features/trajectories/art-format.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/art-format.ts:buildSystemMessage",
+      "type": "function",
+      "name": "buildSystemMessage",
+      "filePath": "eliza/packages/core/src/features/trajectories/art-format.ts",
+      "summary": "buildSystemMessage is a function defined in eliza/packages/core/src/features/trajectories/art-format.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/art-format.ts:buildUserMessage",
+      "type": "function",
+      "name": "buildUserMessage",
+      "filePath": "eliza/packages/core/src/features/trajectories/art-format.ts",
+      "summary": "buildUserMessage is a function defined in eliza/packages/core/src/features/trajectories/art-format.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/art-format.ts:buildAssistantMessage",
+      "type": "function",
+      "name": "buildAssistantMessage",
+      "filePath": "eliza/packages/core/src/features/trajectories/art-format.ts",
+      "summary": "buildAssistantMessage is a function defined in eliza/packages/core/src/features/trajectories/art-format.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/art-format.ts:toARTTrajectory",
+      "type": "function",
+      "name": "toARTTrajectory",
+      "filePath": "eliza/packages/core/src/features/trajectories/art-format.ts",
+      "summary": "toARTTrajectory is a function defined in eliza/packages/core/src/features/trajectories/art-format.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/art-format.ts:filterNumericMetrics",
+      "type": "function",
+      "name": "filterNumericMetrics",
+      "filePath": "eliza/packages/core/src/features/trajectories/art-format.ts",
+      "summary": "filterNumericMetrics is a function defined in eliza/packages/core/src/features/trajectories/art-format.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/art-format.ts:extractGameKnowledge",
+      "type": "function",
+      "name": "extractGameKnowledge",
+      "filePath": "eliza/packages/core/src/features/trajectories/art-format.ts",
+      "summary": "extractGameKnowledge is a function defined in eliza/packages/core/src/features/trajectories/art-format.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/art-format.ts:groupTrajectories",
+      "type": "function",
+      "name": "groupTrajectories",
+      "filePath": "eliza/packages/core/src/features/trajectories/art-format.ts",
+      "summary": "groupTrajectories is a function defined in eliza/packages/core/src/features/trajectories/art-format.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/art-format.ts:extractSharedPrefix",
+      "type": "function",
+      "name": "extractSharedPrefix",
+      "filePath": "eliza/packages/core/src/features/trajectories/art-format.ts",
+      "summary": "extractSharedPrefix is a function defined in eliza/packages/core/src/features/trajectories/art-format.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/art-format.ts:removeSharedPrefix",
+      "type": "function",
+      "name": "removeSharedPrefix",
+      "filePath": "eliza/packages/core/src/features/trajectories/art-format.ts",
+      "summary": "removeSharedPrefix is a function defined in eliza/packages/core/src/features/trajectories/art-format.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/art-format.ts:prepareForRULER",
+      "type": "function",
+      "name": "prepareForRULER",
+      "filePath": "eliza/packages/core/src/features/trajectories/art-format.ts",
+      "summary": "prepareForRULER is a function defined in eliza/packages/core/src/features/trajectories/art-format.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/art-format.ts:toARTJSONL",
+      "type": "function",
+      "name": "toARTJSONL",
+      "filePath": "eliza/packages/core/src/features/trajectories/art-format.ts",
+      "summary": "toARTJSONL is a function defined in eliza/packages/core/src/features/trajectories/art-format.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/art-format.ts:validateARTCompatibility",
+      "type": "function",
+      "name": "validateARTCompatibility",
+      "filePath": "eliza/packages/core/src/features/trajectories/art-format.ts",
+      "summary": "validateARTCompatibility is a function defined in eliza/packages/core/src/features/trajectories/art-format.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/trajectories/export.ts",
+      "type": "file",
+      "name": "export.ts",
+      "filePath": "eliza/packages/core/src/features/trajectories/export.ts",
+      "summary": "export.ts is a typescript source file in the Milady codebase. It contains 8 functions, 2 imports.",
+      "languageNotes": "typescript; code; 165 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/export.ts:exportToHuggingFace",
+      "type": "function",
+      "name": "exportToHuggingFace",
+      "filePath": "eliza/packages/core/src/features/trajectories/export.ts",
+      "summary": "exportToHuggingFace is a function defined in eliza/packages/core/src/features/trajectories/export.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/export.ts:exportGroupedByScenario",
+      "type": "function",
+      "name": "exportGroupedByScenario",
+      "filePath": "eliza/packages/core/src/features/trajectories/export.ts",
+      "summary": "exportGroupedByScenario is a function defined in eliza/packages/core/src/features/trajectories/export.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/export.ts:exportForOpenPipeART",
+      "type": "function",
+      "name": "exportForOpenPipeART",
+      "filePath": "eliza/packages/core/src/features/trajectories/export.ts",
+      "summary": "exportForOpenPipeART is a function defined in eliza/packages/core/src/features/trajectories/export.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/export.ts:exportGroupedForGRPO",
+      "type": "function",
+      "name": "exportGroupedForGRPO",
+      "filePath": "eliza/packages/core/src/features/trajectories/export.ts",
+      "summary": "exportGroupedForGRPO is a function defined in eliza/packages/core/src/features/trajectories/export.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/export.ts:filterTrajectories",
+      "type": "function",
+      "name": "filterTrajectories",
+      "filePath": "eliza/packages/core/src/features/trajectories/export.ts",
+      "summary": "filterTrajectories is a function defined in eliza/packages/core/src/features/trajectories/export.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/export.ts:resolveOutputPath",
+      "type": "function",
+      "name": "resolveOutputPath",
+      "filePath": "eliza/packages/core/src/features/trajectories/export.ts",
+      "summary": "resolveOutputPath is a function defined in eliza/packages/core/src/features/trajectories/export.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/export.ts:writeText",
+      "type": "function",
+      "name": "writeText",
+      "filePath": "eliza/packages/core/src/features/trajectories/export.ts",
+      "summary": "writeText is a function defined in eliza/packages/core/src/features/trajectories/export.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/export.ts:writeJson",
+      "type": "function",
+      "name": "writeJson",
+      "filePath": "eliza/packages/core/src/features/trajectories/export.ts",
+      "summary": "writeJson is a function defined in eliza/packages/core/src/features/trajectories/export.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/features/trajectories/game-rewards.ts",
+      "type": "file",
+      "name": "game-rewards.ts",
+      "filePath": "eliza/packages/core/src/features/trajectories/game-rewards.ts",
+      "summary": "game-rewards.ts is a typescript source file in the Milady codebase. It contains 4 functions, 1 imports.",
+      "languageNotes": "typescript; code; 30 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/game-rewards.ts:computeTrajectoryReward",
+      "type": "function",
+      "name": "computeTrajectoryReward",
+      "filePath": "eliza/packages/core/src/features/trajectories/game-rewards.ts",
+      "summary": "computeTrajectoryReward is a function defined in eliza/packages/core/src/features/trajectories/game-rewards.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/game-rewards.ts:computeStepReward",
+      "type": "function",
+      "name": "computeStepReward",
+      "filePath": "eliza/packages/core/src/features/trajectories/game-rewards.ts",
+      "summary": "computeStepReward is a function defined in eliza/packages/core/src/features/trajectories/game-rewards.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/game-rewards.ts:buildGameStateFromDB",
+      "type": "function",
+      "name": "buildGameStateFromDB",
+      "filePath": "eliza/packages/core/src/features/trajectories/game-rewards.ts",
+      "summary": "buildGameStateFromDB is a function defined in eliza/packages/core/src/features/trajectories/game-rewards.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/game-rewards.ts:recomputeTrajectoryRewards",
+      "type": "function",
+      "name": "recomputeTrajectoryRewards",
+      "filePath": "eliza/packages/core/src/features/trajectories/game-rewards.ts",
+      "summary": "recomputeTrajectoryRewards is a function defined in eliza/packages/core/src/features/trajectories/game-rewards.ts."
+    },
+    {
+      "tags": [
+        "entry-point",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/trajectories/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "eliza/packages/core/src/features/trajectories/index.ts",
+      "summary": "index.ts is a typescript source file in the Milady codebase. It contains 7 functions, 5 imports.",
+      "languageNotes": "typescript; code; 451 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/index.ts:cleanupPendingTrajectory",
+      "type": "function",
+      "name": "cleanupPendingTrajectory",
+      "filePath": "eliza/packages/core/src/features/trajectories/index.ts",
+      "summary": "cleanupPendingTrajectory is a function defined in eliza/packages/core/src/features/trajectories/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/index.ts:endPendingTrajectory",
+      "type": "function",
+      "name": "endPendingTrajectory",
+      "filePath": "eliza/packages/core/src/features/trajectories/index.ts",
+      "summary": "endPendingTrajectory is a function defined in eliza/packages/core/src/features/trajectories/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/index.ts:getFinalStatusForRun",
+      "type": "function",
+      "name": "getFinalStatusForRun",
+      "filePath": "eliza/packages/core/src/features/trajectories/index.ts",
+      "summary": "getFinalStatusForRun is a function defined in eliza/packages/core/src/features/trajectories/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/index.ts:readNonEmptyString",
+      "type": "function",
+      "name": "readNonEmptyString",
+      "filePath": "eliza/packages/core/src/features/trajectories/index.ts",
+      "summary": "readNonEmptyString is a function defined in eliza/packages/core/src/features/trajectories/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/index.ts:copyJsonMetadataField",
+      "type": "function",
+      "name": "copyJsonMetadataField",
+      "filePath": "eliza/packages/core/src/features/trajectories/index.ts",
+      "summary": "copyJsonMetadataField is a function defined in eliza/packages/core/src/features/trajectories/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/index.ts:readStoredWebConversation",
+      "type": "function",
+      "name": "readStoredWebConversation",
+      "filePath": "eliza/packages/core/src/features/trajectories/index.ts",
+      "summary": "readStoredWebConversation is a function defined in eliza/packages/core/src/features/trajectories/index.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/index.ts:buildTrajectoryMetadata",
+      "type": "function",
+      "name": "buildTrajectoryMetadata",
+      "filePath": "eliza/packages/core/src/features/trajectories/index.ts",
+      "summary": "buildTrajectoryMetadata is a function defined in eliza/packages/core/src/features/trajectories/index.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/trajectories/integration.ts",
+      "type": "file",
+      "name": "integration.ts",
+      "filePath": "eliza/packages/core/src/features/trajectories/integration.ts",
+      "summary": "integration.ts is a typescript source file in the Milady codebase. It contains 5 functions, 3 imports.",
+      "languageNotes": "typescript; code; 181 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/integration.ts:startAutonomousTick",
+      "type": "function",
+      "name": "startAutonomousTick",
+      "filePath": "eliza/packages/core/src/features/trajectories/integration.ts",
+      "summary": "startAutonomousTick is a function defined in eliza/packages/core/src/features/trajectories/integration.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/integration.ts:endAutonomousTick",
+      "type": "function",
+      "name": "endAutonomousTick",
+      "filePath": "eliza/packages/core/src/features/trajectories/integration.ts",
+      "summary": "endAutonomousTick is a function defined in eliza/packages/core/src/features/trajectories/integration.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/integration.ts:loggedLLMCall",
+      "type": "function",
+      "name": "loggedLLMCall",
+      "filePath": "eliza/packages/core/src/features/trajectories/integration.ts",
+      "summary": "loggedLLMCall is a function defined in eliza/packages/core/src/features/trajectories/integration.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/integration.ts:logProviderAccess",
+      "type": "function",
+      "name": "logProviderAccess",
+      "filePath": "eliza/packages/core/src/features/trajectories/integration.ts",
+      "summary": "logProviderAccess is a function defined in eliza/packages/core/src/features/trajectories/integration.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/integration.ts:withTrajectoryLogging",
+      "type": "function",
+      "name": "withTrajectoryLogging",
+      "filePath": "eliza/packages/core/src/features/trajectories/integration.ts",
+      "summary": "withTrajectoryLogging is a function defined in eliza/packages/core/src/features/trajectories/integration.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/core/src/features/trajectories/pricing-types.ts",
+      "type": "file",
+      "name": "pricing-types.ts",
+      "filePath": "eliza/packages/core/src/features/trajectories/pricing-types.ts",
+      "summary": "pricing-types.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 28 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/trajectories/pricing.test.ts",
+      "type": "file",
+      "name": "pricing.test.ts",
+      "filePath": "eliza/packages/core/src/features/trajectories/pricing.test.ts",
+      "summary": "pricing.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 296 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/core/src/features/trajectories/pricing.ts",
+      "type": "file",
+      "name": "pricing.ts",
+      "filePath": "eliza/packages/core/src/features/trajectories/pricing.ts",
+      "summary": "pricing.ts is a typescript source file in the Milady codebase. It contains 4 functions, 1 imports.",
+      "languageNotes": "typescript; code; 465 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/pricing.ts:lookupModelContextWindow",
+      "type": "function",
+      "name": "lookupModelContextWindow",
+      "filePath": "eliza/packages/core/src/features/trajectories/pricing.ts",
+      "summary": "lookupModelContextWindow is a function defined in eliza/packages/core/src/features/trajectories/pricing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/pricing.ts:lookupModelPrice",
+      "type": "function",
+      "name": "lookupModelPrice",
+      "filePath": "eliza/packages/core/src/features/trajectories/pricing.ts",
+      "summary": "lookupModelPrice is a function defined in eliza/packages/core/src/features/trajectories/pricing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/pricing.ts:computeCallCostUsd",
+      "type": "function",
+      "name": "computeCallCostUsd",
+      "filePath": "eliza/packages/core/src/features/trajectories/pricing.ts",
+      "summary": "computeCallCostUsd is a function defined in eliza/packages/core/src/features/trajectories/pricing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/pricing.ts:isLocalProvider",
+      "type": "function",
+      "name": "isLocalProvider",
+      "filePath": "eliza/packages/core/src/features/trajectories/pricing.ts",
+      "summary": "isLocalProvider is a function defined in eliza/packages/core/src/features/trajectories/pricing.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/core/src/features/trajectories/reward-service.ts",
+      "type": "file",
+      "name": "reward-service.ts",
+      "filePath": "eliza/packages/core/src/features/trajectories/reward-service.ts",
+      "summary": "reward-service.ts is a typescript source file in the Milady codebase. It contains 3 functions, 1 class, 1 imports.",
+      "languageNotes": "typescript; code; 123 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/reward-service.ts:createRewardService",
+      "type": "function",
+      "name": "createRewardService",
+      "filePath": "eliza/packages/core/src/features/trajectories/reward-service.ts",
+      "summary": "createRewardService is a function defined in eliza/packages/core/src/features/trajectories/reward-service.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/reward-service.ts:scoreTrajectory",
+      "type": "function",
+      "name": "scoreTrajectory",
+      "filePath": "eliza/packages/core/src/features/trajectories/reward-service.ts",
+      "summary": "scoreTrajectory is a function defined in eliza/packages/core/src/features/trajectories/reward-service.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/core/src/features/trajectories/reward-service.ts:scoreTrajectoryGroup",
+      "type": "function",
+      "name": "scoreTrajectoryGroup",
+      "filePath": "eliza/packages/core/src/features/trajectories/reward-service.ts",
+      "summary": "scoreTrajectoryGroup is a function defined in eliza/packages/core/src/features/trajectories/reward-service.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/core/src/features/trajectories/reward-service.ts:RewardService",
+      "type": "class",
+      "name": "RewardService",
+      "filePath": "eliza/packages/core/src/features/trajectories/reward-service.ts",
+      "summary": "RewardService is a class or type declared in eliza/packages/core/src/features/trajectories/reward-service.ts."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/setup/provider.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/setup/provider.ts:formatSettingValue",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/setup/provider.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/setup/provider.ts:generateStatusMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/secrets/setup/provider.ts:generateStatusMessage",
+      "target": "function:eliza/packages/core/src/features/secrets/setup/provider.ts:formatSettingValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/setup/service.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/setup/service.ts:isTelegramDeepLinkService",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/setup/service.ts",
+      "target": "class:eliza/packages/core/src/features/secrets/setup/service.ts:SetupService",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/storage/character-store.ts",
+      "target": "class:eliza/packages/core/src/features/secrets/storage/character-store.ts:CharacterSettingsStorage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/storage/component-store.ts",
+      "target": "class:eliza/packages/core/src/features/secrets/storage/component-store.ts:ComponentSecretStorage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/storage/interface.ts",
+      "target": "class:eliza/packages/core/src/features/secrets/storage/interface.ts:CompositeSecretStorage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/storage/memory-store.ts",
+      "target": "class:eliza/packages/core/src/features/secrets/storage/memory-store.ts:MemorySecretStorage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/storage/world-store.ts",
+      "target": "class:eliza/packages/core/src/features/secrets/storage/world-store.ts:WorldMetadataStorage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/types.ts",
+      "target": "class:eliza/packages/core/src/features/secrets/types.ts:SecretsError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/types.ts",
+      "target": "class:eliza/packages/core/src/features/secrets/types.ts:PermissionDeniedError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/types.ts",
+      "target": "class:eliza/packages/core/src/features/secrets/types.ts:SecretNotFoundError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/types.ts",
+      "target": "class:eliza/packages/core/src/features/secrets/types.ts:ValidationError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/types.ts",
+      "target": "class:eliza/packages/core/src/features/secrets/types.ts:EncryptionError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/types.ts",
+      "target": "class:eliza/packages/core/src/features/secrets/types.ts:StorageError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/validation.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/validation.ts:registerValidator",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/validation.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/validation.ts:unregisterValidator",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/validation.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/validation.ts:getValidator",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/validation.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/validation.ts:validateSecret",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/validation.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/validation.ts:inferValidationStrategy",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/validation.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/validation.ts:verifyOpenAIKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/secrets/validation.ts",
+      "target": "function:eliza/packages/core/src/features/secrets/validation.ts:verifyAnthropicKey",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/secrets/validation.ts:validateSecret",
+      "target": "function:eliza/packages/core/src/features/secrets/validation.ts:getValidator",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/await-child-agent-decision.test.ts",
+      "target": "function:eliza/packages/core/src/features/sub-agent-credentials/actions/await-child-agent-decision.test.ts:createRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/await-child-agent-decision.test.ts",
+      "target": "function:eliza/packages/core/src/features/sub-agent-credentials/actions/await-child-agent-decision.test.ts:message",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/await-child-agent-decision.ts",
+      "target": "function:eliza/packages/core/src/features/sub-agent-credentials/actions/await-child-agent-decision.ts:readParams",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/await-child-agent-decision.ts",
+      "target": "function:eliza/packages/core/src/features/sub-agent-credentials/actions/await-child-agent-decision.ts:getBus",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/declare-sub-agent-credential-scope.test.ts",
+      "target": "function:eliza/packages/core/src/features/sub-agent-credentials/actions/declare-sub-agent-credential-scope.test.ts:createRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/declare-sub-agent-credential-scope.test.ts",
+      "target": "function:eliza/packages/core/src/features/sub-agent-credentials/actions/declare-sub-agent-credential-scope.test.ts:message",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/declare-sub-agent-credential-scope.ts",
+      "target": "function:eliza/packages/core/src/features/sub-agent-credentials/actions/declare-sub-agent-credential-scope.ts:readParams",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/declare-sub-agent-credential-scope.ts",
+      "target": "function:eliza/packages/core/src/features/sub-agent-credentials/actions/declare-sub-agent-credential-scope.ts:getBridge",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/retrieve-child-agent-results.test.ts",
+      "target": "function:eliza/packages/core/src/features/sub-agent-credentials/actions/retrieve-child-agent-results.test.ts:createRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/retrieve-child-agent-results.test.ts",
+      "target": "function:eliza/packages/core/src/features/sub-agent-credentials/actions/retrieve-child-agent-results.test.ts:message",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/retrieve-child-agent-results.ts",
+      "target": "function:eliza/packages/core/src/features/sub-agent-credentials/actions/retrieve-child-agent-results.ts:readParams",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/retrieve-child-agent-results.ts",
+      "target": "function:eliza/packages/core/src/features/sub-agent-credentials/actions/retrieve-child-agent-results.ts:getClient",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/tunnel-credential-to-child-session.test.ts",
+      "target": "function:eliza/packages/core/src/features/sub-agent-credentials/actions/tunnel-credential-to-child-session.test.ts:createRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/tunnel-credential-to-child-session.test.ts",
+      "target": "function:eliza/packages/core/src/features/sub-agent-credentials/actions/tunnel-credential-to-child-session.test.ts:message",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/tunnel-credential-to-child-session.ts",
+      "target": "function:eliza/packages/core/src/features/sub-agent-credentials/actions/tunnel-credential-to-child-session.ts:readParams",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/tunnel-credential-to-child-session.ts",
+      "target": "function:eliza/packages/core/src/features/sub-agent-credentials/actions/tunnel-credential-to-child-session.ts:getBridge",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.test.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.test.ts:createRuntimeWithoutSql",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.test.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.test.ts:makeTrajectoryRow",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.test.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.test.ts:extractSqlStringAssignment",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:asNumber",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:asString",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:asIsoString",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:pickCell",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:isPlainRecord",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:isJsonValue",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:isJsonObject",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:stringValue",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:numberValue",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:booleanValue",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:stringArrayValue",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:truncateTrajectoryString",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:sanitizeTrajectoryJsonValue",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:sanitizeTrajectoryJsonArray",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:sanitizeTrajectoryJsonOptional",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:sanitizeTrajectoryText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:stringifyTrajectoryJsonForSql",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:isEmbeddingLlmCall",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:parseJsonCell",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:parseJsonObjectCell",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeEnvironmentState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeLlmCall",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeProviderAccess",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeActionAttempt",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeTrajectoryStep",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:parseTrajectorySteps",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:parseRewardComponents",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:parseTrajectoryMetrics",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:parseTrajectoryMetadata",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:sqlLiteral",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:trajectoryRunIdWhereClause",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "class:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:TrajectoriesService",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:asIsoString",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:asString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:isJsonValue",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:isPlainRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:isJsonObject",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:isPlainRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:isJsonObject",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:isJsonValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:sanitizeTrajectoryJsonValue",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:truncateTrajectoryString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:sanitizeTrajectoryJsonArray",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:sanitizeTrajectoryJsonValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:sanitizeTrajectoryJsonOptional",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:sanitizeTrajectoryJsonValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:sanitizeTrajectoryText",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:sanitizeTrajectoryJsonValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:stringifyTrajectoryJsonForSql",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:sanitizeTrajectoryJsonValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:parseJsonCell",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:isJsonValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:parseJsonCell",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:isJsonValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:parseJsonObjectCell",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:parseJsonCell",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:parseJsonObjectCell",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:isJsonObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeEnvironmentState",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:isPlainRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeEnvironmentState",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:numberValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeEnvironmentState",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:numberValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeEnvironmentState",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:numberValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeEnvironmentState",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:numberValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeEnvironmentState",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:numberValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeEnvironmentState",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:numberValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeEnvironmentState",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:isJsonObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeLlmCall",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:isPlainRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeLlmCall",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:stringValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeLlmCall",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:numberValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeLlmCall",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:stringValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeLlmCall",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:stringValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeLlmCall",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:stringValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeLlmCall",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:stringValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeLlmCall",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:numberValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeLlmCall",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:numberValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeLlmCall",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:stringValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeLlmCall",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:stringValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeLlmCall",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:numberValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeLlmCall",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:stringArrayValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeProviderAccess",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:isPlainRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeProviderAccess",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:stringValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeProviderAccess",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:stringValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeProviderAccess",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:numberValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeProviderAccess",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:isJsonObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeProviderAccess",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:stringValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeProviderAccess",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:isJsonObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeProviderAccess",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:stringValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeActionAttempt",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:isPlainRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeActionAttempt",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:stringValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeActionAttempt",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:numberValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeActionAttempt",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:stringValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeActionAttempt",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:stringValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeActionAttempt",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:isJsonObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeActionAttempt",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:booleanValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeActionAttempt",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:stringValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeActionAttempt",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:stringValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeActionAttempt",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:isJsonObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeActionAttempt",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:stringValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeActionAttempt",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:numberValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeTrajectoryStep",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:isPlainRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeTrajectoryStep",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:stringValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeTrajectoryStep",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:numberValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeTrajectoryStep",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:numberValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeTrajectoryStep",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeEnvironmentState",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeTrajectoryStep",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:isJsonObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeTrajectoryStep",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeActionAttempt",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeTrajectoryStep",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:numberValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeTrajectoryStep",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:booleanValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeTrajectoryStep",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeLlmCall",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeTrajectoryStep",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeProviderAccess",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeTrajectoryStep",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:stringValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeTrajectoryStep",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:isJsonObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:parseTrajectorySteps",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:parseJsonCell",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:parseTrajectorySteps",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:normalizeTrajectoryStep",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:parseRewardComponents",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:parseJsonObjectCell",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:parseRewardComponents",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:isJsonObject",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:parseRewardComponents",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:stringValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:parseRewardComponents",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:stringValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:parseTrajectoryMetrics",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:parseJsonObjectCell",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:parseTrajectoryMetadata",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:parseJsonObjectCell",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:sqlLiteral",
+      "target": "function:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts:stringifyTrajectoryJsonForSql",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/action-interceptor.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/action-interceptor.ts:setTrajectoryContext",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/action-interceptor.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/action-interceptor.ts:getTrajectoryContext",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/action-interceptor.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/action-interceptor.ts:clearTrajectoryContext",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/action-interceptor.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/action-interceptor.ts:wrapActionWithLogging",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/action-interceptor.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/action-interceptor.ts:wrapPluginActions",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/action-interceptor.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/action-interceptor.ts:logLLMCallFromAction",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/action-interceptor.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/action-interceptor.ts:logProviderFromAction",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/action-interceptor.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/action-interceptor.ts:wrapProviderWithLogging",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/action-interceptor.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/action-interceptor.ts:wrapPluginProviders",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/action-interceptor.ts:wrapActionWithLogging",
+      "target": "function:eliza/packages/core/src/features/trajectories/action-interceptor.ts:getTrajectoryContext",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/action-interceptor.ts:wrapPluginActions",
+      "target": "function:eliza/packages/core/src/features/trajectories/action-interceptor.ts:wrapActionWithLogging",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/action-interceptor.ts:wrapProviderWithLogging",
+      "target": "function:eliza/packages/core/src/features/trajectories/action-interceptor.ts:getTrajectoryContext",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/action-interceptor.ts:wrapPluginProviders",
+      "target": "function:eliza/packages/core/src/features/trajectories/action-interceptor.ts:wrapProviderWithLogging",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/art-format.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/art-format.ts:toARTMessages",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/art-format.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/art-format.ts:buildSystemMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/art-format.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/art-format.ts:buildUserMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/art-format.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/art-format.ts:buildAssistantMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/art-format.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/art-format.ts:toARTTrajectory",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/art-format.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/art-format.ts:filterNumericMetrics",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/art-format.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/art-format.ts:extractGameKnowledge",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/art-format.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/art-format.ts:groupTrajectories",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/art-format.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/art-format.ts:extractSharedPrefix",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/art-format.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/art-format.ts:removeSharedPrefix",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/art-format.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/art-format.ts:prepareForRULER",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/art-format.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/art-format.ts:toARTJSONL",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/art-format.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/art-format.ts:validateARTCompatibility",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/art-format.ts:toARTMessages",
+      "target": "function:eliza/packages/core/src/features/trajectories/art-format.ts:buildSystemMessage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/art-format.ts:toARTMessages",
+      "target": "function:eliza/packages/core/src/features/trajectories/art-format.ts:buildUserMessage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/art-format.ts:toARTMessages",
+      "target": "function:eliza/packages/core/src/features/trajectories/art-format.ts:buildAssistantMessage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/art-format.ts:toARTTrajectory",
+      "target": "function:eliza/packages/core/src/features/trajectories/art-format.ts:toARTMessages",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/art-format.ts:toARTTrajectory",
+      "target": "function:eliza/packages/core/src/features/trajectories/art-format.ts:extractGameKnowledge",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/art-format.ts:toARTTrajectory",
+      "target": "function:eliza/packages/core/src/features/trajectories/art-format.ts:filterNumericMetrics",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/art-format.ts:groupTrajectories",
+      "target": "function:eliza/packages/core/src/features/trajectories/art-format.ts:extractSharedPrefix",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/art-format.ts:extractSharedPrefix",
+      "target": "function:eliza/packages/core/src/features/trajectories/art-format.ts:toARTMessages",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/art-format.ts:prepareForRULER",
+      "target": "function:eliza/packages/core/src/features/trajectories/art-format.ts:toARTTrajectory",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/art-format.ts:prepareForRULER",
+      "target": "function:eliza/packages/core/src/features/trajectories/art-format.ts:extractSharedPrefix",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/art-format.ts:prepareForRULER",
+      "target": "function:eliza/packages/core/src/features/trajectories/art-format.ts:removeSharedPrefix",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/art-format.ts:toARTJSONL",
+      "target": "function:eliza/packages/core/src/features/trajectories/art-format.ts:toARTTrajectory",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/art-format.ts:validateARTCompatibility",
+      "target": "function:eliza/packages/core/src/features/trajectories/art-format.ts:toARTTrajectory",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/export.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/export.ts:exportToHuggingFace",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/export.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/export.ts:exportGroupedByScenario",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/export.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/export.ts:exportForOpenPipeART",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/export.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/export.ts:exportGroupedForGRPO",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/export.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/export.ts:filterTrajectories",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/export.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/export.ts:resolveOutputPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/export.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/export.ts:writeText",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/export.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/export.ts:writeJson",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/export.ts:exportToHuggingFace",
+      "target": "function:eliza/packages/core/src/features/trajectories/export.ts:exportForOpenPipeART",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/export.ts:exportGroupedByScenario",
+      "target": "function:eliza/packages/core/src/features/trajectories/export.ts:filterTrajectories",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/export.ts:exportGroupedByScenario",
+      "target": "function:eliza/packages/core/src/features/trajectories/export.ts:resolveOutputPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/export.ts:exportGroupedByScenario",
+      "target": "function:eliza/packages/core/src/features/trajectories/export.ts:writeJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/export.ts:exportForOpenPipeART",
+      "target": "function:eliza/packages/core/src/features/trajectories/export.ts:filterTrajectories",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/export.ts:exportForOpenPipeART",
+      "target": "function:eliza/packages/core/src/features/trajectories/export.ts:resolveOutputPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/export.ts:exportForOpenPipeART",
+      "target": "function:eliza/packages/core/src/features/trajectories/export.ts:writeText",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/export.ts:exportGroupedForGRPO",
+      "target": "function:eliza/packages/core/src/features/trajectories/export.ts:filterTrajectories",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/export.ts:exportGroupedForGRPO",
+      "target": "function:eliza/packages/core/src/features/trajectories/export.ts:resolveOutputPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/export.ts:exportGroupedForGRPO",
+      "target": "function:eliza/packages/core/src/features/trajectories/export.ts:writeJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/export.ts:writeJson",
+      "target": "function:eliza/packages/core/src/features/trajectories/export.ts:writeText",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/game-rewards.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/game-rewards.ts:computeTrajectoryReward",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/game-rewards.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/game-rewards.ts:computeStepReward",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/game-rewards.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/game-rewards.ts:buildGameStateFromDB",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/game-rewards.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/game-rewards.ts:recomputeTrajectoryRewards",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/index.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/index.ts:cleanupPendingTrajectory",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/index.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/index.ts:endPendingTrajectory",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/index.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/index.ts:getFinalStatusForRun",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/index.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/index.ts:readNonEmptyString",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/index.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/index.ts:copyJsonMetadataField",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/index.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/index.ts:readStoredWebConversation",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/index.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/index.ts:buildTrajectoryMetadata",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/index.ts:endPendingTrajectory",
+      "target": "function:eliza/packages/core/src/features/trajectories/index.ts:cleanupPendingTrajectory",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/index.ts:endPendingTrajectory",
+      "target": "function:eliza/packages/core/src/features/trajectories/index.ts:cleanupPendingTrajectory",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/index.ts:readStoredWebConversation",
+      "target": "function:eliza/packages/core/src/features/trajectories/index.ts:readNonEmptyString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/index.ts:buildTrajectoryMetadata",
+      "target": "function:eliza/packages/core/src/features/trajectories/index.ts:copyJsonMetadataField",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/index.ts:buildTrajectoryMetadata",
+      "target": "function:eliza/packages/core/src/features/trajectories/index.ts:readStoredWebConversation",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/index.ts:buildTrajectoryMetadata",
+      "target": "function:eliza/packages/core/src/features/trajectories/index.ts:readNonEmptyString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/integration.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/integration.ts:startAutonomousTick",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/integration.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/integration.ts:endAutonomousTick",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/integration.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/integration.ts:loggedLLMCall",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/integration.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/integration.ts:logProviderAccess",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/integration.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/integration.ts:withTrajectoryLogging",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/pricing.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/pricing.ts:lookupModelContextWindow",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/pricing.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/pricing.ts:lookupModelPrice",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/pricing.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/pricing.ts:computeCallCostUsd",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/pricing.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/pricing.ts:isLocalProvider",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/core/src/features/trajectories/pricing.ts:computeCallCostUsd",
+      "target": "function:eliza/packages/core/src/features/trajectories/pricing.ts:lookupModelPrice",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/reward-service.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/reward-service.ts:createRewardService",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/reward-service.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/reward-service.ts:scoreTrajectory",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/reward-service.ts",
+      "target": "function:eliza/packages/core/src/features/trajectories/reward-service.ts:scoreTrajectoryGroup",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/core/src/features/trajectories/reward-service.ts",
+      "target": "class:eliza/packages/core/src/features/trajectories/reward-service.ts:RewardService",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/setup/provider.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/setup/config.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/setup/provider.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/setup/provider.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/setup/service.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/services/secrets.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/setup/service.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/setup/config.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/setup/service.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/setup/service.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/setup/service.ts",
+      "target": "file:eliza/packages/core/src/services/setup-state.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/setup/service.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/storage/character-store.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/crypto/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/storage/character-store.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/storage/interface.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/storage/character-store.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/storage/character-store.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/storage/character-store.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/storage/component-store.ts",
+      "target": "file:eliza/packages/core/src/entities.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/storage/component-store.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/crypto/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/storage/component-store.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/storage/interface.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/storage/component-store.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/storage/component-store.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/storage/component-store.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/storage/index.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/storage/character-store.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/storage/index.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/storage/component-store.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/storage/index.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/storage/interface.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/storage/index.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/storage/memory-store.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/storage/index.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/storage/world-store.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/storage/interface.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/storage/memory-store.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/storage/interface.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/storage/memory-store.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/storage/world-store.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/crypto/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/storage/world-store.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/storage/interface.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/storage/world-store.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/storage/world-store.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/storage/world-store.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/validation.ts",
+      "target": "file:eliza/packages/core/src/features/secrets/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/secrets/validation.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/await-child-agent-decision.test.ts",
+      "target": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/await-child-agent-decision.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/await-child-agent-decision.test.ts",
+      "target": "file:eliza/packages/core/src/features/sub-agent-credentials/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/await-child-agent-decision.ts",
+      "target": "file:eliza/packages/core/src/features/sub-agent-credentials/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/await-child-agent-decision.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/await-child-agent-decision.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/declare-sub-agent-credential-scope.test.ts",
+      "target": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/declare-sub-agent-credential-scope.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/declare-sub-agent-credential-scope.test.ts",
+      "target": "file:eliza/packages/core/src/features/sub-agent-credentials/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/declare-sub-agent-credential-scope.ts",
+      "target": "file:eliza/packages/core/src/features/sub-agent-credentials/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/declare-sub-agent-credential-scope.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/declare-sub-agent-credential-scope.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/retrieve-child-agent-results.test.ts",
+      "target": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/retrieve-child-agent-results.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/retrieve-child-agent-results.test.ts",
+      "target": "file:eliza/packages/core/src/features/sub-agent-credentials/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/retrieve-child-agent-results.ts",
+      "target": "file:eliza/packages/core/src/features/sub-agent-credentials/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/retrieve-child-agent-results.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/retrieve-child-agent-results.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/tunnel-credential-to-child-session.test.ts",
+      "target": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/tunnel-credential-to-child-session.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/tunnel-credential-to-child-session.test.ts",
+      "target": "file:eliza/packages/core/src/features/sub-agent-credentials/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/tunnel-credential-to-child-session.ts",
+      "target": "file:eliza/packages/core/src/features/sub-agent-credentials/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/tunnel-credential-to-child-session.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/tunnel-credential-to-child-session.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/plugin.test.ts",
+      "target": "file:eliza/packages/core/src/features/sub-agent-credentials/plugin.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/plugin.ts",
+      "target": "file:eliza/packages/core/src/features/sub-agent-credentials/actions/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/plugin.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/sub-agent-credentials/plugin.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.test.ts",
+      "target": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.test.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "file:eliza/packages/core/src/features/trajectories/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "file:eliza/packages/core/src/services/trajectory-export.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "file:eliza/packages/core/src/services/trajectory-types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "file:eliza/packages/core/src/trajectory-utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "target": "file:eliza/packages/core/src/types/service.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trajectories/action-interceptor.ts",
+      "target": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trajectories/action-interceptor.ts",
+      "target": "file:eliza/packages/core/src/features/trajectories/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trajectories/action-interceptor.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trajectories/action-interceptor.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trajectories/art-format.ts",
+      "target": "file:eliza/packages/core/src/features/trajectories/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trajectories/art-format.ts",
+      "target": "file:eliza/packages/core/src/runtime/system-prompt.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trajectories/export.ts",
+      "target": "file:eliza/packages/core/src/features/trajectories/art-format.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trajectories/export.ts",
+      "target": "file:eliza/packages/core/src/features/trajectories/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trajectories/game-rewards.ts",
+      "target": "file:eliza/packages/core/src/features/trajectories/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trajectories/index.ts",
+      "target": "file:eliza/packages/core/src/entities.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trajectories/index.ts",
+      "target": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trajectories/index.ts",
+      "target": "file:eliza/packages/core/src/trajectory-utils.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trajectories/index.ts",
+      "target": "file:eliza/packages/core/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trajectories/index.ts",
+      "target": "file:eliza/packages/core/src/utils/type-guards.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trajectories/integration.ts",
+      "target": "file:eliza/packages/core/src/features/trajectories/TrajectoriesService.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trajectories/integration.ts",
+      "target": "file:eliza/packages/core/src/features/trajectories/types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trajectories/integration.ts",
+      "target": "file:eliza/packages/core/src/logger.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trajectories/pricing.test.ts",
+      "target": "file:eliza/packages/core/src/features/trajectories/pricing.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trajectories/pricing.ts",
+      "target": "file:eliza/packages/core/src/features/trajectories/pricing-types.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/core/src/features/trajectories/reward-service.ts",
+      "target": "file:eliza/packages/core/src/features/trajectories/types.ts",
+      "type": "imports"
+    }
+  ]
+}

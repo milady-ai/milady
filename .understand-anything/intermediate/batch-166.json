@@ -1,0 +1,54 @@
+{
+  "batchIndex": 166,
+  "nodes": [
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:apps/homepage/.env.example",
+      "type": "config",
+      "name": ".env.example",
+      "filePath": "apps/homepage/.env.example",
+      "summary": ".env.example configures config settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "config; config; 27 lines"
+    },
+    {
+      "tags": [
+        "frontend"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/homepage/index.html",
+      "type": "file",
+      "name": "index.html",
+      "filePath": "apps/homepage/index.html",
+      "summary": "index.html is a html source file in the Milady codebase.",
+      "languageNotes": "html; markup; 43 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:apps/homepage/package.json",
+      "type": "config",
+      "name": "package.json",
+      "filePath": "apps/homepage/package.json",
+      "summary": "package.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 52 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:apps/homepage/tsconfig.json",
+      "type": "config",
+      "name": "tsconfig.json",
+      "filePath": "apps/homepage/tsconfig.json",
+      "summary": "tsconfig.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 58 lines"
+    }
+  ],
+  "edges": []
+}

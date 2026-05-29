@@ -1,0 +1,116 @@
+{
+  "batchIndex": 252,
+  "nodes": [
+    {
+      "tags": [
+        "script",
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/verify/gpu/_common.sh",
+      "type": "file",
+      "name": "_common.sh",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/gpu/_common.sh",
+      "summary": "_common.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 213 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/gpu/_common.sh:GPU_VERIFY_USAGE",
+      "type": "function",
+      "name": "GPU_VERIFY_USAGE",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/gpu/_common.sh",
+      "summary": "GPU_VERIFY_USAGE is a function defined in eliza/plugins/plugin-local-inference/native/verify/gpu/_common.sh."
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/gpu/_common.sh:abort",
+      "type": "function",
+      "name": "abort",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/gpu/_common.sh",
+      "summary": "abort is a function defined in eliza/plugins/plugin-local-inference/native/verify/gpu/_common.sh."
+    },
+    {
+      "tags": [
+        "script",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-local-inference/native/verify/gpu/verify_3090.sh",
+      "type": "file",
+      "name": "verify_3090.sh",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/gpu/verify_3090.sh",
+      "summary": "verify_3090.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 12 lines"
+    },
+    {
+      "tags": [
+        "script",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-local-inference/native/verify/gpu/verify_4090.sh",
+      "type": "file",
+      "name": "verify_4090.sh",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/gpu/verify_4090.sh",
+      "summary": "verify_4090.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 12 lines"
+    },
+    {
+      "tags": [
+        "script",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-local-inference/native/verify/gpu/verify_5090.sh",
+      "type": "file",
+      "name": "verify_5090.sh",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/gpu/verify_5090.sh",
+      "summary": "verify_5090.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 13 lines"
+    },
+    {
+      "tags": [
+        "script",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-local-inference/native/verify/gpu/verify_h200.sh",
+      "type": "file",
+      "name": "verify_h200.sh",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/gpu/verify_h200.sh",
+      "summary": "verify_h200.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 14 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/gpu/_common.sh",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gpu/_common.sh:GPU_VERIFY_USAGE",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/gpu/_common.sh",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/gpu/_common.sh:abort",
+      "type": "contains"
+    }
+  ]
+}

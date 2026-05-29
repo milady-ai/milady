@@ -1,0 +1,448 @@
+{
+  "batchIndex": 272,
+  "nodes": [
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:deploy/observability/prometheus/prometheus.yml",
+      "type": "config",
+      "name": "prometheus.yml",
+      "filePath": "deploy/observability/prometheus/prometheus.yml",
+      "summary": "prometheus.yml configures yaml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "yaml; config; 46 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:deploy/observability/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "deploy/observability/README.md",
+      "summary": "README.md documents deploy/observability with 45 lines of reference material.",
+      "languageNotes": "markdown; docs; 45 lines"
+    },
+    {
+      "tags": [
+        "script",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:deploy/systemd/bin/milady-health-probe.sh",
+      "type": "file",
+      "name": "milady-health-probe.sh",
+      "filePath": "deploy/systemd/bin/milady-health-probe.sh",
+      "summary": "milady-health-probe.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 48 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "shell"
+      ],
+      "complexity": "moderate",
+      "id": "function:deploy/systemd/bin/milady-health-probe.sh:fail",
+      "type": "function",
+      "name": "fail",
+      "filePath": "deploy/systemd/bin/milady-health-probe.sh",
+      "summary": "fail is a function defined in deploy/systemd/bin/milady-health-probe.sh."
+    },
+    {
+      "tags": [
+        "script"
+      ],
+      "complexity": "simple",
+      "id": "file:deploy/systemd/bin/milady-refresh-oauth.sh",
+      "type": "file",
+      "name": "milady-refresh-oauth.sh",
+      "filePath": "deploy/systemd/bin/milady-refresh-oauth.sh",
+      "summary": "milady-refresh-oauth.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 49 lines"
+    },
+    {
+      "tags": [
+        "script"
+      ],
+      "complexity": "moderate",
+      "id": "file:deploy/systemd/install.sh",
+      "type": "file",
+      "name": "install.sh",
+      "filePath": "deploy/systemd/install.sh",
+      "summary": "install.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 89 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:deploy/systemd/milady.env.example",
+      "type": "file",
+      "name": "milady.env.example",
+      "filePath": "deploy/systemd/milady.env.example",
+      "summary": "milady.env.example is a example source file in the Milady codebase.",
+      "languageNotes": "example; code; 23 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:deploy/systemd/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "deploy/systemd/README.md",
+      "summary": "README.md documents deploy/systemd with 74 lines of reference material.",
+      "languageNotes": "markdown; docs; 74 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:deploy/systemd/units/milady-probe.service",
+      "type": "file",
+      "name": "milady-probe.service",
+      "filePath": "deploy/systemd/units/milady-probe.service",
+      "summary": "milady-probe.service is a service source file in the Milady codebase.",
+      "languageNotes": "service; code; 7 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:deploy/systemd/units/milady-probe.timer",
+      "type": "file",
+      "name": "milady-probe.timer",
+      "filePath": "deploy/systemd/units/milady-probe.timer",
+      "summary": "milady-probe.timer is a timer source file in the Milady codebase.",
+      "languageNotes": "timer; code; 10 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:deploy/systemd/units/milady-refresh.service",
+      "type": "file",
+      "name": "milady-refresh.service",
+      "filePath": "deploy/systemd/units/milady-refresh.service",
+      "summary": "milady-refresh.service is a service source file in the Milady codebase.",
+      "languageNotes": "service; code; 7 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:deploy/systemd/units/milady-refresh.timer",
+      "type": "file",
+      "name": "milady-refresh.timer",
+      "filePath": "deploy/systemd/units/milady-refresh.timer",
+      "summary": "milady-refresh.timer is a timer source file in the Milady codebase.",
+      "languageNotes": "timer; code; 13 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:deploy/systemd/units/milady.service",
+      "type": "file",
+      "name": "milady.service",
+      "filePath": "deploy/systemd/units/milady.service",
+      "summary": "milady.service is a service source file in the Milady codebase.",
+      "languageNotes": "service; code; 28 lines"
+    },
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "moderate",
+      "id": "resource:deploy/terraform/logging/main.tf",
+      "type": "resource",
+      "name": "main.tf",
+      "filePath": "deploy/terraform/logging/main.tf",
+      "summary": "main.tf defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "terraform; infra; 120 lines"
+    },
+    {
+      "tags": [
+        "resource",
+        "infrastructure"
+      ],
+      "complexity": "moderate",
+      "id": "resource:deploy/terraform/logging/main.tf:google_storage_bucket.logs_general",
+      "type": "resource",
+      "name": "google_storage_bucket.logs_general",
+      "filePath": "deploy/terraform/logging/main.tf",
+      "summary": "google_storage_bucket.logs_general is an infrastructure resource declared in deploy/terraform/logging/main.tf."
+    },
+    {
+      "tags": [
+        "resource",
+        "infrastructure"
+      ],
+      "complexity": "moderate",
+      "id": "resource:deploy/terraform/logging/main.tf:google_storage_bucket.logs_security_audit",
+      "type": "resource",
+      "name": "google_storage_bucket.logs_security_audit",
+      "filePath": "deploy/terraform/logging/main.tf",
+      "summary": "google_storage_bucket.logs_security_audit is an infrastructure resource declared in deploy/terraform/logging/main.tf."
+    },
+    {
+      "tags": [
+        "resource",
+        "infrastructure"
+      ],
+      "complexity": "moderate",
+      "id": "resource:deploy/terraform/logging/main.tf:google_logging_project_sink.general",
+      "type": "resource",
+      "name": "google_logging_project_sink.general",
+      "filePath": "deploy/terraform/logging/main.tf",
+      "summary": "google_logging_project_sink.general is an infrastructure resource declared in deploy/terraform/logging/main.tf."
+    },
+    {
+      "tags": [
+        "resource",
+        "infrastructure"
+      ],
+      "complexity": "moderate",
+      "id": "resource:deploy/terraform/logging/main.tf:google_logging_project_sink.security_audit",
+      "type": "resource",
+      "name": "google_logging_project_sink.security_audit",
+      "filePath": "deploy/terraform/logging/main.tf",
+      "summary": "google_logging_project_sink.security_audit is an infrastructure resource declared in deploy/terraform/logging/main.tf."
+    },
+    {
+      "tags": [
+        "resource",
+        "infrastructure"
+      ],
+      "complexity": "moderate",
+      "id": "resource:deploy/terraform/logging/main.tf:google_storage_bucket_iam_member.general_writer",
+      "type": "resource",
+      "name": "google_storage_bucket_iam_member.general_writer",
+      "filePath": "deploy/terraform/logging/main.tf",
+      "summary": "google_storage_bucket_iam_member.general_writer is an infrastructure resource declared in deploy/terraform/logging/main.tf."
+    },
+    {
+      "tags": [
+        "resource",
+        "infrastructure"
+      ],
+      "complexity": "moderate",
+      "id": "resource:deploy/terraform/logging/main.tf:google_storage_bucket_iam_member.security_audit_writer",
+      "type": "resource",
+      "name": "google_storage_bucket_iam_member.security_audit_writer",
+      "filePath": "deploy/terraform/logging/main.tf",
+      "summary": "google_storage_bucket_iam_member.security_audit_writer is an infrastructure resource declared in deploy/terraform/logging/main.tf."
+    },
+    {
+      "tags": [
+        "configuration",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "config:docs/agent-packs/electrobun-agentic-desktop-2026/.claude/settings.json",
+      "type": "config",
+      "name": "settings.json",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/.claude/settings.json",
+      "summary": "settings.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 55 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/.codex/AGENTS.md",
+      "type": "document",
+      "name": "AGENTS.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/.codex/AGENTS.md",
+      "summary": "AGENTS.md documents docs/agent-packs/electrobun-agentic-desktop-2026/.codex with 3 lines of reference material.",
+      "languageNotes": "markdown; docs; 3 lines"
+    },
+    {
+      "tags": [
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:docs/agent-packs/electrobun-agentic-desktop-2026/.cursor/rules/electrobun-agentic-desktop-2026.mdc",
+      "type": "file",
+      "name": "electrobun-agentic-desktop-2026.mdc",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/.cursor/rules/electrobun-agentic-desktop-2026.mdc",
+      "summary": "electrobun-agentic-desktop-2026.mdc is a mdc source file in the Milady codebase.",
+      "languageNotes": "mdc; code; 24 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/.github/copilot-instructions.md",
+      "type": "document",
+      "name": "copilot-instructions.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/.github/copilot-instructions.md",
+      "summary": "copilot-instructions.md documents docs/agent-packs/electrobun-agentic-desktop-2026/.github with 12 lines of reference material.",
+      "languageNotes": "markdown; docs; 12 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "config:docs/agent-packs/electrobun-agentic-desktop-2026/.github/workflows/electrobun-agentic-ci.yml",
+      "type": "config",
+      "name": "electrobun-agentic-ci.yml",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/.github/workflows/electrobun-agentic-ci.yml",
+      "summary": "electrobun-agentic-ci.yml configures yaml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "yaml; config; 50 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "config:docs/agent-packs/electrobun-agentic-desktop-2026/.github/workflows/electrobun-release.yml",
+      "type": "config",
+      "name": "electrobun-release.yml",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/.github/workflows/electrobun-release.yml",
+      "summary": "electrobun-release.yml configures yaml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "yaml; config; 50 lines"
+    },
+    {
+      "tags": [
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:docs/agent-packs/electrobun-agentic-desktop-2026/.windsurfrules",
+      "type": "file",
+      "name": ".windsurfrules",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/.windsurfrules",
+      "summary": ".windsurfrules is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 1 lines"
+    },
+    {
+      "tags": [
+        "configuration",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "config:docs/agent-packs/electrobun-agentic-desktop-2026/automations/agent-automation.yaml",
+      "type": "config",
+      "name": "agent-automation.yaml",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/automations/agent-automation.yaml",
+      "summary": "agent-automation.yaml configures yaml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "yaml; config; 20 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "document:docs/agent-packs/electrobun-agentic-desktop-2026/hooks/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/hooks/README.md",
+      "summary": "README.md documents docs/agent-packs/electrobun-agentic-desktop-2026/hooks with 18 lines of reference material.",
+      "languageNotes": "markdown; docs; 18 lines"
+    },
+    {
+      "tags": [
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:docs/agent-packs/electrobun-agentic-desktop-2026/scripts/electrobun/post-build.ts",
+      "type": "file",
+      "name": "post-build.ts",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/scripts/electrobun/post-build.ts",
+      "summary": "post-build.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 8 lines"
+    },
+    {
+      "tags": [
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:docs/agent-packs/electrobun-agentic-desktop-2026/scripts/electrobun/post-package.ts",
+      "type": "file",
+      "name": "post-package.ts",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/scripts/electrobun/post-package.ts",
+      "summary": "post-package.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 11 lines"
+    },
+    {
+      "tags": [
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:docs/agent-packs/electrobun-agentic-desktop-2026/scripts/electrobun/post-wrap.ts",
+      "type": "file",
+      "name": "post-wrap.ts",
+      "filePath": "docs/agent-packs/electrobun-agentic-desktop-2026/scripts/electrobun/post-wrap.ts",
+      "summary": "post-wrap.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 6 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:deploy/systemd/bin/milady-health-probe.sh",
+      "target": "function:deploy/systemd/bin/milady-health-probe.sh:fail",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "resource:deploy/terraform/logging/main.tf",
+      "target": "resource:deploy/terraform/logging/main.tf:google_storage_bucket.logs_general",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "resource:deploy/terraform/logging/main.tf",
+      "target": "resource:deploy/terraform/logging/main.tf:google_storage_bucket.logs_security_audit",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "resource:deploy/terraform/logging/main.tf",
+      "target": "resource:deploy/terraform/logging/main.tf:google_logging_project_sink.general",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "resource:deploy/terraform/logging/main.tf",
+      "target": "resource:deploy/terraform/logging/main.tf:google_logging_project_sink.security_audit",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "resource:deploy/terraform/logging/main.tf",
+      "target": "resource:deploy/terraform/logging/main.tf:google_storage_bucket_iam_member.general_writer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "resource:deploy/terraform/logging/main.tf",
+      "target": "resource:deploy/terraform/logging/main.tf:google_storage_bucket_iam_member.security_audit_writer",
+      "type": "contains"
+    }
+  ]
+}

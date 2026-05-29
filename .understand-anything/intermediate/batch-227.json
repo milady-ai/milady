@@ -1,0 +1,114 @@
+{
+  "batchIndex": 227,
+  "nodes": [
+    {
+      "tags": [
+        "infrastructure"
+      ],
+      "complexity": "simple",
+      "id": "service:eliza/packages/core/.dockerignore",
+      "type": "service",
+      "name": ".dockerignore",
+      "filePath": "eliza/packages/core/.dockerignore",
+      "summary": ".dockerignore defines infrastructure, packaging, or automation behavior used by the Milady build and deployment workflow.",
+      "languageNotes": "unknown; infra; 45 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:eliza/packages/core/CHANGELOG.md",
+      "type": "document",
+      "name": "CHANGELOG.md",
+      "filePath": "eliza/packages/core/CHANGELOG.md",
+      "summary": "CHANGELOG.md documents eliza/packages/core with 133 lines of reference material.",
+      "languageNotes": "markdown; docs; 133 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "complex",
+      "id": "document:eliza/packages/core/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "eliza/packages/core/README.md",
+      "summary": "README.md documents eliza/packages/core with 365 lines of reference material.",
+      "languageNotes": "markdown; docs; 365 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/core/biome.json",
+      "type": "config",
+      "name": "biome.json",
+      "filePath": "eliza/packages/core/biome.json",
+      "summary": "biome.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 24 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/core/bunfig.toml",
+      "type": "config",
+      "name": "bunfig.toml",
+      "filePath": "eliza/packages/core/bunfig.toml",
+      "summary": "bunfig.toml configures toml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "toml; config; 25 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/core/knip.json",
+      "type": "config",
+      "name": "knip.json",
+      "filePath": "eliza/packages/core/knip.json",
+      "summary": "knip.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 26 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:eliza/packages/core/package.json",
+      "type": "config",
+      "name": "package.json",
+      "filePath": "eliza/packages/core/package.json",
+      "summary": "package.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 156 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/core/tsconfig.declarations.json",
+      "type": "config",
+      "name": "tsconfig.declarations.json",
+      "filePath": "eliza/packages/core/tsconfig.declarations.json",
+      "summary": "tsconfig.declarations.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 42 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:eliza/packages/core/tsconfig.json",
+      "type": "config",
+      "name": "tsconfig.json",
+      "filePath": "eliza/packages/core/tsconfig.json",
+      "summary": "tsconfig.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 56 lines"
+    }
+  ],
+  "edges": []
+}

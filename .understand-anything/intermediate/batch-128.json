@@ -1,0 +1,2866 @@
+{
+  "batchIndex": 128,
+  "nodes": [
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "type": "file",
+      "name": "dflash_drafter_runtime_smoke.mjs",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "dflash_drafter_runtime_smoke.mjs is a javascript source file in the Milady codebase. It contains 45 functions, 1 imports.",
+      "languageNotes": "javascript; code; 2051 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:firstExisting",
+      "type": "function",
+      "name": "firstExisting",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "firstExisting is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:timestamp",
+      "type": "function",
+      "name": "timestamp",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "timestamp is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:sha256File",
+      "type": "function",
+      "name": "sha256File",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "sha256File is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:inferTier",
+      "type": "function",
+      "name": "inferTier",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "inferTier is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:parseArgs",
+      "type": "function",
+      "name": "parseArgs",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "parseArgs is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:escapeRegExp",
+      "type": "function",
+      "name": "escapeRegExp",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "escapeRegExp is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:detectCliFeatures",
+      "type": "function",
+      "name": "detectCliFeatures",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "detectCliFeatures is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:supportsCliFlag",
+      "type": "function",
+      "name": "supportsCliFlag",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "supportsCliFlag is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushOptionalFlag",
+      "type": "function",
+      "name": "pushOptionalFlag",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "pushOptionalFlag is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushFirstSupportedFlag",
+      "type": "function",
+      "name": "pushFirstSupportedFlag",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "pushFirstSupportedFlag is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushDraftContextFlag",
+      "type": "function",
+      "name": "pushDraftContextFlag",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "pushDraftContextFlag is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushDraftMinFlag",
+      "type": "function",
+      "name": "pushDraftMinFlag",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "pushDraftMinFlag is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushDraftMaxFlag",
+      "type": "function",
+      "name": "pushDraftMaxFlag",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "pushDraftMaxFlag is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushDraftProbabilityFlag",
+      "type": "function",
+      "name": "pushDraftProbabilityFlag",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "pushDraftProbabilityFlag is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readGgufPrefix",
+      "type": "function",
+      "name": "readGgufPrefix",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "readGgufPrefix is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:assertAvailable",
+      "type": "function",
+      "name": "assertAvailable",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "assertAvailable is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:serializeCliFeatures",
+      "type": "function",
+      "name": "serializeCliFeatures",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "serializeCliFeatures is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readU64",
+      "type": "function",
+      "name": "readU64",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "readU64 is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readString",
+      "type": "function",
+      "name": "readString",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "readString is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:skipScalar",
+      "type": "function",
+      "name": "skipScalar",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "skipScalar is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readScalar",
+      "type": "function",
+      "name": "readScalar",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "readScalar is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readValue",
+      "type": "function",
+      "name": "readValue",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "readValue is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:parseGguf",
+      "type": "function",
+      "name": "parseGguf",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "parseGguf is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:metadataArrayLength",
+      "type": "function",
+      "name": "metadataArrayLength",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "metadataArrayLength is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:tokenizerSummary",
+      "type": "function",
+      "name": "tokenizerSummary",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "tokenizerSummary is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:tokenizerBlockingReason",
+      "type": "function",
+      "name": "tokenizerBlockingReason",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "tokenizerBlockingReason is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:tokenizerCompatibilityFailure",
+      "type": "function",
+      "name": "tokenizerCompatibilityFailure",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "tokenizerCompatibilityFailure is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:normalizeSha256",
+      "type": "function",
+      "name": "normalizeSha256",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "normalizeSha256 is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:compareTargetCheckpointSha256",
+      "type": "function",
+      "name": "compareTargetCheckpointSha256",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "compareTargetCheckpointSha256 is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:releaseCompatibilityFailure",
+      "type": "function",
+      "name": "releaseCompatibilityFailure",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "releaseCompatibilityFailure is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:compareTokenizers",
+      "type": "function",
+      "name": "compareTokenizers",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "compareTokenizers is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readTargetMeta",
+      "type": "function",
+      "name": "readTargetMeta",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "readTargetMeta is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:buildRuntimeArgs",
+      "type": "function",
+      "name": "buildRuntimeArgs",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "buildRuntimeArgs is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:classifyRuntimeOutput",
+      "type": "function",
+      "name": "classifyRuntimeOutput",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "classifyRuntimeOutput is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runRuntime",
+      "type": "function",
+      "name": "runRuntime",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "runRuntime is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:blockedRuntime",
+      "type": "function",
+      "name": "blockedRuntime",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "blockedRuntime is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:parseBenchOutput",
+      "type": "function",
+      "name": "parseBenchOutput",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "parseBenchOutput is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:outputTail",
+      "type": "function",
+      "name": "outputTail",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "outputTail is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runBenchPass",
+      "type": "function",
+      "name": "runBenchPass",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "runBenchPass is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:blockedBenchPass",
+      "type": "function",
+      "name": "blockedBenchPass",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "blockedBenchPass is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:requiresTrueDflashDraftingForShape",
+      "type": "function",
+      "name": "requiresTrueDflashDraftingForShape",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "requiresTrueDflashDraftingForShape is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runDflashBench",
+      "type": "function",
+      "name": "runDflashBench",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "runDflashBench is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:makeTokenizerSelfTestSummary",
+      "type": "function",
+      "name": "makeTokenizerSelfTestSummary",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "makeTokenizerSelfTestSummary is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runSelfTest",
+      "type": "function",
+      "name": "runSelfTest",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "runSelfTest is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "summary": "main is a function defined in eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs",
+      "type": "file",
+      "name": "eagle3_drafter_runtime_smoke.mjs",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs",
+      "summary": "eagle3_drafter_runtime_smoke.mjs is a javascript source file in the Milady codebase. It contains 8 functions, 1 imports.",
+      "languageNotes": "javascript; code; 268 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs:firstExisting",
+      "type": "function",
+      "name": "firstExisting",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs",
+      "summary": "firstExisting is a function defined in eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs:inferTier",
+      "type": "function",
+      "name": "inferTier",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs",
+      "summary": "inferTier is a function defined in eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs:parseArgs",
+      "type": "function",
+      "name": "parseArgs",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs",
+      "summary": "parseArgs is a function defined in eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs:parseRuntimeCounters",
+      "type": "function",
+      "name": "parseRuntimeCounters",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs",
+      "summary": "parseRuntimeCounters is a function defined in eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs:classifyFailure",
+      "type": "function",
+      "name": "classifyFailure",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs",
+      "summary": "classifyFailure is a function defined in eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs:buildRuntimeArgs",
+      "type": "function",
+      "name": "buildRuntimeArgs",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs",
+      "summary": "buildRuntimeArgs is a function defined in eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs:runRuntime",
+      "type": "function",
+      "name": "runRuntime",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs",
+      "summary": "runRuntime is a function defined in eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs",
+      "summary": "main is a function defined in eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs",
+      "type": "file",
+      "name": "mtp_runtime_smoke.mjs",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs",
+      "summary": "mtp_runtime_smoke.mjs is a javascript source file in the Milady codebase. It contains 15 functions, 1 imports.",
+      "languageNotes": "javascript; code; 420 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:parseArgs",
+      "type": "function",
+      "name": "parseArgs",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs",
+      "summary": "parseArgs is a function defined in eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:timestamp",
+      "type": "function",
+      "name": "timestamp",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs",
+      "summary": "timestamp is a function defined in eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:inferTier",
+      "type": "function",
+      "name": "inferTier",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs",
+      "summary": "inferTier is a function defined in eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readGgufMetadata",
+      "type": "function",
+      "name": "readGgufMetadata",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs",
+      "summary": "readGgufMetadata is a function defined in eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readBufferAt",
+      "type": "function",
+      "name": "readBufferAt",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs",
+      "summary": "readBufferAt is a function defined in eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readU32At",
+      "type": "function",
+      "name": "readU32At",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs",
+      "summary": "readU32At is a function defined in eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readU64At",
+      "type": "function",
+      "name": "readU64At",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs",
+      "summary": "readU64At is a function defined in eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readStringAt",
+      "type": "function",
+      "name": "readStringAt",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs",
+      "summary": "readStringAt is a function defined in eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readValueAt",
+      "type": "function",
+      "name": "readValueAt",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs",
+      "summary": "readValueAt is a function defined in eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:hasMtp",
+      "type": "function",
+      "name": "hasMtp",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs",
+      "summary": "hasMtp is a function defined in eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:detectCliFeatures",
+      "type": "function",
+      "name": "detectCliFeatures",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs",
+      "summary": "detectCliFeatures is a function defined in eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:parseBenchOutput",
+      "type": "function",
+      "name": "parseBenchOutput",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs",
+      "summary": "parseBenchOutput is a function defined in eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:outputTail",
+      "type": "function",
+      "name": "outputTail",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs",
+      "summary": "outputTail is a function defined in eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:runBench",
+      "type": "function",
+      "name": "runBench",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs",
+      "summary": "runBench is a function defined in eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs",
+      "summary": "main is a function defined in eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs."
+    },
+    {
+      "tags": [
+        "test",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.test.mjs",
+      "type": "file",
+      "name": "mtp_runtime_smoke.test.mjs",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.test.mjs",
+      "summary": "mtp_runtime_smoke.test.mjs is a javascript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "javascript; code; 23 lines"
+    },
+    {
+      "tags": [
+        "local-inference",
+        "plugin",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs",
+      "type": "file",
+      "name": "speculative_benchmark_report.mjs",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs",
+      "summary": "speculative_benchmark_report.mjs is a javascript source file in the Milady codebase. It contains 11 functions.",
+      "languageNotes": "javascript; code; 192 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:timestamp",
+      "type": "function",
+      "name": "timestamp",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs",
+      "summary": "timestamp is a function defined in eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:assertSpeculator",
+      "type": "function",
+      "name": "assertSpeculator",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs",
+      "summary": "assertSpeculator is a function defined in eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:speculativeReportDir",
+      "type": "function",
+      "name": "speculativeReportDir",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs",
+      "summary": "speculativeReportDir is a function defined in eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:timestampedSpeculativeReportPath",
+      "type": "function",
+      "name": "timestampedSpeculativeReportPath",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs",
+      "summary": "timestampedSpeculativeReportPath is a function defined in eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:latestSpeculativeReportPath",
+      "type": "function",
+      "name": "latestSpeculativeReportPath",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs",
+      "summary": "latestSpeculativeReportPath is a function defined in eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:inferSpeculativeBackend",
+      "type": "function",
+      "name": "inferSpeculativeBackend",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs",
+      "summary": "inferSpeculativeBackend is a function defined in eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:fileSha256",
+      "type": "function",
+      "name": "fileSha256",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs",
+      "summary": "fileSha256 is a function defined in eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:finiteOrNull",
+      "type": "function",
+      "name": "finiteOrNull",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs",
+      "summary": "finiteOrNull is a function defined in eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:deriveStatus",
+      "type": "function",
+      "name": "deriveStatus",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs",
+      "summary": "deriveStatus is a function defined in eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:buildSpeculativeBenchmarkReport",
+      "type": "function",
+      "name": "buildSpeculativeBenchmarkReport",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs",
+      "summary": "buildSpeculativeBenchmarkReport is a function defined in eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:writeSpeculativeBenchmarkReport",
+      "type": "function",
+      "name": "writeSpeculativeBenchmarkReport",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs",
+      "summary": "writeSpeculativeBenchmarkReport is a function defined in eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs."
+    },
+    {
+      "tags": [
+        "test",
+        "local-inference",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.test.mjs",
+      "type": "file",
+      "name": "speculative_benchmark_report.test.mjs",
+      "filePath": "eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.test.mjs",
+      "summary": "speculative_benchmark_report.test.mjs is a javascript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "javascript; code; 61 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:firstExisting",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:timestamp",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:sha256File",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:inferTier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:parseArgs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:escapeRegExp",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:detectCliFeatures",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:supportsCliFlag",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushOptionalFlag",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushFirstSupportedFlag",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushDraftContextFlag",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushDraftMinFlag",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushDraftMaxFlag",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushDraftProbabilityFlag",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readGgufPrefix",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:assertAvailable",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:serializeCliFeatures",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readU64",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readString",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:skipScalar",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readScalar",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readValue",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:parseGguf",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:metadataArrayLength",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:tokenizerSummary",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:tokenizerBlockingReason",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:tokenizerCompatibilityFailure",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:normalizeSha256",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:compareTargetCheckpointSha256",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:releaseCompatibilityFailure",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:compareTokenizers",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readTargetMeta",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:buildRuntimeArgs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:classifyRuntimeOutput",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:blockedRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:parseBenchOutput",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:outputTail",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runBenchPass",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:blockedBenchPass",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:requiresTrueDflashDraftingForShape",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runDflashBench",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:makeTokenizerSelfTestSummary",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runSelfTest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:parseArgs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:timestamp",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:parseArgs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:inferTier",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:supportsCliFlag",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:escapeRegExp",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushOptionalFlag",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:supportsCliFlag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushFirstSupportedFlag",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:supportsCliFlag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushDraftContextFlag",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushFirstSupportedFlag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushDraftMinFlag",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushFirstSupportedFlag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushDraftMaxFlag",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushFirstSupportedFlag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushDraftProbabilityFlag",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushFirstSupportedFlag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:serializeCliFeatures",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:supportsCliFlag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readU64",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:assertAvailable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readString",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readU64",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readString",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:assertAvailable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:skipScalar",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:assertAvailable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:skipScalar",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:assertAvailable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:skipScalar",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:assertAvailable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:skipScalar",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:skipScalar",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:assertAvailable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readScalar",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:assertAvailable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readScalar",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:assertAvailable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readScalar",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:assertAvailable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readScalar",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:assertAvailable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readScalar",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:assertAvailable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readScalar",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:assertAvailable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readScalar",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:assertAvailable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readScalar",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:assertAvailable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readScalar",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readScalar",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readU64",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readScalar",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:assertAvailable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readScalar",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:assertAvailable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readValue",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:skipScalar",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readValue",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readScalar",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readValue",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:assertAvailable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readValue",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readU64",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:parseGguf",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readGgufPrefix",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:parseGguf",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:assertAvailable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:parseGguf",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readU64",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:parseGguf",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readU64",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:parseGguf",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:parseGguf",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:assertAvailable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:parseGguf",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:parseGguf",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:parseGguf",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:assertAvailable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:parseGguf",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readU64",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:parseGguf",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:assertAvailable",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:parseGguf",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readU64",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:tokenizerSummary",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:metadataArrayLength",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:tokenizerSummary",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:metadataArrayLength",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:tokenizerSummary",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:metadataArrayLength",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:tokenizerSummary",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:metadataArrayLength",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:tokenizerSummary",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:metadataArrayLength",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:tokenizerSummary",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:metadataArrayLength",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:compareTargetCheckpointSha256",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:normalizeSha256",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:compareTargetCheckpointSha256",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:normalizeSha256",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:compareTokenizers",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:tokenizerBlockingReason",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:compareTokenizers",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:tokenizerCompatibilityFailure",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:buildRuntimeArgs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushDraftContextFlag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:buildRuntimeArgs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushOptionalFlag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:buildRuntimeArgs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushOptionalFlag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:buildRuntimeArgs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushDraftMinFlag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:buildRuntimeArgs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushDraftMaxFlag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:buildRuntimeArgs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushDraftProbabilityFlag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:buildRuntimeArgs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushOptionalFlag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:buildRuntimeArgs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushOptionalFlag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:buildRuntimeArgs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushOptionalFlag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runRuntime",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:buildRuntimeArgs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runRuntime",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:parseBenchOutput",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runRuntime",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:classifyRuntimeOutput",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runRuntime",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:tokenizerCompatibilityFailure",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runRuntime",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:tokenizerCompatibilityFailure",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:blockedRuntime",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:buildRuntimeArgs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runBenchPass",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushDraftContextFlag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runBenchPass",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushDraftMinFlag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runBenchPass",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushDraftMaxFlag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runBenchPass",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushOptionalFlag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runBenchPass",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushOptionalFlag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runBenchPass",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushOptionalFlag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runBenchPass",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushOptionalFlag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runBenchPass",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:pushOptionalFlag",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runBenchPass",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:parseBenchOutput",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runBenchPass",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:tokenizerCompatibilityFailure",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runBenchPass",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:outputTail",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runDflashBench",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:tokenizerCompatibilityFailure",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runDflashBench",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:blockedBenchPass",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runDflashBench",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:blockedBenchPass",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runDflashBench",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runBenchPass",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runDflashBench",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runBenchPass",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runSelfTest",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:requiresTrueDflashDraftingForShape",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runSelfTest",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:requiresTrueDflashDraftingForShape",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runSelfTest",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:requiresTrueDflashDraftingForShape",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runSelfTest",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:compareTokenizers",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runSelfTest",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:makeTokenizerSelfTestSummary",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runSelfTest",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:makeTokenizerSelfTestSummary",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runSelfTest",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:compareTokenizers",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runSelfTest",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:makeTokenizerSelfTestSummary",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runSelfTest",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:makeTokenizerSelfTestSummary",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runSelfTest",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:compareTokenizers",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runSelfTest",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:makeTokenizerSelfTestSummary",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runSelfTest",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:makeTokenizerSelfTestSummary",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runSelfTest",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:compareTokenizers",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runSelfTest",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:makeTokenizerSelfTestSummary",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runSelfTest",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:makeTokenizerSelfTestSummary",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runSelfTest",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:tokenizerCompatibilityFailure",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runSelfTest",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:compareTargetCheckpointSha256",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runSelfTest",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:compareTargetCheckpointSha256",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runSelfTest",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:compareTargetCheckpointSha256",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runSelfTest",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:releaseCompatibilityFailure",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runSelfTest",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:tokenizerCompatibilityFailure",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runSelfTest",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:classifyRuntimeOutput",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runSelfTest",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:classifyRuntimeOutput",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:parseArgs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runSelfTest",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:detectCliFeatures",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:detectCliFeatures",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:serializeCliFeatures",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:serializeCliFeatures",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:parseGguf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:parseGguf",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:sha256File",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:readTargetMeta",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:tokenizerSummary",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:tokenizerSummary",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:compareTokenizers",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:tokenizerCompatibilityFailure",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:compareTargetCheckpointSha256",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:requiresTrueDflashDraftingForShape",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:releaseCompatibilityFailure",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:blockedRuntime",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runRuntime",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:blockedRuntime",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runRuntime",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs:runDflashBench",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs:firstExisting",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs:inferTier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs:parseArgs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs:parseRuntimeCounters",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs:classifyFailure",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs:buildRuntimeArgs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs:runRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs:parseArgs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs:inferTier",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs:runRuntime",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs:parseRuntimeCounters",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs:runRuntime",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs:classifyFailure",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs:parseArgs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs:buildRuntimeArgs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs:runRuntime",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:parseArgs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:timestamp",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:inferTier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readGgufMetadata",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readBufferAt",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readU32At",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readU64At",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readStringAt",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readValueAt",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:hasMtp",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:detectCliFeatures",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:parseBenchOutput",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:outputTail",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:runBench",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:parseArgs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:timestamp",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:parseArgs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:inferTier",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readGgufMetadata",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readStringAt",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readGgufMetadata",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readU32At",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readGgufMetadata",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readValueAt",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readU32At",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readBufferAt",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readU64At",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readBufferAt",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readStringAt",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readU64At",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readStringAt",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readBufferAt",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readValueAt",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readStringAt",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readValueAt",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readU32At",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readValueAt",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readBufferAt",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readValueAt",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readU32At",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readValueAt",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readU64At",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:detectCliFeatures",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:outputTail",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:runBench",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:parseBenchOutput",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:runBench",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:outputTail",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:parseArgs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:readGgufMetadata",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:hasMtp",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:detectCliFeatures",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:runBench",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:main",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs:runBench",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:timestamp",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:assertSpeculator",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:speculativeReportDir",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:timestampedSpeculativeReportPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:latestSpeculativeReportPath",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:inferSpeculativeBackend",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:fileSha256",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:finiteOrNull",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:deriveStatus",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:buildSpeculativeBenchmarkReport",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:writeSpeculativeBenchmarkReport",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:speculativeReportDir",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:assertSpeculator",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:timestampedSpeculativeReportPath",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:speculativeReportDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:timestampedSpeculativeReportPath",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:timestamp",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:latestSpeculativeReportPath",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:speculativeReportDir",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:buildSpeculativeBenchmarkReport",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:assertSpeculator",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:buildSpeculativeBenchmarkReport",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:fileSha256",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:buildSpeculativeBenchmarkReport",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:finiteOrNull",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:buildSpeculativeBenchmarkReport",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:finiteOrNull",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:buildSpeculativeBenchmarkReport",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:finiteOrNull",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:buildSpeculativeBenchmarkReport",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:finiteOrNull",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:buildSpeculativeBenchmarkReport",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:finiteOrNull",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:buildSpeculativeBenchmarkReport",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:finiteOrNull",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:buildSpeculativeBenchmarkReport",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:finiteOrNull",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:buildSpeculativeBenchmarkReport",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:inferSpeculativeBackend",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:buildSpeculativeBenchmarkReport",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:deriveStatus",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:writeSpeculativeBenchmarkReport",
+      "target": "function:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs:latestSpeculativeReportPath",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/dflash_drafter_runtime_smoke.mjs",
+      "target": "file:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/eagle3_drafter_runtime_smoke.mjs",
+      "target": "file:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs",
+      "target": "file:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.test.mjs",
+      "target": "file:eliza/plugins/plugin-local-inference/native/verify/mtp_runtime_smoke.mjs",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.test.mjs",
+      "target": "file:eliza/plugins/plugin-local-inference/native/verify/speculative_benchmark_report.mjs",
+      "type": "imports"
+    }
+  ]
+}

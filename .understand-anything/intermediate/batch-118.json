@@ -1,0 +1,846 @@
+{
+  "batchIndex": 118,
+  "nodes": [
+    {
+      "tags": [
+        "desktop",
+        "class",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts",
+      "type": "file",
+      "name": "errors.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts",
+      "summary": "errors.ts is a typescript source file in the Milady codebase. It contains 4 functions, 1 class, 1 imports.",
+      "languageNotes": "typescript; code; 61 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts:createFileRemoteError",
+      "type": "function",
+      "name": "createFileRemoteError",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts",
+      "summary": "createFileRemoteError is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts:throwFileRemoteError",
+      "type": "function",
+      "name": "throwFileRemoteError",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts",
+      "summary": "throwFileRemoteError is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts:isFileRemoteError",
+      "type": "function",
+      "name": "isFileRemoteError",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts",
+      "summary": "isFileRemoteError is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts:serializeFileError",
+      "type": "function",
+      "name": "serializeFileError",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts",
+      "summary": "serializeFileError is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "class:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts:FileRemoteException",
+      "type": "class",
+      "name": "FileRemoteException",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts",
+      "summary": "FileRemoteException is a class or type declared in eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts."
+    },
+    {
+      "tags": [
+        "desktop",
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/file-limits.ts",
+      "type": "file",
+      "name": "file-limits.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/file-limits.ts",
+      "summary": "file-limits.ts is a typescript source file in the Milady codebase. It contains 2 functions.",
+      "languageNotes": "typescript; code; 47 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/file-limits.ts:loadFileLimits",
+      "type": "function",
+      "name": "loadFileLimits",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/file-limits.ts",
+      "summary": "loadFileLimits is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/file-limits.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/file-limits.ts:readPositiveInteger",
+      "type": "function",
+      "name": "readPositiveInteger",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/file-limits.ts",
+      "summary": "readPositiveInteger is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/file-limits.ts."
+    },
+    {
+      "tags": [
+        "desktop",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/fs-service.ts",
+      "type": "file",
+      "name": "fs-service.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/fs-service.ts",
+      "summary": "fs-service.ts is a typescript source file in the Milady codebase. It contains 4 functions, 1 class, 4 imports.",
+      "languageNotes": "typescript; code; 388 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/fs-service.ts:isLikelyBinaryFile",
+      "type": "function",
+      "name": "isLikelyBinaryFile",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/fs-service.ts",
+      "summary": "isLikelyBinaryFile is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/fs-service.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/fs-service.ts:isLikelyBinaryBuffer",
+      "type": "function",
+      "name": "isLikelyBinaryBuffer",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/fs-service.ts",
+      "summary": "isLikelyBinaryBuffer is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/fs-service.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/fs-service.ts:globToRegExp",
+      "type": "function",
+      "name": "globToRegExp",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/fs-service.ts",
+      "summary": "globToRegExp is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/fs-service.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/fs-service.ts:clampLimit",
+      "type": "function",
+      "name": "clampLimit",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/fs-service.ts",
+      "summary": "clampLimit is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/fs-service.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/fs-service.ts:FileRemoteService",
+      "type": "class",
+      "name": "FileRemoteService",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/fs-service.ts",
+      "summary": "FileRemoteService is a class or type declared in eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/fs-service.ts."
+    },
+    {
+      "tags": [
+        "desktop",
+        "class",
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/path-guard.ts",
+      "type": "file",
+      "name": "path-guard.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/path-guard.ts",
+      "summary": "path-guard.ts is a typescript source file in the Milady codebase. It contains 1 function, 1 class, 2 imports.",
+      "languageNotes": "typescript; code; 266 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/path-guard.ts:isInsideRoot",
+      "type": "function",
+      "name": "isInsideRoot",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/path-guard.ts",
+      "summary": "isInsideRoot is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/path-guard.ts."
+    },
+    {
+      "tags": [
+        "class",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "class:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/path-guard.ts:PathGuard",
+      "type": "class",
+      "name": "PathGuard",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/path-guard.ts",
+      "summary": "PathGuard is a class or type declared in eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/path-guard.ts."
+    },
+    {
+      "tags": [
+        "desktop"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/protocol.ts",
+      "type": "file",
+      "name": "protocol.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/protocol.ts",
+      "summary": "protocol.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 149 lines"
+    },
+    {
+      "tags": [
+        "desktop",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts",
+      "type": "file",
+      "name": "worker.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts",
+      "summary": "worker.ts is a typescript source file in the Milady codebase. It contains 10 functions, 3 imports.",
+      "languageNotes": "typescript; code; 172 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:post",
+      "type": "function",
+      "name": "post",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts",
+      "summary": "post is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:isRecord",
+      "type": "function",
+      "name": "isRecord",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts",
+      "summary": "isRecord is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:isFileMethod",
+      "type": "function",
+      "name": "isFileMethod",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts",
+      "summary": "isFileMethod is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:parseRequest",
+      "type": "function",
+      "name": "parseRequest",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts",
+      "summary": "parseRequest is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:dispatch",
+      "type": "function",
+      "name": "dispatch",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts",
+      "summary": "dispatch is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:parsePathParams",
+      "type": "function",
+      "name": "parsePathParams",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts",
+      "summary": "parsePathParams is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:parseListParams",
+      "type": "function",
+      "name": "parseListParams",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts",
+      "summary": "parseListParams is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:parseReadTextParams",
+      "type": "function",
+      "name": "parseReadTextParams",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts",
+      "summary": "parseReadTextParams is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:parseSearchParams",
+      "type": "function",
+      "name": "parseSearchParams",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts",
+      "summary": "parseSearchParams is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:parseWriteTextParams",
+      "type": "function",
+      "name": "parseWriteTextParams",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts",
+      "summary": "parseWriteTextParams is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts."
+    },
+    {
+      "tags": [
+        "desktop",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/dev/phase5-smoke.ts",
+      "type": "file",
+      "name": "phase5-smoke.ts",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/fs/src/dev/phase5-smoke.ts",
+      "summary": "phase5-smoke.ts is a typescript source file in the Milady codebase. It contains 2 functions, 2 imports.",
+      "languageNotes": "typescript; code; 147 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/dev/phase5-smoke.ts:expectFileError",
+      "type": "function",
+      "name": "expectFileError",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/fs/src/dev/phase5-smoke.ts",
+      "summary": "expectFileError is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/fs/src/dev/phase5-smoke.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/dev/phase5-smoke.ts:assert",
+      "type": "function",
+      "name": "assert",
+      "filePath": "eliza/packages/app-core/platforms/electrobun/remotes/fs/src/dev/phase5-smoke.ts",
+      "summary": "assert is a function defined in eliza/packages/app-core/platforms/electrobun/remotes/fs/src/dev/phase5-smoke.ts."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts:createFileRemoteError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts:throwFileRemoteError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts:isFileRemoteError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts:serializeFileError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts",
+      "target": "class:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts:FileRemoteException",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts:throwFileRemoteError",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts:createFileRemoteError",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts:serializeFileError",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts:createFileRemoteError",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts:serializeFileError",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts:isFileRemoteError",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts:serializeFileError",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts:createFileRemoteError",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts:serializeFileError",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts:createFileRemoteError",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts:serializeFileError",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts:createFileRemoteError",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/file-limits.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/file-limits.ts:loadFileLimits",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/file-limits.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/file-limits.ts:readPositiveInteger",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/file-limits.ts:loadFileLimits",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/file-limits.ts:readPositiveInteger",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/file-limits.ts:loadFileLimits",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/file-limits.ts:readPositiveInteger",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/file-limits.ts:loadFileLimits",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/file-limits.ts:readPositiveInteger",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/file-limits.ts:loadFileLimits",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/file-limits.ts:readPositiveInteger",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/file-limits.ts:loadFileLimits",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/file-limits.ts:readPositiveInteger",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/fs-service.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/fs-service.ts:isLikelyBinaryFile",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/fs-service.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/fs-service.ts:isLikelyBinaryBuffer",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/fs-service.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/fs-service.ts:globToRegExp",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/fs-service.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/fs-service.ts:clampLimit",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/fs-service.ts",
+      "target": "class:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/fs-service.ts:FileRemoteService",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/fs-service.ts:isLikelyBinaryFile",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/fs-service.ts:isLikelyBinaryBuffer",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/path-guard.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/path-guard.ts:isInsideRoot",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/path-guard.ts",
+      "target": "class:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/path-guard.ts:PathGuard",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:post",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:isRecord",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:isFileMethod",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:parseRequest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:dispatch",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:parsePathParams",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:parseListParams",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:parseReadTextParams",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:parseSearchParams",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:parseWriteTextParams",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:parseRequest",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:parseRequest",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:isFileMethod",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:dispatch",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:parsePathParams",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:dispatch",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:parseListParams",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:dispatch",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:parseReadTextParams",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:dispatch",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:parseSearchParams",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:dispatch",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:parseWriteTextParams",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:parsePathParams",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:parseListParams",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:parseReadTextParams",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:parseSearchParams",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:parseWriteTextParams",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts:isRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/dev/phase5-smoke.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/dev/phase5-smoke.ts:expectFileError",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/dev/phase5-smoke.ts",
+      "target": "function:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/dev/phase5-smoke.ts:assert",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts",
+      "target": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/protocol.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/fs-service.ts",
+      "target": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/fs-service.ts",
+      "target": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/file-limits.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/fs-service.ts",
+      "target": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/path-guard.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/fs-service.ts",
+      "target": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/protocol.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/path-guard.ts",
+      "target": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/path-guard.ts",
+      "target": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/protocol.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts",
+      "target": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts",
+      "target": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/fs-service.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/worker.ts",
+      "target": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/protocol.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/dev/phase5-smoke.ts",
+      "target": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/errors.ts",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/dev/phase5-smoke.ts",
+      "target": "file:eliza/packages/app-core/platforms/electrobun/remotes/fs/src/bun/fs-service.ts",
+      "type": "imports"
+    }
+  ]
+}

@@ -1,0 +1,573 @@
+{
+  "batchIndex": 353,
+  "nodes": [
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:skills/.defaults/eliza-cloud-buy-domain/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "skills/.defaults/eliza-cloud-buy-domain/SKILL.md",
+      "summary": "SKILL.md documents skills/.defaults/eliza-cloud-buy-domain with 89 lines of reference material.",
+      "languageNotes": "markdown; docs; 89 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:skills/.defaults/eliza-cloud-manage-domain/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "skills/.defaults/eliza-cloud-manage-domain/SKILL.md",
+      "summary": "SKILL.md documents skills/.defaults/eliza-cloud-manage-domain with 90 lines of reference material.",
+      "languageNotes": "markdown; docs; 90 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:skills/.defaults/eliza-cloud/references/apps-and-containers.md",
+      "type": "document",
+      "name": "apps-and-containers.md",
+      "filePath": "skills/.defaults/eliza-cloud/references/apps-and-containers.md",
+      "summary": "apps-and-containers.md documents skills/.defaults/eliza-cloud/references with 73 lines of reference material.",
+      "languageNotes": "markdown; docs; 73 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:skills/.defaults/eliza-cloud/references/cloud-backend-and-monetization.md",
+      "type": "document",
+      "name": "cloud-backend-and-monetization.md",
+      "filePath": "skills/.defaults/eliza-cloud/references/cloud-backend-and-monetization.md",
+      "summary": "cloud-backend-and-monetization.md documents skills/.defaults/eliza-cloud/references with 99 lines of reference material.",
+      "languageNotes": "markdown; docs; 99 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:skills/.defaults/eliza-cloud/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "skills/.defaults/eliza-cloud/SKILL.md",
+      "summary": "SKILL.md documents skills/.defaults/eliza-cloud with 94 lines of reference material.",
+      "languageNotes": "markdown; docs; 94 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:skills/.defaults/elizaos/references/core-abstractions.md",
+      "type": "document",
+      "name": "core-abstractions.md",
+      "filePath": "skills/.defaults/elizaos/references/core-abstractions.md",
+      "summary": "core-abstractions.md documents skills/.defaults/elizaos/references with 101 lines of reference material.",
+      "languageNotes": "markdown; docs; 101 lines"
+    },
+    {
+      "tags": [
+        "documentation",
+        "plugin"
+      ],
+      "complexity": "simple",
+      "id": "document:skills/.defaults/elizaos/references/plugin-development.md",
+      "type": "document",
+      "name": "plugin-development.md",
+      "filePath": "skills/.defaults/elizaos/references/plugin-development.md",
+      "summary": "plugin-development.md documents skills/.defaults/elizaos/references with 74 lines of reference material.",
+      "languageNotes": "markdown; docs; 74 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:skills/.defaults/elizaos/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "skills/.defaults/elizaos/SKILL.md",
+      "summary": "SKILL.md documents skills/.defaults/elizaos with 27 lines of reference material.",
+      "languageNotes": "markdown; docs; 27 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:skills/.defaults/github/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "skills/.defaults/github/SKILL.md",
+      "summary": "SKILL.md documents skills/.defaults/github with 77 lines of reference material.",
+      "languageNotes": "markdown; docs; 77 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:skills/.defaults/healthcheck/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "skills/.defaults/healthcheck/SKILL.md",
+      "summary": "SKILL.md documents skills/.defaults/healthcheck with 245 lines of reference material.",
+      "languageNotes": "markdown; docs; 245 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:skills/.defaults/imsg/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "skills/.defaults/imsg/SKILL.md",
+      "summary": "SKILL.md documents skills/.defaults/imsg with 74 lines of reference material.",
+      "languageNotes": "markdown; docs; 74 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:skills/.defaults/nano-banana-pro/scripts/generate_image.py",
+      "type": "file",
+      "name": "generate_image.py",
+      "filePath": "skills/.defaults/nano-banana-pro/scripts/generate_image.py",
+      "summary": "generate_image.py is a python source file in the Milady codebase. It contains 2 functions.",
+      "languageNotes": "python; code; 184 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:skills/.defaults/nano-banana-pro/scripts/generate_image.py:get_api_key",
+      "type": "function",
+      "name": "get_api_key",
+      "filePath": "skills/.defaults/nano-banana-pro/scripts/generate_image.py",
+      "summary": "get_api_key is a function defined in skills/.defaults/nano-banana-pro/scripts/generate_image.py."
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "complex",
+      "id": "function:skills/.defaults/nano-banana-pro/scripts/generate_image.py:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "skills/.defaults/nano-banana-pro/scripts/generate_image.py",
+      "summary": "main is a function defined in skills/.defaults/nano-banana-pro/scripts/generate_image.py."
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:skills/.defaults/nano-banana-pro/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "skills/.defaults/nano-banana-pro/SKILL.md",
+      "summary": "SKILL.md documents skills/.defaults/nano-banana-pro with 58 lines of reference material.",
+      "languageNotes": "markdown; docs; 58 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:skills/.defaults/nano-pdf/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "skills/.defaults/nano-pdf/SKILL.md",
+      "summary": "SKILL.md documents skills/.defaults/nano-pdf with 38 lines of reference material.",
+      "languageNotes": "markdown; docs; 38 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:skills/.defaults/notion/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "skills/.defaults/notion/SKILL.md",
+      "summary": "SKILL.md documents skills/.defaults/notion with 172 lines of reference material.",
+      "languageNotes": "markdown; docs; 172 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:skills/.defaults/obsidian/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "skills/.defaults/obsidian/SKILL.md",
+      "summary": "SKILL.md documents skills/.defaults/obsidian with 81 lines of reference material.",
+      "languageNotes": "markdown; docs; 81 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:skills/.defaults/ordercli/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "skills/.defaults/ordercli/SKILL.md",
+      "summary": "SKILL.md documents skills/.defaults/ordercli with 78 lines of reference material.",
+      "languageNotes": "markdown; docs; 78 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:skills/.defaults/skill-creator/license.txt",
+      "type": "document",
+      "name": "license.txt",
+      "filePath": "skills/.defaults/skill-creator/license.txt",
+      "summary": "license.txt documents skills/.defaults/skill-creator with 202 lines of reference material.",
+      "languageNotes": "txt; docs; 202 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:skills/.defaults/skill-creator/scripts/init_skill.py",
+      "type": "file",
+      "name": "init_skill.py",
+      "filePath": "skills/.defaults/skill-creator/scripts/init_skill.py",
+      "summary": "init_skill.py is a python source file in the Milady codebase. It contains 6 functions.",
+      "languageNotes": "python; code; 378 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:skills/.defaults/skill-creator/scripts/init_skill.py:normalize_skill_name",
+      "type": "function",
+      "name": "normalize_skill_name",
+      "filePath": "skills/.defaults/skill-creator/scripts/init_skill.py",
+      "summary": "normalize_skill_name is a function defined in skills/.defaults/skill-creator/scripts/init_skill.py."
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:skills/.defaults/skill-creator/scripts/init_skill.py:title_case_skill_name",
+      "type": "function",
+      "name": "title_case_skill_name",
+      "filePath": "skills/.defaults/skill-creator/scripts/init_skill.py",
+      "summary": "title_case_skill_name is a function defined in skills/.defaults/skill-creator/scripts/init_skill.py."
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:skills/.defaults/skill-creator/scripts/init_skill.py:parse_resources",
+      "type": "function",
+      "name": "parse_resources",
+      "filePath": "skills/.defaults/skill-creator/scripts/init_skill.py",
+      "summary": "parse_resources is a function defined in skills/.defaults/skill-creator/scripts/init_skill.py."
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:skills/.defaults/skill-creator/scripts/init_skill.py:create_resource_dirs",
+      "type": "function",
+      "name": "create_resource_dirs",
+      "filePath": "skills/.defaults/skill-creator/scripts/init_skill.py",
+      "summary": "create_resource_dirs is a function defined in skills/.defaults/skill-creator/scripts/init_skill.py."
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:skills/.defaults/skill-creator/scripts/init_skill.py:init_skill",
+      "type": "function",
+      "name": "init_skill",
+      "filePath": "skills/.defaults/skill-creator/scripts/init_skill.py",
+      "summary": "init_skill is a function defined in skills/.defaults/skill-creator/scripts/init_skill.py."
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:skills/.defaults/skill-creator/scripts/init_skill.py:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "skills/.defaults/skill-creator/scripts/init_skill.py",
+      "summary": "main is a function defined in skills/.defaults/skill-creator/scripts/init_skill.py."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:skills/.defaults/skill-creator/scripts/package_skill.py",
+      "type": "file",
+      "name": "package_skill.py",
+      "filePath": "skills/.defaults/skill-creator/scripts/package_skill.py",
+      "summary": "package_skill.py is a python source file in the Milady codebase. It contains 2 functions, 1 imports.",
+      "languageNotes": "python; code; 111 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:skills/.defaults/skill-creator/scripts/package_skill.py:package_skill",
+      "type": "function",
+      "name": "package_skill",
+      "filePath": "skills/.defaults/skill-creator/scripts/package_skill.py",
+      "summary": "package_skill is a function defined in skills/.defaults/skill-creator/scripts/package_skill.py."
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:skills/.defaults/skill-creator/scripts/package_skill.py:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "skills/.defaults/skill-creator/scripts/package_skill.py",
+      "summary": "main is a function defined in skills/.defaults/skill-creator/scripts/package_skill.py."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:skills/.defaults/skill-creator/scripts/quick_validate.py",
+      "type": "file",
+      "name": "quick_validate.py",
+      "filePath": "skills/.defaults/skill-creator/scripts/quick_validate.py",
+      "summary": "quick_validate.py is a python source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "python; code; 101 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "python"
+      ],
+      "complexity": "moderate",
+      "id": "function:skills/.defaults/skill-creator/scripts/quick_validate.py:validate_skill",
+      "type": "function",
+      "name": "validate_skill",
+      "filePath": "skills/.defaults/skill-creator/scripts/quick_validate.py",
+      "summary": "validate_skill is a function defined in skills/.defaults/skill-creator/scripts/quick_validate.py."
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "complex",
+      "id": "document:skills/.defaults/skill-creator/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "skills/.defaults/skill-creator/SKILL.md",
+      "summary": "SKILL.md documents skills/.defaults/skill-creator with 370 lines of reference material.",
+      "languageNotes": "markdown; docs; 370 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "moderate",
+      "id": "document:skills/.defaults/slack/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "skills/.defaults/slack/SKILL.md",
+      "summary": "SKILL.md documents skills/.defaults/slack with 144 lines of reference material.",
+      "languageNotes": "markdown; docs; 144 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:skills/.defaults/spotify-player/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "skills/.defaults/spotify-player/SKILL.md",
+      "summary": "SKILL.md documents skills/.defaults/spotify-player with 64 lines of reference material.",
+      "languageNotes": "markdown; docs; 64 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:skills/.defaults/task-agent-eliza-bridge/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "skills/.defaults/task-agent-eliza-bridge/SKILL.md",
+      "summary": "SKILL.md documents skills/.defaults/task-agent-eliza-bridge with 34 lines of reference material.",
+      "languageNotes": "markdown; docs; 34 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:skills/.defaults/nano-banana-pro/scripts/generate_image.py",
+      "target": "function:skills/.defaults/nano-banana-pro/scripts/generate_image.py:get_api_key",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:skills/.defaults/nano-banana-pro/scripts/generate_image.py",
+      "target": "function:skills/.defaults/nano-banana-pro/scripts/generate_image.py:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:skills/.defaults/nano-banana-pro/scripts/generate_image.py:main",
+      "target": "function:skills/.defaults/nano-banana-pro/scripts/generate_image.py:get_api_key",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:skills/.defaults/skill-creator/scripts/init_skill.py",
+      "target": "function:skills/.defaults/skill-creator/scripts/init_skill.py:normalize_skill_name",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:skills/.defaults/skill-creator/scripts/init_skill.py",
+      "target": "function:skills/.defaults/skill-creator/scripts/init_skill.py:title_case_skill_name",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:skills/.defaults/skill-creator/scripts/init_skill.py",
+      "target": "function:skills/.defaults/skill-creator/scripts/init_skill.py:parse_resources",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:skills/.defaults/skill-creator/scripts/init_skill.py",
+      "target": "function:skills/.defaults/skill-creator/scripts/init_skill.py:create_resource_dirs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:skills/.defaults/skill-creator/scripts/init_skill.py",
+      "target": "function:skills/.defaults/skill-creator/scripts/init_skill.py:init_skill",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:skills/.defaults/skill-creator/scripts/init_skill.py",
+      "target": "function:skills/.defaults/skill-creator/scripts/init_skill.py:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:skills/.defaults/skill-creator/scripts/init_skill.py:init_skill",
+      "target": "function:skills/.defaults/skill-creator/scripts/init_skill.py:title_case_skill_name",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:skills/.defaults/skill-creator/scripts/init_skill.py:init_skill",
+      "target": "function:skills/.defaults/skill-creator/scripts/init_skill.py:create_resource_dirs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:skills/.defaults/skill-creator/scripts/init_skill.py:main",
+      "target": "function:skills/.defaults/skill-creator/scripts/init_skill.py:normalize_skill_name",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:skills/.defaults/skill-creator/scripts/init_skill.py:main",
+      "target": "function:skills/.defaults/skill-creator/scripts/init_skill.py:parse_resources",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:skills/.defaults/skill-creator/scripts/init_skill.py:main",
+      "target": "function:skills/.defaults/skill-creator/scripts/init_skill.py:init_skill",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:skills/.defaults/skill-creator/scripts/package_skill.py",
+      "target": "function:skills/.defaults/skill-creator/scripts/package_skill.py:package_skill",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:skills/.defaults/skill-creator/scripts/package_skill.py",
+      "target": "function:skills/.defaults/skill-creator/scripts/package_skill.py:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:skills/.defaults/skill-creator/scripts/package_skill.py:main",
+      "target": "function:skills/.defaults/skill-creator/scripts/package_skill.py:package_skill",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:skills/.defaults/skill-creator/scripts/quick_validate.py",
+      "target": "function:skills/.defaults/skill-creator/scripts/quick_validate.py:validate_skill",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:skills/.defaults/skill-creator/scripts/package_skill.py",
+      "target": "file:skills/.defaults/skill-creator/scripts/quick_validate.py",
+      "type": "imports"
+    }
+  ]
+}

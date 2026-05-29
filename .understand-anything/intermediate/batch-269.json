@@ -1,0 +1,3233 @@
+{
+  "batchIndex": 269,
+  "nodes": [
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:.gitattributes",
+      "type": "file",
+      "name": ".gitattributes",
+      "filePath": ".gitattributes",
+      "summary": ".gitattributes is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 7 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:.github/actions/normalize-snapd-root/action.yml",
+      "type": "config",
+      "name": "action.yml",
+      "filePath": ".github/actions/normalize-snapd-root/action.yml",
+      "summary": "action.yml configures yaml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "yaml; config; 20 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "complex",
+      "id": "config:.github/actions/setup-bun-workspace/action.yml",
+      "type": "config",
+      "name": "action.yml",
+      "filePath": ".github/actions/setup-bun-workspace/action.yml",
+      "summary": "action.yml configures yaml settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "yaml; config; 339 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:.github/agents/my-agent.agent.md",
+      "type": "document",
+      "name": "my-agent.agent.md",
+      "filePath": ".github/agents/my-agent.agent.md",
+      "summary": "my-agent.agent.md documents .github/agents with 62 lines of reference material.",
+      "languageNotes": "markdown; docs; 62 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:.github/CODEOWNERS",
+      "type": "file",
+      "name": "CODEOWNERS",
+      "filePath": ".github/CODEOWNERS",
+      "summary": "CODEOWNERS is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 38 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:.github/hooks/pre-push",
+      "type": "file",
+      "name": "pre-push",
+      "filePath": ".github/hooks/pre-push",
+      "summary": "pre-push is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 57 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:.github/trust-scoring.cjs",
+      "type": "file",
+      "name": "trust-scoring.cjs",
+      "filePath": ".github/trust-scoring.cjs",
+      "summary": "trust-scoring.cjs is a javascript source file in the Milady codebase. It contains 14 functions.",
+      "languageNotes": "javascript; code; 520 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:.github/trust-scoring.cjs:__export",
+      "type": "function",
+      "name": "__export",
+      "filePath": ".github/trust-scoring.cjs",
+      "summary": "__export is a function defined in .github/trust-scoring.cjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:.github/trust-scoring.cjs:__copyProps",
+      "type": "function",
+      "name": "__copyProps",
+      "filePath": ".github/trust-scoring.cjs",
+      "summary": "__copyProps is a function defined in .github/trust-scoring.cjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:.github/trust-scoring.cjs:__toCommonJS",
+      "type": "function",
+      "name": "__toCommonJS",
+      "filePath": ".github/trust-scoring.cjs",
+      "summary": "__toCommonJS is a function defined in .github/trust-scoring.cjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "complex",
+      "id": "function:.github/trust-scoring.cjs:computeTrustScore",
+      "type": "function",
+      "name": "computeTrustScore",
+      "filePath": ".github/trust-scoring.cjs",
+      "summary": "computeTrustScore is a function defined in .github/trust-scoring.cjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:.github/trust-scoring.cjs:computeScoreHistory",
+      "type": "function",
+      "name": "computeScoreHistory",
+      "filePath": ".github/trust-scoring.cjs",
+      "summary": "computeScoreHistory is a function defined in .github/trust-scoring.cjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:.github/trust-scoring.cjs:getComplexityMultiplier",
+      "type": "function",
+      "name": "getComplexityMultiplier",
+      "filePath": ".github/trust-scoring.cjs",
+      "summary": "getComplexityMultiplier is a function defined in .github/trust-scoring.cjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:.github/trust-scoring.cjs:getCategoryMultiplier",
+      "type": "function",
+      "name": "getCategoryMultiplier",
+      "filePath": ".github/trust-scoring.cjs",
+      "summary": "getCategoryMultiplier is a function defined in .github/trust-scoring.cjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:.github/trust-scoring.cjs:updateStreak",
+      "type": "function",
+      "name": "updateStreak",
+      "filePath": ".github/trust-scoring.cjs",
+      "summary": "updateStreak is a function defined in .github/trust-scoring.cjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:.github/trust-scoring.cjs:getTier",
+      "type": "function",
+      "name": "getTier",
+      "filePath": ".github/trust-scoring.cjs",
+      "summary": "getTier is a function defined in .github/trust-scoring.cjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:.github/trust-scoring.cjs:round",
+      "type": "function",
+      "name": "round",
+      "filePath": ".github/trust-scoring.cjs",
+      "summary": "round is a function defined in .github/trust-scoring.cjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:.github/trust-scoring.cjs:createContributorState",
+      "type": "function",
+      "name": "createContributorState",
+      "filePath": ".github/trust-scoring.cjs",
+      "summary": "createContributorState is a function defined in .github/trust-scoring.cjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:.github/trust-scoring.cjs:addEvent",
+      "type": "function",
+      "name": "addEvent",
+      "filePath": ".github/trust-scoring.cjs",
+      "summary": "addEvent is a function defined in .github/trust-scoring.cjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:.github/trust-scoring.cjs:compactState",
+      "type": "function",
+      "name": "compactState",
+      "filePath": ".github/trust-scoring.cjs",
+      "summary": "compactState is a function defined in .github/trust-scoring.cjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:.github/trust-scoring.cjs:expandState",
+      "type": "function",
+      "name": "expandState",
+      "filePath": ".github/trust-scoring.cjs",
+      "summary": "expandState is a function defined in .github/trust-scoring.cjs."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:.github/trust-scoring.js",
+      "type": "file",
+      "name": "trust-scoring.js",
+      "filePath": ".github/trust-scoring.js",
+      "summary": "trust-scoring.js is a javascript source file in the Milady codebase. It contains 12 functions.",
+      "languageNotes": "javascript; code; 858 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "complex",
+      "id": "function:.github/trust-scoring.js:computeTrustScore",
+      "type": "function",
+      "name": "computeTrustScore",
+      "filePath": ".github/trust-scoring.js",
+      "summary": "computeTrustScore is a function defined in .github/trust-scoring.js."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:.github/trust-scoring.js:getComplexityMultiplier",
+      "type": "function",
+      "name": "getComplexityMultiplier",
+      "filePath": ".github/trust-scoring.js",
+      "summary": "getComplexityMultiplier is a function defined in .github/trust-scoring.js."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:.github/trust-scoring.js:getCategoryMultiplier",
+      "type": "function",
+      "name": "getCategoryMultiplier",
+      "filePath": ".github/trust-scoring.js",
+      "summary": "getCategoryMultiplier is a function defined in .github/trust-scoring.js."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:.github/trust-scoring.js:updateStreak",
+      "type": "function",
+      "name": "updateStreak",
+      "filePath": ".github/trust-scoring.js",
+      "summary": "updateStreak is a function defined in .github/trust-scoring.js."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:.github/trust-scoring.js:getTier",
+      "type": "function",
+      "name": "getTier",
+      "filePath": ".github/trust-scoring.js",
+      "summary": "getTier is a function defined in .github/trust-scoring.js."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:.github/trust-scoring.js:round",
+      "type": "function",
+      "name": "round",
+      "filePath": ".github/trust-scoring.js",
+      "summary": "round is a function defined in .github/trust-scoring.js."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:.github/trust-scoring.js:createContributorState",
+      "type": "function",
+      "name": "createContributorState",
+      "filePath": ".github/trust-scoring.js",
+      "summary": "createContributorState is a function defined in .github/trust-scoring.js."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:.github/trust-scoring.js:addEvent",
+      "type": "function",
+      "name": "addEvent",
+      "filePath": ".github/trust-scoring.js",
+      "summary": "addEvent is a function defined in .github/trust-scoring.js."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:.github/trust-scoring.js:compactState",
+      "type": "function",
+      "name": "compactState",
+      "filePath": ".github/trust-scoring.js",
+      "summary": "compactState is a function defined in .github/trust-scoring.js."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:.github/trust-scoring.js:expandState",
+      "type": "function",
+      "name": "expandState",
+      "filePath": ".github/trust-scoring.js",
+      "summary": "expandState is a function defined in .github/trust-scoring.js."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "complex",
+      "id": "function:.github/trust-scoring.js:runExamples",
+      "type": "function",
+      "name": "runExamples",
+      "filePath": ".github/trust-scoring.js",
+      "summary": "runExamples is a function defined in .github/trust-scoring.js."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:.github/trust-scoring.js:printScenario",
+      "type": "function",
+      "name": "printScenario",
+      "filePath": ".github/trust-scoring.js",
+      "summary": "printScenario is a function defined in .github/trust-scoring.js."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:.npmignore",
+      "type": "file",
+      "name": ".npmignore",
+      "filePath": ".npmignore",
+      "summary": ".npmignore is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 29 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:.nvmrc",
+      "type": "file",
+      "name": ".nvmrc",
+      "filePath": ".nvmrc",
+      "summary": ".nvmrc is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 1 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:.understand-anything/.understandignore",
+      "type": "file",
+      "name": ".understandignore",
+      "filePath": ".understand-anything/.understandignore",
+      "summary": ".understandignore is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 159 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:.windsurfrules",
+      "type": "file",
+      "name": ".windsurfrules",
+      "filePath": ".windsurfrules",
+      "summary": ".windsurfrules is a unknown source file in the Milady codebase.",
+      "languageNotes": "unknown; code; 1 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:apps/app/docs/CLIENT-DATA-SECURITY.md",
+      "type": "document",
+      "name": "CLIENT-DATA-SECURITY.md",
+      "filePath": "apps/app/docs/CLIENT-DATA-SECURITY.md",
+      "summary": "CLIENT-DATA-SECURITY.md documents apps/app/docs with 68 lines of reference material.",
+      "languageNotes": "markdown; docs; 68 lines"
+    },
+    {
+      "tags": [
+        "documentation"
+      ],
+      "complexity": "simple",
+      "id": "document:apps/app/docs/SECURITY-SMOKE.md",
+      "type": "document",
+      "name": "SECURITY-SMOKE.md",
+      "filePath": "apps/app/docs/SECURITY-SMOKE.md",
+      "summary": "SECURITY-SMOKE.md documents apps/app/docs with 57 lines of reference material.",
+      "languageNotes": "markdown; docs; 57 lines"
+    },
+    {
+      "tags": [
+        "script",
+        "desktop"
+      ],
+      "complexity": "moderate",
+      "id": "file:apps/app/electrobun/scripts/ensure-whisper-model.sh",
+      "type": "file",
+      "name": "ensure-whisper-model.sh",
+      "filePath": "apps/app/electrobun/scripts/ensure-whisper-model.sh",
+      "summary": "ensure-whisper-model.sh automates a Milady workspace, build, verification, or runtime task.",
+      "languageNotes": "shell; script; 89 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "id": "config:apps/app/native-overrides/ios/App/App/Assets.xcassets/AppIcon.appiconset/Contents.json",
+      "type": "config",
+      "name": "Contents.json",
+      "filePath": "apps/app/native-overrides/ios/App/App/Assets.xcassets/AppIcon.appiconset/Contents.json",
+      "summary": "Contents.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 116 lines"
+    },
+    {
+      "tags": [
+        "configuration"
+      ],
+      "complexity": "simple",
+      "id": "config:apps/app/native-overrides/ios/App/App/Assets.xcassets/Splash.imageset/Contents.json",
+      "type": "config",
+      "name": "Contents.json",
+      "filePath": "apps/app/native-overrides/ios/App/App/Assets.xcassets/Splash.imageset/Contents.json",
+      "summary": "Contents.json configures json settings for the Milady workspace or one of its embedded packages.",
+      "languageNotes": "json; config; 23 lines"
+    },
+    {
+      "tags": [
+        "desktop"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/app/playwright.electrobun.packaged.config.ts",
+      "type": "file",
+      "name": "playwright.electrobun.packaged.config.ts",
+      "filePath": "apps/app/playwright.electrobun.packaged.config.ts",
+      "summary": "playwright.electrobun.packaged.config.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 20 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/app/playwright.ui-packaged.config.ts",
+      "type": "file",
+      "name": "playwright.ui-packaged.config.ts",
+      "filePath": "apps/app/playwright.ui-packaged.config.ts",
+      "summary": "playwright.ui-packaged.config.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 27 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:apps/app/playwright.ui-smoke.config.ts",
+      "type": "file",
+      "name": "playwright.ui-smoke.config.ts",
+      "filePath": "apps/app/playwright.ui-smoke.config.ts",
+      "summary": "playwright.ui-smoke.config.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 69 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:apps/app/scripts/android-local-mode-smoke.mjs",
+      "type": "file",
+      "name": "android-local-mode-smoke.mjs",
+      "filePath": "apps/app/scripts/android-local-mode-smoke.mjs",
+      "summary": "android-local-mode-smoke.mjs is a javascript source file in the Milady codebase. It contains 9 functions.",
+      "languageNotes": "javascript; code; 376 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/android-local-mode-smoke.mjs:argValue",
+      "type": "function",
+      "name": "argValue",
+      "filePath": "apps/app/scripts/android-local-mode-smoke.mjs",
+      "summary": "argValue is a function defined in apps/app/scripts/android-local-mode-smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/android-local-mode-smoke.mjs:hasArg",
+      "type": "function",
+      "name": "hasArg",
+      "filePath": "apps/app/scripts/android-local-mode-smoke.mjs",
+      "summary": "hasArg is a function defined in apps/app/scripts/android-local-mode-smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/android-local-mode-smoke.mjs:run",
+      "type": "function",
+      "name": "run",
+      "filePath": "apps/app/scripts/android-local-mode-smoke.mjs",
+      "summary": "run is a function defined in apps/app/scripts/android-local-mode-smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/android-local-mode-smoke.mjs:adbRun",
+      "type": "function",
+      "name": "adbRun",
+      "filePath": "apps/app/scripts/android-local-mode-smoke.mjs",
+      "summary": "adbRun is a function defined in apps/app/scripts/android-local-mode-smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/android-local-mode-smoke.mjs:adbTry",
+      "type": "function",
+      "name": "adbTry",
+      "filePath": "apps/app/scripts/android-local-mode-smoke.mjs",
+      "summary": "adbTry is a function defined in apps/app/scripts/android-local-mode-smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/android-local-mode-smoke.mjs:resolveSerial",
+      "type": "function",
+      "name": "resolveSerial",
+      "filePath": "apps/app/scripts/android-local-mode-smoke.mjs",
+      "summary": "resolveSerial is a function defined in apps/app/scripts/android-local-mode-smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/android-local-mode-smoke.mjs:delay",
+      "type": "function",
+      "name": "delay",
+      "filePath": "apps/app/scripts/android-local-mode-smoke.mjs",
+      "summary": "delay is a function defined in apps/app/scripts/android-local-mode-smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/android-local-mode-smoke.mjs:cdpEvaluate",
+      "type": "function",
+      "name": "cdpEvaluate",
+      "filePath": "apps/app/scripts/android-local-mode-smoke.mjs",
+      "summary": "cdpEvaluate is a function defined in apps/app/scripts/android-local-mode-smoke.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "complex",
+      "id": "function:apps/app/scripts/android-local-mode-smoke.mjs:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "apps/app/scripts/android-local-mode-smoke.mjs",
+      "summary": "main is a function defined in apps/app/scripts/android-local-mode-smoke.mjs."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "type": "file",
+      "name": "cloud-provisioning-e2e.mjs",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "cloud-provisioning-e2e.mjs is a javascript source file in the Milady codebase. It contains 42 functions.",
+      "languageNotes": "javascript; code; 928 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:argValue",
+      "type": "function",
+      "name": "argValue",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "argValue is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:hasArg",
+      "type": "function",
+      "name": "hasArg",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "hasArg is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:splitList",
+      "type": "function",
+      "name": "splitList",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "splitList is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:log",
+      "type": "function",
+      "name": "log",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "log is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:run",
+      "type": "function",
+      "name": "run",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "run is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:requireToken",
+      "type": "function",
+      "name": "requireToken",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "requireToken is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:redact",
+      "type": "function",
+      "name": "redact",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "redact is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:tryJson",
+      "type": "function",
+      "name": "tryJson",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "tryJson is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:record",
+      "type": "function",
+      "name": "record",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "record is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:dataRecord",
+      "type": "function",
+      "name": "dataRecord",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "dataRecord is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:firstString",
+      "type": "function",
+      "name": "firstString",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "firstString is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:normalizeStatus",
+      "type": "function",
+      "name": "normalizeStatus",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "normalizeStatus is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:resolveRuntimeUrl",
+      "type": "function",
+      "name": "resolveRuntimeUrl",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "resolveRuntimeUrl is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:cloudErrorMessage",
+      "type": "function",
+      "name": "cloudErrorMessage",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "cloudErrorMessage is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:isAcceptableCloudResponse",
+      "type": "function",
+      "name": "isAcceptableCloudResponse",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "isAcceptableCloudResponse is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:responseDiagnostics",
+      "type": "function",
+      "name": "responseDiagnostics",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "responseDiagnostics is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:resolveCloudWebBase",
+      "type": "function",
+      "name": "resolveCloudWebBase",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "resolveCloudWebBase is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:openBrowser",
+      "type": "function",
+      "name": "openBrowser",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "openBrowser is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:waitForBrowserLogin",
+      "type": "function",
+      "name": "waitForBrowserLogin",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "waitForBrowserLogin is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:acquireTokenFromBrowserLogin",
+      "type": "function",
+      "name": "acquireTokenFromBrowserLogin",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "acquireTokenFromBrowserLogin is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:ensureToken",
+      "type": "function",
+      "name": "ensureToken",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "ensureToken is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:cloudRequest",
+      "type": "function",
+      "name": "cloudRequest",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "cloudRequest is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:listAgents",
+      "type": "function",
+      "name": "listAgents",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "listAgents is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:createAgent",
+      "type": "function",
+      "name": "createAgent",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "createAgent is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:getAgent",
+      "type": "function",
+      "name": "getAgent",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "getAgent is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:resolveAgent",
+      "type": "function",
+      "name": "resolveAgent",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "resolveAgent is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:provisionInfo",
+      "type": "function",
+      "name": "provisionInfo",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "provisionInfo is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:jobInfo",
+      "type": "function",
+      "name": "jobInfo",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "jobInfo is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:provisionAgent",
+      "type": "function",
+      "name": "provisionAgent",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "provisionAgent is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:waitForRuntimeUrl",
+      "type": "function",
+      "name": "waitForRuntimeUrl",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "waitForRuntimeUrl is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:probeRuntime",
+      "type": "function",
+      "name": "probeRuntime",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "probeRuntime is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runProgrammaticSurface",
+      "type": "function",
+      "name": "runProgrammaticSurface",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "runProgrammaticSurface is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:summarizeAgent",
+      "type": "function",
+      "name": "summarizeAgent",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "summarizeAgent is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runWebSurface",
+      "type": "function",
+      "name": "runWebSurface",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "runWebSurface is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:serializeFailure",
+      "type": "function",
+      "name": "serializeFailure",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "serializeFailure is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:writeReport",
+      "type": "function",
+      "name": "writeReport",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "writeReport is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:cdpEvaluate",
+      "type": "function",
+      "name": "cdpEvaluate",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "cdpEvaluate is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:resolveAndroidSerial",
+      "type": "function",
+      "name": "resolveAndroidSerial",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "resolveAndroidSerial is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "complex",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runAndroidSurface",
+      "type": "function",
+      "name": "runAndroidSurface",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "runAndroidSurface is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runIosSimulatorSurface",
+      "type": "function",
+      "name": "runIosSimulatorSurface",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "runIosSimulatorSurface is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runIosDeviceSurface",
+      "type": "function",
+      "name": "runIosDeviceSurface",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "runIosDeviceSurface is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "summary": "main is a function defined in apps/app/scripts/cloud-provisioning-e2e.mjs."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:apps/app/scripts/generate-android-icons.mjs",
+      "type": "file",
+      "name": "generate-android-icons.mjs",
+      "filePath": "apps/app/scripts/generate-android-icons.mjs",
+      "summary": "generate-android-icons.mjs is a javascript source file in the Milady codebase.",
+      "languageNotes": "javascript; code; 53 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:apps/app/scripts/prod-bundle-dev-endpoint-guard.mjs",
+      "type": "file",
+      "name": "prod-bundle-dev-endpoint-guard.mjs",
+      "filePath": "apps/app/scripts/prod-bundle-dev-endpoint-guard.mjs",
+      "summary": "prod-bundle-dev-endpoint-guard.mjs is a javascript source file in the Milady codebase. It contains 2 functions.",
+      "languageNotes": "javascript; code; 81 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/prod-bundle-dev-endpoint-guard.mjs:walk",
+      "type": "function",
+      "name": "walk",
+      "filePath": "apps/app/scripts/prod-bundle-dev-endpoint-guard.mjs",
+      "summary": "walk is a function defined in apps/app/scripts/prod-bundle-dev-endpoint-guard.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/prod-bundle-dev-endpoint-guard.mjs:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "apps/app/scripts/prod-bundle-dev-endpoint-guard.mjs",
+      "summary": "main is a function defined in apps/app/scripts/prod-bundle-dev-endpoint-guard.mjs."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:apps/app/scripts/run-ui-playwright.mjs",
+      "type": "file",
+      "name": "run-ui-playwright.mjs",
+      "filePath": "apps/app/scripts/run-ui-playwright.mjs",
+      "summary": "run-ui-playwright.mjs is a javascript source file in the Milady codebase. It contains 2 functions, 1 imports.",
+      "languageNotes": "javascript; code; 112 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/run-ui-playwright.mjs:resolvePlaywrightCommand",
+      "type": "function",
+      "name": "resolvePlaywrightCommand",
+      "filePath": "apps/app/scripts/run-ui-playwright.mjs",
+      "summary": "resolvePlaywrightCommand is a function defined in apps/app/scripts/run-ui-playwright.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:apps/app/scripts/run-ui-playwright.mjs:resolveBunCommand",
+      "type": "function",
+      "name": "resolveBunCommand",
+      "filePath": "apps/app/scripts/run-ui-playwright.mjs",
+      "summary": "resolveBunCommand is a function defined in apps/app/scripts/run-ui-playwright.mjs."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:.github/trust-scoring.cjs",
+      "target": "function:.github/trust-scoring.cjs:__export",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:.github/trust-scoring.cjs",
+      "target": "function:.github/trust-scoring.cjs:__copyProps",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:.github/trust-scoring.cjs",
+      "target": "function:.github/trust-scoring.cjs:__toCommonJS",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:.github/trust-scoring.cjs",
+      "target": "function:.github/trust-scoring.cjs:computeTrustScore",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:.github/trust-scoring.cjs",
+      "target": "function:.github/trust-scoring.cjs:computeScoreHistory",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:.github/trust-scoring.cjs",
+      "target": "function:.github/trust-scoring.cjs:getComplexityMultiplier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:.github/trust-scoring.cjs",
+      "target": "function:.github/trust-scoring.cjs:getCategoryMultiplier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:.github/trust-scoring.cjs",
+      "target": "function:.github/trust-scoring.cjs:updateStreak",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:.github/trust-scoring.cjs",
+      "target": "function:.github/trust-scoring.cjs:getTier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:.github/trust-scoring.cjs",
+      "target": "function:.github/trust-scoring.cjs:round",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:.github/trust-scoring.cjs",
+      "target": "function:.github/trust-scoring.cjs:createContributorState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:.github/trust-scoring.cjs",
+      "target": "function:.github/trust-scoring.cjs:addEvent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:.github/trust-scoring.cjs",
+      "target": "function:.github/trust-scoring.cjs:compactState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:.github/trust-scoring.cjs",
+      "target": "function:.github/trust-scoring.cjs:expandState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.cjs:__toCommonJS",
+      "target": "function:.github/trust-scoring.cjs:__copyProps",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.cjs:computeTrustScore",
+      "target": "function:.github/trust-scoring.cjs:getTier",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.cjs:computeTrustScore",
+      "target": "function:.github/trust-scoring.cjs:getTier",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.cjs:computeTrustScore",
+      "target": "function:.github/trust-scoring.cjs:round",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.cjs:computeTrustScore",
+      "target": "function:.github/trust-scoring.cjs:round",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.cjs:computeTrustScore",
+      "target": "function:.github/trust-scoring.cjs:round",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.cjs:computeTrustScore",
+      "target": "function:.github/trust-scoring.cjs:getComplexityMultiplier",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.cjs:computeTrustScore",
+      "target": "function:.github/trust-scoring.cjs:getCategoryMultiplier",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.cjs:computeTrustScore",
+      "target": "function:.github/trust-scoring.cjs:updateStreak",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.cjs:computeTrustScore",
+      "target": "function:.github/trust-scoring.cjs:round",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.cjs:computeTrustScore",
+      "target": "function:.github/trust-scoring.cjs:round",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.cjs:computeTrustScore",
+      "target": "function:.github/trust-scoring.cjs:round",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.cjs:computeTrustScore",
+      "target": "function:.github/trust-scoring.cjs:round",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.cjs:computeTrustScore",
+      "target": "function:.github/trust-scoring.cjs:round",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.cjs:computeTrustScore",
+      "target": "function:.github/trust-scoring.cjs:round",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.cjs:computeTrustScore",
+      "target": "function:.github/trust-scoring.cjs:round",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.cjs:computeTrustScore",
+      "target": "function:.github/trust-scoring.cjs:round",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.cjs:computeTrustScore",
+      "target": "function:.github/trust-scoring.cjs:round",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.cjs:computeTrustScore",
+      "target": "function:.github/trust-scoring.cjs:round",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.cjs:computeTrustScore",
+      "target": "function:.github/trust-scoring.cjs:round",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.cjs:computeTrustScore",
+      "target": "function:.github/trust-scoring.cjs:round",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.cjs:computeTrustScore",
+      "target": "function:.github/trust-scoring.cjs:getTier",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.cjs:computeScoreHistory",
+      "target": "function:.github/trust-scoring.cjs:computeTrustScore",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:.github/trust-scoring.js",
+      "target": "function:.github/trust-scoring.js:computeTrustScore",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:.github/trust-scoring.js",
+      "target": "function:.github/trust-scoring.js:getComplexityMultiplier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:.github/trust-scoring.js",
+      "target": "function:.github/trust-scoring.js:getCategoryMultiplier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:.github/trust-scoring.js",
+      "target": "function:.github/trust-scoring.js:updateStreak",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:.github/trust-scoring.js",
+      "target": "function:.github/trust-scoring.js:getTier",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:.github/trust-scoring.js",
+      "target": "function:.github/trust-scoring.js:round",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:.github/trust-scoring.js",
+      "target": "function:.github/trust-scoring.js:createContributorState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:.github/trust-scoring.js",
+      "target": "function:.github/trust-scoring.js:addEvent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:.github/trust-scoring.js",
+      "target": "function:.github/trust-scoring.js:compactState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:.github/trust-scoring.js",
+      "target": "function:.github/trust-scoring.js:expandState",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:.github/trust-scoring.js",
+      "target": "function:.github/trust-scoring.js:runExamples",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:.github/trust-scoring.js",
+      "target": "function:.github/trust-scoring.js:printScenario",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.js:computeTrustScore",
+      "target": "function:.github/trust-scoring.js:getTier",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.js:computeTrustScore",
+      "target": "function:.github/trust-scoring.js:getTier",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.js:computeTrustScore",
+      "target": "function:.github/trust-scoring.js:round",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.js:computeTrustScore",
+      "target": "function:.github/trust-scoring.js:round",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.js:computeTrustScore",
+      "target": "function:.github/trust-scoring.js:round",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.js:computeTrustScore",
+      "target": "function:.github/trust-scoring.js:getComplexityMultiplier",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.js:computeTrustScore",
+      "target": "function:.github/trust-scoring.js:getCategoryMultiplier",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.js:computeTrustScore",
+      "target": "function:.github/trust-scoring.js:updateStreak",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.js:computeTrustScore",
+      "target": "function:.github/trust-scoring.js:round",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.js:computeTrustScore",
+      "target": "function:.github/trust-scoring.js:round",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.js:computeTrustScore",
+      "target": "function:.github/trust-scoring.js:round",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.js:computeTrustScore",
+      "target": "function:.github/trust-scoring.js:round",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.js:computeTrustScore",
+      "target": "function:.github/trust-scoring.js:round",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.js:computeTrustScore",
+      "target": "function:.github/trust-scoring.js:round",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.js:computeTrustScore",
+      "target": "function:.github/trust-scoring.js:round",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.js:computeTrustScore",
+      "target": "function:.github/trust-scoring.js:round",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.js:computeTrustScore",
+      "target": "function:.github/trust-scoring.js:round",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.js:computeTrustScore",
+      "target": "function:.github/trust-scoring.js:round",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.js:computeTrustScore",
+      "target": "function:.github/trust-scoring.js:getTier",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.js:runExamples",
+      "target": "function:.github/trust-scoring.js:printScenario",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.js:runExamples",
+      "target": "function:.github/trust-scoring.js:printScenario",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.js:runExamples",
+      "target": "function:.github/trust-scoring.js:printScenario",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.js:runExamples",
+      "target": "function:.github/trust-scoring.js:printScenario",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.js:runExamples",
+      "target": "function:.github/trust-scoring.js:printScenario",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.js:runExamples",
+      "target": "function:.github/trust-scoring.js:printScenario",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.js:runExamples",
+      "target": "function:.github/trust-scoring.js:printScenario",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:.github/trust-scoring.js:printScenario",
+      "target": "function:.github/trust-scoring.js:computeTrustScore",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/android-local-mode-smoke.mjs",
+      "target": "function:apps/app/scripts/android-local-mode-smoke.mjs:argValue",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/android-local-mode-smoke.mjs",
+      "target": "function:apps/app/scripts/android-local-mode-smoke.mjs:hasArg",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/android-local-mode-smoke.mjs",
+      "target": "function:apps/app/scripts/android-local-mode-smoke.mjs:run",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/android-local-mode-smoke.mjs",
+      "target": "function:apps/app/scripts/android-local-mode-smoke.mjs:adbRun",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/android-local-mode-smoke.mjs",
+      "target": "function:apps/app/scripts/android-local-mode-smoke.mjs:adbTry",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/android-local-mode-smoke.mjs",
+      "target": "function:apps/app/scripts/android-local-mode-smoke.mjs:resolveSerial",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/android-local-mode-smoke.mjs",
+      "target": "function:apps/app/scripts/android-local-mode-smoke.mjs:delay",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/android-local-mode-smoke.mjs",
+      "target": "function:apps/app/scripts/android-local-mode-smoke.mjs:cdpEvaluate",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/android-local-mode-smoke.mjs",
+      "target": "function:apps/app/scripts/android-local-mode-smoke.mjs:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/android-local-mode-smoke.mjs:adbRun",
+      "target": "function:apps/app/scripts/android-local-mode-smoke.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/android-local-mode-smoke.mjs:adbTry",
+      "target": "function:apps/app/scripts/android-local-mode-smoke.mjs:adbRun",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/android-local-mode-smoke.mjs:resolveSerial",
+      "target": "function:apps/app/scripts/android-local-mode-smoke.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/android-local-mode-smoke.mjs:main",
+      "target": "function:apps/app/scripts/android-local-mode-smoke.mjs:resolveSerial",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/android-local-mode-smoke.mjs:main",
+      "target": "function:apps/app/scripts/android-local-mode-smoke.mjs:adbRun",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/android-local-mode-smoke.mjs:main",
+      "target": "function:apps/app/scripts/android-local-mode-smoke.mjs:adbRun",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/android-local-mode-smoke.mjs:main",
+      "target": "function:apps/app/scripts/android-local-mode-smoke.mjs:adbRun",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/android-local-mode-smoke.mjs:main",
+      "target": "function:apps/app/scripts/android-local-mode-smoke.mjs:adbRun",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/android-local-mode-smoke.mjs:main",
+      "target": "function:apps/app/scripts/android-local-mode-smoke.mjs:adbRun",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/android-local-mode-smoke.mjs:main",
+      "target": "function:apps/app/scripts/android-local-mode-smoke.mjs:delay",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/android-local-mode-smoke.mjs:main",
+      "target": "function:apps/app/scripts/android-local-mode-smoke.mjs:adbRun",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/android-local-mode-smoke.mjs:main",
+      "target": "function:apps/app/scripts/android-local-mode-smoke.mjs:adbTry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/android-local-mode-smoke.mjs:main",
+      "target": "function:apps/app/scripts/android-local-mode-smoke.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/android-local-mode-smoke.mjs:main",
+      "target": "function:apps/app/scripts/android-local-mode-smoke.mjs:adbTry",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/android-local-mode-smoke.mjs:main",
+      "target": "function:apps/app/scripts/android-local-mode-smoke.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/android-local-mode-smoke.mjs:main",
+      "target": "function:apps/app/scripts/android-local-mode-smoke.mjs:cdpEvaluate",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:argValue",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:hasArg",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:splitList",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:log",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:run",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:requireToken",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:redact",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:tryJson",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:record",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:dataRecord",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:firstString",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:normalizeStatus",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:resolveRuntimeUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:cloudErrorMessage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:isAcceptableCloudResponse",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:responseDiagnostics",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:resolveCloudWebBase",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:openBrowser",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:waitForBrowserLogin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:acquireTokenFromBrowserLogin",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:ensureToken",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:cloudRequest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:listAgents",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:createAgent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:getAgent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:resolveAgent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:provisionInfo",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:jobInfo",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:provisionAgent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:waitForRuntimeUrl",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:probeRuntime",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runProgrammaticSurface",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:summarizeAgent",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runWebSurface",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:serializeFailure",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:writeReport",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:cdpEvaluate",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:resolveAndroidSerial",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runAndroidSurface",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runIosSimulatorSurface",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runIosDeviceSurface",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/cloud-provisioning-e2e.mjs",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:dataRecord",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:record",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:dataRecord",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:record",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:resolveRuntimeUrl",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:record",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:resolveRuntimeUrl",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:firstString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:cloudErrorMessage",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:record",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:cloudErrorMessage",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:firstString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:isAcceptableCloudResponse",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:record",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:openBrowser",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:openBrowser",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:openBrowser",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:waitForBrowserLogin",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:tryJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:waitForBrowserLogin",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:record",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:waitForBrowserLogin",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:firstString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:acquireTokenFromBrowserLogin",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:resolveCloudWebBase",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:acquireTokenFromBrowserLogin",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:acquireTokenFromBrowserLogin",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:openBrowser",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:acquireTokenFromBrowserLogin",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:waitForBrowserLogin",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:acquireTokenFromBrowserLogin",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:ensureToken",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:acquireTokenFromBrowserLogin",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:cloudRequest",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:requireToken",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:cloudRequest",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:tryJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:cloudRequest",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:isAcceptableCloudResponse",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:cloudRequest",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:cloudErrorMessage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:cloudRequest",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:responseDiagnostics",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:cloudRequest",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:responseDiagnostics",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:listAgents",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:cloudRequest",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:listAgents",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:record",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:listAgents",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:dataRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:createAgent",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:cloudRequest",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:createAgent",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:dataRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:createAgent",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:firstString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:getAgent",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:cloudRequest",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:getAgent",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:dataRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:getAgent",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:firstString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:resolveAgent",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:getAgent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:resolveAgent",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:hasArg",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:resolveAgent",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:createAgent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:resolveAgent",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:listAgents",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:resolveAgent",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:firstString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:resolveAgent",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:hasArg",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:resolveAgent",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:createAgent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:provisionInfo",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:record",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:provisionInfo",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:dataRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:provisionInfo",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:firstString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:provisionInfo",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:firstString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:provisionInfo",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:resolveRuntimeUrl",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:provisionInfo",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:normalizeStatus",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:provisionInfo",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:firstString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:jobInfo",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:record",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:jobInfo",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:dataRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:jobInfo",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:record",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:jobInfo",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:record",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:jobInfo",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:normalizeStatus",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:jobInfo",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:firstString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:jobInfo",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:resolveRuntimeUrl",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:jobInfo",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:firstString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:jobInfo",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:record",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:provisionAgent",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:provisionAgent",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:cloudRequest",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:provisionAgent",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:provisionInfo",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:waitForRuntimeUrl",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:cloudRequest",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:waitForRuntimeUrl",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:jobInfo",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:waitForRuntimeUrl",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:getAgent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:waitForRuntimeUrl",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:resolveRuntimeUrl",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:probeRuntime",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:requireToken",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:probeRuntime",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:tryJson",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runProgrammaticSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:resolveAgent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runProgrammaticSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:firstString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runProgrammaticSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:provisionAgent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runProgrammaticSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:summarizeAgent",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runProgrammaticSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:waitForRuntimeUrl",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runProgrammaticSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:probeRuntime",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runProgrammaticSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:firstString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:summarizeAgent",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:firstString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:summarizeAgent",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:firstString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:summarizeAgent",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:firstString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:summarizeAgent",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:firstString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:summarizeAgent",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:firstString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:summarizeAgent",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:firstString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:summarizeAgent",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:firstString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:summarizeAgent",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:firstString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:summarizeAgent",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:firstString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:summarizeAgent",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:firstString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:summarizeAgent",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:firstString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runWebSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:argValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runWebSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:hasArg",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runWebSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:requireToken",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runWebSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:requireToken",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:writeReport",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:redact",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:writeReport",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:resolveAndroidSerial",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:argValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:resolveAndroidSerial",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runAndroidSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:resolveAndroidSerial",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runAndroidSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:argValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runAndroidSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:hasArg",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runAndroidSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runAndroidSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runAndroidSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runAndroidSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runAndroidSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runAndroidSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runAndroidSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runAndroidSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:cdpEvaluate",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runAndroidSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:requireToken",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runAndroidSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:requireToken",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runIosSimulatorSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:argValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runIosSimulatorSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runIosSimulatorSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runIosSimulatorSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:requireToken",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runIosSimulatorSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runIosSimulatorSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:argValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runIosSimulatorSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runIosDeviceSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:argValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runIosDeviceSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:argValue",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runIosDeviceSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runIosDeviceSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runIosDeviceSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:requireToken",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runIosDeviceSurface",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:run",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:main",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:ensureToken",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:main",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:main",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runProgrammaticSurface",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:main",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runProgrammaticSurface",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:main",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runWebSurface",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:main",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runAndroidSurface",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:main",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runIosSimulatorSurface",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:main",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:runIosDeviceSurface",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:main",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:log",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:main",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:serializeFailure",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:main",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:writeReport",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:main",
+      "target": "function:apps/app/scripts/cloud-provisioning-e2e.mjs:redact",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/prod-bundle-dev-endpoint-guard.mjs",
+      "target": "function:apps/app/scripts/prod-bundle-dev-endpoint-guard.mjs:walk",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/prod-bundle-dev-endpoint-guard.mjs",
+      "target": "function:apps/app/scripts/prod-bundle-dev-endpoint-guard.mjs:main",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:apps/app/scripts/prod-bundle-dev-endpoint-guard.mjs:main",
+      "target": "function:apps/app/scripts/prod-bundle-dev-endpoint-guard.mjs:walk",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/run-ui-playwright.mjs",
+      "target": "function:apps/app/scripts/run-ui-playwright.mjs:resolvePlaywrightCommand",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:apps/app/scripts/run-ui-playwright.mjs",
+      "target": "function:apps/app/scripts/run-ui-playwright.mjs:resolveBunCommand",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:apps/app/scripts/run-ui-playwright.mjs",
+      "target": "file:apps/app/test/utils/get-free-port.mjs",
+      "type": "imports"
+    }
+  ]
+}

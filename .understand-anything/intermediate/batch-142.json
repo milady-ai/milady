@@ -1,0 +1,389 @@
+{
+  "batchIndex": 142,
+  "nodes": [
+    {
+      "tags": [
+        "voice",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs",
+      "type": "file",
+      "name": "voice-latency-report.mjs",
+      "filePath": "eliza/packages/app-core/scripts/lib/voice-latency-report.mjs",
+      "summary": "voice-latency-report.mjs is a javascript source file in the Milady codebase. It contains 5 functions.",
+      "languageNotes": "javascript; code; 154 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:fmtMs",
+      "type": "function",
+      "name": "fmtMs",
+      "filePath": "eliza/packages/app-core/scripts/lib/voice-latency-report.mjs",
+      "summary": "fmtMs is a function defined in eliza/packages/app-core/scripts/lib/voice-latency-report.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:pad",
+      "type": "function",
+      "name": "pad",
+      "filePath": "eliza/packages/app-core/scripts/lib/voice-latency-report.mjs",
+      "summary": "pad is a function defined in eliza/packages/app-core/scripts/lib/voice-latency-report.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:padLeft",
+      "type": "function",
+      "name": "padLeft",
+      "filePath": "eliza/packages/app-core/scripts/lib/voice-latency-report.mjs",
+      "summary": "padLeft is a function defined in eliza/packages/app-core/scripts/lib/voice-latency-report.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:renderVoiceLatencyReport",
+      "type": "function",
+      "name": "renderVoiceLatencyReport",
+      "filePath": "eliza/packages/app-core/scripts/lib/voice-latency-report.mjs",
+      "summary": "renderVoiceLatencyReport is a function defined in eliza/packages/app-core/scripts/lib/voice-latency-report.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:fetchAndRenderVoiceLatency",
+      "type": "function",
+      "name": "fetchAndRenderVoiceLatency",
+      "filePath": "eliza/packages/app-core/scripts/lib/voice-latency-report.mjs",
+      "summary": "fetchAndRenderVoiceLatency is a function defined in eliza/packages/app-core/scripts/lib/voice-latency-report.mjs."
+    },
+    {
+      "tags": [
+        "voice",
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/scripts/voice-latency-report.mjs",
+      "type": "file",
+      "name": "voice-latency-report.mjs",
+      "filePath": "eliza/packages/app-core/scripts/voice-latency-report.mjs",
+      "summary": "voice-latency-report.mjs is a javascript source file in the Milady codebase. It contains 2 functions, 1 imports.",
+      "languageNotes": "javascript; code; 96 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/voice-latency-report.mjs:parsePositivePort",
+      "type": "function",
+      "name": "parsePositivePort",
+      "filePath": "eliza/packages/app-core/scripts/voice-latency-report.mjs",
+      "summary": "parsePositivePort is a function defined in eliza/packages/app-core/scripts/voice-latency-report.mjs."
+    },
+    {
+      "tags": [
+        "function",
+        "javascript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/app-core/scripts/voice-latency-report.mjs:resolveApiBase",
+      "type": "function",
+      "name": "resolveApiBase",
+      "filePath": "eliza/packages/app-core/scripts/voice-latency-report.mjs",
+      "summary": "resolveApiBase is a function defined in eliza/packages/app-core/scripts/voice-latency-report.mjs."
+    },
+    {
+      "tags": [
+        "test",
+        "voice"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/app-core/scripts/voice-latency-report.test.ts",
+      "type": "file",
+      "name": "voice-latency-report.test.ts",
+      "filePath": "eliza/packages/app-core/scripts/voice-latency-report.test.ts",
+      "summary": "voice-latency-report.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 176 lines"
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs",
+      "target": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:fmtMs",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs",
+      "target": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:pad",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs",
+      "target": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:padLeft",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs",
+      "target": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:renderVoiceLatencyReport",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs",
+      "target": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:fetchAndRenderVoiceLatency",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:renderVoiceLatencyReport",
+      "target": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:pad",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:renderVoiceLatencyReport",
+      "target": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:padLeft",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:renderVoiceLatencyReport",
+      "target": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:padLeft",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:renderVoiceLatencyReport",
+      "target": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:padLeft",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:renderVoiceLatencyReport",
+      "target": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:padLeft",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:renderVoiceLatencyReport",
+      "target": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:padLeft",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:renderVoiceLatencyReport",
+      "target": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:padLeft",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:renderVoiceLatencyReport",
+      "target": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:padLeft",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:renderVoiceLatencyReport",
+      "target": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:pad",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:renderVoiceLatencyReport",
+      "target": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:padLeft",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:renderVoiceLatencyReport",
+      "target": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:padLeft",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:renderVoiceLatencyReport",
+      "target": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:fmtMs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:renderVoiceLatencyReport",
+      "target": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:padLeft",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:renderVoiceLatencyReport",
+      "target": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:fmtMs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:renderVoiceLatencyReport",
+      "target": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:padLeft",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:renderVoiceLatencyReport",
+      "target": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:fmtMs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:renderVoiceLatencyReport",
+      "target": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:padLeft",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:renderVoiceLatencyReport",
+      "target": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:fmtMs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:renderVoiceLatencyReport",
+      "target": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:padLeft",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:renderVoiceLatencyReport",
+      "target": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:fmtMs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:renderVoiceLatencyReport",
+      "target": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:padLeft",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:renderVoiceLatencyReport",
+      "target": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:fmtMs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:renderVoiceLatencyReport",
+      "target": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:fmtMs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:renderVoiceLatencyReport",
+      "target": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:fmtMs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:renderVoiceLatencyReport",
+      "target": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:fmtMs",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:fetchAndRenderVoiceLatency",
+      "target": "function:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs:renderVoiceLatencyReport",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/voice-latency-report.mjs",
+      "target": "function:eliza/packages/app-core/scripts/voice-latency-report.mjs:parsePositivePort",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/app-core/scripts/voice-latency-report.mjs",
+      "target": "function:eliza/packages/app-core/scripts/voice-latency-report.mjs:resolveApiBase",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/voice-latency-report.mjs:resolveApiBase",
+      "target": "function:eliza/packages/app-core/scripts/voice-latency-report.mjs:parsePositivePort",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/app-core/scripts/voice-latency-report.mjs:resolveApiBase",
+      "target": "function:eliza/packages/app-core/scripts/voice-latency-report.mjs:parsePositivePort",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/scripts/voice-latency-report.mjs",
+      "target": "file:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs",
+      "type": "imports"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.7,
+      "source": "file:eliza/packages/app-core/scripts/voice-latency-report.test.ts",
+      "target": "file:eliza/packages/app-core/scripts/lib/voice-latency-report.mjs",
+      "type": "imports"
+    }
+  ]
+}

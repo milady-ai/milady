@@ -1,0 +1,1610 @@
+{
+  "batchIndex": 326,
+  "nodes": [
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/contracts/permissions-routes.test.ts",
+      "type": "file",
+      "name": "permissions-routes.test.ts",
+      "filePath": "eliza/packages/shared/src/contracts/permissions-routes.test.ts",
+      "summary": "permissions-routes.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 63 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/contracts/permissions-routes.ts",
+      "type": "file",
+      "name": "permissions-routes.ts",
+      "filePath": "eliza/packages/shared/src/contracts/permissions-routes.ts",
+      "summary": "permissions-routes.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 47 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/contracts/permissions.ts",
+      "type": "file",
+      "name": "permissions.ts",
+      "filePath": "eliza/packages/shared/src/contracts/permissions.ts",
+      "summary": "permissions.ts is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 171 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/permissions.ts:isPermissionId",
+      "type": "function",
+      "name": "isPermissionId",
+      "filePath": "eliza/packages/shared/src/contracts/permissions.ts",
+      "summary": "isPermissionId is a function defined in eliza/packages/shared/src/contracts/permissions.ts."
+    },
+    {
+      "tags": [
+        "test",
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/contracts/plugin-routes.test.ts",
+      "type": "file",
+      "name": "plugin-routes.test.ts",
+      "filePath": "eliza/packages/shared/src/contracts/plugin-routes.test.ts",
+      "summary": "plugin-routes.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 224 lines"
+    },
+    {
+      "tags": [
+        "plugin"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/contracts/plugin-routes.ts",
+      "type": "file",
+      "name": "plugin-routes.ts",
+      "filePath": "eliza/packages/shared/src/contracts/plugin-routes.ts",
+      "summary": "plugin-routes.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 108 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/contracts/relationships-routes.test.ts",
+      "type": "file",
+      "name": "relationships-routes.test.ts",
+      "filePath": "eliza/packages/shared/src/contracts/relationships-routes.test.ts",
+      "summary": "relationships-routes.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 43 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/contracts/relationships-routes.ts",
+      "type": "file",
+      "name": "relationships-routes.ts",
+      "filePath": "eliza/packages/shared/src/contracts/relationships-routes.ts",
+      "summary": "relationships-routes.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 27 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/shared/src/contracts/service-routing.ts",
+      "type": "file",
+      "name": "service-routing.ts",
+      "filePath": "eliza/packages/shared/src/contracts/service-routing.ts",
+      "summary": "service-routing.ts is a typescript source file in the Milady codebase. It contains 19 functions, 1 imports.",
+      "languageNotes": "typescript; code; 574 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/service-routing.ts:buildElizaCloudServiceRoute",
+      "type": "function",
+      "name": "buildElizaCloudServiceRoute",
+      "filePath": "eliza/packages/shared/src/contracts/service-routing.ts",
+      "summary": "buildElizaCloudServiceRoute is a function defined in eliza/packages/shared/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/service-routing.ts:buildDefaultElizaCloudServiceRouting",
+      "type": "function",
+      "name": "buildDefaultElizaCloudServiceRouting",
+      "filePath": "eliza/packages/shared/src/contracts/service-routing.ts",
+      "summary": "buildDefaultElizaCloudServiceRouting is a function defined in eliza/packages/shared/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "function",
+      "name": "readTrimmedString",
+      "filePath": "eliza/packages/shared/src/contracts/service-routing.ts",
+      "summary": "readTrimmedString is a function defined in eliza/packages/shared/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountStatus",
+      "type": "function",
+      "name": "normalizeLinkedAccountStatus",
+      "filePath": "eliza/packages/shared/src/contracts/service-routing.ts",
+      "summary": "normalizeLinkedAccountStatus is a function defined in eliza/packages/shared/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountSource",
+      "type": "function",
+      "name": "normalizeLinkedAccountSource",
+      "filePath": "eliza/packages/shared/src/contracts/service-routing.ts",
+      "summary": "normalizeLinkedAccountSource is a function defined in eliza/packages/shared/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeServiceTransport",
+      "type": "function",
+      "name": "normalizeServiceTransport",
+      "filePath": "eliza/packages/shared/src/contracts/service-routing.ts",
+      "summary": "normalizeServiceTransport is a function defined in eliza/packages/shared/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeServiceRouteAccountStrategy",
+      "type": "function",
+      "name": "normalizeServiceRouteAccountStrategy",
+      "filePath": "eliza/packages/shared/src/contracts/service-routing.ts",
+      "summary": "normalizeServiceRouteAccountStrategy is a function defined in eliza/packages/shared/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountFlagConfig",
+      "type": "function",
+      "name": "normalizeLinkedAccountFlagConfig",
+      "filePath": "eliza/packages/shared/src/contracts/service-routing.ts",
+      "summary": "normalizeLinkedAccountFlagConfig is a function defined in eliza/packages/shared/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountFlagsConfig",
+      "type": "function",
+      "name": "normalizeLinkedAccountFlagsConfig",
+      "filePath": "eliza/packages/shared/src/contracts/service-routing.ts",
+      "summary": "normalizeLinkedAccountFlagsConfig is a function defined in eliza/packages/shared/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/service-routing.ts:isLinkedAccountProviderId",
+      "type": "function",
+      "name": "isLinkedAccountProviderId",
+      "filePath": "eliza/packages/shared/src/contracts/service-routing.ts",
+      "summary": "isLinkedAccountProviderId is a function defined in eliza/packages/shared/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountAccountSource",
+      "type": "function",
+      "name": "normalizeLinkedAccountAccountSource",
+      "filePath": "eliza/packages/shared/src/contracts/service-routing.ts",
+      "summary": "normalizeLinkedAccountAccountSource is a function defined in eliza/packages/shared/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountHealth",
+      "type": "function",
+      "name": "normalizeLinkedAccountHealth",
+      "filePath": "eliza/packages/shared/src/contracts/service-routing.ts",
+      "summary": "normalizeLinkedAccountHealth is a function defined in eliza/packages/shared/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountHealthDetail",
+      "type": "function",
+      "name": "normalizeLinkedAccountHealthDetail",
+      "filePath": "eliza/packages/shared/src/contracts/service-routing.ts",
+      "summary": "normalizeLinkedAccountHealthDetail is a function defined in eliza/packages/shared/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountUsage",
+      "type": "function",
+      "name": "normalizeLinkedAccountUsage",
+      "filePath": "eliza/packages/shared/src/contracts/service-routing.ts",
+      "summary": "normalizeLinkedAccountUsage is a function defined in eliza/packages/shared/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountRecord",
+      "type": "function",
+      "name": "normalizeLinkedAccountRecord",
+      "filePath": "eliza/packages/shared/src/contracts/service-routing.ts",
+      "summary": "normalizeLinkedAccountRecord is a function defined in eliza/packages/shared/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountsRecords",
+      "type": "function",
+      "name": "normalizeLinkedAccountsRecords",
+      "filePath": "eliza/packages/shared/src/contracts/service-routing.ts",
+      "summary": "normalizeLinkedAccountsRecords is a function defined in eliza/packages/shared/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "complex",
+      "id": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "type": "function",
+      "name": "normalizeServiceRouteConfig",
+      "filePath": "eliza/packages/shared/src/contracts/service-routing.ts",
+      "summary": "normalizeServiceRouteConfig is a function defined in eliza/packages/shared/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeServiceRoutingConfig",
+      "type": "function",
+      "name": "normalizeServiceRoutingConfig",
+      "filePath": "eliza/packages/shared/src/contracts/service-routing.ts",
+      "summary": "normalizeServiceRoutingConfig is a function defined in eliza/packages/shared/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeDeploymentTargetConfig",
+      "type": "function",
+      "name": "normalizeDeploymentTargetConfig",
+      "filePath": "eliza/packages/shared/src/contracts/service-routing.ts",
+      "summary": "normalizeDeploymentTargetConfig is a function defined in eliza/packages/shared/src/contracts/service-routing.ts."
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/shared/src/contracts/skills-routes.test.ts",
+      "type": "file",
+      "name": "skills-routes.test.ts",
+      "filePath": "eliza/packages/shared/src/contracts/skills-routes.test.ts",
+      "summary": "skills-routes.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 289 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/contracts/skills-routes.ts",
+      "type": "file",
+      "name": "skills-routes.ts",
+      "filePath": "eliza/packages/shared/src/contracts/skills-routes.ts",
+      "summary": "skills-routes.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 168 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/contracts/subscription-routes.test.ts",
+      "type": "file",
+      "name": "subscription-routes.test.ts",
+      "filePath": "eliza/packages/shared/src/contracts/subscription-routes.test.ts",
+      "summary": "subscription-routes.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 112 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/contracts/subscription-routes.ts",
+      "type": "file",
+      "name": "subscription-routes.ts",
+      "filePath": "eliza/packages/shared/src/contracts/subscription-routes.ts",
+      "summary": "subscription-routes.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 63 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/contracts/tail-routes.test.ts",
+      "type": "file",
+      "name": "tail-routes.test.ts",
+      "filePath": "eliza/packages/shared/src/contracts/tail-routes.test.ts",
+      "summary": "tail-routes.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 121 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/contracts/tail-routes.ts",
+      "type": "file",
+      "name": "tail-routes.ts",
+      "filePath": "eliza/packages/shared/src/contracts/tail-routes.ts",
+      "summary": "tail-routes.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 78 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/shared/src/contracts/theme.ts",
+      "type": "file",
+      "name": "theme.ts",
+      "filePath": "eliza/packages/shared/src/contracts/theme.ts",
+      "summary": "theme.ts is a typescript source file in the Milady codebase. It contains 1 function.",
+      "languageNotes": "typescript; code; 297 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/theme.ts:validateThemeDefinition",
+      "type": "function",
+      "name": "validateThemeDefinition",
+      "filePath": "eliza/packages/shared/src/contracts/theme.ts",
+      "summary": "validateThemeDefinition is a function defined in eliza/packages/shared/src/contracts/theme.ts."
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/contracts/update-status.ts",
+      "type": "file",
+      "name": "update-status.ts",
+      "filePath": "eliza/packages/shared/src/contracts/update-status.ts",
+      "summary": "update-status.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 90 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/contracts/verification.ts",
+      "type": "file",
+      "name": "verification.ts",
+      "filePath": "eliza/packages/shared/src/contracts/verification.ts",
+      "summary": "verification.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 9 lines"
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/contracts/wallet-routes.test.ts",
+      "type": "file",
+      "name": "wallet-routes.test.ts",
+      "filePath": "eliza/packages/shared/src/contracts/wallet-routes.test.ts",
+      "summary": "wallet-routes.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 153 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/contracts/wallet-routes.ts",
+      "type": "file",
+      "name": "wallet-routes.ts",
+      "filePath": "eliza/packages/shared/src/contracts/wallet-routes.ts",
+      "summary": "wallet-routes.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 67 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "complex",
+      "id": "file:eliza/packages/shared/src/contracts/wallet.ts",
+      "type": "file",
+      "name": "wallet.ts",
+      "filePath": "eliza/packages/shared/src/contracts/wallet.ts",
+      "summary": "wallet.ts is a typescript source file in the Milady codebase. It contains 6 functions.",
+      "languageNotes": "typescript; code; 358 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/wallet.ts:normalizeWalletRpcProviderId",
+      "type": "function",
+      "name": "normalizeWalletRpcProviderId",
+      "filePath": "eliza/packages/shared/src/contracts/wallet.ts",
+      "summary": "normalizeWalletRpcProviderId is a function defined in eliza/packages/shared/src/contracts/wallet.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/wallet.ts:normalizeWalletRpcSelections",
+      "type": "function",
+      "name": "normalizeWalletRpcSelections",
+      "filePath": "eliza/packages/shared/src/contracts/wallet.ts",
+      "summary": "normalizeWalletRpcSelections is a function defined in eliza/packages/shared/src/contracts/wallet.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/wallet.ts:isWalletConfigCredentialSet",
+      "type": "function",
+      "name": "isWalletConfigCredentialSet",
+      "filePath": "eliza/packages/shared/src/contracts/wallet.ts",
+      "summary": "isWalletConfigCredentialSet is a function defined in eliza/packages/shared/src/contracts/wallet.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/wallet.ts:resolveInitialWalletRpcSelections",
+      "type": "function",
+      "name": "resolveInitialWalletRpcSelections",
+      "filePath": "eliza/packages/shared/src/contracts/wallet.ts",
+      "summary": "resolveInitialWalletRpcSelections is a function defined in eliza/packages/shared/src/contracts/wallet.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/wallet.ts:collectSelectedWalletRpcCredentialKeys",
+      "type": "function",
+      "name": "collectSelectedWalletRpcCredentialKeys",
+      "filePath": "eliza/packages/shared/src/contracts/wallet.ts",
+      "summary": "collectSelectedWalletRpcCredentialKeys is a function defined in eliza/packages/shared/src/contracts/wallet.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/contracts/wallet.ts:buildWalletRpcUpdateRequest",
+      "type": "function",
+      "name": "buildWalletRpcUpdateRequest",
+      "filePath": "eliza/packages/shared/src/contracts/wallet.ts",
+      "summary": "buildWalletRpcUpdateRequest is a function defined in eliza/packages/shared/src/contracts/wallet.ts."
+    },
+    {
+      "tags": [
+        "test"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/contracts/workbench-routes.test.ts",
+      "type": "file",
+      "name": "workbench-routes.test.ts",
+      "filePath": "eliza/packages/shared/src/contracts/workbench-routes.test.ts",
+      "summary": "workbench-routes.test.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 134 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/contracts/workbench-routes.ts",
+      "type": "file",
+      "name": "workbench-routes.ts",
+      "filePath": "eliza/packages/shared/src/contracts/workbench-routes.ts",
+      "summary": "workbench-routes.ts is a typescript source file in the Milady codebase. It contains 1 imports.",
+      "languageNotes": "typescript; code; 233 lines"
+    },
+    {
+      "tags": [
+        "source"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/db/drizzle-database.ts",
+      "type": "file",
+      "name": "drizzle-database.ts",
+      "filePath": "eliza/packages/shared/src/db/drizzle-database.ts",
+      "summary": "drizzle-database.ts is a typescript source file in the Milady codebase.",
+      "languageNotes": "typescript; code; 13 lines"
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "simple",
+      "id": "file:eliza/packages/shared/src/dev-settings-banner-style.ts",
+      "type": "file",
+      "name": "dev-settings-banner-style.ts",
+      "filePath": "eliza/packages/shared/src/dev-settings-banner-style.ts",
+      "summary": "dev-settings-banner-style.ts is a typescript source file in the Milady codebase. It contains 4 functions.",
+      "languageNotes": "typescript; code; 52 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/dev-settings-banner-style.ts:shouldSkipBannerColor",
+      "type": "function",
+      "name": "shouldSkipBannerColor",
+      "filePath": "eliza/packages/shared/src/dev-settings-banner-style.ts",
+      "summary": "shouldSkipBannerColor is a function defined in eliza/packages/shared/src/dev-settings-banner-style.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/dev-settings-banner-style.ts:colorizeDevSettingsBannerLine",
+      "type": "function",
+      "name": "colorizeDevSettingsBannerLine",
+      "filePath": "eliza/packages/shared/src/dev-settings-banner-style.ts",
+      "summary": "colorizeDevSettingsBannerLine is a function defined in eliza/packages/shared/src/dev-settings-banner-style.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/dev-settings-banner-style.ts:colorizeDevSettingsBanner",
+      "type": "function",
+      "name": "colorizeDevSettingsBanner",
+      "filePath": "eliza/packages/shared/src/dev-settings-banner-style.ts",
+      "summary": "colorizeDevSettingsBanner is a function defined in eliza/packages/shared/src/dev-settings-banner-style.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/dev-settings-banner-style.ts:colorizeDevSettingsStartupBanner",
+      "type": "function",
+      "name": "colorizeDevSettingsStartupBanner",
+      "filePath": "eliza/packages/shared/src/dev-settings-banner-style.ts",
+      "summary": "colorizeDevSettingsStartupBanner is a function defined in eliza/packages/shared/src/dev-settings-banner-style.ts."
+    },
+    {
+      "tags": [
+        "function"
+      ],
+      "complexity": "moderate",
+      "id": "file:eliza/packages/shared/src/dev-settings-table.ts",
+      "type": "file",
+      "name": "dev-settings-table.ts",
+      "filePath": "eliza/packages/shared/src/dev-settings-table.ts",
+      "summary": "dev-settings-table.ts is a typescript source file in the Milady codebase. It contains 11 functions.",
+      "languageNotes": "typescript; code; 235 lines"
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/dev-settings-table.ts:truncateCell",
+      "type": "function",
+      "name": "truncateCell",
+      "filePath": "eliza/packages/shared/src/dev-settings-table.ts",
+      "summary": "truncateCell is a function defined in eliza/packages/shared/src/dev-settings-table.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/dev-settings-table.ts:wrapToWidth",
+      "type": "function",
+      "name": "wrapToWidth",
+      "filePath": "eliza/packages/shared/src/dev-settings-table.ts",
+      "summary": "wrapToWidth is a function defined in eliza/packages/shared/src/dev-settings-table.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/dev-settings-table.ts:emitLabeledLines",
+      "type": "function",
+      "name": "emitLabeledLines",
+      "filePath": "eliza/packages/shared/src/dev-settings-table.ts",
+      "summary": "emitLabeledLines is a function defined in eliza/packages/shared/src/dev-settings-table.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/dev-settings-table.ts:boxTopRule",
+      "type": "function",
+      "name": "boxTopRule",
+      "filePath": "eliza/packages/shared/src/dev-settings-table.ts",
+      "summary": "boxTopRule is a function defined in eliza/packages/shared/src/dev-settings-table.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/dev-settings-table.ts:boxMidRule",
+      "type": "function",
+      "name": "boxMidRule",
+      "filePath": "eliza/packages/shared/src/dev-settings-table.ts",
+      "summary": "boxMidRule is a function defined in eliza/packages/shared/src/dev-settings-table.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/dev-settings-table.ts:boxBottomRule",
+      "type": "function",
+      "name": "boxBottomRule",
+      "filePath": "eliza/packages/shared/src/dev-settings-table.ts",
+      "summary": "boxBottomRule is a function defined in eliza/packages/shared/src/dev-settings-table.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/dev-settings-table.ts:boxEmptyRow",
+      "type": "function",
+      "name": "boxEmptyRow",
+      "filePath": "eliza/packages/shared/src/dev-settings-table.ts",
+      "summary": "boxEmptyRow is a function defined in eliza/packages/shared/src/dev-settings-table.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/dev-settings-table.ts:boxRow",
+      "type": "function",
+      "name": "boxRow",
+      "filePath": "eliza/packages/shared/src/dev-settings-table.ts",
+      "summary": "boxRow is a function defined in eliza/packages/shared/src/dev-settings-table.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/dev-settings-table.ts:formatDevSettingsTableNarrowUnframed",
+      "type": "function",
+      "name": "formatDevSettingsTableNarrowUnframed",
+      "filePath": "eliza/packages/shared/src/dev-settings-table.ts",
+      "summary": "formatDevSettingsTableNarrowUnframed is a function defined in eliza/packages/shared/src/dev-settings-table.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/dev-settings-table.ts:formatDevSettingsTableNarrow",
+      "type": "function",
+      "name": "formatDevSettingsTableNarrow",
+      "filePath": "eliza/packages/shared/src/dev-settings-table.ts",
+      "summary": "formatDevSettingsTableNarrow is a function defined in eliza/packages/shared/src/dev-settings-table.ts."
+    },
+    {
+      "tags": [
+        "function",
+        "typescript"
+      ],
+      "complexity": "moderate",
+      "id": "function:eliza/packages/shared/src/dev-settings-table.ts:formatDevSettingsTable",
+      "type": "function",
+      "name": "formatDevSettingsTable",
+      "filePath": "eliza/packages/shared/src/dev-settings-table.ts",
+      "summary": "formatDevSettingsTable is a function defined in eliza/packages/shared/src/dev-settings-table.ts."
+    }
+  ],
+  "edges": [
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/permissions.ts",
+      "target": "function:eliza/packages/shared/src/contracts/permissions.ts:isPermissionId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:buildElizaCloudServiceRoute",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:buildDefaultElizaCloudServiceRouting",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountStatus",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountSource",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeServiceTransport",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeServiceRouteAccountStrategy",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountFlagConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountFlagsConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:isLinkedAccountProviderId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountAccountSource",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountHealth",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountHealthDetail",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountUsage",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountRecord",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountsRecords",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeServiceRoutingConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/service-routing.ts",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeDeploymentTargetConfig",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:buildDefaultElizaCloudServiceRouting",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:buildElizaCloudServiceRoute",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:buildDefaultElizaCloudServiceRouting",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:buildElizaCloudServiceRoute",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountFlagConfig",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountStatus",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountFlagConfig",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountSource",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountFlagConfig",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountFlagConfig",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountFlagsConfig",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountFlagConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountHealthDetail",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountRecord",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountRecord",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:isLinkedAccountProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountRecord",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountRecord",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountAccountSource",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountRecord",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountHealth",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountRecord",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountHealthDetail",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountRecord",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountUsage",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountRecord",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountRecord",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountRecord",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountsRecords",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeLinkedAccountRecord",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeServiceTransport",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeServiceRouteAccountStrategy",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeServiceRoutingConfig",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeServiceRouteConfig",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeDeploymentTargetConfig",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeDeploymentTargetConfig",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeDeploymentTargetConfig",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/service-routing.ts:normalizeDeploymentTargetConfig",
+      "target": "function:eliza/packages/shared/src/contracts/service-routing.ts:readTrimmedString",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/theme.ts",
+      "target": "function:eliza/packages/shared/src/contracts/theme.ts:validateThemeDefinition",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/wallet.ts",
+      "target": "function:eliza/packages/shared/src/contracts/wallet.ts:normalizeWalletRpcProviderId",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/wallet.ts",
+      "target": "function:eliza/packages/shared/src/contracts/wallet.ts:normalizeWalletRpcSelections",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/wallet.ts",
+      "target": "function:eliza/packages/shared/src/contracts/wallet.ts:isWalletConfigCredentialSet",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/wallet.ts",
+      "target": "function:eliza/packages/shared/src/contracts/wallet.ts:resolveInitialWalletRpcSelections",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/wallet.ts",
+      "target": "function:eliza/packages/shared/src/contracts/wallet.ts:collectSelectedWalletRpcCredentialKeys",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/contracts/wallet.ts",
+      "target": "function:eliza/packages/shared/src/contracts/wallet.ts:buildWalletRpcUpdateRequest",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/wallet.ts:normalizeWalletRpcSelections",
+      "target": "function:eliza/packages/shared/src/contracts/wallet.ts:normalizeWalletRpcProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/wallet.ts:normalizeWalletRpcSelections",
+      "target": "function:eliza/packages/shared/src/contracts/wallet.ts:normalizeWalletRpcProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/wallet.ts:normalizeWalletRpcSelections",
+      "target": "function:eliza/packages/shared/src/contracts/wallet.ts:normalizeWalletRpcProviderId",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/wallet.ts:resolveInitialWalletRpcSelections",
+      "target": "function:eliza/packages/shared/src/contracts/wallet.ts:normalizeWalletRpcSelections",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/wallet.ts:buildWalletRpcUpdateRequest",
+      "target": "function:eliza/packages/shared/src/contracts/wallet.ts:normalizeWalletRpcSelections",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/wallet.ts:buildWalletRpcUpdateRequest",
+      "target": "function:eliza/packages/shared/src/contracts/wallet.ts:collectSelectedWalletRpcCredentialKeys",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/contracts/wallet.ts:buildWalletRpcUpdateRequest",
+      "target": "function:eliza/packages/shared/src/contracts/wallet.ts:isWalletConfigCredentialSet",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/dev-settings-banner-style.ts",
+      "target": "function:eliza/packages/shared/src/dev-settings-banner-style.ts:shouldSkipBannerColor",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/dev-settings-banner-style.ts",
+      "target": "function:eliza/packages/shared/src/dev-settings-banner-style.ts:colorizeDevSettingsBannerLine",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/dev-settings-banner-style.ts",
+      "target": "function:eliza/packages/shared/src/dev-settings-banner-style.ts:colorizeDevSettingsBanner",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/dev-settings-banner-style.ts",
+      "target": "function:eliza/packages/shared/src/dev-settings-banner-style.ts:colorizeDevSettingsStartupBanner",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/dev-settings-banner-style.ts:colorizeDevSettingsBanner",
+      "target": "function:eliza/packages/shared/src/dev-settings-banner-style.ts:shouldSkipBannerColor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/dev-settings-banner-style.ts:colorizeDevSettingsStartupBanner",
+      "target": "function:eliza/packages/shared/src/dev-settings-banner-style.ts:shouldSkipBannerColor",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/dev-settings-banner-style.ts:colorizeDevSettingsStartupBanner",
+      "target": "function:eliza/packages/shared/src/dev-settings-banner-style.ts:colorizeDevSettingsBanner",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/dev-settings-banner-style.ts:colorizeDevSettingsStartupBanner",
+      "target": "function:eliza/packages/shared/src/dev-settings-banner-style.ts:colorizeDevSettingsBanner",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/dev-settings-table.ts",
+      "target": "function:eliza/packages/shared/src/dev-settings-table.ts:truncateCell",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/dev-settings-table.ts",
+      "target": "function:eliza/packages/shared/src/dev-settings-table.ts:wrapToWidth",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/dev-settings-table.ts",
+      "target": "function:eliza/packages/shared/src/dev-settings-table.ts:emitLabeledLines",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/dev-settings-table.ts",
+      "target": "function:eliza/packages/shared/src/dev-settings-table.ts:boxTopRule",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/dev-settings-table.ts",
+      "target": "function:eliza/packages/shared/src/dev-settings-table.ts:boxMidRule",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/dev-settings-table.ts",
+      "target": "function:eliza/packages/shared/src/dev-settings-table.ts:boxBottomRule",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/dev-settings-table.ts",
+      "target": "function:eliza/packages/shared/src/dev-settings-table.ts:boxEmptyRow",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/dev-settings-table.ts",
+      "target": "function:eliza/packages/shared/src/dev-settings-table.ts:boxRow",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/dev-settings-table.ts",
+      "target": "function:eliza/packages/shared/src/dev-settings-table.ts:formatDevSettingsTableNarrowUnframed",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/dev-settings-table.ts",
+      "target": "function:eliza/packages/shared/src/dev-settings-table.ts:formatDevSettingsTableNarrow",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 1,
+      "source": "file:eliza/packages/shared/src/dev-settings-table.ts",
+      "target": "function:eliza/packages/shared/src/dev-settings-table.ts:formatDevSettingsTable",
+      "type": "contains"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/dev-settings-table.ts:emitLabeledLines",
+      "target": "function:eliza/packages/shared/src/dev-settings-table.ts:wrapToWidth",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/dev-settings-table.ts:emitLabeledLines",
+      "target": "function:eliza/packages/shared/src/dev-settings-table.ts:wrapToWidth",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/dev-settings-table.ts:formatDevSettingsTableNarrowUnframed",
+      "target": "function:eliza/packages/shared/src/dev-settings-table.ts:wrapToWidth",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/dev-settings-table.ts:formatDevSettingsTableNarrowUnframed",
+      "target": "function:eliza/packages/shared/src/dev-settings-table.ts:emitLabeledLines",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/dev-settings-table.ts:formatDevSettingsTableNarrowUnframed",
+      "target": "function:eliza/packages/shared/src/dev-settings-table.ts:emitLabeledLines",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/dev-settings-table.ts:formatDevSettingsTableNarrowUnframed",
+      "target": "function:eliza/packages/shared/src/dev-settings-table.ts:emitLabeledLines",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/dev-settings-table.ts:formatDevSettingsTableNarrow",
+      "target": "function:eliza/packages/shared/src/dev-settings-table.ts:formatDevSettingsTableNarrowUnframed",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/dev-settings-table.ts:formatDevSettingsTableNarrow",
+      "target": "function:eliza/packages/shared/src/dev-settings-table.ts:boxTopRule",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/dev-settings-table.ts:formatDevSettingsTableNarrow",
+      "target": "function:eliza/packages/shared/src/dev-settings-table.ts:boxEmptyRow",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/dev-settings-table.ts:formatDevSettingsTableNarrow",
+      "target": "function:eliza/packages/shared/src/dev-settings-table.ts:wrapToWidth",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/dev-settings-table.ts:formatDevSettingsTableNarrow",
+      "target": "function:eliza/packages/shared/src/dev-settings-table.ts:emitLabeledLines",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/dev-settings-table.ts:formatDevSettingsTableNarrow",
+      "target": "function:eliza/packages/shared/src/dev-settings-table.ts:emitLabeledLines",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/dev-settings-table.ts:formatDevSettingsTableNarrow",
+      "target": "function:eliza/packages/shared/src/dev-settings-table.ts:emitLabeledLines",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/dev-settings-table.ts:formatDevSettingsTableNarrow",
+      "target": "function:eliza/packages/shared/src/dev-settings-table.ts:boxRow",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/dev-settings-table.ts:formatDevSettingsTableNarrow",
+      "target": "function:eliza/packages/shared/src/dev-settings-table.ts:boxEmptyRow",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/dev-settings-table.ts:formatDevSettingsTableNarrow",
+      "target": "function:eliza/packages/shared/src/dev-settings-table.ts:boxMidRule",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/dev-settings-table.ts:formatDevSettingsTableNarrow",
+      "target": "function:eliza/packages/shared/src/dev-settings-table.ts:boxEmptyRow",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/dev-settings-table.ts:formatDevSettingsTableNarrow",
+      "target": "function:eliza/packages/shared/src/dev-settings-table.ts:boxEmptyRow",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/dev-settings-table.ts:formatDevSettingsTableNarrow",
+      "target": "function:eliza/packages/shared/src/dev-settings-table.ts:boxBottomRule",
+      "type": "calls"
+    },
+    {
+      "direction": "outbound",
+      "weight": 0.8,
+      "source": "function:eliza/packages/shared/src/dev-settings-table.ts:formatDevSettingsTable",
+      "target": "function:eliza/packages/shared/src/dev-settings-table.ts:formatDevSettingsTableNarrow",
+      "type": "calls"
+    }
+  ]
+}
