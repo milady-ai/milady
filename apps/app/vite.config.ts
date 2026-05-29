@@ -2,6 +2,8 @@ import fs from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+// Type-only import is erased by esbuild's config bundler (no runtime resolution).
+import type { DevSettingsRow } from "@elizaos/shared/dev-settings-table";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react-swc";
 import {
@@ -12,29 +14,36 @@ import {
   type ServerOptions,
   transformWithEsbuild,
 } from "vite";
-// Keep workspace-relative TS imports in this config so Vite transpiles them
-// while bundling the config instead of asking Node to load package-exported
-// .ts files directly in CI. Removing this workaround (commit b3060bf16) is
-// what broke the desktop release pipeline on 2026-05-04: Vite's esbuild config
-// loader resolves `@elizaos/shared/<subpath>` to the source `src/<subpath>.ts`,
-// which then fails on TypeScript ESM self-imports like `./env-utils.js`.
-import { colorizeDevSettingsStartupBanner } from "../../eliza/packages/shared/src/dev-settings-banner-style.ts";
-import { prependDevSubsystemFigletHeading } from "../../eliza/packages/shared/src/dev-settings-figlet-heading.ts";
-import {
-  type DevSettingsRow,
-  formatDevSettingsTable,
-} from "../../eliza/packages/shared/src/dev-settings-table.ts";
-import {
-  resolveDesktopApiPort,
-  resolveDesktopApiPortPreference,
-  resolveDesktopUiPort,
-  resolveDesktopUiPortPreference,
-} from "../../eliza/packages/shared/src/runtime-env.ts";
 import { syncElizaEnvAliases } from "../../scripts/lib/sync-eliza-env-aliases.mjs";
 import appConfig from "./app.config";
 import { resolveViteDevServerRuntime } from "./vite-dev-origin.ts";
 
 const _require = createRequire(import.meta.url);
+
+// Load the shared dev-settings + runtime-env helpers through the package `exports`
+// map (compiled dist JS) instead of reaching into the eliza/ clone source. Resolving
+// with `_require.resolve(...)` honors package exports and ignores tsconfig `paths`, so
+// it lands on dist/*.js in BOTH packages mode (CI; eliza/ absent) and local mode. This
+// avoids the relative-into-eliza break (CI Build) and the `@elizaos/shared/<subpath>`
+// -> src/*.ts self-import break that reverted commit b3060bf16; the computed specifier
+// also stops esbuild from statically rewriting it to source during config bundling.
+const { colorizeDevSettingsStartupBanner } = (await import(
+  _require.resolve("@elizaos/shared/dev-settings-banner-style")
+)) as typeof import("@elizaos/shared/dev-settings-banner-style");
+const { prependDevSubsystemFigletHeading } = (await import(
+  _require.resolve("@elizaos/shared/dev-settings-figlet-heading")
+)) as typeof import("@elizaos/shared/dev-settings-figlet-heading");
+const { formatDevSettingsTable } = (await import(
+  _require.resolve("@elizaos/shared/dev-settings-table")
+)) as typeof import("@elizaos/shared/dev-settings-table");
+const {
+  resolveDesktopApiPort,
+  resolveDesktopApiPortPreference,
+  resolveDesktopUiPort,
+  resolveDesktopUiPortPreference,
+} = (await import(
+  _require.resolve("@elizaos/shared/runtime-env")
+)) as typeof import("@elizaos/shared/runtime-env");
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const miladyRoot = path.resolve(here, "../..");
