@@ -287,6 +287,51 @@ function assertCorePackageEntry(nodeModulesRoot) {
   );
 }
 
+function ensureElizaCoreRuntimeDeps(elizaSourceRoot) {
+  // The source-link hydration above provides @elizaos/core's source but NOT its
+  // dependency closure. @elizaos/core source imports runtime deps (e.g.
+  // drizzle-orm in evaluators/_factCandidates.ts) that the packaged-Electrobun
+  // Playwright bootstrap pulls in via startApiServer. When they cannot resolve
+  // from eliza/packages/core the spec import throws "Cannot find package …" and
+  // Playwright reports "No tests found" -> exit 1 (the Windows release leg).
+  // Install any missing ones at the version eliza/packages/core declares so they
+  // resolve from eliza/node_modules; this is a no-op when the dep is already present.
+  const coreManifestPath = path.join(
+    elizaSourceRoot,
+    "packages",
+    "core",
+    "package.json",
+  );
+  if (!fs.existsSync(coreManifestPath)) return;
+  const coreManifest = JSON.parse(fs.readFileSync(coreManifestPath, "utf8"));
+  const coreRequire = createRequire(coreManifestPath);
+  const requiredRuntimeDeps = ["drizzle-orm"];
+  const missing = [];
+  for (const dep of requiredRuntimeDeps) {
+    try {
+      coreRequire.resolve(dep);
+    } catch {
+      const version =
+        coreManifest.dependencies?.[dep] ??
+        coreManifest.devDependencies?.[dep] ??
+        coreManifest.peerDependencies?.[dep];
+      missing.push(version ? `${dep}@${version}` : dep);
+    }
+  }
+  if (missing.length === 0) {
+    console.log(
+      "[hydrate-windows-playwright-deps] @elizaos/core runtime deps already resolvable",
+    );
+    return;
+  }
+  console.log(
+    `[hydrate-windows-playwright-deps] installing missing @elizaos/core runtime deps: ${missing.join(", ")}`,
+  );
+  run(["add", "--no-save", "--ignore-scripts", ...missing], {
+    cwd: elizaSourceRoot,
+  });
+}
+
 run(
   ["add", "--no-save", "--dev", "--ignore-scripts", "@playwright/test@1.59.1"],
   {
@@ -388,4 +433,5 @@ if (fs.existsSync(path.join(elizaRoot, "package.json"))) {
   }
   assertCorePackageEntry(path.join(sqlPluginPath, "node_modules"));
   assertCorePackageEntry(path.join(sqlPluginTypescriptPath, "node_modules"));
+  ensureElizaCoreRuntimeDeps(elizaRoot);
 }
